@@ -1,0 +1,197 @@
+.
+<div align="center">
+<strong><I print(IRELEASENAME) I></strong>
+
+<I
+import "iUtils.js"
+
+if((IPICTURE != null) && (IPICTURE != ""))
+  print("<img src=\"" + IPICTURE + "\" />");
+else
+  print("- no image available -");
+
+print("\r\n");
+
+if(ITITLE != null)
+{
+  print("\r\n<strong>Title:</strong> ");
+  if(ITITLE != "")
+    print(ITITLE);
+}
+
+if(IARTIST != null)
+{
+  print("\r\n<strong>Artist:</strong> ");
+  if(IARTIST != "")
+    print(IARTIST);
+}
+
+if(IGENRE != null)
+{
+  print("\r\n<strong>Genre:</strong> ");
+  if(IGENRE != "")
+    print(IGENRE);
+}
+
+if(IRUNTIME != null)
+{
+  print("\r\n<strong>Runtime:</strong> ");
+  if(IRUNTIME != "")
+    print(IRUNTIME + " Min.");
+}
+
+// Helper function for ILANGUAGE output
+function printLanguage(ShortName, LongName, &LanguageCount)
+{
+  if(Pos(ShortName, ILANGUAGE) > 0)
+  {
+    if(LanguageCount > 0)
+      print(", ");
+    print(LongName);
+    LanguageCount++;
+  }
+}
+
+if(ILANGUAGE != null)
+{
+  languagecount = 0;
+  print("\r\n<strong>Language/s:</strong> ");
+
+  if(Pos("ENG", ILANGUAGE) > 0)
+  {
+    print("English");
+    languagecount++;
+  }
+
+  printLanguage("GER", "German", languagecount);
+  printLanguage("SPA", "Spanish", languagecount);
+  printLanguage("JPN", "Japanese", languagecount);
+  printLanguage("FRE", "French", languagecount);
+  printLanguage("ITA", "Italian", languagecount);
+  printLanguage("RUS", "Russian", languagecount);
+  printLanguage("TUR", "Turkish", languagecount);
+  
+  if(languagecount == 0)
+    print("- no info available -");
+}
+
+if((ITRAILER != null) && (ITRAILER != ""))
+  print("\r\n<strong>Trailer:</strong> <a href=\"" + ITRAILER + "\">" + ITRAILER + "</a>");
+
+if(IVIDEOSTREAM != null)
+{
+  print("\r\n<strong>Video Stream:</strong> ");
+  if(IVIDEOSTREAM != "")
+    print(IVIDEOSTREAM);
+}
+
+if(IVIDEOSYSTEM != null)
+{
+  print("\r\n<strong>Video System:</strong> ");
+  if(IVIDEOSYSTEM != "")
+    print(IVIDEOSYSTEM);
+}
+
+if(IAUDIOSTREAM != null)
+{
+  print("\r\n<strong>Audio Stream:</strong> ");
+  if(IAUDIOSTREAM != "")
+    print(IAUDIOSTREAM);
+}
+
+if(IVIDEOCODEC != null)
+{
+  print("\r\n<strong>Video Codec:</strong> ");
+  if(IVIDEOCODEC != "")
+    print(IVIDEOCODEC);
+}
+
+if(IAUDIOBITRATE != null)
+{
+  print("\r\n<strong>Audio Bitrate:</strong> ");
+  if(IAUDIOBITRATE != "")
+    print(IAUDIOBITRATE);
+}
+
+if(IAUDIOBITRATETYPE != null)
+{
+  print("\r\n<strong>Audio Bitrate Type:</strong> ");
+  if(IAUDIOBITRATETYPE != "")
+    print(IAUDIOBITRATETYPE);
+}
+
+if(IAUDIOENCODER != null)
+{
+  print("\r\n<strong>Audio Encoder:</strong> ");
+  if(IAUDIOENCODER != "")
+    print(IAUDIOENCODER);
+}
+
+if(IAUDIOSAMPLINGRATE != null)
+{
+  print("\r\n<strong>Audio Sampling Rate:</strong> ");
+  if(IAUDIOSAMPLINGRATE != "")
+    print(IAUDIOSAMPLINGRATE);
+}
+
+print("\r\n<strong>Hoster:</strong> ");
+for(i = 0; i < IMirrorController.MirrorCount; i++) 
+{
+  print(IMirrorController.Mirror[I].Hoster);
+  if(i != IMirrorController.MirrorCount -1)
+    print(", ");
+}
+
+for(i = 0; i < IMirrorController.MirrorCount; i++)
+  if(IMirrorController.Mirror[i].Size > 0)
+  {
+    print("\r\n<strong>Size:</strong> " + FloatToStr(IMirrorController.Mirror[i].Size) + " MB");
+    break;
+  }
+
+for(i = 0; i < IMirrorController.MirrorCount; i++)
+  if(IMirrorController.Mirror[i].Parts > 0)
+  {
+    print("\r\n<strong>Parts:</strong> " + IntToStr(IMirrorController.Mirror[i].Parts));
+    break;
+  }
+
+if(IPASSWORD != null)
+{
+  print("\r\n<strong>Password:</strong> ");
+  if(IPASSWORD != "")
+    print(IPASSWORD);
+  else
+    print("- not required -");
+}
+
+if((ISAMPLE != null) && (ISAMPLE != ""))
+  print("\r\n<strong>Sample:</strong> <a href=\"" + ISAMPLE + "\">" + ISAMPLE + "</a>");
+
+if((INOTES != null) && (INOTES != ""))
+  print("\r\n<strong>Notes:</strong> " + INOTES);
+
+if(IDESCRIPTION != null)
+  print("\r\n\r\n" + IDESCRIPTION);
+  
+if((INFO != null) && (INFO != ""))
+{
+  print("\r\n\r\n<strong>nfo:</strong>\r\n");
+  print("\r\n<pre>" + INFO + "</pre>");
+}
+
+print("\r\n");
+
+for(i = 0; i < IMirrorController.MirrorCount; i++) 
+{
+  if(i != 0)
+    print("\r\n");
+  print("\r\n<strong>Mirror: " + IntToStr(I + 1) + "</strong>\r\n");
+  for(j = 0; j < IMirrorController.Mirror[I].CrypterCount; j++) 
+  {
+    print("\r\n<a href=\"" + IMirrorController.Mirror[I].Crypter[J].Link + "\">" + IMirrorController.Mirror[I].Hoster + " <img src=\"" + IMirrorController.Mirror[I].Crypter[J].StatusImageText + "\" /></a>");
+  }
+}
+I>
+</div>
+.

@@ -1,0 +1,12 @@
+<I
+  print(ITitle);
+
+  print(" (");
+
+  if (IReleaseDate != null)
+    print( FormatDateTime("yyyy", StrToDateTime(IReleaseDate)) );
+  else
+    print( FormatDateTime("yyyy", now) );
+
+  print(")");
+I>

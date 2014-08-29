@@ -1,0 +1,76 @@
+YOU SHOULD CAREFULLY READ THE ENTIRE FOLLOWING LICENSE AGREEMENT BEFORE USING THIS SOFTWARE PROGRAM.
+THIS AGREEMENT CONTAINS IMPORTANT TERMS THAT AFFECT YOUR LEGAL RIGHTS. BY USING THE SOFTWARE PROGRAM,
+YOU AGREE TO BE BOUND BY THE TERMS OF THIS AGREEMENT. IF YOU DO NOT AGREE TO THE TERMS OF THIS AGREEMENT,
+PLEASE DO NOT USE THIS SOFTWARE PROGRAM.
+
+The software application(s) (the “Program”), and any and all copies of the Program are the copyrighted
+work of Sebastian Klatte (“S. Klatte”) or its suppliers. All rights reserved, except as expressly stated
+herein. The Program is provided solely for usage by end users according to the terms of this License
+Agreement. Any use, reproduction or redistribution of the Program not in accordance with the terms of the
+License Agreement is expressly prohibited.
+
+
+	LICENSE AGREEMENT
+
+(1)
+
+The Program is licensed, not sold. Your license confers no title or ownership in the Program or copies
+thereof. S. Klatte hereby grants, and by using the Program you thereby accept, a limited, non-exclusive
+license and right to use the Program for legal business based upon the laws in your country.
+S. Klatte is not and cannot be responsible for any illegal activities by the User.
+
+The Program is developed by educational purpose, any profits of the market ("Professional") edition
+or donations used to compensate the development cost (including but not limited to time, wattage,
+software licences, domain cost, and webspace cost). More accurately, this is a non-profit Project.
+Throught sales-rate changes its commonly to make prize adjustments to erase profits.
+
+You may not, in whole or in part: copy, photocopy, reproduce, translate, reverse engineer (with the
+exception of specific circumstances where such act is permitted by law), derive source code, modify,
+disassemble, decompile, or create derivative works based on the Program; remove any proprietary notices
+or labels on the Program; or attempt in any manner to circumvent any security measures designed to control
+access to the Program. The Program is licensed to you as a single product. Its component parts may not be
+separated for use on more than one computer. You may not sell, grant a security interest in or transfer
+reproductions of the Program to other parties in any way, nor to rent, lease or license the Program to
+others without the prior written consent of S. Klatte.
+
+(2)
+
+All title, ownership rights and intellectual property rights in and to the Program and any and all copies
+thereof (including but not limited to any titles, concepts, computer code, code architecture, design,
+layout, any related documentation, and “plugins” incorporated into the Program) are owned by S. Klatte or
+its licensors. The Program is protected by the copyright laws of Germany, international copyright treaties
+and conventions and other laws. All rights are reserved. The Program contains certain licensed materials
+and S. Klattes licensors may protect their rights in the event of any violation of this Agreement.
+
+(3)
+
+This License Agreement is effective until terminated. You may terminate the License Agreement at any time
+by destroying the Program. S. Klatte may, at its discretion, terminate this License Agreement in the event
+that you fail to comply with the terms and conditions contained herein. This License Agreement shall auto-
+matically terminate in the event that you fail to comply with the terms and conditions contained herein.
+In such event, you must immediately destroy the Program. The provisions of Sections 2-4, and 5, 6 will sur-
+vive any termination of the Agreement.
+
+(4)
+
+Its strictly prohibited, in whole or in part, to distribute any copies of this Program (including but not
+limited to any uploads to Websites, FTP-Servers, One-Click-Hosters (“OCH”), and Usenet-Servers) without the
+prior written consent of S. Klatte.
+
+(5)
+
+The entire risk arising out of use or performance of the Program and any printed material(s) remains with
+the User. EXCEPT AS PROVIDED ABOVE, THE PROGRAM AND ANY PRINTED MATERIAL(S) ARE PROVIDED "AS IS" WITHOUT
+WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NONINFRINGEMENT.
+
+(6)
+
+S. Klatte, ITS SUPPLIERS AND DISTRIBUTORS SHALL NOT BE LIABLE IN ANY WAY FOR LOSS OR DAMAGE OF ANY KIND
+RESULTING FROM THE USE OF THE PROGRAM INCLUDING, BUT NOT LIMITED TO, LOSS OF GOODWILL, WORK STOPPAGE,
+COMPUTER FAILURE OR MALFUNCTION, OR ANY AND ALL OTHER COMMERCIAL DAMAGES OR LOSSES. 
+S. Klatte CANNOT AND WILL NOT BE RESPONSIBLE FOR ANY SOFTWARE OR HARDWARE FAILURES OR ANY OTHER EVENT WHICH
+MAY RESULT IN A LOSS OF DATA OR DISRUPTION OF SERVICE.
+
+
+IntelligeN 2009. COPYRIGHT (c) 2007 - 2013 SEBASTIAN KLATTE. ALL RIGHTS RESERVED.

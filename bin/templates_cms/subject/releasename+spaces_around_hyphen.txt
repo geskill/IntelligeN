@@ -1,0 +1,5 @@
+<I
+  import "iUtils.js"
+
+  print(StringReplace(IReleaseName, "-", " - "));
+I>

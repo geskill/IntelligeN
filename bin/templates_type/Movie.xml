@@ -1,0 +1,80 @@
+<xml>
+	<templatetype>Movie</templatetype>
+	<controls>
+		<IReleaseName>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</IReleaseName>
+		<ITitle>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</ITitle>
+		<IPicture>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</IPicture>
+		<ISample>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</ISample>
+		<IAudioStream>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IAudioStream>
+		<IGenre>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IGenre>
+		<ILanguage>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</ILanguage>
+		<IRuntime>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IRuntime>
+		<IReleaseDate>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IReleaseDate>
+		<IVideoCodec>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IVideoCodec>
+		<IVideoStream>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IVideoStream>
+		<IPassword>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IPassword>
+		<INotes>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</INotes>
+		<INFO>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</INFO>
+		<IDescription>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</IDescription>
+	</controls>
+</xml>

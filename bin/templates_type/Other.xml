@@ -1,0 +1,50 @@
+<xml>
+  <templatetype>Other</templatetype>
+  <controls>
+    <IReleaseName>
+      <title hint="#">#</title>
+      <value list="#">#</value>
+      <position top="" left="" height="" width="300"></position>
+    </IReleaseName>
+    <ITitle>
+      <title hint="#">#</title>
+      <value list="#">#</value>
+      <position top="" left="" height="" width="300"></position>
+    </ITitle>
+    <IPicture>
+      <title hint="#">#</title>
+      <value list="#">#</value>
+      <position top="" left="" height="" width="300"></position>
+    </IPicture>
+    <IGenre>
+      <title hint="#">#</title>
+      <value list="#">#</value>
+      <position top="" left="" height="" width="300"></position>
+    </IGenre>
+    <ILanguage>
+      <title hint="#">#</title>
+      <value list="#">#</value>
+      <position top="" left="" height="" width="147"></position>
+    </ILanguage>
+    <IPassword>
+      <title hint="#">#</title>
+      <value list="#">#</value>
+      <position top="" left="" height="" width="147"></position>
+    </IPassword>
+    <INotes>
+      <title hint="#">#</title>
+      <value list="#">#</value>
+      <position top="" left="" height="" width="300"></position>
+    </INotes>
+    <INFO>
+      <title hint="#">#</title>
+      <value list="#">#</value>
+      <position top="" left="" height="" width="300"></position>
+    </INFO>
+    <IDescription>
+      <title hint="#">#</title>
+      <value list="#">#</value>
+      <position top="" left="" height="" width="300"></position>
+    </IDescription>
+  </controls>
+</xml>

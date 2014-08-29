@@ -1,0 +1,197 @@
+.
+[center]
+[b]<I print(IRELEASENAME) I>[/b]
+
+<I
+import "iUtils.js"
+
+if((IPICTURE != null) && (IPICTURE != ""))
+  print("[img]" + IPICTURE + "[/img]");
+else
+  print("- no image available -");
+
+print("\r\n");
+
+if(ITITLE != null)
+{
+  print("\r\n[b]Title:[/b] ");
+  if(ITITLE != "")
+    print(ITITLE);
+}
+
+if(IARTIST != null)
+{
+  print("\r\n[b]Artist:[/b] ");
+  if(IARTIST != "")
+    print(IARTIST);
+}
+
+if(IGENRE != null)
+{
+  print("\r\n[b]Genre:[/b] ");
+  if(IGENRE != "")
+    print(IGENRE);
+}
+
+if(IRUNTIME != null)
+{
+  print("\r\n[b]Runtime:[/b] ");
+  if(IRUNTIME != "")
+    print(IRUNTIME + " Min.");
+}
+
+// Helper function for ILANGUAGE output
+function printLanguage(ShortName, LongName, &LanguageCount)
+{
+  if(Pos(ShortName, ILANGUAGE) > 0)
+  {
+    if(LanguageCount > 0)
+      print(", ");
+    print(LongName);
+    LanguageCount++;
+  }
+}
+
+if(ILANGUAGE != null)
+{
+  languagecount = 0;
+  print("\r\n[b]Language/s:[/b] ");
+
+  if(Pos("ENG", ILANGUAGE) > 0)
+  {
+    print("English");
+    languagecount++;
+  }
+
+  printLanguage("GER", "German", languagecount);
+  printLanguage("SPA", "Spanish", languagecount);
+  printLanguage("JPN", "Japanese", languagecount);
+  printLanguage("FRE", "French", languagecount);
+  printLanguage("ITA", "Italian", languagecount);
+  printLanguage("RUS", "Russian", languagecount);
+  printLanguage("TUR", "Turkish", languagecount);
+  
+  if(languagecount == 0)
+    print("- no info available -");
+}
+
+if((ITRAILER != null) && (ITRAILER != ""))
+  print("\r\n[b]Trailer:[/b] [url]" + ITRAILER + "[/url]");
+
+if(IVIDEOSTREAM != null)
+{
+  print("\r\n[b]Video Stream:[/b] ");
+  if(IVIDEOSTREAM != "")
+    print(IVIDEOSTREAM);
+}
+
+if(IVIDEOSYSTEM != null)
+{
+  print("\r\n[b]Video System:[/b] ");
+  if(IVIDEOSYSTEM != "")
+    print(IVIDEOSYSTEM);
+}
+
+if(IAUDIOSTREAM != null)
+{
+  print("\r\n[b]Audio Stream:[/b] ");
+  if(IAUDIOSTREAM != "")
+    print(IAUDIOSTREAM);
+}
+
+if(IVIDEOCODEC != null)
+{
+  print("\r\n[b]Video Codec:[/b] ");
+  if(IVIDEOCODEC != "")
+    print(IVIDEOCODEC);
+}
+
+if(IAUDIOBITRATE != null)
+{
+  print("\r\n[b]Audio Bitrate:[/b] ");
+  if(IAUDIOBITRATE != "")
+    print(IAUDIOBITRATE);
+}
+
+if(IAUDIOBITRATETYPE != null)
+{
+  print("\r\n[b]Audio Bitrate Type:[/b] ");
+  if(IAUDIOBITRATETYPE != "")
+    print(IAUDIOBITRATETYPE);
+}
+
+if(IAUDIOENCODER != null)
+{
+  print("\r\n[b]Audio Encoder:[/b] ");
+  if(IAUDIOENCODER != "")
+    print(IAUDIOENCODER);
+}
+
+if(IAUDIOSAMPLINGRATE != null)
+{
+  print("\r\n[b]Audio Sampling Rate:[/b] ");
+  if(IAUDIOSAMPLINGRATE != "")
+    print(IAUDIOSAMPLINGRATE);
+}
+
+print("\r\n[b]Hoster:[/b] ");
+for(i = 0; i < IMirrorController.MirrorCount; i++) 
+{
+  print(IMirrorController.Mirror[I].Hoster);
+  if(i != IMirrorController.MirrorCount -1)
+    print(", ");
+}
+
+for(i = 0; i < IMirrorController.MirrorCount; i++)
+  if(IMirrorController.Mirror[i].Size > 0)
+  {
+    print("\r\n[b]Size:[/b] " + FloatToStr(IMirrorController.Mirror[i].Size) + " MB");
+    break;
+  }
+
+for(i = 0; i < IMirrorController.MirrorCount; i++)
+  if(IMirrorController.Mirror[i].Parts > 0)
+  {
+    print("\r\n[b]Parts:[/b] " + IntToStr(IMirrorController.Mirror[i].Parts));
+    break;
+  }
+
+if(IPASSWORD != null)
+{
+  print("\r\n[b]Password:[/b] ");
+  if(IPASSWORD != "")
+    print(IPASSWORD);
+  else
+    print("- not required -");
+}
+
+if((ISAMPLE != null) && (ISAMPLE != ""))
+  print("\r\n[b]Sample:[/b] [url]" + ISAMPLE + "[/url]");
+
+if((INOTES != null) && (INOTES != ""))
+  print("\r\n[b]Notes:[/b] " + INOTES);
+
+if(IDESCRIPTION != null)
+  print("\r\n\r\n" + IDESCRIPTION);
+  
+if((INFO != null) && (INFO != ""))
+{
+  print("\r\n\r\n[b]nfo:[/b]\r\n");
+  print("\r\n[spoiler][nfo]" + INFO + "[/nfo][/spoiler]");
+}
+
+print("\r\n");
+
+for(i = 0; i < IMirrorController.MirrorCount; i++) 
+{
+  if(i != 0)
+    print("\r\n");
+  print("\r\n[b]Mirror: " + IntToStr(I + 1) + "[/b]\r\n");
+  for(j = 0; j < IMirrorController.Mirror[I].CrypterCount; j++) 
+  {
+    print("\r\n[url=" + IMirrorController.Mirror[I].Crypter[J].Link + "]" + IMirrorController.Mirror[I].Hoster + " [img]" + IMirrorController.Mirror[I].Crypter[J].StatusImageText + "[/img][/url]");
+  }
+}
+I>
+[/center]
+.

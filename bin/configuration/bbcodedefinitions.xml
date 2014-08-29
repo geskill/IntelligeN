@@ -1,0 +1,32 @@
+<xml>
+  <phpbb>
+    <TagDelimiterStart>[</TagDelimiterStart>
+    <TagDelimiterEnd>]</TagDelimiterEnd>
+    <StartTagDelimiter></StartTagDelimiter>
+    <EndTagDelimiter>/</EndTagDelimiter>
+    <AttributeDelimiter></AttributeDelimiter>
+    <SizeValues default="100">50
+85
+100
+150
+200</SizeValues>
+  </phpbb>
+  <vBulletin>
+    <TagDelimiterStart>[</TagDelimiterStart>
+    <TagDelimiterEnd>]</TagDelimiterEnd>
+    <StartTagDelimiter></StartTagDelimiter>
+    <EndTagDelimiter>/</EndTagDelimiter>
+    <AttributeDelimiter>"</AttributeDelimiter>
+    <SizeValues default="2">1
+2
+3
+4</SizeValues>
+  </vBulletin>
+  <HTML>
+    <TagDelimiterStart>&lt;</TagDelimiterStart>
+    <TagDelimiterEnd>&gt;</TagDelimiterEnd>
+    <StartTagDelimiter></StartTagDelimiter>
+    <EndTagDelimiter>/</EndTagDelimiter>
+    <AttributeDelimiter>"</AttributeDelimiter>
+  </HTML>
+</xml>

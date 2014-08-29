@@ -1,0 +1,70 @@
+<xml>
+	<templatetype>Audio</templatetype>
+	<controls>
+		<IReleaseName>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</IReleaseName>
+		<ITitle>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</ITitle>
+		<IArtist>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</IArtist>
+		<IPicture>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</IPicture>
+		<IAudioBitrate>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IAudioBitrate>
+		<IAudioBitrateType>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IAudioBitrateType>
+		<IAudioEncoder>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IAudioEncoder>
+		<IAudioSamplingRate>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IAudioSamplingRate>
+		<IGenre>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IGenre>
+		<IPassword>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IPassword>
+		<INotes>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</INotes>
+		<INFO>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</INFO>
+		<IDescription>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</IDescription>
+	</controls>
+</xml>

@@ -1,0 +1,19 @@
+<I
+print(IDescription);
+
+print("\r\n");
+print("_______________________________");
+print("\r\n");
+
+for(i = 0; i < IMirrorController.MirrorCount; i++) 
+{
+  if(i != 0)
+    print("\r\n");
+  switch (i)
+  {
+    case 0: print("Download: ");
+    default: print("Mirror" + IntToStr(i) + ": ");
+  }
+  print(IMirrorController.Mirror[i].Hoster);
+}
+I>

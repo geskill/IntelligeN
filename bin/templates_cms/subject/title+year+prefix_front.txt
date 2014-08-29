@@ -1,0 +1,24 @@
+<I
+  print("[");
+  for(i = 0; i < IMirrorController.MirrorCount; i++) 
+  {
+    if(i != 0)
+      print("/");
+    
+    print(IMirrorController.Mirror[I].HosterShort);
+  }
+  print("]");
+
+  print(" ");
+  
+  print(ITitle);
+
+  print(" (");
+
+  if (IReleaseDate != null)
+    print( FormatDateTime("yyyy", StrToDateTime(IReleaseDate)) );
+  else
+    print( FormatDateTime("yyyy", now) );
+
+  print(")");
+I>
