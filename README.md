@@ -1,4 +1,2 @@
-intelligen
+IntelligeN
 ==========
-
-IntelligeN 2009
