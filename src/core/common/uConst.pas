@@ -7,8 +7,6 @@ uses
   Windows, SysUtils, StrUtils;
 
 type
-  TViewType = (vtData, vtCode, vtPreview);
-
   TTemplateTypeID = (cAudio, cGameCube, cMovie, cNintendoDS, cPCGames, cPlayStation2, cPlayStation3, cPlayStationPortable, cSoftware, cWii, cXbox, cXbox360,
     cXXX, cOther);
 
@@ -31,7 +29,13 @@ const
     'IVideoStream', 'IVideoSystem', 'INFO', 'IDescription');
 
 type
-  RIScirptResult = packed record
+  RTemplateFileInfo = packed record
+    TemplateType: TTemplateTypeID;
+    FileName: WideString;
+    Checksum: WideString;
+  end;
+
+  RIScriptResult = packed record
     CompiledText: WideString;
     HasError: Boolean;
     X, Y: Integer;
@@ -96,9 +100,9 @@ begin
   result := copy(TStringComponentID[Integer(ComponentID)], 2, MaxInt);
 end;
 
-{ RIScirptResult }
+{ RIScriptResult }
 
-procedure RIScirptResult.Init;
+procedure RIScriptResult.Init;
 begin
   CompiledText := '';
   HasError := False;

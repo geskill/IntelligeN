@@ -6,7 +6,7 @@ uses
   // MultiEvent
   Generics.MultiEvents.NotifyInterface,
   // Common
-  uConst, uWebsiteInterface,
+  uBase, uConst, uWebsiteInterface,
   // Plugin
   uPlugInConst;
 
@@ -519,8 +519,8 @@ type
     property Index: Integer read GetIndex write SetIndex;
     property Active: Boolean read GetActive;
 
-    function CheckIScript(AIScript: WideString): RIScirptResult;
-    function ParseIScript(AIScript: WideString): RIScirptResult;
+    function CheckIScript(AIScript: WideString): RIScriptResult;
+    function ParseIScript(AIScript: WideString): RIScriptResult;
     function GenerateWebsiteData: ICMSWebsiteData;
 
     function GeneratePublishItem: IPublishItem;
