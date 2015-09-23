@@ -1,0 +1,371 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{1D2F73A9-4B63-415A-BA7F-8E22FA952849}</ProjectGuid>
+			<MainSource>IntelligeN.dpr</MainSource>
+			<Config Condition="'$(Config)'==''">Debug</Config>
+			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
+			<ProjectVersion>12.0</ProjectVersion>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Basis' or '$(Base)'!=''">
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_1)'!=''">
+			<Cfg_1>true</Cfg_1>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_2)'!=''">
+			<Cfg_2>true</Cfg_2>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Base)'!=''">
+			<UsePackages>true</UsePackages>
+			<DCC_UsePackage>framework;frameworkX</DCC_UsePackage>
+			<DCC_Define>MAINAPP;DRAGONSOFT;$(DCC_Define)</DCC_Define>
+			<DCC_DependencyCheckOutputName>..\..\bin\IntelligeN.exe</DCC_DependencyCheckOutputName>
+			<DCC_ImageBase>00400000</DCC_ImageBase>
+			<DCC_Platform>x86</DCC_Platform>
+			<DCC_ExeOutput>../../bin</DCC_ExeOutput>
+			<DCC_DcuOutput>../../dcu</DCC_DcuOutput>
+			<DCC_ObjOutput>../../obj</DCC_ObjOutput>
+			<DCC_UnitSearchPath>../;../core\common;../core\external\HTTPManager;../core\external\HTTPManager\implementors;../core\external\MultiEvent;../core\external\OmniThreadLibrary;../core\external\OmniThreadLibrary\src;../core\utils;../sdk\dlls;../sdk\plugins;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_1)'!=''">
+			<DCC_MapFile>3</DCC_MapFile>
+			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
+			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
+			<DCC_Define>RELEASE;EUREKALOG;EUREKALOG_VER7;$(DCC_Define)</DCC_Define>
+			<DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_2)'!=''">
+			<DCC_MapFile>3</DCC_MapFile>
+			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
+			<DCC_Optimize>false</DCC_Optimize>
+			<DCC_Define>DEBUG;EUREKALOG;EUREKALOG_VER7;$(DCC_Define)</DCC_Define>
+		</PropertyGroup>
+		<ItemGroup>
+			<DelphiCompile Include="IntelligeN.dpr">
+				<MainSource>MainSource</MainSource>
+			</DelphiCompile>
+			<DCCReference Include="forms\uMain.pas">
+				<Form>Main</Form>
+			</DCCReference>
+			<DCCReference Include="forms\uSettings.pas">
+				<Form>Settings</Form>
+			</DCCReference>
+			<DCCReference Include="forms\uAbout.pas">
+				<Form>About</Form>
+			</DCCReference>
+			<DCCReference Include="forms\uRegister.pas">
+				<Form>Register</Form>
+			</DCCReference>
+			<DCCReference Include="forms\uLicenceInfo.pas">
+				<Form>LicenceInfo</Form>
+			</DCCReference>
+			<DCCReference Include="forms\uUpdate.pas">
+				<Form>Update</Form>
+			</DCCReference>
+			<DCCReference Include="forms\uCAPTCHA.pas">
+				<Form>CAPTCHA</Form>
+			</DCCReference>
+			<DCCReference Include="forms\uIntelligentPosting.pas">
+				<Form>IntelligentPosting</Form>
+			</DCCReference>
+			<DCCReference Include="forms\uSelectDialog.pas">
+				<Form> SelectDialog </Form>
+			</DCCReference>
+			<DCCReference Include="forms\uSelectFolderDialog.pas">
+				<Form>SelectFolderDialog</Form>
+			</DCCReference>
+			<DCCReference Include="forms\uNewDesignWindow.pas">
+				<Form>NewDesignWindow </Form>
+			</DCCReference>
+			<DCCReference Include="api\uApiBackupManager.pas"/>
+			<DCCReference Include="api\uApiCAPTCHA.pas"/>
+			<DCCReference Include="api\uApiCodeTag.pas"/>
+			<DCCReference Include="api\uApiComponentController.pas"/>
+			<DCCReference Include="api\uApiComponentParser.pas"/>
+			<DCCReference Include="api\uApiConst.pas"/>
+			<DCCReference Include="api\uApiControls.pas"/>
+			<DCCReference Include="api\uApiCrawler.pas"/>
+			<DCCReference Include="api\uApiCrypter.pas"/>
+			<DCCReference Include="api\uApiDirectoryMonitor.pas"/>
+			<DCCReference Include="api\uApiDLMF.pas"/>
+			<DCCReference Include="api\uApiFile.pas"/>
+			<DCCReference Include="api\uApiHoster.pas"/>
+			<DCCReference Include="api\uApiHTTP.pas"/>
+			<DCCReference Include="api\uApiImageHoster.pas"/>
+			<DCCReference Include="api\uApiIScriptFormatter.pas"/>
+			<DCCReference Include="api\uApiIScriptParser.pas"/>
+			<DCCReference Include="api\uApiMain.pas"/>
+			<DCCReference Include="api\uApiMainMenu.pas"/>
+			<DCCReference Include="api\uApiMirrorControl.pas"/>
+			<DCCReference Include="api\uApiMirrorController.pas"/>
+			<DCCReference Include="api\uApiMody.pas"/>
+			<DCCReference Include="api\uApiMultiCastEvent.pas"/>
+			<DCCReference Include="api\uApiPlugins.pas"/>
+			<DCCReference Include="api\uApiPluginsAdd.pas"/>
+			<DCCReference Include="api\uApiPrerequisite.pas"/>
+			<DCCReference Include="api\uApiPublishController.pas"/>
+			<DCCReference Include="api\uApiPublishModel.pas"/>
+			<DCCReference Include="api\uApiPublish.pas"/>
+			<DCCReference Include="api\uApiSettings.pas"/>
+			<DCCReference Include="api\uApiSettingsManager.pas"/>
+			<DCCReference Include="api\uApiSettingsExport.pas"/>
+			<DCCReference Include="api\uApiSettingsPluginsCheckListBox.pas"/>
+			<DCCReference Include="api\uApiTabSheetController.pas"/>
+			<DCCReference Include="api\uApiTabSheetItem.pas"/>
+			<DCCReference Include="api\uApiThreadPoolManager.pas"/>
+			<DCCReference Include="api\uApiUpdate.pas"/>
+			<DCCReference Include="api\uApiWebsiteEditor.pas"/>
+			<DCCReference Include="api\uApiXml.pas"/>
+			<DCCReference Include="api\uApiXmlSettings.pas"/>
+			<DCCReference Include="..\core\common\uAppInterface.pas"/>
+			<DCCReference Include="..\core\common\uBase.pas"/>
+			<DCCReference Include="..\core\common\uConst.pas"/>
+			<DCCReference Include="..\core\common\uFileInterface.pas"/>
+			<DCCReference Include="..\core\common\uWebsiteInterface.pas"/>
+			<DCCReference Include="frames\ufAddWebsiteWizard.pas">
+				<Form>fAddWebsiteWizard</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
+			<DCCReference Include="frames\ufControlEditor.pas">
+				<Form>fControlEditor</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
+			<DCCReference Include="frames\ufDesigner.pas">
+				<Form>fDesigner</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
+			<DCCReference Include="frames\ufDesignObjectInspector.pas">
+				<Form>fDesignObjectInspector</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
+			<DCCReference Include="frames\ufDatabase.pas">
+				<Form>fDatabase</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
+			<DCCReference Include="frames\ufPublish.pas">
+				<Form>fPublish</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
+			<DCCReference Include="frames\ufPublishQueue.pas">
+				<Form>fPublishQueue</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
+			<DCCReference Include="frames\ufIScriptDesigner.pas">
+				<Form>IScriptDesigner</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
+			<DCCReference Include="frames\ufLinklist.pas">
+				<Form>fLinklist</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
+			<DCCReference Include="frames\ufLogin.pas">
+				<Form>fLogin</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
+			<DCCReference Include="frames\ufMain.pas">
+				<Form>fMain</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
+			<DCCReference Include="frames\ufHTTPLogger.pas">
+				<Form>fHTTPLogger</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
+			<DCCReference Include="mods\uMyAdvmJScriptStyler.pas"/>
+			<DCCReference Include="mods\uMycxCheckComboBox.pas"/>
+			<DCCReference Include="mods\uMycxRichEdit.pas"/>
+			<DCCReference Include="mods\uMyPopupMenu.pas"/>
+			<DCCReference Include="mods\uMydxBarPopupMenu.pas"/>
+			<DCCReference Include="mods\uMyTMonospaceHint.pas"/>
+			<DCCReference Include="..\sdk\dlls\uExport.pas"/>
+			<DCCReference Include="..\sdk\plugins\uPlugInInterface.pas"/>
+			<DCCReference Include="..\sdk\plugins\uPlugInClass.pas"/>
+			<DCCReference Include="..\sdk\plugins\uPlugInConst.pas"/>
+			<DCCReference Include="..\sdk\plugins\uPlugInEvent.pas"/>
+			<DCCReference Include="..\sdk\plugins\uPlugInHTTPClasses.pas"/>
+			<DCCReference Include="..\sdk\plugins\app\uPlugInAppClass.pas"/>
+			<DCCReference Include="..\sdk\plugins\captcha\uPlugInCAPTCHAClass.pas"/>
+			<DCCReference Include="..\sdk\plugins\cms\uPlugInCMSClass.pas"/>
+			<DCCReference Include="..\sdk\plugins\cms\uPlugInCMSBoardClass.pas"/>
+			<DCCReference Include="..\sdk\plugins\cms\uPlugInCMSSettingsHelper.pas"/>
+			<DCCReference Include="..\sdk\plugins\cms\uPlugInCMSFormbasedClass.pas"/>
+			<DCCReference Include="..\sdk\plugins\cms\uPlugInCMSBlogClass.pas"/>
+			<DCCReference Include="..\sdk\plugins\crawler\uPlugInCrawlerClass.pas"/>
+			<DCCReference Include="..\sdk\plugins\crawler\uPlugInCrawlerConst.pas"/>
+			<DCCReference Include="..\sdk\plugins\crypter\uPlugInCrypterClass.pas"/>
+			<DCCReference Include="..\sdk\plugins\fileformats\uPlugInFileFormatClass.pas"/>
+			<DCCReference Include="..\sdk\plugins\filehoster\uPlugInFileHosterClass.pas"/>
+			<DCCReference Include="..\sdk\plugins\imagehoster\uPlugInImageHosterClass.pas"/>
+			<DCCReference Include="..\core\utils\uFileUtils.pas"/>
+			<DCCReference Include="..\core\utils\uPathUtils.pas"/>
+			<DCCReference Include="..\core\utils\uStringUtils.pas"/>
+			<DCCReference Include="..\core\utils\uImageUtils.pas"/>
+			<DCCReference Include="ole\IntelligeN_TLB.pas"/>
+			<DCCReference Include="ole\uOLE.pas">
+				<CoClasses>IntelligeN2009</CoClasses>
+			</DCCReference>
+			<RidlCompile Include="IntelligeN.ridl"/>
+			<RcItem Include="..\..\res\barmanager.txt">
+				<ContainerId>ResourceItem</ContainerId>
+				<ResourceType>RCData</ResourceType>
+				<ResourceId>BARMANAGER</ResourceId>
+			</RcItem>
+			<RcItem Include="..\..\res\dockmanager.txt">
+				<ContainerId>ResourceItem</ContainerId>
+				<ResourceType>RCData</ResourceType>
+				<ResourceId>DOCKMANAGER</ResourceId>
+			</RcItem>
+			<RcItem Include="..\..\res\sleep32.exe">
+				<ContainerId>ResourceItem</ContainerId>
+				<ResourceType>RCData</ResourceType>
+				<ResourceId>sleep32</ResourceId>
+			</RcItem>
+			<RcItem Include="..\..\res\sleep64.exe">
+				<ContainerId>ResourceItem</ContainerId>
+				<ResourceType>RCData</ResourceType>
+				<ResourceId>sleep64</ResourceId>
+			</RcItem>
+			<BuildConfiguration Include="Basis">
+				<Key>Base</Key>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Release">
+				<Key>Cfg_1</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Debug">
+				<Key>Cfg_2</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+		</ItemGroup>
+		<Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
+		<ProjectExtensions>
+			<Borland.Personality>Delphi.Personality.12</Borland.Personality>
+			<Borland.ProjectType>VCLApplication</Borland.ProjectType>
+			<BorlandProject>
+				<Delphi.Personality>
+					<Source>
+						<Source Name="MainSource">IntelligeN.dpr</Source>
+					</Source>
+					<Parameters>
+						<Parameters Name="UseLauncher">False</Parameters>
+						<Parameters Name="LoadAllSymbols">True</Parameters>
+						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+					</Parameters>
+					<VersionInfo>
+						<VersionInfo Name="IncludeVerInfo">True</VersionInfo>
+						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
+						<VersionInfo Name="MajorVer">2</VersionInfo>
+						<VersionInfo Name="MinorVer">129</VersionInfo>
+						<VersionInfo Name="Release">0</VersionInfo>
+						<VersionInfo Name="Build">4</VersionInfo>
+						<VersionInfo Name="Debug">False</VersionInfo>
+						<VersionInfo Name="PreRelease">False</VersionInfo>
+						<VersionInfo Name="Special">False</VersionInfo>
+						<VersionInfo Name="Private">False</VersionInfo>
+						<VersionInfo Name="DLL">False</VersionInfo>
+						<VersionInfo Name="Locale">1033</VersionInfo>
+						<VersionInfo Name="CodePage">1252</VersionInfo>
+					</VersionInfo>
+					<VersionInfoKeys>
+						<VersionInfoKeys Name="CompanyName"/>
+						<VersionInfoKeys Name="FileDescription">IntelligeN 2009 Application</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">2.129.0.4</VersionInfoKeys>
+						<VersionInfoKeys Name="InternalName"/>
+						<VersionInfoKeys Name="LegalCopyright"/>
+						<VersionInfoKeys Name="LegalTrademarks"/>
+						<VersionInfoKeys Name="OriginalFilename">IntelligeN.exe</VersionInfoKeys>
+						<VersionInfoKeys Name="ProductName">IntelligeN 2009</VersionInfoKeys>
+						<VersionInfoKeys Name="ProductVersion">2.5</VersionInfoKeys>
+						<VersionInfoKeys Name="Comments"/>
+					</VersionInfoKeys>
+					<Excluded_Packages/>
+				</Delphi.Personality>
+				<ActiveXProjectInfo>
+					<version>1</version>
+				</ActiveXProjectInfo>
+			</BorlandProject>
+			<ProjectFileVersion>12</ProjectFileVersion>
+		</ProjectExtensions>
+	</Project>
+
+<!-- EurekaLog First Line
+[Exception Log]
+EurekaLog Version=7007
+Activate=1
+atFixSafeCallException=1
+atVCL=1
+atWin32=1
+boSaveCompressedCopyInCaseOfError=1
+DeleteMapAfterCompile=1
+dpJCL=1
+Encrypt Password=""
+Errors Terminate=5
+idEurekaLog=1
+idEurekaLogDetailed=1
+idMSClassic=1
+idStepsToReproduce=1
+InjectCode=1
+InjectInfo=1
+InjectOptions=1
+loAppendReproduceText=1
+loMaxLeaks=0
+loRAWTracing=1
+loShareMM=1
+ProjectID="{773100CB-70BA-4C76-AEDD-B2988F816212}"
+Save Log File=0
+seMAPI=1
+Sender Classes="TELMailSimpleMAPISender;TELMailMAPISender"
+seSMAPI=1
+sndMAPISubject="IntelligeN 2009 Bug report"
+sndMAPITarget="sebastianklatte@gmx.net"
+sndSendLastHTMLPage=0
+sndSMAPISubject="IntelligeN 2009 Bug report"
+sndSMAPITarget="sebastianklatte@gmx.net"
+soActCtlsControlClass=1
+soActCtlsControlText=1
+soActCtlsFormClass=1
+soActCtlsFormText=1
+soAppCompilationDate=1
+soAppName=1
+soAppParameters=1
+soAppStartDate=1
+soAppUpTime=1
+soAppVersionNumber=1
+soCmpDisplayDPI=1
+soCmpDisplayMode=1
+soCmpFreeDisk=1
+soCmpFreeMemory=1
+soCmpName=1
+soCmpPrinter=1
+soCmpProcessor=1
+soCmpSysUpTime=1
+soCmpTotalDisk=1
+soCmpTotalMemory=1
+soCmpVideoCard=1
+soCmpVM=1
+soCustomData=1
+soExcCount=1
+soExcDate=1
+soExcModuleName=1
+soExcModuleVersion=1
+soExcNote=1
+soExcStatus=1
+soNetDHCP=1
+soNetDNS1=1
+soNetDNS2=1
+soNetGateway=1
+soNetIP=1
+soNetSubmask=1
+soOSBuildN=1
+soOSCharset=1
+soOSLanguage=1
+soOSType=1
+soOSUpdate=1
+soUserCompany=1
+soUserID=1
+soUserPrivileges=1
+TerminateBtn Checked=0
+EurekaLog Last Line -->

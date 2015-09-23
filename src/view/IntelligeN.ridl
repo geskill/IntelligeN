@@ -1,0 +1,66 @@
+// ************************************************************************ //
+// WARNUNG                                                                    
+// -------                                                                    
+// Diese Datei wird von dem Typbibliotheks-Importer oder dem Typbibliothekseditor 
+// erzeugt. Außer Syntaxfehlern analysiert der Editor an der Datei vorgenommene 
+// Änderungen. Wenn Sie aber Änderungen mit dem Editor vornehmen, wird diese  
+// Datei neu erzeugt und Kommentare oder Formatänderungen gehen verloren.     
+// ************************************************************************ //
+// Datei erzeugt am 03.01.2013 20:57:25 (- $Rev: 12980 $, 7884384).
+
+[
+  uuid(81C4A9A6-6D8E-4077-99DB-AD246E0FBD51), 
+  version(1.0)
+    
+]
+library IntelligeN
+{
+
+  importlib("stdole2.tlb");
+
+  interface IIntelligeN2009;
+  coclass IntelligeN2009;
+
+
+  [
+    uuid(49828A90-6AD0-4451-A5B9-B5E999509D4D), 
+    helpstring("Dispatch-Interface für IntelligeN2009-Objekt"), 
+    dual, 
+    oleautomation
+  ]
+  interface IIntelligeN2009: IDispatch
+  {
+    [id(0x00000001)]
+    HRESULT _stdcall openfile([in] BSTR AFileName);
+    [id(0x00000002)]
+    HRESULT _stdcall savefile([in] BSTR AFileName);
+    [id(0x00000003)]
+    HRESULT _stdcall close(void);
+    [id(0x00000005)]
+    HRESULT _stdcall callcrawler(void);
+    [id(0x00000006)]
+    HRESULT _stdcall callremoteupload(void);
+    [id(0x00000007)]
+    HRESULT _stdcall callcheckdirectlinks(void);
+    [id(0x00000008)]
+    HRESULT _stdcall callcrypter(void);
+    [id(0x00000009)]
+    HRESULT _stdcall callpublish(void);
+    [id(0x0000000A)]
+    int _stdcall crawleractive(void);
+    [id(0x0000000B)]
+    int _stdcall hostermanageractive(void);
+    [id(0x0000000C)]
+    int _stdcall publishactive(void);
+  };
+
+  [
+    uuid(33F80641-1EE9-4DB1-BD02-744B0FAFB085), 
+    helpstring("IntelligeN2009 Objekt")
+  ]
+  coclass IntelligeN2009
+  {
+    [default] interface IIntelligeN2009;
+  };
+
+};

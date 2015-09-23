@@ -1,0 +1,4 @@
+BARMANAGER RCData "..\\..\\res\\barmanager.txt"
+DOCKMANAGER RCData "..\\..\\res\\dockmanager.txt"
+sleep32 RCData "..\\..\\res\\sleep32.exe"
+sleep64 RCData "..\\..\\res\\sleep64.exe"

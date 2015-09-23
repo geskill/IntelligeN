@@ -7,7 +7,7 @@ uses
   Generics.MultiEvents.Handler,
   Generics.MultiEvents.NotifyInterface,
   // Common
-  uConst, uAppInterface;
+  uBase, uAppInterface;
 
 type
   TViewChangeMethod = procedure(const NewViewType: TViewType) of object;

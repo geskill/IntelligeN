@@ -1,0 +1,95 @@
+<xml>
+  <HTML>
+    <bold param1="bolded text">&lt;strong&gt;{param1}{selection=$param1}&lt;/strong&gt;</bold>
+    <italic param1="italicized text">&lt;em&gt;{param1}{selection=$param1}&lt;/em&gt;</italic>
+    <underline param1="underlined text">&lt;ins&gt;{param1}{selection=$param1}&lt;/ins&gt;</underline>
+    <strikethrough param1="strikethrough text">&lt;del&gt;{param1}{selection=$param1}&lt;/del&gt;</strikethrough>
+    <size param1="font size" param1value="tiny|small|normal|big|huge" param2="scaled text">&lt;font size=&quot;{param1=50%|85%|100%|150%|200%}&quot;&gt;{param2}{selection=$param2}&lt;/font&gt;</size>
+    <color param1="color" param1value="blue|green|red|yellow" param2="colored text">&lt;font color=&quot;{param1=#0000FF|#00C000|#FF0000|#FFFF00}&quot;&gt;{param2}{selection=$param2}&lt;/font&gt;</color>
+    <left param1="left-aligned text">&lt;div align=&quot;left&quot;&gt;{param1}{selection=$param1}&lt;/div&gt;</left>
+    <center param1="centered text">&lt;div align=&quot;center&quot;&gt;{param1}{selection=$param1}&lt;/div&gt;</center>
+    <right param1="right-aligned text">&lt;div align=&quot;right&quot;&gt;{param1}{selection=$param1}&lt;/div&gt;</right>
+    <image param1="image url">&lt;img src=&quot;{param1}{selection=$param1}&quot; alt=&quot;&quot;&gt;</image>
+    <email param1="email address">&lt;a href=&quot;mailto:{param1}{selection=$param1}&quot;&gt;{param1}&lt;/a&gt;</email>
+    <youtube param1="youtube link">&lt;object width=&quot;425&quot; height=&quot;350&quot;&gt;&lt;param name=&quot;movie&quot; value=&quot;{param1}{selection=$param1}&quot;&gt;&lt;/param&gt;&lt;param name=&quot;wmode&quot; value=&quot;transparent&quot;&gt;&lt;/param&gt;&lt;embed src=&quot;{param1}{selection=$param1}&quot; type=&quot;application/x-shockwave-flash&quot; wmode=&quot;transparent&quot; width=&quot;425&quot; height=&quot;350&quot;&gt;&lt;/embed&gt;&lt;/object&gt;</youtube>
+    <url param1="url" param2="url text">&lt;a href=&quot;{param1}{selection=$param1}&quot;&gt;{param2}&lt;/a&gt;</url>
+    <list>&lt;ul&gt;{selection=
+&lt;li&gt;$lineX&lt;/li&gt;}
+&lt;li&gt;{cursor}&lt;/li&gt;
+&lt;/ul&gt;</list>
+    <quote param1="quotation by" param2="quoted text">&lt;blockquote cite="{param1}"&gt;{param2}{selection=$param2}&lt;/blockquote&gt;</quote>
+    <code param1="code text">&lt;pre&gt;{param1}{selection=$param1}&lt;/pre&gt;</code>
+    <spoiler param1="spoilered text">&lt;div id=&quot;spoiler&quot; style=&quot;display:none;&quot;&gt;{param1}{selection=$param1}&lt;/div&gt;
+&lt;button onclick=&quot;document.all.spoiler.style.display=&#39;&#39;&quot;&gt;SPOILER&lt;/button&gt;</spoiler>
+    <hide param1="hidden text">&lt;hide&gt;{param1}{selection=$param1}&lt;/hide&gt;</hide>
+  </HTML>
+  <phpbb>
+    <bold param1="bolded text">[b]{param1}{selection=$param1}[/b]</bold>
+    <italic param1="italicized text">[i]{param1}{selection=$param1}[/i]</italic>
+    <underline param1="underlined text">[u]{param1}{selection=$param1}[/u]</underline>
+    <strikethrough param1="strikethrough text">[s]{param1}{selection=$param1}[/s]</strikethrough>
+    <size param1="font size" param1value="tiny|small|normal|big|huge" param2="scaled text">[size={param1=50|85|100|150|200}]{param2}{selection=$param2}[/size]</size>
+    <color param1="color" param1value="blue|green|red|yellow" param2="colored text">[color={param1=blue|green|red|yellow}]{param2}{selection=$param2}[/color]</color>
+    <left param1="left-aligned text">[left]{param1}{selection=$param1}[/left]</left>
+    <center param1="centered text">[center]{param1}{selection=$param1}[/center]</center>
+    <right param1="right-aligned text">[right]{param1}{selection=$param1}[/right]</right>
+    <image param1="image url">[img]{param1}{selection=$param1}[/img]</image>
+    <email param1="email address">[email]{param1}{selection=$param1}[/email]</email>
+    <youtube param1="youtube link">[youtube]{param1}{selection=$param1}[/youtube]</youtube>
+    <url param1="url" param2="url text">[url={param1}{selection=$param1}]{param2}[/url]</url>
+    <list param1="sort style" param1value="unsorted|numbered|alphabetical">[list={param1=|1|a}]{selection=
+[*]$lineX}
+[*]{cursor}
+[/list]</list>
+    <quote param1="quotation by" param2="quoted text">[quote="{param1}"]{param2}{selection=$param2}[/quote]</quote>
+    <code param1="highlighter style" param1value="none|php" param2="code text">[code{param1=|php}]{param2}{selection=$param2}[/code]</code>
+    <spoiler param1="spoilered text">[spoiler]{param1}{selection=$param1}[/spoiler]</spoiler>
+    <hide param1="hidden text">[hide]{param1}{selection=$param1}[/hide]</hide>
+  </phpbb>
+  <vBulletin>
+    <bold param1="bolded text">[b]{param1}{selection=$param1}[/b]</bold>
+    <italic param1="italicized text">[i]{param1}{selection=$param1}[/i]</italic>
+    <underline param1="underlined text">[u]{param1}{selection=$param1}[/u]</underline>
+    <strikethrough param1="strikethrough text">[s]{param1}{selection=$param1}[/s]</strikethrough>
+    <size param1="font size" param1value="small|normal|big|huge" param2="scaled text">[size="{param1=1|2|3|4}"]{param2}{selection=$param2}[/size]</size>
+    <color param1="color" param1value="blue|green|red|yellow" param2="colored text">[color="{param1=blue|green|red|yellow}"]{param2}{selection=$param2}[/color]</color>
+    <left param1="left-aligned text">[left]{param1}{selection=$param1}[/left]</left>
+    <center param1="centered text">[center]{param1}{selection=$param1}[/center]</center>
+    <right param1="right-aligned text">[right]{param1}{selection=$param1}[/right]</right>
+    <image param1="image url">[img]{param1}{selection=$param1}[/img]</image>
+    <email param1="email address">[email]{param1}{selection=$param1}[/email]</email>
+    <youtube param1="youtube link">[youtube]{param1}{selection=$param1}[/youtube]</youtube>
+    <url param1="url" param2="url text">[url="{param1}{selection=$param1}"]{param2}[/url]</url>
+    <list param1="sort style" param1value="unsorted|numbered|lowercase alphabetical|uppercase alphabetical|lowercase arabic|uppercase arabic">[list={param1=|1|a|A|i|I}]{selection=
+[*]$lineX}
+[*]{cursor}
+[/list]</list>
+    <quote param1="quotation by" param2="quoted text">[quote="{param1}"]{param2}{selection=$param2}[/quote]</quote>
+    <code param1="code text">[code]{param1}{selection=$param1}[/code]</code>
+    <spoiler param1="spoilered text">[spoiler]{param1}{selection=$param1}[/spoiler]</spoiler>
+    <hide param1="hidden text">[hide]{param1}{selection=$param1}[/hide]</hide>
+  </vBulletin>
+  <wBB>
+    <bold param1="bolded text">[b]{param1}{selection=$param1}[/b]</bold>
+    <italic param1="italicized text">[i]{param1}{selection=$param1}[/i]</italic>
+    <underline param1="underlined text">[u]{param1}{selection=$param1}[/u]</underline>
+    <strikethrough param1="strikethrough text">[s]{param1}{selection=$param1}[/s]</strikethrough>
+    <size param1="font size" param1value="small|normal|big|huge" param2="scaled text">[size={param1=8|10|12|14}]{param2}{selection=$param2}[/size]</size>
+    <color param1="color" param1value="blue|green|red|yellow" param2="colored text">[color={param1=blue|green|red|yellow}]{param2}{selection=$param2}[/color]</color>
+    <left param1="left-aligned text">[align=left]{param1}{selection=$param1}[/align]</left>
+    <center param1="centered text">[align=center]{param1}{selection=$param1}[/align]</center>
+    <right param1="right-aligned text">[align=right]{param1}{selection=$param1}[/align]</right>
+    <image param1="image url">[img]{param1}{selection=$param1}[/img]</image>
+    <email param1="email address">[email]{param1}{selection=$param1}[/email]</email>
+    <youtube param1="youtube link">[youtube]{param1}{selection=$param1}[/youtube]</youtube>
+    <url param1="url" param2="url text">[url='{param1}{selection=$param1}']{param2}[/url]</url>
+    <list param1="sort style" param1value="unsorted|numbered|alphabetical">[list={param1=|1|a}]{selection=
+[*]$lineX}
+[*]{cursor}
+[/list]</list>
+    <quote param1="quotation by" param2="quoted text">[quote='{param1}']{param2}{selection=$param2}[/quote]</quote>
+    <code param1="code text">[code]{param1}{selection=$param1}[/code]</code>
+    <spoiler param1="spoilered text">[spoiler]{param1}{selection=$param1}[/spoiler]</spoiler>
+    <hide param1="hidden text">[hide]{param1}{selection=$param1}[/hide]</hide>
+  </wBB>
+</xml>
