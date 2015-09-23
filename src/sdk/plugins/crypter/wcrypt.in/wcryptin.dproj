@@ -21,8 +21,9 @@
 		</PropertyGroup>
 		<Import Project="..\..\plugin.optset" Condition="'$(Base)'!='' And Exists('..\..\plugin.optset')"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<UsePackages>true</UsePackages>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
-			<DCC_DependencyCheckOutputName>..\..\..\..\bin_portable\plugins\wcryptin.dll</DCC_DependencyCheckOutputName>
+			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\wcryptin.dll</DCC_DependencyCheckOutputName>
 			<GenDll>true</GenDll>
 			<DCC_UsePackage>framework</DCC_UsePackage>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
@@ -98,13 +99,7 @@
 						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
-					<Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dclDataSnapIndy10ServerTransport140.bpl">Embarcadero DBExpress DataSnap-Servertransport-Komponenten</Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dclDataSnapServer140.bpl">Embarcadero DBExpress DataSnap-Serverkomponenten</Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dcloffice2k140.bpl">Microsoft Office 2000 Beispiele für gekapselte Komponenten für Automation Server</Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dclofficexp140.bpl">Microsoft Office XP Beispiele für gekapselte Komponenten für Automation Server</Excluded_Packages>
-						<Excluded_Packages Name="C:\Program Files (x86)\FastReports\FastScript\LibD14\dclfsibx14.bpl">FastScript 1.9 IBX Components</Excluded_Packages>
-					</Excluded_Packages>
+					<Excluded_Packages/>
 				</Delphi.Personality>
 			</BorlandProject>
 			<ProjectFileVersion>12</ProjectFileVersion>
@@ -113,6 +108,8 @@
 
 <!-- EurekaLog First Line
 [Exception Log]
-EurekaLog Version=7001
-DeleteMapAfterCompile=1
+EurekaLog Version=7007
+Activate=0
+DeleteMapAfterCompile=0
+Encrypt Password=""
 EurekaLog Last Line -->

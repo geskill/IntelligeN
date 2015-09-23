@@ -16,8 +16,10 @@ uses
   RegExpr,
   // LkJSON
   uLkJSON,
+  // HTTPManager
+  uHTTPInterface, uHTTPClasses,
   // plugin system
-  uIdHTTPHelper, uPlugInFileHosterClass, uPlugInConst,
+  uPlugInFileHosterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
   uPathUtils;
 
@@ -25,8 +27,8 @@ type
   TKickloadCom = class(TFileHosterPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function CheckLink(AFile: WideString): TLinkInfo; override; stdcall;
-    function CheckLinks(AFiles: WideString): Integer; override; stdcall;
+    function CheckLink(AFile: WideString): TLinkInfo; override; safecall;
+    function CheckLinks(AFiles: WideString): Integer; override; safecall;
   end;
 
 implementation
@@ -66,6 +68,7 @@ var
   end;
 
 begin
+  {
   with TIdHTTPHelper.Create(Self) do
     try
       with TStringList.Create do
@@ -117,6 +120,7 @@ begin
     finally
       Free;
     end;
+  }
   Result := FCheckedLinksList.Count;
 end;
 

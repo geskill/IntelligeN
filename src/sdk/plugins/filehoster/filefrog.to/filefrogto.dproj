@@ -22,8 +22,9 @@
 		<Import Project="..\..\plugin.optset" Condition="'$(Base)'!='' And Exists('..\..\plugin.optset')"/>
 		<Import Project="..\filehoster.optset" Condition="'$(Base)'!='' And Exists('..\filehoster.optset')"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<UsePackages>true</UsePackages>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
-			<DCC_DependencyCheckOutputName>..\..\..\..\bin_portable\plugins\filefrogto.dll</DCC_DependencyCheckOutputName>
+			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\filefrogto.dll</DCC_DependencyCheckOutputName>
 			<GenDll>true</GenDll>
 			<DCC_UsePackage>framework</DCC_UsePackage>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
@@ -99,13 +100,7 @@
 						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
-					<Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dclDataSnapIndy10ServerTransport140.bpl">Embarcadero DBExpress DataSnap-Servertransport-Komponenten</Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dclDataSnapServer140.bpl">Embarcadero DBExpress DataSnap-Serverkomponenten</Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dcloffice2k140.bpl">Microsoft Office 2000 Beispiele für gekapselte Komponenten für Automation Server</Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dclofficexp140.bpl">Microsoft Office XP Beispiele für gekapselte Komponenten für Automation Server</Excluded_Packages>
-						<Excluded_Packages Name="C:\Program Files (x86)\FastReports\FastScript\LibD14\dclfsibx14.bpl">FastScript 1.9 IBX Components</Excluded_Packages>
-					</Excluded_Packages>
+					<Excluded_Packages/>
 				</Delphi.Personality>
 			</BorlandProject>
 			<ProjectFileVersion>12</ProjectFileVersion>
@@ -114,7 +109,7 @@
 
 <!-- EurekaLog First Line
 [Exception Log]
-EurekaLog Version=7001
+EurekaLog Version=7007
 Activate=0
 AutoCrashOperation=2
 boHandleSafeCallExceptions=1
@@ -126,12 +121,12 @@ csoShowWindowsThreads=1
 DeleteMapAfterCompile=1
 Email Address=""
 Email Object=""
+Encrypt Password=""
 Errors Number=32
 Errors Terminate=3
 Foreground Tab=0
 Freeze Timeout=0
 loCatchLeaks=0
-loEnableMMDebugMode=0
 loFreeAllLeaks=1
 loHideRTLLeaks=0
 loMaxLeaks=1024

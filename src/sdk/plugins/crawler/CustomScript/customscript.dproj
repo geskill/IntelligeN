@@ -23,7 +23,7 @@
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<UsePackages>true</UsePackages>
 			<DCC_UsePackage>framework</DCC_UsePackage>
-			<DCC_DependencyCheckOutputName>..\..\..\..\bin_portable\plugins\customscript.dll</DCC_DependencyCheckOutputName>
+			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\customscript.dll</DCC_DependencyCheckOutputName>
 			<GenDll>true</GenDll>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DCC_Platform>x86</DCC_Platform>
@@ -43,10 +43,6 @@
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
 			<DCCReference Include="uCustomScript.pas"/>
-			<RcItem Include="customscript.ico">
-				<ResourceType>Icon</ResourceType>
-				<ResourceId>icon</ResourceId>
-			</RcItem>
 			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
 				<DependentOn>..\..\plugin.optset</DependentOn>
@@ -111,6 +107,8 @@
 
 <!-- EurekaLog First Line
 [Exception Log]
-EurekaLog Version=7001
-DeleteMapAfterCompile=1
+EurekaLog Version=7007
+Activate=0
+DeleteMapAfterCompile=0
+Encrypt Password=""
 EurekaLog Last Line -->

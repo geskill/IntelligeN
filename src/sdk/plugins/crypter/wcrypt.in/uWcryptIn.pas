@@ -58,6 +58,8 @@ begin
   _Foldertypes := TFoldertypes(TFoldertype(Foldertypes));
   _Containertypes := TContainertypes(TContainertype(ContainerTypes));
 
+  {
+
   with TIdHTTPHelper.Create(Self) do
     try
       _lkJSONobject := TlkJSONobject.Create;
@@ -127,6 +129,8 @@ begin
     finally
       Free;
     end;
+
+  }
 end;
 
 function TWcryptIn.GetFolderInfo;
@@ -142,6 +146,8 @@ begin
     Hoster := '';
     Parts := 0;
   end;
+
+  {
 
   with TIdHTTPHelper.Create(Self) do
     try
@@ -178,6 +184,8 @@ begin
     finally
       Free;
     end;
+
+  }
 
   Result := CrypterFolderInfo;
 end;

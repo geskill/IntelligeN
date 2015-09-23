@@ -24,7 +24,7 @@
 			<DCC_UnitSearchPath>../amazon.com;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<UsePackages>true</UsePackages>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
-			<DCC_DependencyCheckOutputName>..\..\..\..\bin_portable\plugins\amazonde.dll</DCC_DependencyCheckOutputName>
+			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\amazonde.dll</DCC_DependencyCheckOutputName>
 			<GenDll>true</GenDll>
 			<DCC_UsePackage>framework</DCC_UsePackage>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
@@ -115,7 +115,7 @@
 
 <!-- EurekaLog First Line
 [Exception Log]
-EurekaLog Version=7001
+EurekaLog Version=7007
 Activate=0
 AutoCrashOperation=2
 boHandleSafeCallExceptions=1
@@ -133,7 +133,6 @@ Errors Terminate=3
 Foreground Tab=0
 Freeze Timeout=0
 loCatchLeaks=0
-loEnableMMDebugMode=0
 loFreeAllLeaks=1
 loHideRTLLeaks=0
 loMaxLeaks=1024

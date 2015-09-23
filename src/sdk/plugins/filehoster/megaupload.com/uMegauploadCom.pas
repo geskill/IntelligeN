@@ -14,8 +14,10 @@ uses
   Windows, SysUtils, Classes, Math, HTTPApp,
   // Reg Ex
   RegExpr,
+  // HTTPManager
+  uHTTPInterface, uHTTPClasses,
   // plugin system
-  uIdHTTPHelper, uPlugInFileHosterClass, uPlugInConst,
+  uPlugInFileHosterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
   uPathUtils;
 
@@ -23,8 +25,8 @@ type
   TMegauploadCom = class(TFileHosterPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function CheckLink(AFile: WideString): TLinkInfo; override; stdcall;
-    function CheckLinks(AFiles: WideString): Integer; override; stdcall;
+    function CheckLink(AFile: WideString): TLinkInfo; override; safecall;
+    function CheckLinks(AFiles: WideString): Integer; override; safecall;
   end;
 
 implementation
@@ -71,6 +73,7 @@ var
   I: Integer;
   _params, _postreply: TStringStream;
 begin
+  {
   with TIdHTTPHelper.Create(Self) do
     try
       with TStringList.Create do
@@ -117,6 +120,7 @@ begin
     finally
       Free;
     end;
+  }
   result := FCheckedLinksList.Count;
 end;
 

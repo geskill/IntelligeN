@@ -52,7 +52,7 @@ begin
   Result := LongWord(_ComponentIDs);
 end;
 
-function TChipDe.GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): Boolean;
+function TChipDe.GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool;
 begin
   Result := True;
 end;
@@ -66,12 +66,7 @@ procedure TChipDe.Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; co
 const
   website = 'http://www.chip.de/';
 begin
-  with TIdHTTPHelper.Create(Self) do
-    try
-      //
-    finally
-      Free;
-    end
+
 end;
 
 end.

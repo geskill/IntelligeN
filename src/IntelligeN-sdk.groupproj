@@ -1,0 +1,72 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{DA33157E-1CC9-4669-9F9A-7F4ACD6053C2}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="core\framework\framework.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\dlls\core\IntelligeN.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\dlls\xml\IXML.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="view\frameworkX\frameworkX.dproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="framework">
+			<MSBuild Projects="core\framework\framework.dproj"/>
+		</Target>
+		<Target Name="framework:Clean">
+			<MSBuild Targets="Clean" Projects="core\framework\framework.dproj"/>
+		</Target>
+		<Target Name="framework:Make">
+			<MSBuild Targets="Make" Projects="core\framework\framework.dproj"/>
+		</Target>
+		<Target Name="IntelligeN">
+			<MSBuild Projects="sdk\dlls\core\IntelligeN.dproj"/>
+		</Target>
+		<Target Name="IntelligeN:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\dlls\core\IntelligeN.dproj"/>
+		</Target>
+		<Target Name="IntelligeN:Make">
+			<MSBuild Targets="Make" Projects="sdk\dlls\core\IntelligeN.dproj"/>
+		</Target>
+		<Target Name="IXML">
+			<MSBuild Projects="sdk\dlls\xml\IXML.dproj"/>
+		</Target>
+		<Target Name="IXML:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\dlls\xml\IXML.dproj"/>
+		</Target>
+		<Target Name="IXML:Make">
+			<MSBuild Targets="Make" Projects="sdk\dlls\xml\IXML.dproj"/>
+		</Target>
+		<Target Name="frameworkX">
+			<MSBuild Projects="view\frameworkX\frameworkX.dproj"/>
+		</Target>
+		<Target Name="frameworkX:Clean">
+			<MSBuild Targets="Clean" Projects="view\frameworkX\frameworkX.dproj"/>
+		</Target>
+		<Target Name="frameworkX:Make">
+			<MSBuild Targets="Make" Projects="view\frameworkX\frameworkX.dproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="framework;IntelligeN;IXML;frameworkX"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="framework:Clean;IntelligeN:Clean;IXML:Clean;frameworkX:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="framework:Make;IntelligeN:Make;IXML:Make;frameworkX:Make"/>
+		</Target>
+		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+	</Project>

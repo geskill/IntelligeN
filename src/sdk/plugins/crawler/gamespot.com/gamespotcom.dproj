@@ -21,7 +21,9 @@
 		</PropertyGroup>
 		<Import Project="..\..\plugin.optset" Condition="'$(Base)'!='' And Exists('..\..\plugin.optset')"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
-			<DCC_DependencyCheckOutputName>..\..\..\..\bin_portable\plugins\gamespotcom.dll</DCC_DependencyCheckOutputName>
+			<DCC_UsePackage>framework</DCC_UsePackage>
+			<UsePackages>true</UsePackages>
+			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\gamespotcom.dll</DCC_DependencyCheckOutputName>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<GenDll>true</GenDll>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
@@ -104,6 +106,8 @@
 
 <!-- EurekaLog First Line
 [Exception Log]
-EurekaLog Version=7001
-DeleteMapAfterCompile=1
+EurekaLog Version=7007
+Activate=0
+DeleteMapAfterCompile=0
+Encrypt Password=""
 EurekaLog Last Line -->

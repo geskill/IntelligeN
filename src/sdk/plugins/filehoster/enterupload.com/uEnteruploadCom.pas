@@ -16,8 +16,10 @@ uses
   RegExpr,
   // LkJSON
   uLkJSON,
+  // HTTPManager
+  uHTTPInterface, uHTTPClasses,
   // plugin system
-  uIdHTTPHelper, uPlugInFileHosterClass, uPlugInConst,
+  uPlugInFileHosterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
   uPathUtils, uSizeUtils;
 
@@ -25,7 +27,7 @@ type
   TEnteruploadCom = class(TFileHosterPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function CheckLink(AFile: WideString): TLinkInfo; override; stdcall;
+    function CheckLink(AFile: WideString): TLinkInfo; override; safecall;
     // function CheckLinks(AFiles: WideString): Integer; override;
   end;
 
@@ -51,6 +53,7 @@ begin
     FileName := '';
     Checksum := '';
   end;
+  {
   with TIdHTTPHelper.Create(Self) do
     try
       AddCookie('lang=english', 'http://www.enterupload.com/');
@@ -96,6 +99,7 @@ begin
     finally
       Free;
     end;
+  }
   Result := LinkInfo;
 end;
 

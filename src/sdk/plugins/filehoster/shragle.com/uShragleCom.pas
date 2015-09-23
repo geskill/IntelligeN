@@ -14,8 +14,10 @@ uses
   Windows, SysUtils, Classes, Math, HTTPApp,
   // Reg Ex
   RegExpr,
+  // HTTPManager
+  uHTTPInterface, uHTTPClasses,
   // plugin system
-  uIdHTTPHelper, uPlugInFileHosterClass, uPlugInConst,
+  uPlugInFileHosterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
   uPathUtils, uSizeUtils;
 
@@ -23,8 +25,8 @@ type
   TShragleCom = class(TFileHosterPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function CheckLink(AFile: WideString): TLinkInfo; override; stdcall;
-    // function CheckLinks(AFiles: WideString): Integer; override; stdcall;
+    function CheckLink(AFile: WideString): TLinkInfo; override; safecall;
+    // function CheckLinks(AFiles: WideString): Integer; override; safecall;
   end;
 
 implementation
@@ -64,6 +66,7 @@ begin
     FileName := '';
     Checksum := '';
   end;
+  {
   with TIdHTTPHelper.Create(Self) do
     try
       _postreply := TStringStream.Create('', CP_UTF8);
@@ -94,6 +97,7 @@ begin
     finally
       Free;
     end;
+  }
   Result := LinkInfo;
 end;
 

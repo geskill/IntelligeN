@@ -5,12 +5,12 @@ interface
 uses
   // Delphi
   SysUtils, Classes, Controls, HTTPApp,
-  // Indy
-  IdMultipartFormData,
   // RegEx
   RegExpr,
+  // HTTPManager
+  uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInImageHosterClass, uPlugInConst, uIdHTTPHelper;
+  uPlugInImageHosterClass, uPlugInHTTPClasses;
 
 type
   TYoupicIn = class(TImageHosterPlugIn)
@@ -30,10 +30,11 @@ function TYoupicIn.RemoteUpload;
 const
   Website = 'http://youpic.in/';
 var
-  _params: TIdMultiPartFormDataStream;
+  //_params: TIdMultiPartFormDataStream;
   _reply: TStringStream;
 begin
   result := AImageUrl;
+  {
   with TIdHTTPHelper.Create(Self) do
     try
       Request.Referer := Website;
@@ -93,6 +94,7 @@ begin
     finally
       Free;
     end;
+  }
 end;
 
 end.

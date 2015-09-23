@@ -1,6 +1,6 @@
 ﻿library customscript;
 
-{$R *.dres}
+
 
 uses
   uPlugInInterface,

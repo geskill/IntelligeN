@@ -12,14 +12,14 @@ interface
 uses
   // Delphi
   Windows, SysUtils, Classes, Math, HTTPApp, Variants,
-  // Indy
-  IdHTTP,
   // Reg Ex
   RegExpr,
   // LkJSON
   uLkJSON,
+  // HTTPManager
+  uHTTPInterface, uHTTPClasses,
   // plugin system
-  uIdHTTPHelper, uPlugInFileHosterClass, uPlugInConst,
+  uPlugInFileHosterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
   uPathUtils, uSizeUtils;
 
@@ -27,8 +27,8 @@ type
   TWuploadCom = class(TFileHosterPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function CheckLink(AFile: WideString): TLinkInfo; override; stdcall;
-    function CheckLinks(AFiles: WideString): Integer; override; stdcall;
+    function CheckLink(AFile: WideString): TLinkInfo; override; safecall;
+    function CheckLinks(AFiles: WideString): Integer; override; safecall;
   end;
 
 implementation
@@ -93,6 +93,7 @@ var
   FileName: string;
   FileSize: Int64;
 begin
+  {
   with TIdHTTPHelper.Create(Self) do
     try
       ProtocolVersion := pv1_1;
@@ -171,6 +172,7 @@ begin
     finally
       Free;
     end;
+  }
   Result := FCheckedLinksList.Count;
 end;
 

@@ -1,0 +1,1680 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{0F4D6643-DF3B-48D0-AECE-14A23E3B1942}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="view\IntelligeN.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\app\linkgrabber\linkgrabber.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\app\mirrorsort\mirrorsort.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\captcha\vBulletin RandomQuestion\vbulletin_randomquestion.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\Blogger\blogger.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\cherryCMS\cherrycms.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\Discuz!\discuz.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\Discuz!X\discuzx.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\DLE\dle.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\FluxBB\fluxbb.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\HTW\htw.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\iCMS\icms.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\ipb2\ipb2.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\ipb3\ipb3.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\Joomla\joomla.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\LoadIT\loadit.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\MyBB\mybb.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\N3m0CMS\n3m0cms.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\phpbb2\phpbb2.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\phpbb3\phpbb3.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\smf\smf.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\uCMS\ucms.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\vBulletin\vbulletin.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\wbb2\wbb2.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\wbb3\wbb3.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\wbb4\wbb4.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\wFusion\wfusion.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\WordPress\wordpress.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\XenForo\xenforo.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\1advd.ch\einsadvdch.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\adultdvdempire.com\adultdvdempirecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\amazon.com\amazoncom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\amazon.de\amazonde.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\bigfishgames.com\bigfishgamescom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\bigfishgames.de\bigfishgamesde.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\binsearch.info\binsearchinfo.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\cd-lexikon.de\cdlexikonde.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\cduniverse.com\cduniversecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\chip.de\chipde.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\cinefacts.de\cinefactsde.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\cover-paradies.to\coverparadiesto.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\CustomScript\customscript.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\erodvd.nl\erodvdnl.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\exs.no-ip.org\exsnoiporg.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\gamespot.com\gamespotcom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\gamestar.de\gamestarde.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\gametrailers.com\gametrailerscom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\gaming-universe.de\gaminguniversede.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\ign.com\igncom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\images.google.de\imagesgooglede.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\imdb.com\imdbcom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\jadedvideo.com\jadedvideocom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\ludibria.com\ludibriacom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\moviemaze.de\moviemazede.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\nfodb.ru\nfodbru.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\nintendolife.com\nintendolifecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\pcgdb.de\pcgdbde.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\pornofilm-vertrieb.de\pornofilmvertriebde.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\Releasename\releasename.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\sceper.eu\scepereu.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\sexvideoall.com\sexvideoallcom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\thalia.de\thaliade.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\wiiboxart.com\wiiboxartcom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\xonair.com\xonaircom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\xrel.to\xrelto.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\youtube.com\youtubecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crawler\zelluloid.de\zelluloidde.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crypter\linkcrypt.ws\linkcryptws.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crypter\linksave.in\linksavein.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crypter\ncrypt.in\ncryptin.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crypter\relink.us\relinkus.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crypter\share-links.biz\sharelinksbiz.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\crypter\wcrypt.in\wcryptin.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\fileformats\extracted.post.code.1\extractedpostcode1.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\fileformats\intelligen.xml.1\intelligenxml1.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\fileformats\intelligen.xml.2\intelligenxml2.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\fileformats\releasename.reader\releasenamereader.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\bitshare.com\bitsharecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\cloudzer.net\cloudzernet.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\crocko.com\crockocom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\data-loading.com\dataloadingcom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\datei.to\dateito.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\depositfiles.com\depositfilescom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\enterupload.com\enteruploadcom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\extabit.com\extabitcom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\filefactory.com\filefactorycom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\filefrog.to\filefrogto.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\filejungle.com\filejunglecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\filepost.com\filepostcom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\fileserve.com\fileservecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\filesonic.com\filesoniccom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\filestore.to\filestoreto.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\freakshare.com\freaksharecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\hotfile.com\hotfilecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\ifile.it\ifileit.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\junocloud.me\junocloudme.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\kewlshare.com\kewlsharecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\kickload.com\kickloadcom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\letitbit.net\letitbitnet.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\load.to\loadto.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\loadfiles.in\loadfilesin.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\mediafire.com\mediafirecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\megaupload.com\megauploadcom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\netload.in\netloadin.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\netuploaded.com\netuploadedcom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\oron.com\oroncom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\qshare.com\qsharecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\rapidgator.net\rapidgatornet.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\rapidshare.com\rapidsharecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\remixshare.com\remixsharecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\sendspace.com\sendspacecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\share-now.net\sharenownet.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\share-online.biz\shareonlinebiz.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\shragle.com\shraglecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\speedshare.org\speedshareorg.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\terabit.to\terabitto.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\turbobit.net\turbobitnet.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\ugotfile.com\ugotfilecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\uploaded.net\uploadednet.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\uploading.com\uploadingcom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\uploadspace.pl\uploadspacepl.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\uploadstation.com\uploadstationcom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\uploadstube.de\uploadstubede.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\wupload.com\wuploadcom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\x7.to\x7to.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\xup.in\xupin.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\zippyshare.com\zippysharecom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\filehoster\zshare.net\zsharenet.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\imagehoster\anyimg.com\anyimgcom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\imagehoster\ddlw.org\ddlworg.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\imagehoster\directupload.net\directuploadnet.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\imagehoster\imagebanana.com\imagebananacom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\imagehoster\imageshack.us\imageshackus.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\imagehoster\imgur.com\imgurcom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\imagehoster\picfront.org\picfrontorg.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\imagehoster\picload.org\picloadorg.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\imagehoster\tinypic.com\tinypiccom.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\imagehoster\youpic.in\youpicin.dproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="IntelligeN">
+			<MSBuild Projects="view\IntelligeN.dproj"/>
+		</Target>
+		<Target Name="IntelligeN:Clean">
+			<MSBuild Targets="Clean" Projects="view\IntelligeN.dproj"/>
+		</Target>
+		<Target Name="IntelligeN:Make">
+			<MSBuild Targets="Make" Projects="view\IntelligeN.dproj"/>
+		</Target>
+		<Target Name="linkgrabber">
+			<MSBuild Projects="sdk\plugins\app\linkgrabber\linkgrabber.dproj"/>
+		</Target>
+		<Target Name="linkgrabber:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\app\linkgrabber\linkgrabber.dproj"/>
+		</Target>
+		<Target Name="linkgrabber:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\app\linkgrabber\linkgrabber.dproj"/>
+		</Target>
+		<Target Name="mirrorsort">
+			<MSBuild Projects="sdk\plugins\app\mirrorsort\mirrorsort.dproj"/>
+		</Target>
+		<Target Name="mirrorsort:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\app\mirrorsort\mirrorsort.dproj"/>
+		</Target>
+		<Target Name="mirrorsort:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\app\mirrorsort\mirrorsort.dproj"/>
+		</Target>
+		<Target Name="vbulletin_randomquestion">
+			<MSBuild Projects="sdk\plugins\captcha\vBulletin RandomQuestion\vbulletin_randomquestion.dproj"/>
+		</Target>
+		<Target Name="vbulletin_randomquestion:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\captcha\vBulletin RandomQuestion\vbulletin_randomquestion.dproj"/>
+		</Target>
+		<Target Name="vbulletin_randomquestion:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\captcha\vBulletin RandomQuestion\vbulletin_randomquestion.dproj"/>
+		</Target>
+		<Target Name="blogger">
+			<MSBuild Projects="sdk\plugins\cms\Blogger\blogger.dproj"/>
+		</Target>
+		<Target Name="blogger:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\Blogger\blogger.dproj"/>
+		</Target>
+		<Target Name="blogger:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\Blogger\blogger.dproj"/>
+		</Target>
+		<Target Name="cherrycms">
+			<MSBuild Projects="sdk\plugins\cms\cherryCMS\cherrycms.dproj"/>
+		</Target>
+		<Target Name="cherrycms:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\cherryCMS\cherrycms.dproj"/>
+		</Target>
+		<Target Name="cherrycms:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\cherryCMS\cherrycms.dproj"/>
+		</Target>
+		<Target Name="discuz">
+			<MSBuild Projects="sdk\plugins\cms\Discuz!\discuz.dproj"/>
+		</Target>
+		<Target Name="discuz:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\Discuz!\discuz.dproj"/>
+		</Target>
+		<Target Name="discuz:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\Discuz!\discuz.dproj"/>
+		</Target>
+		<Target Name="discuzx">
+			<MSBuild Projects="sdk\plugins\cms\Discuz!X\discuzx.dproj"/>
+		</Target>
+		<Target Name="discuzx:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\Discuz!X\discuzx.dproj"/>
+		</Target>
+		<Target Name="discuzx:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\Discuz!X\discuzx.dproj"/>
+		</Target>
+		<Target Name="dle">
+			<MSBuild Projects="sdk\plugins\cms\DLE\dle.dproj"/>
+		</Target>
+		<Target Name="dle:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\DLE\dle.dproj"/>
+		</Target>
+		<Target Name="dle:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\DLE\dle.dproj"/>
+		</Target>
+		<Target Name="fluxbb">
+			<MSBuild Projects="sdk\plugins\cms\FluxBB\fluxbb.dproj"/>
+		</Target>
+		<Target Name="fluxbb:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\FluxBB\fluxbb.dproj"/>
+		</Target>
+		<Target Name="fluxbb:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\FluxBB\fluxbb.dproj"/>
+		</Target>
+		<Target Name="htw">
+			<MSBuild Projects="sdk\plugins\cms\HTW\htw.dproj"/>
+		</Target>
+		<Target Name="htw:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\HTW\htw.dproj"/>
+		</Target>
+		<Target Name="htw:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\HTW\htw.dproj"/>
+		</Target>
+		<Target Name="icms">
+			<MSBuild Projects="sdk\plugins\cms\iCMS\icms.dproj"/>
+		</Target>
+		<Target Name="icms:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\iCMS\icms.dproj"/>
+		</Target>
+		<Target Name="icms:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\iCMS\icms.dproj"/>
+		</Target>
+		<Target Name="ipb2">
+			<MSBuild Projects="sdk\plugins\cms\ipb2\ipb2.dproj"/>
+		</Target>
+		<Target Name="ipb2:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\ipb2\ipb2.dproj"/>
+		</Target>
+		<Target Name="ipb2:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\ipb2\ipb2.dproj"/>
+		</Target>
+		<Target Name="ipb3">
+			<MSBuild Projects="sdk\plugins\cms\ipb3\ipb3.dproj"/>
+		</Target>
+		<Target Name="ipb3:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\ipb3\ipb3.dproj"/>
+		</Target>
+		<Target Name="ipb3:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\ipb3\ipb3.dproj"/>
+		</Target>
+		<Target Name="joomla">
+			<MSBuild Projects="sdk\plugins\cms\Joomla\joomla.dproj"/>
+		</Target>
+		<Target Name="joomla:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\Joomla\joomla.dproj"/>
+		</Target>
+		<Target Name="joomla:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\Joomla\joomla.dproj"/>
+		</Target>
+		<Target Name="loadit">
+			<MSBuild Projects="sdk\plugins\cms\LoadIT\loadit.dproj"/>
+		</Target>
+		<Target Name="loadit:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\LoadIT\loadit.dproj"/>
+		</Target>
+		<Target Name="loadit:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\LoadIT\loadit.dproj"/>
+		</Target>
+		<Target Name="mybb">
+			<MSBuild Projects="sdk\plugins\cms\MyBB\mybb.dproj"/>
+		</Target>
+		<Target Name="mybb:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\MyBB\mybb.dproj"/>
+		</Target>
+		<Target Name="mybb:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\MyBB\mybb.dproj"/>
+		</Target>
+		<Target Name="n3m0cms">
+			<MSBuild Projects="sdk\plugins\cms\N3m0CMS\n3m0cms.dproj"/>
+		</Target>
+		<Target Name="n3m0cms:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\N3m0CMS\n3m0cms.dproj"/>
+		</Target>
+		<Target Name="n3m0cms:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\N3m0CMS\n3m0cms.dproj"/>
+		</Target>
+		<Target Name="phpbb2">
+			<MSBuild Projects="sdk\plugins\cms\phpbb2\phpbb2.dproj"/>
+		</Target>
+		<Target Name="phpbb2:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\phpbb2\phpbb2.dproj"/>
+		</Target>
+		<Target Name="phpbb2:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\phpbb2\phpbb2.dproj"/>
+		</Target>
+		<Target Name="phpbb3">
+			<MSBuild Projects="sdk\plugins\cms\phpbb3\phpbb3.dproj"/>
+		</Target>
+		<Target Name="phpbb3:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\phpbb3\phpbb3.dproj"/>
+		</Target>
+		<Target Name="phpbb3:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\phpbb3\phpbb3.dproj"/>
+		</Target>
+		<Target Name="smf">
+			<MSBuild Projects="sdk\plugins\cms\smf\smf.dproj"/>
+		</Target>
+		<Target Name="smf:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\smf\smf.dproj"/>
+		</Target>
+		<Target Name="smf:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\smf\smf.dproj"/>
+		</Target>
+		<Target Name="ucms">
+			<MSBuild Projects="sdk\plugins\cms\uCMS\ucms.dproj"/>
+		</Target>
+		<Target Name="ucms:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\uCMS\ucms.dproj"/>
+		</Target>
+		<Target Name="ucms:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\uCMS\ucms.dproj"/>
+		</Target>
+		<Target Name="vbulletin">
+			<MSBuild Projects="sdk\plugins\cms\vBulletin\vbulletin.dproj"/>
+		</Target>
+		<Target Name="vbulletin:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\vBulletin\vbulletin.dproj"/>
+		</Target>
+		<Target Name="vbulletin:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\vBulletin\vbulletin.dproj"/>
+		</Target>
+		<Target Name="wbb2">
+			<MSBuild Projects="sdk\plugins\cms\wbb2\wbb2.dproj"/>
+		</Target>
+		<Target Name="wbb2:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\wbb2\wbb2.dproj"/>
+		</Target>
+		<Target Name="wbb2:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\wbb2\wbb2.dproj"/>
+		</Target>
+		<Target Name="wbb3">
+			<MSBuild Projects="sdk\plugins\cms\wbb3\wbb3.dproj"/>
+		</Target>
+		<Target Name="wbb3:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\wbb3\wbb3.dproj"/>
+		</Target>
+		<Target Name="wbb3:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\wbb3\wbb3.dproj"/>
+		</Target>
+		<Target Name="wbb4">
+			<MSBuild Projects="sdk\plugins\cms\wbb4\wbb4.dproj"/>
+		</Target>
+		<Target Name="wbb4:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\wbb4\wbb4.dproj"/>
+		</Target>
+		<Target Name="wbb4:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\wbb4\wbb4.dproj"/>
+		</Target>
+		<Target Name="wfusion">
+			<MSBuild Projects="sdk\plugins\cms\wFusion\wfusion.dproj"/>
+		</Target>
+		<Target Name="wfusion:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\wFusion\wfusion.dproj"/>
+		</Target>
+		<Target Name="wfusion:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\wFusion\wfusion.dproj"/>
+		</Target>
+		<Target Name="wordpress">
+			<MSBuild Projects="sdk\plugins\cms\WordPress\wordpress.dproj"/>
+		</Target>
+		<Target Name="wordpress:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\WordPress\wordpress.dproj"/>
+		</Target>
+		<Target Name="wordpress:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\WordPress\wordpress.dproj"/>
+		</Target>
+		<Target Name="xenforo">
+			<MSBuild Projects="sdk\plugins\cms\XenForo\xenforo.dproj"/>
+		</Target>
+		<Target Name="xenforo:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\XenForo\xenforo.dproj"/>
+		</Target>
+		<Target Name="xenforo:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\XenForo\xenforo.dproj"/>
+		</Target>
+		<Target Name="einsadvdch">
+			<MSBuild Projects="sdk\plugins\crawler\1advd.ch\einsadvdch.dproj"/>
+		</Target>
+		<Target Name="einsadvdch:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\1advd.ch\einsadvdch.dproj"/>
+		</Target>
+		<Target Name="einsadvdch:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\1advd.ch\einsadvdch.dproj"/>
+		</Target>
+		<Target Name="adultdvdempirecom">
+			<MSBuild Projects="sdk\plugins\crawler\adultdvdempire.com\adultdvdempirecom.dproj"/>
+		</Target>
+		<Target Name="adultdvdempirecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\adultdvdempire.com\adultdvdempirecom.dproj"/>
+		</Target>
+		<Target Name="adultdvdempirecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\adultdvdempire.com\adultdvdempirecom.dproj"/>
+		</Target>
+		<Target Name="amazoncom">
+			<MSBuild Projects="sdk\plugins\crawler\amazon.com\amazoncom.dproj"/>
+		</Target>
+		<Target Name="amazoncom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\amazon.com\amazoncom.dproj"/>
+		</Target>
+		<Target Name="amazoncom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\amazon.com\amazoncom.dproj"/>
+		</Target>
+		<Target Name="amazonde">
+			<MSBuild Projects="sdk\plugins\crawler\amazon.de\amazonde.dproj"/>
+		</Target>
+		<Target Name="amazonde:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\amazon.de\amazonde.dproj"/>
+		</Target>
+		<Target Name="amazonde:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\amazon.de\amazonde.dproj"/>
+		</Target>
+		<Target Name="bigfishgamescom">
+			<MSBuild Projects="sdk\plugins\crawler\bigfishgames.com\bigfishgamescom.dproj"/>
+		</Target>
+		<Target Name="bigfishgamescom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\bigfishgames.com\bigfishgamescom.dproj"/>
+		</Target>
+		<Target Name="bigfishgamescom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\bigfishgames.com\bigfishgamescom.dproj"/>
+		</Target>
+		<Target Name="bigfishgamesde">
+			<MSBuild Projects="sdk\plugins\crawler\bigfishgames.de\bigfishgamesde.dproj"/>
+		</Target>
+		<Target Name="bigfishgamesde:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\bigfishgames.de\bigfishgamesde.dproj"/>
+		</Target>
+		<Target Name="bigfishgamesde:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\bigfishgames.de\bigfishgamesde.dproj"/>
+		</Target>
+		<Target Name="binsearchinfo">
+			<MSBuild Projects="sdk\plugins\crawler\binsearch.info\binsearchinfo.dproj"/>
+		</Target>
+		<Target Name="binsearchinfo:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\binsearch.info\binsearchinfo.dproj"/>
+		</Target>
+		<Target Name="binsearchinfo:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\binsearch.info\binsearchinfo.dproj"/>
+		</Target>
+		<Target Name="cdlexikonde">
+			<MSBuild Projects="sdk\plugins\crawler\cd-lexikon.de\cdlexikonde.dproj"/>
+		</Target>
+		<Target Name="cdlexikonde:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\cd-lexikon.de\cdlexikonde.dproj"/>
+		</Target>
+		<Target Name="cdlexikonde:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\cd-lexikon.de\cdlexikonde.dproj"/>
+		</Target>
+		<Target Name="cduniversecom">
+			<MSBuild Projects="sdk\plugins\crawler\cduniverse.com\cduniversecom.dproj"/>
+		</Target>
+		<Target Name="cduniversecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\cduniverse.com\cduniversecom.dproj"/>
+		</Target>
+		<Target Name="cduniversecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\cduniverse.com\cduniversecom.dproj"/>
+		</Target>
+		<Target Name="chipde">
+			<MSBuild Projects="sdk\plugins\crawler\chip.de\chipde.dproj"/>
+		</Target>
+		<Target Name="chipde:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\chip.de\chipde.dproj"/>
+		</Target>
+		<Target Name="chipde:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\chip.de\chipde.dproj"/>
+		</Target>
+		<Target Name="cinefactsde">
+			<MSBuild Projects="sdk\plugins\crawler\cinefacts.de\cinefactsde.dproj"/>
+		</Target>
+		<Target Name="cinefactsde:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\cinefacts.de\cinefactsde.dproj"/>
+		</Target>
+		<Target Name="cinefactsde:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\cinefacts.de\cinefactsde.dproj"/>
+		</Target>
+		<Target Name="coverparadiesto">
+			<MSBuild Projects="sdk\plugins\crawler\cover-paradies.to\coverparadiesto.dproj"/>
+		</Target>
+		<Target Name="coverparadiesto:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\cover-paradies.to\coverparadiesto.dproj"/>
+		</Target>
+		<Target Name="coverparadiesto:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\cover-paradies.to\coverparadiesto.dproj"/>
+		</Target>
+		<Target Name="customscript">
+			<MSBuild Projects="sdk\plugins\crawler\CustomScript\customscript.dproj"/>
+		</Target>
+		<Target Name="customscript:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\CustomScript\customscript.dproj"/>
+		</Target>
+		<Target Name="customscript:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\CustomScript\customscript.dproj"/>
+		</Target>
+		<Target Name="erodvdnl">
+			<MSBuild Projects="sdk\plugins\crawler\erodvd.nl\erodvdnl.dproj"/>
+		</Target>
+		<Target Name="erodvdnl:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\erodvd.nl\erodvdnl.dproj"/>
+		</Target>
+		<Target Name="erodvdnl:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\erodvd.nl\erodvdnl.dproj"/>
+		</Target>
+		<Target Name="exsnoiporg">
+			<MSBuild Projects="sdk\plugins\crawler\exs.no-ip.org\exsnoiporg.dproj"/>
+		</Target>
+		<Target Name="exsnoiporg:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\exs.no-ip.org\exsnoiporg.dproj"/>
+		</Target>
+		<Target Name="exsnoiporg:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\exs.no-ip.org\exsnoiporg.dproj"/>
+		</Target>
+		<Target Name="gamespotcom">
+			<MSBuild Projects="sdk\plugins\crawler\gamespot.com\gamespotcom.dproj"/>
+		</Target>
+		<Target Name="gamespotcom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\gamespot.com\gamespotcom.dproj"/>
+		</Target>
+		<Target Name="gamespotcom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\gamespot.com\gamespotcom.dproj"/>
+		</Target>
+		<Target Name="gamestarde">
+			<MSBuild Projects="sdk\plugins\crawler\gamestar.de\gamestarde.dproj"/>
+		</Target>
+		<Target Name="gamestarde:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\gamestar.de\gamestarde.dproj"/>
+		</Target>
+		<Target Name="gamestarde:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\gamestar.de\gamestarde.dproj"/>
+		</Target>
+		<Target Name="gametrailerscom">
+			<MSBuild Projects="sdk\plugins\crawler\gametrailers.com\gametrailerscom.dproj"/>
+		</Target>
+		<Target Name="gametrailerscom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\gametrailers.com\gametrailerscom.dproj"/>
+		</Target>
+		<Target Name="gametrailerscom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\gametrailers.com\gametrailerscom.dproj"/>
+		</Target>
+		<Target Name="gaminguniversede">
+			<MSBuild Projects="sdk\plugins\crawler\gaming-universe.de\gaminguniversede.dproj"/>
+		</Target>
+		<Target Name="gaminguniversede:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\gaming-universe.de\gaminguniversede.dproj"/>
+		</Target>
+		<Target Name="gaminguniversede:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\gaming-universe.de\gaminguniversede.dproj"/>
+		</Target>
+		<Target Name="igncom">
+			<MSBuild Projects="sdk\plugins\crawler\ign.com\igncom.dproj"/>
+		</Target>
+		<Target Name="igncom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\ign.com\igncom.dproj"/>
+		</Target>
+		<Target Name="igncom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\ign.com\igncom.dproj"/>
+		</Target>
+		<Target Name="imagesgooglede">
+			<MSBuild Projects="sdk\plugins\crawler\images.google.de\imagesgooglede.dproj"/>
+		</Target>
+		<Target Name="imagesgooglede:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\images.google.de\imagesgooglede.dproj"/>
+		</Target>
+		<Target Name="imagesgooglede:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\images.google.de\imagesgooglede.dproj"/>
+		</Target>
+		<Target Name="imdbcom">
+			<MSBuild Projects="sdk\plugins\crawler\imdb.com\imdbcom.dproj"/>
+		</Target>
+		<Target Name="imdbcom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\imdb.com\imdbcom.dproj"/>
+		</Target>
+		<Target Name="imdbcom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\imdb.com\imdbcom.dproj"/>
+		</Target>
+		<Target Name="jadedvideocom">
+			<MSBuild Projects="sdk\plugins\crawler\jadedvideo.com\jadedvideocom.dproj"/>
+		</Target>
+		<Target Name="jadedvideocom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\jadedvideo.com\jadedvideocom.dproj"/>
+		</Target>
+		<Target Name="jadedvideocom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\jadedvideo.com\jadedvideocom.dproj"/>
+		</Target>
+		<Target Name="ludibriacom">
+			<MSBuild Projects="sdk\plugins\crawler\ludibria.com\ludibriacom.dproj"/>
+		</Target>
+		<Target Name="ludibriacom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\ludibria.com\ludibriacom.dproj"/>
+		</Target>
+		<Target Name="ludibriacom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\ludibria.com\ludibriacom.dproj"/>
+		</Target>
+		<Target Name="moviemazede">
+			<MSBuild Projects="sdk\plugins\crawler\moviemaze.de\moviemazede.dproj"/>
+		</Target>
+		<Target Name="moviemazede:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\moviemaze.de\moviemazede.dproj"/>
+		</Target>
+		<Target Name="moviemazede:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\moviemaze.de\moviemazede.dproj"/>
+		</Target>
+		<Target Name="nfodbru">
+			<MSBuild Projects="sdk\plugins\crawler\nfodb.ru\nfodbru.dproj"/>
+		</Target>
+		<Target Name="nfodbru:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\nfodb.ru\nfodbru.dproj"/>
+		</Target>
+		<Target Name="nfodbru:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\nfodb.ru\nfodbru.dproj"/>
+		</Target>
+		<Target Name="nintendolifecom">
+			<MSBuild Projects="sdk\plugins\crawler\nintendolife.com\nintendolifecom.dproj"/>
+		</Target>
+		<Target Name="nintendolifecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\nintendolife.com\nintendolifecom.dproj"/>
+		</Target>
+		<Target Name="nintendolifecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\nintendolife.com\nintendolifecom.dproj"/>
+		</Target>
+		<Target Name="pcgdbde">
+			<MSBuild Projects="sdk\plugins\crawler\pcgdb.de\pcgdbde.dproj"/>
+		</Target>
+		<Target Name="pcgdbde:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\pcgdb.de\pcgdbde.dproj"/>
+		</Target>
+		<Target Name="pcgdbde:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\pcgdb.de\pcgdbde.dproj"/>
+		</Target>
+		<Target Name="pornofilmvertriebde">
+			<MSBuild Projects="sdk\plugins\crawler\pornofilm-vertrieb.de\pornofilmvertriebde.dproj"/>
+		</Target>
+		<Target Name="pornofilmvertriebde:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\pornofilm-vertrieb.de\pornofilmvertriebde.dproj"/>
+		</Target>
+		<Target Name="pornofilmvertriebde:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\pornofilm-vertrieb.de\pornofilmvertriebde.dproj"/>
+		</Target>
+		<Target Name="releasename">
+			<MSBuild Projects="sdk\plugins\crawler\Releasename\releasename.dproj"/>
+		</Target>
+		<Target Name="releasename:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\Releasename\releasename.dproj"/>
+		</Target>
+		<Target Name="releasename:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\Releasename\releasename.dproj"/>
+		</Target>
+		<Target Name="scepereu">
+			<MSBuild Projects="sdk\plugins\crawler\sceper.eu\scepereu.dproj"/>
+		</Target>
+		<Target Name="scepereu:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\sceper.eu\scepereu.dproj"/>
+		</Target>
+		<Target Name="scepereu:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\sceper.eu\scepereu.dproj"/>
+		</Target>
+		<Target Name="sexvideoallcom">
+			<MSBuild Projects="sdk\plugins\crawler\sexvideoall.com\sexvideoallcom.dproj"/>
+		</Target>
+		<Target Name="sexvideoallcom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\sexvideoall.com\sexvideoallcom.dproj"/>
+		</Target>
+		<Target Name="sexvideoallcom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\sexvideoall.com\sexvideoallcom.dproj"/>
+		</Target>
+		<Target Name="thaliade">
+			<MSBuild Projects="sdk\plugins\crawler\thalia.de\thaliade.dproj"/>
+		</Target>
+		<Target Name="thaliade:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\thalia.de\thaliade.dproj"/>
+		</Target>
+		<Target Name="thaliade:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\thalia.de\thaliade.dproj"/>
+		</Target>
+		<Target Name="wiiboxartcom">
+			<MSBuild Projects="sdk\plugins\crawler\wiiboxart.com\wiiboxartcom.dproj"/>
+		</Target>
+		<Target Name="wiiboxartcom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\wiiboxart.com\wiiboxartcom.dproj"/>
+		</Target>
+		<Target Name="wiiboxartcom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\wiiboxart.com\wiiboxartcom.dproj"/>
+		</Target>
+		<Target Name="xonaircom">
+			<MSBuild Projects="sdk\plugins\crawler\xonair.com\xonaircom.dproj"/>
+		</Target>
+		<Target Name="xonaircom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\xonair.com\xonaircom.dproj"/>
+		</Target>
+		<Target Name="xonaircom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\xonair.com\xonaircom.dproj"/>
+		</Target>
+		<Target Name="xrelto">
+			<MSBuild Projects="sdk\plugins\crawler\xrel.to\xrelto.dproj"/>
+		</Target>
+		<Target Name="xrelto:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\xrel.to\xrelto.dproj"/>
+		</Target>
+		<Target Name="xrelto:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\xrel.to\xrelto.dproj"/>
+		</Target>
+		<Target Name="youtubecom">
+			<MSBuild Projects="sdk\plugins\crawler\youtube.com\youtubecom.dproj"/>
+		</Target>
+		<Target Name="youtubecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\youtube.com\youtubecom.dproj"/>
+		</Target>
+		<Target Name="youtubecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\youtube.com\youtubecom.dproj"/>
+		</Target>
+		<Target Name="zelluloidde">
+			<MSBuild Projects="sdk\plugins\crawler\zelluloid.de\zelluloidde.dproj"/>
+		</Target>
+		<Target Name="zelluloidde:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crawler\zelluloid.de\zelluloidde.dproj"/>
+		</Target>
+		<Target Name="zelluloidde:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crawler\zelluloid.de\zelluloidde.dproj"/>
+		</Target>
+		<Target Name="linkcryptws">
+			<MSBuild Projects="sdk\plugins\crypter\linkcrypt.ws\linkcryptws.dproj"/>
+		</Target>
+		<Target Name="linkcryptws:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crypter\linkcrypt.ws\linkcryptws.dproj"/>
+		</Target>
+		<Target Name="linkcryptws:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crypter\linkcrypt.ws\linkcryptws.dproj"/>
+		</Target>
+		<Target Name="linksavein">
+			<MSBuild Projects="sdk\plugins\crypter\linksave.in\linksavein.dproj"/>
+		</Target>
+		<Target Name="linksavein:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crypter\linksave.in\linksavein.dproj"/>
+		</Target>
+		<Target Name="linksavein:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crypter\linksave.in\linksavein.dproj"/>
+		</Target>
+		<Target Name="ncryptin">
+			<MSBuild Projects="sdk\plugins\crypter\ncrypt.in\ncryptin.dproj"/>
+		</Target>
+		<Target Name="ncryptin:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crypter\ncrypt.in\ncryptin.dproj"/>
+		</Target>
+		<Target Name="ncryptin:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crypter\ncrypt.in\ncryptin.dproj"/>
+		</Target>
+		<Target Name="relinkus">
+			<MSBuild Projects="sdk\plugins\crypter\relink.us\relinkus.dproj"/>
+		</Target>
+		<Target Name="relinkus:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crypter\relink.us\relinkus.dproj"/>
+		</Target>
+		<Target Name="relinkus:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crypter\relink.us\relinkus.dproj"/>
+		</Target>
+		<Target Name="sharelinksbiz">
+			<MSBuild Projects="sdk\plugins\crypter\share-links.biz\sharelinksbiz.dproj"/>
+		</Target>
+		<Target Name="sharelinksbiz:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crypter\share-links.biz\sharelinksbiz.dproj"/>
+		</Target>
+		<Target Name="sharelinksbiz:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crypter\share-links.biz\sharelinksbiz.dproj"/>
+		</Target>
+		<Target Name="wcryptin">
+			<MSBuild Projects="sdk\plugins\crypter\wcrypt.in\wcryptin.dproj"/>
+		</Target>
+		<Target Name="wcryptin:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\crypter\wcrypt.in\wcryptin.dproj"/>
+		</Target>
+		<Target Name="wcryptin:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\crypter\wcrypt.in\wcryptin.dproj"/>
+		</Target>
+		<Target Name="extractedpostcode1">
+			<MSBuild Projects="sdk\plugins\fileformats\extracted.post.code.1\extractedpostcode1.dproj"/>
+		</Target>
+		<Target Name="extractedpostcode1:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\fileformats\extracted.post.code.1\extractedpostcode1.dproj"/>
+		</Target>
+		<Target Name="extractedpostcode1:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\fileformats\extracted.post.code.1\extractedpostcode1.dproj"/>
+		</Target>
+		<Target Name="intelligenxml1">
+			<MSBuild Projects="sdk\plugins\fileformats\intelligen.xml.1\intelligenxml1.dproj"/>
+		</Target>
+		<Target Name="intelligenxml1:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\fileformats\intelligen.xml.1\intelligenxml1.dproj"/>
+		</Target>
+		<Target Name="intelligenxml1:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\fileformats\intelligen.xml.1\intelligenxml1.dproj"/>
+		</Target>
+		<Target Name="intelligenxml2">
+			<MSBuild Projects="sdk\plugins\fileformats\intelligen.xml.2\intelligenxml2.dproj"/>
+		</Target>
+		<Target Name="intelligenxml2:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\fileformats\intelligen.xml.2\intelligenxml2.dproj"/>
+		</Target>
+		<Target Name="intelligenxml2:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\fileformats\intelligen.xml.2\intelligenxml2.dproj"/>
+		</Target>
+		<Target Name="releasenamereader">
+			<MSBuild Projects="sdk\plugins\fileformats\releasename.reader\releasenamereader.dproj"/>
+		</Target>
+		<Target Name="releasenamereader:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\fileformats\releasename.reader\releasenamereader.dproj"/>
+		</Target>
+		<Target Name="releasenamereader:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\fileformats\releasename.reader\releasenamereader.dproj"/>
+		</Target>
+		<Target Name="bitsharecom">
+			<MSBuild Projects="sdk\plugins\filehoster\bitshare.com\bitsharecom.dproj"/>
+		</Target>
+		<Target Name="bitsharecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\bitshare.com\bitsharecom.dproj"/>
+		</Target>
+		<Target Name="bitsharecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\bitshare.com\bitsharecom.dproj"/>
+		</Target>
+		<Target Name="cloudzernet">
+			<MSBuild Projects="sdk\plugins\filehoster\cloudzer.net\cloudzernet.dproj"/>
+		</Target>
+		<Target Name="cloudzernet:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\cloudzer.net\cloudzernet.dproj"/>
+		</Target>
+		<Target Name="cloudzernet:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\cloudzer.net\cloudzernet.dproj"/>
+		</Target>
+		<Target Name="crockocom">
+			<MSBuild Projects="sdk\plugins\filehoster\crocko.com\crockocom.dproj"/>
+		</Target>
+		<Target Name="crockocom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\crocko.com\crockocom.dproj"/>
+		</Target>
+		<Target Name="crockocom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\crocko.com\crockocom.dproj"/>
+		</Target>
+		<Target Name="dataloadingcom">
+			<MSBuild Projects="sdk\plugins\filehoster\data-loading.com\dataloadingcom.dproj"/>
+		</Target>
+		<Target Name="dataloadingcom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\data-loading.com\dataloadingcom.dproj"/>
+		</Target>
+		<Target Name="dataloadingcom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\data-loading.com\dataloadingcom.dproj"/>
+		</Target>
+		<Target Name="dateito">
+			<MSBuild Projects="sdk\plugins\filehoster\datei.to\dateito.dproj"/>
+		</Target>
+		<Target Name="dateito:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\datei.to\dateito.dproj"/>
+		</Target>
+		<Target Name="dateito:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\datei.to\dateito.dproj"/>
+		</Target>
+		<Target Name="depositfilescom">
+			<MSBuild Projects="sdk\plugins\filehoster\depositfiles.com\depositfilescom.dproj"/>
+		</Target>
+		<Target Name="depositfilescom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\depositfiles.com\depositfilescom.dproj"/>
+		</Target>
+		<Target Name="depositfilescom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\depositfiles.com\depositfilescom.dproj"/>
+		</Target>
+		<Target Name="enteruploadcom">
+			<MSBuild Projects="sdk\plugins\filehoster\enterupload.com\enteruploadcom.dproj"/>
+		</Target>
+		<Target Name="enteruploadcom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\enterupload.com\enteruploadcom.dproj"/>
+		</Target>
+		<Target Name="enteruploadcom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\enterupload.com\enteruploadcom.dproj"/>
+		</Target>
+		<Target Name="extabitcom">
+			<MSBuild Projects="sdk\plugins\filehoster\extabit.com\extabitcom.dproj"/>
+		</Target>
+		<Target Name="extabitcom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\extabit.com\extabitcom.dproj"/>
+		</Target>
+		<Target Name="extabitcom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\extabit.com\extabitcom.dproj"/>
+		</Target>
+		<Target Name="filefactorycom">
+			<MSBuild Projects="sdk\plugins\filehoster\filefactory.com\filefactorycom.dproj"/>
+		</Target>
+		<Target Name="filefactorycom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\filefactory.com\filefactorycom.dproj"/>
+		</Target>
+		<Target Name="filefactorycom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\filefactory.com\filefactorycom.dproj"/>
+		</Target>
+		<Target Name="filefrogto">
+			<MSBuild Projects="sdk\plugins\filehoster\filefrog.to\filefrogto.dproj"/>
+		</Target>
+		<Target Name="filefrogto:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\filefrog.to\filefrogto.dproj"/>
+		</Target>
+		<Target Name="filefrogto:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\filefrog.to\filefrogto.dproj"/>
+		</Target>
+		<Target Name="filejunglecom">
+			<MSBuild Projects="sdk\plugins\filehoster\filejungle.com\filejunglecom.dproj"/>
+		</Target>
+		<Target Name="filejunglecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\filejungle.com\filejunglecom.dproj"/>
+		</Target>
+		<Target Name="filejunglecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\filejungle.com\filejunglecom.dproj"/>
+		</Target>
+		<Target Name="filepostcom">
+			<MSBuild Projects="sdk\plugins\filehoster\filepost.com\filepostcom.dproj"/>
+		</Target>
+		<Target Name="filepostcom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\filepost.com\filepostcom.dproj"/>
+		</Target>
+		<Target Name="filepostcom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\filepost.com\filepostcom.dproj"/>
+		</Target>
+		<Target Name="fileservecom">
+			<MSBuild Projects="sdk\plugins\filehoster\fileserve.com\fileservecom.dproj"/>
+		</Target>
+		<Target Name="fileservecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\fileserve.com\fileservecom.dproj"/>
+		</Target>
+		<Target Name="fileservecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\fileserve.com\fileservecom.dproj"/>
+		</Target>
+		<Target Name="filesoniccom">
+			<MSBuild Projects="sdk\plugins\filehoster\filesonic.com\filesoniccom.dproj"/>
+		</Target>
+		<Target Name="filesoniccom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\filesonic.com\filesoniccom.dproj"/>
+		</Target>
+		<Target Name="filesoniccom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\filesonic.com\filesoniccom.dproj"/>
+		</Target>
+		<Target Name="filestoreto">
+			<MSBuild Projects="sdk\plugins\filehoster\filestore.to\filestoreto.dproj"/>
+		</Target>
+		<Target Name="filestoreto:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\filestore.to\filestoreto.dproj"/>
+		</Target>
+		<Target Name="filestoreto:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\filestore.to\filestoreto.dproj"/>
+		</Target>
+		<Target Name="freaksharecom">
+			<MSBuild Projects="sdk\plugins\filehoster\freakshare.com\freaksharecom.dproj"/>
+		</Target>
+		<Target Name="freaksharecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\freakshare.com\freaksharecom.dproj"/>
+		</Target>
+		<Target Name="freaksharecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\freakshare.com\freaksharecom.dproj"/>
+		</Target>
+		<Target Name="hotfilecom">
+			<MSBuild Projects="sdk\plugins\filehoster\hotfile.com\hotfilecom.dproj"/>
+		</Target>
+		<Target Name="hotfilecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\hotfile.com\hotfilecom.dproj"/>
+		</Target>
+		<Target Name="hotfilecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\hotfile.com\hotfilecom.dproj"/>
+		</Target>
+		<Target Name="ifileit">
+			<MSBuild Projects="sdk\plugins\filehoster\ifile.it\ifileit.dproj"/>
+		</Target>
+		<Target Name="ifileit:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\ifile.it\ifileit.dproj"/>
+		</Target>
+		<Target Name="ifileit:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\ifile.it\ifileit.dproj"/>
+		</Target>
+		<Target Name="junocloudme">
+			<MSBuild Projects="sdk\plugins\filehoster\junocloud.me\junocloudme.dproj"/>
+		</Target>
+		<Target Name="junocloudme:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\junocloud.me\junocloudme.dproj"/>
+		</Target>
+		<Target Name="junocloudme:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\junocloud.me\junocloudme.dproj"/>
+		</Target>
+		<Target Name="kewlsharecom">
+			<MSBuild Projects="sdk\plugins\filehoster\kewlshare.com\kewlsharecom.dproj"/>
+		</Target>
+		<Target Name="kewlsharecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\kewlshare.com\kewlsharecom.dproj"/>
+		</Target>
+		<Target Name="kewlsharecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\kewlshare.com\kewlsharecom.dproj"/>
+		</Target>
+		<Target Name="kickloadcom">
+			<MSBuild Projects="sdk\plugins\filehoster\kickload.com\kickloadcom.dproj"/>
+		</Target>
+		<Target Name="kickloadcom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\kickload.com\kickloadcom.dproj"/>
+		</Target>
+		<Target Name="kickloadcom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\kickload.com\kickloadcom.dproj"/>
+		</Target>
+		<Target Name="letitbitnet">
+			<MSBuild Projects="sdk\plugins\filehoster\letitbit.net\letitbitnet.dproj"/>
+		</Target>
+		<Target Name="letitbitnet:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\letitbit.net\letitbitnet.dproj"/>
+		</Target>
+		<Target Name="letitbitnet:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\letitbit.net\letitbitnet.dproj"/>
+		</Target>
+		<Target Name="loadto">
+			<MSBuild Projects="sdk\plugins\filehoster\load.to\loadto.dproj"/>
+		</Target>
+		<Target Name="loadto:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\load.to\loadto.dproj"/>
+		</Target>
+		<Target Name="loadto:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\load.to\loadto.dproj"/>
+		</Target>
+		<Target Name="loadfilesin">
+			<MSBuild Projects="sdk\plugins\filehoster\loadfiles.in\loadfilesin.dproj"/>
+		</Target>
+		<Target Name="loadfilesin:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\loadfiles.in\loadfilesin.dproj"/>
+		</Target>
+		<Target Name="loadfilesin:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\loadfiles.in\loadfilesin.dproj"/>
+		</Target>
+		<Target Name="mediafirecom">
+			<MSBuild Projects="sdk\plugins\filehoster\mediafire.com\mediafirecom.dproj"/>
+		</Target>
+		<Target Name="mediafirecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\mediafire.com\mediafirecom.dproj"/>
+		</Target>
+		<Target Name="mediafirecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\mediafire.com\mediafirecom.dproj"/>
+		</Target>
+		<Target Name="megauploadcom">
+			<MSBuild Projects="sdk\plugins\filehoster\megaupload.com\megauploadcom.dproj"/>
+		</Target>
+		<Target Name="megauploadcom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\megaupload.com\megauploadcom.dproj"/>
+		</Target>
+		<Target Name="megauploadcom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\megaupload.com\megauploadcom.dproj"/>
+		</Target>
+		<Target Name="netloadin">
+			<MSBuild Projects="sdk\plugins\filehoster\netload.in\netloadin.dproj"/>
+		</Target>
+		<Target Name="netloadin:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\netload.in\netloadin.dproj"/>
+		</Target>
+		<Target Name="netloadin:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\netload.in\netloadin.dproj"/>
+		</Target>
+		<Target Name="netuploadedcom">
+			<MSBuild Projects="sdk\plugins\filehoster\netuploaded.com\netuploadedcom.dproj"/>
+		</Target>
+		<Target Name="netuploadedcom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\netuploaded.com\netuploadedcom.dproj"/>
+		</Target>
+		<Target Name="netuploadedcom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\netuploaded.com\netuploadedcom.dproj"/>
+		</Target>
+		<Target Name="oroncom">
+			<MSBuild Projects="sdk\plugins\filehoster\oron.com\oroncom.dproj"/>
+		</Target>
+		<Target Name="oroncom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\oron.com\oroncom.dproj"/>
+		</Target>
+		<Target Name="oroncom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\oron.com\oroncom.dproj"/>
+		</Target>
+		<Target Name="qsharecom">
+			<MSBuild Projects="sdk\plugins\filehoster\qshare.com\qsharecom.dproj"/>
+		</Target>
+		<Target Name="qsharecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\qshare.com\qsharecom.dproj"/>
+		</Target>
+		<Target Name="qsharecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\qshare.com\qsharecom.dproj"/>
+		</Target>
+		<Target Name="rapidgatornet">
+			<MSBuild Projects="sdk\plugins\filehoster\rapidgator.net\rapidgatornet.dproj"/>
+		</Target>
+		<Target Name="rapidgatornet:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\rapidgator.net\rapidgatornet.dproj"/>
+		</Target>
+		<Target Name="rapidgatornet:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\rapidgator.net\rapidgatornet.dproj"/>
+		</Target>
+		<Target Name="rapidsharecom">
+			<MSBuild Projects="sdk\plugins\filehoster\rapidshare.com\rapidsharecom.dproj"/>
+		</Target>
+		<Target Name="rapidsharecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\rapidshare.com\rapidsharecom.dproj"/>
+		</Target>
+		<Target Name="rapidsharecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\rapidshare.com\rapidsharecom.dproj"/>
+		</Target>
+		<Target Name="remixsharecom">
+			<MSBuild Projects="sdk\plugins\filehoster\remixshare.com\remixsharecom.dproj"/>
+		</Target>
+		<Target Name="remixsharecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\remixshare.com\remixsharecom.dproj"/>
+		</Target>
+		<Target Name="remixsharecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\remixshare.com\remixsharecom.dproj"/>
+		</Target>
+		<Target Name="sendspacecom">
+			<MSBuild Projects="sdk\plugins\filehoster\sendspace.com\sendspacecom.dproj"/>
+		</Target>
+		<Target Name="sendspacecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\sendspace.com\sendspacecom.dproj"/>
+		</Target>
+		<Target Name="sendspacecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\sendspace.com\sendspacecom.dproj"/>
+		</Target>
+		<Target Name="sharenownet">
+			<MSBuild Projects="sdk\plugins\filehoster\share-now.net\sharenownet.dproj"/>
+		</Target>
+		<Target Name="sharenownet:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\share-now.net\sharenownet.dproj"/>
+		</Target>
+		<Target Name="sharenownet:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\share-now.net\sharenownet.dproj"/>
+		</Target>
+		<Target Name="shareonlinebiz">
+			<MSBuild Projects="sdk\plugins\filehoster\share-online.biz\shareonlinebiz.dproj"/>
+		</Target>
+		<Target Name="shareonlinebiz:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\share-online.biz\shareonlinebiz.dproj"/>
+		</Target>
+		<Target Name="shareonlinebiz:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\share-online.biz\shareonlinebiz.dproj"/>
+		</Target>
+		<Target Name="shraglecom">
+			<MSBuild Projects="sdk\plugins\filehoster\shragle.com\shraglecom.dproj"/>
+		</Target>
+		<Target Name="shraglecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\shragle.com\shraglecom.dproj"/>
+		</Target>
+		<Target Name="shraglecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\shragle.com\shraglecom.dproj"/>
+		</Target>
+		<Target Name="speedshareorg">
+			<MSBuild Projects="sdk\plugins\filehoster\speedshare.org\speedshareorg.dproj"/>
+		</Target>
+		<Target Name="speedshareorg:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\speedshare.org\speedshareorg.dproj"/>
+		</Target>
+		<Target Name="speedshareorg:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\speedshare.org\speedshareorg.dproj"/>
+		</Target>
+		<Target Name="terabitto">
+			<MSBuild Projects="sdk\plugins\filehoster\terabit.to\terabitto.dproj"/>
+		</Target>
+		<Target Name="terabitto:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\terabit.to\terabitto.dproj"/>
+		</Target>
+		<Target Name="terabitto:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\terabit.to\terabitto.dproj"/>
+		</Target>
+		<Target Name="turbobitnet">
+			<MSBuild Projects="sdk\plugins\filehoster\turbobit.net\turbobitnet.dproj"/>
+		</Target>
+		<Target Name="turbobitnet:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\turbobit.net\turbobitnet.dproj"/>
+		</Target>
+		<Target Name="turbobitnet:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\turbobit.net\turbobitnet.dproj"/>
+		</Target>
+		<Target Name="ugotfilecom">
+			<MSBuild Projects="sdk\plugins\filehoster\ugotfile.com\ugotfilecom.dproj"/>
+		</Target>
+		<Target Name="ugotfilecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\ugotfile.com\ugotfilecom.dproj"/>
+		</Target>
+		<Target Name="ugotfilecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\ugotfile.com\ugotfilecom.dproj"/>
+		</Target>
+		<Target Name="uploadednet">
+			<MSBuild Projects="sdk\plugins\filehoster\uploaded.net\uploadednet.dproj"/>
+		</Target>
+		<Target Name="uploadednet:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\uploaded.net\uploadednet.dproj"/>
+		</Target>
+		<Target Name="uploadednet:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\uploaded.net\uploadednet.dproj"/>
+		</Target>
+		<Target Name="uploadingcom">
+			<MSBuild Projects="sdk\plugins\filehoster\uploading.com\uploadingcom.dproj"/>
+		</Target>
+		<Target Name="uploadingcom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\uploading.com\uploadingcom.dproj"/>
+		</Target>
+		<Target Name="uploadingcom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\uploading.com\uploadingcom.dproj"/>
+		</Target>
+		<Target Name="uploadspacepl">
+			<MSBuild Projects="sdk\plugins\filehoster\uploadspace.pl\uploadspacepl.dproj"/>
+		</Target>
+		<Target Name="uploadspacepl:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\uploadspace.pl\uploadspacepl.dproj"/>
+		</Target>
+		<Target Name="uploadspacepl:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\uploadspace.pl\uploadspacepl.dproj"/>
+		</Target>
+		<Target Name="uploadstationcom">
+			<MSBuild Projects="sdk\plugins\filehoster\uploadstation.com\uploadstationcom.dproj"/>
+		</Target>
+		<Target Name="uploadstationcom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\uploadstation.com\uploadstationcom.dproj"/>
+		</Target>
+		<Target Name="uploadstationcom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\uploadstation.com\uploadstationcom.dproj"/>
+		</Target>
+		<Target Name="uploadstubede">
+			<MSBuild Projects="sdk\plugins\filehoster\uploadstube.de\uploadstubede.dproj"/>
+		</Target>
+		<Target Name="uploadstubede:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\uploadstube.de\uploadstubede.dproj"/>
+		</Target>
+		<Target Name="uploadstubede:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\uploadstube.de\uploadstubede.dproj"/>
+		</Target>
+		<Target Name="wuploadcom">
+			<MSBuild Projects="sdk\plugins\filehoster\wupload.com\wuploadcom.dproj"/>
+		</Target>
+		<Target Name="wuploadcom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\wupload.com\wuploadcom.dproj"/>
+		</Target>
+		<Target Name="wuploadcom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\wupload.com\wuploadcom.dproj"/>
+		</Target>
+		<Target Name="x7to">
+			<MSBuild Projects="sdk\plugins\filehoster\x7.to\x7to.dproj"/>
+		</Target>
+		<Target Name="x7to:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\x7.to\x7to.dproj"/>
+		</Target>
+		<Target Name="x7to:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\x7.to\x7to.dproj"/>
+		</Target>
+		<Target Name="xupin">
+			<MSBuild Projects="sdk\plugins\filehoster\xup.in\xupin.dproj"/>
+		</Target>
+		<Target Name="xupin:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\xup.in\xupin.dproj"/>
+		</Target>
+		<Target Name="xupin:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\xup.in\xupin.dproj"/>
+		</Target>
+		<Target Name="zippysharecom">
+			<MSBuild Projects="sdk\plugins\filehoster\zippyshare.com\zippysharecom.dproj"/>
+		</Target>
+		<Target Name="zippysharecom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\zippyshare.com\zippysharecom.dproj"/>
+		</Target>
+		<Target Name="zippysharecom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\zippyshare.com\zippysharecom.dproj"/>
+		</Target>
+		<Target Name="zsharenet">
+			<MSBuild Projects="sdk\plugins\filehoster\zshare.net\zsharenet.dproj"/>
+		</Target>
+		<Target Name="zsharenet:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\zshare.net\zsharenet.dproj"/>
+		</Target>
+		<Target Name="zsharenet:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\zshare.net\zsharenet.dproj"/>
+		</Target>
+		<Target Name="anyimgcom">
+			<MSBuild Projects="sdk\plugins\imagehoster\anyimg.com\anyimgcom.dproj"/>
+		</Target>
+		<Target Name="anyimgcom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\imagehoster\anyimg.com\anyimgcom.dproj"/>
+		</Target>
+		<Target Name="anyimgcom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\imagehoster\anyimg.com\anyimgcom.dproj"/>
+		</Target>
+		<Target Name="ddlworg">
+			<MSBuild Projects="sdk\plugins\imagehoster\ddlw.org\ddlworg.dproj"/>
+		</Target>
+		<Target Name="ddlworg:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\imagehoster\ddlw.org\ddlworg.dproj"/>
+		</Target>
+		<Target Name="ddlworg:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\imagehoster\ddlw.org\ddlworg.dproj"/>
+		</Target>
+		<Target Name="directuploadnet">
+			<MSBuild Projects="sdk\plugins\imagehoster\directupload.net\directuploadnet.dproj"/>
+		</Target>
+		<Target Name="directuploadnet:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\imagehoster\directupload.net\directuploadnet.dproj"/>
+		</Target>
+		<Target Name="directuploadnet:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\imagehoster\directupload.net\directuploadnet.dproj"/>
+		</Target>
+		<Target Name="imagebananacom">
+			<MSBuild Projects="sdk\plugins\imagehoster\imagebanana.com\imagebananacom.dproj"/>
+		</Target>
+		<Target Name="imagebananacom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\imagehoster\imagebanana.com\imagebananacom.dproj"/>
+		</Target>
+		<Target Name="imagebananacom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\imagehoster\imagebanana.com\imagebananacom.dproj"/>
+		</Target>
+		<Target Name="imageshackus">
+			<MSBuild Projects="sdk\plugins\imagehoster\imageshack.us\imageshackus.dproj"/>
+		</Target>
+		<Target Name="imageshackus:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\imagehoster\imageshack.us\imageshackus.dproj"/>
+		</Target>
+		<Target Name="imageshackus:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\imagehoster\imageshack.us\imageshackus.dproj"/>
+		</Target>
+		<Target Name="imgurcom">
+			<MSBuild Projects="sdk\plugins\imagehoster\imgur.com\imgurcom.dproj"/>
+		</Target>
+		<Target Name="imgurcom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\imagehoster\imgur.com\imgurcom.dproj"/>
+		</Target>
+		<Target Name="imgurcom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\imagehoster\imgur.com\imgurcom.dproj"/>
+		</Target>
+		<Target Name="picfrontorg">
+			<MSBuild Projects="sdk\plugins\imagehoster\picfront.org\picfrontorg.dproj"/>
+		</Target>
+		<Target Name="picfrontorg:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\imagehoster\picfront.org\picfrontorg.dproj"/>
+		</Target>
+		<Target Name="picfrontorg:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\imagehoster\picfront.org\picfrontorg.dproj"/>
+		</Target>
+		<Target Name="picloadorg">
+			<MSBuild Projects="sdk\plugins\imagehoster\picload.org\picloadorg.dproj"/>
+		</Target>
+		<Target Name="picloadorg:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\imagehoster\picload.org\picloadorg.dproj"/>
+		</Target>
+		<Target Name="picloadorg:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\imagehoster\picload.org\picloadorg.dproj"/>
+		</Target>
+		<Target Name="tinypiccom">
+			<MSBuild Projects="sdk\plugins\imagehoster\tinypic.com\tinypiccom.dproj"/>
+		</Target>
+		<Target Name="tinypiccom:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\imagehoster\tinypic.com\tinypiccom.dproj"/>
+		</Target>
+		<Target Name="tinypiccom:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\imagehoster\tinypic.com\tinypiccom.dproj"/>
+		</Target>
+		<Target Name="youpicin">
+			<MSBuild Projects="sdk\plugins\imagehoster\youpic.in\youpicin.dproj"/>
+		</Target>
+		<Target Name="youpicin:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\imagehoster\youpic.in\youpicin.dproj"/>
+		</Target>
+		<Target Name="youpicin:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\imagehoster\youpic.in\youpicin.dproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="IntelligeN;linkgrabber;mirrorsort;vbulletin_randomquestion;blogger;cherrycms;discuz;discuzx;dle;fluxbb;htw;icms;ipb2;ipb3;joomla;loadit;mybb;n3m0cms;phpbb2;phpbb3;smf;ucms;vbulletin;wbb2;wbb3;wbb4;wfusion;wordpress;xenforo;einsadvdch;adultdvdempirecom;amazoncom;amazonde;bigfishgamescom;bigfishgamesde;binsearchinfo;cdlexikonde;cduniversecom;chipde;cinefactsde;coverparadiesto;customscript;erodvdnl;exsnoiporg;gamespotcom;gamestarde;gametrailerscom;gaminguniversede;igncom;imagesgooglede;imdbcom;jadedvideocom;ludibriacom;moviemazede;nfodbru;nintendolifecom;pcgdbde;pornofilmvertriebde;releasename;scepereu;sexvideoallcom;thaliade;wiiboxartcom;xonaircom;xrelto;youtubecom;zelluloidde;linkcryptws;linksavein;ncryptin;relinkus;sharelinksbiz;wcryptin;extractedpostcode1;intelligenxml1;intelligenxml2;releasenamereader;bitsharecom;cloudzernet;crockocom;dataloadingcom;dateito;depositfilescom;enteruploadcom;extabitcom;filefactorycom;filefrogto;filejunglecom;filepostcom;fileservecom;filesoniccom;filestoreto;freaksharecom;hotfilecom;ifileit;junocloudme;kewlsharecom;kickloadcom;letitbitnet;loadto;loadfilesin;mediafirecom;megauploadcom;netloadin;netuploadedcom;oroncom;qsharecom;rapidgatornet;rapidsharecom;remixsharecom;sendspacecom;sharenownet;shareonlinebiz;shraglecom;speedshareorg;terabitto;turbobitnet;ugotfilecom;uploadednet;uploadingcom;uploadspacepl;uploadstationcom;uploadstubede;wuploadcom;x7to;xupin;zippysharecom;zsharenet;anyimgcom;ddlworg;directuploadnet;imagebananacom;imageshackus;imgurcom;picfrontorg;picloadorg;tinypiccom;youpicin"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="IntelligeN:Clean;linkgrabber:Clean;mirrorsort:Clean;vbulletin_randomquestion:Clean;blogger:Clean;cherrycms:Clean;discuz:Clean;discuzx:Clean;dle:Clean;fluxbb:Clean;htw:Clean;icms:Clean;ipb2:Clean;ipb3:Clean;joomla:Clean;loadit:Clean;mybb:Clean;n3m0cms:Clean;phpbb2:Clean;phpbb3:Clean;smf:Clean;ucms:Clean;vbulletin:Clean;wbb2:Clean;wbb3:Clean;wbb4:Clean;wfusion:Clean;wordpress:Clean;xenforo:Clean;einsadvdch:Clean;adultdvdempirecom:Clean;amazoncom:Clean;amazonde:Clean;bigfishgamescom:Clean;bigfishgamesde:Clean;binsearchinfo:Clean;cdlexikonde:Clean;cduniversecom:Clean;chipde:Clean;cinefactsde:Clean;coverparadiesto:Clean;customscript:Clean;erodvdnl:Clean;exsnoiporg:Clean;gamespotcom:Clean;gamestarde:Clean;gametrailerscom:Clean;gaminguniversede:Clean;igncom:Clean;imagesgooglede:Clean;imdbcom:Clean;jadedvideocom:Clean;ludibriacom:Clean;moviemazede:Clean;nfodbru:Clean;nintendolifecom:Clean;pcgdbde:Clean;pornofilmvertriebde:Clean;releasename:Clean;scepereu:Clean;sexvideoallcom:Clean;thaliade:Clean;wiiboxartcom:Clean;xonaircom:Clean;xrelto:Clean;youtubecom:Clean;zelluloidde:Clean;linkcryptws:Clean;linksavein:Clean;ncryptin:Clean;relinkus:Clean;sharelinksbiz:Clean;wcryptin:Clean;extractedpostcode1:Clean;intelligenxml1:Clean;intelligenxml2:Clean;releasenamereader:Clean;bitsharecom:Clean;cloudzernet:Clean;crockocom:Clean;dataloadingcom:Clean;dateito:Clean;depositfilescom:Clean;enteruploadcom:Clean;extabitcom:Clean;filefactorycom:Clean;filefrogto:Clean;filejunglecom:Clean;filepostcom:Clean;fileservecom:Clean;filesoniccom:Clean;filestoreto:Clean;freaksharecom:Clean;hotfilecom:Clean;ifileit:Clean;junocloudme:Clean;kewlsharecom:Clean;kickloadcom:Clean;letitbitnet:Clean;loadto:Clean;loadfilesin:Clean;mediafirecom:Clean;megauploadcom:Clean;netloadin:Clean;netuploadedcom:Clean;oroncom:Clean;qsharecom:Clean;rapidgatornet:Clean;rapidsharecom:Clean;remixsharecom:Clean;sendspacecom:Clean;sharenownet:Clean;shareonlinebiz:Clean;shraglecom:Clean;speedshareorg:Clean;terabitto:Clean;turbobitnet:Clean;ugotfilecom:Clean;uploadednet:Clean;uploadingcom:Clean;uploadspacepl:Clean;uploadstationcom:Clean;uploadstubede:Clean;wuploadcom:Clean;x7to:Clean;xupin:Clean;zippysharecom:Clean;zsharenet:Clean;anyimgcom:Clean;ddlworg:Clean;directuploadnet:Clean;imagebananacom:Clean;imageshackus:Clean;imgurcom:Clean;picfrontorg:Clean;picloadorg:Clean;tinypiccom:Clean;youpicin:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="IntelligeN:Make;linkgrabber:Make;mirrorsort:Make;vbulletin_randomquestion:Make;blogger:Make;cherrycms:Make;discuz:Make;discuzx:Make;dle:Make;fluxbb:Make;htw:Make;icms:Make;ipb2:Make;ipb3:Make;joomla:Make;loadit:Make;mybb:Make;n3m0cms:Make;phpbb2:Make;phpbb3:Make;smf:Make;ucms:Make;vbulletin:Make;wbb2:Make;wbb3:Make;wbb4:Make;wfusion:Make;wordpress:Make;xenforo:Make;einsadvdch:Make;adultdvdempirecom:Make;amazoncom:Make;amazonde:Make;bigfishgamescom:Make;bigfishgamesde:Make;binsearchinfo:Make;cdlexikonde:Make;cduniversecom:Make;chipde:Make;cinefactsde:Make;coverparadiesto:Make;customscript:Make;erodvdnl:Make;exsnoiporg:Make;gamespotcom:Make;gamestarde:Make;gametrailerscom:Make;gaminguniversede:Make;igncom:Make;imagesgooglede:Make;imdbcom:Make;jadedvideocom:Make;ludibriacom:Make;moviemazede:Make;nfodbru:Make;nintendolifecom:Make;pcgdbde:Make;pornofilmvertriebde:Make;releasename:Make;scepereu:Make;sexvideoallcom:Make;thaliade:Make;wiiboxartcom:Make;xonaircom:Make;xrelto:Make;youtubecom:Make;zelluloidde:Make;linkcryptws:Make;linksavein:Make;ncryptin:Make;relinkus:Make;sharelinksbiz:Make;wcryptin:Make;extractedpostcode1:Make;intelligenxml1:Make;intelligenxml2:Make;releasenamereader:Make;bitsharecom:Make;cloudzernet:Make;crockocom:Make;dataloadingcom:Make;dateito:Make;depositfilescom:Make;enteruploadcom:Make;extabitcom:Make;filefactorycom:Make;filefrogto:Make;filejunglecom:Make;filepostcom:Make;fileservecom:Make;filesoniccom:Make;filestoreto:Make;freaksharecom:Make;hotfilecom:Make;ifileit:Make;junocloudme:Make;kewlsharecom:Make;kickloadcom:Make;letitbitnet:Make;loadto:Make;loadfilesin:Make;mediafirecom:Make;megauploadcom:Make;netloadin:Make;netuploadedcom:Make;oroncom:Make;qsharecom:Make;rapidgatornet:Make;rapidsharecom:Make;remixsharecom:Make;sendspacecom:Make;sharenownet:Make;shareonlinebiz:Make;shraglecom:Make;speedshareorg:Make;terabitto:Make;turbobitnet:Make;ugotfilecom:Make;uploadednet:Make;uploadingcom:Make;uploadspacepl:Make;uploadstationcom:Make;uploadstubede:Make;wuploadcom:Make;x7to:Make;xupin:Make;zippysharecom:Make;zsharenet:Make;anyimgcom:Make;ddlworg:Make;directuploadnet:Make;imagebananacom:Make;imageshackus:Make;imgurcom:Make;picfrontorg:Make;picloadorg:Make;tinypiccom:Make;youpicin:Make"/>
+		</Target>
+		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+	</Project>

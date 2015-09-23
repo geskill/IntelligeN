@@ -4,13 +4,15 @@ interface
 
 uses
   // Delphi
-  SysUtils, HTTPApp,
+  Windows, SysUtils, Classes, HTTPApp,
   // RegEx
   RegExpr,
   // Common
   uConst, uAppInterface,
+  // HTTPManager
+  uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrawlerClass;
+  uPlugInCrawlerClass, uPlugInHTTPClasses;
 
 type
   TGamespotCom = class(TCrawlerPlugIn)
@@ -45,7 +47,7 @@ var
   _ComponentIDs: TComponentIDs;
 begin
   _ComponentIDs := [cPicture, cGenre];
-  result := Word(_ComponentIDs);
+  result := LongWord(_ComponentIDs);
 end;
 
 function TGamespotCom.GetComponentIDDefaultValue;
@@ -71,16 +73,7 @@ begin
 
   _Count := 0;
 
-  with TIdHTTP.Create(nil) do
-    try
-      HandleRedirects := True;
-
-      s := Get(website + 'search.html?qs=' + HTTPEncode(_searchname));
-
-      //
-    finally
-      Free;
-    end;
+  //s := Get(website + 'search.html?qs=' + HTTPEncode(_searchname));
 end;
 
 end.

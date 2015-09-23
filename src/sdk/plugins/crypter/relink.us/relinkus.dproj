@@ -24,9 +24,6 @@
 			<UsePackages>true</UsePackages>
 			<DCC_UsePackage>framework</DCC_UsePackage>
 			<DCC_UnitSearchPath>../;../../;../../../3rdparty\HTTPManager;../../../3rdparty\MultiEvent;../../../3rdparty\TRegExpr\Source;../../../common;../../../utils;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
-			<DCC_DcuOutput>../../../../dcu</DCC_DcuOutput>
-			<DCC_ExeOutput>../../../../bin_portable\plugins</DCC_ExeOutput>
-			<DCC_DependencyCheckOutputName>..\..\..\..\bin_portable\plugins\relinkus.dll</DCC_DependencyCheckOutputName>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<GenDll>true</GenDll>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
