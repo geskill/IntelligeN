@@ -13,9 +13,6 @@ const
 
   Homepage = 'http://intelligen2009.com/';
 
-  /// when changing these names, crack detection needs changing
-  ProgrammVersion: array [0 .. 3] of string = ('Personal', 'Professional', 'Enterprise', 'Architect');
-
   BackupFilename = 'releases.sdb';
 
 type

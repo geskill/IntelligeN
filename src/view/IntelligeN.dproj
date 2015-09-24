@@ -2,7 +2,7 @@
 		<PropertyGroup>
 			<ProjectGuid>{1D2F73A9-4B63-415A-BA7F-8E22FA952849}</ProjectGuid>
 			<MainSource>IntelligeN.dpr</MainSource>
-			<Config Condition="'$(Config)'==''">Debug</Config>
+			<Config Condition="'$(Config)'==''">Portable-D</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 			<ProjectVersion>12.0</ProjectVersion>
 		</PropertyGroup>
@@ -17,6 +17,12 @@
 		<PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_2)'!=''">
 			<Cfg_2>true</Cfg_2>
 			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Portable-D' or '$(Cfg_3)'!=''">
+			<Cfg_3>true</Cfg_3>
+			<CfgParent>Cfg_2</CfgParent>
+			<Cfg_2>true</Cfg_2>
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
@@ -43,6 +49,10 @@
 			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
 			<DCC_Optimize>false</DCC_Optimize>
 			<DCC_Define>DEBUG;EUREKALOG;EUREKALOG_VER7;$(DCC_Define)</DCC_Define>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_3)'!=''">
+			<DCC_ExeOutput>../../bin_portable</DCC_ExeOutput>
+			<DCC_DependencyCheckOutputName>..\..\bin_portable\IntelligeN.exe</DCC_DependencyCheckOutputName>
 		</PropertyGroup>
 		<ItemGroup>
 			<DelphiCompile Include="IntelligeN.dpr">
@@ -230,6 +240,10 @@
 			</RcItem>
 			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Portable-D">
+				<Key>Cfg_3</Key>
+				<CfgParent>Cfg_2</CfgParent>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_1</Key>

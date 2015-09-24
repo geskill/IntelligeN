@@ -27,7 +27,7 @@ type
   TPlugInCollectionItem = class(TCollectionItem)
   private
     FName, FPath: string;
-    FEnabled, FPreEnabled: Boolean;
+    FEnabled: Boolean;
     FIconHandle: Cardinal;
     FIcon: TIcon;
     function GetIconHandle: Cardinal;
@@ -35,7 +35,6 @@ type
   public
     function GetPath: string; virtual;
     property Icon: TIcon read GetIcon;
-    property PreEnabled: Boolean read FPreEnabled write FPreEnabled;
     destructor Destroy; override;
   published
     property Name: string read FName write FName;
@@ -93,7 +92,6 @@ type
   published
     property Name;
     property Enabled;
-    property PreEnabled;
     property Websites: TCollection read FWebsites write FWebsites;
   end;
 
@@ -121,7 +119,6 @@ type
   published
     property Name;
     property Enabled;
-    property PreEnabled;
     property Limit: Integer read FLimit write FLimit;
     property Contingent: TCollection read FContingent write FContingent;
   end;
@@ -145,7 +142,6 @@ type
   published
     property Name;
     property Enabled;
-    property PreEnabled;
     property UseAccount: Boolean read FUseAccount write FUseAccount;
     property AccountName: string read FAccountName write FAccountName;
     property AccountPassword: string read FAccountPassword write FAccountPassword;
@@ -582,7 +578,6 @@ type
   end;
 
 var
-  FirstStart: Boolean;
   SettingsManager: TSettingsManager;
 
 implementation

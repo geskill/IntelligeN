@@ -49,10 +49,6 @@ uses
 
 procedure TUpdate.FormCreate(Sender: TObject);
 begin
-  // START CRACK DETECTION
-  if not(Main.V = 0) then
-    Exit;
-  // END CRACK DETECTION
   FUpdateController := TUpdateController.Create(True);
 
   with SettingsManager.Settings do
@@ -60,11 +56,6 @@ begin
     if CheckForUpdates then
       UpdateController.Start;
   end;
-
-  // START CRACK DETECTION
-  if not(Main.V = 0) then
-    Halt;
-  // END CRACK DETECTION
 end;
 
 procedure TUpdate.FormDestroy(Sender: TObject);

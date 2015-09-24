@@ -443,7 +443,7 @@ type
     procedure UpdateAllOpenedTabs(ATemplateTypeID: TTemplateTypeID; AComponentID: TComponentID; AActiveControlAccess: TActiveControlAccess); overload;
     function GetSelectedTemplateTypes(TemplateTypeListView: TcxListView): TTemplateTypeIDs;
   public
-    procedure SetComponentStatusFromSettings(ASmart: Boolean = False);
+    procedure SetComponentStatusFromSettings;
     property CMSPluginsCheckListBox: TPluginsCheckListBox read FCMSPluginsCheckListBox write FCMSPluginsCheckListBox;
     procedure AddCMSWebsite(AFileName, AWebsiteName, AWebsiteType: string);
   end;
@@ -1804,7 +1804,7 @@ begin
 
   FOnCrawlerContingentChange := False;
 
-  if FirstStart then
+  if SettingsManager.FirstStart then
     SettingsManager.PreLoadPlugins;
 
   A;
@@ -2045,44 +2045,17 @@ end;
 
 procedure TSettings.CMSClickCheck(Sender: TObject; AIndex: Integer; APrevState: TcxCheckBoxState; ANewState: TcxCheckBoxState);
 begin
-  if not(Main.V = 0) or (GetCheckedCount(Sender as TcxCheckListBox) < 3) then
+  with SettingsManager.Settings.Plugins do
   begin
-    with SettingsManager.Settings.Plugins do
+    with TPlugInCollectionItem(CMS.Items[AIndex]) do
     begin
-      with TPlugInCollectionItem(CMS.Items[AIndex]) do
-      begin
-        Enabled := (ANewState = cbsChecked);
-        PreEnabled := (ANewState = cbsChecked);
-      end;
-      if Assigned(OnCMSChange) then
-        OnCMSChange.Invoke(pctEnabled, AIndex, Byte(ANewState));
+      Enabled := (ANewState = cbsChecked);
     end;
-    // START CRACK DETECTION
-    if (Main.V = 0) and (GetCheckedCount(Sender as TcxCheckListBox) >= 3) and (DayOfTheWeek(Now) = 4) then
-      Exit;
-    if Assigned(Main.fLogin) and not Assigned(Main.fLogin.FmiRenewLicense) and (GetCheckedCount(Sender as TcxCheckListBox) > 7) then
-      Halt;
-    // END CRACK DETECTION
-    // Main.fPublish.GenerateColumns;
-    // START CRACK DETECTION
-    if (length(Main.fLogin.eLoginname.Text) < 1) and (GetCheckedCount(Sender as TcxCheckListBox) > 3) then
-      Halt;
-    // END CRACK DETECTION
-  end
-  else
-  begin
-    TcxCheckListBox(Sender).Items.Items[AIndex].Checked := False;
-
-    Async(
-      { } procedure
-      { } begin
-      { . } Sleep(50);
-      { } end).Await(
-      { } procedure
-      { } begin
-      { . } MessageDlg('You cannot activate more than 2 cms plug-ins in the personal version! ' + StrBeFairAndUpgrade, mtWarning, [mbOK], 0);
-      { } end);
+    if Assigned(OnCMSChange) then
+      OnCMSChange.Invoke(pctEnabled, AIndex, Byte(ANewState));
   end;
+
+  // Main.fPublish.GenerateColumns;
 end;
 
 procedure TSettings.CMSEndDrag(Sender: TObject; OldIndex: Integer; NewIndex: Integer);
@@ -2228,35 +2201,9 @@ end;
 
 procedure TSettings.CrawlerClickCheck(Sender: TObject; AIndex: Integer; APrevState: TcxCheckBoxState; ANewState: TcxCheckBoxState);
 begin
-  if not(Main.V = 0) or (GetCheckedCount(Sender as TcxCheckListBox) < 4) then
+  with TPlugInCollectionItem(SettingsManager.Settings.Plugins.Crawler.Items[AIndex]) do
   begin
-    // START CRACK DETECTION
-    if (Main.V = 0) and (GetCheckedCount(Sender as TcxCheckListBox) >= 4) and (DayOfTheWeek(Now) = 2) then
-      Exit;
-    // END CRACK DETECTION
-    with TPlugInCollectionItem(SettingsManager.Settings.Plugins.Crawler.Items[AIndex]) do
-    begin
-      Enabled := (ANewState = cbsChecked);
-      PreEnabled := (ANewState = cbsChecked);
-    end;
-    // START CRACK DETECTION
-    if (length(Main.fLogin.eLoginpassword.Text) < 1) and (GetCheckedCount(Sender as TcxCheckListBox) > 4) then
-      Halt;
-    // END CRACK DETECTION
-  end
-  else
-  begin
-    TcxCheckListBox(Sender).Items.Items[AIndex].Checked := False;
-
-    Async(
-      { } procedure
-      { } begin
-      { . } Sleep(50);
-      { } end).Await(
-      { } procedure
-      { } begin
-      { . } MessageDlg('You cannot activate more than 3 crawler plug-ins in the personal version! ' + StrBeFairAndUpgrade, mtWarning, [mbOK], 0);
-      { } end);
+    Enabled := (ANewState = cbsChecked);
   end;
 end;
 
@@ -2408,49 +2355,12 @@ procedure TSettings.CrypterClickCheck(Sender: TObject; AIndex: Integer; APrevSta
   end;
 
 begin
-  if not(Main.V = 0) or (GetCheckedCount(Sender as TcxCheckListBox) < 2) then
+  with TPlugInCollectionItem(SettingsManager.Settings.Plugins.Crypter.Items[AIndex]) do
   begin
-    // START CRACK DETECTION
-    if (Main.V = 0) and (GetCheckedCount(Sender as TcxCheckListBox) >= 2) and (DayOfTheWeek(Now) = 6) then
-      Exit;
-    // END CRACK DETECTION
-    with TPlugInCollectionItem(SettingsManager.Settings.Plugins.Crypter.Items[AIndex]) do
-    begin
-      Enabled := (ANewState = cbsChecked);
-      PreEnabled := (ANewState = cbsChecked);
-    end;
-    CrypterUpdate(Main.fMain, TCrypterCollectionItem(SettingsManager.Settings.Plugins.Crypter.Items[AIndex]));
-    // START CRACK DETECTION
-    if (length(Main.fLogin.eLoginname.Text) < 1) and (GetCheckedCount(Sender as TcxCheckListBox) > 2) then
-      Halt;
-    // END CRACK DETECTION
-  end
-  else
-  begin
-    TcxCheckListBox(Sender).Items.Items[AIndex].Checked := False;
-
-    if not(APrevState = cbsChecked) then
-    begin
-      Async(
-        { } procedure
-        { } begin
-        { . } Sleep(50);
-        { } end).Await(
-        { } procedure
-        { } begin
-        { . } MessageDlg('You cannot activate more than 1 cryper plug-in in the personal version! ' + StrBeFairAndUpgrade, mtWarning, [mbOK], 0);
-        { } end);
-    end
-    else
-    begin
-      with TPlugInCollectionItem(SettingsManager.Settings.Plugins.Crypter.Items[AIndex]) do
-      begin
-        Enabled := (ANewState = cbsChecked);
-        PreEnabled := (ANewState = cbsChecked);
-      end;
-      CrypterUpdate(Main.fMain, TCrypterCollectionItem(SettingsManager.Settings.Plugins.Crypter.Items[AIndex]));
-    end;
+    Enabled := (ANewState = cbsChecked);
   end;
+  CrypterUpdate(Main.fMain, TCrypterCollectionItem(SettingsManager.Settings.Plugins.Crypter.Items[AIndex]));
+
   if ANewState = cbsUnchecked then
     cxcobDefaultMirrorTabIndexItemsRefresh;
 end;
@@ -2717,58 +2627,52 @@ begin
   cxCBCMSAll.Properties.OnChange := Event;
 end;
 
-procedure TSettings.SetComponentStatusFromSettings(ASmart: Boolean = False);
+procedure TSettings.SetComponentStatusFromSettings;
 var
   I: Integer;
   StringList: TStrings;
 begin
-  if not ASmart then
-  begin
-    cxCBSaveOnClose.Checked := SettingsManager.Settings.SaveOnClose;
+  cxCBSaveOnClose.Checked := SettingsManager.Settings.SaveOnClose;
 
-    cxcbNativeStyle.Checked := SettingsManager.Settings.NativeStyle;
-    cxcbUseSkins.Enabled := not cxcbNativeStyle.Checked;
-    // cxcbUseSkins.Checked := SettingsManager.Settings.UseSkins;
-    // cxCOBDefaultSkin.ItemIndex := cxCOBDefaultSkin.Properties.Items.IndexOf(SettingsManager.Settings.DefaultSkin);
-    cxcbCheckForUpdates.Checked := SettingsManager.Settings.CheckForUpdates;
-    cxCOBCAPTCHAPosition.ItemIndex := Integer(SettingsManager.Settings.CAPTCHAPosition);
-  end;
+  cxcbNativeStyle.Checked := SettingsManager.Settings.NativeStyle;
+  cxcbUseSkins.Enabled := not cxcbNativeStyle.Checked;
+  // cxcbUseSkins.Checked := SettingsManager.Settings.UseSkins;
+  // cxCOBDefaultSkin.ItemIndex := cxCOBDefaultSkin.Properties.Items.IndexOf(SettingsManager.Settings.DefaultSkin);
+  cxcbCheckForUpdates.Checked := SettingsManager.Settings.CheckForUpdates;
+  cxCOBCAPTCHAPosition.ItemIndex := Integer(SettingsManager.Settings.CAPTCHAPosition);
 
   with SettingsManager.Settings.Plugins do
   begin
-    if not ASmart then
+    with App do
     begin
-      with App do
+      for I := 0 to Count - 1 do
       begin
-        for I := 0 to Count - 1 do
+        with FAppPluginsCheckListBox.InnerCheckListBox.Items.Add do
         begin
-          with FAppPluginsCheckListBox.InnerCheckListBox.Items.Add do
-          begin
-            Checked := TPlugInCollectionItem(Items[I]).Enabled;
-            Text := TPlugInCollectionItem(Items[I]).name;
-            // ImageIndex := FAppPluginsCheckListBox.InnerCheckListBox.Images.AddIcon(TPlugInCollectionItem(Items[I]).Icon);
+          Checked := TPlugInCollectionItem(Items[I]).Enabled;
+          Text := TPlugInCollectionItem(Items[I]).name;
+          // ImageIndex := FAppPluginsCheckListBox.InnerCheckListBox.Images.AddIcon(TPlugInCollectionItem(Items[I]).Icon);
 
-            if not FileExists(TPlugInCollectionItem(Items[I]).GetPath) then
-              Enabled := False;
+          if not FileExists(TPlugInCollectionItem(Items[I]).GetPath) then
+            Enabled := False;
 
-            if Enabled and Checked then
-              TApiPlugin.AppLoad(TAppCollectionItem(Items[I]), Main)
-          end;
+          if Enabled and Checked then
+            TApiPlugin.AppLoad(TAppCollectionItem(Items[I]), Main)
         end;
       end;
-      with CAPTCHA do
+    end;
+    with CAPTCHA do
+    begin
+      for I := 0 to Count - 1 do
       begin
-        for I := 0 to Count - 1 do
+        with FCAPTCHAPluginsCheckListBox.InnerCheckListBox.Items.Add do
         begin
-          with FCAPTCHAPluginsCheckListBox.InnerCheckListBox.Items.Add do
-          begin
-            Checked := TPlugInCollectionItem(Items[I]).Enabled;
-            Text := TPlugInCollectionItem(Items[I]).name;
-            // ImageIndex := FCAPTCHAPluginsCheckListBox.InnerCheckListBox.Images.AddIcon(TPlugInCollectionItem(Items[I]).Icon);
+          Checked := TPlugInCollectionItem(Items[I]).Enabled;
+          Text := TPlugInCollectionItem(Items[I]).name;
+          // ImageIndex := FCAPTCHAPluginsCheckListBox.InnerCheckListBox.Images.AddIcon(TPlugInCollectionItem(Items[I]).Icon);
 
-            if not FileExists(TPlugInCollectionItem(Items[I]).GetPath) then
-              Enabled := False;
-          end;
+          if not FileExists(TPlugInCollectionItem(Items[I]).GetPath) then
+            Enabled := False;
         end;
       end;
     end;
@@ -2821,9 +2725,6 @@ begin
         end;
       end;
     end;
-
-    if ASmart then
-      Exit;
 
     with FileFormats do
     begin

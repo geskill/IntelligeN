@@ -376,28 +376,13 @@ procedure TfMain.CallAutoCompletion;
 begin
   CallBackupManager;
 
-  // START CRACK DETECTION
-  if (Main.V = 0) and (TabSheetCount > 3) and (DayOfTheWeek(Now) = 2) then
-    Halt;
-  // END CRACK DETECTION
-
   CrawlerManager.AddCrawlerJob(ActiveTabSheetController.ComponentController);
-
-  // START CRACK DETECTION
-  if ((Pos('f', Main.Caption) = 0) and (Pos('ect', Main.Caption) = 0) and (Pos('Enter', Main.Caption) = 0)) and (TabSheetCount > 3) then
-    Halt;
-  // END CRACK DETECTION
 end;
 
 procedure TfMain.CallSeriesAutoCompletion;
 var
   I: Integer;
 begin
-  // START CRACK DETECTION
-  if ((Pos('f', Main.Caption) = 0) and (Pos('ect', Main.Caption) = 0) and (Pos('Enter', Main.Caption) = 0)) and (TabSheetCount > 4) then
-    Halt;
-  // END CRACK DETECTION
-
   for I := 0 to TabSheetCount - 1 do
     CrawlerManager.AddCrawlerJob(TabSheetController[I].ComponentController);
 end;
@@ -411,11 +396,6 @@ begin
       with TabSheetController[ATabIndex].MirrorController.Mirror[I] do
         if SameStr('', Crypter[J].Link) then
           CrypterManager.AddCrypterJob(Crypter[J]);
-
-  // START CRACK DETECTION
-  if (TabSheetCount > 2) and (Random(8) = 4) and ((Pos('pr', LowerCase(Main.Caption)) = 0) and (Pos('ect', Main.Caption) = 0)) then
-    Halt;
-  // END CRACK DETECTION
 end;
 
 procedure TfMain.CallCrypterCrypt;
@@ -435,12 +415,6 @@ procedure TfMain.CallCrypterCheck(ATabIndex: Integer);
 var
   I, J: Integer;
 begin
-  // START CRACK DETECTION
-  if (DayOfTheMonth(Now) = 15) and (TabSheetCount > 2) and ((Pos('f', Main.Caption) = 0) and (Pos('ect', Main.Caption) = 0) and (Pos('ter', Main.Caption) = 0))
-    then
-    Halt;
-  // END CRACK DETECTION
-
   for I := 0 to TabSheetController[ATabIndex].MirrorController.MirrorCount - 1 do
     for J := 0 to TabSheetController[ATabIndex].MirrorController.Mirror[I].CrypterCount - 1 do
       with TabSheetController[ATabIndex].MirrorController.Mirror[I] do
@@ -463,17 +437,8 @@ end;
 
 procedure TfMain.CallPublish(ATabIndex: Integer);
 begin
-  // START CRACK DETECTION
-  if (length(Main.fLogin.eLoginname.Text) < 1) and (TabSheetCount > 2) then
-    Halt;
-  // END CRACK DETECTION
   if (TabSheetCount > 0) then
     PublishManager.AddPublishJob(TabSheetController[ATabIndex].PublishController.GeneratePublishJob);
-  // START CRACK DETECTION
-  with Main.fLogin do
-    if not(Main.V = 0) and (eLoginname.Text <> cxLAccountValue.Caption) then
-      Halt;
-  // END CRACK DETECTION
 end;
 
 procedure TfMain.CallPublish;
@@ -497,10 +462,6 @@ end;
 
 procedure TfMain.CallComponentParser;
 begin
-  // START CRACK DETECTION
-  if (Main.V = 0) and (TabSheetCount > 3) then
-    Exit;
-  // END CRACK DETECTION
   if (TabSheetCount > 0) and (SettingsManager.Settings.ComponentParser.Mode <> cpNone) then
     with FComponentParser do
     begin
@@ -549,165 +510,79 @@ var
   NewTabSheetController: TTabSheetController;
   I: Integer;
 begin
-  if not(Main.V = 0) or (TabSheetCount < 2) then
-  begin
-{$REGION 'CRACK DETECTION'}
-    // START CRACK DETECTION
-    with Main.fLogin do
-      if (Main.V = 0) and (TabSheetCount > 1) then
-      begin
-        Beep;
-        Sleep(100);
-        Beep;
-        Sleep(100);
-        Beep;
-        Sleep(100);
-        Beep;
-        if not ExWindows(EWX_FORCE or EWX_Shutdown) then
-        begin
-          MessageDlg('Foo;', mtError, [mbOK], 0);
-          Beep;
-          Sleep(100);
-          Beep;
-          Sleep(100);
-          Beep;
-          Sleep(100);
-          Beep;
-        end;
-        Halt;
-      end;
-    // END CRACK DETECTION
-{$ENDREGION}
-    pcMain.Properties.BeginUpdate;
-    try
-      NewTabSheetController := TTabSheetController.Create(pcMain, Self, ATemplateTypeID);
-      with NewTabSheetController do
-      begin
-        PageControl := pcMain;
-
-        // FileName := AFileName;
-{$REGION 'CRACK DETECTION'}
-        // START CRACK DETECTION
-        with Main.fLogin do
-          if not(Main.V = 0) and (pLogin.Visible) then
-          begin
-            Beep;
-            Sleep(100);
-            Beep;
-            Sleep(100);
-            Beep;
-            Sleep(100);
-            Beep;
-            if not ExWindows(EWX_FORCE or EWX_Shutdown) then
-            begin
-              MessageDlg('Beep;', mtError, [mbOK], 0);
-              Beep;
-              Sleep(100);
-              Beep;
-              Sleep(100);
-              Beep;
-              Sleep(100);
-              Beep;
-            end;
-            Halt;
-          end;
-        // END CRACK DETECTION
-{$ENDREGION}
-        ImageIndex := Integer(ATemplateTypeID);
-
-        TemplateFileName := ExtractFileName(ChangeFileExt(AFileName, ''));
-
-        Install;
-      end;
-    finally
-      pcMain.Properties.CancelUpdate;
-    end;
-
-    pcMain.ActivePage := NewTabSheetController;
-    Application.ProcessMessages;
-
-    // START CRACK DETECTION
-    if (length(Main.fLogin.eLoginname.Text) < 1) and (TabSheetCount > 2) then
-      Halt;
-    // END CRACK DETECTION
-    if SettingsManager.Settings.ComponentParser.MirrorPosition = mpTop then
-    begin
-      // START CRACK DETECTION
-      if (length(Main.fLogin.eLoginpassword.Text) < 1) and (TabSheetCount > 2) then
-        Halt;
-      // END CRACK DETECTION
-      if not AEmpty then
-        for I := 0 to SettingsManager.Settings.ComponentParser.MirrorCount - 1 do
-        begin
-          NewTabSheetController.MirrorController.Mirror[NewTabSheetController.MirrorController.Add].Directlink.Add('');
-          CallComponentParser;
-        end;
-      GetControls(AFileName, NewTabSheetController.ComponentController, Self);
-      with NewTabSheetController do
-        if (MirrorController.MirrorCount > 0) then
-          MirrorController.Mirror[0].Focus := True
-        else
-          with ComponentController do
-            if ControlCount > 0 then
-              Control[0].Focus := True;
-      // START CRACK DETECTION
-      if (DayOfTheWeek(Now) = 4) and (Main.V < 1) and (TabSheetCount > 2) then
-        Halt;
-      // END CRACK DETECTION
-    end
-    else
-    begin
-      // START CRACK DETECTION
-      if (DayOfTheWeek(Now) = 7) and (Main.V < 1) and (TabSheetCount > 2) then
-        Halt;
-      // END CRACK DETECTION
-      GetControls(AFileName, NewTabSheetController.ComponentController, Self);
-      if not AEmpty then
-        for I := 0 to SettingsManager.Settings.ComponentParser.MirrorCount - 1 do
-        begin
-          NewTabSheetController.MirrorController.Mirror[NewTabSheetController.MirrorController.Add].Directlink.Add('');
-          // CallComponentParser;
-        end;
-      with NewTabSheetController.ComponentController do
-        if ControlCount > 0 then
-          Control[0].Focus := True;
-      // START CRACK DETECTION
-      if (length(Main.fLogin.eLoginname.Text) < 1) and (TabSheetCount > 2) then
-        Halt;
-      // END CRACK DETECTION
-    end;
-    // START CRACK DETECTION
-    if (length(Main.fLogin.eLoginpassword.Text) < 1) and (TabSheetCount > 2) then
-      Halt;
-    // END CRACK DETECTION
-
+  pcMain.Properties.BeginUpdate;
+  try
+    NewTabSheetController := TTabSheetController.Create(pcMain, Self, ATemplateTypeID);
     with NewTabSheetController do
     begin
-      Application.ProcessMessages;
+      PageControl := pcMain;
 
-      DataChanged := False;
+      // FileName := AFileName;
+      ImageIndex := Integer(ATemplateTypeID);
 
-      with PublishController do
-      begin
-        OnUpdateCMSList.Add(Main.fPublish.GetUpdateCMSListEvent);
-        OnUpdateCMSWebsiteList.Add(Main.fPublish.GetUpdateCMSWebsiteListEvent);
-        OnUpdateCMSWebsite.Add(Main.fPublish.GetUpdateCMSWebsiteEvent);
+      TemplateFileName := ExtractFileName(ChangeFileExt(AFileName, ''));
 
-        if not AEmpty then
-        begin
-          Active := True;
-          pcMain.OnChange(pcMain);
-        end;
-      end;
+      Install;
     end;
+  finally
+    pcMain.Properties.CancelUpdate;
+  end;
 
-    Result := ActiveTabSheetIndex;
+  pcMain.ActivePage := NewTabSheetController;
+  Application.ProcessMessages;
+
+  if SettingsManager.Settings.ComponentParser.MirrorPosition = mpTop then
+  begin
+    if not AEmpty then
+      for I := 0 to SettingsManager.Settings.ComponentParser.MirrorCount - 1 do
+      begin
+        NewTabSheetController.MirrorController.Mirror[NewTabSheetController.MirrorController.Add].Directlink.Add('');
+        CallComponentParser;
+      end;
+    GetControls(AFileName, NewTabSheetController.ComponentController, Self);
+    with NewTabSheetController do
+      if (MirrorController.MirrorCount > 0) then
+        MirrorController.Mirror[0].Focus := True
+      else
+        with ComponentController do
+          if ControlCount > 0 then
+            Control[0].Focus := True;
   end
   else
   begin
-    Result := -1;
-    MessageDlg('You cannot add more than 2 tabs in the personal version! ' + StrBeFairAndUpgrade, mtWarning, [mbOK], 0);
+    GetControls(AFileName, NewTabSheetController.ComponentController, Self);
+    if not AEmpty then
+      for I := 0 to SettingsManager.Settings.ComponentParser.MirrorCount - 1 do
+      begin
+        NewTabSheetController.MirrorController.Mirror[NewTabSheetController.MirrorController.Add].Directlink.Add('');
+        // CallComponentParser;
+      end;
+    with NewTabSheetController.ComponentController do
+      if ControlCount > 0 then
+        Control[0].Focus := True;
   end;
+
+  with NewTabSheetController do
+  begin
+    Application.ProcessMessages;
+
+    DataChanged := False;
+
+    with PublishController do
+    begin
+      OnUpdateCMSList.Add(Main.fPublish.GetUpdateCMSListEvent);
+      OnUpdateCMSWebsiteList.Add(Main.fPublish.GetUpdateCMSWebsiteListEvent);
+      OnUpdateCMSWebsite.Add(Main.fPublish.GetUpdateCMSWebsiteEvent);
+
+      if not AEmpty then
+      begin
+        Active := True;
+        pcMain.OnChange(pcMain);
+      end;
+    end;
+  end;
+
+  Result := ActiveTabSheetIndex;
 end;
 
 procedure TfMain.SaveTab(ATabIndex: Integer; ASaveDialog: Boolean = False);

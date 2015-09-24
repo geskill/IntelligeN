@@ -10,7 +10,7 @@ uses
   cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxTextEdit,
   cxGridCustomTableView, cxGridCardView, cxGridCustomView, cxClasses, cxGridLevel, cxGrid, cxLabel, cxButtons,
   // Api
-  uApiConst, uApiHTTP, uApiMain, uApiSettings, cxGridCustomLayoutView;
+  uApiConst, uApiHTTP, uApiMain, uApiSettings, cxGridCustomLayoutView, cxNavigator;
 
 type
   TLicenceInfo = class(TForm)
@@ -151,8 +151,8 @@ begin
                               cxGridCardView1.DataController.Values[I, cxGridCardView1Row2.index] := VarToStr(ChildNodes.Nodes['date'].NodeValue);
                               cxGridCardView1.DataController.Values[I, cxGridCardView1Row3.index] := VarToStr(ChildNodes.Nodes['days'].NodeValue)
                                 + ' (+' + IntToStr(StrToIntDef(VarToStr(ChildNodes.Nodes['days'].NodeValue), 30) div 30) + ')';
-                              cxGridCardView1.DataController.Values[I, cxGridCardView1Row4.index] := ProgrammVersion[Min(length(ProgrammVersion) - 1,
-                                StrToIntDef(VarToStr(ChildNodes.Nodes['type'].NodeValue), 0))];
+                              //cxGridCardView1.DataController.Values[I, cxGridCardView1Row4.index] := ProgrammVersion[Min(length(ProgrammVersion) - 1,
+                              //  StrToIntDef(VarToStr(ChildNodes.Nodes['type'].NodeValue), 0))];
                             end;
                         finally
                           EndUpdate;

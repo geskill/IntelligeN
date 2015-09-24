@@ -153,13 +153,11 @@ begin
   Application.CreateForm(TUpdate, Update);
   AnalyzeStartupParams;
     if SettingsManager.Settings.Login.AutoLogin then
-      Main.fLogin.cxbLoginClick(nil)
-    else Main.fLogin.Check;
+      Main.fLogin.cxbLoginClick(nil);
     if Assigned(SettingsManager.Settings.Layout.ActiveLayout) then
       with Main do
       begin
         LoadLayout(SettingsManager.Settings.Layout.ActiveLayout);
-        dxDPDatabase.Visible := (V > 1);
         Width := Width + 1;
         Width := Width - 1;
       end;

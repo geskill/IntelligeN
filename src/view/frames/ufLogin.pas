@@ -68,7 +68,6 @@ type
     u = 'acc/';
   public
     FmiChangePassword, FmiRenewLicense, FmiLicenseHistory: TdxBarButton;
-    procedure Check; // Aktiviert/Deaktiviert Funktionen entsprechend der Lizenz
     constructor Create(AOwner: TComponent); override;
   end;
 
@@ -130,8 +129,6 @@ begin
     Sort;
 
     cxLAccountValue.Caption := eLoginname.Text;
-
-    Check;
   end;
 end;
 
@@ -139,12 +136,8 @@ procedure TfLogin.cxbLogoutClick(Sender: TObject);
 begin
   FbpmUserCP.Free;
 
-  Main.V := 0;
-
   pLogout.Visible := False;
   pLogin.Visible := True;
-
-  Check;
 end;
 
 procedure TfLogin.cxbUserCPMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -419,7 +412,7 @@ begin
               Attributes['m'] := copy(_b, 1, 8);
             with AddChild('status') do
             begin
-              NodeValue := Main.V;
+
               Attributes['s'] := copy(_b, 9, 8);
             end;
             with AddChild('code') do
@@ -570,11 +563,6 @@ begin
   _k := _i;
   _i := _k;
 
-  // START CRACK DETECTION
-  if Now < EncodeDate(2012, 1, 31) then
-    Halt;
-  // END CRACK DETECTION
-
   with TApiHTTP.CreateAccounting do
     try
       Params := TIdMultiPartFormDataStream.Create;
@@ -663,7 +651,6 @@ begin
                       end
                       else
                       begin
-                        Main.V := 0;
                         Exit;
                       end;
                     end;
@@ -671,30 +658,15 @@ begin
                 end;
               end;
             end;
-            // START CRACK DETECTION
-            if (Pos('Win32', Response.Server) > 0) then
-              Exit;
-            // END CRACK DETECTION
-            if ReplyData.DataString = '' then
-              Exit;
-            // START CRACK DETECTION
-            if not FileExists(ExtractFilePath(ParamStr(0)) + '.licence') and _did_c then
-              Halt;
-            // END CRACK DETECTION
             try
               LoadFromXML(ReplyData.DataString);
               Active := True;
             except
               on E: Exception do
               begin
-                Main.V := 0;
                 Exit;
               end;
             end;
-            // START CRACK DETECTION
-            if (Pos('Win32', Response.Server) > 0) and (Random(25) = 14) then
-              Halt;
-            // END CRACK DETECTION
           end;
           with XMLDoc.DocumentElement do
             if HasChildNodes then
@@ -702,75 +674,23 @@ begin
               with ChildNodes.Nodes['datetime'] do
               begin
                 _e := THash_MD5.CalcBinary(THash_MD5.CalcBinary(THash_MD5.CalcBinary(NodeValue, TFormat_HEXL), TFormat_HEXL), TFormat_HEXL);
-                // START CRACK DETECTION
-                if not SameText(Attributes['d'], copy(_e, 25, 8)) and (DayOfTheWeek(Now) = 5) then
-                  Exit;
-                // END CRACK DETECTION
+
               end;
-              // START CRACK DETECTION
-              if FileExists(ExtractFilePath(ParamStr(0)) + '.licence') and not _did_c then
-                if SameText(_e, E) then
-                  Exit;
-              // END CRACK DETECTION
+
               with ChildNodes.Nodes['msg'] do
               begin
                 _errormsg := VarToStr(NodeValue);
-                // START CRACK DETECTION
-                if not SameText(Attributes['m'], copy(_e, 1, 8)) and (DayOfTheWeek(Now) = 2) then
-                  Exit;
-                // END CRACK DETECTION
+
               end;
               with ChildNodes.Nodes['status'] do
               begin
-                // START CRACK DETECTION
-                if (Random(4) = 3) then
-                  _i := NodeValue;
 
-                _j := NodeValue;
-                // END CRACK DETECTION
-                // START CRACK DETECTION
-                if not SameText(Attributes['s'], copy(_e, 9, 8)) and (Random(15) = 3) then
-                  Exit;
-                // END CRACK DETECTION
-                Main.V := NodeValue;
-                // START CRACK DETECTION
-                _k := NodeValue;
-                // END CRACK DETECTION
+
               end;
               with ChildNodes.Nodes['code'] do
               begin
-                case NodeValue of
-                  0:
-                    if (Main.V = 0) then
-                      MessageDlg('Your username or password is invalid', mtError, [mbOK], 0);
-                  1:
-                    if (Main.V = 0) then
-                      MessageDlg('Your account awaits activation (check your mails)', mtError, [mbOK], 0);
-                  2:
-                    if (Main.V = 0) then
-                      MessageDlg('Your account has been expired', mtError, [mbOK], 0);
-                  255:
-                    begin
-                      if (Main.V = 0) then
-                        MessageDlg(_errormsg, mtError, [mbOK], 0)
-                      else
-                        MessageDlg(_errormsg, mtWarning, [mbOK], 0);
-                    end;
-                end;
-                // START CRACK DETECTION
-                if not SameText(Attributes['c'], copy(_e, 17, 8)) then
-                  Halt;
-                // END CRACK DETECTION
-                // START CRACK DETECTION
-                if FileExists(ExtractFilePath(ParamStr(0)) + '.licence') and not _did_c then
-                  if SameText(_e, E) and (DayOfTheWeek(Now) = 6) then
-                    Halt;
-                // END CRACK DETECTION
+
               end;
-              // START CRACK DETECTION
-              if not(_j = Main.V) then
-                Halt;
-              // END CRACK DETECTION
             end;
         finally
           ReplyData.Free;
@@ -778,30 +698,20 @@ begin
       finally
         Params.Free;
       end;
-      // START CRACK DETECTION
-      if (Pos('Win32', Response.Server) > 0) and (DayOfTheWeek(Now) = 1) then
-        Halt;
-      // END CRACK DETECTION
     finally
       Free;
     end;
 
-  if (Main.V = 0) then
+  if (false) then
 
   else
   begin
-    // START CRACK DETECTION
-    if (Main.V = 0) then
-      Halt;
-    // END CRACK DETECTION
+
     if not _did_c then
       B(_e);
 
     pLogin.Visible := False;
-    // START CRACK DETECTION
-    if not(_k = Main.V) then
-      Halt;
-    // END CRACK DETECTION
+
     pLogout.Visible := True;
 
     FbpmUserCP := TdxBarPopupMenu.Create(Main);
@@ -814,10 +724,7 @@ begin
       ImageIndex := 19;
       OnClick := FmiChangePasswordClick;
     end;
-    // START CRACK DETECTION
-    if not(_i = -1) and not(_i = Main.V) then
-      Halt;
-    // END CRACK DETECTION
+
     with FbpmUserCP.ItemLinks.Add do
       Item := FmiChangePassword;
     FmiRenewLicense := TdxBarButton.Create(FbpmUserCP);
@@ -836,163 +743,17 @@ begin
       ImageIndex := 21;
       OnClick := FmiLicenseHistoryClick;
     end;
-    // START CRACK DETECTION
-    if Now < EncodeDate(2011, 11, 24) then
-      Halt;
-    // END CRACK DETECTION
+
     with FbpmUserCP.ItemLinks.Add do
       Item := FmiLicenseHistory;
-    // START CRACK DETECTION
-    if (Main.V = 0) and (Random(20) = 16) then
-      Halt;
-    // END CRACK DETECTION
+
   end;
-end;
-
-procedure TfLogin.Check;
-var
-  I, J: Integer;
-  X: Boolean;
-begin
-  with Main do
-  begin
-    X := (Main.V < 1);
-    Caption := ProgrammName + ' ' + ProgrammVersion[Min(length(ProgrammVersion) - 1, V)];
-
-    nSeries.Enabled := (V > 0);
-
-    aWindowDatabase.Visible := (V > 1);
-    dxDPDatabase.Visible := (V > 1);
-    Settings.cxTSDatabase.TabVisible := (V > 1);
-
-    if (V > 0) then
-    begin
-      nSeries.Visible := ivAlways;
-      nSeriesAutoCompletion.Visible := ivAlways;
-      nSeriesCrypterCrypt.Visible := ivAlways;
-      nSeriesCrypterCheck.Visible := ivAlways;
-    end
-    else
-    begin
-      nSeries.Visible := ivNever;
-      nSeriesAutoCompletion.Visible := ivNever;
-      nSeriesCrypterCrypt.Visible := ivNever;
-      nSeriesCrypterCheck.Visible := ivNever;
-    end;
-
-    with SettingsManager.Settings.Plugins do
-    begin
-      with CMS do
-      begin
-        if (Main.V < 1) then
-        begin
-          J := 0;
-          for I := 0 to Count - 1 do
-          begin
-            if (J >= 2) and TPlugInCollectionItem(Items[I]).Enabled then
-            begin
-              TPlugInCollectionItem(Items[I]).Enabled := False;
-              TPlugInCollectionItem(Items[I]).PreEnabled := True;
-            end;
-            if TPlugInCollectionItem(Items[I]).Enabled then
-              Inc(J);
-          end;
-        end
-        else
-        begin
-          // START CRACK DETECTION
-          if (Main.V < 1) and (DayOfTheWeek(Now) = 7) then
-            Exit;
-          // END CRACK DETECTION
-          for I := 0 to Count - 1 do
-            with TPlugInCollectionItem(Items[I]) do
-              Enabled := Enabled or PreEnabled;
-          // START CRACK DETECTION
-          if (Main.V = 0) and (DayOfTheWeek(Now) = 2) then
-            Halt;
-          // END CRACK DETECTION
-        end;
-        // Main.fPublish.GenerateColumns;
-      end;
-      with Crawler do
-      begin
-        if (Main.V < 1) then
-        begin
-          J := 0;
-          for I := 0 to Count - 1 do
-          begin
-            if (J >= 3) and TPlugInCollectionItem(Items[I]).Enabled then
-            begin
-              TPlugInCollectionItem(Items[I]).Enabled := False;
-              TPlugInCollectionItem(Items[I]).PreEnabled := True;
-            end;
-            if TPlugInCollectionItem(Items[I]).Enabled then
-              Inc(J);
-          end;
-        end
-        else
-        begin
-          for I := 0 to Count - 1 do
-            with TPlugInCollectionItem(Items[I]) do
-              Enabled := Enabled or PreEnabled;
-          // START CRACK DETECTION
-          if (Main.V < 1) and (DayOfTheWeek(Now) = 5) then
-            Halt;
-          // END CRACK DETECTION
-        end;
-      end;
-      with Crypter do
-      begin
-        if (Main.V < 1) then
-        begin
-          J := 0;
-          for I := 0 to Count - 1 do
-          begin
-            if (J >= 1) and TPlugInCollectionItem(Items[I]).Enabled then
-            begin
-              TPlugInCollectionItem(Items[I]).Enabled := False;
-              TPlugInCollectionItem(Items[I]).PreEnabled := True;
-            end;
-            if TPlugInCollectionItem(Items[I]).Enabled then
-              Inc(J);
-          end;
-        end
-        else
-        begin
-          // START CRACK DETECTION
-          if (Main.V < 1) and (DayOfTheWeek(Now) = 3) then
-            Halt;
-          // END CRACK DETECTION
-          for I := 0 to Count - 1 do
-            with TPlugInCollectionItem(Items[I]) do
-              Enabled := Enabled or PreEnabled;
-        end;
-      end;
-    end;
-    Settings.SetComponentStatusFromSettings(True);
-  end;
-  // START CRACK DETECTION
-  if X and (Main.V >= 1) then
-    Halt;
-  // END CRACK DETECTION
 end;
 
 constructor TfLogin.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  // START CRACK DETECTION
-  if not(Main.V = 0) then
-  begin
-    Beep;
-    Sleep(100);
-    Beep;
-    Sleep(100);
-    Beep;
-    Sleep(100);
-    Beep;
-    Sleep(1000);
-  end;
-  // END CRACK DETECTION
+
   pLogin.DoubleBuffered := True;
 
   with SettingsManager.Settings.Login do
@@ -1006,15 +767,7 @@ begin
     cbLoginAutoLogin.Checked := AutoLogin;
   end;
 
-  // START CRACK DETECTION
-  if not(Main.V = 0) then
-    Halt;
-  // END CRACK DETECTION
   A;
-  // START CRACK DETECTION
-  if (Main.V > 0) and (DayOfTheWeek(Now) = 6) then
-    Halt;
-  // END CRACK DETECTION
 end;
 
 end.

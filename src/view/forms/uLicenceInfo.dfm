@@ -28,6 +28,7 @@ object LicenceInfo: TLicenceInfo
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 0
     object cxGridCardView1: TcxGridCardView
+      Navigator.Buttons.CustomButtons = <>
       DataController.Summary.DefaultGroupSummaryItems = <>
       DataController.Summary.FooterSummaryItems = <>
       DataController.Summary.SummaryGroups = <>

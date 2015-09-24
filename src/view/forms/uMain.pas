@@ -291,7 +291,6 @@ type
     procedure dxBpmComponentparserPopup(Sender: TObject);
     procedure dxBCComponentparserChange(Sender: TObject);
   private
-    FV: Integer;
     FOnStartup: INotifyEvent;
     FMainMenu: IMainMenu;
     FCodeDefinition: TCodeDefinition;
@@ -311,7 +310,6 @@ type
     function GetCustomisedHoster(const AHoster: WideString; AShortName: WordBool = False): WideString;
     function GetControlValues(const ATemplateTypeID: TTemplateTypeID; const AComponentID: TComponentID): WideString;
   public
-    property V: Integer read FV write FV default 0;
     procedure LoadLayout(ALayoutCollectionItem: TLayoutCollectionItem);
     procedure SaveLayout(ALayoutName: string);
     procedure SetEditMenu(AMenuItems: TdxBarItemLinks);
@@ -386,7 +384,7 @@ begin
     Self.WindowState := WindowState;
   end;
 
-  Caption := ProgrammName + ' ' + ProgrammVersion[V];
+  Caption := ProgrammName;
 
   FMainMenu := TIMainMenu.Create(dxBarManagerBarMainMenu);
 

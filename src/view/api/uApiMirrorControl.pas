@@ -331,7 +331,7 @@ resourcestring
 
 procedure FilterContainerFile(FileName: TFilename; cxRichEdit: TMycxRichEdit);
 begin
-  if not(Main.V = 0) and ((ExtractFileExt(FileName) = '.ccf') or (ExtractFileExt(FileName) = '.ncf') or (ExtractFileExt(FileName) = '.rsdf') or (ExtractFileExt(FileName) = '.dlc')) then
+  if ((ExtractFileExt(FileName) = '.ccf') or (ExtractFileExt(FileName) = '.ncf') or (ExtractFileExt(FileName) = '.rsdf') or (ExtractFileExt(FileName) = '.dlc')) then
     cxRichEdit.Lines.Text := TDLMF.ContainerFileToPlainEx(FileName, '')
   else
     with TStringList.Create do
@@ -390,10 +390,7 @@ const
 begin
   with TOpenDialog.Create(nil) do
     try
-      Filter := StrTextFiles + ' (*.txt)|*.txt';
-      if not(Main.V = 0) then
-        Filter := Filter + '|' + StrContainerFiles + ' (' + CONTAINER_FILES + ')|' + CONTAINER_FILES;
-      Filter := Filter + '|' + StrAllFiles + ' (*.*)|*.*';
+      Filter := StrTextFiles + ' (*.txt)|*.txt' + '|' + StrContainerFiles + ' (' + CONTAINER_FILES + ')|' + CONTAINER_FILES + '|' + StrAllFiles + ' (*.*)|*.*';
       if Execute then
         FilterContainerFile(FileName, FMycxRichEdit);
     finally
@@ -519,8 +516,7 @@ begin
       ControlClassName := c.ClassName;
     // OutputDebugString(PChar(ControlClassName + ' X: ' + IntToStr(p.X) + ' (' + IntToStr(Width) + ') Y: ' + IntToStr(p.Y) + ' (' + IntToStr(Height) + ')'));
     // minor bug: NativeStyle = True moving mouse fast 45° out buttom left
-    if not Focused and not(SameStr('TcxControlScrollBar', ControlClassName) or (SameStr('TcxRichInnerEdit', ControlClassName) and not((p.Y >= Height) or (p.Y <= 0) or (p.X >= Width) or (p.X <= 0))))
-      then
+    if not Focused and not(SameStr('TcxControlScrollBar', ControlClassName) or (SameStr('TcxRichInnerEdit', ControlClassName) and not((p.Y >= Height) or (p.Y <= 0) or (p.X >= Width) or (p.X <= 0)))) then
     begin
       FTransparentPanel.Redraw;
       RefreshInfo;
@@ -2078,7 +2074,7 @@ end;
 procedure TMirrorControl.FmiRemoveMirrorClick(Sender: TObject);
 begin
   MirrorController.Remove(Self.index);
-  //FcxTabControl.Free; // ???
+  // FcxTabControl.Free; // ???
   Main.fMain.CallComponentparser;
 end;
 
@@ -2321,12 +2317,6 @@ begin
       Result := I;
       Exit;
     end;
-
-  if (Main.V = 0) and (CrypterCount = 1) then
-  begin
-    MessageDlg('You cannot activate more than 1 cryper plug-in in the personal version! ' + StrBeFairAndUpgrade, mtWarning, [mbOK], 0);
-    Exit;
-  end;
 
   FcxTabControl.Tabs.Add(AName);
 

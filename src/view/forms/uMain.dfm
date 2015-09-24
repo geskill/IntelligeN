@@ -332,7 +332,6 @@ object Main: TMain
       AllowFloating = True
       AutoHide = False
       CustomCaptionButtons.Buttons = <>
-      ExplicitHeight = 650
       DockingType = 1
       OriginalWidth = 200
       OriginalHeight = 140
@@ -360,7 +359,7 @@ object Main: TMain
           Align = alClient
           TabOrder = 0
           ExplicitWidth = 196
-          ExplicitHeight = 254
+          ExplicitHeight = 227
           inherited pLogin: TPanel
             Width = 180
             ExplicitWidth = 180
@@ -371,12 +370,6 @@ object Main: TMain
             inherited eLoginname: TcxTextEdit
               ExplicitWidth = 180
               Width = 180
-            end
-            inherited cbLoginSaveData: TcxCheckBox
-              ExplicitWidth = 180
-            end
-            inherited cbLoginAutoLogin: TcxCheckBox
-              ExplicitWidth = 173
             end
             inherited eLoginpassword: TcxTextEdit
               ExplicitWidth = 180
@@ -1500,9 +1493,8 @@ object Main: TMain
     object nSeries: TdxBarSubItem
       Caption = 'Series'
       Category = 5
-      Enabled = False
       Hint = 'Series'
-      Visible = ivNever
+      Visible = ivAlways
       ItemLinks = <
         item
           Visible = True
