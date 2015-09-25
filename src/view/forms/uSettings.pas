@@ -102,10 +102,12 @@ type
     cxGCMSLevel1: TcxGridLevel;
     cxGCMS: TcxGrid;
     cxGCMSTableView1: TcxGridTableView;
+    cxGCMSTableView1Column1: TcxGridColumn;
     cxGCMSTableView1Column2: TcxGridColumn;
     cxGCMSTableView1Column3: TcxGridColumn;
     cxGCMSTableView1Column4: TcxGridColumn;
-    cxGCMSTableView1Column1: TcxGridColumn;
+    cxGCMSTableView1Column5: TcxGridColumn;
+    cxGCMSTableView1Column6: TcxGridColumn;
     cxGCrawlerLevel1: TcxGridLevel;
     cxGCrawler: TcxGrid;
     cxGCrawlerTableView1: TcxGridTableView;
@@ -131,13 +133,11 @@ type
     lControlsItems: TLabel;
     cxMControlsItemAlsoKnownAs: TcxMemo;
     lControlsItemsSort: TLabel;
-    cxGCMSTableView1Column5: TcxGridColumn;
     cxCOBDefaultSkin: TcxComboBox;
     cxLBControlsItems: TcxListBox;
     lControlsItemsAdd: TLabel;
     lControlsItemsEdit: TLabel;
     lControlsItemsRemove: TLabel;
-    cxGCMSTableView1Column6: TcxGridColumn;
     cxTSFileFormats: TcxTabSheet;
     cxPCCrypterAdvertisment: TcxPageControl;
     cxTSCrypterAdvertismentLayer: TcxTabSheet;
@@ -556,28 +556,28 @@ end;
 
 procedure TSettings.cxGCMSTableView1Column5PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
 var
-  _MessageFileName: string;
-begin
-  with cxGCMSTableView1.DataController do
-    _MessageFileName := VarToStr(Values[FocusedRecordIndex, cxGCMSTableView1Column5.index]);
-
-  PromptForFileName(_MessageFileName, '', '', '', ExcludeTrailingPathDelimiter(GetTemplatesCMSFolder));
-
-  with cxGCMSTableView1.DataController do
-    Values[FocusedRecordIndex, cxGCMSTableView1Column5.index] := ExtractRelativePath(GetTemplatesCMSFolder, _MessageFileName);
-end;
-
-procedure TSettings.cxGCMSTableView1Column6PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
-var
   _SubjectFileName: string;
 begin
   with cxGCMSTableView1.DataController do
-    _SubjectFileName := VarToStr(Values[FocusedRecordIndex, cxGCMSTableView1Column6.index]);
+    _SubjectFileName := VarToStr(Values[FocusedRecordIndex, cxGCMSTableView1Column5.index]);
 
   PromptForFileName(_SubjectFileName, '', '', '', ExcludeTrailingPathDelimiter(GetTemplatesCMSFolder));
 
   with cxGCMSTableView1.DataController do
-    Values[FocusedRecordIndex, cxGCMSTableView1Column6.index] := ExtractRelativePath(GetTemplatesCMSFolder, _SubjectFileName);
+    Values[FocusedRecordIndex, cxGCMSTableView1Column5.index] := ExtractRelativePath(GetTemplatesCMSFolder, _SubjectFileName);
+end;
+
+procedure TSettings.cxGCMSTableView1Column6PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
+var
+  _MessageFileName: string;
+begin
+  with cxGCMSTableView1.DataController do
+    _MessageFileName := VarToStr(Values[FocusedRecordIndex, cxGCMSTableView1Column6.index]);
+
+  PromptForFileName(_MessageFileName, '', '', '', ExcludeTrailingPathDelimiter(GetTemplatesCMSFolder));
+
+  with cxGCMSTableView1.DataController do
+    Values[FocusedRecordIndex, cxGCMSTableView1Column6.index] := ExtractRelativePath(GetTemplatesCMSFolder, _MessageFileName);
 end;
 
 procedure TSettings.cxGCMSTableView1Column7PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
@@ -627,28 +627,11 @@ begin
       else
         CMSWebsitesCollectionItem.AccountPassword := Values[FocusedRecordIndex, cxGCMSTableView1Column4.index];
 
-      FileName := CMSWebsitesCollectionItem.GetMessageFileName;
-      if Values[FocusedRecordIndex, cxGCMSTableView1Column5.index] = Null then
-        CMSWebsitesCollectionItem.MessageFileName := ''
-      else
-        CMSWebsitesCollectionItem.MessageFileName := Values[FocusedRecordIndex, cxGCMSTableView1Column5.index];
-      if not SameText(FileName, CMSWebsitesCollectionItem.GetMessageFileName) then
-      begin
-        with CMSCollectionItem do
-          if Assigned(OnMessagesChange) then
-          begin
-            if FileExists(FileName) then
-              OnMessagesChange.Invoke(cctDelete, CMSWebsitesCollectionItem.Index, -1);
-            if FileExists(CMSWebsitesCollectionItem.GetMessageFileName) then
-              OnMessagesChange.Invoke(cctAdd, CMSWebsitesCollectionItem.Index, -1);
-          end;
-      end;
-
       FileName := CMSWebsitesCollectionItem.GetSubjectFileName;
-      if Values[FocusedRecordIndex, cxGCMSTableView1Column6.index] = Null then
+      if Values[FocusedRecordIndex, cxGCMSTableView1Column5.index] = Null then
         CMSWebsitesCollectionItem.SubjectFileName := ''
       else
-        CMSWebsitesCollectionItem.SubjectFileName := Values[FocusedRecordIndex, cxGCMSTableView1Column6.index];
+        CMSWebsitesCollectionItem.SubjectFileName := Values[FocusedRecordIndex, cxGCMSTableView1Column5.index];
       if not SameText(FileName, CMSWebsitesCollectionItem.GetSubjectFileName) then
       begin
         with CMSCollectionItem do
@@ -658,6 +641,25 @@ begin
               OnSubjectsChange.Invoke(cctDelete, CMSWebsitesCollectionItem.Index, -1);
             if FileExists(CMSWebsitesCollectionItem.GetSubjectFileName) then
               OnSubjectsChange.Invoke(cctAdd, CMSWebsitesCollectionItem.Index, -1);
+            OnSubjectsChange.Invoke(cctChange, CMSWebsitesCollectionItem.Index, -1);
+          end;
+      end;
+
+      FileName := CMSWebsitesCollectionItem.GetMessageFileName;
+      if Values[FocusedRecordIndex, cxGCMSTableView1Column6.index] = Null then
+        CMSWebsitesCollectionItem.MessageFileName := ''
+      else
+        CMSWebsitesCollectionItem.MessageFileName := Values[FocusedRecordIndex, cxGCMSTableView1Column6.index];
+      if not SameText(FileName, CMSWebsitesCollectionItem.GetMessageFileName) then
+      begin
+        with CMSCollectionItem do
+          if Assigned(OnMessagesChange) then
+          begin
+            if FileExists(FileName) then
+              OnMessagesChange.Invoke(cctDelete, CMSWebsitesCollectionItem.Index, -1);
+            if FileExists(CMSWebsitesCollectionItem.GetMessageFileName) then
+              OnMessagesChange.Invoke(cctAdd, CMSWebsitesCollectionItem.Index, -1);
+            OnMessagesChange.Invoke(cctChange, CMSWebsitesCollectionItem.Index, -1);
           end;
       end;
 
@@ -2019,6 +2021,10 @@ begin
     begin
       with cxGCMSTableView1.DataController do
       begin
+        // Required to disable OnDataChanged in order to update the table without
+        // making the OnDataChanged call. Otherwise Invoke calls will be triggered.
+        OnDataChanged := nil;
+
         BeginUpdate;
         try
           RecordCount := Websites.Count;
@@ -2029,12 +2035,15 @@ begin
             Values[I, cxGCMSTableView1Column2.index] := TCMSWebsitesCollectionItem(Websites.Items[I]).name;
             Values[I, cxGCMSTableView1Column3.index] := TCMSWebsitesCollectionItem(Websites.Items[I]).AccountName;
             Values[I, cxGCMSTableView1Column4.index] := TCMSWebsitesCollectionItem(Websites.Items[I]).AccountPassword;
-            Values[I, cxGCMSTableView1Column5.index] := TCMSWebsitesCollectionItem(Websites.Items[I]).MessageFileName;
-            Values[I, cxGCMSTableView1Column6.index] := TCMSWebsitesCollectionItem(Websites.Items[I]).SubjectFileName;
+            Values[I, cxGCMSTableView1Column5.index] := TCMSWebsitesCollectionItem(Websites.Items[I]).SubjectFileName;
+            Values[I, cxGCMSTableView1Column6.index] := TCMSWebsitesCollectionItem(Websites.Items[I]).MessageFileName;
           end;
         finally
           EndUpdate;
         end;
+
+        // Reset the OnDataChanged!
+        OnDataChanged := cxGCMSTableView1DataControllerDataChanged;
       end;
 
       SetCMSCheckAllStatus;
@@ -2903,8 +2912,8 @@ begin
           Values[_Record, cxGCMSTableView1Column2.index] := CMSWebsitesCollectionItem.name;
           Values[_Record, cxGCMSTableView1Column3.index] := CMSWebsitesCollectionItem.AccountName;
           Values[_Record, cxGCMSTableView1Column4.index] := CMSWebsitesCollectionItem.AccountPassword;
-          Values[_Record, cxGCMSTableView1Column5.index] := CMSWebsitesCollectionItem.MessageFileName;
-          Values[_Record, cxGCMSTableView1Column6.index] := CMSWebsitesCollectionItem.SubjectFileName;
+          Values[_Record, cxGCMSTableView1Column5.index] := CMSWebsitesCollectionItem.SubjectFileName;
+          Values[_Record, cxGCMSTableView1Column6.index] := CMSWebsitesCollectionItem.MessageFileName;
         finally
           EndUpdate;
         end;

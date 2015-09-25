@@ -118,7 +118,7 @@ object Settings: TSettings
         Anchors = [akLeft, akTop, akRight, akBottom]
         Focusable = False
         TabOrder = 0
-        Properties.ActivePage = cxTSCrypter
+        Properties.ActivePage = cxTSCMS
         Properties.CustomButtons.Buttons = <>
         Properties.HotTrack = True
         ClientRectBottom = 297
@@ -128,18 +128,10 @@ object Settings: TSettings
         object cxTSApp: TcxTabSheet
           Caption = 'App'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
         end
         object cxTSCAPTCHA: TcxTabSheet
           Caption = 'CAPTCHA'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
         end
         object cxTSCMS: TcxTabSheet
           Caption = 'CMS'
@@ -172,6 +164,7 @@ object Settings: TSettings
               inherited cxCBEditFormattedURL: TcxCheckBox
                 Left = 401
                 ExplicitLeft = 401
+                ExplicitWidth = 21
               end
               inherited cxCOBURLCMS: TcxComboBox
                 ExplicitWidth = 235
@@ -343,7 +336,7 @@ object Settings: TSettings
                   Properties.EchoMode = eemPassword
                   Width = 80
                 end
-                object cxGCMSTableView1Column6: TcxGridColumn
+                object cxGCMSTableView1Column5: TcxGridColumn
                   Caption = 'Subject'
                   PropertiesClassName = 'TcxButtonEditProperties'
                   Properties.Buttons = <
@@ -352,11 +345,11 @@ object Settings: TSettings
                       Hint = 'Browse...'
                       Kind = bkEllipsis
                     end>
-                  Properties.OnButtonClick = cxGCMSTableView1Column6PropertiesButtonClick
+                  Properties.OnButtonClick = cxGCMSTableView1Column5PropertiesButtonClick
                   Options.ShowEditButtons = isebAlways
                   Width = 79
                 end
-                object cxGCMSTableView1Column5: TcxGridColumn
+                object cxGCMSTableView1Column6: TcxGridColumn
                   Caption = 'Message'
                   PropertiesClassName = 'TcxButtonEditProperties'
                   Properties.Buttons = <
@@ -365,7 +358,7 @@ object Settings: TSettings
                       Hint = 'Browse...'
                       Kind = bkEllipsis
                     end>
-                  Properties.OnButtonClick = cxGCMSTableView1Column5PropertiesButtonClick
+                  Properties.OnButtonClick = cxGCMSTableView1Column6PropertiesButtonClick
                   Options.ShowEditButtons = isebAlways
                   Width = 79
                 end
@@ -947,10 +940,6 @@ object Settings: TSettings
         object cxTSFileHoster: TcxTabSheet
           Caption = 'File Hoster'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
         end
         object cxTSImageHoster: TcxTabSheet
           Caption = 'Image Hoster'
