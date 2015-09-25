@@ -17,7 +17,7 @@ uses
   // Common
   uBase, uConst, uAppInterface,
   // Api
-  uApiCodeTag, uApiConst, uApiComponentController, uApiIScriptFormatter, uApiMirrorController, uApiPublishController, uApiSettings,
+  uApiConst, uApiCodeTag, uApiComponentController, uApiIScriptFormatter, uApiMirrorController, uApiPublishController, uApiMultiCastEvent, uApiSettings,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPManager,
   // MultiEvent
@@ -77,6 +77,12 @@ type
 
     FActiveDesigner: TIScriptDesigner;
 
+    // website data
+    FActiveWebsiteData: ICMSWebsiteContainer;
+    FActiveCMSCollectionItem: TCMSCollectionItem;
+    FSubjectChange: TICMSItemChangeEventHandler;
+    FMessageChange: TICMSItemChangeEventHandler;
+
     // code + preview
     FWebsitePanel: TPanel;
     FWebsite: TcxImageComboBox;
@@ -93,6 +99,9 @@ type
     FCopySubjectToClipboardButton, FCopyMessageToClipboardButton: TcxButton;
 
     function GetCMSWebsiteContainer: ICMSWebsiteContainer;
+
+    procedure SubjectUpdate(ACMSItemChangeType: TCMSItemChangeType; AIndex, AParam: Integer);
+    procedure MessageUpdate(ACMSItemChangeType: TCMSItemChangeType; AIndex, AParam: Integer);
 
     procedure FWebsiteChange(Sender: TObject);
     procedure FHtmlViewHotSpotClick(Sender: TObject; const URL: string; var Handled: Boolean);
@@ -117,14 +126,22 @@ type
 
     function GetActiveWebsite: WideString;
     procedure SetActiveWebsite(AWebsite: WideString);
+    function GetActiveWebsiteData: ICMSWebsiteContainer;
+    procedure SetActiveWebsiteData(AWebsiteData: ICMSWebsiteContainer);
+    procedure RegisterWebsite;
+    procedure DeregisterWebsite;
+    procedure UpdateActiveWebsite;
+
     function GetViewType: TViewType;
     procedure SetViewType(AViewType: TViewType);
 
     procedure UpdateHTMLView(ASubject, AMessage: RIScriptResult);
+    procedure RenderHTMLView;
   public
     constructor Create(AOwner: TComponent; ATabSheetController: ITabSheetController); override;
 
     property ActiveWebsite: WideString read GetActiveWebsite write SetActiveWebsite;
+    property ActiveWebsiteData: ICMSWebsiteContainer read GetActiveWebsiteData;
 
     property PublishController: IPublishController read FPublishController write FPublishController;
 
@@ -315,6 +332,7 @@ end;
 { TDesignTabSheetItem }
 
 function TDesignTabSheetItem.GetCMSWebsiteContainer: ICMSWebsiteContainer;
+
   function GetImageComboBoxValue(AValue: string): string;
   begin
     Result := copy(AValue, 1, LastDelimiter('=', AValue) - 1);
@@ -336,17 +354,43 @@ begin
   Result := PublishController.CMS[CMSName].Website[CMSWebsiteIndex];
 end;
 
-procedure TDesignTabSheetItem.FWebsiteChange(Sender: TObject);
+procedure TDesignTabSheetItem.SubjectUpdate(ACMSItemChangeType: TCMSItemChangeType; AIndex, AParam: Integer);
 var
-  CMSWebsiteContainer: ICMSWebsiteContainer;
+  LCMSWebsitesCollectionItem: TCMSWebsitesCollectionItem;
 begin
-  CMSWebsiteContainer := GetCMSWebsiteContainer;
+  if (ACMSItemChangeType = cctChange) then
+  begin
+    LCMSWebsitesCollectionItem := TCMSWebsitesCollectionItem(FActiveCMSCollectionItem.Websites.Items[AIndex]);
 
-  FSubjectDesigner.SetFileName(CMSWebsiteContainer.SubjectFileName);
+    if SameStr(ActiveWebsite, LCMSWebsitesCollectionItem.Website) then
+    begin
+      if Assigned(ActiveWebsiteData) then
+        FSubjectDesigner.SetFileName(ActiveWebsiteData.SubjectFileName);
+      RenderHTMLView;
+    end;
+  end;
+end;
 
-  FMessageDesigner.SetFileName(CMSWebsiteContainer.MessageFileName);
+procedure TDesignTabSheetItem.MessageUpdate(ACMSItemChangeType: TCMSItemChangeType; AIndex, AParam: Integer);
+var
+  LCMSWebsitesCollectionItem: TCMSWebsitesCollectionItem;
+begin
+  if (ACMSItemChangeType = cctChange) then
+  begin
+    LCMSWebsitesCollectionItem := TCMSWebsitesCollectionItem(FActiveCMSCollectionItem.Websites.Items[AIndex]);
 
-  UpdateHTMLView(CMSWebsiteContainer.ParseIScript(FSubjectDesigner.Data), CMSWebsiteContainer.ParseIScript(FMessageDesigner.Data));
+    if SameStr(ActiveWebsite, LCMSWebsitesCollectionItem.Website) then
+    begin
+      if Assigned(ActiveWebsiteData) then
+        FMessageDesigner.SetFileName(ActiveWebsiteData.MessageFileName);
+      RenderHTMLView;
+    end;
+  end;
+end;
+
+procedure TDesignTabSheetItem.FWebsiteChange(Sender: TObject);
+begin
+  UpdateActiveWebsite;
 end;
 
 procedure TDesignTabSheetItem.FHtmlViewHotSpotClick(Sender: TObject; const URL: string; var Handled: Boolean);
@@ -431,7 +475,8 @@ end;
 
 procedure TDesignTabSheetItem.FCopySubjectToClipboardButtonClick(Sender: TObject);
 begin
-  Clipboard.AsText := GetCMSWebsiteContainer.ParseIScript(FSubjectDesigner.Data).CompiledText;
+  if Assigned(ActiveWebsiteData) then
+    Clipboard.AsText := ActiveWebsiteData.ParseIScript(FSubjectDesigner.Data).CompiledText;
 end;
 
 procedure TDesignTabSheetItem.FCheckMessageScriptButtonClick(Sender: TObject);
@@ -447,7 +492,8 @@ end;
 
 procedure TDesignTabSheetItem.FCopyMessageToClipboardButtonClick(Sender: TObject);
 begin
-  Clipboard.AsText := GetCMSWebsiteContainer.ParseIScript(FMessageDesigner.Data).CompiledText;
+  if Assigned(ActiveWebsiteData) then
+    Clipboard.AsText := ActiveWebsiteData.ParseIScript(FMessageDesigner.Data).CompiledText;
 end;
 
 procedure TDesignTabSheetItem.FSubjectMemoEnter(Sender: TObject);
@@ -472,50 +518,41 @@ procedure TDesignTabSheetItem.CheckScript(AIScriptDesigner: TIScriptDesigner);
 var
   LIScirptResult: RIScriptResult;
 begin
-  with AIScriptDesigner do
-  begin
-    LIScirptResult := GetCMSWebsiteContainer.CheckIScript(Data);
-    if LIScirptResult.HasError then
+  if Assigned(ActiveWebsiteData) then
+    with AIScriptDesigner do
     begin
-      if SameStr('', LIScirptResult.ErrorUnit) then
-        MessageDlg(LIScirptResult.ErrorMessage, mtError, [mbOK], 0)
-      else
-        MessageDlg(LIScirptResult.ErrorUnit + ': ' + LIScirptResult.ErrorMessage, mtError, [mbOK], 0);
+      LIScirptResult := ActiveWebsiteData.CheckIScript(Data);
+      if LIScirptResult.HasError then
+      begin
+        if SameStr('', LIScirptResult.ErrorUnit) then
+          MessageDlg(LIScirptResult.ErrorMessage, mtError, [mbOK], 0)
+        else
+          MessageDlg(LIScirptResult.ErrorUnit + ': ' + LIScirptResult.ErrorMessage, mtError, [mbOK], 0);
 
-      if AdvMemo.CanFocus then
-        AdvMemo.SetFocus;
-      AdvMemo.SetCursor(LIScirptResult.X, LIScirptResult.Y);
-    end
-    else
-      MessageDlg('The IScript compiled successful.', mtInformation, [mbOK], 0);
-  end;
+        if AdvMemo.CanFocus then
+          AdvMemo.SetFocus;
+        AdvMemo.SetCursor(LIScirptResult.X, LIScirptResult.Y);
+      end
+      else
+        MessageDlg('The IScript compiled successful.', mtInformation, [mbOK], 0);
+    end;
 end;
 
 procedure TDesignTabSheetItem.ViewChange(const NewViewType: TViewType);
-var
-  CMSWebsiteContainer: ICMSWebsiteContainer;
 begin
   if FTabSheetController.IsTabActive then
   begin
     Main.fMain.SwitchDesignView((NewViewType = vtData) and Assigned(FActiveDesigner));
     if (vtPreview = NewViewType) then
     begin
-      CMSWebsiteContainer := GetCMSWebsiteContainer;
-
-      UpdateHTMLView(CMSWebsiteContainer.ParseIScript(FSubjectDesigner.Data), CMSWebsiteContainer.ParseIScript(FMessageDesigner.Data));
+      RenderHTMLView;
     end;
   end;
 end;
 
 function TDesignTabSheetItem.GetActiveWebsite: WideString;
-var
-  CMSWebsiteContainer: ICMSWebsiteContainer;
 begin
-  CMSWebsiteContainer := GetCMSWebsiteContainer;
-  if Assigned(CMSWebsiteContainer) then
-    Result := CMSWebsiteContainer.Name
-  else
-    Result := '';
+  Result := IfThen(Assigned(ActiveWebsiteData), ActiveWebsiteData.Name);
 end;
 
 procedure TDesignTabSheetItem.SetActiveWebsite(AWebsite: WideString);
@@ -533,6 +570,52 @@ begin
         ItemIndex := Index;
         break;
       end;
+  end;
+end;
+
+function TDesignTabSheetItem.GetActiveWebsiteData: ICMSWebsiteContainer;
+begin
+  result := FActiveWebsiteData;
+end;
+
+procedure TDesignTabSheetItem.SetActiveWebsiteData(AWebsiteData: ICMSWebsiteContainer);
+begin
+  FActiveWebsiteData := AWebsiteData;
+end;
+
+procedure TDesignTabSheetItem.RegisterWebsite;
+begin
+  FActiveCMSCollectionItem := TCMSCollectionItem(SettingsManager.Settings.Plugins.FindPlugInCollectionItemFromCollection(ActiveWebsiteData.CMS, SettingsManager.Settings.Plugins.CMS));
+  FSubjectChange := TICMSItemChangeEventHandler.Create(SubjectUpdate);
+  FActiveCMSCollectionItem.OnSubjectsChange.Add(FSubjectChange);
+  FMessageChange := TICMSItemChangeEventHandler.Create(MessageUpdate);
+  FActiveCMSCollectionItem.OnMessagesChange.Add(FMessageChange);
+end;
+
+procedure TDesignTabSheetItem.DeregisterWebsite;
+begin
+  if Assigned(FActiveCMSCollectionItem) then
+  begin
+    FActiveCMSCollectionItem.OnSubjectsChange.Remove(FSubjectChange);
+    FActiveCMSCollectionItem.OnMessagesChange.Remove(FMessageChange);
+    FSubjectChange := nil;
+    FMessageChange := nil;
+  end;
+end;
+
+procedure TDesignTabSheetItem.UpdateActiveWebsite;
+begin
+  SetActiveWebsiteData(GetCMSWebsiteContainer);
+
+  if Assigned(ActiveWebsiteData) then
+  begin
+    DeregisterWebsite;
+    RegisterWebsite;
+
+    FSubjectDesigner.SetFileName(ActiveWebsiteData.SubjectFileName);
+    FMessageDesigner.SetFileName(ActiveWebsiteData.MessageFileName);
+
+    RenderHTMLView;
   end;
 end;
 
@@ -679,6 +762,16 @@ begin
   HTML := HTML + Message;
 
   FHtmlView.LoadFromString(HTML);
+end;
+
+procedure TDesignTabSheetItem.RenderHTMLView;
+begin
+  SetActiveWebsiteData(GetCMSWebsiteContainer);
+
+  if Assigned(ActiveWebsiteData) then
+  begin
+    UpdateHTMLView(ActiveWebsiteData.ParseIScript(FSubjectDesigner.Data), ActiveWebsiteData.ParseIScript(FMessageDesigner.Data));
+  end;
 end;
 
 constructor TDesignTabSheetItem.Create;
@@ -1126,6 +1219,8 @@ end;
 
 destructor TDesignTabSheetItem.Destroy;
 begin
+  DeregisterWebsite;
+
   FTabSheetController.PageController.OnViewChange.Remove(FIViewChangeEvent);
   FIViewChangeEvent := nil;
 
