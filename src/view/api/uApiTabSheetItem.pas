@@ -1240,7 +1240,10 @@ begin
   with FPublishController do
   begin
     Active := False;
-    TabSheetController := nil;
+    // Disabled, because PublishController.Destroy() uses
+    // TabSheetController.IsTabActive to Invoke updating the
+    // CMS list only if the current tab was visible.
+    // TabSheetController := nil;
   end;
 
   FPublishController := nil;

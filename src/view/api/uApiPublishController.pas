@@ -1536,7 +1536,9 @@ end;
 
 destructor TIPublishController.Destroy;
 begin
-  OnUpdateCMSList.Invoke(nil);
+  // TODO: test this
+  if TabSheetController.IsTabActive then
+    OnUpdateCMSList.Invoke(nil);
 
   FPluginChangeEventHandler := nil;
   FIChange := nil;
