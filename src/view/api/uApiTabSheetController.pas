@@ -268,14 +268,9 @@ procedure TTabSheetController.Install;
 begin
   FDataTabSheetItem := TDataTabSheetItem.Create(Self, Self);
 
-  UpdateCaption;
-
-  FIReleaseNameChange := TIReleaseNameChangeEventHandler.Create(ReleaseNameChange);
-  ComponentController.OnReleaseNameChange := FIReleaseNameChange;
-
-  FIControlChange := TIControlEventHandler.Create(ControlChange);
-  ComponentController.OnControlChange.Add(FIControlChange);
   FDesignTabSheetItem := TDesignTabSheetItem.Create(Self, Self);
+
+  UpdateCaption;
 
   AddEvents;
 end;
@@ -287,6 +282,9 @@ begin
 
   FIControlChange := TIControlEventHandler.Create(ControlChange);
   ComponentController.OnControlChange.Add(FIControlChange);
+
+  FIMirrorChange := TINotifyEventHandler.Create(MirrorChange);
+  MirrorController.OnChange.Add(FIMirrorChange);
 
   FIUpdateCMSListEvent := TIUpdateCMSListEventHandler.Create(FDesignTabSheetItem.UpdateCMSList);
   PublishController.OnUpdateCMSList.Add(FIUpdateCMSListEvent);
@@ -315,6 +313,11 @@ procedure TTabSheetController.RemoveEvents;
 begin
   /// removing tabs with active crawler is forbidden, nevertheless additionally blacklist entry
   PageController.CrawlerManager.RemoveCrawlerJob(ComponentController);
+
+  ComponentController.OnReleaseNameChange := nil;
+
+  PublishController.OnUpdateCMSWebsiteList.Remove(FIUpdateCMSWebsiteListEvent);
+  PublishController.OnUpdateCMSList.Remove(FIUpdateCMSListEvent);
 
   MirrorController.OnChange.Remove(FIMirrorChange);
   ComponentController.OnControlChange.Remove(FIControlChange);
