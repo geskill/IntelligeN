@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<nodeSet version="1.0">
+  <view uin="fvaqh8kvdkp_v">
+    <property name="$defaultDiagram" value="true" />
+    <property name="$metaclass" value="Package Diagram" />
+    <property name="$name" value="default" />
+    <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateInterface.@unitclass">
+      <property name="$shortcutReference" value="true" />
+    </reference>
+    <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateInterface.IUpdateFile">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="60,40,300,420" />
+      <property name="location_set_by_user" value="True" />
+      <property name="bounds_setted_by_user" value="True" />
+      <reference referencedUin="delphi:e_property:src:UpdateManager:uApiUpdateInterface.IUpdateFile.FileSystem">
+        <property name="bounds" value="35,18,0,0" />
+      </reference>
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateInterface.IUpdateFile.GetFileSystem()" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateInterface.IUpdateFile.SetFileSystem(uApiUpdateConst.TFileSystem)" />
+      <reference referencedUin="delphi:e_property:src:UpdateManager:uApiUpdateInterface.IUpdateFile.FileSizeCompressed">
+        <property name="bounds" value="115,26,0,0" />
+      </reference>
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateInterface.IUpdateFile.GetFileSizeCompressed()" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateInterface.IUpdateFile.SetFileSizeCompressed(System.Integer)" />
+      <reference referencedUin="delphi:e_property:src:UpdateManager:uApiUpdateInterface.IUpdateFile.FileName">
+        <property name="bounds" value="135,76,0,0" />
+      </reference>
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateInterface.IUpdateFile.GetFileName()" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateInterface.IUpdateFile.SetFileName(System.WideString)" />
+      <reference referencedUin="delphi:e_property:src:UpdateManager:uApiUpdateInterface.IUpdateFile.FileChecksum">
+        <property name="bounds" value="75,46,0,0" />
+      </reference>
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateInterface.IUpdateFile.GetFileChecksum()" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateInterface.IUpdateFile.SetFileChecksum(System.WideString)" />
+      <reference referencedUin="delphi:e_property:src:UpdateManager:uApiUpdateInterface.IUpdateFile.FilePathAddition">
+        <property name="bounds" value="255,76,0,0" />
+      </reference>
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateInterface.IUpdateFile.GetFilePathAddition()" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateInterface.IUpdateFile.SetFilePathAddition(System.WideString)" />
+    </reference>
+    <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateInterface.ILocalUpdateFile">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="400,40,280,280" />
+      <property name="location_set_by_user" value="True" />
+      <property name="bounds_setted_by_user" value="True" />
+      <reference referencedUin="delphi:l_gnt:src:UpdateManager:uApiUpdateInterface.ILocalUpdateFile:uApiUpdateInterface.IUpdateFile">
+        <property name="sourceAnchor" value="400,72" />
+        <property name="targetAnchor" value="360,72" />
+        <property name="bendpoints" value="" />
+      </reference>
+      <reference referencedUin="delphi:e_property:src:UpdateManager:uApiUpdateInterface.ILocalUpdateFile.FullFileName">
+        <property name="bounds" value="135,-2,0,0" />
+      </reference>
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateInterface.ILocalUpdateFile.GetFullFileName()" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateInterface.ILocalUpdateFile.SetFullFileName(System.WideString)" />
+    </reference>
+  </view>
+</nodeSet>

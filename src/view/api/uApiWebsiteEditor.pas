@@ -11,10 +11,12 @@ uses
   cxGridTableView, cxDataStorage, cxFilter, cxBlobEdit, cxButtonEdit, cxListBox, cxEdit, cxCheckComboBox,
   // Dev Express Mod
   uMycxCheckComboBox,
+  // HTTPManager implementation
+  uHTTPIndyHelper,
   // Common
   uConst, uAppInterface,
   // API
-  uApiFile, uApiHTTP,
+  uApiFile,
   // Utils,
   uStringUtils,
   // Plugin system
@@ -2234,7 +2236,7 @@ begin
     with Properties do
     begin
       DropDownListStyle := lsFixedList;
-      Items.Text := TApiHTTP.Charsets;
+      Items.Text := THTTPIndyHelper.Charsets;
     end;
 
     Anchors := [akLeft, akBottom];

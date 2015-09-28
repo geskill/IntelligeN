@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<nodeSet version="1.0">
+  <view uin="pa2i7onufjszip2tj_v">
+    <property name="$defaultDiagram" value="true" />
+    <property name="$metaclass" value="Package Diagram" />
+    <property name="$name" value="default" />
+    <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateController.@unitclass">
+      <property name="$shortcutReference" value="true" />
+    </reference>
+    <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateController.TUpdateController">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="60,80,120,67" />
+      <property name="location_set_by_user" value="True" />
+    </reference>
+    <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateController.TLocalUpdateController">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="199,62,257,146" />
+      <reference referencedUin="delphi:e_field:src:UpdateManager:uApiUpdateController.TLocalUpdateController.FIntelligeNFileSystem" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateController.TLocalUpdateController.Create(System.WideString)" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateController.TLocalUpdateController.Destroy()" />
+      <reference referencedUin="delphi:l_gnt:src:UpdateManager:uApiUpdateController.TLocalUpdateController:uApiUpdateController.TUpdateController">
+        <property name="sourceAnchor" value="199,113" />
+        <property name="targetAnchor" value="180,113" />
+        <property name="bendpoints" value="" />
+      </reference>
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateController.TLocalUpdateController.GetLocalFiles(Generics.Collections.TList`1)" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateController.TLocalUpdateController.GatherLocalFileInformation(Generics.Collections.TList`1)" />
+    </reference>
+  </view>
+</nodeSet>

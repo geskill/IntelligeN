@@ -1,0 +1,3 @@
+tlbimp IntelligeN.tlb
+
+pause

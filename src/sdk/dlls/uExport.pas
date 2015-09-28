@@ -27,6 +27,9 @@ function GetTemplatesCMSFolder: WideString; stdcall; external ProgrammLibrary na
 function GetTemplatesSiteFolder: WideString; stdcall; external ProgrammLibrary name 'GetTemplatesSiteFolder';
 function GetTemplatesTypeFolder: WideString; stdcall; external ProgrammLibrary name 'GetTemplatesTypeFolder';
 
+function GetPathFromFileSystemID(AFileSystem: TFileSystem): WideString; stdcall; external ProgrammLibrary name 'GetPathFromFileSystemID';
+function GetFileSystemIDFromPath(AFileName: WideString): TFileSystem; stdcall; external ProgrammLibrary name 'GetFileSystemIDFromPath';
+
 // IXML
 function GetFileInfo(AFileName: WideString): RTemplateFileInfo; stdcall; external 'IXML.dll' name 'GetFileInfo';
 

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<nodeSet version="1.0">
+  <view uin="gfj3b0fnevr_v">
+    <property name="$defaultDiagram" value="true" />
+    <property name="$metaclass" value="Package Diagram" />
+    <property name="$name" value="default" />
+    <reference referencedUin="delphi:e_class:src:UpdateManager:IntelligeNFileSystem.TIntelligeNFileSystem">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="10,10,246,238" />
+      <reference referencedUin="delphi:e_field:src:UpdateManager:IntelligeNFileSystem.TIntelligeNFileSystem.FFrameworkLib" />
+      <reference referencedUin="delphi:e_field:src:UpdateManager:IntelligeNFileSystem.TIntelligeNFileSystem.FFileSystemLib" />
+      <reference referencedUin="delphi:e_field:src:UpdateManager:IntelligeNFileSystem.TIntelligeNFileSystem.FRAMEWORK_LIB" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:IntelligeNFileSystem.TIntelligeNFileSystem.Execute(System.string,IntelligeNFileSystem.TIntelligeNFileSystem.TLibProc)" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:IntelligeNFileSystem.TIntelligeNFileSystem.Create(SysUtils.TFileName)" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:IntelligeNFileSystem.TIntelligeNFileSystem.GetRootDir()" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:IntelligeNFileSystem.TIntelligeNFileSystem.GetPathFromFileSystemID(uApiUpdateConst.TFileSystem)" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:IntelligeNFileSystem.TIntelligeNFileSystem.GetFileSystemIDFromPath(System.WideString)" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:IntelligeNFileSystem.TIntelligeNFileSystem.Destroy()" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:IntelligeNFileSystem.TIntelligeNFileSystem.TLibProc" />
+    </reference>
+    <reference referencedUin="delphi:e_class:src:UpdateManager:IntelligeNFileSystem.@unitclass">
+      <property name="$shortcutReference" value="true" />
+    </reference>
+    <reference referencedUin="delphi:e_class:src:UpdateManager:IntelligeNFileSystem.TGetRootDir">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="275,1,153,36" />
+    </reference>
+    <reference referencedUin="delphi:e_class:src:UpdateManager:IntelligeNFileSystem.TGetPathFromFileSystemID">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="275,56,242,36" />
+    </reference>
+    <reference referencedUin="delphi:e_class:src:UpdateManager:IntelligeNFileSystem.TGetFileSystemIDFromPath">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="275,111,251,36" />
+    </reference>
+  </view>
+</nodeSet>

@@ -10,7 +10,7 @@ uses
   // DLLs
   uExport,
   // Api
-  uApiCAPTCHA, uApiConst, uApiMain, uApiHTTP, uApiSettings, uApiWebsiteEditor, uApiXml,
+  uApiCAPTCHA, uApiConst, uApiMain, uApiSettings, uApiWebsiteEditor, uApiXml,
   // HTTPManager
   uHTTPManager,
   // Plugin system

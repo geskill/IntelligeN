@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<nodeSet version="1.0">
+  <view uin="xbn0uvp0bne_v">
+    <property name="$defaultDiagram" value="true" />
+    <property name="$metaclass" value="Package Diagram" />
+    <property name="$name" value="default" />
+    <reference referencedUin="design:view:::fvaqh8kvdkp_v">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="10,10,168,166" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateInterface.IUpdateFile" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateInterface.@unitclass" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateInterface.ILocalUpdateFile" />
+    </reference>
+    <reference referencedUin="design:view:::9xgaedxbu5g_v">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="197,1,98,151" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:uMain.TfMain" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:uMain.@unitclass" />
+    </reference>
+    <reference referencedUin="design:view:::f10xx0cb6sk_v">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="197,171,144,134" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:UpdateManager.@unitclass" />
+    </reference>
+    <reference referencedUin="design:view:::reerg2nyhiq_v">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="38,195,152,166" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateConst.TFileSystem" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateConst.@unitclass" />
+    </reference>
+    <reference referencedUin="design:view:::qev0csqe0wj_v">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="379,1,153,166" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateModel.TIUpdateFile" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateModel.@unitclass" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateModel.TILocalUpdateFile" />
+    </reference>
+    <reference referencedUin="design:view:::gfj3b0fnevr_v">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="360,186,251,213" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:IntelligeNFileSystem.TIntelligeNFileSystem" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:IntelligeNFileSystem.@unitclass" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:IntelligeNFileSystem.TGetRootDir" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:IntelligeNFileSystem.TGetPathFromFileSystemID" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:IntelligeNFileSystem.TGetFileSystemIDFromPath" />
+    </reference>
+    <reference referencedUin="design:view:::pa2i7onufjszip2tj_v">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="649,1,173,166" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateController.TUpdateController" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateController.@unitclass" />
+      <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateController.TLocalUpdateController" />
+    </reference>
+  </view>
+</nodeSet>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<nodeSet version="1.0">
+  <view uin="qev0csqe0wj_v">
+    <property name="$defaultDiagram" value="true" />
+    <property name="$metaclass" value="Package Diagram" />
+    <property name="$name" value="default" />
+    <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateModel.@unitclass">
+      <property name="$shortcutReference" value="true" />
+    </reference>
+    <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateModel.TIUpdateFile">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="40,40,320,520" />
+      <property name="location_set_by_user" value="True" />
+      <property name="bounds_setted_by_user" value="True" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateModel.TIUpdateFile.GetFileSystem()" />
+      <reference referencedUin="delphi:e_property:src:UpdateManager:uApiUpdateModel.TIUpdateFile.FileSystem" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateModel.TIUpdateFile.GetFileSizeCompressed()" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateModel.TIUpdateFile.SetFileSizeCompressed(System.Integer)" />
+      <reference referencedUin="delphi:e_property:src:UpdateManager:uApiUpdateModel.TIUpdateFile.FileSizeCompressed" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateModel.TIUpdateFile.GetFileName()" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateModel.TIUpdateFile.SetFileName(System.WideString)" />
+      <reference referencedUin="delphi:e_property:src:UpdateManager:uApiUpdateModel.TIUpdateFile.FileName" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateModel.TIUpdateFile.GetFileChecksum()" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateModel.TIUpdateFile.SetFileChecksum(System.WideString)" />
+      <reference referencedUin="delphi:e_property:src:UpdateManager:uApiUpdateModel.TIUpdateFile.FileChecksum" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateModel.TIUpdateFile.GetFilePathAddition()" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateModel.TIUpdateFile.SetFilePathAddition(System.WideString)" />
+      <reference referencedUin="delphi:e_property:src:UpdateManager:uApiUpdateModel.TIUpdateFile.FilePathAddition" />
+      <reference referencedUin="delphi:e_field:src:UpdateManager:uApiUpdateModel.TIUpdateFile.FFilePathAddition">
+        <property name="bounds" value="35,-11,0,0" />
+      </reference>
+      <reference referencedUin="delphi:e_field:src:UpdateManager:uApiUpdateModel.TIUpdateFile.FFileChecksum">
+        <property name="bounds" value="155,9,0,0" />
+      </reference>
+      <reference referencedUin="delphi:e_field:src:UpdateManager:uApiUpdateModel.TIUpdateFile.FFileName">
+        <property name="bounds" value="75,9,0,0" />
+      </reference>
+      <reference referencedUin="delphi:e_field:src:UpdateManager:uApiUpdateModel.TIUpdateFile.FFileSizeCompressed">
+        <property name="bounds" value="75,-11,0,0" />
+      </reference>
+      <reference referencedUin="delphi:e_field:src:UpdateManager:uApiUpdateModel.TIUpdateFile.FFileSystem">
+        <property name="bounds" value="75,-11,0,0" />
+      </reference>
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateModel.TIUpdateFile.SetFileSystem(uApiUpdateConst.TFileSystem)" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateModel.TIUpdateFile.Create(System.WideString)" />
+    </reference>
+    <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateModel.TILocalUpdateFile">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="420,40,280,460" />
+      <property name="location_set_by_user" value="True" />
+      <property name="bounds_setted_by_user" value="True" />
+      <reference referencedUin="delphi:l_gnt:src:UpdateManager:uApiUpdateModel.TILocalUpdateFile:uApiUpdateModel.TIUpdateFile">
+        <property name="sourceAnchor" value="420,82" />
+        <property name="targetAnchor" value="360,82" />
+        <property name="bendpoints" value="" />
+      </reference>
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateModel.TILocalUpdateFile.GetFullFileName()" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateModel.TILocalUpdateFile.SetFullFileName(System.WideString)" />
+      <reference referencedUin="delphi:e_property:src:UpdateManager:uApiUpdateModel.TILocalUpdateFile.FullFileName" />
+      <reference referencedUin="delphi:e_method:src:UpdateManager:uApiUpdateModel.TILocalUpdateFile.Create(System.WideString)" />
+      <reference referencedUin="delphi:e_field:src:UpdateManager:uApiUpdateModel.TILocalUpdateFile.FFullFileName">
+        <property name="bounds" value="15,-13,0,0" />
+      </reference>
+    </reference>
+  </view>
+</nodeSet>

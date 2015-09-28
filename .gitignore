@@ -27,6 +27,7 @@
 *.dll
 *.bpl
 *.bpi
+*.dcu
 *.dcp
 *.so
 *.apk

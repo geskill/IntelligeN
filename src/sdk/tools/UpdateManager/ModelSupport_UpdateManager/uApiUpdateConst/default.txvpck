@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<nodeSet version="1.0">
+  <view uin="reerg2nyhiq_v">
+    <property name="$defaultDiagram" value="true" />
+    <property name="$metaclass" value="Package Diagram" />
+    <property name="$name" value="default" />
+    <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateConst.@unitclass">
+      <property name="$shortcutReference" value="true" />
+    </reference>
+    <reference referencedUin="delphi:e_class:src:UpdateManager:uApiUpdateConst.TFileSystem">
+      <property name="$shortcutReference" value="true" />
+      <property name="bounds" value="160,100,100,188" />
+      <reference referencedUin="delphi:e_field:src:UpdateManager:uApiUpdateConst.TFileSystem.fsRoot" />
+      <reference referencedUin="delphi:e_field:src:UpdateManager:uApiUpdateConst.TFileSystem.fsConfig" />
+      <reference referencedUin="delphi:e_field:src:UpdateManager:uApiUpdateConst.TFileSystem.fsPlugins" />
+      <reference referencedUin="delphi:e_field:src:UpdateManager:uApiUpdateConst.TFileSystem.fsSettings" />
+      <reference referencedUin="delphi:e_field:src:UpdateManager:uApiUpdateConst.TFileSystem.fsCMS" />
+      <reference referencedUin="delphi:e_field:src:UpdateManager:uApiUpdateConst.TFileSystem.fsCMSSubject" />
+      <reference referencedUin="delphi:e_field:src:UpdateManager:uApiUpdateConst.TFileSystem.fsCMSMessage" />
+      <reference referencedUin="delphi:e_field:src:UpdateManager:uApiUpdateConst.TFileSystem.fsSite" />
+      <reference referencedUin="delphi:e_field:src:UpdateManager:uApiUpdateConst.TFileSystem.fsType" />
+    </reference>
+  </view>
+</nodeSet>

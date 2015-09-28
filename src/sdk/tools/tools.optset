@@ -1,0 +1,13 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<DCC_UnitSearchPath>../;../../plugins;../../../core\external;../../../core\external\DEC\Part_I;../../../core\external\HTTPManager;../../../core\external\HTTPManager\implementors;../../../core\external\MultiEvent;../../../core\external\OmniThreadLibrary;../../../core\external\OmniThreadLibrary\src;../../../core\external\TRegExpr\Source;../../../core\common;../../../core\utils;../../../view\external;../../../view\external\Abbrevia\source;../../../view\api;../../../view\ole;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+		</PropertyGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Delphi.Personality.12</Borland.Personality>
+			<Borland.ProjectType>OptionSet</Borland.ProjectType>
+			<BorlandProject>
+				<Delphi.Personality/>
+			</BorlandProject>
+			<ProjectFileVersion>12</ProjectFileVersion>
+		</ProjectExtensions>
+	</Project>

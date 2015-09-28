@@ -1,0 +1,142 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{EA17A186-1DD1-40F0-9E9B-5557FD8128C8}</ProjectGuid>
+			<ProjectVersion>12.0</ProjectVersion>
+			<MainSource>UpdateManager.dpr</MainSource>
+			<Config Condition="'$(Config)'==''">Debug</Config>
+			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Basis' or '$(Base)'!=''">
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_1)'!=''">
+			<Cfg_1>true</Cfg_1>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_2)'!=''">
+			<Cfg_2>true</Cfg_2>
+			<CfgParent>Base</CfgParent>
+			<Base>true</Base>
+		</PropertyGroup>
+		<Import Project="..\tools.optset" Condition="'$(Base)'!='' And Exists('..\tools.optset')"/>
+		<PropertyGroup Condition="'$(Base)'!=''">
+			<DCC_UsePackage>rtl;vcl;vclx;vclimg;vclactnband;dbrtl;vcldb;vcldbx;bdertl;vcltouch;xmlrtl;dsnap;TeeUI;TeeDB;Tee;vclib;ibxpress;adortl;VclSmp;vclie;inet;websnap;webdsnap;inetdb;dsnapcon;inetdbbde;inetdbxpress;soaprtl;vclribbon;DbxCommonDriver;DbxClientDriver;DBXInterBaseDriver;DBXMySQLDriver;dbexpress;dbxcds;DBXFirebirdDriver;DBXSybaseASEDriver;DBXSybaseASADriver;DBXOracleDriver;DBXMSSQLDriver;DBXInformixDriver;DBXDb2Driver;EurekaLogCore;dxCoreRS14;cxLibraryRS14;dxGDIPlusRS14;dxThemeRS14;cxPageControlRS14;dxServerModeRS14;cxDataRS14;dxDBXServerModeRS14;dxADOServerModeRS14;cxEditorsRS14;dxBarRS14;dxComnRS14;dxBarExtDBItemsRS14;dxBarExtItemsRS14;dxBarDBNavRS14;dxRibbonRS14;dxTabbedMDIRS14;dxLayoutControlRS14;cxGridRS14;cxExportRS14;dxmdsRS14;dxDockingRS14;cxPageControldxBarPopupMenuRS14;cxBarEditItemRS14;IndyCore140;IndySystem140;IndyProtocols140;advmemopkgd2010;intrawebdb_100_140;Intraweb_100_140</DCC_UsePackage>
+			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
+			<DCC_ExeOutput>bin</DCC_ExeOutput>
+			<DCC_DcuOutput>dcu</DCC_DcuOutput>
+			<DCC_UnitSearchPath>../../3rdparty;../../3rdparty\Abbrevia 3.05\source;../../3rdparty\DEC\Part_I;../../3rdparty\HTTPManager;../../3rdparty\HTTPManager\implementors;../../3rdparty\MultiEvent;../../3rdparty\OmniThreadLibrary-3.02;../../3rdparty\OmniThreadLibrary-3.02\src;../../3rdparty\TRegExpr\Source;../../api;../../utils;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_DependencyCheckOutputName>bin\UpdateManager.exe</DCC_DependencyCheckOutputName>
+			<DCC_ImageBase>00400000</DCC_ImageBase>
+			<DCC_Platform>x86</DCC_Platform>
+			<CfgDependentOn>..\tools.optset</CfgDependentOn>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_1)'!=''">
+			<DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+			<DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
+			<DCC_DebugInformation>false</DCC_DebugInformation>
+		</PropertyGroup>
+		<PropertyGroup Condition="'$(Cfg_2)'!=''">
+			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+		</PropertyGroup>
+		<ItemGroup>
+			<DelphiCompile Include="UpdateManager.dpr">
+				<MainSource>MainSource</MainSource>
+			</DelphiCompile>
+			<DCCReference Include="uMain.pas">
+				<Form>fMain</Form>
+			</DCCReference>
+			<DCCReference Include="IntelligeNFileSystem.pas"/>
+			<DCCReference Include="uApiUpdateModel.pas"/>
+			<DCCReference Include="uApiUpdateInterface.pas"/>
+			<DCCReference Include="uApiUpdateConst.pas"/>
+			<DCCReference Include="uApiUpdateController.pas"/>
+			<DCCReference Include="uApiUpdateSettings.pas"/>
+			<DCCReference Include="uApiServerXMLReader.pas"/>
+			<DCCReference Include="uServerInterface.pas"/>
+			<DCCReference Include="uServerClasses.pas"/>
+			<None Include="ModelSupport_UpdateManager\default.txaPackage"/>
+			<None Include="ModelSupport_UpdateManager\default.txvpck"/>
+			<None Include="ModelSupport_UpdateManager\uApiUpdateInterface\default.txvpck"/>
+			<None Include="ModelSupport_UpdateManager\UpdateManager\default.txvpck"/>
+			<None Include="ModelSupport_UpdateManager\uApiUpdateInterface\default.txaPackage"/>
+			<None Include="ModelSupport_UpdateManager\uApiUpdateModel\default.txvpck"/>
+			<None Include="ModelSupport_UpdateManager\uApiUpdateModel\default.txaPackage"/>
+			<None Include="ModelSupport_UpdateManager\IntelligeNFileSystem\default.txvpck"/>
+			<None Include="ModelSupport_UpdateManager\uMain\default.txvpck"/>
+			<None Include="ModelSupport_UpdateManager\uApiUpdateConst\default.txaPackage"/>
+			<None Include="ModelSupport_UpdateManager\uApiUpdateConst\default.txvpck"/>
+			<None Include="ModelSupport_UpdateManager\uApiUpdateController\default.txaPackage"/>
+			<None Include="ModelSupport_UpdateManager\uApiUpdateController\default.txvpck"/>
+			<None Include="ModelSupport_UpdateManager\uApiUpdateSettings\default.txvpck"/>
+			<None Include="ModelSupport_UpdateManager\uApiUpdateSettings\default.txaPackage"/>
+			<BuildConfiguration Include="Basis">
+				<Key>Base</Key>
+				<DependentOn>..\tools.optset</DependentOn>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Release">
+				<Key>Cfg_1</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Debug">
+				<Key>Cfg_2</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+		</ItemGroup>
+		<Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
+		<ProjectExtensions>
+			<Borland.Personality>Delphi.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Delphi.Personality>
+					<Source>
+						<Source Name="MainSource">UpdateManager.dpr</Source>
+					</Source>
+					<Parameters>
+						<Parameters Name="UseLauncher">False</Parameters>
+						<Parameters Name="LoadAllSymbols">True</Parameters>
+						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
+					</Parameters>
+					<VersionInfo>
+						<VersionInfo Name="IncludeVerInfo">True</VersionInfo>
+						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
+						<VersionInfo Name="MajorVer">1</VersionInfo>
+						<VersionInfo Name="MinorVer">0</VersionInfo>
+						<VersionInfo Name="Release">0</VersionInfo>
+						<VersionInfo Name="Build">0</VersionInfo>
+						<VersionInfo Name="Debug">False</VersionInfo>
+						<VersionInfo Name="PreRelease">False</VersionInfo>
+						<VersionInfo Name="Special">False</VersionInfo>
+						<VersionInfo Name="Private">False</VersionInfo>
+						<VersionInfo Name="DLL">False</VersionInfo>
+						<VersionInfo Name="Locale">1031</VersionInfo>
+						<VersionInfo Name="CodePage">1252</VersionInfo>
+					</VersionInfo>
+					<VersionInfoKeys>
+						<VersionInfoKeys Name="CompanyName"/>
+						<VersionInfoKeys Name="FileDescription">IntelligeN 2009 UpdateManager</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="InternalName"/>
+						<VersionInfoKeys Name="LegalCopyright"/>
+						<VersionInfoKeys Name="LegalTrademarks"/>
+						<VersionInfoKeys Name="OriginalFilename"/>
+						<VersionInfoKeys Name="ProductName"/>
+						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="Comments"/>
+					</VersionInfoKeys>
+					<Excluded_Packages/>
+				</Delphi.Personality>
+				<ModelSupport>True</ModelSupport>
+			</BorlandProject>
+			<ProjectFileVersion>12</ProjectFileVersion>
+		</ProjectExtensions>
+	</Project>
+
+<!-- EurekaLog First Line
+[Exception Log]
+EurekaLog Version=7007
+Activate=0
+DeleteMapAfterCompile=0
+Encrypt Password=""
+EurekaLog Last Line -->
