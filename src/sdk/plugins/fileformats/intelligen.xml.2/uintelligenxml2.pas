@@ -121,8 +121,10 @@ begin
               for X := 0 to Mirror[I].DirectlinksMirrorCount - 1 do
                 with AddChild('directlink') do
                 begin
-                  Attributes['size'] := Mirror[I].Directlink.GetSize(X);
+                  Attributes['size'] := Mirror[I].Size;
+                  Attributes['partsize'] := Mirror[I].PartSize;
                   Attributes['hoster'] := Mirror[I].Hoster;
+                  Attributes['parts'] := Mirror[I].Parts;
                   NodeValue := Mirror[I].DirectlinksMirror[X];
                 end;
               for X := 0 to Mirror[I].CrypterCount - 1 do
@@ -130,8 +132,12 @@ begin
                 begin
                   Attributes['name'] := Mirror[I].Crypter[X].name;
                   Attributes['status'] := Mirror[I].Crypter[X].Status;
+                  Attributes['partsize'] := Mirror[I].Crypter[X].PartSize;
                   Attributes['size'] := Mirror[I].Crypter[X].Size;
                   Attributes['hoster'] := Mirror[I].Crypter[X].Hoster;
+                  Attributes['parts'] := Mirror[I].Crypter[X].Parts;
+                  Attributes['statusimage'] := Mirror[I].Crypter[X].StatusImage;
+                  Attributes['statusimagetext'] := Mirror[I].Crypter[X].StatusImageText;
                   NodeValue := Mirror[I].Crypter[X].Link;
                 end;
             end;
