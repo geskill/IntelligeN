@@ -121,7 +121,7 @@ begin
               for X := 0 to Mirror[I].DirectlinksMirrorCount - 1 do
                 with AddChild('directlink') do
                 begin
-                  Attributes['size'] := Mirror[I].Size;
+                  Attributes['size'] := Mirror[I].Directlink.GetSize(X);
                   Attributes['partsize'] := Mirror[I].PartSize;
                   Attributes['hoster'] := Mirror[I].Hoster;
                   Attributes['parts'] := Mirror[I].Parts;

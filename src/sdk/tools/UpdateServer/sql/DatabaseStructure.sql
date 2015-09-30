@@ -1,13 +1,13 @@
 -- phpMyAdmin SQL Dump
--- version 3.4.3.1
+-- version 4.3.11
 -- http://www.phpmyadmin.net
 --
--- Host: localhost:3306
--- Erstellungszeit: 06. Mrz 2013 um 19:27
--- Server Version: 5.5.27
--- PHP-Version: 5.3.16
+-- Host: 127.0.0.1
+-- Erstellungszeit: 30. Sep 2015 um 23:12
+-- Server-Version: 5.6.24
+-- PHP-Version: 5.6.8
 
-SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
 
@@ -17,62 +17,164 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8 */;
 
 --
--- Datenbank: `geskill_intellig`
+-- Datenbank: `intelligen_2k9`
 --
-CREATE DATABASE `geskill_intellig` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;
-USE `geskill_intellig`;
+CREATE DATABASE IF NOT EXISTS `intelligen_2k9` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `intelligen_2k9`;
 
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `int2k9_upd_files`
+-- Tabellenstruktur für Tabelle `intelligen_2k9_update_systems`
 --
 
-CREATE TABLE IF NOT EXISTS `int2k9_upd_files` (
-  `id` int(4) NOT NULL AUTO_INCREMENT,
-  `file_major_version_number` int(3) NOT NULL DEFAULT '2',
-  `file_minor_version_number` int(3) NOT NULL,
-  `file_major_build_number` int(3) NOT NULL,
-  `file_minor_build_number` int(3) NOT NULL,
-  `file_filesystem` int(1) NOT NULL,
-  `file_pathappendix` varchar(200) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `file_name` varchar(100) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `file_size` int(25) NOT NULL,
-  `file_checksum` varchar(32) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  `file_info` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+CREATE TABLE IF NOT EXISTS `intelligen_2k9_update_systems` (
+  `id` int(5) NOT NULL,
+  `filesystem_id` enum('fsRoot','fsConfig','fsPlugins','fsSettings','fsCMS','fsCMSSubject','fsCMSMessage','fsSite','fsType') COLLATE utf8mb4_unicode_ci DEFAULT 'fsRoot' COMMENT 'Represents TFileSystem defined in uBase.pas',
+  `path_appendix` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'Name of the file incl. file extension'
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONEN DER TABELLE `intelligen_2k9_update_systems`:
+--
 
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `int2k9_upd_version`
+-- Tabellenstruktur für Tabelle `intelligen_2k9_update_system_files`
 --
 
-CREATE TABLE IF NOT EXISTS `int2k9_upd_version` (
-  `id` int(4) NOT NULL AUTO_INCREMENT,
-  `live` tinyint(1) NOT NULL DEFAULT '0',
+CREATE TABLE IF NOT EXISTS `intelligen_2k9_update_system_files` (
+  `id` int(5) NOT NULL,
+  `system_id` int(5) NOT NULL,
   `major_version_number` int(3) NOT NULL DEFAULT '2',
   `minor_version_number` int(3) NOT NULL,
   `major_build_number` int(3) NOT NULL,
-  `minor_build_number` int(3) NOT NULL,
-  `description` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+  `minor_build_number` int(3) NOT NULL DEFAULT '0',
+  `size` int(25) NOT NULL,
+  `checksum` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONEN DER TABELLE `intelligen_2k9_update_system_files`:
+--   `system_id`
+--       `intelligen_2k9_update_systems` -> `id`
+--   `system_id`
+--       `intelligen_2k9_update_systems` -> `id`
+--
 
 -- --------------------------------------------------------
 
 --
--- Tabellenstruktur für Tabelle `int2k9_upd_version_files`
+-- Tabellenstruktur für Tabelle `intelligen_2k9_update_versions`
 --
 
-CREATE TABLE IF NOT EXISTS `int2k9_upd_version_files` (
-  `id` int(3) NOT NULL AUTO_INCREMENT,
-  `id_version` int(3) NOT NULL,
-  `id_file` int(4) NOT NULL,
-  `action` int(1) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+CREATE TABLE IF NOT EXISTS `intelligen_2k9_update_versions` (
+  `id` int(5) NOT NULL,
+  `active` tinyint(1) NOT NULL DEFAULT '0',
+  `major_version_number` int(3) NOT NULL DEFAULT '2',
+  `minor_version_number` int(3) NOT NULL,
+  `major_build_number` int(3) NOT NULL,
+  `minor_build_number` int(3) NOT NULL DEFAULT '0',
+  `created` datetime NOT NULL,
+  `modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONEN DER TABELLE `intelligen_2k9_update_versions`:
+--
+
+-- --------------------------------------------------------
+
+--
+-- Tabellenstruktur für Tabelle `intelligen_2k9_update_version_files`
+--
+
+CREATE TABLE IF NOT EXISTS `intelligen_2k9_update_version_files` (
+  `id` int(5) NOT NULL,
+  `version_id` int(5) NOT NULL,
+  `file_id` int(5) NOT NULL,
+  `created` datetime NOT NULL,
+  `modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONEN DER TABELLE `intelligen_2k9_update_version_files`:
+--   `version_id`
+--       `intelligen_2k9_update_versions` -> `id`
+--   `file_id`
+--       `intelligen_2k9_update_system_files` -> `id`
+--
+
+--
+-- Indizes der exportierten Tabellen
+--
+
+--
+-- Indizes für die Tabelle `intelligen_2k9_update_systems`
+--
+ALTER TABLE `intelligen_2k9_update_systems`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indizes für die Tabelle `intelligen_2k9_update_system_files`
+--
+ALTER TABLE `intelligen_2k9_update_system_files`
+  ADD PRIMARY KEY (`id`), ADD KEY `system_id` (`system_id`);
+
+--
+-- Indizes für die Tabelle `intelligen_2k9_update_versions`
+--
+ALTER TABLE `intelligen_2k9_update_versions`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indizes für die Tabelle `intelligen_2k9_update_version_files`
+--
+ALTER TABLE `intelligen_2k9_update_version_files`
+  ADD PRIMARY KEY (`id`), ADD KEY `version_id` (`version_id`), ADD KEY `file_id` (`file_id`);
+
+--
+-- AUTO_INCREMENT für exportierte Tabellen
+--
+
+--
+-- AUTO_INCREMENT für Tabelle `intelligen_2k9_update_systems`
+--
+ALTER TABLE `intelligen_2k9_update_systems`
+  MODIFY `id` int(5) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=1;
+--
+-- AUTO_INCREMENT für Tabelle `intelligen_2k9_update_system_files`
+--
+ALTER TABLE `intelligen_2k9_update_system_files`
+  MODIFY `id` int(5) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=1;
+--
+-- AUTO_INCREMENT für Tabelle `intelligen_2k9_update_versions`
+--
+ALTER TABLE `intelligen_2k9_update_versions`
+  MODIFY `id` int(5) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=1;
+--
+-- AUTO_INCREMENT für Tabelle `intelligen_2k9_update_version_files`
+--
+ALTER TABLE `intelligen_2k9_update_version_files`
+  MODIFY `id` int(5) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=1;
+--
+-- Constraints der exportierten Tabellen
+--
+
+--
+-- Constraints der Tabelle `intelligen_2k9_update_system_files`
+--
+ALTER TABLE `intelligen_2k9_update_system_files`
+ADD CONSTRAINT `intelligen_2k9_update_system_files_ibfk_1` FOREIGN KEY (`system_id`) REFERENCES `intelligen_2k9_update_systems` (`id`);
+
+--
+-- Constraints der Tabelle `intelligen_2k9_update_version_files`
+--
+ALTER TABLE `intelligen_2k9_update_version_files`
+ADD CONSTRAINT `intelligen_2k9_update_version_files_ibfk_1` FOREIGN KEY (`version_id`) REFERENCES `intelligen_2k9_update_versions` (`id`),
+ADD CONSTRAINT `intelligen_2k9_update_version_files_ibfk_2` FOREIGN KEY (`file_id`) REFERENCES `intelligen_2k9_update_system_files` (`id`);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
