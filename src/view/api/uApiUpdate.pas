@@ -7,12 +7,14 @@ uses
   Windows, SysUtils, Classes, Graphics, Generics.Collections, IdComponent, Variants, XMLDoc, XMLIntf, ActiveX,
   // AB
   AbArcTyp, AbUnZper,
+  // HTTPManager
+  uHTTPInterface, uHTTPClasses, uHTTPManager, uHTTPIndyHelper,
   // Api
-  uApiConst, uApiHTTP,
+  uBase, uApiConst, uApiSettings,
   // DLLs
   uExport,
   // plugin system
-  uPlugInInterface, uPlugInClass, uHTTPInterface, uHTTPClasses,
+  uPlugInInterface, uPlugInClass,
   // Utils
   uFileUtils, uPathUtils;
 
@@ -46,13 +48,12 @@ type
   private
     FFiletype: Integer;
     FFilesize: Int64;
-    FFilename, FFilechecksum, FFileinfo: string;
+    FFilename, FFilechecksum: string;
   public
     property Filetype: Integer read FFiletype write FFiletype;
     property Filesize: Int64 read FFilesize write FFilesize;
     property Filename: string read FFilename write FFilename;
     property Filechecksum: string read FFilechecksum write FFilechecksum;
-    property Fileinfo: string read FFileinfo write FFileinfo;
   end;
 
 implementation
@@ -107,67 +108,60 @@ end;
 
 function TUpdateController.LocalPathFromID(AID: Integer): string;
 begin
-  case AID of
-    0:
-      Result := ExtractFilePath(ParamStr(0));
-    1:
-      Result := GetConfigurationFolder;
-    2:
-      Result := GetPluginFolder;
-    3:
-      Result := GetSettingsFolder;
-    4:
-      Result := GetTemplatesCMSFolder;
-    5:
-      Result := GetTemplatesCMSFolder + '\message\';
-    6:
-      Result := GetTemplatesCMSFolder + '\subject\';
-    7:
-      Result := GetTemplatesSiteFolder;
-    8:
-      Result := GetTemplatesTypeFolder;
-  end;
+  result := GetPathFromFileSystemID(uBase.TFileSystem(AID));
 end;
 
 function TUpdateController.LocalPathVariableFormID(AID: Integer): string;
 begin
   case AID of
-    0:
-      Result := '%intelligen_root%';
     1:
-      Result := '%intelligen_configuration%';
+      Result := '%intelligen_root%';
     2:
-      Result := '%intelligen_plugins%';
+      Result := '%intelligen_configuration%';
     3:
-      Result := '%intelligen_settings%';
+      Result := '%intelligen_plugins%';
     4:
-      Result := '%intelligen_templates_cms%';
+      Result := '%intelligen_settings%';
     5:
-      Result := '%intelligen_templates_cms%\message\';
+      Result := '%intelligen_templates_cms%';
     6:
-      Result := '%intelligen_templates_cms%\subject\';
+      Result := '%intelligen_templates_cms%\message\';
     7:
-      Result := '%intelligen_templates_site%';
+      Result := '%intelligen_templates_cms%\subject\';
     8:
+      Result := '%intelligen_templates_site%';
+    9:
       Result := '%intelligen_templates_type%';
   end;
 end;
+
 
 constructor TUpdateController.Create(CreateSuspended: Boolean);
 begin
   inherited Create(CreateSuspended);
 
-  //FProxy := TProxy.Create;
+  // FProxy := TProxy.Create;
 end;
 
 procedure TUpdateController.Execute;
 const
   u = 'upd/';
 var
+  LHTTPManager: IHTTPManager;
+  LHTTPRequest: IHTTPRequest;
+  LHTTPParams: IHTTPParams;
+  LHTTPOptions: IHTTPOptions;
+  LRequestID: Double;
+  LHTTPProcess: IHTTPProcess;
+
+  LUpdateList: TList<TUpdateFile>;
+
   XMLDoc: IXMLDocument;
   I: Integer;
+
+  LFilePathName: string;
+
   _StringList: TStringList;
-  _StringStream: TStringStream;
   _MemoryStream: TMemoryStream;
   _DownloadPath, _UpdatePath: string;
   _UpdateList: TList<TUpdateFile>;
@@ -175,84 +169,113 @@ var
 begin
   Queue(SearchingUpdate);
 
-  _UpdateList := TList<TUpdateFile>.Create;
+  LHTTPManager := THTTPManager.Instance();
+
+  LHTTPRequest := THTTPRequest.Create(Homepage + u + copy(u, 2, 1) + '.php?action=update_v2');
+
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams, GetFileVersion(ParamStr(0)) do
+  begin
+    AddFormField('major_version', IntToStr(MajorVersion));
+    AddFormField('minor_version', IntToStr(MinorVersion));
+    AddFormField('major_build', IntToStr(MajorBuild));
+    AddFormField('minor_build', IntToStr(MinorBuild));
+  end;
+
+  LHTTPOptions := THTTPOptions.Create(SettingsManager.Settings.HTTP.GetProxy(psaMain));
+
+  LHTTPOptions.ConnectTimeout := SettingsManager.Settings.HTTP.ConnectTimeout;
+  LHTTPOptions.ReadTimeout := SettingsManager.Settings.HTTP.ReadTimeout;
+
+  LRequestID := LHTTPManager.Post(LHTTPRequest, LHTTPParams, LHTTPOptions);
+
+  repeat
+    sleep(75);
+  until LHTTPManager.HasResult(LRequestID);
+
+  LHTTPProcess := LHTTPManager.GetResult(LRequestID);
+
+  if (LHTTPProcess.HTTPResult.HasError) then
+  begin
+    Queue(UpdateError);
+    FErrorMsg := LHTTPProcess.HTTPResult.HTTPResponseInfo.ErrorClassName + ': ' + LHTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
+    Exit;
+  end;
+
+  LUpdateList := TList<TUpdateFile>.Create;
   try
-    with TApiHTTP.Create do
-      try
-        _StringStream := TStringStream.Create;
-        try
-          try
-            Get(Homepage + u + copy(u, 2, 1) + '.php?action=update_v1', _StringStream);
-          except
-            on E: Exception do
+
+    OleInitialize(nil);
+    XMLDoc := NewXMLDocument;
+    try
+      with XMLDoc do
+      begin
+        LoadFromXML(LHTTPProcess.HTTPResult.SourceCode);
+        Active := True;
+      end;
+
+      with XMLDoc.DocumentElement do
+        if HasChildNodes then
+        begin
+          with ChildNodes.Nodes['header'] do
+            if HasChildNodes then
             begin
-              Queue(UpdateError);
-              FErrorMsg := E.message;
-              Exit;
+              _DownloadPath := VarToStr(ChildNodes.Nodes['files_dir'].NodeValue);
+              FVersionInfo := VarToStr(ChildNodes.Nodes['major_version'].NodeValue) + '.' +
+              { . } VarToStr(ChildNodes.Nodes['minor_version'].NodeValue) + '.' +
+              { . } VarToStr(ChildNodes.Nodes['major_build'].NodeValue) + '.' +
+              { . } VarToStr(ChildNodes.Nodes['minor_build'].NodeValue);
             end;
-          end;
 
-          OleInitialize(nil);
-          XMLDoc := NewXMLDocument;
-          try
-            with XMLDoc do
+          // TODO: seperate between upgrade / update
+
+          with ChildNodes.Nodes['files'] do
+            if HasChildNodes then
             begin
-              LoadFromStream(_StringStream, xetUTF_8);
-              Active := True;
+              FUpdateSize := 0;
+              FFilesInfo := '';
+              for I := 0 to ChildNodes.Count - 1 do
+                with ChildNodes.Nodes[I] do
+                begin
+
+                  LFilePathName := IncludeTrailingPathDelimiter(
+                    { . } IncludeTrailingPathDelimiter(LocalPathFromID(StrToIntDef(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue), 0))) +
+                    { ... } VarToStr(ChildNodes.Nodes['path_appendix'].NodeValue)
+                    { . } ) +
+                  { . } VarToStr(ChildNodes.Nodes['name'].NodeValue);
+
+                  if (not FileExists(LFilePathName)) or (not SameText(GetMD5FromFile(LFilePathName), VarToStr(ChildNodes.Nodes['checksum'].NodeValue))) then
+                  begin
+                    _UpdateFile := TUpdateFile.Create;
+
+                    with _UpdateFile do
+                    begin
+                      Filetype := StrToIntDef(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue), 0);
+                      Filesize := StrToIntDef(VarToStr(ChildNodes.Nodes['size'].NodeValue), 0);
+                      Filename := VarToStr(ChildNodes.Nodes['name'].NodeValue);
+                      Filechecksum := VarToStr(ChildNodes.Nodes['checksum'].NodeValue);
+
+                      Inc(FUpdateSize, Filesize);
+                    end;
+                    _UpdateList.Add(_UpdateFile);
+                  end;
+                end;
             end;
-
-            with XMLDoc.DocumentElement do
-              if HasChildNodes then
-              begin
-                with ChildNodes.Nodes['header'] do
-                  if HasChildNodes then
-                  begin
-                    _DownloadPath := Homepage + VarToStr(ChildNodes.Nodes['files_dir'].NodeValue);
-                    FVersionInfo := VarToStr(ChildNodes.Nodes['major_version'].NodeValue) + '.' + VarToStr(ChildNodes.Nodes['minor_version'].NodeValue)
-                      + '.' + VarToStr(ChildNodes.Nodes['major_build'].NodeValue) + '.' + VarToStr(ChildNodes.Nodes['minor_build'].NodeValue);
-                  end;
-                with ChildNodes.Nodes['files'] do
-                  if HasChildNodes then
-                  begin
-                    FUpdateSize := 0;
-                    FFilesInfo := '';
-                    for I := 0 to ChildNodes.Count - 1 do
-                      with ChildNodes.Nodes[I] do
-                        if (not FileExists(LocalPathFromID(Attributes['type']) + ChildNodes.Nodes['name'].NodeValue)) or
-                          (not SameText(GetMD5FromFile(LocalPathFromID(Attributes['type']) + ChildNodes.Nodes['name'].NodeValue), Attributes['csum'])) then
-                        begin
-                          _UpdateFile := TUpdateFile.Create;
-
-                          with _UpdateFile do
-                          begin
-                            Filetype := Attributes['type'];
-                            Filesize := Attributes['size'];
-                            Filename := VarToStr(ChildNodes.Nodes['name'].NodeValue);
-                            Filechecksum := VarToStr(Attributes['csum']);
-                            Fileinfo := VarToStr(ChildNodes.Nodes['info'].NodeValue);
-
-                            FFilesInfo := FFilesInfo + Filename + ':' + #13#10 + Fileinfo + #13#10;
-
-                            Inc(FUpdateSize, Filesize);
-                          end;
-                          _UpdateList.Add(_UpdateFile);
-                        end;
-                  end;
-              end;
-          finally
-            XMLDoc := nil;
-            OleUninitialize;
-          end;
-        finally
-          _StringStream.Free;
         end;
+    finally
+      XMLDoc := nil;
+      OleUninitialize;
+    end;
 
-        if not(_UpdateList.Count > 0) then
-        begin
-          Queue(NoUpdateAvailable);
-        end
-        else
-        begin
+    if not(_UpdateList.Count > 0) then
+    begin
+      Queue(NoUpdateAvailable);
+    end
+    else
+    begin
+
+      with THTTPIndyHelper.Create do
+        try
           OnWork := Work;
           OnWorkBegin := WorkBegin;
           OnWorkEnd := WorkEnd;
@@ -307,43 +330,44 @@ begin
 
                 DeleteFile(_UpdatePath + 'files\' + _UpdateList.Items[I].Filechecksum + '.zip');
 
-                _StringList.Add('copy "' + _UpdatePath + 'files\' + _UpdateList.Items[I].Filename + '" "' + LocalPathVariableFormID
-                    (_UpdateList.Items[I].Filetype) + '"');
+                _StringList.Add('copy "' + _UpdatePath + 'files\' + _UpdateList.Items[I].Filename + '" "' + LocalPathVariableFormID(_UpdateList.Items[I].Filetype) + '"');
               finally
                 _MemoryStream.Free;
               end;
             end;
-            _StringList.Add('rmdir /s /q files');
-            _StringList.Add('del "' + _UpdatePath + 'sleep32.exe"');
-            _StringList.Add('del "' + _UpdatePath + 'sleep64.exe"');
-            _StringList.Add('start "" "%intelligen_root%IntelligeN.exe"');
-            _StringList.SaveToFile(_UpdatePath + 'exec_update.bat');
           finally
-            _StringList.Free;
+            Free;
           end;
 
-          with TResourceStream.Create(hInstance, 'sleep32', RT_RCDATA) do
-            try
-              SaveToFile(_UpdatePath + 'sleep32.exe');
-            finally
-              Free;
-            end;
-
-          with TResourceStream.Create(hInstance, 'sleep64', RT_RCDATA) do
-            try
-              SaveToFile(_UpdatePath + 'sleep64.exe');
-            finally
-              Free;
-            end;
-
-          Queue(UpdateFinished);
+          _StringList.Add('rmdir /s /q files');
+          _StringList.Add('del "' + _UpdatePath + 'sleep32.exe"');
+          _StringList.Add('del "' + _UpdatePath + 'sleep64.exe"');
+          _StringList.Add('start "" "%intelligen_root%IntelligeN.exe"');
+          _StringList.SaveToFile(_UpdatePath + 'exec_update.bat');
+        finally
+          _StringList.Free;
         end;
-      finally
-        Free;
-      end;
+
+      with TResourceStream.Create(hInstance, 'sleep32', RT_RCDATA) do
+        try
+          SaveToFile(_UpdatePath + 'sleep32.exe');
+        finally
+          Free;
+        end;
+
+      with TResourceStream.Create(hInstance, 'sleep64', RT_RCDATA) do
+        try
+          SaveToFile(_UpdatePath + 'sleep64.exe');
+        finally
+          Free;
+        end;
+
+      Queue(UpdateFinished);
+    end;
   finally
-    _UpdateList.Free;
+    LUpdateList.Free;
   end;
+
 end;
 
 end.
