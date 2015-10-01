@@ -71,6 +71,57 @@ function systems_message($status, $code, $msg, $data = null) {
 }
 
 /**
+ * @param int $status
+ * @param int $code
+ * @param $msg
+ * @param int $version_id
+ * @return XML
+ */
+function version_message($status, $code, $msg, $version_id) {
+
+	$xml = status_message($status, $code, $msg);
+
+	$version = XML::addElement($xml->rootnode, 'version');
+
+	XML::addElement($version, 'id', $version_id);
+
+	return $xml;
+}
+
+/**
+ * @param $status
+ * @param $code
+ * @param $msg
+ * @param SQLUpdateVersion[]|null $data
+ * @return XML
+ */
+function versions_message($status, $code, $msg, $data = null) {
+
+	$xml = status_message($status, $code, $msg);
+
+	if (!is_null($data)) {
+
+		$versions = XML::addElement($xml->rootnode, 'systems');
+
+		foreach ($data as $Version)  {
+
+			$version = XML::addElement($versions, 'system');
+
+			XML::addElement($version, 'id', $Version->id);
+			XML::addElement($version, 'active', $Version->active);
+			XML::addElement($version, 'major_version_number', $Version->major_version_number);
+			XML::addElement($version, 'minor_version_number', $Version->minor_version_number);
+			XML::addElement($version, 'major_build_number', $Version->major_build_number);
+			XML::addElement($version, 'minor_build_number', $Version->minor_build_number);
+			XML::addElement($version, 'created', $Version->created);
+			XML::addElement($version, 'modified', $Version->modified);
+		}
+	}
+
+	return $xml;
+}
+
+/**
  * @param $status
  * @param $code
  * @param $msg

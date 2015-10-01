@@ -38,6 +38,9 @@ class UploadSystem
 		return $result;
 	}
 
+	/**
+	 * @return null|XML
+     */
 	private function addSystems()
 	{
 		$result = null;
@@ -77,6 +80,31 @@ class UploadSystem
 		return $result;
 	}
 
+	/**
+	 * @return null|XML
+	 */
+	private function getVersions()
+	{
+		$result = null;
+
+		$sqlsystem = new SQLSystem();
+		$versions = $sqlsystem->GetAllVersions();
+
+		if (is_null($versions) || count($versions) == 0) {
+
+			$result = status_message(0, 0, 'No version system yet defined.');
+		}
+		else {
+
+			$result = versions_message(1, 1, "OK", $versions);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * @return null|XML
+     */
 	private function addVersion()
 	{
 		$result = null;
@@ -84,11 +112,11 @@ class UploadSystem
 		if (isset($_REQUEST['major_version']) && isset($_REQUEST['minor_version']) && isset($_REQUEST['major_build']) && isset($_REQUEST['minor_build'])) {
 
 			$sqlsystem = new SQLSystem();
-			$success = $sqlsystem->AddVersion($_REQUEST['major_version'], $_REQUEST['minor_version'], $_REQUEST['major_build'], $_REQUEST['minor_build']);
+			$version_id = $sqlsystem->AddVersion($_REQUEST['major_version'], $_REQUEST['minor_version'], $_REQUEST['major_build'], $_REQUEST['minor_build']);
 
-			if ($success) {
+			if ($version_id) {
 
-				$result = status_message(1, 1, 'Version have been added successfully.');
+				$result = version_message(1, 1, 'Version have been added successfully.', $version_id);
 			}
 			else  {
 
@@ -100,8 +128,6 @@ class UploadSystem
 			$result = status_message(0, 0, 'No version specified.');
 		}
 
-		// TODO: return Version ID as result (include in XML file)
-
 		return $result;
 	}
 
@@ -112,6 +138,9 @@ class UploadSystem
 		return "";
 	}
 
+	/**
+	 * @return null|XML
+     */
 	private function activateVersion()
 	{
 		$result = null;
@@ -159,6 +188,9 @@ class UploadSystem
 						echo $this->addSystems();
 						break;
 
+					case 'get_versions_v2':
+						echo $this->getVersions();
+						break;
 					case 'add_version_v2':
 						echo $this->addVersion();
 						break;

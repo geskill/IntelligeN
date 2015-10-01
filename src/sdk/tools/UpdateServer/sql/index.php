@@ -15,6 +15,10 @@ class SQLUpdateVersion {
 	public $id;
 	/**
 	 * @var
+	 */
+	public $active;
+	/**
+	 * @var
      */
 	public $major_version_number;
 	/**
@@ -177,6 +181,7 @@ class SQLSystem
 			$row = $query_result->fetch_assoc();
 
 			$result->id = $row['id'];
+			$result->active = $row['active'];
 			$result->major_version_number = $row['major_version_number'];
 			$result->minor_version_number = $row['minor_version_number'];
 			$result->major_build_number = $row['major_build_number'];
@@ -229,6 +234,7 @@ class SQLSystem
 			$row = $query_result->fetch_assoc();
 
 			$result->id = $row['id'];
+			$result->active = $row['active'];
 			$result->major_version_number = $row['major_version_number'];
 			$result->minor_version_number = $row['minor_version_number'];
 			$result->major_build_number = $row['major_build_number'];
@@ -359,6 +365,46 @@ class SQLSystem
 	}
 
 	/**
+	 * @return SQLUpdateVersion[]|null
+	 */
+	function GetAllVersions() {
+
+		$result = null;
+
+		// Select all entries from systems.
+		$sql = "SELECT * FROM `intelligen_2k9_update_versions`";
+
+		$query_result = $this->link->query($sql);
+		if(!$query_result)
+		{
+			die(status_message(0, 0, 'There was an error running the query [' . $this->link->error . ']'));
+		}
+
+		if ($query_result->num_rows >= 1)
+		{
+			$result = array();
+
+			while($row = $query_result->fetch_assoc()){
+
+				$version = new SQLUpdateVersion();
+
+				$version->id = $row['id'];
+				$version->active = $row['active'];
+				$version->major_version_number = $row['major_version_number'];
+				$version->minor_version_number = $row['minor_version_number'];
+				$version->major_build_number = $row['major_build_number'];
+				$version->minor_build_number = $row['minor_build_number'];
+				$version->created = $row['created'];
+				$version->modified = $row['modified'];
+
+				$result[] = $version;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
 	 * @param SQLUpdateSystem[] $systems
 	 * @return bool
      */
@@ -382,6 +428,13 @@ class SQLSystem
 		return true;
 	}
 
+	/**
+	 * @param $major_version
+	 * @param $minor_version
+	 * @param $major_build
+	 * @param $minor_build
+	 * @return bool
+     */
 	private function VersionExists($major_version, $minor_version, $major_build, $minor_build) {
 
 		$sql = "SELECT * FROM `intelligen_2k9_update_versions` WHERE";
@@ -399,7 +452,16 @@ class SQLSystem
 		return ($query_result->num_rows > 0);
 	}
 
+	/**
+	 * @param $major_version
+	 * @param $minor_version
+	 * @param $major_build
+	 * @param $minor_build
+	 * @return int|mixed
+     */
 	function AddVersion($major_version, $minor_version, $major_build, $minor_build) {
+
+		$result = 0;
 
 		if (!$this->VersionExists($major_version, $minor_version, $major_build, $minor_build)) {
 
@@ -412,16 +474,24 @@ class SQLSystem
 				die(status_message(0, 0, 'There was an error running the query [' . $this->link->error . ']'));
 			}
 
-			// TODO: return Version ID as result
-
-			return true;
+			return $this->link->insert_id;
 		}
+
+		return $result;
+	}
+
+
+	function AddFiles() {
+
+		// TODO: add files
 
 		return false;
 	}
 
-	// TODO: add files
-
+	/**
+	 * @param $version_id
+	 * @return bool
+     */
 	function SetVersionActive($version_id) {
 
 		$sql = "UPDATE `intelligen_2k9`.`intelligen_2k9_update_versions` SET `active` = '1', `modified` = CURRENT_TIMESTAMP";
@@ -496,47 +566,6 @@ class SQLSystem
 
 			echo files_message(1, $code, $message, $last_upgrade_files, $last_update_files);
 		}
-	}
-	
-	function search_version($major_version, $minor_version, $major_build, $minor_build)
-	{
-		$result = new SQLVersionResult();
-		
-		$sql = "SELECT id FROM `int2k9_upd_version` WHERE";
-		
-		$sql .= " (`major_version_number` = '" . mysql_real_escape_string($major_version) . "')";
-		
-		$sql .= " AND (`minor_version_number` = '" . mysql_real_escape_string($minor_version) . "')";
-		
-		$sql .= " AND (`major_build_number` = '" . mysql_real_escape_string($major_build) . "')";
-		
-		$sql .= " AND (`minor_build_number` = '" . mysql_real_escape_string($minor_build) . "')";
-		
-		$query = mysql_query($sql, $this->link);
-		if(!$query)
-			die(message(0, 0, mysql_error()));
-		
-		if(mysql_num_rows($query) == 1)
-		{
-			$data = mysql_fetch_assoc($query);
-			$result->id = $data['id'];
-		}
-		else
-		{
-			$result->new = true;
-			
-			$sql = "INSERT INTO `int2k9_upd_version`(`major_version_number`, `minor_version_number`, `major_build_number`, `minor_build_number`, `description`)";
-			$sql .= " VALUES (" . mysql_real_escape_string($major_version) . ", " . mysql_real_escape_string($minor_version) . ", " . mysql_real_escape_string($major_build) . ", " . mysql_real_escape_string($minor_build) . ", '')";
-			
-			$query = mysql_query($sql);
-			
-			if($query)
-				$result->id = mysql_insert_id($this->link);
-			else
-				die(message(0, 0, mysql_error()));
-		}
-
-		return $result;
 	}
 
 	/**
