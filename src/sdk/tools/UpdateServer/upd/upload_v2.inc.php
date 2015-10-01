@@ -131,11 +131,51 @@ class UploadSystem
 		return $result;
 	}
 
+	/**
+	 * @return null|XML
+     */
 	private function addFiles()
 	{
-		// TODO: add files to db
+		$result = null;
 
-		return "";
+		if (isset($_REQUEST['files']) && isset($_REQUEST['version_id'])) {
+
+			$files = array();
+
+			foreach ($_REQUEST['files'] as $File) {
+
+				$file = new SQLUpdateSystemFile();
+
+				$file->id = 0; // Not in DB yet.
+				$file->system_id = $File['system_id'];
+				$file->major_version_number = $File['major_version_number'];
+				$file->minor_version_number = $File['minor_version_number'];
+				$file->major_build_number = $File['major_build_number'];
+				$file->minor_build_number = $File['minor_build_number'];
+				$file->size = $File['size'];
+				$file->checksum = $File['checksum'];
+
+				$files[] = $file;
+			}
+
+			$sqlsystem = new SQLSystem();
+			$success = $sqlsystem->AddFiles($_REQUEST['version_id'], $files);
+
+			if ($success) {
+
+				$result = status_message(1, 1, 'Files have been added successfully.');
+			}
+			else  {
+
+				$result = status_message(0, 0, 'Files not added.');
+			}
+		}
+		else {
+
+			$result = status_message(0, 0, 'No files specified.');
+		}
+
+		return $result;
 	}
 
 	/**
@@ -194,9 +234,11 @@ class UploadSystem
 					case 'add_version_v2':
 						echo $this->addVersion();
 						break;
+
 					case 'add_files_v2':
 						echo $this->addFiles();
 						break;
+
 					case 'activate_version_v2':
 						echo $this->activateVersion();
 						break;

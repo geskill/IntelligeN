@@ -78,6 +78,9 @@ class SQLUpdateVersionFile {
 	public $modified;
 }
 
+/**
+ * Class SQLUpdateSystem
+ */
 class SQLUpdateSystem {
 	/**
 	 * @var
@@ -97,6 +100,9 @@ class SQLUpdateSystem {
 	public $name;
 }
 
+/**
+ * Class SQLUpdateSystemFile
+ */
 class SQLUpdateSystemFile {
 	/**
 	 * @var
@@ -136,6 +142,9 @@ class SQLUpdateSystemFile {
 	public $checksum;
 }
 
+/**
+ * Class SQLUpdateVersionFile
+ */
 class SQLSystem
 {
 	/**
@@ -155,10 +164,10 @@ class SQLSystem
 		$result = null;
 
 		// Select latest stable upgrade version
-		$sql = "SELECT * FROM `intelligen_2k9_update_versions` WHERE (`active` = '1')";
-		$sql .= " AND (`major_version_number` = '" . $this->link->escape_string($major_version) . "')";
-		$sql .= " AND (`minor_build_number` = '0')";
-		$sql .= " ORDER BY `minor_version_number` DESC, `major_build_number` DESC LIMIT 1";
+		$sql = "SELECT * FROM `intelligen_2k9_update_versions` WHERE (`active` = '1')
+		AND (`major_version_number` = '" . $this->link->escape_string($major_version) . "')
+		AND (`minor_build_number` = '0')
+		ORDER BY `minor_version_number` DESC, `major_build_number` DESC LIMIT 1";
 
 		$query_result = $this->link->query($sql);
 		if(!$query_result)
@@ -168,9 +177,9 @@ class SQLSystem
 		else if ($query_result->num_rows == 0)
 		{
 			// If the are no stable upgrade versions, select latest unstable upgrade version
-			$sql = "SELECT * FROM `intelligen_2k9_update_versions` WHERE (`active` = '1')";
-			$sql .= " AND (`major_version_number` = '" . $this->link->escape_string($major_version) . "')";
-			$sql .= " ORDER BY `minor_version_number` DESC, `major_build_number` DESC, `minor_build_number` DESC LIMIT 1";
+			$sql = "SELECT * FROM `intelligen_2k9_update_versions` WHERE (`active` = '1')
+			AND (`major_version_number` = '" . $this->link->escape_string($major_version) . "')
+			ORDER BY `minor_version_number` DESC, `major_build_number` DESC, `minor_build_number` DESC LIMIT 1";
 			$query_result = $this->link->query($sql);
 		}
 
@@ -191,7 +200,6 @@ class SQLSystem
 		}
 
 		return $result;
-		
 	}
 
 	/**
@@ -206,11 +214,11 @@ class SQLSystem
 		$result = null;
 
 		// Select latest stable update version
-		$sql = "SELECT * FROM `intelligen_2k9_update_versions` WHERE (`active` = '1')";
-		$sql .= " AND (`major_version_number` = '" . $this->link->escape_string($major_version) . "')";
-		$sql .= " AND (`minor_version_number` = '" . $this->link->escape_string($minor_version) . "')";
-		$sql .= " AND (`minor_build_number` = '0')";
-		$sql .= " ORDER BY `major_build_number` DESC LIMIT 1";
+		$sql = "SELECT * FROM `intelligen_2k9_update_versions` WHERE (`active` = '1')
+		AND (`major_version_number` = '" . $this->link->escape_string($major_version) . "')
+		AND (`minor_version_number` = '" . $this->link->escape_string($minor_version) . "')
+		AND (`minor_build_number` = '0')
+		ORDER BY `major_build_number` DESC LIMIT 1";
 		
 		$query_result = $this->link->query($sql);
 		if(!$query_result)
@@ -220,10 +228,10 @@ class SQLSystem
 		else if ($query_result->num_rows == 0)
 		{
 			// If the are no stable update versions, select latest unstable update version
-			$sql = "SELECT * FROM `intelligen_2k9_update_versions` WHERE (`active` = '1')";
-			$sql .= " AND (`major_version_number` = '" . $this->link->escape_string($major_version) . "')";
-			$sql .= " AND (`minor_version_number` = '" . $this->link->escape_string($minor_version) . "')";
-			$sql .= " ORDER BY `major_build_number` DESC, `minor_build_number` DESC LIMIT 1";
+			$sql = "SELECT * FROM `intelligen_2k9_update_versions` WHERE (`active` = '1')
+			AND (`major_version_number` = '" . $this->link->escape_string($major_version) . "')
+			AND (`minor_version_number` = '" . $this->link->escape_string($minor_version) . "')
+			ORDER BY `major_build_number` DESC, `minor_build_number` DESC LIMIT 1";
 			$query_result = $this->link->query($sql);
 		}
 
@@ -405,16 +413,39 @@ class SQLSystem
 	}
 
 	/**
+	 * @param SQLUpdateSystem $system
+	 * @return bool
+	 */
+	function SystemExists($system) {
+
+		$sql = "SELECT * FROM `intelligen_2k9_update_systems` WHERE
+ 		(`filesystem_id` = '" . $this->link->escape_string($system->filesystem_id) . "')
+		 AND (`path_appendix` = '" . $this->link->escape_string($system->path_appendix) . "')
+		 AND (`name` = '" . $this->link->escape_string($system->name) . "')";
+
+		$query_result = $this->link->query($sql);
+		if(!$query_result)
+		{
+			die(status_message(0, 0, 'There was an error running the query [' . $this->link->error . ']'));
+		}
+
+		return ($query_result->num_rows > 0);
+	}
+
+	/**
 	 * @param SQLUpdateSystem[] $systems
 	 * @return bool
      */
 	function AddSystems($systems) {
 
-		$sql = "INSERT INTO `intelligen_2k9`.`intelligen_2k9_update_systems` (`id`, `filesystem_id`, `path_appendix`, `name`) VALUES";
+		$sql = "INSERT INTO `intelligen_2k9_update_systems` (`filesystem_id`, `path_appendix`, `name`) VALUES";
 
 		foreach ($systems as $system) {
 
-			$sql .= " (NULL, " . $this->link->escape_string($system->filesystem_id) . ", '" . $this->link->escape_string($system->path_appendix) . "', '" . $this->link->escape_string($system->name) . "'),";
+			if (!$this->SystemExists($system)) {
+
+				$sql .= " ('" . $this->link->escape_string($system->filesystem_id) . "', '" . $this->link->escape_string($system->path_appendix) . "', '" . $this->link->escape_string($system->name) . "'),";
+			}
 		}
 
 		$sql = rtrim($sql, ",");
@@ -437,11 +468,11 @@ class SQLSystem
      */
 	private function VersionExists($major_version, $minor_version, $major_build, $minor_build) {
 
-		$sql = "SELECT * FROM `intelligen_2k9_update_versions` WHERE";
-		$sql .= " AND (`major_version_number` = '" . $this->link->escape_string($major_version) . "')";
-		$sql .= " AND (`minor_version_number` = '" . $this->link->escape_string($minor_version) . "')";
-		$sql .= " AND (`major_build_number` = '" . $this->link->escape_string($major_build) . "')";
-		$sql .= " AND (`minor_build_number` = '" . $this->link->escape_string($minor_build) . "')";
+		$sql = "SELECT * FROM `intelligen_2k9_update_versions` WHERE
+		(`major_version_number` = '" . $this->link->escape_string($major_version) . "')
+		AND (`minor_version_number` = '" . $this->link->escape_string($minor_version) . "')
+		AND (`major_build_number` = '" . $this->link->escape_string($major_build) . "')
+		AND (`minor_build_number` = '" . $this->link->escape_string($minor_build) . "')";
 
 		$query_result = $this->link->query($sql);
 		if(!$query_result)
@@ -465,8 +496,8 @@ class SQLSystem
 
 		if (!$this->VersionExists($major_version, $minor_version, $major_build, $minor_build)) {
 
-			$sql = "INSERT INTO `intelligen_2k9`.`intelligen_2k9_update_versions` (`major_version_number`, `minor_version_number`, `major_build_number`, `minor_build_number`, `created`) VALUES";
-			$sql .= " ('" . $this->link->escape_string($major_version) . "', '" . $this->link->escape_string($minor_version) . "', '" . $this->link->escape_string($major_build) . "', '" . $this->link->escape_string($minor_build) . "', CURRENT_TIMESTAMP)";
+			$sql = "INSERT INTO `intelligen_2k9_update_versions` (`major_version_number`, `minor_version_number`, `major_build_number`, `minor_build_number`, `created`) VALUES
+			('" . $this->link->escape_string($major_version) . "', '" . $this->link->escape_string($minor_version) . "', '" . $this->link->escape_string($major_build) . "', '" . $this->link->escape_string($minor_build) . "', CURRENT_TIMESTAMP)";
 
 			$query_result = $this->link->query($sql);
 			if(!$query_result)
@@ -480,12 +511,160 @@ class SQLSystem
 		return $result;
 	}
 
+	/**
+	 * @param $checksum
+	 * @return null|SQLUpdateSystemFile
+	 */
+	private function GetFile($checksum) {
 
-	function AddFiles() {
+		$result = null;
 
-		// TODO: add files
+		$sql = "SELECT * FROM `intelligen_2k9_update_system_files` WHERE
+		(`checksum` = '" . $this->link->escape_string($checksum) . "')";
 
-		return false;
+		$query_result = $this->link->query($sql);
+		if(!$query_result)
+		{
+			die(status_message(0, 0, 'There was an error running the query [' . $this->link->error . ']'));
+		}
+
+		if ($query_result->num_rows == 1)
+		{
+			$result = new SQLUpdateSystemFile();
+
+			$row = $query_result->fetch_assoc();
+
+			$result->id = $row['id'];
+			$result->system_id = $row['system_id'];
+			$result->major_version_number = $row['major_version_number'];
+			$result->minor_version_number = $row['minor_version_number'];
+			$result->major_build_number = $row['major_build_number'];
+			$result->minor_build_number = $row['minor_build_number'];
+			$result->size = $row['size'];
+			$result->checksum = $row['checksum'];
+		}
+
+		return $result;
+	}
+
+	/**
+	 * @param $checksum
+	 * @return bool
+	 */
+	private function FileExists($checksum) {
+
+		return !is_null($this->GetFile($checksum));
+	}
+
+	/**
+	 * @param $version_id
+	 * @param $file_id
+	 * @return null|SQLUpdateVersionFile
+	 */
+	private function GetFileLink($version_id, $file_id) {
+
+		$result = null;
+
+		$sql = "SELECT * FROM `intelligen_2k9_update_version_files` WHERE
+		(`version_id` = '" . $this->link->escape_string($version_id) . "')
+		AND (`file_id` = '" . $this->link->escape_string($file_id) . "')";
+
+		$query_result = $this->link->query($sql);
+		if(!$query_result)
+		{
+			die(status_message(0, 0, 'There was an error running the query [' . $this->link->error . ']'));
+		}
+
+		if ($query_result->num_rows == 1)
+		{
+			$result = new SQLUpdateVersionFile();
+
+			$row = $query_result->fetch_assoc();
+
+			$result->id = $row['id'];
+			$result->version_id = $row['version_id'];
+			$result->version = null;
+			$result->file_id = $row['file_id'];
+			$result->file = null;
+			$result->created = $row['created'];
+			$result->modified = $row['modified'];
+		}
+
+		return $result;
+	}
+
+	/**
+	 * @param $version_id
+	 * @param $file_id
+	 * @return bool
+	 */
+	private function FileLinkExists($version_id, $file_id) {
+
+		return !is_null($this->GetFileLink($version_id, $file_id));
+	}
+
+	/**
+	 * @param $version_id
+	 * @param SQLUpdateSystemFile[] $files
+	 * @return bool
+	 */
+	function AddFiles($version_id, $files) {
+
+		$sql = "INSERT INTO `intelligen_2k9_update_system_files` (`system_id`, `major_version_number`, `minor_version_number`, `major_build_number`, `minor_build_number`, `size`, `checksum`) VALUES";
+		$hasNewFiles = false;
+
+		foreach ($files as $file) {
+
+			if (!$this->FileExists($file)) {
+
+				$sql .= " ('" . $this->link->escape_string($file->system_id) . "', '" . $this->link->escape_string($file->major_version_number) . "', '" . $this->link->escape_string($file->minor_version_number) . "', '" . $this->link->escape_string($file->major_build_number) . "', '" . $this->link->escape_string($file->minor_build_number) . "', '" . $this->link->escape_string($file->size) . "', '" . $this->link->escape_string($file->checksum) . "'),";
+
+				$hasNewFiles = true;
+			}
+		}
+
+		if ($hasNewFiles) {
+
+			$sql = rtrim($sql, ",");
+
+			$query_result = $this->link->query($sql);
+			if(!$query_result)
+			{
+				die(status_message(0, 0, 'There was an error running the query [' . $this->link->error . ']'));
+			}
+		}
+
+		// Get files ids, update using reference
+		foreach ($files as $key => &$file) {
+
+			$file = $this->GetFile($file->checksum);
+		}
+
+		$sql = "INSERT INTO `intelligen_2k9_update_version_files` (`version_id`, `file_id`, `created`) VALUES";
+		$hasNewFileLinks = false;
+
+		foreach ($files as $file) {
+
+			if (!$this->FileLinkExists($version_id, $file->id)) {
+
+				$sql .= " ('" . $this->link->escape_string($version_id) . "', '" . $this->link->escape_string($file->id) . "', CURRENT_TIMESTAMP),";
+
+				$hasNewFileLinks = true;
+			}
+		}
+
+		if ($hasNewFileLinks) {
+
+			$sql = rtrim($sql, ",");
+
+			$query_result = $this->link->query($sql);
+			if(!$query_result)
+			{
+				die(status_message(0, 0, 'There was an error running the query [' . $this->link->error . ']'));
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -494,8 +673,8 @@ class SQLSystem
      */
 	function SetVersionActive($version_id) {
 
-		$sql = "UPDATE `intelligen_2k9`.`intelligen_2k9_update_versions` SET `active` = '1', `modified` = CURRENT_TIMESTAMP";
-		$sql .= " WHERE `intelligen_2k9_update_versions`.`id` = '" . $this->link->escape_string($version_id) . "'";
+		$sql = "UPDATE `intelligen_2k9_update_versions` SET `active` = '1', `modified` = CURRENT_TIMESTAMP
+		WHERE `intelligen_2k9_update_versions`.`id` = '" . $this->link->escape_string($version_id) . "'";
 
 		$query_result = $this->link->query($sql);
 		if(!$query_result)

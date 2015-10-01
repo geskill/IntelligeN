@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Erstellungszeit: 30. Sep 2015 um 23:12
+-- Erstellungszeit: 01. Okt 2015 um 16:41
 -- Server-Version: 5.6.24
 -- PHP-Version: 5.6.8
 
@@ -27,6 +27,8 @@ USE `intelligen_2k9`;
 --
 -- Tabellenstruktur für Tabelle `intelligen_2k9_update_systems`
 --
+-- Erstellt am: 30. Sep 2015 um 22:53
+--
 
 CREATE TABLE IF NOT EXISTS `intelligen_2k9_update_systems` (
   `id` int(5) NOT NULL,
@@ -43,6 +45,8 @@ CREATE TABLE IF NOT EXISTS `intelligen_2k9_update_systems` (
 
 --
 -- Tabellenstruktur für Tabelle `intelligen_2k9_update_system_files`
+--
+-- Erstellt am: 30. Sep 2015 um 19:36
 --
 
 CREATE TABLE IF NOT EXISTS `intelligen_2k9_update_system_files` (
@@ -69,6 +73,8 @@ CREATE TABLE IF NOT EXISTS `intelligen_2k9_update_system_files` (
 --
 -- Tabellenstruktur für Tabelle `intelligen_2k9_update_versions`
 --
+-- Erstellt am: 30. Sep 2015 um 23:20
+--
 
 CREATE TABLE IF NOT EXISTS `intelligen_2k9_update_versions` (
   `id` int(5) NOT NULL,
@@ -89,6 +95,8 @@ CREATE TABLE IF NOT EXISTS `intelligen_2k9_update_versions` (
 
 --
 -- Tabellenstruktur für Tabelle `intelligen_2k9_update_version_files`
+--
+-- Erstellt am: 30. Sep 2015 um 19:27
 --
 
 CREATE TABLE IF NOT EXISTS `intelligen_2k9_update_version_files` (
