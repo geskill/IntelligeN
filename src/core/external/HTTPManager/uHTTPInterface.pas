@@ -46,8 +46,7 @@ type
     function GetAccountName: WideString; safecall;
     function GetAccountPassword: WideString; safecall;
 
-    procedure Activate(AType: TProxyType; AServer: WideString; APort: Integer; ARequireAuthentication: WordBool; AAccountName, AAccountPassword: WideString);
-      safecall;
+    procedure Activate(AType: TProxyType; AServer: WideString; APort: Integer; ARequireAuthentication: WordBool; AAccountName, AAccountPassword: WideString); safecall;
     property Active: WordBool read GetActive;
     property ServerType: TProxyType read GetType;
     property Server: WideString read GetServer;

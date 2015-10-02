@@ -62,8 +62,7 @@ type
   public
     constructor Create;
     constructor Clone(const AProxy: IProxy);
-    procedure Activate(AType: TProxyType; AServer: WideString; APort: Integer; ARequireAuthentication: WordBool; AAccountName, AAccountPassword: WideString);
-      safecall;
+    procedure Activate(AType: TProxyType; AServer: WideString; APort: Integer; ARequireAuthentication: WordBool; AAccountName, AAccountPassword: WideString); safecall;
     property Active: WordBool read GetActive;
     property ServerType: TProxyType read GetType;
     property Server: WideString read GetServer;
@@ -282,8 +281,7 @@ type
     function GetRedirectMaximum: Integer; safecall;
     procedure SetRedirectMaximum(ARedirectMaximum: Integer); safecall;
   public
-    constructor Create(AProxy: IProxy); overload;
-    constructor Create; overload;
+    constructor Create(const AProxy: IProxy = nil);
     constructor Clone(const AHTTPOptions: IHTTPOptions);
 
     property UseCompressor: WordBool read GetUseCompressor write SetUseCompressor;
@@ -419,8 +417,8 @@ end;
 constructor TProxy.Create;
 begin
   FActive := False;
-  FPort := 0;
   FServer := '';
+  FPort := 0;
   FAccountName := '';
   FAccountPassword := '';
 end;
@@ -1035,11 +1033,14 @@ end;
 
 { THTTPOptions }
 
-constructor THTTPOptions.Create(AProxy: IProxy);
+constructor THTTPOptions.Create(const AProxy: IProxy = nil);
 begin
   FUseCompressor := True;
 
-  FProxy := AProxy;
+  if not Assigned(AProxy) then
+    FProxy := TProxy.Create
+  else
+    FProxy := AProxy;
 
   FConnectTimeout := 0;
   FReadTimeout := 0;
@@ -1047,11 +1048,6 @@ begin
   FHandleRedirects := True;
   FHandleSketchyRedirects := True;
   FRedirectMaximum := 15;
-end;
-
-constructor THTTPOptions.Create;
-begin
-  Create(TProxy.Create);
 end;
 
 constructor THTTPOptions.Clone(const AHTTPOptions: IHTTPOptions);
