@@ -52,10 +52,10 @@ CREATE TABLE IF NOT EXISTS `intelligen_2k9_update_systems` (
 CREATE TABLE IF NOT EXISTS `intelligen_2k9_update_system_files` (
   `id` int(5) NOT NULL,
   `system_id` int(5) NOT NULL,
-  `major_version_number` int(3) NOT NULL DEFAULT '2',
-  `minor_version_number` int(3) NOT NULL,
-  `major_build_number` int(3) NOT NULL,
-  `minor_build_number` int(3) NOT NULL DEFAULT '0',
+  `major_version` int(3) NOT NULL DEFAULT '2',
+  `minor_version` int(3) NOT NULL,
+  `major_build` int(3) NOT NULL,
+  `minor_build` int(3) NOT NULL DEFAULT '0',
   `size` int(25) NOT NULL,
   `checksum` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -79,10 +79,10 @@ CREATE TABLE IF NOT EXISTS `intelligen_2k9_update_system_files` (
 CREATE TABLE IF NOT EXISTS `intelligen_2k9_update_versions` (
   `id` int(5) NOT NULL,
   `active` tinyint(1) NOT NULL DEFAULT '0',
-  `major_version_number` int(3) NOT NULL DEFAULT '2',
-  `minor_version_number` int(3) NOT NULL,
-  `major_build_number` int(3) NOT NULL,
-  `minor_build_number` int(3) NOT NULL DEFAULT '0',
+  `major_version` int(3) NOT NULL DEFAULT '2',
+  `minor_version` int(3) NOT NULL,
+  `major_build` int(3) NOT NULL,
+  `minor_build` int(3) NOT NULL DEFAULT '0',
   `created` datetime NOT NULL,
   `modified` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

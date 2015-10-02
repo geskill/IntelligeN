@@ -109,10 +109,10 @@ function versions_message($status, $code, $msg, $data = null) {
 
 			XML::addElement($version, 'id', $Version->id);
 			XML::addElement($version, 'active', $Version->active);
-			XML::addElement($version, 'major_version_number', $Version->major_version_number);
-			XML::addElement($version, 'minor_version_number', $Version->minor_version_number);
-			XML::addElement($version, 'major_build_number', $Version->major_build_number);
-			XML::addElement($version, 'minor_build_number', $Version->minor_build_number);
+			XML::addElement($version, 'major_version', $Version->major_version);
+			XML::addElement($version, 'minor_version', $Version->minor_version);
+			XML::addElement($version, 'major_build', $Version->major_build);
+			XML::addElement($version, 'minor_build', $Version->minor_build);
 			XML::addElement($version, 'created', $Version->created);
 			XML::addElement($version, 'modified', $Version->modified);
 		}
@@ -161,10 +161,10 @@ function add_files_to_files_message($node, $data) {
 
 				XML::addElement($header, 'files_dir', HTTP_PATH);
 
-				XML::addElement($header, 'major_version_number', $VersionFile->version->major_version_number);
-				XML::addElement($header, 'minor_version_number', $VersionFile->version->minor_version_number);
-				XML::addElement($header, 'major_build_number', $VersionFile->version->major_build_number);
-				XML::addElement($header, 'minor_build_number', $VersionFile->version->minor_build_number);
+				XML::addElement($header, 'major_version', $VersionFile->version->major_version);
+				XML::addElement($header, 'minor_version', $VersionFile->version->minor_version);
+				XML::addElement($header, 'major_build', $VersionFile->version->major_build);
+				XML::addElement($header, 'minor_build', $VersionFile->version->minor_build);
 				XML::addElement($header, 'created', $VersionFile->version->created);
 				XML::addElement($header, 'modified', $VersionFile->version->modified);
 
@@ -173,10 +173,10 @@ function add_files_to_files_message($node, $data) {
 
 			$file = XML::addElement($files, 'file');
 
-			XML::addElement($file, 'major_version_number', $VersionFile->file->major_version_number);
-			XML::addElement($file, 'minor_version_number', $VersionFile->file->minor_version_number);
-			XML::addElement($file, 'major_build_number', $VersionFile->file->major_build_number);
-			XML::addElement($file, 'minor_build_number', $VersionFile->file->minor_build_number);
+			XML::addElement($file, 'major_version', $VersionFile->file->major_version);
+			XML::addElement($file, 'minor_version', $VersionFile->file->minor_version);
+			XML::addElement($file, 'major_build', $VersionFile->file->major_build);
+			XML::addElement($file, 'minor_build', $VersionFile->file->minor_build);
 			XML::addElement($file, 'size', $VersionFile->file->size);
 			XML::addElement($file, 'checksum', $VersionFile->file->checksum);
 

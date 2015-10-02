@@ -148,10 +148,10 @@ class UploadSystem
 
 				$file->id = 0; // Not in DB yet.
 				$file->system_id = $File['system_id'];
-				$file->major_version_number = $File['major_version_number'];
-				$file->minor_version_number = $File['minor_version_number'];
-				$file->major_build_number = $File['major_build_number'];
-				$file->minor_build_number = $File['minor_build_number'];
+				$file->major_version = $File['major_version'];
+				$file->minor_version = $File['minor_version'];
+				$file->major_build = $File['major_build'];
+				$file->minor_build = $File['minor_build'];
 				$file->size = $File['size'];
 				$file->checksum = $File['checksum'];
 
