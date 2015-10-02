@@ -142,7 +142,7 @@ class function TPlugInCMSSettingsHelper.LoadSettingsToClass;
 
           if not InArray(StrToIntDef(TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[z]), 0), AArray) then
           begin
-            if IsInteger(TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[z])) then
+            if IsNumber(TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[z])) then
             begin
               SetLength(AArray, length(AArray) + 1);
               AArray[length(AArray) - 1] := StrToInt(TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[z]));
@@ -217,7 +217,7 @@ begin
 
                           if SameText(rttiProperty.Name, 'forums') then
                           begin
-                            if IsInteger(TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[I])) then
+                            if IsNumber(TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[I])) then
                             begin
                               SetLength(Result, 1);
                               Result[0] := StrToInt(TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[I]));

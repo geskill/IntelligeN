@@ -516,7 +516,7 @@ begin
         RecordCount := length(FIDInfos);
 
         if (length(FIDInfos) > 0) then
-          if IsInteger(FIDInfos[0].ID) then
+          if IsNumber(FIDInfos[0].ID) then
             FcxGIDTableViewColumn1.DataBinding.ValueTypeClass := TcxIntegerValueType
           else
             FcxGIDTableViewColumn1.DataBinding.ValueTypeClass := TcxStringValueType;

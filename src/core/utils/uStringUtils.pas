@@ -3,7 +3,10 @@ unit uStringUtils;
 interface
 
 uses
-  Windows, Classes, Variants, SysUtils, StrUtils, RegExpr;
+  // Delphi
+  Windows, Classes, Variants, SysUtils, StrUtils,
+  // RegEx
+  RegExpr;
 
 function MatchTextMask(const Mask, S: WideString; CaseSensitive: Boolean = False): Boolean;
 
@@ -11,7 +14,7 @@ function SplittString(splitt: Char; S: string; AExact: Boolean = False): TString
 
 function StringReplaceMultiple(const Source: string; const OldPatterns, NewPatterns: array of string; CaseSensitive: Boolean = True): string;
 
-function IsInteger(AVariant: Variant): Boolean;
+function IsNumber(AVariant: Variant): Boolean;
 
 function CharCount(const SubStr, S: string): Integer;
 
@@ -263,13 +266,15 @@ begin
   end;
 end;
 
-function IsInteger(AVariant: Variant): Boolean;
+{$HINTS OFF}
+function IsNumber(AVariant: Variant): Boolean;
 var
-  buf: Integer;
+  LValue, LCode: Integer;
 begin
-  buf := StrToIntDef(VarToStrDef(AVariant, ''), 0);
-  Result := buf > 0;
+  val(VarToStrDef(AVariant, ''), LValue, LCode);
+  result := (LCode = 0);
 end;
+{$HINTS ON}
 
 function ExtractTextBetween(const Str: string; const Delim1, Delim2: string): string;
 var
