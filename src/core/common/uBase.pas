@@ -7,7 +7,7 @@ const
   ProgrammName = Programm + ' 2009';
 
 type
-  TFileSystem = (fsRoot = 1, fsConfig = 2, fsPlugins = 3, fsSettings = 4, fsCMS = 5, fsCMSSubject = 6, fsCMSMessage = 7, fsSite = 8, fsType = 9);
+  TFileSystem = (fsNull, fsRoot, fsConfig, fsPlugins, fsSettings, fsCMS, fsCMSSubject, fsCMSMessage, fsSite, fsType);
 
   TViewType = (vtData, vtCode, vtPreview);
 
