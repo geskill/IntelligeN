@@ -16,6 +16,7 @@ type
   THTTPIndyHelper = class(TIdHTTP)
   private
     FLastRedirect: string;
+    FHandleWrongProtocolException: Boolean;
     FHandleSketchyRedirects: Boolean;
 
     function GetCookieList: string;
@@ -23,6 +24,8 @@ type
     function GetUseCompressor: Boolean;
     procedure SetUseCompressor(AUseCompressor: Boolean);
     function GetResponseRefresh: string;
+
+    function IsWrongProtocolException(ALowerCaseSourceCode: string): Boolean;
 
     procedure WriteErrorMsgToStream(AMsg: string; AStream: TStream);
 
@@ -42,6 +45,7 @@ type
     property CookieList: string read GetCookieList write SetCookieList;
     property UseCompressor: Boolean read GetUseCompressor write SetUseCompressor;
 
+    property HandleWrongProtocolException: Boolean read FHandleWrongProtocolException write FHandleWrongProtocolException;
     {$REGION 'Documentation'}
     ///	<summary>
     ///	  <para>
@@ -148,6 +152,11 @@ begin
     Result := copy(_RefreshHeader, Pos(url, _RefreshHeader) + length(url));
 end;
 
+function THTTPIndyHelper.IsWrongProtocolException(ALowerCaseSourceCode: string): Boolean;
+begin
+  result := (not(Pos('<body', ALowerCaseSourceCode) = 0))
+end;
+
 procedure THTTPIndyHelper.WriteErrorMsgToStream(AMsg: string; AStream: TStream);
 begin
   WriteStringToStream(AStream, AMsg, CharsetToEncoding(ResponseCharset));
@@ -176,7 +185,7 @@ begin
         raise ;
     on E: EIdHTTPProtocolException do
     begin
-      if not(Pos('<body', LowerCase(E.ErrorMessage)) = 0) then
+      if HandleWrongProtocolException and IsWrongProtocolException(LowerCase(E.ErrorMessage)) then
         // handle normaly for wrong HTTP code responses
         WriteErrorMsgToStream(E.ErrorMessage, AResponseContent)
       else if ((not HandleRedirects) or (RedirectCount < RedirectMaximum)) and (ResponseCode = 302) then
@@ -256,6 +265,7 @@ begin
 
   AllowCookies := True;
   HandleRedirects := True;
+  FHandleWrongProtocolException := True;
   FHandleSketchyRedirects := True;
 
   // force to use HTTP 1.1
