@@ -9,36 +9,14 @@ uses
   uApiSettingsManager, uApiSettingsInterfacedCollectionItem, uApiUpdateInterface;
 
 type
-  // class(TInterfacedCollectionItem, )
-
-  TUpdateFileCollectionItem = class(TInterfacedCollectionItem, IStatusFile)
-  private
-    FFileName: WideString;
-    FStatus: WordBool;
-  protected
-    function GetFileName: WideString;
-    procedure SetFileName(AFileName: WideString);
-    function GetStatus: WordBool;
-    procedure SetStatus(AStatus: WordBool);
-  public
-    constructor Create(Collection: TCollection); override;
-    destructor Destroy; override;
-  published
-    property FileName: WideString read GetFileName write SetFileName;
-    property Status: WordBool read GetStatus write SetStatus;
-  end;
-
   TUpdateFileSystemCollectionItem = class(TCollectionItem)
   private
     FLibraryFile: string;
-    FFiles: TCollection;
   public
     constructor Create(Collection: TCollection); override;
-    function GetFiles: TList<IStatusFile>;
     destructor Destroy; override;
   published
     property LibraryFile: string read FLibraryFile write FLibraryFile;
-    property Files: TCollection read FFiles write FFiles;
   end;
 
   TUpdateServerCollectionItem = class(TInterfacedCollectionItem, IUpdateServer)
@@ -76,60 +54,15 @@ var
 
 implementation
 
-{ TUpdateFileCollectionItem }
-
-function TUpdateFileCollectionItem.GetFileName: WideString;
-begin
-  Result := FFileName;
-end;
-
-procedure TUpdateFileCollectionItem.SetFileName(AFileName: WideString);
-begin
-  FFileName := AFileName;
-end;
-
-function TUpdateFileCollectionItem.GetStatus: WordBool;
-begin
-  Result := FStatus;
-end;
-
-procedure TUpdateFileCollectionItem.SetStatus(AStatus: WordBool);
-begin
-  FStatus := AStatus;
-end;
-
-constructor TUpdateFileCollectionItem.Create(Collection: TCollection);
-begin
-  inherited Create(Collection);
-
-end;
-
-destructor TUpdateFileCollectionItem.Destroy;
-begin
-
-  inherited Destroy;
-end;
-
 { TUpdateFileSystemCollectionItem }
 
 constructor TUpdateFileSystemCollectionItem.Create(Collection: TCollection);
 begin
   inherited Create(Collection);
-  FFiles := TCollection.Create(TUpdateFileSystemCollectionItem);
-end;
-
-function TUpdateFileSystemCollectionItem.GetFiles: TList<IStatusFile>;
-var
-  LCollectionItem: TCollectionItem;
-begin
-  Result := TList<IStatusFile>.Create;
-  for LCollectionItem in FFiles do
-    Result.Add(TUpdateFileCollectionItem(LCollectionItem));
 end;
 
 destructor TUpdateFileSystemCollectionItem.Destroy;
 begin
-  FFiles.Free;
   inherited Destroy;
 end;
 

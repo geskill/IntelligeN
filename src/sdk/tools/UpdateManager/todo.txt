@@ -1,4 +1,4 @@
 = FileSystem =
 
-- Allow remove existing FileSystem
-- Display no longer existing FileSystem
+- Allow to remove existing FileSystem
+- Display icon for no longer existing FileSystem

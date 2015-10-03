@@ -1,7 +1,6 @@
 object fMain: TfMain
   Left = 0
   Top = 0
-  ActiveControl = JvWizardInteriorPageUpdateFiles
   Caption = 'Update Manager'
   ClientHeight = 338
   ClientWidth = 635
@@ -21,7 +20,7 @@ object fMain: TfMain
     Top = 0
     Width = 635
     Height = 338
-    ActivePage = JvWizardInteriorPageUpdateFiles
+    ActivePage = JvWizardInteriorPageFiles
     ButtonBarHeight = 42
     ButtonStart.Caption = 'To &Start Page'
     ButtonStart.NumGlyphs = 1
@@ -128,93 +127,6 @@ object fMain: TfMain
         OnClick = lbSelectPathClick
       end
     end
-    object JvWizardInteriorPageFiles: TJvWizardInteriorPage
-      Header.Title.Color = clNone
-      Header.Title.Text = 'Files'
-      Header.Title.Anchors = [akLeft, akTop, akRight]
-      Header.Title.Font.Charset = DEFAULT_CHARSET
-      Header.Title.Font.Color = clWindowText
-      Header.Title.Font.Height = -16
-      Header.Title.Font.Name = 'Tahoma'
-      Header.Title.Font.Style = [fsBold]
-      Header.Subtitle.Color = clNone
-      Header.Subtitle.Text = 'Select the files you wish to keep tracking and updating on.'
-      Header.Subtitle.Anchors = [akLeft, akTop, akRight, akBottom]
-      Header.Subtitle.Font.Charset = DEFAULT_CHARSET
-      Header.Subtitle.Font.Color = clWindowText
-      Header.Subtitle.Font.Height = -11
-      Header.Subtitle.Font.Name = 'Tahoma'
-      Header.Subtitle.Font.Style = []
-      OnPage = JvWizardInteriorPageFilesPage
-      OnNextButtonClick = JvWizardInteriorPageFilesNextButtonClick
-      DesignSize = (
-        490
-        296)
-      object lFileSystem: TLabel
-        Left = 6
-        Top = 282
-        Width = 3
-        Height = 13
-        Anchors = [akLeft, akBottom]
-      end
-      object cxGFiles: TcxGrid
-        Left = 3
-        Top = 72
-        Width = 484
-        Height = 204
-        Anchors = [akLeft, akTop, akRight, akBottom]
-        BevelInner = bvNone
-        BevelOuter = bvNone
-        TabOrder = 0
-        object cxGFilesTableView: TcxGridTableView
-          Navigator.Buttons.CustomButtons = <>
-          DataController.Summary.DefaultGroupSummaryItems = <>
-          DataController.Summary.FooterSummaryItems = <>
-          DataController.Summary.SummaryGroups = <>
-          OptionsView.ColumnAutoWidth = True
-          object cxGFilesTableViewColumn1: TcxGridColumn
-            Caption = 'Status'
-            PropertiesClassName = 'TcxCheckBoxProperties'
-            Properties.ImmediatePost = True
-            Properties.NullStyle = nssUnchecked
-            Width = 45
-          end
-          object cxGFilesTableViewColumn2: TcxGridColumn
-            Caption = 'Condition'
-            PropertiesClassName = 'TcxLabelProperties'
-            OnCustomDrawCell = cxGFilesTableViewColumn2CustomDrawCell
-            Width = 45
-          end
-          object cxGFilesTableViewColumn3: TcxGridColumn
-            Caption = 'FileName'
-            PropertiesClassName = 'TcxLabelProperties'
-            Width = 216
-          end
-          object cxGFilesTableViewColumn4: TcxGridColumn
-            Caption = 'Version'
-            PropertiesClassName = 'TcxLabelProperties'
-          end
-          object cxGFilesTableViewColumn5: TcxGridColumn
-            Caption = 'Action'
-            PropertiesClassName = 'TcxComboBoxProperties'
-            Properties.DropDownListStyle = lsFixedList
-            Properties.ImmediateDropDownWhenActivated = True
-            Properties.ImmediatePost = True
-            Properties.ImmediateUpdateText = True
-            Properties.ReadOnly = True
-            OnGetPropertiesForEdit = cxGFilesTableViewColumn5GetPropertiesForEdit
-          end
-          object cxGFilesTableViewColumn6: TcxGridColumn
-            Caption = 'Actions'
-            PropertiesClassName = 'TcxMemoProperties'
-            Visible = False
-          end
-        end
-        object cxGFilesLevel: TcxGridLevel
-          GridView = cxGFilesTableView
-        end
-      end
-    end
     object JvWizardInteriorPageServer: TJvWizardInteriorPage
       Header.Title.Color = clNone
       Header.Title.Text = 'Server'
@@ -297,9 +209,9 @@ object fMain: TfMain
         TextHint = '(optional)'
       end
     end
-    object JvWizardInteriorPageUpdateInfo: TJvWizardInteriorPage
+    object JvWizardInteriorPageServerInfo: TJvWizardInteriorPage
       Header.Title.Color = clNone
-      Header.Title.Text = 'Update Info'
+      Header.Title.Text = 'Server Info'
       Header.Title.Anchors = [akLeft, akTop, akRight]
       Header.Title.Font.Charset = DEFAULT_CHARSET
       Header.Title.Font.Color = clWindowText
@@ -317,7 +229,7 @@ object fMain: TfMain
       Header.Subtitle.Font.Name = 'Tahoma'
       Header.Subtitle.Font.Style = []
       EnabledButtons = [bkStart, bkLast, bkBack, bkFinish, bkCancel, bkHelp]
-      OnPage = JvWizardInteriorPageUpdateInfoPage
+      OnPage = JvWizardInteriorPageServerInfoPage
       DesignSize = (
         490
         296)
@@ -373,7 +285,7 @@ object fMain: TfMain
         Height = 13
         Caption = 'Reciving information for update files ...'
       end
-      object lUpdateInfoError: TLabel
+      object lServerInfoError: TLabel
         Left = 24
         Top = 264
         Width = 28
@@ -382,7 +294,7 @@ object fMain: TfMain
         Caption = 'Error:'
         Visible = False
       end
-      object eUpdateInfoError: TEdit
+      object eServerInfoError: TEdit
         Left = 58
         Top = 264
         Width = 255
@@ -393,6 +305,95 @@ object fMain: TfMain
         ReadOnly = True
         TabOrder = 0
         Visible = False
+      end
+    end
+    object JvWizardInteriorPageFiles: TJvWizardInteriorPage
+      Header.Title.Color = clNone
+      Header.Title.Text = 'Local Files'
+      Header.Title.Anchors = [akLeft, akTop, akRight]
+      Header.Title.Font.Charset = DEFAULT_CHARSET
+      Header.Title.Font.Color = clWindowText
+      Header.Title.Font.Height = -16
+      Header.Title.Font.Name = 'Tahoma'
+      Header.Title.Font.Style = [fsBold]
+      Header.Subtitle.Color = clNone
+      Header.Subtitle.Text = 'Select the files you wish to keep tracking and updating on.'
+      Header.Subtitle.Anchors = [akLeft, akTop, akRight, akBottom]
+      Header.Subtitle.Font.Charset = DEFAULT_CHARSET
+      Header.Subtitle.Font.Color = clWindowText
+      Header.Subtitle.Font.Height = -11
+      Header.Subtitle.Font.Name = 'Tahoma'
+      Header.Subtitle.Font.Style = []
+      OnPage = JvWizardInteriorPageFilesPage
+      OnExitPage = JvWizardInteriorPageFilesExitPage
+      OnNextButtonClick = JvWizardInteriorPageFilesNextButtonClick
+      DesignSize = (
+        490
+        296)
+      object lFileSystem: TLabel
+        Left = 6
+        Top = 282
+        Width = 3
+        Height = 13
+        Anchors = [akLeft, akBottom]
+      end
+      object cxGFiles: TcxGrid
+        Left = 3
+        Top = 72
+        Width = 484
+        Height = 204
+        Anchors = [akLeft, akTop, akRight, akBottom]
+        BevelInner = bvNone
+        BevelOuter = bvNone
+        TabOrder = 0
+        object cxGFilesTableView: TcxGridTableView
+          Navigator.Buttons.CustomButtons = <>
+          DataController.Summary.DefaultGroupSummaryItems = <>
+          DataController.Summary.FooterSummaryItems = <>
+          DataController.Summary.SummaryGroups = <>
+          DataController.OnDataChanged = cxGFilesTableViewDataControllerDataChanged
+          OptionsView.ColumnAutoWidth = True
+          object cxGFilesTableViewColumn1: TcxGridColumn
+            Caption = 'Status'
+            PropertiesClassName = 'TcxCheckBoxProperties'
+            Properties.ImmediatePost = True
+            Properties.NullStyle = nssUnchecked
+            Width = 45
+          end
+          object cxGFilesTableViewColumn2: TcxGridColumn
+            Caption = 'Condition'
+            PropertiesClassName = 'TcxLabelProperties'
+            OnCustomDrawCell = cxGFilesTableViewColumn2CustomDrawCell
+            Width = 45
+          end
+          object cxGFilesTableViewColumn3: TcxGridColumn
+            Caption = 'FileName'
+            PropertiesClassName = 'TcxLabelProperties'
+            Width = 216
+          end
+          object cxGFilesTableViewColumn4: TcxGridColumn
+            Caption = 'Version'
+            PropertiesClassName = 'TcxLabelProperties'
+          end
+          object cxGFilesTableViewColumn5: TcxGridColumn
+            Caption = 'Action'
+            PropertiesClassName = 'TcxComboBoxProperties'
+            Properties.DropDownListStyle = lsFixedList
+            Properties.ImmediateDropDownWhenActivated = True
+            Properties.ImmediatePost = True
+            Properties.ImmediateUpdateText = True
+            Properties.ReadOnly = True
+            OnGetPropertiesForEdit = cxGFilesTableViewColumn5GetPropertiesForEdit
+          end
+          object cxGFilesTableViewColumn6: TcxGridColumn
+            Caption = 'Actions'
+            PropertiesClassName = 'TcxMemoProperties'
+            Visible = False
+          end
+        end
+        object cxGFilesLevel: TcxGridLevel
+          GridView = cxGFilesTableView
+        end
       end
     end
     object JvWizardInteriorPageUpdateFiles: TJvWizardInteriorPage
@@ -412,6 +413,7 @@ object fMain: TfMain
       Header.Subtitle.Font.Height = -11
       Header.Subtitle.Font.Name = 'Tahoma'
       Header.Subtitle.Font.Style = []
+      OnPage = JvWizardInteriorPageUpdateFilesPage
     end
     object JvWizardInteriorPagePublish: TJvWizardInteriorPage
       Header.Title.Color = clNone
