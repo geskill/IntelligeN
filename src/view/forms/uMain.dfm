@@ -371,6 +371,12 @@ object Main: TMain
               ExplicitWidth = 180
               Width = 180
             end
+            inherited cbLoginSaveData: TcxCheckBox
+              ExplicitWidth = 97
+            end
+            inherited cbLoginAutoLogin: TcxCheckBox
+              ExplicitWidth = 72
+            end
             inherited eLoginpassword: TcxTextEdit
               ExplicitWidth = 180
               Width = 180

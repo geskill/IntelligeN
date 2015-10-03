@@ -4,146 +4,190 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, Classes, Graphics, Generics.Collections, IdComponent, Variants, XMLDoc, XMLIntf, ActiveX,
+  Windows, SysUtils, Classes, Graphics, Variants, XMLDoc, XMLIntf, ActiveX,
+  // Indy
+  IdComponent,
+  // OmniThreadLibrary
+  OtlParallel, OtlTaskControl, OtlSync, OtlTask,
+  // Spring Framework
+  Spring.SystemUtils, Spring.Collections.Lists,
   // AB
   AbArcTyp, AbUnZper,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPManager, uHTTPIndyHelper,
   // Api
-  uBase, uApiConst, uApiSettings,
+  uBase, uApiConst, uApiSettings, uApiUpdateInterfaceBase, uApiUpdateModelBase,
   // DLLs
   uExport,
   // plugin system
   uPlugInInterface, uPlugInClass,
   // Utils
-  uFileUtils, uPathUtils;
+  uFileUtils, uPathUtils, uStringUtils;
 
 type
-  TUpdateController = class(TThread)
+  TUpdateVersion = class
   private
-    //FProxy: IProxy;
-    FUpdateSize, FDownloadedSize: Int64;
-    FVersionInfo, FFilesInfo, FErrorMsg: string;
-
-    procedure UpdatePosition;
-    procedure SearchingUpdate;
-    procedure NoUpdateAvailable;
-    procedure UpdateAvailable;
-    procedure UpdateFinished;
-    procedure UpdateError;
-
-    procedure Work(ASender: TObject; AWorkMode: TWorkMode; AWorkCount: Int64);
-    procedure WorkBegin(ASender: TObject; AWorkMode: TWorkMode; AWorkCountMax: Int64);
-    procedure WorkEnd(ASender: TObject; AWorkMode: TWorkMode);
-
-    function LocalPathFromID(AID: Integer): string;
-    function LocalPathVariableFormID(AID: Integer): string;
+    FDownloadPath: string;
+    FUpdateVersion: IFileVersion;
+    FUpdateFiles: TInterfaceList<IUpdateSystemFile>;
+    FUpdateSize: Int64;
+    FUpdateCreated: TDateTime;
+    FUpdateModified: TDateTime;
   public
-    constructor Create(CreateSuspended: Boolean);
-    procedure Execute; override;
-    //property Proxy: IProxy read FProxy write FProxy;
+    constructor Create(const AFileVersion: IFileVersion = nil);
+    constructor Clone(AUpdateVersion: TUpdateVersion);
+
+    property DownloadPath: string read FDownloadPath write FDownloadPath;
+    property UpdateVersion: IFileVersion read FUpdateVersion write FUpdateVersion;
+    property UpdateFiles: TInterfaceList<IUpdateSystemFile>read FUpdateFiles write FUpdateFiles;
+    property UpdateSize: Int64 read FUpdateSize write FUpdateSize;
+    property UpdateCreated: TDateTime read FUpdateCreated write FUpdateCreated;
+    property UpdateModified: TDateTime read FUpdateModified write FUpdateModified;
+
+    destructor Destroy; override;
   end;
 
-  TUpdateFile = class
+  TUpdateVersions = class
   private
-    FFiletype: Integer;
-    FFilesize: Int64;
-    FFilename, FFilechecksum: string;
+    FUpgrade, FUpdate: TUpdateVersion;
   public
-    property Filetype: Integer read FFiletype write FFiletype;
-    property Filesize: Int64 read FFilesize write FFilesize;
-    property Filename: string read FFilename write FFilename;
-    property Filechecksum: string read FFilechecksum write FFilechecksum;
+    constructor Create;
+
+    function HasUpdate: Boolean;
+
+    property Upgrade: TUpdateVersion read FUpgrade write FUpgrade;
+    property Update: TUpdateVersion read FUpdate write FUpdate;
+
+    destructor Destroy; override;
+  end;
+
+  TUpdateErrorNotifyEvent = procedure(Sender: TObject; ErrorMsg: string) of object;
+  TUpdateDownloadPositionNotifyEvent = procedure(Sender: TObject; Position: Integer) of object;
+  TUpdateHasChangesNotifyEvent = procedure(Sender: TObject; UpdateVersions: TUpdateVersions) of object;
+
+  TUpdateController = class
+  private
+    FProxy: IProxy;
+    FConnectTimeout, FReadTimeout: Integer;
+
+    FUpdateVersions: TUpdateVersions;
+
+    FSQLFormatSettings: TFormatSettings;
+
+    FBusy: Boolean;
+
+    FUpdateSize, FDownloadedSize: Int64;
+    FErrorMsg: string;
+
+    FOnSearchingUpdate, FOnUpdateNoChanges, FOnUpdateStartDownload, FOnUpdateFinishedDownload: TNotifyEvent;
+    FOnUpdateHasChanges: TUpdateHasChangesNotifyEvent;
+    FOnUpdateError: TUpdateErrorNotifyEvent;
+    FOnUpdateDownloading: TUpdateDownloadPositionNotifyEvent;
+  protected
+
+    function ReadUpdate(): Boolean;
+    function LocalPathFromID(AID: Integer): string;
+    procedure ReadFiles(const ANode: IXMLNode; AUpdateVersion: TUpdateVersion);
+    function LocalPathVariableFromFileSystem(AFileSystem: TFileSystem): string;
+    procedure DownloadFiles(const task: IOmniTask; AUpdateVersion: TUpdateVersion);
+
+    procedure DoUpdateSearching;
+    procedure DoUpdateNoChanges;
+    procedure DoUpdateHasChanges;
+    procedure DoUpdateError;
+    procedure DoUpdateStartDownload;
+    procedure DoUpdateDownloading;
+    procedure DoUpdateFinishedDownload;
+  public
+    constructor Create(const AProxy: IProxy = nil; AConnectTimeout: Integer = 5000; AReadTimeout: Integer = 10000);
+    destructor Destroy; override;
+
+    procedure CheckForUpdates;
+    procedure Download(AUpdateVersion: TUpdateVersion);
+    procedure DownloadUpgrade;
+    procedure DownloadUpdate;
+  published
+    property OnUpdateSearching: TNotifyEvent read FOnSearchingUpdate write FOnSearchingUpdate;
+    property OnUpdateNoChanges: TNotifyEvent read FOnUpdateNoChanges write FOnUpdateNoChanges;
+    property OnUpdateHasChanges: TUpdateHasChangesNotifyEvent read FOnUpdateHasChanges write FOnUpdateHasChanges;
+    property OnUpdateError: TUpdateErrorNotifyEvent read FOnUpdateError write FOnUpdateError;
+    property OnUpdateStartDownload: TNotifyEvent read FOnUpdateStartDownload write FOnUpdateStartDownload;
+    property OnUpdateDownloading: TUpdateDownloadPositionNotifyEvent read FOnUpdateDownloading write FOnUpdateDownloading;
+    property OnUpdateFinishedDownload: TNotifyEvent read FOnUpdateFinishedDownload write FOnUpdateFinishedDownload;
   end;
 
 implementation
 
-uses
-  uUpdate;
+{ TUpdateVersion }
 
-procedure TUpdateController.UpdatePosition;
+constructor TUpdateVersion.Create(const AFileVersion: IFileVersion = nil);
 begin
-  Update.update_position(round((FUpdateSize / FDownloadedSize) * 100));
+  inherited Create;
+
+  if not Assigned(AFileVersion) then
+    FUpdateVersion := TIFileVersion.Create
+  else
+    FUpdateVersion := AFileVersion;
+
+  FUpdateFiles := TInterfaceList<IUpdateSystemFile>.Create();
 end;
 
-procedure TUpdateController.SearchingUpdate;
+constructor TUpdateVersion.Clone(AUpdateVersion: TUpdateVersion);
+var
+  LFileVersion: IFileVersion;
+  LUpdateSystemFile: IUpdateSystemFile;
+  LUpdateFileIndex: Integer;
 begin
-  Update.update_searching;
-end;
+  LFileVersion := TIFileVersion.Clone(AUpdateVersion.UpdateVersion);
 
-procedure TUpdateController.NoUpdateAvailable;
-begin
-  Update.update_unnecessary;
-end;
+  Create(LFileVersion);
 
-procedure TUpdateController.UpdateAvailable;
-begin
-  Update.update_available(FVersionInfo + sLineBreak + FFilesInfo);
-end;
+  FDownloadPath := AUpdateVersion.DownloadPath;
 
-procedure TUpdateController.UpdateFinished;
-begin
-  Update.update_finished;
-end;
-
-procedure TUpdateController.UpdateError;
-begin
-  Update.update_error(FErrorMsg);
-end;
-
-procedure TUpdateController.Work(ASender: TObject; AWorkMode: TWorkMode; AWorkCount: Int64);
-begin
-  //
-end;
-
-procedure TUpdateController.WorkBegin(ASender: TObject; AWorkMode: TWorkMode; AWorkCountMax: Int64);
-begin
-  //
-end;
-
-procedure TUpdateController.WorkEnd(ASender: TObject; AWorkMode: TWorkMode);
-begin
-  //
-end;
-
-function TUpdateController.LocalPathFromID(AID: Integer): string;
-begin
-  result := GetPathFromFileSystemID(uBase.TFileSystem(AID));
-end;
-
-function TUpdateController.LocalPathVariableFormID(AID: Integer): string;
-begin
-  case AID of
-    1:
-      Result := '%intelligen_root%';
-    2:
-      Result := '%intelligen_configuration%';
-    3:
-      Result := '%intelligen_plugins%';
-    4:
-      Result := '%intelligen_settings%';
-    5:
-      Result := '%intelligen_templates_cms%';
-    6:
-      Result := '%intelligen_templates_cms%\message\';
-    7:
-      Result := '%intelligen_templates_cms%\subject\';
-    8:
-      Result := '%intelligen_templates_site%';
-    9:
-      Result := '%intelligen_templates_type%';
+  // Do NOT use "For in" loop
+  // see: http://stackoverflow.com/questions/28010268/why-does-delphi-unclear-increases-the-refcount-of-the-last-element-in-the-list-o
+  for LUpdateFileIndex := 0 to AUpdateVersion.UpdateFiles.Count - 1 do
+  begin
+    LUpdateSystemFile := TIUpdateSystemFile.Clone(AUpdateVersion.UpdateFiles[LUpdateFileIndex]);
+    FUpdateFiles.Add(LUpdateSystemFile);
   end;
+
+  FUpdateSize := AUpdateVersion.UpdateSize;
+  FUpdateCreated := AUpdateVersion.UpdateCreated;
+  FUpdateModified := AUpdateVersion.UpdateModified;
 end;
 
-
-constructor TUpdateController.Create(CreateSuspended: Boolean);
+destructor TUpdateVersion.Destroy;
 begin
-  inherited Create(CreateSuspended);
-
-  // FProxy := TProxy.Create;
+  FUpdateVersion := nil;
+  FUpdateFiles.Free;
+  inherited Destroy;
 end;
 
-procedure TUpdateController.Execute;
+{ TUpdateVersions }
+
+constructor TUpdateVersions.Create;
+begin
+  inherited Create;
+  FUpgrade := TUpdateVersion.Create;
+  FUpdate := TUpdateVersion.Create;
+end;
+
+function TUpdateVersions.HasUpdate: Boolean;
+begin
+  result := (Upgrade.UpdateFiles.Count > 0) or (Update.UpdateFiles.Count > 0);
+end;
+
+destructor TUpdateVersions.Destroy;
+begin
+  FUpgrade.Free;
+  FUpdate.Free;
+  inherited Destroy;
+end;
+
+{ TUpdateController }
+
+function TUpdateController.ReadUpdate(): Boolean;
 const
   u = 'upd/';
 var
@@ -154,20 +198,13 @@ var
   LRequestID: Double;
   LHTTPProcess: IHTTPProcess;
 
-  LUpdateList: TList<TUpdateFile>;
-
-  XMLDoc: IXMLDocument;
-  I: Integer;
-
-  LFilePathName: string;
-
-  _StringList: TStringList;
-  _MemoryStream: TMemoryStream;
-  _DownloadPath, _UpdatePath: string;
-  _UpdateList: TList<TUpdateFile>;
-  _UpdateFile: TUpdateFile;
+  LXMLDoc: IXMLDocument;
 begin
-  Queue(SearchingUpdate);
+  GetLocaleFormatSettings(LOCALE_USER_DEFAULT, FSQLFormatSettings);
+  FSQLFormatSettings.DateSeparator := '-';
+  FSQLFormatSettings.TimeSeparator := ':';
+  FSQLFormatSettings.ShortDateFormat := 'yyyy-MM-dd';
+  FSQLFormatSettings.ShortTimeFormat := 'hh:mm:ss';
 
   LHTTPManager := THTTPManager.Instance();
 
@@ -182,10 +219,12 @@ begin
     AddFormField('minor_build', IntToStr(MinorBuild));
   end;
 
-  LHTTPOptions := THTTPOptions.Create(SettingsManager.Settings.HTTP.GetProxy(psaMain));
-
-  LHTTPOptions.ConnectTimeout := SettingsManager.Settings.HTTP.ConnectTimeout;
-  LHTTPOptions.ReadTimeout := SettingsManager.Settings.HTTP.ReadTimeout;
+  LHTTPOptions := THTTPOptions.Create(FProxy);
+  with LHTTPOptions do
+  begin
+    ConnectTimeout := FConnectTimeout;
+    ReadTimeout := FReadTimeout;
+  end;
 
   LRequestID := LHTTPManager.Post(LHTTPRequest, LHTTPParams, LHTTPOptions);
 
@@ -197,177 +236,413 @@ begin
 
   if (LHTTPProcess.HTTPResult.HasError) then
   begin
-    Queue(UpdateError);
     FErrorMsg := LHTTPProcess.HTTPResult.HTTPResponseInfo.ErrorClassName + ': ' + LHTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
-    Exit;
+    Exit(False);
   end;
 
-  LUpdateList := TList<TUpdateFile>.Create;
+  OleInitialize(nil);
+  LXMLDoc := NewXMLDocument;
   try
-
-    OleInitialize(nil);
-    XMLDoc := NewXMLDocument;
-    try
-      with XMLDoc do
-      begin
-        LoadFromXML(LHTTPProcess.HTTPResult.SourceCode);
-        Active := True;
-      end;
-
-      with XMLDoc.DocumentElement do
-        if HasChildNodes then
-        begin
-          with ChildNodes.Nodes['header'] do
-            if HasChildNodes then
-            begin
-              _DownloadPath := VarToStr(ChildNodes.Nodes['files_dir'].NodeValue);
-              FVersionInfo := VarToStr(ChildNodes.Nodes['major_version'].NodeValue) + '.' +
-              { . } VarToStr(ChildNodes.Nodes['minor_version'].NodeValue) + '.' +
-              { . } VarToStr(ChildNodes.Nodes['major_build'].NodeValue) + '.' +
-              { . } VarToStr(ChildNodes.Nodes['minor_build'].NodeValue);
-            end;
-
-          // TODO: seperate between upgrade / update
-
-          with ChildNodes.Nodes['files'] do
-            if HasChildNodes then
-            begin
-              FUpdateSize := 0;
-              FFilesInfo := '';
-              for I := 0 to ChildNodes.Count - 1 do
-                with ChildNodes.Nodes[I] do
-                begin
-
-                  LFilePathName := IncludeTrailingPathDelimiter(
-                    { . } IncludeTrailingPathDelimiter(LocalPathFromID(StrToIntDef(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue), 0))) +
-                    { ... } VarToStr(ChildNodes.Nodes['path_appendix'].NodeValue)
-                    { . } ) +
-                  { . } VarToStr(ChildNodes.Nodes['name'].NodeValue);
-
-                  if (not FileExists(LFilePathName)) or (not SameText(GetMD5FromFile(LFilePathName), VarToStr(ChildNodes.Nodes['checksum'].NodeValue))) then
-                  begin
-                    _UpdateFile := TUpdateFile.Create;
-
-                    with _UpdateFile do
-                    begin
-                      Filetype := StrToIntDef(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue), 0);
-                      Filesize := StrToIntDef(VarToStr(ChildNodes.Nodes['size'].NodeValue), 0);
-                      Filename := VarToStr(ChildNodes.Nodes['name'].NodeValue);
-                      Filechecksum := VarToStr(ChildNodes.Nodes['checksum'].NodeValue);
-
-                      Inc(FUpdateSize, Filesize);
-                    end;
-                    _UpdateList.Add(_UpdateFile);
-                  end;
-                end;
-            end;
-        end;
-    finally
-      XMLDoc := nil;
-      OleUninitialize;
+    with LXMLDoc do
+    begin
+      LoadFromXML(LHTTPProcess.HTTPResult.SourceCode);
+      Active := True;
     end;
 
-    if not(_UpdateList.Count > 0) then
+    with LXMLDoc.DocumentElement do
+      if HasChildNodes then
+      begin
+        if ChildNodes.Nodes['upgrade'].HasChildNodes then
+          ReadFiles(ChildNodes.Nodes['upgrade'], FUpdateVersions.Upgrade);
+        if ChildNodes.Nodes['update'].HasChildNodes then
+          ReadFiles(ChildNodes.Nodes['update'], FUpdateVersions.Update);
+      end;
+  finally
+    LXMLDoc := nil;
+    OleUninitialize;
+  end;
+
+  result := True;
+end;
+
+function TUpdateController.LocalPathFromID(AID: Integer): string;
+begin
+  result := GetPathFromFileSystemID(uBase.TFileSystem(AID));
+end;
+
+procedure TUpdateController.ReadFiles(const ANode: IXMLNode; AUpdateVersion: TUpdateVersion);
+var
+  LFileIndex: Integer;
+  LFilePathName: string;
+
+  s: string;
+
+  LUpdateSystemFile: IUpdateSystemFile;
+begin
+  with ANode.ChildNodes.Nodes['header'] do
+    if HasChildNodes then
     begin
-      Queue(NoUpdateAvailable);
+      AUpdateVersion.DownloadPath := VarToStr(ChildNodes.Nodes['files_dir'].NodeValue);
+
+      AUpdateVersion.UpdateVersion.MajorVersion := StrToIntDef(VarToStr(ChildNodes.Nodes['major_version'].NodeValue), 0);
+      AUpdateVersion.UpdateVersion.MinorVersion := StrToIntDef(VarToStr(ChildNodes.Nodes['minor_version'].NodeValue), 0);
+      AUpdateVersion.UpdateVersion.MajorBuild := StrToIntDef(VarToStr(ChildNodes.Nodes['major_build'].NodeValue), 0);
+      AUpdateVersion.UpdateVersion.MinorBuild := StrToIntDef(VarToStr(ChildNodes.Nodes['minor_build'].NodeValue), 0);
+
+      AUpdateVersion.UpdateCreated := StrToDateTime(VarToStr(ChildNodes.Nodes['created'].NodeValue), FSQLFormatSettings);
+      AUpdateVersion.UpdateModified := StrToDateTime(VarToStr(ChildNodes.Nodes['modified'].NodeValue), FSQLFormatSettings);
+    end;
+
+  with ANode.ChildNodes.Nodes['files'] do
+    if HasChildNodes then
+    begin
+      for LFileIndex := 0 to ChildNodes.Count - 1 do
+        with ChildNodes.Nodes[LFileIndex] do
+        begin
+          LFilePathName := IncludeTrailingPathDelimiter(
+            { . } IncludeTrailingPathDelimiter(LocalPathFromID(StrToIntDef(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue), 0))) +
+            { ... } VarToStr(ChildNodes.Nodes['path_appendix'].NodeValue)
+            { . } ) +
+          { . } VarToStr(ChildNodes.Nodes['name'].NodeValue);
+
+          if (not FileExists(LFilePathName)) or (not SameText(GetMD5FromFile(LFilePathName), VarToStr(ChildNodes.Nodes['checksum'].NodeValue))) then
+          begin
+            LUpdateSystemFile := TIUpdateSystemFile.Create(VarToStr(ChildNodes.Nodes['name'].NodeValue));
+
+            with LUpdateSystemFile do
+            begin
+              if (IsNumber(ChildNodes.Nodes['filesystem_id'].NodeValue)) then
+                FileBase.FileSystem := TFileSystem(StrToIntDef(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue), 0))
+              else
+                FileBase.FileSystem := TEnum.Parse<TFileSystem>(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue));
+
+              FileBase.FilePathAppendix := VarToStr(ChildNodes.Nodes['path_appendix'].NodeValue);
+
+              FileVersion.MajorVersion := StrToIntDef(VarToStr(ChildNodes.Nodes['major_version'].NodeValue), 0);
+              FileVersion.MinorVersion := StrToIntDef(VarToStr(ChildNodes.Nodes['minor_version'].NodeValue), 0);
+              FileVersion.MajorBuild := StrToIntDef(VarToStr(ChildNodes.Nodes['major_build'].NodeValue), 0);
+              FileVersion.MinorBuild := StrToIntDef(VarToStr(ChildNodes.Nodes['minor_build'].NodeValue), 0);
+
+              FileSizeCompressed := StrToIntDef(VarToStr(ChildNodes.Nodes['size'].NodeValue), 0);
+              FileChecksum := VarToStr(ChildNodes.Nodes['checksum'].NodeValue);
+
+              AUpdateVersion.UpdateSize := AUpdateVersion.UpdateSize + FileSizeCompressed;
+            end;
+            AUpdateVersion.UpdateFiles.Add(LUpdateSystemFile);
+          end;
+        end;
+    end;
+end;
+
+function TUpdateController.LocalPathVariableFromFileSystem(AFileSystem: TFileSystem): string;
+begin
+  case AFileSystem of
+    fsRoot:
+      result := '%intelligen_root%';
+    fsConfig:
+      result := '%intelligen_configuration%';
+    fsPlugins:
+      result := '%intelligen_plugins%';
+    fsSettings:
+      result := '%intelligen_settings%';
+    fsCMS:
+      result := '%intelligen_templates_cms%';
+    fsCMSSubject:
+      result := '%intelligen_templates_cms%\message\';
+    fsCMSMessage:
+      result := '%intelligen_templates_cms%\subject\';
+    fsSite:
+      result := '%intelligen_templates_site%';
+    fsType:
+      result := '%intelligen_templates_type%';
+  end;
+end;
+
+procedure TUpdateController.DownloadFiles(const task: IOmniTask; AUpdateVersion: TUpdateVersion);
+var
+  LUpdatePath, LUpdateFilesPath: string;
+
+  LCommandLine: TStringList;
+
+  LUpdateFileIndex: Integer;
+  LUpdateFile: IUpdateSystemFile;
+
+  LMemoryStream: TMemoryStream;
+begin
+  LUpdatePath := GetHiddenDataDir + 'update\';
+  LUpdateFilesPath := LUpdatePath + 'files\';
+  ForceDirectories(LUpdateFilesPath);
+
+  FDownloadedSize := 0;
+
+  LCommandLine := TStringList.Create;
+  try
+    LCommandLine.Add('if "%ProgramFiles(x86)%XXX"=="XXX" goto x86');
+    LCommandLine.Add('set waitexe=sleep64.exe');
+    LCommandLine.Add('goto checkdone');
+
+    LCommandLine.Add(':x86');
+    LCommandLine.Add('set waitexe=sleep32.exe');
+
+    LCommandLine.Add(':checkdone');
+
+    LCommandLine.Add('"' + LUpdatePath + '%waitexe%" 5');
+    LCommandLine.Add('start "/w" "taskkill.exe" /F /IM IntelligeN.exe /t');
+    LCommandLine.Add('set intelligen_root=' + ExtractFilePath(ParamStr(0)));
+    LCommandLine.Add('set intelligen_configuration=' + GetConfigurationFolder);
+    LCommandLine.Add('set intelligen_plugins=' + GetPluginFolder);
+    LCommandLine.Add('set intelligen_settings=' + GetSettingsFolder);
+    LCommandLine.Add('set intelligen_templates_cms=' + GetTemplatesCMSFolder);
+    LCommandLine.Add('set intelligen_templates_type=' + GetTemplatesTypeFolder);
+    LCommandLine.Add('"' + LUpdatePath + '%waitexe%" 5');
+
+    with THTTPIndyHelper.Create do
+      try
+        HandleWrongProtocolException := False;
+
+        for LUpdateFileIndex := 0 to AUpdateVersion.UpdateFiles.Count - 1 do
+        begin
+          LUpdateFile := AUpdateVersion.UpdateFiles[LUpdateFileIndex];
+
+          LMemoryStream := TMemoryStream.Create;
+          try
+            try
+              Get(AUpdateVersion.DownloadPath + LUpdateFile.FileChecksum, LMemoryStream);
+            except
+              on E: Exception do
+              begin
+                FErrorMsg := 'downloading ' + LUpdateFile.FileBase.FileName + ' ' + E.message;
+                task.Invoke(
+                  { } procedure
+                  { } begin
+                  { . } DoUpdateError;
+                  { } end);
+                Exit;
+              end;
+            end;
+            Inc(FDownloadedSize, LUpdateFile.FileSizeCompressed);
+            task.Invoke(
+              { } procedure
+              { } begin
+              { . } DoUpdateDownloading;
+              { } end);
+            LMemoryStream.SaveToFile(LUpdateFilesPath + LUpdateFile.FileChecksum + '.zip');
+
+            // with TAbArchive.CreateFromStream(_MemoryStream, _UpdateList.Items[I].Filechecksum + '.zip') do
+            // FArchive := TAbArchive.CreateFromStream(_MemoryStream, _UpdateList.Items[I].Filechecksum + '.zip');
+
+            try
+              with TAbUnZipper.Create(nil) do
+                try
+                  FileName := LUpdateFilesPath + LUpdateFile.FileChecksum + '.zip';
+                  BaseDirectory := LUpdateFilesPath;
+                  ExtractFiles('*.*');
+                finally
+                  Free;
+                end;
+            except
+              on E: Exception do
+              begin
+                FErrorMsg := 'extracting ' + LUpdateFile.FileBase.FileName + ' ' + E.message;
+                task.Invoke(
+                  { } procedure
+                  { } begin
+                  { . } DoUpdateError;
+                  { } end);
+                Exit;
+              end;
+            end;
+
+            DeleteFile(LUpdateFilesPath + LUpdateFile.FileChecksum + '.zip');
+
+            LCommandLine.Add('copy "' + LUpdateFilesPath + LUpdateFile.FileBase.FileName + '" "' + LocalPathVariableFromFileSystem(LUpdateFile.FileBase.FileSystem) + '"');
+          finally
+            LMemoryStream.Free;
+          end;
+
+          LUpdateFile := nil;
+        end;
+      finally
+        Free;
+      end;
+
+    LCommandLine.Add('rmdir /s /q files');
+    LCommandLine.Add('del "' + LUpdatePath + 'sleep32.exe"');
+    LCommandLine.Add('del "' + LUpdatePath + 'sleep64.exe"');
+    LCommandLine.Add('start "" "%intelligen_root%IntelligeN.exe"');
+    LCommandLine.SaveToFile(LUpdatePath + 'exec_update.bat');
+  finally
+    LCommandLine.Free;
+  end;
+
+  with TResourceStream.Create(hInstance, 'sleep32', RT_RCDATA) do
+    try
+      SaveToFile(LUpdatePath + 'sleep32.exe');
+    finally
+      Free;
+    end;
+
+  with TResourceStream.Create(hInstance, 'sleep64', RT_RCDATA) do
+    try
+      SaveToFile(LUpdatePath + 'sleep64.exe');
+    finally
+      Free;
+    end;
+
+  task.Invoke(
+    { } procedure
+    { } begin
+    { . } DoUpdateFinishedDownload;
+    { } end);
+end;
+
+procedure TUpdateController.DoUpdateSearching;
+begin
+  if Assigned(FOnSearchingUpdate) then
+    FOnSearchingUpdate(Self);
+end;
+
+procedure TUpdateController.DoUpdateNoChanges;
+begin
+  if Assigned(FOnUpdateNoChanges) then
+    FOnUpdateNoChanges(Self);
+end;
+
+procedure TUpdateController.DoUpdateHasChanges;
+begin
+  if Assigned(FOnUpdateHasChanges) then
+    FOnUpdateHasChanges(Self, FUpdateVersions);
+end;
+
+procedure TUpdateController.DoUpdateError;
+begin
+  if Assigned(FOnUpdateError) then
+    FOnUpdateError(Self, FErrorMsg);
+end;
+
+procedure TUpdateController.DoUpdateStartDownload;
+begin
+  if Assigned(FOnUpdateStartDownload) then
+    FOnUpdateStartDownload(Self);
+end;
+
+procedure TUpdateController.DoUpdateDownloading;
+begin
+  if Assigned(FOnUpdateDownloading) then
+    FOnUpdateDownloading(Self, (round((FUpdateSize / FDownloadedSize) * 100)));
+end;
+
+procedure TUpdateController.DoUpdateFinishedDownload;
+begin
+  if Assigned(FOnUpdateFinishedDownload) then
+    FOnUpdateFinishedDownload(Self);
+end;
+
+constructor TUpdateController.Create(const AProxy: IProxy = nil; AConnectTimeout: Integer = 5000; AReadTimeout: Integer = 10000);
+begin
+  inherited Create;
+
+  FProxy := AProxy;
+  FConnectTimeout := AConnectTimeout;
+  FReadTimeout := AReadTimeout;
+
+  FUpdateVersions := nil; // Create at CheckForUpdates point
+
+  if SettingsManager.Settings.CheckForUpdates then
+    CheckForUpdates;
+end;
+
+destructor TUpdateController.Destroy;
+begin
+  FUpdateVersions.Free;
+
+  inherited Destroy;
+end;
+
+procedure TUpdateController.CheckForUpdates;
+var
+  SearchResult: Boolean;
+begin
+  if not FBusy then
+  begin
+    FBusy := True;
+
+    DoUpdateSearching;
+
+    if not Assigned(FUpdateVersions) then
+    begin
+      FUpdateVersions := TUpdateVersions.Create;
     end
     else
     begin
-
-      with THTTPIndyHelper.Create do
-        try
-          OnWork := Work;
-          OnWorkBegin := WorkBegin;
-          OnWorkEnd := WorkEnd;
-          FDownloadedSize := 0;
-          Queue(UpdateAvailable);
-
-          _UpdatePath := GetHiddenDataDir + 'update\';
-          ForceDirectories(_UpdatePath + 'files\');
-
-          _StringList := TStringList.Create;
-          try
-            _StringList.Add('if "%ProgramFiles(x86)%XXX"=="XXX" goto x86');
-            _StringList.Add('set waitexe=sleep64.exe');
-            _StringList.Add('goto checkdone');
-
-            _StringList.Add(':x86');
-            _StringList.Add('set waitexe=sleep32.exe');
-
-            _StringList.Add(':checkdone');
-
-            _StringList.Add('"' + _UpdatePath + '%waitexe%" 5');
-            _StringList.Add('start "/w" "taskkill.exe" /F /IM IntelligeN.exe /t');
-            _StringList.Add('set intelligen_root=' + ExtractFilePath(ParamStr(0)));
-            _StringList.Add('set intelligen_configuration=' + GetConfigurationFolder);
-            _StringList.Add('set intelligen_plugins=' + GetPluginFolder);
-            _StringList.Add('set intelligen_settings=' + GetSettingsFolder);
-            _StringList.Add('set intelligen_templates_cms=' + GetTemplatesCMSFolder);
-            _StringList.Add('set intelligen_templates_type=' + GetTemplatesTypeFolder);
-            _StringList.Add('"' + _UpdatePath + '%waitexe%" 5');
-
-            for I := 0 to _UpdateList.Count - 1 do
-            begin
-              _MemoryStream := TMemoryStream.Create;
-              try
-                Get(_DownloadPath + _UpdateList.Items[I].Filechecksum, _MemoryStream);
-                Inc(FDownloadedSize, _UpdateList.Items[I].Filesize);
-                Queue(UpdatePosition);
-                _MemoryStream.SaveToFile(_UpdatePath + 'files\' + _UpdateList.Items[I].Filechecksum + '.zip');
-                // with TAbArchive.CreateFromStream(_MemoryStream, _UpdateList.Items[I].Filechecksum + '.zip') do
-
-                // Exit;
-
-                with TAbUnZipper.Create(nil) do
-                  try
-                    // FArchive := TAbArchive.CreateFromStream(_MemoryStream, _UpdateList.Items[I].Filechecksum + '.zip');
-                    Filename := _UpdatePath + 'files\' + _UpdateList.Items[I].Filechecksum + '.zip';
-                    BaseDirectory := _UpdatePath + 'files\';
-                    ExtractFiles('*.*');
-                  finally
-                    Free;
-                  end;
-
-                DeleteFile(_UpdatePath + 'files\' + _UpdateList.Items[I].Filechecksum + '.zip');
-
-                _StringList.Add('copy "' + _UpdatePath + 'files\' + _UpdateList.Items[I].Filename + '" "' + LocalPathVariableFormID(_UpdateList.Items[I].Filetype) + '"');
-              finally
-                _MemoryStream.Free;
-              end;
-            end;
-          finally
-            Free;
-          end;
-
-          _StringList.Add('rmdir /s /q files');
-          _StringList.Add('del "' + _UpdatePath + 'sleep32.exe"');
-          _StringList.Add('del "' + _UpdatePath + 'sleep64.exe"');
-          _StringList.Add('start "" "%intelligen_root%IntelligeN.exe"');
-          _StringList.SaveToFile(_UpdatePath + 'exec_update.bat');
-        finally
-          _StringList.Free;
-        end;
-
-      with TResourceStream.Create(hInstance, 'sleep32', RT_RCDATA) do
-        try
-          SaveToFile(_UpdatePath + 'sleep32.exe');
-        finally
-          Free;
-        end;
-
-      with TResourceStream.Create(hInstance, 'sleep64', RT_RCDATA) do
-        try
-          SaveToFile(_UpdatePath + 'sleep64.exe');
-        finally
-          Free;
-        end;
-
-      Queue(UpdateFinished);
+      FUpdateVersions.Free;
+      FUpdateVersions := TUpdateVersions.Create;
     end;
-  finally
-    LUpdateList.Free;
-  end;
 
+    Parallel.Async(
+      { } procedure(const task: IOmniTask)
+      { } begin
+      { . } SearchResult := ReadUpdate();
+      { } end,
+      { } Parallel.TaskConfig.OnTerminated(
+        { } procedure(const task: IOmniTaskControl)
+        { } begin
+        { . } if (SearchResult) then
+        { . } begin
+        { . } if not FUpdateVersions.HasUpdate then
+        { ... } begin
+        { ..... } DoUpdateNoChanges;
+        { ... } end
+        { ... } else
+        { ... } begin
+        { ..... } DoUpdateHasChanges;
+        { ... } end;
+        { . } end
+        { . } else
+        { . } begin
+        { ... } DoUpdateError;
+        { . } end;
+        { . } FBusy := False;
+        { } end
+        { } ));
+  end;
+end;
+
+procedure TUpdateController.Download(AUpdateVersion: TUpdateVersion);
+var
+  LUpdateVersion: TUpdateVersion;
+begin
+  if not FBusy then
+  begin
+    FBusy := True;
+
+    LUpdateVersion := TUpdateVersion.Clone(AUpdateVersion);
+
+    DoUpdateStartDownload;
+
+    Parallel.Async(
+      { } procedure(const task: IOmniTask)
+      { } begin
+      { . } DownloadFiles(task, LUpdateVersion);
+      { } end,
+      { } Parallel.TaskConfig.OnTerminated(
+        { } procedure(const task: IOmniTaskControl)
+        { } begin
+        { . } LUpdateVersion.Free;
+        { . } FBusy := False;
+        { } end
+        { } ));
+  end;
+end;
+
+procedure TUpdateController.DownloadUpgrade;
+begin
+  Download(FUpdateVersions.Upgrade);
+end;
+
+procedure TUpdateController.DownloadUpdate;
+begin
+  Download(FUpdateVersions.Update);
 end;
 
 end.

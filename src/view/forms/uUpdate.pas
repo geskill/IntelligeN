@@ -4,14 +4,15 @@ interface
 
 uses
   // Delphi
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ShellAPI,
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, ShellAPI,
   // Dev Express
-  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, StdCtrls,
-  cxProgressBar, cxLabel, cxTextEdit, cxMemo, cxRichEdit,
+  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit,
+  cxProgressBar, cxLabel, cxTextEdit, cxRadioGroup,
   // DLLs
   uExport,
   // Api
-  uApiConst, uApiSettings, uApiUpdate;
+  uApiSettings, uApiUpdate;
 
 type
   TUpdate = class(TForm)
@@ -19,23 +20,29 @@ type
     cxPBUpdateStatus: TcxProgressBar;
     bRestartProgram: TButton;
     bClose: TButton;
-    cxREUpdateInfo: TcxRichEdit;
-    cxLShowInfo: TcxLabel;
+    cxRBUpgrade: TcxRadioButton;
+    cxRBUpdate: TcxRadioButton;
+    bDownload: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure cxLShowInfoClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+
+    procedure cxRBClick(Sender: TObject);
+    procedure bDownloadClick(Sender: TObject);
     procedure bRestartProgramClick(Sender: TObject);
     procedure bCloseClick(Sender: TObject);
   private
     FUpdateController: TUpdateController;
+  protected
+    procedure UpdateSearching(Sender: TObject);
+    procedure UpdateNoChanges(Sender: TObject);
+    procedure UpdateHasChanges(Sender: TObject; UpdateVersions: TUpdateVersions);
+    procedure UpdateError(Sender: TObject; ErrorMsg: string);
+    procedure UpdateStartDownload(Sender: TObject);
+    procedure UpdateDownloading(Sender: TObject; Position: Integer);
+    procedure UpdateFinishedDownload(Sender: TObject);
   public
     property UpdateController: TUpdateController read FUpdateController;
-    procedure update_position(APosition: Integer);
-    procedure update_searching;
-    procedure update_available(AUpdateInformation: string = '');
-    procedure update_unnecessary;
-    procedure update_finished;
-    procedure update_error(AErrorMsg: string = 'unknown error');
   end;
 
 var
@@ -43,31 +50,41 @@ var
 
 implementation
 
-uses
-  uMain;
 {$R *.dfm}
 
 procedure TUpdate.FormCreate(Sender: TObject);
 begin
-  FUpdateController := TUpdateController.Create(True);
-
-  with SettingsManager.Settings do
-  begin
-    if CheckForUpdates then
-      UpdateController.Start;
-  end;
+  FUpdateController := TUpdateController.Create(SettingsManager.Settings.HTTP.GetProxy(psaMain), SettingsManager.Settings.HTTP.ConnectTimeout, SettingsManager.Settings.HTTP.ReadTimeout);
+  FUpdateController.OnUpdateSearching := UpdateSearching;
+  FUpdateController.OnUpdateNoChanges := UpdateNoChanges;
+  FUpdateController.OnUpdateHasChanges := UpdateHasChanges;
+  FUpdateController.OnUpdateError := UpdateError;
+  FUpdateController.OnUpdateStartDownload := UpdateStartDownload;
+  FUpdateController.OnUpdateDownloading := UpdateDownloading;
+  FUpdateController.OnUpdateFinishedDownload := UpdateFinishedDownload;
 end;
 
 procedure TUpdate.FormDestroy(Sender: TObject);
 begin
-  FUpdateController.Terminate;
   FUpdateController.Free;
 end;
 
-procedure TUpdate.cxLShowInfoClick(Sender: TObject);
+procedure TUpdate.FormShow(Sender: TObject);
 begin
-  Height := 400;
-  cxREUpdateInfo.Height := 228;
+  UpdateController.CheckForUpdates;
+end;
+
+procedure TUpdate.cxRBClick(Sender: TObject);
+begin
+  bDownload.Enabled := (cxRBUpgrade.Checked) or (cxRBUpdate.Checked);
+end;
+
+procedure TUpdate.bDownloadClick(Sender: TObject);
+begin
+  if cxRBUpgrade.Checked then
+    UpdateController.DownloadUpgrade
+  else
+    UpdateController.DownloadUpdate;
 end;
 
 procedure TUpdate.bRestartProgramClick(Sender: TObject);
@@ -81,47 +98,91 @@ begin
   Close;
 end;
 
-procedure TUpdate.update_position(APosition: Integer);
-begin
-  cxPBUpdateStatus.Position := APosition - 1;
-end;
-
-procedure TUpdate.update_searching;
+procedure TUpdate.UpdateSearching(Sender: TObject);
 begin
   cxLMessage.Caption := 'searching ...';
   cxPBUpdateStatus.Visible := False;
 end;
 
-procedure TUpdate.update_available(AUpdateInformation: string = '');
+procedure TUpdate.UpdateNoChanges(Sender: TObject);
 begin
-  cxLMessage.Caption := 'an update is available downloading ...';
-  cxPBUpdateStatus.Position := 0;
-  cxREUpdateInfo.Lines.Text := AUpdateInformation;
-  cxPBUpdateStatus.Visible := True;
-  cxLShowInfo.Visible := True;
   bRestartProgram.Visible := False;
-end;
-
-procedure TUpdate.update_unnecessary;
-begin
-  cxLMessage.Caption := 'no update is available';
+  cxLMessage.Caption := 'No update is available';
   cxPBUpdateStatus.Visible := False;
-  cxLShowInfo.Visible := False;
-  bRestartProgram.Visible := False;
 end;
 
-procedure TUpdate.update_finished;
+procedure TUpdate.UpdateHasChanges(Sender: TObject; UpdateVersions: TUpdateVersions);
+
+  function GetUpdateTitle(AUpdateVersion: TUpdateVersion): string;
+  begin
+    if (AUpdateVersion.UpdateVersion.IsPreRelease) then
+      result := result + 'PRE_RELEASE ';
+
+    result := AUpdateVersion.UpdateVersion.ToString + ' (' + DateTimeToStr(AUpdateVersion.UpdateCreated) + ')';
+  end;
+
 begin
-  cxLMessage.Caption := 'update finished';
+  bRestartProgram.Visible := False;
+  bDownload.Visible := True;
+
+  cxLMessage.Caption := 'An update is available:';
+
+  if (UpdateVersions.Upgrade.UpdateFiles.Count > 0) then
+  begin
+    cxRBUpgrade.Caption := GetUpdateTitle(UpdateVersions.Upgrade);
+    cxRBUpgrade.Visible := True;
+    cxRBUpgrade.Checked := False;
+
+    cxRBUpdate.Top := 70;
+
+    bDownload.Enabled := True;
+  end
+  else
+  begin
+    cxRBUpdate.Top := 52;
+  end;
+
+  if (UpdateVersions.Update.UpdateFiles.Count > 0) then
+  begin
+    cxRBUpdate.Caption := GetUpdateTitle(UpdateVersions.Update);
+    cxRBUpdate.Checked := True;
+    cxRBUpdate.Visible := True;
+
+    bDownload.Enabled := True;
+  end;
+end;
+
+procedure TUpdate.UpdateError(Sender: TObject; ErrorMsg: string);
+begin
+  if (ErrorMsg = '') then
+    ErrorMsg := 'unknown error (maybe timeout, try again later)';
+  cxLMessage.Caption := 'error: ' + ErrorMsg;
+end;
+
+procedure TUpdate.UpdateStartDownload(Sender: TObject);
+begin
+  bDownload.Enabled := False;
+  bDownload.Visible := False;
+
+  cxRBUpgrade.Visible := False;
+  cxRBUpdate.Visible := False;
+
+  cxLMessage.Caption := 'Downloading ...';
+  cxPBUpdateStatus.Position := 0;
+
+  cxPBUpdateStatus.Visible := True;
+end;
+
+procedure TUpdate.UpdateDownloading(Sender: TObject; Position: Integer);
+begin
+  cxPBUpdateStatus.Position := Position - 1;
+end;
+
+procedure TUpdate.UpdateFinishedDownload(Sender: TObject);
+begin
+  cxLMessage.Caption := 'Update finished';
   cxPBUpdateStatus.Position := 100;
   bRestartProgram.Visible := True;
-end;
-
-procedure TUpdate.update_error(AErrorMsg: string);
-begin
-  if (AErrorMsg = '') then
-    AErrorMsg := 'unknown error (maybe timeout, try again later)';
-  cxLMessage.Caption := 'error: ' + AErrorMsg;
 end;
 
 end.

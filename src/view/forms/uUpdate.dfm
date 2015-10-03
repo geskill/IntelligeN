@@ -15,6 +15,7 @@ object Update: TUpdate
   Position = poMainFormCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnShow = FormShow
   DesignSize = (
     400
     126)
@@ -30,7 +31,7 @@ object Update: TUpdate
     Anchors = [akLeft, akTop, akRight]
     AutoSize = False
     Properties.SolidTextColor = True
-    TabOrder = 1
+    TabOrder = 3
     Visible = False
     Height = 35
     Width = 336
@@ -42,7 +43,7 @@ object Update: TUpdate
     Height = 25
     Anchors = [akTop, akRight]
     Caption = 'Restart'
-    TabOrder = 2
+    TabOrder = 5
     Visible = False
     OnClick = bRestartProgramClick
   end
@@ -54,27 +55,37 @@ object Update: TUpdate
     Anchors = [akTop, akRight]
     Cancel = True
     Caption = 'Close'
-    TabOrder = 3
+    TabOrder = 6
     OnClick = bCloseClick
   end
-  object cxREUpdateInfo: TcxRichEdit
-    Left = 32
-    Top = 136
+  object cxRBUpgrade: TcxRadioButton
+    Left = 45
+    Top = 52
+    Width = 323
+    Height = 17
     Anchors = [akLeft, akTop, akRight]
-    Properties.AutoURLDetect = True
-    Properties.MemoMode = True
-    Properties.ReadOnly = True
-    Properties.ScrollBars = ssBoth
-    TabOrder = 4
-    Height = 0
-    Width = 336
-  end
-  object cxLShowInfo: TcxLabel
-    Left = 32
-    Top = 101
-    Cursor = crHandPoint
-    Caption = '[+] Show update details'
+    TabOrder = 1
     Visible = False
-    OnClick = cxLShowInfoClick
+    OnClick = cxRBClick
+  end
+  object cxRBUpdate: TcxRadioButton
+    Left = 45
+    Top = 70
+    Width = 323
+    Height = 17
+    Anchors = [akLeft, akTop, akRight]
+    TabOrder = 2
+    Visible = False
+    OnClick = cxRBClick
+  end
+  object bDownload: TButton
+    Left = 32
+    Top = 93
+    Width = 75
+    Height = 25
+    Caption = 'Download'
+    TabOrder = 4
+    Visible = False
+    OnClick = bDownloadClick
   end
 end

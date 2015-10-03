@@ -730,11 +730,7 @@ end;
 
 procedure TMain.aCheckforUpdatesExecute(Sender: TObject);
 begin
-  with uUpdate.Update do
-  begin
-    Show;
-    UpdateController.Resume; // Start not allowed here
-  end;
+  uUpdate.Update.Show;
 end;
 
 procedure TMain.aSupportBoardExecute(Sender: TObject);
