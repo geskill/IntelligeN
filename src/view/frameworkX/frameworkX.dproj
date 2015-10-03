@@ -24,7 +24,7 @@
 			<DCC_DcuOutput>dcu</DCC_DcuOutput>
 			<DCC_BplOutput>../../../bin</DCC_BplOutput>
 			<DCC_DependencyCheckOutputName>..\..\..\bin\frameworkX.bpl</DCC_DependencyCheckOutputName>
-			<DCC_UnitSearchPath>../external\;../external\Abbrevia\source;../external\HtmlViewer\source;../../core\external\OmniThreadLibrary;../../core\external\OmniThreadLibrary\src;../../sdk\plugins;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_UnitSearchPath>../external\;../external\Abbrevia\source;../external\HtmlViewer\source;../../core\external\OmniThreadLibrary;../../core\external\OmniThreadLibrary\src;../../core\external\Spring4D\Base;../../core\external\Spring4D\Base\Collections;../../core\external\Spring4D\Base\Reflection;../../core\external\Spring4D\Core\Container;../../core\external\Spring4D\Core\Services;../../core\external\Spring4D\Extensions\Cryptography;../../core\external\Spring4D\Extensions\Utils;../../sdk\plugins;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<GenDll>true</GenDll>
 			<GenPackage>true</GenPackage>
@@ -46,6 +46,54 @@
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
 			<DCCReference Include="framework.dcp"/>
+			<DCCReference Include="..\..\Source\Base\Spring.pas"/>
+			<DCCReference Include="..\..\Source\Base\Collections\Spring.Collections.pas"/>
+			<DCCReference Include="..\..\Source\Base\Collections\Spring.Collections.Adapters.pas"/>
+			<DCCReference Include="..\..\Source\Base\Collections\Spring.Collections.Base.pas"/>
+			<DCCReference Include="..\..\Source\Base\Collections\Spring.Collections.Dictionaries.pas"/>
+			<DCCReference Include="..\..\Source\Base\Collections\Spring.Collections.Events.pas"/>
+			<DCCReference Include="..\..\Source\Base\Collections\Spring.Collections.Extensions.pas"/>
+			<DCCReference Include="..\..\Source\Base\Collections\Spring.Collections.Lists.pas"/>
+			<DCCReference Include="..\..\Source\Base\Collections\Spring.Collections.LinkedLists.pas"/>
+			<DCCReference Include="..\..\Source\Base\Collections\Spring.Collections.MultiMaps.pas"/>
+			<DCCReference Include="..\..\Source\Base\Collections\Spring.Collections.Queues.pas"/>
+			<DCCReference Include="..\..\Source\Base\Collections\Spring.Collections.Sets.pas"/>
+			<DCCReference Include="..\..\Source\Base\Collections\Spring.Collections.Stacks.pas"/>
+			<DCCReference Include="..\..\Source\Base\Spring.DesignPatterns.pas"/>
+			<DCCReference Include="..\..\Source\Base\Spring.Events.pas"/>
+			<DCCReference Include="..\..\Source\Base\Spring.Events.Base.pas"/>
+			<DCCReference Include="..\..\Source\Base\Spring.Helpers.pas"/>
+			<DCCReference Include="..\..\Source\Base\Reflection\Spring.Reflection.pas"/>
+			<DCCReference Include="..\..\Source\Base\Reflection\Spring.Reflection.Activator.pas"/>
+			<DCCReference Include="..\..\Source\Base\Reflection\Spring.Reflection.ValueConverters.pas"/>
+			<DCCReference Include="..\..\Source\Base\Spring.ResourceStrings.pas"/>
+			<DCCReference Include="..\..\Source\Core\Services\Spring.Services.pas"/>
+			<DCCReference Include="..\..\Source\Core\Services\Spring.Services.Logging.pas"/>
+			<DCCReference Include="..\..\Source\Core\Container\Spring.Container.pas"/>
+			<DCCReference Include="..\..\Source\Core\Container\Spring.Container.ActivatorExtension.pas"/>
+			<DCCReference Include="..\..\Source\Core\Container\Spring.Container.Builder.pas"/>
+			<DCCReference Include="..\..\Source\Core\Container\Spring.Container.Common.pas"/>
+			<DCCReference Include="..\..\Source\Core\Container\Spring.Container.ComponentActivator.pas"/>
+			<DCCReference Include="..\..\Source\Core\Container\Spring.Container.Core.pas"/>
+			<DCCReference Include="..\..\Source\Core\Container\Spring.Container.CreationContext.pas"/>
+			<DCCReference Include="..\..\Source\Core\Container\Spring.Container.DecoratorExtension.pas"/>
+			<DCCReference Include="..\..\Source\Core\Container\Spring.Container.Extensions.pas"/>
+			<DCCReference Include="..\..\Source\Core\Container\Spring.Container.Injection.pas"/>
+			<DCCReference Include="..\..\Source\Core\Container\Spring.Container.LifetimeManager.pas"/>
+			<DCCReference Include="..\..\Source\Core\Container\Spring.Container.Pool.pas"/>
+			<DCCReference Include="..\..\Source\Core\Container\Spring.Container.Registration.pas"/>
+			<DCCReference Include="..\..\Source\Core\Container\Spring.Container.Resolvers.pas"/>
+			<DCCReference Include="..\..\Source\Core\Container\Spring.Container.ResourceStrings.pas"/>
+			<DCCReference Include="..\..\Source\Extensions\Cryptography\Spring.Cryptography.Base.pas"/>
+			<DCCReference Include="..\..\Source\Extensions\Cryptography\Spring.Cryptography.CRC.pas"/>
+			<DCCReference Include="..\..\Source\Extensions\Cryptography\Spring.Cryptography.DES.pas"/>
+			<DCCReference Include="..\..\Source\Extensions\Cryptography\Spring.Cryptography.MD5.pas"/>
+			<DCCReference Include="..\..\Source\Extensions\Cryptography\Spring.Cryptography.pas"/>
+			<DCCReference Include="..\..\Source\Extensions\Cryptography\Spring.Cryptography.SHA.pas"/>
+			<DCCReference Include="..\..\Source\Extensions\Cryptography\Spring.Cryptography.Utils.pas"/>
+			<DCCReference Include="..\..\Source\Extensions\Utils\Spring.Utils.IO.pas"/>
+			<DCCReference Include="..\..\Source\Extensions\Utils\Spring.Utils.pas"/>
+			<DCCReference Include="..\..\Source\Extensions\Utils\Spring.Utils.WinApi.pas"/>
 			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
 			</BuildConfiguration>
@@ -79,9 +127,9 @@
 						<VersionInfo Name="IncludeVerInfo">True</VersionInfo>
 						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
 						<VersionInfo Name="MajorVer">2</VersionInfo>
-						<VersionInfo Name="MinorVer">0</VersionInfo>
+						<VersionInfo Name="MinorVer">129</VersionInfo>
 						<VersionInfo Name="Release">0</VersionInfo>
-						<VersionInfo Name="Build">129</VersionInfo>
+						<VersionInfo Name="Build">0</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -91,15 +139,15 @@
 						<VersionInfo Name="CodePage">1252</VersionInfo>
 					</VersionInfo>
 					<VersionInfoKeys>
-						<VersionInfoKeys Name="CompanyName"/>
-						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">2.0.0.129</VersionInfoKeys>
+						<VersionInfoKeys Name="CompanyName">Sebastian Klatte</VersionInfoKeys>
+						<VersionInfoKeys Name="FileDescription">IntelligeN 2009 Framework</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">2.129.0.0</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
-						<VersionInfoKeys Name="LegalCopyright"/>
+						<VersionInfoKeys Name="LegalCopyright">(c) 2015 Sebastian Klatte</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks"/>
-						<VersionInfoKeys Name="OriginalFilename"/>
-						<VersionInfoKeys Name="ProductName"/>
-						<VersionInfoKeys Name="ProductVersion">2.0.0.129</VersionInfoKeys>
+						<VersionInfoKeys Name="OriginalFilename">frameworkX.bpl</VersionInfoKeys>
+						<VersionInfoKeys Name="ProductName">IntelligeN 2009</VersionInfoKeys>
+						<VersionInfoKeys Name="ProductVersion">2.5</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 					<Excluded_Packages/>
