@@ -62,6 +62,9 @@ begin
   FUpdateController.OnUpdateStartDownload := UpdateStartDownload;
   FUpdateController.OnUpdateDownloading := UpdateDownloading;
   FUpdateController.OnUpdateFinishedDownload := UpdateFinishedDownload;
+
+  if SettingsManager.Settings.CheckForUpdates then
+    UpdateController.CheckForUpdates;
 end;
 
 procedure TUpdate.FormDestroy(Sender: TObject);
@@ -149,6 +152,9 @@ begin
     cxRBUpdate.Visible := True;
 
     bDownload.Enabled := True;
+
+    if SettingsManager.Settings.CheckForUpdates then
+      UpdateController.DownloadUpdate;
   end;
 end;
 

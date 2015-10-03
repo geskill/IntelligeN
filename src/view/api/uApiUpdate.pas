@@ -16,7 +16,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPManager, uHTTPIndyHelper,
   // Api
-  uBase, uApiConst, uApiSettings, uApiUpdateInterfaceBase, uApiUpdateModelBase,
+  uBase, uApiConst, uApiUpdateInterfaceBase, uApiUpdateModelBase,
   // DLLs
   uExport,
   // plugin system
@@ -547,9 +547,6 @@ begin
   FReadTimeout := AReadTimeout;
 
   FUpdateVersions := nil; // Create at CheckForUpdates point
-
-  if SettingsManager.Settings.CheckForUpdates then
-    CheckForUpdates;
 end;
 
 destructor TUpdateController.Destroy;
