@@ -12,7 +12,7 @@ uses
   // Common
   uBase,
   // Api
-  uApiConst, uApiHTTP, uApiMain, uApiSettings,
+  uApiConst, uApiMain, uApiSettings,
   // Utils
   uFileUtils;
 
@@ -221,6 +221,7 @@ begin
       finally
         Free;
       end;
+    {
     with TApiHTTP.CreateAccounting do
       try
         Params := TIdMultiPartFormDataStream.Create;
@@ -307,6 +308,7 @@ begin
       finally
         Free;
       end;
+    }
   end
   else
   begin
@@ -563,6 +565,7 @@ begin
   _k := _i;
   _i := _k;
 
+  {
   with TApiHTTP.CreateAccounting do
     try
       Params := TIdMultiPartFormDataStream.Create;
@@ -701,6 +704,7 @@ begin
     finally
       Free;
     end;
+  }
 
   if (false) then
 

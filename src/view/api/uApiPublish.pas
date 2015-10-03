@@ -29,15 +29,14 @@ type
     FErrorMsg: string;
     FCAPTCHAResult: Boolean;
     FCAPTCHAImageUrl, FCAPTCHAName, FCAPTCHAText, FCAPTCHACookies: WideString;
-    FIntelligentPostingResult, FIntelligentPostingRedoSearch: Boolean;
+    FIntelligentPostingResult, FIntelligentPostingRedoSearch: WordBool;
     FIntelligentPostingSearchValue, FIntelligentPostingSearchResults: WideString;
     FIntelligentPostingSearchIndex: Integer;
     procedure InternalErrorHandler(AErrorMsg: string);
     procedure CAPTCHAInputThreaded;
-    function CAPTCHAInputSynchronizer(const AImageUrl, AName: WideString; out AText: WideString; var ACookies: WideString): Boolean; stdcall;
+    function CAPTCHAInputSynchronizer(const AImageUrl, AName: WideString; out AText: WideString; var ACookies: WideString): WordBool; safecall;
     procedure IntelligentPostingHandlerThreaded;
-    function IntelligentPostingHandlerSynchronizer(var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer;
-      out ARedoSearch: Boolean): Boolean; stdcall;
+    function IntelligentPostingHandlerSynchronizer(var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool; safecall;
   protected
     FPublishItem: IPublishItem;
     FPublishRetry: Integer;
@@ -124,7 +123,7 @@ begin
   FWait.Signal;
 end;
 
-function TPublishItemThread.CAPTCHAInputSynchronizer(const AImageUrl, AName: WideString; out AText: WideString; var ACookies: WideString): Boolean;
+function TPublishItemThread.CAPTCHAInputSynchronizer(const AImageUrl, AName: WideString; out AText: WideString; var ACookies: WideString): WordBool;
 begin
   FCAPTCHAImageUrl := AImageUrl;
   FCAPTCHAName := AName;
@@ -140,13 +139,11 @@ end;
 
 procedure TPublishItemThread.IntelligentPostingHandlerThreaded;
 begin
-  FIntelligentPostingResult := TIntelligentPostingClass.IntelligentPostingHandler(FIntelligentPostingSearchValue, FIntelligentPostingSearchResults,
-    FIntelligentPostingSearchIndex, FIntelligentPostingRedoSearch);
+  FIntelligentPostingResult := TIntelligentPostingClass.IntelligentPostingHandler(FIntelligentPostingSearchValue, FIntelligentPostingSearchResults, FIntelligentPostingSearchIndex, FIntelligentPostingRedoSearch);
   FWait.Signal;
 end;
 
-function TPublishItemThread.IntelligentPostingHandlerSynchronizer(var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer;
-  out ARedoSearch: Boolean): Boolean;
+function TPublishItemThread.IntelligentPostingHandlerSynchronizer(var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool;
 begin
   FIntelligentPostingSearchValue := ASearchValue;
   FIntelligentPostingSearchResults := ASearchResults;
@@ -292,8 +289,7 @@ end;
 procedure TPublishPool.AddPublishItem;
 begin
   FInList.Add(APublishItem);
-  CreateTask(TPublishItemThread.Create(APublishItem, APublishRetry), 'TPublishItemThread (' + APublishItem.Website + ')').MonitorWith(FOmniTED).Schedule
-    (FThreadPool);
+  CreateTask(TPublishItemThread.Create(APublishItem, APublishRetry), 'TPublishItemThread (' + APublishItem.Website + ')').MonitorWith(FOmniTED).Schedule(FThreadPool);
 end;
 
 procedure TPublishPool.RemovePublishItem;
@@ -451,8 +447,7 @@ begin
   FInList.Add(APublishJob);
   UniqueID := GetNextUniqueID;
   APublishJob.UniqueID := UniqueID;
-  CreateTask(TPublishThread.Create(APublishJob, PublishRate, PublishDelay, PublishRetry, FOnGUIInteractionItem),
-    'TPublishThread (' + APublishJob.Description + ')').MonitorWith(FOmniTED).Schedule(FThreadPool);
+  CreateTask(TPublishThread.Create(APublishJob, PublishRate, PublishDelay, PublishRetry, FOnGUIInteractionItem), 'TPublishThread (' + APublishJob.Description + ')').MonitorWith(FOmniTED).Schedule(FThreadPool);
   if Assigned(FOnGUIInteractionItem) then
     FOnGUIInteractionItem(pmisCREATED, APublishJob, 0, '');
   Result := UniqueID;

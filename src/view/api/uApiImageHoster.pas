@@ -21,7 +21,7 @@ type
     FCAPTCHAResult: Boolean;
     FCAPTCHAImageUrl, FCAPTCHAName, FCAPTCHAText, FCAPTCHACookies: WideString;
     procedure CAPTCHAInputThreaded;
-    function CAPTCHAInputSynchronizer(const AImageUrl, AName: WideString; out AText: WideString; var ACookies: WideString): Boolean; stdcall;
+    function CAPTCHAInputSynchronizer(const AImageUrl, AName: WideString; out AText: WideString; var ACookies: WideString): WordBool; safecall;
   protected
     FPictureMirror: IPictureMirror;
     FErrorMsg: string;
@@ -61,7 +61,7 @@ begin
   FCAPTCHAResult := TCAPTCHAClass.CAPTCHAInput(FCAPTCHAImageUrl, FCAPTCHAName, FCAPTCHAText, FCAPTCHACookies);
 end;
 
-function TImageHosterUploadThread.CAPTCHAInputSynchronizer(const AImageUrl, AName: WideString; out AText: WideString; var ACookies: WideString): Boolean;
+function TImageHosterUploadThread.CAPTCHAInputSynchronizer(const AImageUrl, AName: WideString; out AText: WideString; var ACookies: WideString): WordBool;
 begin
   FCAPTCHAImageUrl := AImageUrl;
   FCAPTCHAName := AName;

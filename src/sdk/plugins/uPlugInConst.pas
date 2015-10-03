@@ -3,10 +3,9 @@ unit uPlugInConst;
 interface
 
 type
-  TCAPTCHAInput = function(const AImageUrl, AName: WideString; out AText: WideString; var ACookies: WideString): Boolean of object; stdcall;
+  TCAPTCHAInput = function(const ACAPTCHA: WideString; const AName: WideString; out AText: WideString; var ACookies: WideString): WordBool of object; safecall;
   TCAPTCHAType = (ctImage, ctText);
-  TIntelligentPostingHelper = function(var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer;
-    out ARedoSearch: Boolean): Boolean of object; stdcall;
+  TIntelligentPostingHelper = function(var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool of object; safecall;
   TCMSType = (cmsBoard, cmsBlog, cmsFormbased);
   TCMSIDType = (citCategory, citPrefix, citIcon);
   TFoldertype = (ftWeb, ftPlain, ftContainer);

@@ -8,9 +8,9 @@ uses
   IdMultipartFormData, DECCipher, DECHash, DECFmt, XMLDoc, XMLIntf, Math,
   // Dev Express
   cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxTextEdit,
-  cxGridCustomTableView, cxGridCardView, cxGridCustomView, cxClasses, cxGridLevel, cxGrid, cxLabel, cxButtons,
+  cxGridCustomTableView, cxGridCardView, cxGridCustomView, cxClasses, cxGridLevel, cxGrid, cxLabel, cxButtons, cxGridCustomLayoutView, cxNavigator,
   // Api
-  uApiConst, uApiHTTP, uApiMain, uApiSettings, cxGridCustomLayoutView, cxNavigator;
+  uApiConst, uApiMain, uApiSettings;
 
 type
   TLicenceInfo = class(TForm)
@@ -77,6 +77,7 @@ begin
 
   _errormsg := 'Unknown error';
 
+  {
   with TApiHTTP.CreateAccounting do
     try
       Params := TIdMultiPartFormDataStream.Create;
@@ -171,6 +172,7 @@ begin
     finally
       Free;
     end;
+  }
 end;
 
 end.

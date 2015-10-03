@@ -25,8 +25,7 @@ type
   end;
 
   TIntelligentPostingClass = class
-    class function IntelligentPostingHandler(var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer;
-      out ARedoSearch: Boolean): Boolean; stdcall;
+    class function IntelligentPostingHandler(var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool; safecall;
   end;
 
 implementation

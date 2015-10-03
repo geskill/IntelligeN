@@ -3,13 +3,13 @@ unit uRegister;
 interface
 
 uses
+  // Delphi
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, ShellAPI, Dialogs, XMLDoc, XMLIntf,
-
-  IdMultipartFormData,
-
-  cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, Menus, StdCtrls, cxButtons, cxRadioGroup, ExtCtrls, cxControls, cxContainer, cxEdit, cxTextEdit,
-
-  uApiConst, uApiHTTP, uApiSettings, cxLabel;
+  // Dev Express
+  cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, Menus, StdCtrls, cxButtons, cxRadioGroup, ExtCtrls, cxControls,
+  cxContainer, cxEdit, cxTextEdit, cxLabel,
+  // Api
+  uApiConst, uApiSettings;
 
 type
   TRegister = class(TForm)
@@ -82,7 +82,7 @@ procedure TRegister.cxBDoNextClick(Sender: TObject);
 const
   paypalurl = 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=HJGRSGGSULBHN&os0=';
 var
-  Params: TIdMultiPartFormDataStream;
+  // Params: TIdMultiPartFormDataStream;
   ReplyData: TStringStream;
   XMLDoc: IXMLDocument;
   _errormsg: string;
@@ -151,6 +151,7 @@ begin
       MessageDlg(_errormsg, mtError, [mbOK], 0)
     else
     begin
+      {
       with TApiHTTP.CreateAccounting do
         try
           Params := TIdMultiPartFormDataStream.Create;
@@ -245,6 +246,7 @@ begin
         finally
           Free;
         end;
+        }
     end;
   end
 end;
