@@ -8,11 +8,9 @@ uses
   // AB
   AbArcTyp, AbZipper,
   // Api
-  uApiSettings,
+  uApiMain, uApiSettings,
   // DLLs
-  uExport,
-  // Utils
-  uFileUtils;
+  uExport;
 
 type
   TApiSettingsExport = class
@@ -81,16 +79,14 @@ begin
                 begin
                   _FileStream := TFileStream.Create(GetPath, OF_SHARE_DENY_NONE);
                   try
-                    _StringStream_templates_website.WriteString(ExtractFileName(GetPath) + ':' + sLineBreak + ExtractFilePath(GetPath)
-                        + sLineBreak + sLineBreak);
+                    _StringStream_templates_website.WriteString(ExtractFileName(GetPath) + ':' + sLineBreak + ExtractFilePath(GetPath) + sLineBreak + sLineBreak);
                     AddFromStream('!templates_site\' + ExtractFileName(GetPath), _FileStream);
                   finally
                     _FileStream.Free;
                   end;
                 end
                 else
-                  _StringStream_templates_website.WriteString(ExtractFileName(GetPath) + ' (FILE IS MISSING!):' + sLineBreak + ExtractFilePath(GetPath)
-                      + sLineBreak + sLineBreak);
+                  _StringStream_templates_website.WriteString(ExtractFileName(GetPath) + ' (FILE IS MISSING!):' + sLineBreak + ExtractFilePath(GetPath) + sLineBreak + sLineBreak);
               end;
               if Pos(LowerCase(GetTemplatesCMSFolder), LowerCase(GetMessageFileName)) = 0 then
               begin
@@ -99,16 +95,14 @@ begin
                 begin
                   _FileStream := TFileStream.Create(GetMessageFileName, OF_SHARE_DENY_NONE);
                   try
-                    _StringStream_templates_cms.WriteString(ExtractFileName(GetMessageFileName) + ':' + sLineBreak + ExtractFilePath(GetMessageFileName)
-                        + sLineBreak + sLineBreak);
+                    _StringStream_templates_cms.WriteString(ExtractFileName(GetMessageFileName) + ':' + sLineBreak + ExtractFilePath(GetMessageFileName) + sLineBreak + sLineBreak);
                     AddFromStream('!templates_cms\' + ExtractFileName(GetMessageFileName), _FileStream);
                   finally
                     _FileStream.Free;
                   end;
                 end
                 else
-                  _StringStream_templates_cms.WriteString(ExtractFileName(GetMessageFileName) + ' (FILE IS MISSING!):' + sLineBreak + ExtractFilePath
-                      (GetMessageFileName) + sLineBreak + sLineBreak);
+                  _StringStream_templates_cms.WriteString(ExtractFileName(GetMessageFileName) + ' (FILE IS MISSING!):' + sLineBreak + ExtractFilePath(GetMessageFileName) + sLineBreak + sLineBreak);
               end;
             end;
 
@@ -122,7 +116,7 @@ begin
       _StringStream_templates_website.Free;
     end;
 
-    ZipfileComment := 'created with v' + GetMinorVersion(ParamStr(0));
+    ZipfileComment := 'created with v' + IntToStr(MINOR_VERSION);
 
     CloseArchive;
   end;

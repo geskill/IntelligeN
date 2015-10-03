@@ -3,21 +3,7 @@ unit uFileUtils;
 interface
 
 uses
-  Windows, SysUtils, Classes, DECHash, DECFmt,
-{$WARN UNIT_PLATFORM OFF}
-  FileCtrl,
-{$WARN UNIT_PLATFORM ON}
-  ShellAPI;
-
-type
-  RFileVersion = packed record
-    MajorVersion: Integer;
-    MinorVersion: Integer;
-    MajorBuild: Integer;
-    MinorBuild: Integer;
-    procedure Init;
-    function ToString: string;
-  end;
+  Windows, SysUtils, Classes, DECHash, DECFmt, ShellAPI;
 
 function TrueFilename(AFileName: string): string;
 
@@ -29,28 +15,9 @@ procedure GetDirectoriesFromDirectory(Directory: string; const List: TStrings; C
 
 procedure GetFilesInDirectory(Directory: string; const Mask: string; List: TStrings; WithPath, WithSubDirs, WithFileExt, ClearList: Boolean);
 
-function FileVersionToStr(MajorVersion, MinorVersion, MajorBuild, MinorBuild: Integer): string;
-function GetFileVersion(const FileName: string): RFileVersion;
-function GetMinorVersion(const FileName: string): string;
-
 function DeleteFile(const AFile: string): Boolean;
 
 implementation
-
-{ RFileVersion }
-
-procedure RFileVersion.Init;
-begin
-  MajorVersion := 0;
-  MinorVersion := 0;
-  MajorBuild := 0;
-  MinorBuild := 0;
-end;
-
-function RFileVersion.ToString: string;
-begin
-  Result := FileVersionToStr(MajorVersion, MinorVersion, MajorBuild, MinorBuild);
-end;
 
 function TrueFilename(AFileName: string): string;
 const
@@ -180,44 +147,6 @@ begin
   finally
     List.EndUpdate;
   end;
-end;
-
-function FileVersionToStr(MajorVersion, MinorVersion, MajorBuild, MinorBuild: Integer): string;
-begin
-  Result := IntToStr(MajorVersion) + '.' + IntToStr(MinorVersion) + '.' + IntToStr(MajorBuild) + '.' + IntToStr(MinorBuild);
-end;
-
-function GetFileVersion(const FileName: string): RFileVersion;
-var
-  VersionInfoSize, VersionInfoValueSize, Zero: DWord;
-  VersionInfo, VersionInfoValue: Pointer;
-begin
-  Result.Init;
-  VersionInfoSize := GetFileVersionInfoSize(PChar(FileName), Zero);
-  if VersionInfoSize = 0 then
-    Exit;
-  { Bei nicht genug Speicher wird EOutOfMemory-Exception ausgelöst }
-  GetMem(VersionInfo, VersionInfoSize);
-  try
-    if GetFileVersionInfo(PChar(FileName), 0, VersionInfoSize, VersionInfo) and VerQueryValue(VersionInfo, '\'
-      { root block } , VersionInfoValue, VersionInfoValueSize) and (0 <> LongInt(VersionInfoValueSize)) then
-    begin
-      with TVSFixedFileInfo(VersionInfoValue^), Result do
-      begin
-        MajorVersion := HiWord(dwFileVersionMS);
-        MinorVersion := LoWord(dwFileVersionMS);
-        MajorBuild := HiWord(dwFileVersionLS);
-        MinorBuild := LoWord(dwFileVersionLS);
-      end; { with }
-    end; { then }
-  finally
-    FreeMem(VersionInfo);
-  end; { try }
-end; { GetFileVersion }
-
-function GetMinorVersion(const FileName: string): string;
-begin
-  Result := IntToStr(GetFileVersion(FileName).MinorVersion);
 end;
 
 function DeleteFile(const AFile: string): Boolean;

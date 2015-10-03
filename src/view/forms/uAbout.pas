@@ -5,12 +5,12 @@ interface
 uses
   // Delphi
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, ShellAPI,
+  // Spring Framework
+  Spring.Utils,
   // Common
   uBase,
   // DLLs
-  uExport,
-  // Utils
-  uFileUtils;
+  uExport;
 
 type
   TAbout = class(TForm)
@@ -30,15 +30,13 @@ var
 
 implementation
 
-uses
-  uMain;
 {$R *.dfm}
 
 procedure TAbout.FormCreate(Sender: TObject);
 var
   s: string;
 begin
-  s := ProgrammName + ' v' + GetFileVersion(ParamStr(0)).ToString;
+  s := ProgrammName + ' v' + TFileVersionInfo.GetVersionInfo(ParamStr(0)).FileVersion;
 
   if IsPortable then
     s := s + 'p';

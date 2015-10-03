@@ -7,6 +7,8 @@ uses
   Windows, SysUtils, Classes, Dialogs,
   // Dev Express
   cxCheckListBox,
+  // Spring Framework
+  Spring.Utils,
   // Utils
   uFileUtils, uPathUtils,
   // Common
@@ -24,8 +26,7 @@ type
   TAddPlugin = class
   private
     FOnPluginLoaded: TOnPluginLoaded;
-    function LoadPlugin(aPlugIn: TGUID; ACollection: TCollection; ACheckListBox: TcxCheckListBox; APlugInName, APlugInNameFile: string;
-      AErrorMsg: Boolean = True): Boolean;
+    function LoadPlugin(aPlugIn: TGUID; ACollection: TCollection; ACheckListBox: TcxCheckListBox; APlugInName, APlugInNameFile: string; AErrorMsg: Boolean = True): Boolean;
   public
     constructor Create;
 
@@ -44,6 +45,8 @@ implementation
 
 function TAddPlugin.LoadPlugin;
 var
+  LPluginMinorVersion: Integer;
+
   hLib: Cardinal;
   MLoadPlugIn: TLoadPlugIn;
   PlugIn: IPlugIn;
@@ -51,9 +54,11 @@ var
   OverridePlugin: Boolean;
   CheckListBoxItem: TcxCheckListBoxItem;
 begin
+  LPluginMinorVersion := TFileVersionInfo.GetVersionInfo(APlugInNameFile).FileVersionNumber.Minor;
+
   OverridePlugin := False;
 
-  if SameStr(MINOR_VERSION, GetMinorVersion(APlugInNameFile)) then
+  if (MINOR_VERSION = LPluginMinorVersion) then
   begin
     hLib := LoadLibrary(PChar(APlugInNameFile));
     try
@@ -132,7 +137,7 @@ begin
     end;
   end
   else if AErrorMsg then
-    raise Exception.Create(Format(StrThisPluginIsIncom, [MINOR_VERSION, GetMinorVersion(APlugInNameFile)]))
+    raise Exception.Create(Format(StrThisPluginIsIncom, [MINOR_VERSION, LPluginMinorVersion]))
 end;
 
 constructor TAddPlugin.Create;

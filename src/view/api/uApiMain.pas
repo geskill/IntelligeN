@@ -5,6 +5,8 @@ interface
 uses
   // Delphi
   Windows, SysUtils, Forms, Controls, Classes, StdCtrls, ExtCtrls, Math, NB30,
+  // Spring Framework
+  Spring.Utils,
   // DLLs
   uExport,
   // Api
@@ -24,7 +26,7 @@ procedure AnalyzeStartupParams; overload;
 procedure AnalyzeStartupParams(const StartupParams: array of string); overload;
 
 var
-  MINOR_VERSION: string;
+  MINOR_VERSION: Integer;
 
 implementation
 
@@ -209,6 +211,6 @@ begin
 end;
 
 initialization
-  MINOR_VERSION := GetMinorVersion(ParamStr(0));
+  MINOR_VERSION := TFileVersionInfo.GetVersionInfo(ParamStr(0)).FileVersionNumber.Minor;
 
 end.

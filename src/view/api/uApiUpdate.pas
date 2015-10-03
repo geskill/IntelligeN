@@ -10,7 +10,7 @@ uses
   // OmniThreadLibrary
   OtlParallel, OtlTaskControl, OtlSync, OtlTask,
   // Spring Framework
-  Spring.SystemUtils, Spring.Collections.Lists,
+  Spring.SystemUtils, Spring.Collections.Lists, Spring.Utils,
   // AB
   AbArcTyp, AbUnZper,
   // HTTPManager
@@ -211,12 +211,12 @@ begin
   LHTTPRequest := THTTPRequest.Create(Homepage + u + copy(u, 2, 1) + '.php?action=update_v2');
 
   LHTTPParams := THTTPParams.Create;
-  with LHTTPParams, GetFileVersion(ParamStr(0)) do
+  with LHTTPParams, TFileVersionInfo.GetVersionInfo(ParamStr(0)).FileVersionNumber do
   begin
-    AddFormField('major_version', IntToStr(MajorVersion));
-    AddFormField('minor_version', IntToStr(MinorVersion));
-    AddFormField('major_build', IntToStr(MajorBuild));
-    AddFormField('minor_build', IntToStr(MinorBuild));
+    AddFormField('major_version', IntToStr(Major));
+    AddFormField('minor_version', IntToStr(Minor));
+    AddFormField('major_build', IntToStr(Build));
+    AddFormField('minor_build', IntToStr(Reversion));
   end;
 
   LHTTPOptions := THTTPOptions.Create(FProxy);

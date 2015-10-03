@@ -5,6 +5,8 @@ interface
 uses
   // Delphi
   Windows, Forms, SysUtils, Classes, Math, Graphics,
+  // Spring Framework
+  Spring.Utils,
   // Common
   uConst, uAppInterface,
   // DLLs
@@ -16,7 +18,7 @@ uses
   // Plugin system
   uPlugInInterface, uPlugInConst,
   // Utils
-  uFileUtils, uPathUtils;
+  uPathUtils;
 
 type
   TErrorProc = reference to procedure(AErrorMsg: string);
@@ -94,6 +96,7 @@ end;
 
 class procedure TApiPlugin.LoadPlugin(ARelativPluginPath: string; APluginProc: TPluginProc; AErrorProc: TErrorProc = nil);
 var
+  LPluginMinorVersion: Integer;
   PluginPath: string;
   hLib: Cardinal;
   MLoadPlugIn: TLoadPlugIn;
@@ -104,8 +107,9 @@ begin
   // OutputDebugString(PChar('LoadPlugin() after PathCombineEx() ' + IntToStr(GetCurrentThreadId)));
   if FileExists(PluginPath) then
   begin
-    if not SameStr(MINOR_VERSION, GetMinorVersion(PluginPath)) then
-      ReturnError(Format(StrThisPluginIsIncom, [MINOR_VERSION, GetMinorVersion(PluginPath)]), AErrorProc);
+    LPluginMinorVersion := TFileVersionInfo.GetVersionInfo(PluginPath).FileVersionNumber.Minor;
+    if not (MINOR_VERSION = LPluginMinorVersion) then
+      ReturnError(Format(StrThisPluginIsIncom, [MINOR_VERSION, LPluginMinorVersion]), AErrorProc);
 
     hLib := LoadLibrary(PChar(PluginPath));
     try
