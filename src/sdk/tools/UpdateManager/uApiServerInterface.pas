@@ -1,11 +1,11 @@
-unit uServerInterface;
+unit uApiServerInterface;
 
 interface
 
 uses
   // Delphi
   Generics.Collections,
-  //
+  // Api
   uApiUpdateInterface;
 
 type
@@ -27,9 +27,16 @@ type
 
   IVersionsResponse = interface(IBasicServerResponse)
     ['{75DD6A08-3C92-4617-97CF-ACD2AE6A1AAB}']
-    function GetVersions: TList<IUpdateServerVersion>;
+    function GetVersions: TList<IUpdateManagerVersion>;
 
-    property Versions: TList<IUpdateServerVersion> read GetVersions;
+    property Versions: TList<IUpdateManagerVersion>read GetVersions;
+  end;
+
+  ISystemsResponse = interface(IBasicServerResponse)
+    ['{AC2D03AE-8BA3-4C26-A6E4-AF7D3B4D395F}']
+    function GetSystems: TList<IUpdateManagerSystemFileBase>;
+
+    property Systems: TList<IUpdateManagerSystemFileBase>read GetSystems;
   end;
 
   IFTPServerResponse = interface(IBasicServerResponse)

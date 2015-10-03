@@ -11,8 +11,8 @@ uses
   uApiUpdateController in 'uApiUpdateController.pas',
   uApiUpdateSettings in 'uApiUpdateSettings.pas',
   uApiServerXMLReader in 'uApiServerXMLReader.pas',
-  uServerInterface in 'uServerInterface.pas',
-  uServerClasses in 'uServerClasses.pas';
+  uApiServerInterface in 'uApiServerInterface.pas',
+  uApiServerClasses in 'uApiServerClasses.pas';
 
 {$R *.res}
 

@@ -8,94 +8,36 @@ uses
   // Common
   uBase,
   // Api
-  uApiUpdateInterface, uApiUpdateConst;
+  uApiUpdateConst, uApiUpdateInterface, uApiUpdateModelBase;
 
 type
-  TIFile = class(TInterfacedObject, IFile)
-  private
-    FFileName: WideString;
-  protected
-    function GetFileName: WideString;
-    procedure SetFileName(AFileName: WideString);
-  public
-    constructor Create(AFileName: WideString); virtual;
-
-    property FileName: WideString read GetFileName write SetFileName;
-  end;
-
-  TIChecksumFile = class(TIFile, IChecksumFile)
-  private
-    FFileChecksum: WideString;
-  protected
-    function GetFileChecksum: WideString;
-    procedure SetFileChecksum(AFileChecksum: WideString);
-  public
-    property FileChecksum: WideString read GetFileChecksum write SetFileChecksum;
-  end;
-
-  TIFileVersion = class(TInterfacedObject, IFileVersion)
-  private
-    FMajorVersion, FMinorVersion, FMajorBuild, FMinorBuild: Integer;
-  protected
-    function GetMajorVersion: Integer;
-    procedure SetMajorVersion(AMajorVersion: Integer);
-    function GetMinorVersion: Integer;
-    procedure SetMinorVersion(AMinorVersion: Integer);
-    function GetMajorBuild: Integer;
-    procedure SetMajorBuild(AMajorBuild: Integer);
-    function GetMinorBuild: Integer;
-    procedure SetMinorBuild(AMinorBuild: Integer);
-
-  public
-    property MajorVersion: Integer read GetMajorVersion write SetMajorVersion;
-    property MinorVersion: Integer read GetMinorVersion write SetMinorVersion;
-    property MajorBuild: Integer read GetMajorBuild write SetMajorBuild;
-    property MinorBuild: Integer read GetMinorBuild write SetMinorBuild;
-  end;
-
-  TIUpdateServerVersion = class(TIFileVersion, IUpdateServerVersion)
+  TIUpdateManagerVersion = class(TIFileVersion, IUpdateManagerVersion)
   private
     FID: Integer;
-    FNew: WordBool;
+    FActive: WordBool;
   protected
     function GetID: Integer;
     procedure SetID(AID: Integer);
-    function GetNew: WordBool;
-    procedure SetNew(ANew: WordBool);
+    function GetActive: WordBool;
+    procedure SetActive(AActive: WordBool);
   public
     property ID: Integer read GetID write SetID;
-    property New: WordBool read GetNew write SetNew;
+    property Active: WordBool read GetActive write SetActive;
   end;
 
-  TIUpdateFile = class(TIChecksumFile, IUpdateFile)
+  TIUpdateManagerSystemFileBase = class(TIUpdateSystemFileBase, IUpdateManagerSystemFileBase)
   private
-    FFileSystem: TFileSystem;
-    FFileSizeCompressed: Integer;
-    FFilePathAddition: WideString;
-
-    FFileVersion: IFileVersion;
+    FID: Integer;
   protected
-    function GetFileSystem: TFileSystem;
-    procedure SetFileSystem(val: TFileSystem);
-
-    function GetFileSizeCompressed: Integer;
-    procedure SetFileSizeCompressed(val: Integer);
-
-    function GetFilePathAddition: WideString;
-    procedure SetFilePathAddition(val: WideString);
-
-    function GetFileVersion: IFileVersion;
-    procedure SetFileVersion(AFileVersion: IFileVersion);
+    function GetID: Integer;
+    procedure SetID(AID: Integer);
   public
-    constructor Create(AFileName: WideString); override;
+    constructor Create;
 
-    property FileSystem: TFileSystem read GetFileSystem write SetFileSystem;
-    property FileSizeCompressed: Integer read GetFileSizeCompressed write SetFileSizeCompressed;
-    property FilePathAddition: WideString read GetFilePathAddition write SetFilePathAddition;
-
-    property FileVersion: IFileVersion read GetFileVersion write SetFileVersion;
+    property ID: Integer read GetID write SetID;
   end;
 
+  (*
   TIUpdateLocalFile = class(TIUpdateFile, IUpdateLocalFile)
   private
     FStatus: WordBool;
@@ -119,6 +61,7 @@ type
     property Action: TUpdateAction read GetAction write SetAction;
     property Actions: TUpdateActions read GetActions write SetActions;
   end;
+  *)
 
   TIFTPServer = class(TInterfacedObject, IFTPServer)
   private
@@ -146,147 +89,46 @@ type
 
 implementation
 
-{ TIFile }
+{ TIUpdateManagerVersion }
 
-function TIFile.GetFileName: WideString;
-begin
-  Result := FFileName;
-end;
-
-procedure TIFile.SetFileName(AFileName: WideString);
-begin
-  FFileName := AFileName;
-end;
-
-constructor TIFile.Create(AFileName: WideString);
-begin
-  FFileName := AFileName;
-end;
-
-{ TIChecksumFile }
-
-function TIChecksumFile.GetFileChecksum: WideString;
-begin
-  Result := FFileChecksum;
-end;
-
-procedure TIChecksumFile.SetFileChecksum(AFileChecksum: WideString);
-begin
-  FFileChecksum := AFileChecksum;
-end;
-
-{ TIFileVersion }
-
-function TIFileVersion.GetMajorVersion;
-begin
-  Result := FMajorVersion;
-end;
-
-procedure TIFileVersion.SetMajorVersion;
-begin
-  FMajorVersion := AMajorVersion;
-end;
-
-function TIFileVersion.GetMinorVersion;
-begin
-  Result := FMinorVersion;
-end;
-
-procedure TIFileVersion.SetMinorVersion;
-begin
-  FMinorVersion := AMinorVersion;
-end;
-
-function TIFileVersion.GetMajorBuild;
-begin
-  Result := FMajorBuild;
-end;
-
-procedure TIFileVersion.SetMajorBuild;
-begin
-  FMajorBuild := AMajorBuild;
-end;
-
-function TIFileVersion.GetMinorBuild;
-begin
-  Result := FMinorBuild;
-end;
-
-procedure TIFileVersion.SetMinorBuild;
-begin
-  FMinorBuild := AMinorBuild;
-end;
-
-{ TIUpdateServerVersion }
-
-function TIUpdateServerVersion.GetID: Integer;
+function TIUpdateManagerVersion.GetID: Integer;
 begin
   Result := FID;
 end;
 
-procedure TIUpdateServerVersion.SetID(AID: Integer);
+procedure TIUpdateManagerVersion.SetID(AID: Integer);
 begin
   FID := AID;
 end;
 
-function TIUpdateServerVersion.GetNew: WordBool;
+function TIUpdateManagerVersion.GetActive: WordBool;
 begin
-  Result := FNew;
+  Result := FActive;
 end;
 
-procedure TIUpdateServerVersion.SetNew(ANew: WordBool);
+procedure TIUpdateManagerVersion.SetActive(AActive: WordBool);
 begin
-  FNew := ANew;
+  FActive := AActive;
 end;
 
-{ TIUpdateFile }
+{ TIUpdateManagerSystemFileBase }
 
-function TIUpdateFile.GetFileSystem: TFileSystem;
+constructor TIUpdateManagerSystemFileBase.Create;
 begin
-  Result := FFileSystem;
+  inherited Create('');
 end;
 
-procedure TIUpdateFile.SetFileSystem(val: TFileSystem);
+function TIUpdateManagerSystemFileBase.GetID: Integer;
 begin
-  FFileSystem := val;
+  Result := FID;
 end;
 
-function TIUpdateFile.GetFileSizeCompressed: Integer;
+procedure TIUpdateManagerSystemFileBase.SetID(AID: Integer);
 begin
-  Result := FFileSizeCompressed;
+  FID := AID;
 end;
 
-procedure TIUpdateFile.SetFileSizeCompressed(val: Integer);
-begin
-  FFileSizeCompressed := val;
-end;
-
-function TIUpdateFile.GetFilePathAddition: WideString;
-begin
-  Result := FFilePathAddition;
-end;
-
-procedure TIUpdateFile.SetFilePathAddition(val: WideString);
-begin
-  FFilePathAddition := val;
-end;
-
-function TIUpdateFile.GetFileVersion: IFileVersion;
-begin
-  Result := FFileVersion;
-end;
-
-procedure TIUpdateFile.SetFileVersion(AFileVersion: IFileVersion);
-begin
-  FFileVersion := AFileVersion;
-end;
-
-constructor TIUpdateFile.Create(AFileName: WideString);
-begin
-  inherited Create(AFileName);
-
-  FFileVersion := TIFileVersion.Create;
-end;
+(*
 
 { TIUpdateLocalFile }
 
@@ -337,6 +179,8 @@ begin
   FStatus := AStatus;
   FCondition := ACondition;
 end;
+
+*)
 
 { TIFTPServer }
 

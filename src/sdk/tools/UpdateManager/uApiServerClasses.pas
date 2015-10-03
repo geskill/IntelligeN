@@ -1,12 +1,12 @@
-unit uServerClasses;
+unit uApiServerClasses;
 
 interface
 
 uses
   // Delphi
   SysUtils, Classes, Generics.Collections,
-  // Common
-  uApiUpdateInterface, uServerInterface, uApiUpdateModel;
+  // Api
+  uApiUpdateInterface, uApiServerInterface, uApiUpdateModel;
 
 type
   TIBasicServerResponse = class(TInterfacedObject, IBasicServerResponse)
@@ -32,13 +32,26 @@ type
 
   TIVersionsResponse = class(TIBasicServerResponse, IVersionsResponse)
   private
-    FList: TList<IUpdateServerVersion>;
+    FList: TList<IUpdateManagerVersion>;
   protected
-    function GetVersions: TList<IUpdateServerVersion>;
+    function GetVersions: TList<IUpdateManagerVersion>;
   public
     constructor Create; override;
 
-    property Versions: TList<IUpdateServerVersion>read GetVersions;
+    property Versions: TList<IUpdateManagerVersion>read GetVersions;
+
+    destructor Destroy; override;
+  end;
+
+  TISystemsResponse = class(TIBasicServerResponse, ISystemsResponse)
+  private
+    FList: TList<IUpdateManagerSystemFileBase>;
+  protected
+    function GetSystems: TList<IUpdateManagerSystemFileBase>;
+  public
+    constructor Create; override;
+
+    property Systems: TList<IUpdateManagerSystemFileBase>read GetSystems;
 
     destructor Destroy; override;
   end;
@@ -105,15 +118,34 @@ end;
 constructor TIVersionsResponse.Create;
 begin
   inherited Create;
-  FList := TList<IUpdateServerVersion>.Create();
+  FList := TList<IUpdateManagerVersion>.Create();
 end;
 
-function TIVersionsResponse.GetVersions: TList<IUpdateServerVersion>;
+function TIVersionsResponse.GetVersions: TList<IUpdateManagerVersion>;
 begin
   Result := FList;
 end;
 
 destructor TIVersionsResponse.Destroy;
+begin
+  FList := nil; //.Free;
+  inherited Destroy;
+end;
+
+{ TISystemsResponse }
+
+constructor TISystemsResponse.Create;
+begin
+  inherited Create;
+  FList := TList<IUpdateManagerSystemFileBase>.Create();
+end;
+
+function TISystemsResponse.GetSystems: TList<IUpdateManagerSystemFileBase>;
+begin
+  Result := FList;
+end;
+
+destructor TISystemsResponse.Destroy;
 begin
   FList := nil; //.Free;
   inherited Destroy;

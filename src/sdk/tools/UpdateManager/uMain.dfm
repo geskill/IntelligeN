@@ -1,6 +1,7 @@
 object fMain: TfMain
   Left = 0
   Top = 0
+  ActiveControl = JvWizardInteriorPageServerInfo
   Caption = 'Update Manager'
   ClientHeight = 338
   ClientWidth = 635
@@ -20,7 +21,7 @@ object fMain: TfMain
     Top = 0
     Width = 635
     Height = 338
-    ActivePage = JvWizardInteriorPageFiles
+    ActivePage = JvWizardInteriorPageServerInfo
     ButtonBarHeight = 42
     ButtonStart.Caption = 'To &Start Page'
     ButtonStart.NumGlyphs = 1

@@ -13,10 +13,8 @@ uses
   OtlParallel, OtlTaskControl,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPManager,
-  // Common
-  uServerInterface,
   // Api
-  uApiServerXMLReader, uApiUpdateConst, uApiUpdateInterface, uApiUpdateModel,
+  uApiServerXMLReader, uApiServerInterface, uApiUpdateConst, uApiUpdateInterface, uApiUpdateModel,
   // Utils
   uFileUtils,
   // IntelligeN
@@ -31,10 +29,12 @@ type
 
   end;
 
-  TUpdateLocalFileList = TList<IUpdateLocalFile>;
-  TUpdateFileVersionList = TList<IFileVersion>;
-  TUpdateVersionsList = TList<IUpdateServerVersion>;
+  // TUpdateLocalFileList = TList<IUpdateLocalFile>;
+  // TUpdateFileVersionList = TList<IFileVersion>;
+  TUpdateManagerVersionsList = TList<IUpdateManagerVersion>;
+  TUpdateManagerSystemsList = TList<IUpdateManagerSystemFileBase>;
 
+  (*
   TLocalUpdateController = class(TUpdateController)
   private
     FIntelligeNFileSystem: TIntelligeNFileSystem;
@@ -55,6 +55,7 @@ type
 
     destructor Destroy; override;
   end;
+  *)
 
   TLocalUploadController = class(TUpdateController)
   private
@@ -64,13 +65,15 @@ type
     TUpdateRequest = reference to procedure(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
   private
     procedure RequestGetVersions(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
+    procedure RequestGetSystems(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
     procedure RequestFTPServer(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
   protected
     procedure Request(ARequestID: Double; AUpdateRequest: TUpdateRequest; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
   public
     constructor Create(AServer: IUpdateServer);
 
-    function GetVersions(ALocalList: TList<IFileVersion>; out AServerList: TUpdateVersionsList; out AErrorMsg: WideString): WordBool;
+    function GetVersions(out AVersionsList: TUpdateManagerVersionsList; out AErrorMsg: WideString): WordBool;
+    function GetSystems(out ASystemsList: TUpdateManagerSystemsList; out AErrorMsg: WideString): WordBool;
     function GetFTPServer(out AFTPServer: IFTPServer; out AErrorMsg: WideString): WordBool;
 
     destructor Destroy; override;
@@ -78,6 +81,7 @@ type
 
 implementation
 
+(*
 procedure TLocalUpdateController.InspectPossibleActions(const ALocalUpdateFile: IUpdateLocalFile);
 begin
   with ALocalUpdateFile do
@@ -223,6 +227,8 @@ begin
   inherited Destroy;
 end;
 
+*)
+
 { TLocalUploadController }
 
 procedure TLocalUploadController.RequestGetVersions;
@@ -238,6 +244,21 @@ begin
   else
     oErrorMsg := '';
   oResponse := LVersionsResponse;
+end;
+
+procedure TLocalUploadController.RequestGetSystems(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
+var
+  LSystemsResponse: ISystemsResponse;
+begin
+  OutputDebugString(PChar(HTTPResult.SourceCode));
+
+  LSystemsResponse := TServerXMLReader.ReadSystems(HTTPResult.SourceCode);
+
+  if LSystemsResponse.HasError then
+    oErrorMsg := LSystemsResponse.Msg
+  else
+    oErrorMsg := '';
+  oResponse := LSystemsResponse;
 end;
 
 procedure TLocalUploadController.RequestFTPServer;
@@ -306,36 +327,36 @@ begin
   FServer := AServer;
 end;
 
-function TLocalUploadController.GetVersions;
+function TLocalUploadController.GetVersions(out AVersionsList: TUpdateManagerVersionsList; out AErrorMsg: WideString): WordBool;
 var
-  LHTTPParams: IHTTPParams;
-  LFileVersion: IFileVersion;
-
   LBasicServerResponse: IBasicServerResponse;
   LVersionsResponse: IVersionsResponse;
 begin
-  LHTTPParams := THTTPParams.Create;
-  with LHTTPParams do
-  begin
-    for LFileVersion in ALocalList do
-      with LFileVersion do
-      begin
-        AddFormField('major_version[]', IntToStr(MajorVersion));
-        AddFormField('minor_version[]', IntToStr(MinorVersion));
-        AddFormField('major_build[]', IntToStr(MajorBuild));
-        AddFormField('minor_build[]', IntToStr(MinorBuild));
-      end;
-  end;
-
-  Request(THTTPManager.Instance().Post(THTTPRequest.Create(FServer.Name + 'p.php?action=upload_v2&upload=versions_v2&access_token=' + HTTPEncode(FServer.AccessToken)), LHTTPParams), { }
+  Request(THTTPManager.Instance().Get(THTTPRequest.Create(FServer.Name + 'p.php?action=upload_v2&upload=get_versions_v2&access_token=' + HTTPEncode(FServer.AccessToken))), { }
     RequestGetVersions, { }
     LBasicServerResponse, { }
     AErrorMsg);
 
   if Assigned(LBasicServerResponse) and (LBasicServerResponse.QueryInterface(IVersionsResponse, LVersionsResponse) = 0) then
-    AServerList := LVersionsResponse.Versions;
+    AVersionsList := LVersionsResponse.Versions;
 
-  Result := Assigned(LVersionsResponse) and (LVersionsResponse.Versions.Count > 0);
+  Result := Assigned(LVersionsResponse);
+end;
+
+function TLocalUploadController.GetSystems(out ASystemsList: TUpdateManagerSystemsList; out AErrorMsg: WideString): WordBool;
+var
+  LBasicServerResponse: IBasicServerResponse;
+  LSystemsResponse: ISystemsResponse;
+begin
+  Request(THTTPManager.Instance().Get(THTTPRequest.Create(FServer.Name + 'p.php?action=upload_v2&upload=get_systems_v2&access_token=' + HTTPEncode(FServer.AccessToken))), { }
+    RequestGetSystems, { }
+    LBasicServerResponse, { }
+    AErrorMsg);
+
+  if Assigned(LBasicServerResponse) and (LBasicServerResponse.QueryInterface(ISystemsResponse, LSystemsResponse) = 0) then
+    ASystemsList := LSystemsResponse.Systems;
+
+  Result := Assigned(LSystemsResponse);
 end;
 
 function TLocalUploadController.GetFTPServer;
@@ -345,7 +366,7 @@ var
 
   buf: Integer;
 begin
-  Request(THTTPManager.Instance().Get(THTTPRequest.Create(FServer.Name + 'p.php?action=upload_v2&upload=ftpserver_v2&access_token=' + HTTPEncode(FServer.AccessToken))), { }
+  Request(THTTPManager.Instance().Get(THTTPRequest.Create(FServer.Name + 'p.php?action=upload_v2&upload=get_ftp_server_v2&access_token=' + HTTPEncode(FServer.AccessToken))), { }
     RequestFTPServer, { }
     LBasicServerResponse, { }
     AErrorMsg);

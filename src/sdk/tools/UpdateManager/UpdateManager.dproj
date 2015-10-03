@@ -25,7 +25,6 @@
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<DCC_ExeOutput>bin</DCC_ExeOutput>
 			<DCC_DcuOutput>dcu</DCC_DcuOutput>
-			<DCC_UnitSearchPath>../../3rdparty;../../3rdparty\Abbrevia 3.05\source;../../3rdparty\DEC\Part_I;../../3rdparty\HTTPManager;../../3rdparty\HTTPManager\implementors;../../3rdparty\MultiEvent;../../3rdparty\OmniThreadLibrary-3.02;../../3rdparty\OmniThreadLibrary-3.02\src;../../3rdparty\TRegExpr\Source;../../api;../../utils;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_DependencyCheckOutputName>bin\UpdateManager.exe</DCC_DependencyCheckOutputName>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DCC_Platform>x86</DCC_Platform>
@@ -54,8 +53,8 @@
 			<DCCReference Include="uApiUpdateController.pas"/>
 			<DCCReference Include="uApiUpdateSettings.pas"/>
 			<DCCReference Include="uApiServerXMLReader.pas"/>
-			<DCCReference Include="uServerInterface.pas"/>
-			<DCCReference Include="uServerClasses.pas"/>
+			<DCCReference Include="uApiServerInterface.pas"/>
+			<DCCReference Include="uApiServerClasses.pas"/>
 			<None Include="ModelSupport_UpdateManager\default.txaPackage"/>
 			<None Include="ModelSupport_UpdateManager\default.txvpck"/>
 			<None Include="ModelSupport_UpdateManager\uApiUpdateInterface\default.txvpck"/>

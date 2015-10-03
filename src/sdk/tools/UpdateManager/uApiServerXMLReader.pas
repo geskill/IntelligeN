@@ -5,16 +5,20 @@ interface
 uses
   // Delphi
   SysUtils, Classes, XMLDoc, XMLIntf, ActiveX, Variants,
+  // Spring Framework
+  Spring.SystemUtils, Spring.Collections.Lists,
   // Common
-  uServerInterface, uApiUpdateModel, uApiUpdateInterface,
-
-  uServerClasses;
+  uBase,
+  // Api
+  uApiServerInterface, uApiServerClasses, uApiUpdateModel, uApiUpdateInterface,
+  // Utils
+  uStringUtils;
 
 type
   TServerXMLReader = class
   type
     TIBasicMeta = class of TIBasicServerResponse;
-    TServerRequestType = (srtVersions, srtFTPServer);
+    TServerRequestType = (srtVersions, srtSystems, srtFTPServer);
   private
     class function GetClassType(AType: TServerRequestType): TIBasicMeta;
   protected
@@ -22,6 +26,7 @@ type
 
   public
     class function ReadVersions(AXMLContent: string): IVersionsResponse;
+    class function ReadSystems(AXMLContent: string): ISystemsResponse;
     class function ReadFTPServer(AXMLContent: string): IFTPServerResponse;
   end;
 
@@ -34,6 +39,8 @@ begin
   case AType of
     srtVersions:
       Result := TIVersionsResponse;
+    srtSystems:
+      Result := TISystemsResponse;
     srtFTPServer:
       Result := TIFTPServerResponse;
   end;
@@ -47,8 +54,8 @@ var
 
   XMLNodeIndex: Integer;
 
-
-  LUpdateServerVersion: IUpdateServerVersion;
+  LUpdateVersion: IUpdateManagerVersion;
+  LUpdateSystemFileBase: IUpdateManagerSystemFileBase;
 begin
   LBasicServerResponse := GetClassType(AType).Create;
 
@@ -81,26 +88,53 @@ begin
                     with ChildNodes.Nodes['versions'] do
                       for XMLNodeIndex := 0 to ChildNodes.Count - 1 do
                       begin
-                        LUpdateServerVersion := TIUpdateServerVersion.Create;
-                        with ChildNodes.Nodes[XMLNodeIndex], LUpdateServerVersion do
+                        LUpdateVersion := TIUpdateManagerVersion.Create;
+                        with ChildNodes.Nodes[XMLNodeIndex], LUpdateVersion do
                         begin
-                          ID := StrToIntDef(VarToStr(Attributes['id']), -1);
-                          New := (StrToIntDef(VarToStr(Attributes['new']), 0) = 0);
+                          ID := StrToIntDef(VarToStr(ChildNodes.Nodes['id'].NodeValue), 0);
 
-                          MajorVersion := StrToIntDef(VarToStr(ChildNodes.Nodes['major_version'].NodeValue), -1);
-                          MinorVersion := StrToIntDef(VarToStr(ChildNodes.Nodes['minor_version'].NodeValue), -1);
-                          MajorBuild := StrToIntDef(VarToStr(ChildNodes.Nodes['major_build'].NodeValue), -1);
-                          MinorBuild := StrToIntDef(VarToStr(ChildNodes.Nodes['minor_build'].NodeValue), -1);
+                          if (IsNumber(ChildNodes.Nodes['active'].NodeValue)) then
+                            Active := not(ChildNodes.Nodes['active'].NodeValue = 0)
+                          else
+                            Active := StrToBoolDef(VarToStr(ChildNodes.Nodes['major_version'].NodeValue), False);
+
+                          MajorVersion := StrToIntDef(VarToStr(ChildNodes.Nodes['major_version'].NodeValue), 0);
+                          MinorVersion := StrToIntDef(VarToStr(ChildNodes.Nodes['minor_version'].NodeValue), 0);
+                          MajorBuild := StrToIntDef(VarToStr(ChildNodes.Nodes['major_build'].NodeValue), 0);
+                          MinorBuild := StrToIntDef(VarToStr(ChildNodes.Nodes['minor_build'].NodeValue), 0);
                         end;
-                        Versions.Add(LUpdateServerVersion);
+                        Versions.Add(LUpdateVersion);
+                      end;
+                end;
+              srtSystems:
+                with (Result as ISystemsResponse) do
+                begin
+                  if Assigned(ChildNodes.FindNode('systems')) then
+                    with ChildNodes.Nodes['systems'] do
+                      for XMLNodeIndex := 0 to ChildNodes.Count - 1 do
+                      begin
+                        LUpdateSystemFileBase := TIUpdateManagerSystemFileBase.Create;
+                        with ChildNodes.Nodes[XMLNodeIndex], LUpdateSystemFileBase do
+                        begin
+                          ID := StrToIntDef(VarToStr(ChildNodes.Nodes['id'].NodeValue), 0);
+
+                          FileName := VarToStr(ChildNodes.Nodes['name'].NodeValue);
+
+                          if (IsNumber(ChildNodes.Nodes['filesystem_id'].NodeValue)) then
+                            FileSystem := TFileSystem(StrToIntDef(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue), 0))
+                          else
+                            FileSystem := TEnum.Parse<TFileSystem>(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue));
+
+                          FilePathAppendix := VarToStr(ChildNodes.Nodes['path_appendix'].NodeValue);
+                        end;
+                        Systems.Add(LUpdateSystemFileBase);
                       end;
                 end;
               srtFTPServer:
                 with (Result as IFTPServerResponse) do
                 begin
                   if Assigned(ChildNodes.FindNode('server')) then
-                    with ChildNodes.Nodes['server'] do
-                      with Server do
+                    with ChildNodes.Nodes['server'], Server do
                       begin
                         Name := VarToStr(ChildNodes.Nodes['name'].NodeValue);
                         Port := VarToStr(ChildNodes.Nodes['port'].NodeValue);
@@ -122,6 +156,11 @@ end;
 class function TServerXMLReader.ReadVersions(AXMLContent: string): IVersionsResponse;
 begin
   Result := TServerXMLReader.Read(AXMLContent, srtVersions) as IVersionsResponse;
+end;
+
+class function TServerXMLReader.ReadSystems(AXMLContent: string): ISystemsResponse;
+begin
+  Result := TServerXMLReader.Read(AXMLContent, srtSystems) as ISystemsResponse;
 end;
 
 class function TServerXMLReader.ReadFTPServer(AXMLContent: string): IFTPServerResponse;
