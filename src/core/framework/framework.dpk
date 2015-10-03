@@ -88,6 +88,7 @@ contains
   Generics.Collections,
   Generics.Defaults,
   FileCtrl,
+  Diagnostics,
   AppEvnts,
   Mask,
   HTTPApp,

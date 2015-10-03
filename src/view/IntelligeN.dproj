@@ -104,7 +104,6 @@
 			<DCCReference Include="api\uApiDLMF.pas"/>
 			<DCCReference Include="api\uApiFile.pas"/>
 			<DCCReference Include="api\uApiHoster.pas"/>
-			<DCCReference Include="api\uApiHTTP.pas"/>
 			<DCCReference Include="api\uApiImageHoster.pas"/>
 			<DCCReference Include="api\uApiIScriptFormatter.pas"/>
 			<DCCReference Include="api\uApiIScriptParser.pas"/>
@@ -128,6 +127,8 @@
 			<DCCReference Include="api\uApiTabSheetItem.pas"/>
 			<DCCReference Include="api\uApiThreadPoolManager.pas"/>
 			<DCCReference Include="api\uApiUpdate.pas"/>
+			<DCCReference Include="api\uApiUpdateInterfaceBase.pas"/>
+			<DCCReference Include="api\uApiUpdateModelBase.pas"/>
 			<DCCReference Include="api\uApiWebsiteEditor.pas"/>
 			<DCCReference Include="api\uApiXml.pas"/>
 			<DCCReference Include="api\uApiXmlSettings.pas"/>
@@ -274,7 +275,7 @@
 						<VersionInfo Name="MajorVer">2</VersionInfo>
 						<VersionInfo Name="MinorVer">129</VersionInfo>
 						<VersionInfo Name="Release">0</VersionInfo>
-						<VersionInfo Name="Build">4</VersionInfo>
+						<VersionInfo Name="Build">5</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -284,11 +285,11 @@
 						<VersionInfo Name="CodePage">1252</VersionInfo>
 					</VersionInfo>
 					<VersionInfoKeys>
-						<VersionInfoKeys Name="CompanyName"/>
+						<VersionInfoKeys Name="CompanyName">Sebastian Klatte</VersionInfoKeys>
 						<VersionInfoKeys Name="FileDescription">IntelligeN 2009 Application</VersionInfoKeys>
-						<VersionInfoKeys Name="FileVersion">2.129.0.4</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">2.129.0.5</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
-						<VersionInfoKeys Name="LegalCopyright"/>
+						<VersionInfoKeys Name="LegalCopyright">(c) 2015 Sebastian Klatte</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks"/>
 						<VersionInfoKeys Name="OriginalFilename">IntelligeN.exe</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductName">IntelligeN 2009</VersionInfoKeys>

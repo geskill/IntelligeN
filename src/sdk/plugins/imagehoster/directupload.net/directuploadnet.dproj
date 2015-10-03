@@ -23,7 +23,7 @@
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<UsePackages>true</UsePackages>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
-			<DCC_DependencyCheckOutputName>..\..\..\..\bin_portable\plugins\directuploadnet.dll</DCC_DependencyCheckOutputName>
+			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\directuploadnet.dll</DCC_DependencyCheckOutputName>
 			<GenDll>true</GenDll>
 			<DCC_UsePackage>framework</DCC_UsePackage>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
@@ -91,14 +91,14 @@
 						<VersionInfo Name="CodePage">1252</VersionInfo>
 					</VersionInfo>
 					<VersionInfoKeys>
-						<VersionInfoKeys Name="CompanyName">SRK Corp.</VersionInfoKeys>
-						<VersionInfoKeys Name="FileDescription"/>
+						<VersionInfoKeys Name="CompanyName">Sebastian Klatte</VersionInfoKeys>
+						<VersionInfoKeys Name="FileDescription">IntelligeN 2009 Plugin</VersionInfoKeys>
 						<VersionInfoKeys Name="FileVersion">2.129.0.4</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
-						<VersionInfoKeys Name="LegalCopyright"/>
+						<VersionInfoKeys Name="LegalCopyright">(c) 2015 Sebastian Klatte</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks"/>
-						<VersionInfoKeys Name="OriginalFilename"/>
-						<VersionInfoKeys Name="ProductName"/>
+						<VersionInfoKeys Name="OriginalFilename">directuploadnet.dll</VersionInfoKeys>
+						<VersionInfoKeys Name="ProductName">IntelligeN 2009</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductVersion">2.5</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
@@ -117,7 +117,7 @@
 
 <!-- EurekaLog First Line
 [Exception Log]
-EurekaLog Version=7001
+EurekaLog Version=7007
 Activate=0
 AutoCrashOperation=2
 boHandleSafeCallExceptions=1
@@ -135,7 +135,6 @@ Errors Terminate=3
 Foreground Tab=0
 Freeze Timeout=0
 loCatchLeaks=0
-loEnableMMDebugMode=0
 loFreeAllLeaks=1
 loHideRTLLeaks=0
 loMaxLeaks=1024

@@ -23,7 +23,7 @@
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<DCC_UsePackage>framework</DCC_UsePackage>
 			<UsePackages>true</UsePackages>
-			<DCC_DependencyCheckOutputName>..\..\..\..\bin_portable\plugins\chipde.dll</DCC_DependencyCheckOutputName>
+			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\chipde.dll</DCC_DependencyCheckOutputName>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<GenDll>true</GenDll>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
@@ -72,12 +72,12 @@
 						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
 					</Parameters>
 					<VersionInfo>
-						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>
+						<VersionInfo Name="IncludeVerInfo">True</VersionInfo>
 						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
-						<VersionInfo Name="MajorVer">1</VersionInfo>
-						<VersionInfo Name="MinorVer">0</VersionInfo>
+						<VersionInfo Name="MajorVer">2</VersionInfo>
+						<VersionInfo Name="MinorVer">129</VersionInfo>
 						<VersionInfo Name="Release">0</VersionInfo>
-						<VersionInfo Name="Build">0</VersionInfo>
+						<VersionInfo Name="Build">4</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -87,15 +87,15 @@
 						<VersionInfo Name="CodePage">1252</VersionInfo>
 					</VersionInfo>
 					<VersionInfoKeys>
-						<VersionInfoKeys Name="CompanyName"/>
-						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="CompanyName">Sebastian Klatte</VersionInfoKeys>
+						<VersionInfoKeys Name="FileDescription">IntelligeN 2009 Plugin</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">2.129.0.4</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
-						<VersionInfoKeys Name="LegalCopyright"/>
+						<VersionInfoKeys Name="LegalCopyright">(c) 2015 Sebastian Klatte</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks"/>
-						<VersionInfoKeys Name="OriginalFilename"/>
-						<VersionInfoKeys Name="ProductName"/>
-						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="OriginalFilename">chipde.dll</VersionInfoKeys>
+						<VersionInfoKeys Name="ProductName">IntelligeN 2009</VersionInfoKeys>
+						<VersionInfoKeys Name="ProductVersion">2.5</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 					<Excluded_Packages>
@@ -110,6 +110,8 @@
 
 <!-- EurekaLog First Line
 [Exception Log]
-EurekaLog Version=7001
-DeleteMapAfterCompile=1
+EurekaLog Version=7007
+Activate=0
+DeleteMapAfterCompile=0
+Encrypt Password=""
 EurekaLog Last Line -->
