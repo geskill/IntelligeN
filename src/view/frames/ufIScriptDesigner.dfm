@@ -124,7 +124,7 @@ object IScriptDesigner: TIScriptDesigner
     UrlStyle.BkColor = clWhite
     UrlStyle.Style = [fsUnderline]
     UseStyler = True
-    Version = '3.1.8.0'
+    Version = '3.4.4.1'
     WordWrap = wwNone
     OnGetAutoCompletionList = AdvMemoGetAutoCompletionList
     OnChange = AdvMemoChange

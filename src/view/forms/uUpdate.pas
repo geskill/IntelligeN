@@ -118,10 +118,10 @@ procedure TUpdate.UpdateHasChanges(Sender: TObject; UpdateVersions: TUpdateVersi
 
   function GetUpdateTitle(AUpdateVersion: TUpdateVersion): string;
   begin
-    if (AUpdateVersion.UpdateVersion.IsPreRelease) then
-      result := result + 'PRE_RELEASE ';
-
     result := AUpdateVersion.UpdateVersion.ToString + ' (' + DateTimeToStr(AUpdateVersion.UpdateCreated) + ')';
+
+    if (AUpdateVersion.UpdateVersion.IsPreRelease) then
+      result := 'PRE-RELEASE ' + result;
   end;
 
 begin
