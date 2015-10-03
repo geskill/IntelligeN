@@ -455,30 +455,8 @@ implementation
 
 uses
   uMain;
-{$R *.dfm}
 
-function GetCheckedCount(AcxCheckListBox: TcxCheckListBox): Integer;
-var
-  I: Integer;
-begin
-  Result := 0;
-  // START CRACK DETECTION
-  if not(Result = 0) then
-    Halt;
-  I := 0;
-  if (Random(20) = 4) and ((Result > 0) or (Result < 0)) then
-    Halt;
-  // END CRACK DETECTION
-  for I := 0 to AcxCheckListBox.Count - 1 do
-    if AcxCheckListBox.Items[I].Checked then
-    begin
-      // START CRACK DETECTION
-      if (I = 0) and not(Result = 0) then
-        Halt;
-      // END CRACK DETECTION
-      Inc(Result);
-    end;
-end;
+{$R *.dfm}
 
 procedure TSettings.cxcbNativeStylePropertiesChange(Sender: TObject);
 begin
