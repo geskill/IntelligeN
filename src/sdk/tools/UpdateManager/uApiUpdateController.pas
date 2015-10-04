@@ -11,14 +11,16 @@ uses
   DECCipher, DECHash, DECFmt,
   // OmniThreadLibrary
   OtlParallel, OtlTaskControl,
+  // Spring Framework
+  Spring.Utils,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPManager,
+  // Export
+  uDynamicExport,
   // Api
   uApiServerXMLReader, uApiServerInterface, uApiUpdateConst, uApiUpdateInterface, uApiUpdateModel,
   // Utils
-  uFileUtils,
-  // IntelligeN
-  IntelligeNFileSystem;
+  uFileUtils;
 
 type
   /// <author>Sebastian Klatte</author>
@@ -29,33 +31,33 @@ type
 
   end;
 
-  // TUpdateLocalFileList = TList<IUpdateLocalFile>;
+  TUpdateManagerLocalFileList = TList<IUpdateManagerSystemFile>;
   // TUpdateFileVersionList = TList<IFileVersion>;
   TUpdateManagerVersionsList = TList<IUpdateManagerVersion>;
   TUpdateManagerSystemsList = TList<IUpdateManagerSystemFileBase>;
 
-  (*
   TLocalUpdateController = class(TUpdateController)
   private
     FIntelligeNFileSystem: TIntelligeNFileSystem;
 
   type
-    TLocalFileProcess = reference to procedure(const AUpdateLocalFile: IUpdateLocalFile);
+    TLocalFileProcess = reference to procedure(const ALocalSystemFile: IUpdateManagerSystemFile);
   protected
-    procedure InspectPossibleActions(const ALocalUpdateFile: IUpdateLocalFile);
-    procedure GatherLocalFileInformation(const ALocalUpdateFile: IUpdateLocalFile);
-    procedure CompressLocalFile(const ALocalUpdateFile: IUpdateLocalFile);
+    // procedure InspectPossibleActions(const ALocalFile: IUpdateManagerSystemFile);
+    procedure GatherBaseLocalFileInformation(const ALocalSystemFile: IUpdateManagerSystemFile);
+    procedure GatherLocalFileInformation(const ALocalSystemFile: IUpdateManagerSystemFile);
+    procedure CompressLocalFile(const ALocalSystemFile: IUpdateManagerSystemFile);
+
+    procedure ProcessLocalFiles(ALocalFileProcess: TLocalFileProcess; AList: TUpdateManagerLocalFileList);
   public
     constructor Create(AFileSystemLib: WideString);
 
-    class procedure ExtractExecuteFiles(AList: TUpdateLocalFileList; out oList: TUpdateFileVersionList);
+    // class procedure ExtractExecuteFiles(AList: TUpdateLocalFileList; out oList: TUpdateFileVersionList);
 
-    procedure GetLocalFiles(ASettingFiles: TList<IStatusFile>; out AList: TUpdateLocalFileList);
-    procedure ProcessLocalFiles(ALocalFileProcess: TLocalFileProcess; AList: TUpdateLocalFileList);
+    procedure GetLocalFiles(ASystemsList: TUpdateManagerSystemsList; out AList: TUpdateManagerLocalFileList);
 
     destructor Destroy; override;
   end;
-  *)
 
   TLocalUploadController = class(TUpdateController)
   private
@@ -82,68 +84,85 @@ type
 implementation
 
 (*
-procedure TLocalUpdateController.InspectPossibleActions(const ALocalUpdateFile: IUpdateLocalFile);
-begin
+  procedure TLocalUpdateController.InspectPossibleActions(const ALocalUpdateFile: IUpdateLocalFile);
+  begin
   with ALocalUpdateFile do
-    case Condition of
-      ucNew:
-        begin
-          Action := uaAddnUpdate;
-          Actions := [Action];
-        end;
-      ucCondition:
-        begin
-          Action := uaEditnUpdate;
-          Actions := [Action, uaDelete, uaIgnoreThisUpdate];
-        end;
-      ucMissing:
-        begin
-          Action := uaIgnoreThisUpdate;
-          Actions := [Action, uaDelete];
-        end;
-    end;
+  case Condition of
+  ucNew:
+  begin
+  Action := uaAddnUpdate;
+  Actions := [Action];
+  end;
+  ucCondition:
+  begin
+  Action := uaEditnUpdate;
+  Actions := [Action, uaDelete, uaIgnoreThisUpdate];
+  end;
+  ucMissing:
+  begin
+  Action := uaIgnoreThisUpdate;
+  Actions := [Action, uaDelete];
+  end;
+  end;
+  end;
+*)
+
+procedure TLocalUpdateController.GatherBaseLocalFileInformation(const ALocalSystemFile: IUpdateManagerSystemFile);
+begin
+  with ALocalSystemFile do
+  begin
+    FileBase.FileSystem := FIntelligeNFileSystem.GetFileSystemIDFromPath(ALocalSystemFile.LocalFile.FileName);
+    FileBase.FilePathAppendix := ExtractRelativePath(FIntelligeNFileSystem.GetPathFromFileSystemID(FileBase.FileSystem), ExtractFilePath(ALocalSystemFile.LocalFile.FileName));
+    FileBase.FileName := ExtractFileName(ALocalSystemFile.LocalFile.FileName);
+  end;
 end;
 
-procedure TLocalUpdateController.GatherLocalFileInformation(const ALocalUpdateFile: IUpdateLocalFile);
+procedure TLocalUpdateController.GatherLocalFileInformation(const ALocalSystemFile: IUpdateManagerSystemFile);
 var
-  LFileVersion: RFileVersion;
+  LFileVersion: TFileVersionInfo;
 begin
-  LFileVersion := GetFileVersion(ALocalUpdateFile.FileName);
+  LFileVersion := TFileVersionInfo.GetVersionInfo(ALocalSystemFile.LocalFile.FileName);
 
-  with ALocalUpdateFile do
+  with ALocalSystemFile do
   begin
-    FileChecksum := GetMD5FromFile(FileName);
-    FileSystem := FIntelligeNFileSystem.GetFileSystemIDFromPath(FileName);
-    FilePathAddition := ExtractRelativePath(FIntelligeNFileSystem.GetPathFromFileSystemID(FileSystem), ExtractFilePath(FileName));
+    FileChecksum := GetMD5FromFile(ALocalSystemFile.LocalFile.FileName);
 
     with FileVersion do
     begin
-      MajorVersion := LFileVersion.MajorVersion;
-      MinorVersion := LFileVersion.MinorVersion;
-      MajorBuild := LFileVersion.MajorBuild;
-      MinorBuild := LFileVersion.MinorBuild;
+      MajorVersion := LFileVersion.FileVersionNumber.Major;
+      MinorVersion := LFileVersion.FileVersionNumber.Minor;
+      MajorBuild := LFileVersion.FileVersionNumber.Build;
+      MinorBuild := LFileVersion.FileVersionNumber.Reversion;
     end;
   end;
 end;
 
-procedure TLocalUpdateController.CompressLocalFile(const ALocalUpdateFile: IUpdateLocalFile);
+procedure TLocalUpdateController.CompressLocalFile(const ALocalSystemFile: IUpdateManagerSystemFile);
 begin
-  with ALocalUpdateFile, TAbZipper.Create(nil) do
+  with TAbZipper.Create(nil) do
     try
       AutoSave := True;
       DOSMode := False;
 
-      FileName := FStoreUpdateFilesPath + FileChecksum + '.zip';
+      FileName := FStoreUpdateFilesPath + ALocalSystemFile.FileChecksum + '.zip';
       BaseDirectory := ExtractFilePath(FileName);
 
-      AddFiles(ALocalUpdateFile.FileName, 0);
+      AddFiles(ALocalSystemFile.LocalFile.FileName, 0);
 
       CloseArchive;
 
-      FileSizeCompressed := GetFileSize(FileName);
+      ALocalSystemFile.FileSizeCompressed := GetFileSize(FileName);
     finally
       Free;
     end;
+end;
+
+procedure TLocalUpdateController.ProcessLocalFiles(ALocalFileProcess: TLocalFileProcess; AList: TUpdateManagerLocalFileList);
+var
+  LFileIndex: Integer;
+begin
+  for LFileIndex := 0 to AList.Count - 1 do
+    ALocalFileProcess(AList[LFileIndex]);
 end;
 
 constructor TLocalUpdateController.Create;
@@ -152,73 +171,100 @@ begin
   FIntelligeNFileSystem := TIntelligeNFileSystem.Create(AFileSystemLib);
 end;
 
-class procedure TLocalUpdateController.ExtractExecuteFiles;
-const
+(*
+  class procedure TLocalUpdateController.ExtractExecuteFiles;
+  const
   EXECUTE_FILES: array [0 .. 2] of string = ('.EXE', '.DLL', '.BPL');
-var
+  var
   LUpdateLocalFile: IUpdateLocalFile;
-begin
+  begin
   oList := TUpdateFileVersionList.Create;
 
   for LUpdateLocalFile in AList do
-    if not(IndexText(ExtractFileExt(LUpdateLocalFile.FileName), EXECUTE_FILES) = -1) then
-      oList.Add(LUpdateLocalFile.FileVersion);
-end;
+  if not(IndexText(ExtractFileExt(LUpdateLocalFile.FileName), EXECUTE_FILES) = -1) then
+  oList.Add(LUpdateLocalFile.FileVersion);
+  end;
+*)
 
 procedure TLocalUpdateController.GetLocalFiles;
 var
   LRootDir: string;
-  LSettingFileIndex, LFileIndex, LListIndex: Integer;
   LFileList: TStringList;
-  LNewFile: Boolean;
+  LFileIndex, LSystemFileIndex: Integer;
+
+  LUpdateManagerSystemFile: IUpdateManagerSystemFile;
+  LUpdateManagerLocalFile: IUpdateManagerLocalFile;
+
+  LLocalFileNotInSystem: Boolean;
+  LLocalFileNotFound: Boolean;
 begin
-  AList := TUpdateLocalFileList.Create;
+  AList := TUpdateManagerLocalFileList.Create;
 
   LRootDir := FIntelligeNFileSystem.GetRootDir;
 
-  // Adding all previous files (all tracking files)
-  for LSettingFileIndex := 0 to ASettingFiles.Count - 1 do
-    with ASettingFiles.Items[LSettingFileIndex] do
-    begin
-      if FileExists(LRootDir + FileName) then
-        AList.Add(TIUpdateLocalFile.Create(LRootDir + FileName, Status, ucCondition))
-      else
-        AList.Add(TIUpdateLocalFile.Create(LRootDir + FileName, Status, ucMissing))
-    end;
-
-  // Adding all files in selected directory
+  // Generate list of all local files.
   LFileList := TStringList.Create;
   try
     GetFilesInDirectory(LRootDir, '*.*', LFileList, True, True, True, True);
 
     for LFileIndex := 0 to LFileList.Count - 1 do
     begin
-      LNewFile := True;
-      for LListIndex := 0 to AList.Count - 1 do
-        if SameText(LFileList.Strings[LFileIndex], AList.Items[LListIndex].FileName) then
-        begin
-          LNewFile := True;
-          break;
-        end;
+      LUpdateManagerLocalFile := TIUpdateManagerLocalFile.Create(LFileList.Strings[LFileIndex]);
 
-      if LNewFile then
-        AList.Add(TIUpdateLocalFile.Create(LFileList.Strings[LFileIndex], False, ucNew));
+      LUpdateManagerSystemFile := TIUpdateManagerSystemFile.Create(LUpdateManagerLocalFile);
+
+      // Iterate over list of all system files to find already integrated files.
+      LLocalFileNotInSystem := True;
+      for LSystemFileIndex := 0 to ASystemsList.Count - 1 do
+      begin
+        with ASystemsList[LSystemFileIndex] do
+          if SameText(LUpdateManagerLocalFile.FileName, GetFullFileName(FIntelligeNFileSystem)) then
+          begin
+            LUpdateManagerLocalFile.Online := True;
+            LUpdateManagerLocalFile.Status := True;
+            LUpdateManagerLocalFile.Condition := ucFound;
+
+            LLocalFileNotInSystem := False;
+            break;
+          end;
+      end;
+      if (LLocalFileNotInSystem) then
+      begin
+        GatherBaseLocalFileInformation(LUpdateManagerSystemFile);
+      end;
+
+      AList.Add(LUpdateManagerSystemFile);
     end;
   finally
     LFileList.Free;
   end;
 
-  ProcessLocalFiles(InspectPossibleActions, AList);
-
   ProcessLocalFiles(GatherLocalFileInformation, AList);
-end;
 
-procedure TLocalUpdateController.ProcessLocalFiles(ALocalFileProcess: TLocalFileProcess; AList: TUpdateLocalFileList);
-var
-  LFileIndex: Integer;
-begin
-  for LFileIndex := 0 to AList.Count - 1 do
-    ALocalFileProcess(AList.Items[LFileIndex]);
+  // Iterate over list of all system files to find missing local files.
+  for LSystemFileIndex := 0 to ASystemsList.Count - 1 do
+  begin
+    LLocalFileNotFound := False;
+    for LFileIndex := 0 to AList.Count - 1 do
+      if SameText(AList[LFileIndex].LocalFile.FileName, ASystemsList[LSystemFileIndex].GetFullFileName(FIntelligeNFileSystem)) then
+      begin
+        LLocalFileNotFound := True;
+        break;
+      end;
+
+    if not LLocalFileNotFound then
+    begin
+      LUpdateManagerSystemFile := TIUpdateManagerSystemFile.Create(nil);
+
+      with LUpdateManagerSystemFile do
+      begin
+        LocalFile.Online := False;
+        LocalFile.Status := True;
+        LocalFile.Condition := ucMissing;
+      end;
+      AList.Add(LUpdateManagerSystemFile);
+    end;
+  end;
 end;
 
 destructor TLocalUpdateController.Destroy;
@@ -226,8 +272,6 @@ begin
   FIntelligeNFileSystem.Free;
   inherited Destroy;
 end;
-
-*)
 
 { TLocalUploadController }
 

@@ -46,7 +46,7 @@
 			<DCCReference Include="uMain.pas">
 				<Form>fMain</Form>
 			</DCCReference>
-			<DCCReference Include="IntelligeNFileSystem.pas"/>
+			<DCCReference Include="uDynamicExport.pas"/>
 			<DCCReference Include="uApiUpdateModel.pas"/>
 			<DCCReference Include="uApiUpdateInterface.pas"/>
 			<DCCReference Include="uApiUpdateConst.pas"/>

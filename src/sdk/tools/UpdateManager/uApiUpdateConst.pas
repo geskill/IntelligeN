@@ -3,7 +3,7 @@ unit uApiUpdateConst;
 interface
 
 type
-  TUpdateCondition = (ucNew, ucCondition, ucMissing);
+  TUpdateCondition = (ucNew, ucFound, ucMissing);
 
   TUpdateAction = (uaAddnUpdate, uaEditnUpdate, uaDelete, uaIgnoreThisUpdate);
 

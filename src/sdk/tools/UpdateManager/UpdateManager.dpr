@@ -4,7 +4,7 @@ uses
   Forms,
   Dialogs,
   uMain in 'uMain.pas' {fMain},
-  IntelligeNFileSystem in 'IntelligeNFileSystem.pas',
+  uDynamicExport in 'uDynamicExport.pas',
   uApiUpdateModel in 'uApiUpdateModel.pas',
   uApiUpdateInterface in 'uApiUpdateInterface.pas',
   uApiUpdateConst in 'uApiUpdateConst.pas',

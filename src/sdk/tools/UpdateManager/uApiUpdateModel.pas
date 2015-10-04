@@ -7,6 +7,8 @@ uses
   SysUtils,
   // Common
   uBase,
+  // Export
+  uDynamicExport,
   // Api
   uApiUpdateConst, uApiUpdateInterface, uApiUpdateModelBase;
 
@@ -34,17 +36,21 @@ type
   public
     constructor Create;
 
+    function GetFullFileName(AIntelligeNFileSystem: TIntelligeNFileSystem): WideString;
+
     property ID: Integer read GetID write SetID;
   end;
 
-  (*
-  TIUpdateLocalFile = class(TIUpdateFile, IUpdateLocalFile)
+  TIUpdateManagerLocalFile = class(TIFile, IUpdateManagerLocalFile)
   private
+    FOnline: WordBool;
     FStatus: WordBool;
     FCondition: TUpdateCondition;
     FAction: TUpdateAction;
     FActions: TUpdateActions;
   protected
+    function GetOnline: WordBool;
+    procedure SetOnline(AOnline: WordBool);
     function GetStatus: WordBool;
     procedure SetStatus(AStatus: WordBool);
     function GetCondition: TUpdateCondition;
@@ -54,14 +60,32 @@ type
     function GetActions: TUpdateActions;
     procedure SetActions(AActions: TUpdateActions);
   public
-    constructor Create(AFileName: WideString; AStatus: WordBool; ACondition: TUpdateCondition);
+    constructor Create(AFileName: WideString);
 
+    property Online: WordBool read GetOnline write SetOnline;
     property Status: WordBool read GetStatus write SetStatus;
     property Condition: TUpdateCondition read GetCondition write SetCondition;
     property Action: TUpdateAction read GetAction write SetAction;
     property Actions: TUpdateActions read GetActions write SetActions;
   end;
-  *)
+
+  TIUpdateManagerSystemFile = class(TIUpdateSystemFile, IUpdateManagerSystemFile)
+  private
+    FID: Integer;
+    FLocalFile: IUpdateManagerLocalFile;
+  protected
+    function GetID: Integer;
+    procedure SetID(AID: Integer);
+    function GetLocalFile: IUpdateManagerLocalFile;
+    procedure SetLocalFile(ALocalFile: IUpdateManagerLocalFile);
+  public
+    constructor Create(const ALocalFile: IUpdateManagerLocalFile);
+
+    property ID: Integer read GetID write SetID;
+    property LocalFile: IUpdateManagerLocalFile read GetLocalFile write SetLocalFile;
+
+    destructor Destroy;
+  end;
 
   TIFTPServer = class(TInterfacedObject, IFTPServer)
   private
@@ -113,11 +137,6 @@ end;
 
 { TIUpdateManagerSystemFileBase }
 
-constructor TIUpdateManagerSystemFileBase.Create;
-begin
-  inherited Create('');
-end;
-
 function TIUpdateManagerSystemFileBase.GetID: Integer;
 begin
   Result := FID;
@@ -128,59 +147,125 @@ begin
   FID := AID;
 end;
 
-(*
+function TIUpdateManagerSystemFileBase.GetFullFileName(AIntelligeNFileSystem: TIntelligeNFileSystem): WideString;
+begin
+  Result := IncludeTrailingPathDelimiter(
+    { . } IncludeTrailingPathDelimiter(AIntelligeNFileSystem.GetPathFromFileSystemID(FileSystem)) +
+    { ... } FilePathAppendix
+    { . } ) +
+  { . } FileName;
+end;
 
-{ TIUpdateLocalFile }
+constructor TIUpdateManagerSystemFileBase.Create;
+begin
+  inherited Create('');
+end;
 
-function TIUpdateLocalFile.GetStatus;
+{ TIUpdateManagerLocalFile }
+
+function TIUpdateManagerLocalFile.GetOnline: WordBool;
+begin
+  Result := FOnline;
+end;
+
+procedure TIUpdateManagerLocalFile.SetOnline(AOnline: WordBool);
+begin
+  FOnline := AOnline;
+end;
+
+function TIUpdateManagerLocalFile.GetStatus;
 begin
   Result := FStatus;
 end;
 
-procedure TIUpdateLocalFile.SetStatus;
+procedure TIUpdateManagerLocalFile.SetStatus;
 begin
   FStatus := AStatus;
 end;
 
-function TIUpdateLocalFile.GetCondition;
+function TIUpdateManagerLocalFile.GetCondition;
 begin
   Result := FCondition;
 end;
 
-procedure TIUpdateLocalFile.SetCondition;
+procedure TIUpdateManagerLocalFile.SetCondition;
 begin
   FCondition := ACondition;
 end;
 
-function TIUpdateLocalFile.GetAction;
+function TIUpdateManagerLocalFile.GetAction;
 begin
   Result := FAction;
 end;
 
-procedure TIUpdateLocalFile.SetAction;
+procedure TIUpdateManagerLocalFile.SetAction;
 begin
   FAction := AAction;
 end;
 
-function TIUpdateLocalFile.GetActions;
+function TIUpdateManagerLocalFile.GetActions;
 begin
   Result := FActions;
 end;
 
-procedure TIUpdateLocalFile.SetActions;
+procedure TIUpdateManagerLocalFile.SetActions;
 begin
   FActions := AActions;
 end;
 
-constructor TIUpdateLocalFile.Create;
+constructor TIUpdateManagerLocalFile.Create(AFileName: WideString);
 begin
   inherited Create(AFileName);
 
-  FStatus := AStatus;
-  FCondition := ACondition;
+  FOnline := False;
+  FStatus := False;
+  FCondition := ucNew;
+  FAction := uaAddnUpdate;
+  FActions := [];
 end;
 
-*)
+{ TIUpdateManagerSystemFile }
+
+function TIUpdateManagerSystemFile.GetID: Integer;
+begin
+  Result := FID;
+end;
+
+procedure TIUpdateManagerSystemFile.SetID(AID: Integer);
+begin
+  FID := AID;
+end;
+
+function TIUpdateManagerSystemFile.GetLocalFile: IUpdateManagerLocalFile;
+begin
+  Result := FLocalFile;
+end;
+
+procedure TIUpdateManagerSystemFile.SetLocalFile(ALocalFile: IUpdateManagerLocalFile);
+begin
+  FLocalFile := ALocalFile;
+end;
+
+constructor TIUpdateManagerSystemFile.Create;
+begin
+  if not Assigned(ALocalFile) then
+  begin
+    inherited Create('');
+    FLocalFile := TIUpdateManagerLocalFile.Create('')
+  end
+  else
+  begin
+    inherited Create(ExtractFileName(ALocalFile.FileName));
+    FLocalFile := ALocalFile;
+  end;
+  FID := 0;
+end;
+
+destructor TIUpdateManagerSystemFile.Destroy;
+begin
+  FLocalFile := nil;
+  inherited Destroy;
+end;
 
 { TIFTPServer }
 

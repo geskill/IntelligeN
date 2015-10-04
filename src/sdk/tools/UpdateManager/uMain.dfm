@@ -1,7 +1,7 @@
 object fMain: TfMain
   Left = 0
   Top = 0
-  ActiveControl = JvWizardInteriorPageServerInfo
+  ActiveControl = JvWizardInteriorPageUpdateFiles
   Caption = 'Update Manager'
   ClientHeight = 338
   ClientWidth = 635
@@ -21,7 +21,7 @@ object fMain: TfMain
     Top = 0
     Width = 635
     Height = 338
-    ActivePage = JvWizardInteriorPageServerInfo
+    ActivePage = JvWizardInteriorPageUpdateFiles
     ButtonBarHeight = 42
     ButtonStart.Caption = 'To &Start Page'
     ButtonStart.NumGlyphs = 1
@@ -308,7 +308,7 @@ object fMain: TfMain
         Visible = False
       end
     end
-    object JvWizardInteriorPageFiles: TJvWizardInteriorPage
+    object JvWizardInteriorPageLocalFiles: TJvWizardInteriorPage
       Header.Title.Color = clNone
       Header.Title.Text = 'Local Files'
       Header.Title.Anchors = [akLeft, akTop, akRight]
@@ -325,9 +325,9 @@ object fMain: TfMain
       Header.Subtitle.Font.Height = -11
       Header.Subtitle.Font.Name = 'Tahoma'
       Header.Subtitle.Font.Style = []
-      OnPage = JvWizardInteriorPageFilesPage
-      OnExitPage = JvWizardInteriorPageFilesExitPage
-      OnNextButtonClick = JvWizardInteriorPageFilesNextButtonClick
+      OnPage = JvWizardInteriorPageLocalFilesPage
+      OnExitPage = JvWizardInteriorPageLocalFilesExitPage
+      OnNextButtonClick = JvWizardInteriorPageLocalFilesNextButtonClick
       DesignSize = (
         490
         296)
@@ -384,6 +384,7 @@ object fMain: TfMain
             Properties.ImmediatePost = True
             Properties.ImmediateUpdateText = True
             Properties.ReadOnly = True
+            Visible = False
             OnGetPropertiesForEdit = cxGFilesTableViewColumn5GetPropertiesForEdit
           end
           object cxGFilesTableViewColumn6: TcxGridColumn

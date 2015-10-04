@@ -5,6 +5,8 @@ interface
 uses
   // Common
   uBase,
+  // Export
+  uDynamicExport,
   // Api
   uApiUpdateConst, uApiUpdateInterfaceBase;
 
@@ -50,7 +52,40 @@ type
     function GetID: Integer;
     procedure SetID(AID: Integer);
 
+    function GetFullFileName(AIntelligeNFileSystem: TIntelligeNFileSystem): WideString;
+
     property ID: Integer read GetID write SetID;
+  end;
+
+  IUpdateManagerLocalFile = interface(IFile)
+    ['{FF118ECC-48CE-4F93-9841-97DFE234F928}']
+    function GetOnline: WordBool;
+    procedure SetOnline(AOnline: WordBool);
+    function GetStatus: WordBool;
+    procedure SetStatus(AStatus: WordBool);
+    function GetCondition: TUpdateCondition;
+    procedure SetCondition(ACondition: TUpdateCondition);
+    function GetAction: TUpdateAction;
+    procedure SetAction(AAction: TUpdateAction);
+    function GetActions: TUpdateActions;
+    procedure SetActions(AActions: TUpdateActions);
+
+    property Online: WordBool read GetOnline write SetOnline;
+    property Status: WordBool read GetStatus write SetStatus;
+    property Condition: TUpdateCondition read GetCondition write SetCondition;
+    property Action: TUpdateAction read GetAction write SetAction;
+    property Actions: TUpdateActions read GetActions write SetActions;
+  end;
+
+  IUpdateManagerSystemFile = interface(IUpdateSystemFile)
+    ['{4666FFA3-9D57-45B5-A15F-D29C36103ABB}']
+    function GetID: Integer;
+    procedure SetID(AID: Integer);
+    function GetLocalFile: IUpdateManagerLocalFile;
+    procedure SetLocalFile(ALocalFile: IUpdateManagerLocalFile);
+
+    property ID: Integer read GetID write SetID;
+    property LocalFile: IUpdateManagerLocalFile read GetLocalFile write SetLocalFile;
   end;
 
   IServer = interface
