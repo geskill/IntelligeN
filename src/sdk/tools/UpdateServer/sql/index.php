@@ -498,8 +498,8 @@ class SQLSystem
 
 		if (!$this->VersionExists($major_version, $minor_version, $major_build, $minor_build)) {
 
-			$sql = "INSERT INTO `intelligen_2k9_update_versions` (`major_version`, `minor_version`, `major_build`, `minor_build`, `created`) VALUES
-			('" . $this->link->escape_string($major_version) . "', '" . $this->link->escape_string($minor_version) . "', '" . $this->link->escape_string($major_build) . "', '" . $this->link->escape_string($minor_build) . "', CURRENT_TIMESTAMP)";
+			$sql = "INSERT INTO `intelligen_2k9_update_versions` (`major_version`, `minor_version`, `major_build`, `minor_build`) VALUES
+			('" . $this->link->escape_string($major_version) . "', '" . $this->link->escape_string($minor_version) . "', '" . $this->link->escape_string($major_build) . "', '" . $this->link->escape_string($minor_build) . "'";
 
 			$query_result = $this->link->query($sql);
 			if(!$query_result)
@@ -642,14 +642,14 @@ class SQLSystem
 			$file = $this->GetFile($file->checksum);
 		}
 
-		$sql = "INSERT INTO `intelligen_2k9_update_version_files` (`version_id`, `file_id`, `created`) VALUES";
+		$sql = "INSERT INTO `intelligen_2k9_update_version_files` (`version_id`, `file_id`) VALUES";
 		$hasNewFileLinks = false;
 
 		foreach ($files as $file) {
 
 			if (!$this->FileLinkExists($version_id, $file->id)) {
 
-				$sql .= " ('" . $this->link->escape_string($version_id) . "', '" . $this->link->escape_string($file->id) . "', CURRENT_TIMESTAMP),";
+				$sql .= " ('" . $this->link->escape_string($version_id) . "', '" . $this->link->escape_string($file->id) . "'),";
 
 				$hasNewFileLinks = true;
 			}
@@ -675,7 +675,7 @@ class SQLSystem
      */
 	function SetVersionActive($version_id) {
 
-		$sql = "UPDATE `intelligen_2k9_update_versions` SET `active` = '1', `modified` = CURRENT_TIMESTAMP
+		$sql = "UPDATE `intelligen_2k9_update_versions` SET `active` = '1'
 		WHERE `intelligen_2k9_update_versions`.`id` = '" . $this->link->escape_string($version_id) . "'";
 
 		$query_result = $this->link->query($sql);
