@@ -17,7 +17,7 @@ uses
   // Api
   uApiUpdateConst, uApiUpdateInterface, uApiUpdateSettings, uApiUpdateController,
   // Utils
-  uFileUtils, uPathUtils, uSetUtils, uStringUtils;
+  uFileUtils, uPathUtils, uSetUtils, uStringUtils, ComCtrls;
 
 type
   TfMain = class(TForm)
@@ -79,6 +79,16 @@ type
     cxSEMajorBuild: TcxSpinEdit;
     cxSEMinorBuild: TcxSpinEdit;
     lPreRelease: TLabel;
+    cxCBLocalFilesEnableDisableAll: TcxCheckBox;
+    JvLEDAddVersion: TJvLED;
+    lAddVersion: TLabel;
+    JvLEDAddSystems: TJvLED;
+    lAddingTheNewSystems: TLabel;
+    JvLEDCompressLocalFiles: TJvLED;
+    lCompressingLocalFiles: TLabel;
+    JvLEDUploadLocalFiles: TJvLED;
+    lUploadingLocalFiles: TLabel;
+    pbUploadProgress: TProgressBar;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure JvWizardCancelButtonClick(Sender: TObject);
@@ -97,17 +107,21 @@ type
     procedure lbSelectServerClick(Sender: TObject);
     { *************************************** STEP - 3 *************************************** }
     procedure JvWizardInteriorPageServerInfoPage(Sender: TObject);
+
     { *************************************** STEP - 4 *************************************** }
     procedure JvWizardInteriorPageLocalFilesExitPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
     procedure JvWizardInteriorPageLocalFilesPage(Sender: TObject);
     procedure JvWizardInteriorPageLocalFilesNextButtonClick(Sender: TObject; var Stop: Boolean);
+    procedure cxCBLocalFilesEnableDisableAllPropertiesChange(Sender: TObject);
     procedure cxGLocalFilesTableViewColumn2CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
     procedure cxGLocalFilesTableViewColumn5GetPropertiesForEdit(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AProperties: TcxCustomEditProperties);
     procedure cxGLocalFilesTableViewDataControllerDataChanged(Sender: TObject);
+    procedure cxGUpdateFilesTableViewColumn5CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
+
     procedure lFileSystemClick(Sender: TObject);
     { *************************************** STEP - 5 *************************************** }
     procedure JvWizardInteriorPageUpdateFilesPage(Sender: TObject);
-
+    procedure cxGUpdateFilesTableViewColumn6GetPropertiesForEdit(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AProperties: TcxCustomEditProperties);
     { *************************************** STEP - 6 *************************************** }
     procedure JvWizardInteriorPageUpdateVersionPage(Sender: TObject);
     procedure rbSelectVersion(Sender: TObject);
@@ -127,6 +141,9 @@ type
     FActiveSystemsList: TUpdateManagerSystemsList;
 
     FActiveLocalFiles: TUpdateManagerLocalFileList;
+
+    function GetLocalFilesCheckAllStatus: Byte;
+    procedure SetLocalFilesCheckAllStatus;
 
     procedure LoadSettings;
     procedure SaveSettings;
@@ -299,6 +316,7 @@ var
   LCanContinue: Boolean;
 begin
   LCanContinue := LoadLocalFilesList;
+  SetLocalFilesCheckAllStatus;
   lFileSystem.Caption := ExtractFilePath(FActiveUpdateFileCollectionItem.LibraryFile);
   cxGLocalFilesTableView.DataController.OnDataChanged := cxGLocalFilesTableViewDataControllerDataChanged;
   CanContinue(LCanContinue, JvWizardInteriorPageLocalFiles);
@@ -314,6 +332,40 @@ begin
       Status := Values[LFileIndex, cxGLocalFilesTableViewColumn1.Index];
       // Action := TUpdateAction(GetEnumValue(TypeInfo(TUpdateAction), Values[LFileIndex, cxGFilesTableViewColumn5.Index]));
     end;
+end;
+
+procedure TfMain.cxCBLocalFilesEnableDisableAllPropertiesChange(Sender: TObject);
+
+  procedure SetStatus(AStatus: Boolean);
+  var
+    LFileIndex: Integer;
+  begin
+    with cxGLocalFilesTableView.DataController do
+    begin
+      OnDataChanged := nil;
+
+      BeginUpdate;
+      try
+        for LFileIndex := 0 to RecordCount - 1 do
+          if not(Values[LFileIndex, cxGLocalFilesTableViewColumn1.Index] = AStatus) then
+            Values[LFileIndex, cxGLocalFilesTableViewColumn1.Index] := AStatus;
+      finally
+        EndUpdate;
+      end;
+
+      OnDataChanged := cxGLocalFilesTableViewDataControllerDataChanged;
+      // Do here everything EXCEPT "SetLocalFilesCheckAllStatus" from "cxGLocalFilesTableViewDataControllerDataChanged"
+      CheckCanContinueToUpdateFiles;
+    end;
+  end;
+
+begin
+  case cxCBLocalFilesEnableDisableAll.State of
+    cbsUnchecked:
+      SetStatus(False);
+    cbsChecked:
+      SetStatus(True);
+  end;
 end;
 
 procedure TfMain.cxGLocalFilesTableViewColumn2CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
@@ -344,6 +396,7 @@ end;
 
 procedure TfMain.cxGLocalFilesTableViewDataControllerDataChanged(Sender: TObject);
 begin
+  SetLocalFilesCheckAllStatus;
   CheckCanContinueToUpdateFiles;
 end;
 
@@ -357,6 +410,34 @@ end;
 procedure TfMain.JvWizardInteriorPageUpdateFilesPage(Sender: TObject);
 begin
   LoadUpdateFilesList;
+end;
+
+procedure TfMain.cxGUpdateFilesTableViewColumn5CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
+var
+  V: Variant;
+begin
+  V := AViewInfo.Value;
+
+  if not VarIsNull(V) then
+  begin
+    if Pos('Add', V) > 0 then
+      AViewInfo.EditViewInfo.TextColor := clPurple
+    else if Pos('Edit', V) > 0 then
+      AViewInfo.EditViewInfo.TextColor := clBlue
+    else if Pos('Delete', V) > 0 then
+      AViewInfo.EditViewInfo.TextColor := clRed
+    else
+      AViewInfo.EditViewInfo.TextColor := clBlack;
+
+    AViewInfo.EditViewInfo.Paint(ACanvas);
+
+    ADone := True;
+  end;
+end;
+
+procedure TfMain.cxGUpdateFilesTableViewColumn6GetPropertiesForEdit(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AProperties: TcxCustomEditProperties);
+begin
+  TcxCustomComboBoxProperties(AProperties).Items.Text := ARecord.Values[cxGUpdateFilesTableViewColumn6.Index];
 end;
 
 { *************************************** STEP - 6 *************************************** }
@@ -396,6 +477,57 @@ begin
 end;
 
 { ****************************************************************************** }
+
+function TfMain.GetLocalFilesCheckAllStatus: Byte;
+var
+  LRecordCount: Integer;
+  LStatus: Byte; // 0 = Unchecked, 1 = Checked, 3 = Grayed, 255 = Undefined
+begin
+  LStatus := 255;
+
+  with cxGLocalFilesTableView.DataController do
+    for LRecordCount := 0 to RecordCount - 1 do
+    begin
+      case Values[LRecordCount, cxGLocalFilesTableViewColumn1.index] of
+        0:
+          if (LStatus = 255) or (LStatus = 0) then
+            LStatus := 0
+          else
+            LStatus := 2;
+      else
+        if (LStatus = 255) or (LStatus = 1) then
+          LStatus := 1
+        else
+          LStatus := 2;
+      end;
+    end;
+  if (LStatus = 255) then
+    LStatus := 2;
+
+  Result := LStatus;
+end;
+
+procedure TfMain.SetLocalFilesCheckAllStatus;
+var
+  LEvent: TNotifyEvent;
+begin
+  with cxCBLocalFilesEnableDisableAll do
+  begin
+    LEvent := Properties.OnChange;
+    Properties.OnChange := nil;
+
+    case GetLocalFilesCheckAllStatus of
+      0:
+        State := cbsUnchecked;
+      1:
+        State := cbsChecked;
+    else
+      State := cbsGrayed;
+    end;
+
+    Properties.OnChange := LEvent;
+  end;
+end;
 
 procedure TfMain.LoadSettings;
 begin
@@ -625,8 +757,53 @@ begin
 end;
 
 function TfMain.LoadUpdateFilesList: Boolean;
+
+  function ActionsToStr(AUpdateActions: TUpdateActions): string;
+  begin
+    with SplittString(',', SetToString(TypeInfo(TUpdateActions), AUpdateActions, False)) do
+      try
+        Result := Text;
+      finally
+        Free;
+      end;
+  end;
+
+var
+  LLocalUpdateController: TLocalUpdateController;
+
+  LFileIndex: Integer;
 begin
-  //
+  LLocalUpdateController := TLocalUpdateController.Create(FActiveUpdateFileCollectionItem.LibraryFile);
+  try
+    LLocalUpdateController.GetPossibleActionsForLocalFiles(FActiveLocalFiles);
+  finally
+    LLocalUpdateController.Free;
+  end;
+
+  with cxGUpdateFilesTableView.DataController do
+  begin
+    RecordCount := 0;
+
+    BeginUpdate;
+    try
+      RecordCount := FActiveLocalFiles.Count;
+
+      for LFileIndex := 0 to RecordCount - 1 do
+        with FActiveLocalFiles[LFileIndex] do
+        begin
+          Values[LFileIndex, cxGUpdateFilesTableViewColumn1.Index] := LocalFile.Status;
+          Values[LFileIndex, cxGUpdateFilesTableViewColumn2.Index] := GetEnumName(TypeInfo(TUpdateCondition), Integer(LocalFile.Condition));
+          Values[LFileIndex, cxGUpdateFilesTableViewColumn3.Index] := ExtractRelativePath(ExtractFilePath(FActiveUpdateFileCollectionItem.LibraryFile), LocalFile.FileName);
+          Values[LFileIndex, cxGUpdateFilesTableViewColumn4.Index] := FileVersion.ToString;
+          Values[LFileIndex, cxGUpdateFilesTableViewColumn5.Index] := GetEnumName(TypeInfo(TUpdateAction), Integer(LocalFile.Action));
+          Values[LFileIndex, cxGUpdateFilesTableViewColumn6.Index] := ActionsToStr(LocalFile.Actions);
+        end;
+    finally
+      EndUpdate;
+    end;
+  end;
+
+  Result := True;
 end;
 
 procedure TfMain.SaveFilesList;

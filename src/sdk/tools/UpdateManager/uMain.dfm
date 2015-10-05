@@ -1,7 +1,7 @@
 object fMain: TfMain
   Left = 0
   Top = 0
-  ActiveControl = rbAddNewVersion
+  ActiveControl = JvWizardInteriorPageUploadFiles
   Caption = 'Update Manager'
   ClientHeight = 338
   ClientWidth = 635
@@ -21,7 +21,7 @@ object fMain: TfMain
     Top = 0
     Width = 635
     Height = 338
-    ActivePage = JvWizardInteriorPageUpdateVersion
+    ActivePage = JvWizardInteriorPageUploadFiles
     ButtonBarHeight = 42
     ButtonStart.Caption = 'To &Start Page'
     ButtonStart.NumGlyphs = 1
@@ -347,21 +347,21 @@ object fMain: TfMain
         Margins.Bottom = 1
         Align = alBottom
         OnClick = lFileSystemClick
-        ExplicitLeft = 6
         ExplicitWidth = 3
       end
       object cxGLocalFiles: TcxGrid
         AlignWithMargins = True
         Left = 3
-        Top = 72
+        Top = 91
         Width = 484
-        Height = 206
-        Margins.Top = 2
+        Height = 187
+        Margins.Top = 21
         Align = alClient
         BevelInner = bvNone
         BevelOuter = bvNone
-        TabOrder = 0
-        ExplicitHeight = 204
+        TabOrder = 1
+        ExplicitTop = 72
+        ExplicitHeight = 206
         object cxGLocalFilesTableView: TcxGridTableView
           Navigator.Buttons.CustomButtons = <>
           DataController.Summary.DefaultGroupSummaryItems = <>
@@ -411,6 +411,18 @@ object fMain: TfMain
         object cxGLocalFilesLevel: TcxGridLevel
           GridView = cxGLocalFilesTableView
         end
+      end
+      object cxCBLocalFilesEnableDisableAll: TcxCheckBox
+        Left = 3
+        Top = 72
+        Caption = 'enable/disable all'
+        Properties.ValueChecked = 1
+        Properties.ValueGrayed = 2
+        Properties.ValueUnchecked = 0
+        Properties.OnChange = cxCBLocalFilesEnableDisableAllPropertiesChange
+        State = cbsGrayed
+        TabOrder = 0
+        Transparent = True
       end
     end
     object JvWizardInteriorPageUpdateFiles: TJvWizardInteriorPage
@@ -482,13 +494,14 @@ object fMain: TfMain
             Properties.ImmediateDropDownWhenActivated = True
             Properties.ImmediatePost = True
             Properties.ImmediateUpdateText = True
-            Properties.ReadOnly = True
-            OnGetPropertiesForEdit = cxGLocalFilesTableViewColumn5GetPropertiesForEdit
+            OnCustomDrawCell = cxGUpdateFilesTableViewColumn5CustomDrawCell
+            OnGetPropertiesForEdit = cxGUpdateFilesTableViewColumn6GetPropertiesForEdit
           end
           object cxGUpdateFilesTableViewColumn6: TcxGridColumn
             Caption = 'Actions'
             PropertiesClassName = 'TcxMemoProperties'
             Visible = False
+            OnGetPropertiesForEdit = cxGUpdateFilesTableViewColumn6GetPropertiesForEdit
           end
         end
         object cxGUpdateFilesLevel: TcxGridLevel
@@ -514,7 +527,6 @@ object fMain: TfMain
       Header.Subtitle.Font.Name = 'Tahoma'
       Header.Subtitle.Font.Style = []
       EnabledButtons = [bkStart, bkLast, bkBack, bkFinish, bkCancel, bkHelp]
-      Caption = 'JvWizardInteriorPageUpdateVersion'
       OnPage = JvWizardInteriorPageUpdateVersionPage
       DesignSize = (
         490
@@ -615,8 +627,67 @@ object fMain: TfMain
       Header.Subtitle.Font.Name = 'Tahoma'
       Header.Subtitle.Font.Style = []
       EnabledButtons = [bkStart, bkLast, bkFinish, bkCancel, bkHelp]
-      Caption = 'JvWizardInteriorPageUploadFiles'
       OnPage = JvWizardInteriorPageUploadFilesPage
+      object JvLEDAddVersion: TJvLED
+        Left = 24
+        Top = 88
+        ColorOff = clSilver
+        Status = False
+      end
+      object lAddVersion: TLabel
+        Left = 47
+        Top = 90
+        Width = 208
+        Height = 13
+        Caption = 'Adding the new version to the database ...'
+      end
+      object JvLEDAddSystems: TJvLED
+        Left = 24
+        Top = 120
+        ColorOff = clSilver
+        Status = False
+      end
+      object lAddingTheNewSystems: TLabel
+        Left = 47
+        Top = 122
+        Width = 212
+        Height = 13
+        Caption = 'Adding the new systems to the database ...'
+      end
+      object JvLEDCompressLocalFiles: TJvLED
+        Left = 24
+        Top = 152
+        ColorOff = clSilver
+        Status = False
+      end
+      object lCompressingLocalFiles: TLabel
+        Left = 47
+        Top = 154
+        Width = 122
+        Height = 13
+        Caption = 'Compressing local files ...'
+      end
+      object JvLEDUploadLocalFiles: TJvLED
+        Left = 24
+        Top = 184
+        ColorOff = clSilver
+        Status = False
+      end
+      object lUploadingLocalFiles: TLabel
+        Left = 47
+        Top = 186
+        Width = 108
+        Height = 13
+        Caption = 'Uploading local files ...'
+      end
+      object pbUploadProgress: TProgressBar
+        Left = 47
+        Top = 207
+        Width = 242
+        Height = 17
+        TabOrder = 0
+        Visible = False
+      end
     end
     object JvWizardInteriorPagePublish: TJvWizardInteriorPage
       Header.Title.Color = clNone

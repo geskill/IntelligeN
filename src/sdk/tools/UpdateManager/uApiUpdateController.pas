@@ -43,7 +43,7 @@ type
   type
     TLocalFileProcess = reference to procedure(const ALocalSystemFile: IUpdateManagerSystemFile);
   protected
-    // procedure InspectPossibleActions(const ALocalFile: IUpdateManagerSystemFile);
+    procedure InspectPossibleActions(const ALocalSystemFile: IUpdateManagerSystemFile);
     procedure GatherBaseLocalFileInformation(const ALocalSystemFile: IUpdateManagerSystemFile);
     procedure GatherLocalFileInformation(const ALocalSystemFile: IUpdateManagerSystemFile);
     procedure CompressLocalFile(const ALocalSystemFile: IUpdateManagerSystemFile);
@@ -55,6 +55,7 @@ type
     // class procedure ExtractExecuteFiles(AList: TUpdateLocalFileList; out oList: TUpdateFileVersionList);
 
     procedure GetLocalFiles(ASystemsList: TUpdateManagerSystemsList; out AList: TUpdateManagerLocalFileList);
+    procedure GetPossibleActionsForLocalFiles(AList: TUpdateManagerLocalFileList);
 
     destructor Destroy; override;
   end;
@@ -83,29 +84,40 @@ type
 
 implementation
 
-(*
-  procedure TLocalUpdateController.InspectPossibleActions(const ALocalUpdateFile: IUpdateLocalFile);
-  begin
-  with ALocalUpdateFile do
-  case Condition of
-  ucNew:
-  begin
-  Action := uaAddnUpdate;
-  Actions := [Action];
-  end;
-  ucCondition:
-  begin
-  Action := uaEditnUpdate;
-  Actions := [Action, uaDelete, uaIgnoreThisUpdate];
-  end;
-  ucMissing:
-  begin
-  Action := uaIgnoreThisUpdate;
-  Actions := [Action, uaDelete];
-  end;
-  end;
-  end;
-*)
+procedure TLocalUpdateController.InspectPossibleActions(const ALocalSystemFile: IUpdateManagerSystemFile);
+begin
+  with ALocalSystemFile.LocalFile do
+    case Condition of
+      ucNew:
+        begin
+          if Status then
+            Action := uaAddnUpdate
+          else
+            Action := uaIgnoreThisUpdate;
+
+          Actions := [uaAddnUpdate, uaIgnoreThisUpdate];
+        end;
+      ucFound:
+        begin
+          if Status then
+            Action := uaEditnUpdate
+          else
+            Action := uaDelete;
+
+          Actions := [uaEditnUpdate, uaDelete, uaIgnoreThisUpdate];
+        end;
+      ucMissing:
+        begin
+          if Status then
+            Action := uaDelete
+          else
+            Action := uaIgnoreThisUpdate;
+
+          Action := uaIgnoreThisUpdate;
+          Actions := [uaDelete, uaIgnoreThisUpdate];
+        end;
+    end;
+end;
 
 procedure TLocalUpdateController.GatherBaseLocalFileInformation(const ALocalSystemFile: IUpdateManagerSystemFile);
 begin
@@ -265,6 +277,11 @@ begin
       AList.Add(LUpdateManagerSystemFile);
     end;
   end;
+end;
+
+procedure TLocalUpdateController.GetPossibleActionsForLocalFiles(AList: TUpdateManagerLocalFileList);
+begin
+  ProcessLocalFiles(InspectPossibleActions, AList);
 end;
 
 destructor TLocalUpdateController.Destroy;
