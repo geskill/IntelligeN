@@ -18,7 +18,7 @@ type
   TServerXMLReader = class
   type
     TIBasicMeta = class of TIBasicServerResponse;
-    TServerRequestType = (srtVersions, srtSystems, srtFTPServer);
+    TServerRequestType = (srtVersions, srtSystems, srtFTPServer, srtVersionAdd, srtSystemsAdd);
   private
     class function GetClassType(AType: TServerRequestType): TIBasicMeta;
   protected
@@ -28,6 +28,8 @@ type
     class function ReadVersions(AXMLContent: string): IVersionsResponse;
     class function ReadSystems(AXMLContent: string): ISystemsResponse;
     class function ReadFTPServer(AXMLContent: string): IFTPServerResponse;
+    class function ReadVersionAdd(AXMLContent: string): IVersionAddResponse;
+    class function ReadSystemsAdd(AXMLContent: string): IBasicServerResponse;
   end;
 
 implementation
@@ -43,6 +45,10 @@ begin
       Result := TISystemsResponse;
     srtFTPServer:
       Result := TIFTPServerResponse;
+    srtVersionAdd:
+      Result := TIVersionAddResponse;
+    srtSystemsAdd:
+      Result := TIBasicServerResponse;
   end;
 end;
 
@@ -143,6 +149,15 @@ begin
                         Password := VarToStr(ChildNodes.Nodes['password'].NodeValue);
                       end;
                 end;
+              srtVersionAdd:
+                with (Result as IVersionAddResponse) do
+                begin
+                  if Assigned(ChildNodes.FindNode('version')) then
+                    with ChildNodes.Nodes['version'] do
+                      begin
+                        VersionID := StrToIntDef(VarToStr(ChildNodes.Nodes['id'].NodeValue), 0);
+                      end;
+                end;
             end;
           end;
     end;
@@ -166,6 +181,16 @@ end;
 class function TServerXMLReader.ReadFTPServer(AXMLContent: string): IFTPServerResponse;
 begin
   Result := TServerXMLReader.Read(AXMLContent, srtFTPServer) as IFTPServerResponse;
+end;
+
+class function TServerXMLReader.ReadVersionAdd(AXMLContent: string): IVersionAddResponse;
+begin
+  Result := TServerXMLReader.Read(AXMLContent, srtVersionAdd) as IVersionAddResponse;
+end;
+
+class function TServerXMLReader.ReadSystemsAdd(AXMLContent: string): IBasicServerResponse;
+begin
+  Result := TServerXMLReader.Read(AXMLContent, srtSystemsAdd) as IBasicServerResponse;
 end;
 
 end.

@@ -3,17 +3,20 @@ unit uFileUtils;
 interface
 
 uses
-  Windows, SysUtils, Classes, DECHash, DECFmt, ShellAPI;
+  // Delphi
+  Windows, SysUtils, Classes, ShellAPI,
+  // DEC
+  DECHash, DECFmt;
 
 function TrueFilename(AFileName: string): string;
 
-function GetMD5FromFile(FileName: string): string;
+function GetMD5FromFile(FileName: string): string; deprecated;
 
-function GetFileSize(const FileName: string): Int64;
+function GetFileSize(const FileName: string): Int64; deprecated;
 
-procedure GetDirectoriesFromDirectory(Directory: string; const List: TStrings; ClearList: Boolean);
+procedure GetDirectoriesFromDirectory(Directory: string; const List: TStrings; ClearList: Boolean); deprecated;
 
-procedure GetFilesInDirectory(Directory: string; const Mask: string; List: TStrings; WithPath, WithSubDirs, WithFileExt, ClearList: Boolean);
+procedure GetFilesInDirectory(Directory: string; const Mask: string; List: TStrings; WithPath, WithSubDirs, WithFileExt, ClearList: Boolean); deprecated;
 
 function DeleteFile(const AFile: string): Boolean;
 
@@ -31,11 +34,13 @@ begin
   Result := AFileName;
 end;
 
+// TODO: FUTURE: replace with Spring.Cryptography.MD5
 function GetMD5FromFile(FileName: string): string;
 begin
   Result := string(THash_MD5.CalcFile(FileName, TFormat_HEX));
 end;
 
+// TODO: FUTURE: replace with Spring.Utils.IO
 function GetFileSize(const FileName: string): Int64;
 var
   FileStream: TFileStream;
@@ -53,6 +58,7 @@ begin
 end;
 {$WARN SYMBOL_PLATFORM OFF}
 
+// TODO: FUTURE: replace with Spring.Utils.IO
 procedure GetDirectoriesFromDirectory(Directory: string; const List: TStrings; ClearList: Boolean);
 
   function SlashSep(const Path, S: string): string;
@@ -99,6 +105,7 @@ begin
 end;
 {$WARN SYMBOL_PLATFORM ON}
 
+// TODO: FUTURE: replace with Spring.Utils.IO
 procedure GetFilesInDirectory(Directory: string; const Mask: string; List: TStrings; WithPath, WithSubDirs, WithFileExt, ClearList: Boolean);
 
   procedure ScanDir(const Directory: string);

@@ -9,16 +9,19 @@ uses
   AbArcTyp, AbZipper,
   // DEC
   DECCipher, DECHash, DECFmt,
+  // Spring Framework
+  Spring.Utils, Spring.SystemUtils,
   // OmniThreadLibrary
   OtlParallel, OtlTaskControl,
-  // Spring Framework
-  Spring.Utils,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPManager,
+  // Common
+  uBase,
   // Export
   uDynamicExport,
   // Api
-  uApiServerXMLReader, uApiServerInterface, uApiUpdateConst, uApiUpdateInterface, uApiUpdateModel,
+  uApiServerXMLReader, uApiServerInterface, uApiUpdateConst,
+  uApiUpdateInterface, uApiUpdateInterfaceBase, uApiUpdateModel,
   // Utils
   uFileUtils;
 
@@ -32,9 +35,10 @@ type
   end;
 
   TUpdateManagerLocalFileList = TList<IUpdateManagerSystemFile>;
-  // TUpdateFileVersionList = TList<IFileVersion>;
+
   TUpdateManagerVersionsList = TList<IUpdateManagerVersion>;
   TUpdateManagerSystemsList = TList<IUpdateManagerSystemFileBase>;
+  TUpdateSystemFileBaseList = TList<IUpdateSystemFileBase>;
 
   TLocalUpdateController = class(TUpdateController)
   private
@@ -70,6 +74,8 @@ type
     procedure RequestGetVersions(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
     procedure RequestGetSystems(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
     procedure RequestFTPServer(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
+    procedure RequestVersionAdd(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
+    procedure RequestSystemsAdd(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
   protected
     procedure Request(ARequestID: Double; AUpdateRequest: TUpdateRequest; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
   public
@@ -78,6 +84,9 @@ type
     function GetVersions(out AVersionsList: TUpdateManagerVersionsList; out AErrorMsg: WideString): WordBool;
     function GetSystems(out ASystemsList: TUpdateManagerSystemsList; out AErrorMsg: WideString): WordBool;
     function GetFTPServer(out AFTPServer: IFTPServer; out AErrorMsg: WideString): WordBool;
+
+    function AddVersion(AMajorVersion, AMinorVersion, AMajorBuild, AMinorBuild: Integer; out AVersionID: Integer; out AErrorMsg: WideString): WordBool;
+    function AddSystems(ASystemFileBaseList: TUpdateSystemFileBaseList; out AErrorMsg: WideString): WordBool;
 
     destructor Destroy; override;
   end;
@@ -206,6 +215,7 @@ var
 
   LUpdateManagerSystemFile: IUpdateManagerSystemFile;
   LUpdateManagerLocalFile: IUpdateManagerLocalFile;
+  LUpdateManagerSystemFileBase: IUpdateManagerSystemFileBase;
 
   LLocalFileNotInSystem: Boolean;
   LLocalFileNotFound: Boolean;
@@ -223,7 +233,7 @@ begin
     begin
       LUpdateManagerLocalFile := TIUpdateManagerLocalFile.Create(LFileList.Strings[LFileIndex]);
 
-      LUpdateManagerSystemFile := TIUpdateManagerSystemFile.Create(LUpdateManagerLocalFile);
+      LUpdateManagerSystemFileBase := nil;
 
       // Iterate over list of all system files to find already integrated files.
       LLocalFileNotInSystem := True;
@@ -232,6 +242,8 @@ begin
         with ASystemsList[LSystemFileIndex] do
           if SameText(LUpdateManagerLocalFile.FileName, GetFullFileName(FIntelligeNFileSystem)) then
           begin
+            LUpdateManagerSystemFileBase := ASystemsList[LSystemFileIndex];
+
             LUpdateManagerLocalFile.Online := True;
             LUpdateManagerLocalFile.Status := True;
             LUpdateManagerLocalFile.Condition := ucFound;
@@ -240,6 +252,9 @@ begin
             break;
           end;
       end;
+
+      LUpdateManagerSystemFile := TIUpdateManagerSystemFile.Create(LUpdateManagerLocalFile, LUpdateManagerSystemFileBase);
+
       if (LLocalFileNotInSystem) then
       begin
         GatherBaseLocalFileInformation(LUpdateManagerSystemFile);
@@ -266,7 +281,7 @@ begin
 
     if not LLocalFileNotFound then
     begin
-      LUpdateManagerSystemFile := TIUpdateManagerSystemFile.Create(nil);
+      LUpdateManagerSystemFile := TIUpdateManagerSystemFile.Create(nil, nil);
 
       with LUpdateManagerSystemFile do
       begin
@@ -307,7 +322,7 @@ begin
   oResponse := LVersionsResponse;
 end;
 
-procedure TLocalUploadController.RequestGetSystems(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
+procedure TLocalUploadController.RequestGetSystems;
 var
   LSystemsResponse: ISystemsResponse;
 begin
@@ -361,6 +376,36 @@ begin
     oErrorMsg := '';
   end;
   oResponse := LFTPServerResponse;
+end;
+
+procedure TLocalUploadController.RequestVersionAdd;
+var
+  LVersionAddResponse: IVersionAddResponse;
+begin
+  OutputDebugString(PChar(HTTPResult.SourceCode));
+
+  LVersionAddResponse := TServerXMLReader.ReadVersionAdd(HTTPResult.SourceCode);
+
+  if LVersionAddResponse.HasError then
+    oErrorMsg := LVersionAddResponse.Msg
+  else
+    oErrorMsg := '';
+  oResponse := LVersionAddResponse;
+end;
+
+procedure TLocalUploadController.RequestSystemsAdd(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
+var
+  LBasicServerResponse: IBasicServerResponse;
+begin
+  OutputDebugString(PChar(HTTPResult.SourceCode));
+
+  LBasicServerResponse := TServerXMLReader.ReadSystemsAdd(HTTPResult.SourceCode);
+
+  if LBasicServerResponse.HasError then
+    oErrorMsg := LBasicServerResponse.Msg
+  else
+    oErrorMsg := '';
+  oResponse := LBasicServerResponse;
 end;
 
 procedure TLocalUploadController.Request;
@@ -436,6 +481,65 @@ begin
     AFTPServer := LFTPServerResponse.Server;
 
   Result := Assigned(LFTPServerResponse) and TryStrToInt(LFTPServerResponse.Server.Port, buf);
+end;
+
+function TLocalUploadController.AddVersion(AMajorVersion, AMinorVersion, AMajorBuild, AMinorBuild: Integer; out AVersionID: Integer; out AErrorMsg: WideString): WordBool;
+var
+  LHTTPParams: IHTTPParams;
+
+  LBasicServerResponse: IBasicServerResponse;
+  LVersionAddResponse: IVersionAddResponse;
+begin
+  AVersionID := 0;
+
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
+  begin
+    AddFormField('major_version', IntToStr(AMajorVersion));
+    AddFormField('minor_version', IntToStr(AMinorVersion));
+    AddFormField('major_build', IntToStr(AMajorBuild));
+    AddFormField('minor_build', IntToStr(AMinorBuild));
+  end;
+
+  Request(THTTPManager.Instance().Post(THTTPRequest.Create(FServer.Name + 'p.php?action=upload_v2&upload=add_version_v2&access_token=' + HTTPEncode(FServer.AccessToken)), LHTTPParams), { }
+    RequestVersionAdd, { }
+    LBasicServerResponse, { }
+    AErrorMsg);
+
+  if Assigned(LBasicServerResponse) and (LBasicServerResponse.QueryInterface(IVersionAddResponse, LVersionAddResponse) = 0) then
+    AVersionID := LVersionAddResponse.VersionID;
+
+  Result := Assigned(LBasicServerResponse) and (AVersionID > 0);
+end;
+
+function TLocalUploadController.AddSystems(ASystemFileBaseList: TUpdateSystemFileBaseList; out AErrorMsg: WideString): WordBool;
+var
+  LHTTPParams: IHTTPParams;
+  LSystemFileBaseIndex: Integer;
+
+  LFileVersion: IFileVersion;
+
+  LBasicServerResponse: IBasicServerResponse;
+  LVersionsResponse: IVersionsResponse;
+begin
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
+  begin
+    for LSystemFileBaseIndex := 0 to ASystemFileBaseList.Count - 1 do
+      with ASystemFileBaseList[LSystemFileBaseIndex] do
+      begin
+        AddFormField('systems[' + IntToStr(LSystemFileBaseIndex) + '][name]', FileName);
+        AddFormField('systems[' + IntToStr(LSystemFileBaseIndex) + '][filesystem_id]', TEnum.GetName<TFileSystem>(FileSystem));
+        AddFormField('systems[' + IntToStr(LSystemFileBaseIndex) + '][path_appendix]', FilePathAppendix);
+      end;
+  end;
+
+  Request(THTTPManager.Instance().Post(THTTPRequest.Create(FServer.Name + 'p.php?action=upload_v2&upload=add_systems_v2&access_token=' + HTTPEncode(FServer.AccessToken)), LHTTPParams), { }
+    RequestSystemsAdd, { }
+    LBasicServerResponse, { }
+    AErrorMsg);
+
+  Result := Assigned(LBasicServerResponse);
 end;
 
 destructor TLocalUploadController.Destroy;

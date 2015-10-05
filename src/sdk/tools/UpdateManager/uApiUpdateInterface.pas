@@ -18,24 +18,6 @@ type
     property Status: WordBool read GetStatus write SetStatus;
   end;
 
-  (*
-    IUpdateLocalFile = interface(IUpdateFile)
-    function GetStatus: WordBool;
-    procedure SetStatus(AStatus: WordBool);
-    function GetCondition: TUpdateCondition;
-    procedure SetCondition(ACondition: TUpdateCondition);
-    function GetAction: TUpdateAction;
-    procedure SetAction(AAction: TUpdateAction);
-    function GetActions: TUpdateActions;
-    procedure SetActions(AActions: TUpdateActions);
-
-    property Status: WordBool read GetStatus write SetStatus;
-    property Condition: TUpdateCondition read GetCondition write SetCondition;
-    property Action: TUpdateAction read GetAction write SetAction;
-    property Actions: TUpdateActions read GetActions write SetActions;
-    end;
-    *)
-
   IUpdateManagerVersion = interface(IFileVersion)
     ['{DDAF7DDA-822F-4EAC-98C5-0E64F35AAD93}']
     function GetID: Integer;
@@ -81,10 +63,13 @@ type
     ['{4666FFA3-9D57-45B5-A15F-D29C36103ABB}']
     function GetID: Integer;
     procedure SetID(AID: Integer);
+    function GetFileBase: IUpdateManagerSystemFileBase;
+    procedure SetFileBase(const AFileBase: IUpdateManagerSystemFileBase);
     function GetLocalFile: IUpdateManagerLocalFile;
-    procedure SetLocalFile(ALocalFile: IUpdateManagerLocalFile);
+    procedure SetLocalFile(const ALocalFile: IUpdateManagerLocalFile);
 
     property ID: Integer read GetID write SetID;
+    property FileBase: IUpdateManagerSystemFileBase read GetFileBase write SetFileBase;
     property LocalFile: IUpdateManagerLocalFile read GetLocalFile write SetLocalFile;
   end;
 

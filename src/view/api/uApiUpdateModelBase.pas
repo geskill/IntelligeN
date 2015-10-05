@@ -74,8 +74,8 @@ type
     FFileSizeCompressed: Integer;
     FFileChecksum: WideString;
   protected
-    function GetFileBase: IUpdateSystemFileBase;
-    procedure SetFileBase(AFileBase: IUpdateSystemFileBase);
+    function GetFileBase: IUpdateSystemFileBase; virtual;
+    procedure SetFileBase(AFileBase: IUpdateSystemFileBase); virtual;
 
     function GetFileVersion: IFileVersion;
     procedure SetFileVersion(AFileVersion: IFileVersion);

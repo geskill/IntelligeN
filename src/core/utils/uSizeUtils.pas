@@ -3,6 +3,7 @@ unit uSizeUtils;
 interface
 
 uses
+  // Delphi
   Windows, SysUtils;
 
 type

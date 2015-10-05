@@ -69,6 +69,16 @@ type
     destructor Destroy; override;
   end;
 
+  TIVersionAddResponse = class(TIBasicServerResponse, IVersionAddResponse)
+  private
+    FVersionID: Integer;
+  protected
+    function GetVersionID: Integer;
+    procedure SetVersionID(AVersionID: Integer);
+  public
+    property VersionID: Integer read GetVersionID write SetVersionID;
+  end;
+
 implementation
 
 { TIBasicServerResponse }
@@ -128,7 +138,7 @@ end;
 
 destructor TIVersionsResponse.Destroy;
 begin
-  FList := nil; //.Free;
+  FList := nil; // .Free;
   inherited Destroy;
 end;
 
@@ -147,7 +157,7 @@ end;
 
 destructor TISystemsResponse.Destroy;
 begin
-  FList := nil; //.Free;
+  FList := nil; // .Free;
   inherited Destroy;
 end;
 
@@ -168,6 +178,18 @@ destructor TIFTPServerResponse.Destroy;
 begin
   FFTPServer := nil;
   inherited Destroy;
+end;
+
+{ TIVersionAddResponse }
+
+function TIVersionAddResponse.GetVersionID: Integer;
+begin
+  Result := FVersionID;
+end;
+
+procedure TIVersionAddResponse.SetVersionID(AVersionID: Integer);
+begin
+  FVersionID := AVersionID;
 end;
 
 end.

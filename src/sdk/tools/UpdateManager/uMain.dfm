@@ -1,7 +1,7 @@
 object fMain: TfMain
   Left = 0
   Top = 0
-  ActiveControl = JvWizardInteriorPageUploadFiles
+  ActiveControl = rbAddNewVersion
   Caption = 'Update Manager'
   ClientHeight = 338
   ClientWidth = 635
@@ -21,7 +21,7 @@ object fMain: TfMain
     Top = 0
     Width = 635
     Height = 338
-    ActivePage = JvWizardInteriorPageUploadFiles
+    ActivePage = JvWizardInteriorPageUpdateVersion
     ButtonBarHeight = 42
     ButtonStart.Caption = 'To &Start Page'
     ButtonStart.NumGlyphs = 1
@@ -360,8 +360,6 @@ object fMain: TfMain
         BevelInner = bvNone
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitTop = 72
-        ExplicitHeight = 206
         object cxGLocalFilesTableView: TcxGridTableView
           Navigator.Buttons.CustomButtons = <>
           DataController.Summary.DefaultGroupSummaryItems = <>
@@ -443,6 +441,7 @@ object fMain: TfMain
       Header.Subtitle.Font.Name = 'Tahoma'
       Header.Subtitle.Font.Style = []
       OnPage = JvWizardInteriorPageUpdateFilesPage
+      OnNextButtonClick = JvWizardInteriorPageUpdateFilesNextButtonClick
       object cxGUpdateFiles: TcxGrid
         AlignWithMargins = True
         Left = 3
@@ -569,13 +568,14 @@ object fMain: TfMain
         Enabled = False
         ItemHeight = 13
         TabOrder = 6
-        OnClick = lbSelectServerClick
+        OnClick = lbSelectVersionClick
       end
       object cxSEMajorVersion: TcxSpinEdit
         Left = 64
         Top = 111
         Properties.AssignedValues.MinValue = True
         Properties.ValueType = vtInt
+        Properties.OnChange = cxSEMajorVersionPropertiesChange
         TabOrder = 1
         Value = 2
         Width = 41
@@ -585,6 +585,7 @@ object fMain: TfMain
         Top = 111
         Properties.AssignedValues.MinValue = True
         Properties.ValueType = vtInt
+        Properties.OnChange = cxSEMinorVersionPropertiesChange
         TabOrder = 2
         Value = 129
         Width = 41
@@ -594,6 +595,7 @@ object fMain: TfMain
         Top = 111
         Properties.AssignedValues.MinValue = True
         Properties.ValueType = vtInt
+        Properties.OnChange = cxSEMajorBuildPropertiesChange
         TabOrder = 3
         Width = 41
       end
@@ -628,6 +630,9 @@ object fMain: TfMain
       Header.Subtitle.Font.Style = []
       EnabledButtons = [bkStart, bkLast, bkFinish, bkCancel, bkHelp]
       OnPage = JvWizardInteriorPageUploadFilesPage
+      DesignSize = (
+        490
+        296)
       object JvLEDAddVersion: TJvLED
         Left = 24
         Top = 88
@@ -680,12 +685,33 @@ object fMain: TfMain
         Height = 13
         Caption = 'Uploading local files ...'
       end
+      object lUploadInfoError: TLabel
+        Left = 24
+        Top = 264
+        Width = 28
+        Height = 13
+        Anchors = [akLeft, akBottom]
+        Caption = 'Error:'
+        Visible = False
+      end
       object pbUploadProgress: TProgressBar
         Left = 47
         Top = 207
         Width = 242
         Height = 17
         TabOrder = 0
+        Visible = False
+      end
+      object eUploadInfoError: TEdit
+        Left = 58
+        Top = 264
+        Width = 255
+        Height = 13
+        Anchors = [akLeft, akBottom]
+        BorderStyle = bsNone
+        Color = clBtnFace
+        ReadOnly = True
+        TabOrder = 1
         Visible = False
       end
     end

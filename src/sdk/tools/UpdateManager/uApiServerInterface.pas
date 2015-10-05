@@ -46,6 +46,14 @@ type
     property Server: IFTPServer read GetFTPServer;
   end;
 
+  IVersionAddResponse = interface(IBasicServerResponse)
+    ['{EDDB207A-6EF0-4B54-B33E-B1A7BA6B446B}']
+    function GetVersionID: Integer;
+    procedure SetVersionID(AVersionID: Integer);
+
+    property VersionID: Integer read GetVersionID write SetVersionID;
+  end;
+
 implementation
 
 end.

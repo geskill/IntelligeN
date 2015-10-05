@@ -2914,7 +2914,7 @@ begin
         end;
       end;
 
-      SetCMSCheckAllStatus; // TODO: Verify OnDataChanged
+      SetCMSCheckAllStatus;
     end;
 
   // Main.fPublish.GenerateColumns;

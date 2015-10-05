@@ -60,7 +60,7 @@ type
     function GetActions: TUpdateActions;
     procedure SetActions(AActions: TUpdateActions);
   public
-    constructor Create(AFileName: WideString);
+    constructor Create(AFileName: WideString); reintroduce;
 
     property Online: WordBool read GetOnline write SetOnline;
     property Status: WordBool read GetStatus write SetStatus;
@@ -72,16 +72,20 @@ type
   TIUpdateManagerSystemFile = class(TIUpdateSystemFile, IUpdateManagerSystemFile)
   private
     FID: Integer;
+    FFileBase: IUpdateManagerSystemFileBase;
     FLocalFile: IUpdateManagerLocalFile;
   protected
     function GetID: Integer;
     procedure SetID(AID: Integer);
+    function GetFileBase: IUpdateManagerSystemFileBase; reintroduce; overload;
+    procedure SetFileBase(const AFileBase: IUpdateManagerSystemFileBase); reintroduce; overload;
     function GetLocalFile: IUpdateManagerLocalFile;
-    procedure SetLocalFile(ALocalFile: IUpdateManagerLocalFile);
+    procedure SetLocalFile(const ALocalFile: IUpdateManagerLocalFile);
   public
-    constructor Create(const ALocalFile: IUpdateManagerLocalFile);
+    constructor Create(const ALocalFile: IUpdateManagerLocalFile; const AFileBase: IUpdateManagerSystemFileBase);
 
     property ID: Integer read GetID write SetID;
+    property FileBase: IUpdateManagerSystemFileBase read GetFileBase write SetFileBase;
     property LocalFile: IUpdateManagerLocalFile read GetLocalFile write SetLocalFile;
 
     destructor Destroy;
@@ -236,12 +240,22 @@ begin
   FID := AID;
 end;
 
+function TIUpdateManagerSystemFile.GetFileBase: IUpdateManagerSystemFileBase;
+begin
+  Result := FFileBase;
+end;
+
+procedure TIUpdateManagerSystemFile.SetFileBase(const AFileBase: IUpdateManagerSystemFileBase);
+begin
+  FFileBase := AFileBase;
+end;
+
 function TIUpdateManagerSystemFile.GetLocalFile: IUpdateManagerLocalFile;
 begin
   Result := FLocalFile;
 end;
 
-procedure TIUpdateManagerSystemFile.SetLocalFile(ALocalFile: IUpdateManagerLocalFile);
+procedure TIUpdateManagerSystemFile.SetLocalFile(const ALocalFile: IUpdateManagerLocalFile);
 begin
   FLocalFile := ALocalFile;
 end;
@@ -251,7 +265,7 @@ begin
   if not Assigned(ALocalFile) then
   begin
     inherited Create('');
-    FLocalFile := TIUpdateManagerLocalFile.Create('')
+    FLocalFile := TIUpdateManagerLocalFile.Create('');
   end
   else
   begin
@@ -259,10 +273,15 @@ begin
     FLocalFile := ALocalFile;
   end;
   FID := 0;
+  if not Assigned(AFileBase) then
+    FFileBase := TIUpdateManagerSystemFileBase.Create
+  else
+    FFileBase := AFileBase;
 end;
 
 destructor TIUpdateManagerSystemFile.Destroy;
 begin
+  FFileBase := nil;
   FLocalFile := nil;
   inherited Destroy;
 end;
