@@ -496,25 +496,39 @@ procedure TSettings.cxCBCMSAllPropertiesChange(Sender: TObject);
 
   procedure SetStatus(AStatus: Boolean);
   var
-    I: Integer;
-    CMSWebsitesCollectionItem: TCMSWebsitesCollectionItem;
+    LFileIndex: Integer;
+    LCMSWebsitesCollectionItem: TCMSWebsitesCollectionItem;
   begin
     with cxGCMSTableView1.DataController do
-      for I := 0 to RecordCount - 1 do
+    begin
+      OnDataChanged := nil;
+
+      BeginUpdate;
+      try
+      for LFileIndex := 0 to RecordCount - 1 do
       begin
         with TCMSCollectionItem(SettingsManager.Settings.Plugins.CMS.Items[FCMSPluginsCheckListBox.InnerCheckListBox.ItemIndex]) do
         begin
-          CMSWebsitesCollectionItem := FindCMSWebsite(Values[I, cxGCMSTableView1Column2.index]);
+          LCMSWebsitesCollectionItem := FindCMSWebsite(Values[LFileIndex, cxGCMSTableView1Column2.index]);
 
-          if not(CMSWebsitesCollectionItem.Enabled = AStatus) then
+          if not(LCMSWebsitesCollectionItem.Enabled = AStatus) then
           begin
-            CMSWebsitesCollectionItem.Enabled := AStatus;
-            Values[I, cxGCMSTableView1Column1.index] := AStatus;
+            Values[LFileIndex, cxGCMSTableView1Column1.index] := AStatus;
+
+            // Do here everything EXCEPT "SetCMSCheckAllStatus" from "cxGCMSTableView1DataControllerDataChanged"
+            LCMSWebsitesCollectionItem.Enabled := AStatus;
+
             if Assigned(OnWebsitesChange) then
-              OnWebsitesChange.Invoke(cctEnabled, CMSWebsitesCollectionItem.Index, IfThen(AStatus, 1));
+              OnWebsitesChange.Invoke(cctEnabled, LCMSWebsitesCollectionItem.Index, IfThen(AStatus, 1));
           end;
         end;
       end;
+      finally
+        EndUpdate;
+      end;
+
+      OnDataChanged := cxGCMSTableView1DataControllerDataChanged;
+    end;
   end;
 
 begin
@@ -2568,50 +2582,53 @@ end;
 
 function TSettings.GetCMSCheckAllStatus;
 var
-  I: Integer;
-  _Status: Byte;
+  LRecordCount: Integer;
+  LStatus: Byte; // 0 = Unchecked, 1 = Checked, 3 = Grayed, 255 = Undefined
 begin
-  _Status := 255;
+  LStatus := 255;
 
   with cxGCMSTableView1.DataController do
-    for I := 0 to RecordCount - 1 do
+    for LRecordCount := 0 to RecordCount - 1 do
     begin
-      case Values[I, cxGCMSTableView1Column1.index] of
+      case Values[LRecordCount, cxGCMSTableView1Column1.index] of
         0:
-          if (_Status = 255) or (_Status = 0) then
-            _Status := 0
+          if (LStatus = 255) or (LStatus = 0) then
+            LStatus := 0
           else
-            _Status := 2;
+            LStatus := 2;
       else
-        if (_Status = 255) or (_Status = 1) then
-          _Status := 1
+        if (LStatus = 255) or (LStatus = 1) then
+          LStatus := 1
         else
-          _Status := 2;
+          LStatus := 2;
       end;
     end;
-  if _Status = 255 then
-    _Status := 2;
+  if (LStatus = 255) then
+    LStatus := 2;
 
-  Result := _Status;
+  Result := LStatus;
 end;
 
 procedure TSettings.SetCMSCheckAllStatus;
 var
-  Event: TNotifyEvent;
+  LEvent: TNotifyEvent;
 begin
-  Event := cxCBCMSAll.Properties.OnChange;
-  cxCBCMSAll.Properties.OnChange := nil;
+  with cxCBCMSAll do
+  begin
+    LEvent := Properties.OnChange;
+    Properties.OnChange := nil;
 
-  case GetCMSCheckAllStatus of
-    0:
-      cxCBCMSAll.State := cbsUnchecked;
-    1:
-      cxCBCMSAll.State := cbsChecked;
-  else
-    cxCBCMSAll.State := cbsGrayed;
+    case GetCMSCheckAllStatus of
+      0:
+        State := cbsUnchecked;
+      1:
+        State := cbsChecked;
+    else
+      State := cbsGrayed;
+    end;
+
+    Properties.OnChange := LEvent;
   end;
-
-  cxCBCMSAll.Properties.OnChange := Event;
 end;
 
 procedure TSettings.SetComponentStatusFromSettings;
@@ -2896,14 +2913,8 @@ begin
           EndUpdate;
         end;
       end;
-      case GetCMSCheckAllStatus of
-        0:
-          cxCBCMSAll.State := cbsUnchecked;
-        1:
-          cxCBCMSAll.State := cbsChecked;
-      else
-        cxCBCMSAll.State := cbsGrayed;
-      end;
+
+      SetCMSCheckAllStatus; // TODO: Verify OnDataChanged
     end;
 
   // Main.fPublish.GenerateColumns;

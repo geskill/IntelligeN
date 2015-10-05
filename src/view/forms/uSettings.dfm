@@ -385,7 +385,7 @@ object Settings: TSettings
             object cxCBCMSAll: TcxCheckBox
               Left = 0
               Top = 0
-              Caption = 'enable / disable all'
+              Caption = 'enable/disable all'
               Properties.ValueChecked = 1
               Properties.ValueGrayed = 2
               Properties.ValueUnchecked = 0
