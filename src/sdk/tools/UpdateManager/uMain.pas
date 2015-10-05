@@ -5,12 +5,13 @@ interface
 uses
   // Delphi
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Buttons, StdCtrls, TypInfo, Generics.Collections,
+  ShellAPI,
   // JEDI VCL
   JvWizard, JvWizardRouteMapNodes, JvExControls, JvLED,
   // DevExpress
   cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit,
   cxNavigator, cxCheckBox, cxLabel, cxTextEdit, cxDropDownEdit, cxBlobEdit, cxGridCustomTableView, cxGridTableView, cxGridCustomView,
-  cxClasses, cxGridLevel, cxGrid, cxMemo,
+  cxClasses, cxGridLevel, cxGrid, cxMemo, cxContainer, cxMaskEdit, cxSpinEdit,
   // Export
   uDynamicExport,
   // Api
@@ -29,15 +30,15 @@ type
     sbSelectRootDir: TSpeedButton;
     rbSelectExisting: TRadioButton;
     lbSelectPath: TListBox;
-    cxGFiles: TcxGrid;
-    cxGFilesLevel: TcxGridLevel;
-    cxGFilesTableView: TcxGridTableView;
-    cxGFilesTableViewColumn1: TcxGridColumn;
-    cxGFilesTableViewColumn2: TcxGridColumn;
-    cxGFilesTableViewColumn3: TcxGridColumn;
-    cxGFilesTableViewColumn4: TcxGridColumn;
-    cxGFilesTableViewColumn5: TcxGridColumn;
-    cxGFilesTableViewColumn6: TcxGridColumn;
+    cxGLocalFiles: TcxGrid;
+    cxGLocalFilesLevel: TcxGridLevel;
+    cxGLocalFilesTableView: TcxGridTableView;
+    cxGLocalFilesTableViewColumn1: TcxGridColumn;
+    cxGLocalFilesTableViewColumn2: TcxGridColumn;
+    cxGLocalFilesTableViewColumn3: TcxGridColumn;
+    cxGLocalFilesTableViewColumn4: TcxGridColumn;
+    cxGLocalFilesTableViewColumn5: TcxGridColumn;
+    cxGLocalFilesTableViewColumn6: TcxGridColumn;
     lFileSystem: TLabel;
     JvWizardInteriorPageServer: TJvWizardInteriorPage;
     JvWizardInteriorPagePublish: TJvWizardInteriorPage;
@@ -59,6 +60,25 @@ type
     JvWizardInteriorPageUpdateFiles: TJvWizardInteriorPage;
     lServerInfoError: TLabel;
     eServerInfoError: TEdit;
+    cxGUpdateFiles: TcxGrid;
+    cxGUpdateFilesTableView: TcxGridTableView;
+    cxGUpdateFilesTableViewColumn1: TcxGridColumn;
+    cxGUpdateFilesTableViewColumn2: TcxGridColumn;
+    cxGUpdateFilesTableViewColumn3: TcxGridColumn;
+    cxGUpdateFilesTableViewColumn4: TcxGridColumn;
+    cxGUpdateFilesTableViewColumn5: TcxGridColumn;
+    cxGUpdateFilesTableViewColumn6: TcxGridColumn;
+    cxGUpdateFilesLevel: TcxGridLevel;
+    JvWizardInteriorPageUpdateVersion: TJvWizardInteriorPage;
+    JvWizardInteriorPageUploadFiles: TJvWizardInteriorPage;
+    rbAddNewVersion: TRadioButton;
+    rbSelectExistingVersion: TRadioButton;
+    lbSelectVersion: TListBox;
+    cxSEMajorVersion: TcxSpinEdit;
+    cxSEMinorVersion: TcxSpinEdit;
+    cxSEMajorBuild: TcxSpinEdit;
+    cxSEMinorBuild: TcxSpinEdit;
+    lPreRelease: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure JvWizardCancelButtonClick(Sender: TObject);
@@ -81,12 +101,22 @@ type
     procedure JvWizardInteriorPageLocalFilesExitPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
     procedure JvWizardInteriorPageLocalFilesPage(Sender: TObject);
     procedure JvWizardInteriorPageLocalFilesNextButtonClick(Sender: TObject; var Stop: Boolean);
-    procedure cxGFilesTableViewColumn2CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
-    procedure cxGFilesTableViewColumn5GetPropertiesForEdit(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AProperties: TcxCustomEditProperties);
-    procedure cxGFilesTableViewDataControllerDataChanged(Sender: TObject);
+    procedure cxGLocalFilesTableViewColumn2CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
+    procedure cxGLocalFilesTableViewColumn5GetPropertiesForEdit(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AProperties: TcxCustomEditProperties);
+    procedure cxGLocalFilesTableViewDataControllerDataChanged(Sender: TObject);
+    procedure lFileSystemClick(Sender: TObject);
     { *************************************** STEP - 5 *************************************** }
     procedure JvWizardInteriorPageUpdateFilesPage(Sender: TObject);
 
+    { *************************************** STEP - 6 *************************************** }
+    procedure JvWizardInteriorPageUpdateVersionPage(Sender: TObject);
+    procedure rbSelectVersion(Sender: TObject);
+    procedure cxSEMinorBuildPropertiesChange(Sender: TObject);
+    { *************************************** STEP - 6 *************************************** }
+
+    procedure JvWizardInteriorPageUploadFilesPage(Sender: TObject);
+
+    { *************************************** STEP - 7 *************************************** }
   private
   var
     FActiveUpdateFileCollectionItem: TUpdateFileSystemCollectionItem;
@@ -105,7 +135,7 @@ type
     procedure CheckCanContinueToServer;
     procedure CheckCanContinueToServerInfo;
     procedure CheckCanContinueToUpdateFiles;
-
+    procedure CheckCanContinueToUploadFiles;
   protected
     function LoadServerInfos: Boolean;
     function LoadLocalFilesList: Boolean;
@@ -126,7 +156,7 @@ implementation
 
 procedure TfMain.FormCreate(Sender: TObject);
 begin
-  cxGFilesTableView.DataController.OnDataChanged := nil;
+  cxGLocalFilesTableView.DataController.OnDataChanged := nil;
   LoadSettings;
 end;
 
@@ -261,7 +291,7 @@ end;
 
 procedure TfMain.JvWizardInteriorPageLocalFilesExitPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
 begin
-  cxGFilesTableView.DataController.OnDataChanged := nil;
+  cxGLocalFilesTableView.DataController.OnDataChanged := nil;
 end;
 
 procedure TfMain.JvWizardInteriorPageLocalFilesPage(Sender: TObject);
@@ -270,8 +300,8 @@ var
 begin
   LCanContinue := LoadLocalFilesList;
   lFileSystem.Caption := ExtractFilePath(FActiveUpdateFileCollectionItem.LibraryFile);
-  cxGFilesTableView.DataController.OnDataChanged := cxGFilesTableViewDataControllerDataChanged;
-  CanContinue(LCanContinue, JvWizardInteriorPageServerInfo);
+  cxGLocalFilesTableView.DataController.OnDataChanged := cxGLocalFilesTableViewDataControllerDataChanged;
+  CanContinue(LCanContinue, JvWizardInteriorPageLocalFiles);
 end;
 
 procedure TfMain.JvWizardInteriorPageLocalFilesNextButtonClick(Sender: TObject; var Stop: Boolean);
@@ -279,14 +309,14 @@ var
   LFileIndex: Integer;
 begin
   for LFileIndex := 0 to FActiveLocalFiles.Count - 1 do
-    with cxGFilesTableView.DataController, FActiveLocalFiles[LFileIndex].LocalFile do
+    with cxGLocalFilesTableView.DataController, FActiveLocalFiles[LFileIndex].LocalFile do
     begin
-      Status := Values[LFileIndex, cxGFilesTableViewColumn1.Index];
+      Status := Values[LFileIndex, cxGLocalFilesTableViewColumn1.Index];
       // Action := TUpdateAction(GetEnumValue(TypeInfo(TUpdateAction), Values[LFileIndex, cxGFilesTableViewColumn5.Index]));
     end;
 end;
 
-procedure TfMain.cxGFilesTableViewColumn2CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
+procedure TfMain.cxGLocalFilesTableViewColumn2CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
 var
   V: Variant;
 begin
@@ -307,21 +337,62 @@ begin
   end;
 end;
 
-procedure TfMain.cxGFilesTableViewColumn5GetPropertiesForEdit(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AProperties: TcxCustomEditProperties);
+procedure TfMain.cxGLocalFilesTableViewColumn5GetPropertiesForEdit(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AProperties: TcxCustomEditProperties);
 begin
-  TcxCustomComboBoxProperties(AProperties).Items.Text := ARecord.Values[cxGFilesTableViewColumn6.Index];
+  TcxCustomComboBoxProperties(AProperties).Items.Text := ARecord.Values[cxGLocalFilesTableViewColumn6.Index];
 end;
 
-procedure TfMain.cxGFilesTableViewDataControllerDataChanged(Sender: TObject);
+procedure TfMain.cxGLocalFilesTableViewDataControllerDataChanged(Sender: TObject);
 begin
   CheckCanContinueToUpdateFiles;
+end;
+
+procedure TfMain.lFileSystemClick(Sender: TObject);
+begin
+  ShellExecute(Handle, 'open', PChar(lFileSystem.Caption), nil, nil, SW_SHOW);
 end;
 
 { *************************************** STEP - 5 *************************************** }
 
 procedure TfMain.JvWizardInteriorPageUpdateFilesPage(Sender: TObject);
 begin
+  LoadUpdateFilesList;
+end;
 
+{ *************************************** STEP - 6 *************************************** }
+
+procedure TfMain.JvWizardInteriorPageUpdateVersionPage(Sender: TObject);
+var
+  LVersionIndex: Integer;
+begin
+  for LVersionIndex := 0 to FActiveVersionsList.Count - 1 do
+    lbSelectVersion.Items.Add(FActiveVersionsList[LVersionIndex].ToString);
+
+  CheckCanContinueToUploadFiles;
+end;
+
+procedure TfMain.rbSelectVersion(Sender: TObject);
+begin
+  cxSEMajorVersion.Enabled := rbAddNewVersion.Checked;
+  cxSEMinorVersion.Enabled := rbAddNewVersion.Checked;
+  cxSEMajorBuild.Enabled := rbAddNewVersion.Checked;
+  cxSEMinorBuild.Enabled := rbAddNewVersion.Checked;
+
+  lbSelectVersion.Enabled := rbSelectExistingVersion.Checked;
+
+  CheckCanContinueToUploadFiles;
+end;
+
+procedure TfMain.cxSEMinorBuildPropertiesChange(Sender: TObject);
+begin
+  lPreRelease.Visible := not(cxSEMinorBuild.Value = 0);
+end;
+
+{ *************************************** STEP - 6 *************************************** }
+
+procedure TfMain.JvWizardInteriorPageUploadFilesPage(Sender: TObject);
+begin
+  //
 end;
 
 { ****************************************************************************** }
@@ -373,16 +444,32 @@ var
   LCanContinue: Boolean;
 begin
   LCanContinue := False;
-  with cxGFilesTableView.DataController do
+  with cxGLocalFilesTableView.DataController do
     for LFileIndex := 0 to RecordCount - 1 do
     begin
-      if Values[LFileIndex, cxGFilesTableViewColumn1.Index] then
+      if Values[LFileIndex, cxGLocalFilesTableViewColumn1.Index] then
       begin
         LCanContinue := True;
         break;
       end;
     end;
   CanContinue(LCanContinue, JvWizardInteriorPageLocalFiles);
+end;
+
+procedure TfMain.CheckCanContinueToUploadFiles;
+
+  function FileVersionToStr(MajorVersion, MinorVersion, MajorBuild, MinorBuild: Integer): string;
+  begin
+    Result := IntToStr(MajorVersion) + '.' + IntToStr(MinorVersion) + '.' + IntToStr(MajorBuild) + '.' + IntToStr(MinorBuild);
+  end;
+
+begin
+  if rbAddNewVersion.Checked then
+  begin
+    CanContinue((lbSelectServer.Items.IndexOf(FileVersionToStr(cxSEMajorVersion.Value, cxSEMinorVersion.Value, cxSEMajorBuild.Value, cxSEMinorBuild.Value)) = -1), JvWizardInteriorPageUpdateVersion)
+  end
+  else if rbSelectExistingVersion.Checked then
+    CanContinue((lbSelectVersion.ItemIndex <> -1), JvWizardInteriorPageUpdateVersion);
 end;
 
 { ****************************************************************************** }
@@ -476,7 +563,7 @@ begin
     LLocalUploadController.Free;
   end;
 
-  result := LStatus;
+  Result := LStatus;
 end;
 
 function TfMain.LoadLocalFilesList: Boolean;
@@ -485,7 +572,7 @@ function TfMain.LoadLocalFilesList: Boolean;
   begin
     with SplittString(',', SetToString(TypeInfo(TUpdateActions), AUpdateActions, False)) do
       try
-        result := Text;
+        Result := Text;
       finally
         Free;
       end;
@@ -509,7 +596,7 @@ begin
     LLocalUpdateController.Free;
   end;
 
-  with cxGFilesTableView.DataController do
+  with cxGLocalFilesTableView.DataController do
   begin
     RecordCount := 0;
 
@@ -520,17 +607,21 @@ begin
       for LFileIndex := 0 to RecordCount - 1 do
         with FActiveLocalFiles[LFileIndex] do
         begin
-          Values[LFileIndex, cxGFilesTableViewColumn1.Index] := LocalFile.Online;
-          Values[LFileIndex, cxGFilesTableViewColumn2.Index] := GetEnumName(TypeInfo(TUpdateCondition), Integer(LocalFile.Condition));
-          Values[LFileIndex, cxGFilesTableViewColumn3.Index] := ExtractRelativePath(ExtractFilePath(FActiveUpdateFileCollectionItem.LibraryFile), LocalFile.FileName);
-          Values[LFileIndex, cxGFilesTableViewColumn4.Index] := FileVersion.ToString;
-          // Values[LFileIndex, cxGFilesTableViewColumn5.Index] := GetEnumName(TypeInfo(TUpdateAction), Integer(LocalFile.Action));
-          // Values[LFileIndex, cxGFilesTableViewColumn6.Index] := ActionsToStr(LocalFile.Actions);
+          Values[LFileIndex, cxGLocalFilesTableViewColumn1.Index] := LocalFile.Status;
+          if LocalFile.Status then
+            LStatus := True;
+          Values[LFileIndex, cxGLocalFilesTableViewColumn2.Index] := GetEnumName(TypeInfo(TUpdateCondition), Integer(LocalFile.Condition));
+          Values[LFileIndex, cxGLocalFilesTableViewColumn3.Index] := ExtractRelativePath(ExtractFilePath(FActiveUpdateFileCollectionItem.LibraryFile), LocalFile.FileName);
+          Values[LFileIndex, cxGLocalFilesTableViewColumn4.Index] := FileVersion.ToString;
+          // Values[LFileIndex, cxGLocalFilesTableViewColumn5.Index] := GetEnumName(TypeInfo(TUpdateAction), Integer(LocalFile.Action));
+          // Values[LFileIndex, cxGLocalFilesTableViewColumn6.Index] := ActionsToStr(LocalFile.Actions);
         end;
     finally
       EndUpdate;
     end;
   end;
+
+  Result := LStatus;
 end;
 
 function TfMain.LoadUpdateFilesList: Boolean;

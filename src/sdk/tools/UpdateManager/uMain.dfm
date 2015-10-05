@@ -1,7 +1,7 @@
 object fMain: TfMain
   Left = 0
   Top = 0
-  ActiveControl = JvWizardInteriorPageUpdateFiles
+  ActiveControl = rbAddNewVersion
   Caption = 'Update Manager'
   ClientHeight = 338
   ClientWidth = 635
@@ -21,7 +21,7 @@ object fMain: TfMain
     Top = 0
     Width = 635
     Height = 338
-    ActivePage = JvWizardInteriorPageUpdateFiles
+    ActivePage = JvWizardInteriorPageUpdateVersion
     ButtonBarHeight = 42
     ButtonStart.Caption = 'To &Start Page'
     ButtonStart.NumGlyphs = 1
@@ -104,7 +104,9 @@ object fMain: TfMain
         Width = 145
         Height = 17
         Caption = 'Add new FileSystem'
+        Checked = True
         TabOrder = 0
+        TabStop = True
         OnClick = rbSelectFileSystem
       end
       object rbSelectExisting: TRadioButton
@@ -114,6 +116,7 @@ object fMain: TfMain
         Height = 17
         Caption = 'Select existing FileSystem'
         TabOrder = 2
+        TabStop = True
         OnClick = rbSelectFileSystem
       end
       object lbSelectPath: TListBox
@@ -165,7 +168,9 @@ object fMain: TfMain
         Width = 145
         Height = 17
         Caption = 'Add new Server'
+        Checked = True
         TabOrder = 0
+        TabStop = True
         OnClick = rbSelectServer
       end
       object eServerDir: TEdit
@@ -186,6 +191,7 @@ object fMain: TfMain
         Height = 17
         Caption = 'Select existing Server'
         TabOrder = 3
+        TabStop = True
         OnClick = rbSelectServer
       end
       object lbSelectServer: TListBox
@@ -328,55 +334,64 @@ object fMain: TfMain
       OnPage = JvWizardInteriorPageLocalFilesPage
       OnExitPage = JvWizardInteriorPageLocalFilesExitPage
       OnNextButtonClick = JvWizardInteriorPageLocalFilesNextButtonClick
-      DesignSize = (
-        490
-        296)
       object lFileSystem: TLabel
-        Left = 6
+        AlignWithMargins = True
+        Left = 5
         Top = 282
-        Width = 3
+        Width = 480
         Height = 13
-        Anchors = [akLeft, akBottom]
+        Cursor = crHandPoint
+        Margins.Left = 5
+        Margins.Top = 1
+        Margins.Right = 5
+        Margins.Bottom = 1
+        Align = alBottom
+        OnClick = lFileSystemClick
+        ExplicitLeft = 6
+        ExplicitWidth = 3
       end
-      object cxGFiles: TcxGrid
+      object cxGLocalFiles: TcxGrid
+        AlignWithMargins = True
         Left = 3
         Top = 72
         Width = 484
-        Height = 204
-        Anchors = [akLeft, akTop, akRight, akBottom]
+        Height = 206
+        Margins.Top = 2
+        Align = alClient
         BevelInner = bvNone
         BevelOuter = bvNone
         TabOrder = 0
-        object cxGFilesTableView: TcxGridTableView
+        ExplicitHeight = 204
+        object cxGLocalFilesTableView: TcxGridTableView
           Navigator.Buttons.CustomButtons = <>
           DataController.Summary.DefaultGroupSummaryItems = <>
           DataController.Summary.FooterSummaryItems = <>
           DataController.Summary.SummaryGroups = <>
-          DataController.OnDataChanged = cxGFilesTableViewDataControllerDataChanged
+          DataController.OnDataChanged = cxGLocalFilesTableViewDataControllerDataChanged
           OptionsView.ColumnAutoWidth = True
-          object cxGFilesTableViewColumn1: TcxGridColumn
+          object cxGLocalFilesTableViewColumn1: TcxGridColumn
             Caption = 'Status'
             PropertiesClassName = 'TcxCheckBoxProperties'
             Properties.ImmediatePost = True
             Properties.NullStyle = nssUnchecked
             Width = 45
           end
-          object cxGFilesTableViewColumn2: TcxGridColumn
+          object cxGLocalFilesTableViewColumn2: TcxGridColumn
             Caption = 'Condition'
             PropertiesClassName = 'TcxLabelProperties'
-            OnCustomDrawCell = cxGFilesTableViewColumn2CustomDrawCell
+            OnCustomDrawCell = cxGLocalFilesTableViewColumn2CustomDrawCell
             Width = 45
           end
-          object cxGFilesTableViewColumn3: TcxGridColumn
+          object cxGLocalFilesTableViewColumn3: TcxGridColumn
             Caption = 'FileName'
             PropertiesClassName = 'TcxLabelProperties'
             Width = 216
           end
-          object cxGFilesTableViewColumn4: TcxGridColumn
+          object cxGLocalFilesTableViewColumn4: TcxGridColumn
             Caption = 'Version'
             PropertiesClassName = 'TcxLabelProperties'
           end
-          object cxGFilesTableViewColumn5: TcxGridColumn
+          object cxGLocalFilesTableViewColumn5: TcxGridColumn
             Caption = 'Action'
             PropertiesClassName = 'TcxComboBoxProperties'
             Properties.DropDownListStyle = lsFixedList
@@ -385,16 +400,16 @@ object fMain: TfMain
             Properties.ImmediateUpdateText = True
             Properties.ReadOnly = True
             Visible = False
-            OnGetPropertiesForEdit = cxGFilesTableViewColumn5GetPropertiesForEdit
+            OnGetPropertiesForEdit = cxGLocalFilesTableViewColumn5GetPropertiesForEdit
           end
-          object cxGFilesTableViewColumn6: TcxGridColumn
+          object cxGLocalFilesTableViewColumn6: TcxGridColumn
             Caption = 'Actions'
             PropertiesClassName = 'TcxMemoProperties'
             Visible = False
           end
         end
-        object cxGFilesLevel: TcxGridLevel
-          GridView = cxGFilesTableView
+        object cxGLocalFilesLevel: TcxGridLevel
+          GridView = cxGLocalFilesTableView
         end
       end
     end
@@ -408,7 +423,7 @@ object fMain: TfMain
       Header.Title.Font.Name = 'Tahoma'
       Header.Title.Font.Style = [fsBold]
       Header.Subtitle.Color = clNone
-      Header.Subtitle.Text = 'Subtitle'
+      Header.Subtitle.Text = 'Here you can verify the list of files that will be updated.'
       Header.Subtitle.Anchors = [akLeft, akTop, akRight, akBottom]
       Header.Subtitle.Font.Charset = DEFAULT_CHARSET
       Header.Subtitle.Font.Color = clWindowText
@@ -416,6 +431,192 @@ object fMain: TfMain
       Header.Subtitle.Font.Name = 'Tahoma'
       Header.Subtitle.Font.Style = []
       OnPage = JvWizardInteriorPageUpdateFilesPage
+      object cxGUpdateFiles: TcxGrid
+        AlignWithMargins = True
+        Left = 3
+        Top = 72
+        Width = 484
+        Height = 221
+        Margins.Top = 2
+        Align = alClient
+        Anchors = []
+        BevelInner = bvNone
+        BevelOuter = bvNone
+        TabOrder = 0
+        object cxGUpdateFilesTableView: TcxGridTableView
+          Navigator.Buttons.CustomButtons = <>
+          DataController.Summary.DefaultGroupSummaryItems = <>
+          DataController.Summary.FooterSummaryItems = <>
+          DataController.Summary.SummaryGroups = <>
+          DataController.OnDataChanged = cxGLocalFilesTableViewDataControllerDataChanged
+          OptionsView.ColumnAutoWidth = True
+          object cxGUpdateFilesTableViewColumn1: TcxGridColumn
+            Caption = 'Status'
+            PropertiesClassName = 'TcxCheckBoxProperties'
+            Properties.ImmediatePost = True
+            Properties.NullStyle = nssUnchecked
+            Visible = False
+            Width = 45
+          end
+          object cxGUpdateFilesTableViewColumn2: TcxGridColumn
+            Caption = 'Condition'
+            PropertiesClassName = 'TcxLabelProperties'
+            Visible = False
+            OnCustomDrawCell = cxGLocalFilesTableViewColumn2CustomDrawCell
+            Width = 45
+          end
+          object cxGUpdateFilesTableViewColumn3: TcxGridColumn
+            Caption = 'FileName'
+            PropertiesClassName = 'TcxLabelProperties'
+            Width = 216
+          end
+          object cxGUpdateFilesTableViewColumn4: TcxGridColumn
+            Caption = 'Version'
+            PropertiesClassName = 'TcxLabelProperties'
+            Visible = False
+          end
+          object cxGUpdateFilesTableViewColumn5: TcxGridColumn
+            Caption = 'Action'
+            PropertiesClassName = 'TcxComboBoxProperties'
+            Properties.DropDownListStyle = lsFixedList
+            Properties.ImmediateDropDownWhenActivated = True
+            Properties.ImmediatePost = True
+            Properties.ImmediateUpdateText = True
+            Properties.ReadOnly = True
+            OnGetPropertiesForEdit = cxGLocalFilesTableViewColumn5GetPropertiesForEdit
+          end
+          object cxGUpdateFilesTableViewColumn6: TcxGridColumn
+            Caption = 'Actions'
+            PropertiesClassName = 'TcxMemoProperties'
+            Visible = False
+          end
+        end
+        object cxGUpdateFilesLevel: TcxGridLevel
+          GridView = cxGUpdateFilesTableView
+        end
+      end
+    end
+    object JvWizardInteriorPageUpdateVersion: TJvWizardInteriorPage
+      Header.Title.Color = clNone
+      Header.Title.Text = 'Update Version'
+      Header.Title.Anchors = [akLeft, akTop, akRight]
+      Header.Title.Font.Charset = DEFAULT_CHARSET
+      Header.Title.Font.Color = clWindowText
+      Header.Title.Font.Height = -16
+      Header.Title.Font.Name = 'Tahoma'
+      Header.Title.Font.Style = [fsBold]
+      Header.Subtitle.Color = clNone
+      Header.Subtitle.Text = 'Select a Version which will contain the update.'
+      Header.Subtitle.Anchors = [akLeft, akTop, akRight, akBottom]
+      Header.Subtitle.Font.Charset = DEFAULT_CHARSET
+      Header.Subtitle.Font.Color = clWindowText
+      Header.Subtitle.Font.Height = -11
+      Header.Subtitle.Font.Name = 'Tahoma'
+      Header.Subtitle.Font.Style = []
+      EnabledButtons = [bkStart, bkLast, bkBack, bkFinish, bkCancel, bkHelp]
+      Caption = 'JvWizardInteriorPageUpdateVersion'
+      OnPage = JvWizardInteriorPageUpdateVersionPage
+      DesignSize = (
+        490
+        296)
+      object lPreRelease: TLabel
+        Left = 252
+        Top = 114
+        Width = 74
+        Height = 13
+        Caption = '(PRE-RELEASE)'
+        Visible = False
+      end
+      object rbAddNewVersion: TRadioButton
+        Left = 48
+        Top = 88
+        Width = 145
+        Height = 17
+        Caption = 'Add new Version'
+        Checked = True
+        TabOrder = 0
+        TabStop = True
+        OnClick = rbSelectVersion
+      end
+      object rbSelectExistingVersion: TRadioButton
+        Left = 48
+        Top = 152
+        Width = 145
+        Height = 17
+        Caption = 'Select existing Version'
+        TabOrder = 5
+        TabStop = True
+        OnClick = rbSelectVersion
+      end
+      object lbSelectVersion: TListBox
+        Left = 64
+        Top = 175
+        Width = 404
+        Height = 74
+        Anchors = [akLeft, akTop, akRight, akBottom]
+        Enabled = False
+        ItemHeight = 13
+        TabOrder = 6
+        OnClick = lbSelectServerClick
+      end
+      object cxSEMajorVersion: TcxSpinEdit
+        Left = 64
+        Top = 111
+        Properties.AssignedValues.MinValue = True
+        Properties.ValueType = vtInt
+        TabOrder = 1
+        Value = 2
+        Width = 41
+      end
+      object cxSEMinorVersion: TcxSpinEdit
+        Left = 111
+        Top = 111
+        Properties.AssignedValues.MinValue = True
+        Properties.ValueType = vtInt
+        TabOrder = 2
+        Value = 129
+        Width = 41
+      end
+      object cxSEMajorBuild: TcxSpinEdit
+        Left = 158
+        Top = 111
+        Properties.AssignedValues.MinValue = True
+        Properties.ValueType = vtInt
+        TabOrder = 3
+        Width = 41
+      end
+      object cxSEMinorBuild: TcxSpinEdit
+        Left = 205
+        Top = 111
+        Properties.AssignedValues.MinValue = True
+        Properties.ValueType = vtInt
+        Properties.OnChange = cxSEMinorBuildPropertiesChange
+        TabOrder = 4
+        Width = 41
+      end
+    end
+    object JvWizardInteriorPageUploadFiles: TJvWizardInteriorPage
+      Header.Title.Color = clNone
+      Header.Title.Text = 'Upload Files'
+      Header.Title.Anchors = [akLeft, akTop, akRight]
+      Header.Title.Font.Charset = DEFAULT_CHARSET
+      Header.Title.Font.Color = clWindowText
+      Header.Title.Font.Height = -16
+      Header.Title.Font.Name = 'Tahoma'
+      Header.Title.Font.Style = [fsBold]
+      Header.Subtitle.Color = clNone
+      Header.Subtitle.Text = 
+        'Your files are now getting uploaded to the server. Just wait a m' +
+        'oment.'
+      Header.Subtitle.Anchors = [akLeft, akTop, akRight, akBottom]
+      Header.Subtitle.Font.Charset = DEFAULT_CHARSET
+      Header.Subtitle.Font.Color = clWindowText
+      Header.Subtitle.Font.Height = -11
+      Header.Subtitle.Font.Name = 'Tahoma'
+      Header.Subtitle.Font.Style = []
+      EnabledButtons = [bkStart, bkLast, bkFinish, bkCancel, bkHelp]
+      Caption = 'JvWizardInteriorPageUploadFiles'
+      OnPage = JvWizardInteriorPageUploadFilesPage
     end
     object JvWizardInteriorPagePublish: TJvWizardInteriorPage
       Header.Title.Color = clNone
@@ -427,13 +628,14 @@ object fMain: TfMain
       Header.Title.Font.Name = 'Tahoma'
       Header.Title.Font.Style = [fsBold]
       Header.Subtitle.Color = clNone
-      Header.Subtitle.Text = 'Subtitle'
+      Header.Subtitle.Text = 'The update is ready. Approve now to activate the update.'
       Header.Subtitle.Anchors = [akLeft, akTop, akRight, akBottom]
       Header.Subtitle.Font.Charset = DEFAULT_CHARSET
       Header.Subtitle.Font.Color = clWindowText
       Header.Subtitle.Font.Height = -11
       Header.Subtitle.Font.Name = 'Tahoma'
       Header.Subtitle.Font.Style = []
+      VisibleButtons = [bkBack, bkFinish, bkCancel]
     end
     object JvWizardRouteMapNodes: TJvWizardRouteMapNodes
       Left = 0
