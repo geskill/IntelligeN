@@ -101,11 +101,11 @@ function versions_message($status, $code, $msg, $data = null) {
 
 	if (!is_null($data)) {
 
-		$versions = XML::addElement($xml->rootnode, 'systems');
+		$versions = XML::addElement($xml->rootnode, 'versions');
 
 		foreach ($data as $Version)  {
 
-			$version = XML::addElement($versions, 'system');
+			$version = XML::addElement($versions, 'version');
 
 			XML::addElement($version, 'id', $Version->id);
 			XML::addElement($version, 'active', $Version->active);

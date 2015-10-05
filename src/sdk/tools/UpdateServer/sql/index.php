@@ -499,7 +499,7 @@ class SQLSystem
 		if (!$this->VersionExists($major_version, $minor_version, $major_build, $minor_build)) {
 
 			$sql = "INSERT INTO `intelligen_2k9_update_versions` (`major_version`, `minor_version`, `major_build`, `minor_build`) VALUES
-			('" . $this->link->escape_string($major_version) . "', '" . $this->link->escape_string($minor_version) . "', '" . $this->link->escape_string($major_build) . "', '" . $this->link->escape_string($minor_build) . "'";
+			('" . $this->link->escape_string($major_version) . "', '" . $this->link->escape_string($minor_version) . "', '" . $this->link->escape_string($major_build) . "', '" . $this->link->escape_string($minor_build) . "')";
 
 			$query_result = $this->link->query($sql);
 			if(!$query_result)
