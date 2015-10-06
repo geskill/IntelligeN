@@ -192,7 +192,7 @@ class UploadSystem
 
 			if ($success) {
 
-				$result = status_message(1, 1, 'Version have been activated successfully.');
+				$result = status_message(1, 1, 'Version has been activated successfully.');
 			}
 			else  {
 

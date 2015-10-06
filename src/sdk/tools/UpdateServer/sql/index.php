@@ -616,7 +616,7 @@ class SQLSystem
 
 		foreach ($files as $file) {
 
-			if (!$this->FileExists($file)) {
+			if (!$this->FileExists($file->checksum)) {
 
 				$sql .= " ('" . $this->link->escape_string($file->system_id) . "', '" . $this->link->escape_string($file->major_version) . "', '" . $this->link->escape_string($file->minor_version) . "', '" . $this->link->escape_string($file->major_build) . "', '" . $this->link->escape_string($file->minor_build) . "', '" . $this->link->escape_string($file->size_compressed) . "', '" . $this->link->escape_string($file->checksum) . "'),";
 
@@ -635,10 +635,10 @@ class SQLSystem
 			}
 		}
 
-		// Get files ids, update using reference
-		foreach ($files as $key => &$file) {
+		// Get files ids, update file_id (using reference causes problems)
+		foreach ($files as $key => $file) {
 
-			$file = $this->GetFile($file->checksum);
+			$files[$key]->id = $this->GetFile($file->checksum)->id;
 		}
 
 		$sql = "INSERT INTO `intelligen_2k9_update_version_files` (`version_id`, `file_id`) VALUES";
