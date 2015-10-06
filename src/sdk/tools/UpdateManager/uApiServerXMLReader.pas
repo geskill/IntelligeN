@@ -18,7 +18,7 @@ type
   TServerXMLReader = class
   type
     TIBasicMeta = class of TIBasicServerResponse;
-    TServerRequestType = (srtVersions, srtSystems, srtFTPServer, srtVersionAdd, srtSystemsAdd);
+    TServerRequestType = (srtVersions, srtSystems, srtFTPServer, srtVersionAdd, srtSystemsAdd, srtFilesAdd, srtActivateVersion);
   private
     class function GetClassType(AType: TServerRequestType): TIBasicMeta;
   protected
@@ -30,6 +30,8 @@ type
     class function ReadFTPServer(AXMLContent: string): IFTPServerResponse;
     class function ReadVersionAdd(AXMLContent: string): IVersionAddResponse;
     class function ReadSystemsAdd(AXMLContent: string): IBasicServerResponse;
+    class function ReadFilesAdd(AXMLContent: string): IBasicServerResponse;
+    class function ReadActivateVersion(AXMLContent: string): IBasicServerResponse;
   end;
 
 implementation
@@ -49,6 +51,12 @@ begin
       Result := TIVersionAddResponse;
     srtSystemsAdd:
       Result := TIBasicServerResponse;
+    srtFilesAdd:
+      Result := TIBasicServerResponse;
+    srtActivateVersion:
+      Result := TIBasicServerResponse;
+  else
+    raise Exception.Create('Unknown TServerRequestType');
   end;
 end;
 
@@ -141,22 +149,22 @@ begin
                 begin
                   if Assigned(ChildNodes.FindNode('server')) then
                     with ChildNodes.Nodes['server'], Server do
-                      begin
-                        Name := VarToStr(ChildNodes.Nodes['name'].NodeValue);
-                        Port := VarToStr(ChildNodes.Nodes['port'].NodeValue);
-                        Path := VarToStr(ChildNodes.Nodes['path'].NodeValue);
-                        Username := VarToStr(ChildNodes.Nodes['username'].NodeValue);
-                        Password := VarToStr(ChildNodes.Nodes['password'].NodeValue);
-                      end;
+                    begin
+                      Name := VarToStr(ChildNodes.Nodes['name'].NodeValue);
+                      Port := VarToStr(ChildNodes.Nodes['port'].NodeValue);
+                      Path := VarToStr(ChildNodes.Nodes['path'].NodeValue);
+                      Username := VarToStr(ChildNodes.Nodes['username'].NodeValue);
+                      Password := VarToStr(ChildNodes.Nodes['password'].NodeValue);
+                    end;
                 end;
               srtVersionAdd:
                 with (Result as IVersionAddResponse) do
                 begin
                   if Assigned(ChildNodes.FindNode('version')) then
                     with ChildNodes.Nodes['version'] do
-                      begin
-                        VersionID := StrToIntDef(VarToStr(ChildNodes.Nodes['id'].NodeValue), 0);
-                      end;
+                    begin
+                      VersionID := StrToIntDef(VarToStr(ChildNodes.Nodes['id'].NodeValue), 0);
+                    end;
                 end;
             end;
           end;
@@ -191,6 +199,16 @@ end;
 class function TServerXMLReader.ReadSystemsAdd(AXMLContent: string): IBasicServerResponse;
 begin
   Result := TServerXMLReader.Read(AXMLContent, srtSystemsAdd) as IBasicServerResponse;
+end;
+
+class function TServerXMLReader.ReadFilesAdd(AXMLContent: string): IBasicServerResponse;
+begin
+  Result := TServerXMLReader.Read(AXMLContent, srtFilesAdd) as IBasicServerResponse;
+end;
+
+class function TServerXMLReader.ReadActivateVersion(AXMLContent: string): IBasicServerResponse;
+begin
+  Result := TServerXMLReader.Read(AXMLContent, srtActivateVersion) as IBasicServerResponse;
 end;
 
 end.

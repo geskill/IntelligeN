@@ -84,6 +84,8 @@ type
   public
     constructor Create(const ALocalFile: IUpdateManagerLocalFile; const AFileBase: IUpdateManagerSystemFileBase);
 
+    function GetCompressedFileName: WideString;
+
     property ID: Integer read GetID write SetID;
     property FileBase: IUpdateManagerSystemFileBase read GetFileBase write SetFileBase;
     property LocalFile: IUpdateManagerLocalFile read GetLocalFile write SetLocalFile;
@@ -277,6 +279,11 @@ begin
     FFileBase := TIUpdateManagerSystemFileBase.Create
   else
     FFileBase := AFileBase;
+end;
+
+function TIUpdateManagerSystemFile.GetCompressedFileName: WideString;
+begin
+  Result := FileChecksum + '.zip';
 end;
 
 destructor TIUpdateManagerSystemFile.Destroy;

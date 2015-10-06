@@ -37,7 +37,9 @@
 			<DCC_DebugInformation>false</DCC_DebugInformation>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
-			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+			<DCC_MapFile>3</DCC_MapFile>
+			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
+			<DCC_Define>DEBUG;EUREKALOG;EUREKALOG_VER7;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<ItemGroup>
 			<DelphiCompile Include="UpdateManager.dpr">
@@ -109,7 +111,7 @@
 						<VersionInfo Name="Special">False</VersionInfo>
 						<VersionInfo Name="Private">False</VersionInfo>
 						<VersionInfo Name="DLL">False</VersionInfo>
-						<VersionInfo Name="Locale">1031</VersionInfo>
+						<VersionInfo Name="Locale">1033</VersionInfo>
 						<VersionInfo Name="CodePage">1252</VersionInfo>
 					</VersionInfo>
 					<VersionInfoKeys>
@@ -135,7 +137,26 @@
 <!-- EurekaLog First Line
 [Exception Log]
 EurekaLog Version=7007
-Activate=0
+Activate=1
+atFixSafeCallException=1
+atVCL=1
+atWin32=1
 DeleteMapAfterCompile=0
+dpJCL=1
 Encrypt Password=""
+idEurekaLog=1
+idEurekaLogDetailed=1
+idMSClassic=1
+idStepsToReproduce=1
+InjectCode=1
+InjectInfo=1
+InjectOptions=1
+ProjectID="{63C55C53-2286-4921-8E21-5D9C0CD6AECE}"
+seMAPI=1
+Sender Classes="TELMailSimpleMAPISender;TELMailMAPISender;TELMailShellSender"
+seSMAPI=1
+sndMAPITarget="sebastianklatte@gmx.net"
+sndShellRecepient="sebastianklatte@gmx.net"
+sndShellUTF8=1
+sndSMAPITarget="sebastianklatte@gmx.net"
 EurekaLog Last Line -->

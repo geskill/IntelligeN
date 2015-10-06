@@ -1,7 +1,7 @@
 object fMain: TfMain
   Left = 0
   Top = 0
-  ActiveControl = rbAddNewVersion
+  ActiveControl = JvWizardInteriorPagePublish
   Caption = 'Update Manager'
   ClientHeight = 338
   ClientWidth = 635
@@ -21,7 +21,7 @@ object fMain: TfMain
     Top = 0
     Width = 635
     Height = 338
-    ActivePage = JvWizardInteriorPageUpdateVersion
+    ActivePage = JvWizardInteriorPagePublish
     ButtonBarHeight = 42
     ButtonStart.Caption = 'To &Start Page'
     ButtonStart.NumGlyphs = 1
@@ -733,6 +733,7 @@ object fMain: TfMain
       Header.Subtitle.Font.Name = 'Tahoma'
       Header.Subtitle.Font.Style = []
       VisibleButtons = [bkBack, bkFinish, bkCancel]
+      OnFinishButtonClick = JvWizardInteriorPagePublishFinishButtonClick
     end
     object JvWizardRouteMapNodes: TJvWizardRouteMapNodes
       Left = 0

@@ -68,6 +68,8 @@ type
     function GetLocalFile: IUpdateManagerLocalFile;
     procedure SetLocalFile(const ALocalFile: IUpdateManagerLocalFile);
 
+    function GetCompressedFileName: WideString;
+
     property ID: Integer read GetID write SetID;
     property FileBase: IUpdateManagerSystemFileBase read GetFileBase write SetFileBase;
     property LocalFile: IUpdateManagerLocalFile read GetLocalFile write SetLocalFile;

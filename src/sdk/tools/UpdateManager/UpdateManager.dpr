@@ -1,6 +1,19 @@
 program UpdateManager;
 
 uses
+  EMemLeaks,
+  EResLeaks,
+  ESendMailMAPI,
+  ESendMailSMAPI,
+  EDialogWinAPIMSClassic,
+  EDialogWinAPIEurekaLogDetailed,
+  EDialogWinAPIStepsToReproduce,
+  EDebugExports,
+  EDebugJCL,
+  EFixSafeCallException,
+  EMapWin32,
+  EAppVCL,
+  ExceptionLog7,
   Forms,
   Dialogs,
   uMain in 'uMain.pas' {fMain},

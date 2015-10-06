@@ -134,12 +134,13 @@ type
     procedure cxSEMinorBuildPropertiesChange(Sender: TObject);
     procedure lbSelectVersionClick(Sender: TObject);
     { *************************************** STEP - 6 *************************************** }
-
     procedure JvWizardInteriorPageUploadFilesPage(Sender: TObject);
 
     { *************************************** STEP - 7 *************************************** }
+    procedure JvWizardInteriorPagePublishFinishButtonClick(Sender: TObject; var Stop: Boolean);
   private
   var
+    FStoreUpdateFilesPath: string;
     FActiveUpdateFileCollectionItem: TUpdateFileSystemCollectionItem;
     FActiveUpdateServerCollectionItem: TUpdateServerCollectionItem;
 
@@ -147,6 +148,7 @@ type
     FActiveUpdateFTPServer: IFTPServer;
     FActiveSystemsList: TUpdateManagerSystemsList;
 
+    FVersionID: Integer;
     FActiveLocalFiles: TUpdateManagerLocalFileList;
 
     function GetLocalFilesCheckAllStatus: Byte;
@@ -166,7 +168,7 @@ type
     function LoadLocalFilesList: Boolean;
     function LoadUpdateFilesList: Boolean;
     function UploadFiles: Boolean;
-
+    function ActivateVersion: Boolean;
   public
 
   end;
@@ -180,6 +182,8 @@ implementation
 
 procedure TfMain.FormCreate(Sender: TObject);
 begin
+  FStoreUpdateFilesPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'update_files\';
+  ForceDirectories(FStoreUpdateFilesPath);
   cxGLocalFilesTableView.DataController.OnDataChanged := nil;
   LoadSettings;
 end;
@@ -526,8 +530,22 @@ procedure TfMain.JvWizardInteriorPageUploadFilesPage(Sender: TObject);
 var
   LCanContinue: Boolean;
 begin
+  pbUploadProgress.Visible := False;
   LCanContinue := UploadFiles;
-  CanContinue(LCanContinue, JvWizardInteriorPageServerInfo);
+  CanContinue(LCanContinue, JvWizardInteriorPageUploadFiles);
+end;
+
+{ *************************************** STEP - 7 *************************************** }
+
+procedure TfMain.JvWizardInteriorPagePublishFinishButtonClick(Sender: TObject; var Stop: Boolean);
+begin
+  if ActivateVersion then
+  begin
+    ShowMessage('Update is now online and ready to use.');
+    Close;
+  end
+  else
+    ShowMessage('The was an error. Start over again.');
 end;
 
 { ****************************************************************************** }
@@ -879,14 +897,16 @@ function TfMain.UploadFiles: Boolean;
 
 var
   LLocalUploadController: TLocalUploadController;
+  LLocalUpdateController: TLocalUpdateController;
 
   LStatus: WordBool;
   LErrorMsg: WideString;
 
-  LVersionID: Integer;
-
   LLocalFileIndex: Integer;
+  LUpdateSystemFileList: TUpdateManagerLocalFileList;
   LUpdateSystemFileBaseList: TUpdateSystemFileBaseList;
+
+  LUploadFiles: TUpdateManagerLocalFileList;
 begin
   LStatus := False;
 
@@ -896,13 +916,13 @@ begin
 
     if (rbAddNewVersion.Checked) then
     begin
-      LStatus := LLocalUploadController.AddVersion(cxSEMajorVersion.Value, cxSEMinorVersion.Value, cxSEMajorBuild.Value, cxSEMinorBuild.Value, LVersionID, LErrorMsg);
+      LStatus := LLocalUploadController.AddVersion(cxSEMajorVersion.Value, cxSEMinorVersion.Value, cxSEMajorBuild.Value, cxSEMinorBuild.Value, FVersionID, LErrorMsg);
       SetLEDStatus(LStatus, JvLEDAddVersion);
     end
     else
     begin
-      LVersionID := FActiveVersionsList[lbSelectVersion.ItemIndex].ID;
-      LStatus := (LVersionID > 0);
+      FVersionID := FActiveVersionsList[lbSelectVersion.ItemIndex].ID;
+      LStatus := (FVersionID > 0);
       if not LStatus then
         LErrorMsg := 'Failed to retrieve the version id in the previous step. Start over again.';
       SetLEDStatus(LStatus, JvLEDAddVersion, True);
@@ -916,6 +936,7 @@ begin
     begin
       LErrorMsg := '';
 
+      LUpdateSystemFileList := TUpdateManagerLocalFileList.Create;
       LUpdateSystemFileBaseList := TUpdateSystemFileBaseList.Create;
       try
         // Make list of new systems
@@ -923,12 +944,39 @@ begin
           with FActiveLocalFiles[LLocalFileIndex] do
             if (LocalFile.Action = uaAddnUpdate) then
             begin
+              LUpdateSystemFileList.Add(FActiveLocalFiles[LLocalFileIndex]);
               LUpdateSystemFileBaseList.Add(FActiveLocalFiles[LLocalFileIndex].FileBase);
             end;
 
         if LUpdateSystemFileBaseList.Count > 0 then
         begin
+          // Add new systems
           LStatus := LLocalUploadController.AddSystems(LUpdateSystemFileBaseList, LErrorMsg);
+
+          if (LStatus) then
+          begin
+            LErrorMsg := '';
+
+            if Assigned(FActiveSystemsList) then
+              FActiveSystemsList.Free;
+
+            // Retrieve ids from new systems
+            LStatus := LLocalUploadController.GetSystems(FActiveSystemsList, LErrorMsg);
+
+            if (LStatus) then
+            begin
+              LErrorMsg := '';
+
+              // Combine "FActiveLocalFiles" with all SystemIDs
+              LLocalUpdateController := TLocalUpdateController.Create(FActiveUpdateFileCollectionItem.LibraryFile);
+              try
+                LStatus := LLocalUpdateController.MergeLocalFiles(FActiveSystemsList, LUpdateSystemFileList, LErrorMsg);
+              finally
+                LLocalUpdateController.Free;
+              end;
+            end;
+          end;
+
           SetLEDStatus(LStatus, JvLEDAddSystems);
         end
         else
@@ -938,6 +986,7 @@ begin
 
       finally
         LUpdateSystemFileBaseList.Free;
+        LUpdateSystemFileList.Free;
       end;
 
       if not LStatus then
@@ -948,15 +997,83 @@ begin
       begin
         LErrorMsg := '';
 
-        // TODO: Retrieve now all SystemIDs again
+        LUploadFiles := TUpdateManagerLocalFileList.Create;
+        try
+          // Make list of upload files
+          for LLocalFileIndex := 0 to FActiveLocalFiles.Count - 1 do
+            with FActiveLocalFiles[LLocalFileIndex] do
+              if (LocalFile.Action in [uaAddnUpdate, uaEditnUpdate { , uaDelete } ]) then
+              begin
+                LUploadFiles.Add(FActiveLocalFiles[LLocalFileIndex]);
+              end;
 
-        // TODO: Combine "FActiveLocalFiles" with all SystemIDs
+          // Compress all selected files
+          LLocalUpdateController := TLocalUpdateController.Create(FActiveUpdateFileCollectionItem.LibraryFile);
+          try
+            LLocalUpdateController.CompressLocalFiles(LUploadFiles, FStoreUpdateFilesPath);
+          finally
+            LLocalUpdateController.Free;
+          end;
+          SetLEDStatus(LStatus, JvLEDCompressLocalFiles);
 
-        // TODO: Compress all selected files.
+          LErrorMsg := '';
+          // Add all selected files into the DB.
+          LStatus := LLocalUploadController.AddFiles(FVersionID, LUploadFiles, LErrorMsg);
 
-        // TODO: Upload and add all selected files into the DB.
+          if not LStatus then
+          begin
+            SetErrorMsg(LStatus, LErrorMsg);
+          end
+          else
+          begin
+            LErrorMsg := '';
+
+            pbUploadProgress.Visible := True;
+
+            // Upload all selected files onto server.
+            LLocalUpdateController := TLocalUpdateController.Create(FActiveUpdateFileCollectionItem.LibraryFile);
+            try
+              LLocalUpdateController.OnUpdateUploading :=
+              { } procedure(Sender: TObject; Position: Integer)
+              { } begin
+                { . } pbUploadProgress.Position := Position * 100;
+                { } end;
+
+              LStatus := LLocalUpdateController.UploadLocalFiles(LUploadFiles, FActiveUpdateFTPServer, FStoreUpdateFilesPath);
+            finally
+              LLocalUpdateController.Free;
+            end;
+
+            SetLEDStatus(LStatus, JvLEDUploadLocalFiles);
+          end;
+
+        finally
+          LUploadFiles.Free;
+        end;
+
       end;
     end;
+  finally
+    LLocalUploadController.Free;
+  end;
+
+  Result := LStatus;
+end;
+
+function TfMain.ActivateVersion: Boolean;
+var
+  LLocalUploadController: TLocalUploadController;
+
+  LStatus: WordBool;
+  LErrorMsg: WideString;
+begin
+  LStatus := False;
+
+  LLocalUploadController := TLocalUploadController.Create(FActiveUpdateServerCollectionItem);
+  try
+    LErrorMsg := '';
+
+    LStatus := LLocalUploadController.ActivateVersion(FVersionID, LErrorMsg);
   finally
     LLocalUploadController.Free;
   end;
