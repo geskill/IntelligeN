@@ -249,7 +249,7 @@ var
   SearchValue: WideString;
   SearchResults: TStringList;
   SearchIndex: Integer;
-  RedoSearch: Boolean;
+  RedoSearch: WordBool;
 
   _found_thread_id, _found_thread_name: Variant;
 begin

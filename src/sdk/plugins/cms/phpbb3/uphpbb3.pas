@@ -247,7 +247,7 @@ var
   SearchValue: WideString;
   SearchResults, SearchResultsForumID: TStringList;
   SearchIndex: Integer;
-  RedoSearch: Boolean;
+  RedoSearch: WordBool;
 
   _found_forum_id, _found_thread_id, _found_thread_name: Variant;
 begin
