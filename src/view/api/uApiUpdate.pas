@@ -323,7 +323,7 @@ begin
               FileVersion.MajorBuild := StrToIntDef(VarToStr(ChildNodes.Nodes['major_build'].NodeValue), 0);
               FileVersion.MinorBuild := StrToIntDef(VarToStr(ChildNodes.Nodes['minor_build'].NodeValue), 0);
 
-              FileSizeCompressed := StrToIntDef(VarToStr(ChildNodes.Nodes['size'].NodeValue), 0);
+              FileSizeCompressed := StrToIntDef(VarToStr(ChildNodes.Nodes['size_compressed'].NodeValue), 0);
               FileChecksum := VarToStr(ChildNodes.Nodes['checksum'].NodeValue);
 
               AUpdateVersion.UpdateSize := AUpdateVersion.UpdateSize + FileSizeCompressed;

@@ -135,7 +135,7 @@ class SQLUpdateSystemFile {
 	/**
 	 * @var
      */
-	public $size;
+	public $size_compressed;
 	/**
 	 * @var
      */
@@ -274,12 +274,11 @@ class SQLSystem
 
 		`intelligen_2k9_update_system_files`.`id` AS `s_f_id`,
 		`intelligen_2k9_update_system_files`.`system_id` AS `s_f_system_id`,
-		`intelligen_2k9_update_system_files`.`size` AS `s_f_size`,
 		`intelligen_2k9_update_system_files`.`major_version` AS `s_f_major_version`,
 		`intelligen_2k9_update_system_files`.`minor_version` AS `s_f_minor_version`,
 		`intelligen_2k9_update_system_files`.`major_build` AS `s_f_major_build`,
 		`intelligen_2k9_update_system_files`.`minor_build` AS `s_f_minor_build`,
-		`intelligen_2k9_update_system_files`.`size` AS `s_f_size`,
+		`intelligen_2k9_update_system_files`.`size_compressed` AS `s_f_size_compressed`,
 		`intelligen_2k9_update_system_files`.`checksum` AS `s_f_checksum`,
 
 		`intelligen_2k9_update_systems`.`id` AS `s_id`,
@@ -325,7 +324,7 @@ class SQLSystem
 				$version_file->file->minor_version = $row['s_f_minor_version'];
 				$version_file->file->major_build = $row['s_f_major_build'];
 				$version_file->file->minor_build = $row['s_f_minor_build'];
-				$version_file->file->size = $row['s_f_size'];
+				$version_file->file->size_compressed = $row['s_f_size_compressed'];
 				$version_file->file->checksum = $row['s_f_checksum'];
 
 				$version_file->created = $row['v_f_created'];
@@ -542,7 +541,7 @@ class SQLSystem
 			$result->minor_version = $row['minor_version'];
 			$result->major_build = $row['major_build'];
 			$result->minor_build = $row['minor_build'];
-			$result->size = $row['size'];
+			$result->size_compressed = $row['size_compressed'];
 			$result->checksum = $row['checksum'];
 		}
 
@@ -612,14 +611,14 @@ class SQLSystem
 	 */
 	function AddFiles($version_id, $files) {
 
-		$sql = "INSERT INTO `intelligen_2k9_update_system_files` (`system_id`, `major_version`, `minor_version`, `major_build`, `minor_build`, `size`, `checksum`) VALUES";
+		$sql = "INSERT INTO `intelligen_2k9_update_system_files` (`system_id`, `major_version`, `minor_version`, `major_build`, `minor_build`, `size_compressed`, `checksum`) VALUES";
 		$hasNewFiles = false;
 
 		foreach ($files as $file) {
 
 			if (!$this->FileExists($file)) {
 
-				$sql .= " ('" . $this->link->escape_string($file->system_id) . "', '" . $this->link->escape_string($file->major_version) . "', '" . $this->link->escape_string($file->minor_version) . "', '" . $this->link->escape_string($file->major_build) . "', '" . $this->link->escape_string($file->minor_build) . "', '" . $this->link->escape_string($file->size) . "', '" . $this->link->escape_string($file->checksum) . "'),";
+				$sql .= " ('" . $this->link->escape_string($file->system_id) . "', '" . $this->link->escape_string($file->major_version) . "', '" . $this->link->escape_string($file->minor_version) . "', '" . $this->link->escape_string($file->major_build) . "', '" . $this->link->escape_string($file->minor_build) . "', '" . $this->link->escape_string($file->size_compressed) . "', '" . $this->link->escape_string($file->checksum) . "'),";
 
 				$hasNewFiles = true;
 			}

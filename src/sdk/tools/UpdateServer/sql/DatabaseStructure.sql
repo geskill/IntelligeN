@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS `intelligen_2k9_update_system_files` (
   `minor_version` int(3) NOT NULL,
   `major_build` int(3) NOT NULL,
   `minor_build` int(3) NOT NULL DEFAULT '0',
-  `size` int(25) NOT NULL,
+  `size_compressed` int(25) NOT NULL,
   `checksum` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

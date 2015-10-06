@@ -152,7 +152,7 @@ class UploadSystem
 				$file->minor_version = $File['minor_version'];
 				$file->major_build = $File['major_build'];
 				$file->minor_build = $File['minor_build'];
-				$file->size = $File['size'];
+				$file->size_compressed = $File['size_compressed'];
 				$file->checksum = $File['checksum'];
 
 				$files[] = $file;

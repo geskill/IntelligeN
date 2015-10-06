@@ -74,12 +74,11 @@ $sql = "SELECT
 
 		`intelligen_2k9_update_system_files`.`id` AS `s_f_id`,
 		`intelligen_2k9_update_system_files`.`system_id` AS `s_f_system_id`,
-		`intelligen_2k9_update_system_files`.`size` AS `s_f_size`,
 		`intelligen_2k9_update_system_files`.`major_version` AS `s_f_major_version`,
 		`intelligen_2k9_update_system_files`.`minor_version` AS `s_f_minor_version`,
 		`intelligen_2k9_update_system_files`.`major_build` AS `s_f_major_build`,
 		`intelligen_2k9_update_system_files`.`minor_build` AS `s_f_minor_build`,
-		`intelligen_2k9_update_system_files`.`size` AS `s_f_size`,
+		`intelligen_2k9_update_system_files`.`size_compressed` AS `s_f_size_compressed`,
 		`intelligen_2k9_update_system_files`.`checksum` AS `s_f_checksum`,
 
 		`intelligen_2k9_update_systems`.`id` AS `s_id`,
@@ -99,7 +98,7 @@ while($data = mysql_fetch_assoc($query))
 {
 	$file = MyDom::addElement($files, 'file');
 	MyDom::addAttribute($file, 'type', $data['s_filesystem_int_id']);
-	MyDom::addAttribute($file, 'size', $data['s_f_size']);
+	MyDom::addAttribute($file, 'size', $data['s_f_size_compressed']); // Name for old version is "size"
 	MyDom::addAttribute($file, 'csum', $data['s_f_checksum']);
 	MyDom::addElement($file, 'name', $data['s_name']);
 	MyDom::addElement($file, 'info', '');

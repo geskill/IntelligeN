@@ -177,7 +177,7 @@ function add_files_to_files_message($node, $data) {
 			XML::addElement($file, 'minor_version', $VersionFile->file->minor_version);
 			XML::addElement($file, 'major_build', $VersionFile->file->major_build);
 			XML::addElement($file, 'minor_build', $VersionFile->file->minor_build);
-			XML::addElement($file, 'size', $VersionFile->file->size);
+			XML::addElement($file, 'size_compressed', $VersionFile->file->size_compressed);
 			XML::addElement($file, 'checksum', $VersionFile->file->checksum);
 
 			XML::addElement($file, 'filesystem_id', $VersionFile->file->system->filesystem_id);
