@@ -86,7 +86,6 @@ type
   protected
 
     function ReadUpdate(): Boolean;
-    function LocalPathFromID(AID: Integer): string;
     procedure ReadFiles(const ANode: IXMLNode; AUpdateVersion: TUpdateVersion);
     function LocalPathVariableFromFileSystem(AFileSystem: TFileSystem): string;
     procedure DownloadFiles(const task: IOmniTask; AUpdateVersion: TUpdateVersion);
@@ -265,17 +264,11 @@ begin
   result := True;
 end;
 
-function TUpdateController.LocalPathFromID(AID: Integer): string;
-begin
-  result := GetPathFromFileSystemID(uBase.TFileSystem(AID));
-end;
-
 procedure TUpdateController.ReadFiles(const ANode: IXMLNode; AUpdateVersion: TUpdateVersion);
 var
   LFileIndex: Integer;
+  LFileSystem: TFileSystem;
   LFilePathName: string;
-
-  s: string;
 
   LUpdateSystemFile: IUpdateSystemFile;
 begin
@@ -299,10 +292,13 @@ begin
       for LFileIndex := 0 to ChildNodes.Count - 1 do
         with ChildNodes.Nodes[LFileIndex] do
         begin
+          if (IsNumber(ChildNodes.Nodes['filesystem_id'].NodeValue)) then
+            LFileSystem := TFileSystem(StrToIntDef(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue), 0))
+          else
+            LFileSystem := TEnum.Parse<TFileSystem>(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue));
+
           LFilePathName := IncludeTrailingPathDelimiter(
-            { . } IncludeTrailingPathDelimiter(LocalPathFromID(StrToIntDef(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue), 0))) +
-            { ... } VarToStr(ChildNodes.Nodes['path_appendix'].NodeValue)
-            { . } ) +
+            { . } IncludeTrailingPathDelimiter(GetPathFromFileSystemID(LFileSystem)) + VarToStr(ChildNodes.Nodes['path_appendix'].NodeValue)) +
           { . } VarToStr(ChildNodes.Nodes['name'].NodeValue);
 
           if (not FileExists(LFilePathName)) or (not SameText(GetMD5FromFile(LFilePathName), VarToStr(ChildNodes.Nodes['checksum'].NodeValue))) then
@@ -311,10 +307,7 @@ begin
 
             with LUpdateSystemFile do
             begin
-              if (IsNumber(ChildNodes.Nodes['filesystem_id'].NodeValue)) then
-                FileBase.FileSystem := TFileSystem(StrToIntDef(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue), 0))
-              else
-                FileBase.FileSystem := TEnum.Parse<TFileSystem>(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue));
+              FileBase.FileSystem := LFileSystem;
 
               FileBase.FilePathAppendix := VarToStr(ChildNodes.Nodes['path_appendix'].NodeValue);
 

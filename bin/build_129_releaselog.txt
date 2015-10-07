@@ -358,6 +358,8 @@
 
 + Improved Loading CMS Website settings
 
++ Improved check/uncheck all from website settings
+
 + Fixed a bug where the publish list got empty if a not active tab was removed before.
 
 + Fixed a bug where changes in the mirros do not update the file changed status
