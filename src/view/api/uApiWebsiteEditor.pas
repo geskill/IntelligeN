@@ -14,7 +14,7 @@ uses
   // HTTPManager implementation
   uHTTPIndyHelper,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // API
   uApiFile,
   // Utils,
@@ -73,8 +73,7 @@ type
     FOnAccept: TAcceptEvent;
 
     procedure FcxGIDDblClick(Sender: TObject);
-    procedure FcxGIDFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord;
-      ANewItemRecordFocusingChanged: Boolean);
+    procedure FcxGIDFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure FcxGIDKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FcxPEIDInitPopup(Sender: TObject);
     procedure FcxBCancelClick(Sender: TObject);
@@ -103,7 +102,7 @@ type
   TIDEditBPanel = class(TIDEditPanel)
   protected
     FAppController: IAppController;
-    FStringTemplateTypeID: string;
+    FStringTypeID: string;
 
     FcxLControlName, FcxLControlValue: TcxLabel;
     FcxCOBControlName, FcxCOBControlValue: TcxComboBox;
@@ -233,24 +232,24 @@ type
     procedure FcxTCIDsChange(Sender: TObject);
     procedure FcxCBFilterEnabledChange(Sender: TObject);
     procedure FcxGridFilterControlsTableViewColumn3PropertiesInitPopup(Sender: TObject);
-    procedure FcxGridFilterControlsTableViewColumn4GetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
-      ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption; var AIsHintMultiLine: Boolean; var AHintTextRect: TRect);
+    procedure FcxGridFilterControlsTableViewColumn4GetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption;
+      var AIsHintMultiLine: Boolean; var AHintTextRect: TRect);
     procedure FcxGridFilterControlsTableViewColumn4PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure FcxTCHosterChange(Sender: TObject);
-    procedure FcxGridCustomFieldsTableViewColumn3GetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
-      ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption; var AIsHintMultiLine: Boolean; var AHintTextRect: TRect);
+    procedure FcxGridCustomFieldsTableViewColumn3GetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption; var AIsHintMultiLine: Boolean;
+      var AHintTextRect: TRect);
     procedure FcxGridCustomFieldsTableViewColumn3PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
-    function GetCustomFields: WordBool;
-    procedure SetCustomFields(ACustomFields: WordBool);
+    function GetCustomFields: WordBool; safecall;
+    procedure SetCustomFields(ACustomFields: WordBool); safecall;
   public
     constructor Create(ACMSPlugIn: ICMSPlugIn; AAppController: IAppController; AWebsiteSettingsFileName: TFileName); reintroduce; virtual;
-    procedure AddEdit(AName: WideString; ADefaultValue: WideString = ''; ATopValue: WordBool = False);
-    procedure AddCheckbox(AName: WideString; ADefaultValue: WordBool = False; ATopValue: WordBool = False);
-    procedure AddCategoryTab(AName: WideString);
+    procedure AddEdit(AName: WideString; ADefaultValue: WideString = ''; ATopValue: WordBool = False); safecall;
+    procedure AddCheckbox(AName: WideString; ADefaultValue: WordBool = False; ATopValue: WordBool = False); safecall;
+    procedure AddCategoryTab(AName: WideString); safecall;
     procedure AddHosterTab(AHosterType: THosterType);
     property CustomFields: WordBool read GetCustomFields write SetCustomFields;
 
-    function ShowModal: Integer; override;
+    function ShowModal: Integer; reintroduce; safecall;
     property CMSPlugIn: ICMSPlugIn read FCMSPlugIn write FCMSPlugIn;
     property WebsiteSettingsFileName: TFileName read FWebsiteSettingsFileName write FWebsiteSettingsFileName;
     destructor Destroy; override;
@@ -319,8 +318,7 @@ begin
   FcxPEID.DroppedDown := False;
 end;
 
-procedure TIDEditPanel.FcxGIDFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord;
-  ANewItemRecordFocusingChanged: Boolean);
+procedure TIDEditPanel.FcxGIDFocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 begin
   if AFocusedRecord <> nil then
     FcxPEID.Text := AFocusedRecord.Values[FcxGIDTableViewColumn1.Index];
@@ -565,7 +563,7 @@ end;
 
 constructor TIDEditAPanel.Create(AOwner: TComponent);
 var
-  I: Integer;
+  LTypeID: TTypeID;
 begin
   inherited Create(AOwner);
 
@@ -595,8 +593,8 @@ begin
     begin
       // DropDownListStyle
 
-      for I := low(TStringTemplateTypeID) to high(TStringTemplateTypeID) do
-        Items.Add(TStringTemplateTypeID[I]);
+      for LTypeID := Low(TTypeID) to High(TTypeID) do
+        Items.Add(TypeIDToString(LTypeID));
     end;
   end;
 end;
@@ -626,19 +624,18 @@ end;
 
 procedure TIDEditBPanel.FcxCOBControlValueInitPopup(Sender: TObject);
 begin
-  if (IndexStr(FStringTemplateTypeID, TStringTemplateTypeID) <> -1) and (IndexStr(FcxCOBControlName.Text, TStringComponentID) <> -1) then
-    FcxCOBControlValue.Properties.Items.Text := FAppController.GetControlValues(StringToTTemplateTypeID(FStringTemplateTypeID),
-      StringToTComponentID(FcxCOBControlName.Text));
+  if (IndexStr(FStringTypeID, TStringTemplateTypeID) <> -1) and (IndexStr(FcxCOBControlName.Text, TStringComponentID) <> -1) then
+    FcxCOBControlValue.Properties.Items.Text := FAppController.GetControlValues(StringToTypeID(FStringTypeID), StringToControlID(FcxCOBControlName.Text));
 end;
 
 constructor TIDEditBPanel.Create(AOwner: TComponent; AAppController: IAppController; AStringTemplateTypeID: string);
 var
-  I: Integer;
+  LControlID: TControlID;
 begin
   inherited Create(AOwner);
 
   FAppController := AAppController;
-  FStringTemplateTypeID := AStringTemplateTypeID;
+  FStringTypeID := AStringTemplateTypeID;
 
   FcxLControlName := TcxLabel.Create(Self);
   with FcxLControlName do
@@ -666,8 +663,8 @@ begin
     begin
       // DropDownListStyle
 
-      for I := low(TStringComponentID) to high(TStringComponentID) do
-        Items.Add(TStringComponentID[I]);
+      for LControlID := Low(TControlID) to High(TControlID) do
+        Items.Add(ControlIDToString(LControlID));
     end;
   end;
 
@@ -795,8 +792,7 @@ begin
     TargetNode := GetNodeAt(X, Y);
     SourceNode := Selected;
 
-    if (TargetNode = SourceNode) or (SourceNode.Level = 0) or ((SourceNode.Level > 0) and not Assigned(TargetNode)) or
-      ((TargetNode.Level = 0) and not MouseOverTargetNode) then
+    if (TargetNode = SourceNode) or (SourceNode.Level = 0) or ((SourceNode.Level > 0) and not Assigned(TargetNode)) or ((TargetNode.Level = 0) and not MouseOverTargetNode) then
     begin
       MessageBeep(MB_ICONEXCLAMATION);
       EndDrag(False);
@@ -1266,7 +1262,7 @@ end;
 
 function THosterPanel.GetHosterName: string;
 begin
-  Result := GetHosterTypeName(FHosterType);
+  result := GetHosterTypeName(FHosterType);
 end;
 
 procedure THosterPanel.UpdateRankedWhiteList;
@@ -1739,23 +1735,23 @@ end;
 
 procedure TBasisWebsiteEditor.FcxGridFilterControlsTableViewColumn3PropertiesInitPopup(Sender: TObject);
 var
-  I: Integer;
-  ComponentID: TComponentID;
+  LTypeID: TTypeID;
+  AControlID: TControlID;
   StringList: TStringList;
 begin
   with FcxGridFilterControlsTableView.DataController do
-    ComponentID := StringToTComponentID(Values[GetFocusedRecordIndex, FcxGridFilterControlsTableViewColumn1.index]);
+    AControlID := StringToControlID(Values[GetFocusedRecordIndex, FcxGridFilterControlsTableViewColumn1.index]);
 
   with TStringList.Create do
     try
       Sorted := True;
       Duplicates := dupIgnore;
 
-      for I := low(TStringTemplateTypeID) to high(TStringTemplateTypeID) do
+      for LTypeID := Low(TTypeID) to High(TTypeID) do
       begin
         StringList := TStringList.Create;
         try
-          StringList.Text := FAppController.GetControlValues(TTemplateTypeID(I), ComponentID);
+          StringList.Text := FAppController.GetControlValues(LTypeID, AControlID);
           AddStrings(StringList);
         finally
           StringList.Free;
@@ -1769,8 +1765,8 @@ begin
     end;
 end;
 
-procedure TBasisWebsiteEditor.FcxGridFilterControlsTableViewColumn4GetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
-  ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption; var AIsHintMultiLine: Boolean; var AHintTextRect: TRect);
+procedure TBasisWebsiteEditor.FcxGridFilterControlsTableViewColumn4GetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption;
+  var AIsHintMultiLine: Boolean; var AHintTextRect: TRect);
 begin
   with FcxGridFilterControlsTableView.DataController do
     if NewItemRowFocused then
@@ -1796,8 +1792,8 @@ begin
     FHosterPanelList.Items[I].Visible := (FcxTCHoster.TabIndex = I);
 end;
 
-procedure TBasisWebsiteEditor.FcxGridCustomFieldsTableViewColumn3GetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
-  ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption; var AIsHintMultiLine: Boolean; var AHintTextRect: TRect);
+procedure TBasisWebsiteEditor.FcxGridCustomFieldsTableViewColumn3GetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption;
+  var AIsHintMultiLine: Boolean; var AHintTextRect: TRect);
 begin
   with FcxGridCustomFieldsTableView.DataController do
     if NewItemRowFocused then
@@ -1827,7 +1823,7 @@ end;
 
 constructor TBasisWebsiteEditor.Create(ACMSPlugIn: ICMSPlugIn; AAppController: IAppController; AWebsiteSettingsFileName: TFileName);
 var
-  I: Integer;
+  LControlID: TControlID;
 begin
   CreateNew(nil);
 
@@ -1979,11 +1975,11 @@ begin
     with Properties do
     begin
       EmptySelectionText := '';
-      for I := 0 to length(TStringTemplateTypeID) - 1 do
+      for LControlID := Low(TControlID) to High(TControlID) do
         with Items.Add do
         begin
           Enabled := True;
-          Description := TStringTemplateTypeID[I];
+          Description := ControlIDToString(LControlID);
         end;
     end;
 
@@ -2043,8 +2039,8 @@ begin
       Caption := 'Control name';
       PropertiesClass := TcxComboBoxProperties;
       with Properties as TcxComboBoxProperties do
-        for I := low(TStringComponentID) to high(TStringComponentID) do
-          Items.Add(TStringComponentID[I]);
+        for LControlID := Low(TControlID) to High(TControlID) do
+          Items.Add(ControlIDToString(LControlID));
     end;
 
     FcxGridFilterControlsTableViewColumn2 := FcxGridFilterControlsTableView.CreateColumn;
@@ -2334,8 +2330,7 @@ const
   CheckboxInfo: array [0 .. 60, 0 .. 2] of string = ( { }
     ('use_plainlinks', 'Plainlinks', 'if active IntelligeN uses directlinks, otherwise it uses the links form the first crypter'), { }
     ('use_textasdescription', 'text as description',
-      'activate this to use the IScript-Message template' + sLineBreak + 'to be posted in the description field, otherwise the' + sLineBreak +
-        'normal description ll be posted in the description field'), { }
+      'activate this to use the IScript-Message template' + sLineBreak + 'to be posted in the description field, otherwise the' + sLineBreak + 'normal description ll be posted in the description field'), { }
     ('htmlon', 'Html Code', ''), { }
     ('allowimgcode', '[img] Code', ''), { }
     ('parseurloff', 'Disable Parse URL', ''), { }
@@ -2389,8 +2384,7 @@ const
     ('hasThank', 'Activate Thankomat', 'Activate the Thankomat for this post'), { }
     ('closeThread', 'Close thread', 'Closes the thread after this post'), { }
     ('draft', 'Draft', ''), { }
-    ('intelligent_posting', '', 'Before this plugin creates a new post,' + sLineBreak + 'it checks whether there are similar' + sLineBreak +
-        'entries and posts in this (if existing)'),
+    ('intelligent_posting', '', 'Before this plugin creates a new post,' + sLineBreak + 'it checks whether there are similar' + sLineBreak + 'entries and posts in this (if existing)'),
     { }
     ('intelligent_posting_helper', '', 'a dialog will popup to let you verify the search'), { }
     ('intelligent_posting_mask_search', '', 'surrounds search value with quotation marks (")'), { }
@@ -2500,8 +2494,7 @@ function TBasisWebsiteEditor.ShowModal: Integer;
         for z := 0 to ChildNodes.Count - 1 do
           if ChildNodes.Nodes[z].NodeType = ntElement then
           begin
-            s := '="' + TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[z]) + '" ' + VarToStr(ChildNodes.Nodes[z].Attributes['type']) + '="' + VarToStr
-              (ChildNodes.Nodes[z].Attributes['value']) + '"';
+            s := '="' + TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[z]) + '" ' + VarToStr(ChildNodes.Nodes[z].Attributes['type']) + '="' + VarToStr(ChildNodes.Nodes[z].Attributes['value']) + '"';
             SubAdd(AcxTreeView, AcxTreeView.Items.AddChild(ATreeNode, s), ChildNodes.Nodes[z]);
           end;
   end;
@@ -2588,8 +2581,7 @@ begin
               begin
                 if HasChildNodes then
                   for Y := 0 to ChildNodes.Count - 1 do
-                    SubAdd(FIDPanelList.Items[I].FcxTreeView, FIDPanelList.Items[I].FcxTreeView.Items.AddChild(nil,
-                        VarToStr(ChildNodes.Nodes[Y].Attributes['name']) + ' ="' + TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[Y]) + '"'),
+                    SubAdd(FIDPanelList.Items[I].FcxTreeView, FIDPanelList.Items[I].FcxTreeView.Items.AddChild(nil, VarToStr(ChildNodes.Nodes[Y].Attributes['name']) + ' ="' + TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[Y]) + '"'),
                       ChildNodes.Nodes[Y]);
               end;
               with FIDPanelList.Items[I] do
@@ -2655,8 +2647,7 @@ begin
                     with FHosterPanelList.Items[I] do
                       if HosterType = htFile then
                       begin
-                        FcxLBBlackList.Items.Text := FetchOldHosterBlackList(VarToStr(ChildNodes.Nodes['hoster_blacklist'].NodeValue),
-                          FcxCOBAddToBlackList.Properties.Items);
+                        FcxLBBlackList.Items.Text := FetchOldHosterBlackList(VarToStr(ChildNodes.Nodes['hoster_blacklist'].NodeValue), FcxCOBAddToBlackList.Properties.Items);
                         UpdateRankedWhiteList;
                       end;
                 end;

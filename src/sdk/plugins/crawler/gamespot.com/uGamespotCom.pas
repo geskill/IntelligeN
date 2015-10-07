@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -17,14 +17,14 @@ uses
 type
   TGamespotCom = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -34,28 +34,28 @@ begin
   result := 'gamespot.com';
 end;
 
-function TGamespotCom.GetAvailableTemplateTypeIDs;
+function TGamespotCom.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cNintendoDS, cPCGames, cPlayStation2, cPlayStation3, cPlayStationPortable, cWii, cXbox360];
   result := Word(_TemplateTypeIDs);
 end;
 
-function TGamespotCom.GetAvailableComponentIDs;
+function TGamespotCom.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture, cGenre];
   result := LongWord(_ComponentIDs);
 end;
 
-function TGamespotCom.GetComponentIDDefaultValue;
+function TGamespotCom.GetControlIDDefaultValue;
 begin
   result := True;
 end;
 
-function TGamespotCom.GetLimitDefaultValue;
+function TGamespotCom.GetResultsLimitDefaultValue;
 begin
   result := 0;
 end;
@@ -67,9 +67,9 @@ var
   _searchname, s: string;
   _Count: Integer;
 begin
-  _searchname := AComponentController.FindControl(cReleaseName).Value;
+  _searchname := AControlController.FindControl(cReleaseName).Value;
   if (_searchname = '') then
-    _searchname := AComponentController.FindControl(cTitle).Value;
+    _searchname := AControlController.FindControl(cTitle).Value;
 
   _Count := 0;
 

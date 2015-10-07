@@ -10,7 +10,7 @@ uses
   // Utils
   uHTMLUtils,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -22,17 +22,17 @@ type
     function AmazonHTMLDescription2Text(AHtmlContent: string): string;
     function AmazonOriginalSize(ASizedImage: string): string;
     function AmazonSearchRequest(AWebsite, ASearchAlias, ATitle: string; out AFollowUpRequest: Double): string;
-    function AmazonExtractGameCategory(AHTML: string; AInsideHTML: Boolean = False): TTemplateTypeID;
+    function AmazonExtractGameCategory(AHTML: string; AInsideHTML: Boolean = False): TTypeID;
     function AmazonDetailedPageRequest(AFollowUpRequest: Double; AWebsite: string): string;
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -78,7 +78,7 @@ begin
   Result := HTTPManager.GetResult(AFollowUpRequest).HTTPResult.SourceCode;
 end;
 
-function TAmazonCom.AmazonExtractGameCategory(AHTML: string; AInsideHTML: Boolean = False): TTemplateTypeID;
+function TAmazonCom.AmazonExtractGameCategory(AHTML: string; AInsideHTML: Boolean = False): TTypeID;
 var
   Category: string;
 begin
@@ -136,20 +136,20 @@ begin
   Result := 'Amazon.com';
 end;
 
-function TAmazonCom.GetAvailableTemplateTypeIDs;
+function TAmazonCom.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
-  _TemplateTypeIDs := [ low(TTemplateTypeID) .. high(TTemplateTypeID)] - [cXXX];
+  _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)] - [cXXX];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TAmazonCom.GetAvailableComponentIDs;
+function TAmazonCom.GetAvailableControlIDs;
 var
-  _TemplateTypeID: TTemplateTypeID;
-  _ComponentIDs: TComponentIDs;
+  _TemplateTypeID: TTypeID;
+  _ComponentIDs: TControlIDs;
 begin
-  _TemplateTypeID := TTemplateTypeID(TemplateTypeID);
+  _TemplateTypeID := TTypeID(ATypeID);
 
   _ComponentIDs := [cPicture, cDescription];
 
@@ -159,22 +159,22 @@ begin
   Result := LongWord(_ComponentIDs);
 end;
 
-function TAmazonCom.GetComponentIDDefaultValue;
+function TAmazonCom.GetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TAmazonCom.GetLimitDefaultValue;
+function TAmazonCom.GetResultsLimitDefaultValue;
 begin
   Result := 5;
 end;
 
-procedure TAmazonCom.Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController);
+procedure TAmazonCom.Exec;
 const
   website = 'http://www.amazon.com/';
 var
-  _TemplateTypeID: TTemplateTypeID;
-  _ComponentIDs: TComponentIDs;
+  _TemplateTypeID: TTypeID;
+  _ComponentIDs: TControlIDs;
 
   _Title, _search_alias: string;
   _Count: Integer;
@@ -186,18 +186,18 @@ var
   var
     _tracklist: string;
   begin
-    if (AComponentController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
+    if (AControlController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsitecode;
           Expression := '<li> <b>Run Time:<\/b> (\d+) minutes<\/li>';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cRuntime).AddValue(Match[1], GetName);
+            AControlController.FindControl(cRuntime).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cVideoSystem) <> nil) and (cVideoSystem in _ComponentIDs) then
+    if (AControlController.FindControl(cVideoSystem) <> nil) and (cVideoSystem in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsitecode;
@@ -206,14 +206,14 @@ var
           if Exec(InputString) then
           begin
             if (Pos('NTSC', string(Match[1])) > 0) then
-              AComponentController.FindControl(cVideoSystem).AddValue('NTSC', GetName)
+              AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'NTSC', GetName)
             else if (Pos('PAL', string(Match[1])) > 0) then
-              AComponentController.FindControl(cVideoSystem).AddValue('PAL', GetName);
+              AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'PAL');
           end;
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
     begin
       with TRegExpr.Create do
         try
@@ -226,7 +226,7 @@ var
             repeat
               _tracklist := _tracklist + Trim(Match[1]) + sLineBreak;
             until not ExecNext;
-            AComponentController.FindControl(cDescription).AddValue(copy(_tracklist, 1, length(_tracklist) - 2), GetName);
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, copy(_tracklist, 1, length(_tracklist) - 2));
           end;
         finally
           Free;
@@ -239,14 +239,14 @@ var
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cDescription).AddValue(Trim(AmazonHTMLDescription2Text(Match[1])), GetName);
+              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(AmazonHTMLDescription2Text(Match[1])));
             until not ExecNext;
           end;
         finally
           Free;
         end;
     end;
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsitecode;
@@ -255,7 +255,7 @@ var
           if Exec(InputString) then
           begin
             if not(Pos('no-img', string(Match[1])) > 0) then
-              AComponentController.FindControl(cPicture).AddValue(AmazonOriginalSize(Match[1]), GetName);
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, AmazonOriginalSize(Match[1]));
           end;
         finally
           Free;
@@ -300,9 +300,9 @@ var
   end;
 
 begin
-  _TemplateTypeID := TTemplateTypeID(ATemplateTypeID);
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  _TemplateTypeID := TTypeID(ATypeID);
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
   _Count := 0;
 
   case _TemplateTypeID of

@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // Utils
   uHTMLUtils,
   // HTTPManager
@@ -21,14 +21,14 @@ type
   protected
     function MoviemazeHTMLDescription2Text(AHtmlContent: string): string;
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -52,28 +52,28 @@ begin
   Result := 'Moviemaze.de';
 end;
 
-function TMoviemazeDe.GetAvailableTemplateTypeIDs;
+function TMoviemazeDe.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cMovie];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TMoviemazeDe.GetAvailableComponentIDs;
+function TMoviemazeDe.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture, cGenre, cRuntime, cDescription];
   Result := LongWord(_ComponentIDs);
 end;
 
-function TMoviemazeDe.GetComponentIDDefaultValue;
+function TMoviemazeDe.GetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TMoviemazeDe.GetLimitDefaultValue;
+function TMoviemazeDe.GetResultsLimitDefaultValue;
 begin
   Result := 5;
 end;
@@ -82,7 +82,7 @@ procedure TMoviemazeDe.Exec;
 const
   website: string = 'http://www.moviemaze.de/';
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _Title: string;
   _Count: Integer;
 
@@ -112,7 +112,7 @@ var
             if length(_picturenumber) < 2 then
               _picturenumber := '0' + _picturenumber;
 
-            AComponentController.FindControl(cPicture).AddValue(website + 'filme/' + _incnumber + '/poster_lg' + _picturenumber + '.jpg', GetName);
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, website + 'filme/' + _incnumber + '/poster_lg' + _picturenumber + '.jpg');
           until not ExecNext;
         end;
       finally
@@ -124,7 +124,7 @@ var
   var
     s: string;
   begin
-    if (AComponentController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
       with TRegExpr.Create do
       begin
         try
@@ -146,7 +146,7 @@ var
                   if Exec(InputString) then
                   begin
                     repeat
-                      AComponentController.FindControl(cGenre).AddValue(Match[1], GetName);
+                      AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[1]);
                     until not ExecNext;
                   end;
                 finally
@@ -155,13 +155,13 @@ var
               end;
             end
             else
-              AComponentController.FindControl(cGenre).AddValue(s, GetName);
+              AControlController.FindControl(cGenre).AddProposedValue(GetName, s);
           end;
         finally
           Free;
         end;
       end;
-    if (AComponentController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
+    if (AControlController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
       with TRegExpr.Create do
       begin
         try
@@ -169,12 +169,12 @@ var
           Expression := 'nge:<\/span><\/td>\s+<td class="standard" valign="top"><nobr>\s+(\d+) ';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cRuntime).AddValue(Match[1], GetName);
+            AControlController.FindControl(cRuntime).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
       end;
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
     begin
       with TRegExpr.Create do
         try
@@ -183,18 +183,18 @@ var
           Expression := '"plot">\s+(.*?)<\/div>';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cDescription).AddValue(HTMLDecode(Match[1]), GetName);
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, HTMLDecode(Match[1]));
 
           // critics
           Expression := '"summary">(.*?)<\/div><br\/>';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cDescription).AddValue(MoviemazeHTMLDescription2Text(Match[1]), GetName);
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, MoviemazeHTMLDescription2Text(Match[1]));
         finally
           Free;
         end;
     end;
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
       with TRegExpr.Create do
       begin
         try
@@ -219,9 +219,9 @@ var
   end;
 
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
+  LongWord(_ComponentIDs) := AControlIDs;
 
-  _Title := AComponentController.FindControl(cTitle).Value;
+  _Title := AControlController.FindControl(cTitle).Value;
   _Count := 0;
 
   HTTPParams := THTTPParams.Create;

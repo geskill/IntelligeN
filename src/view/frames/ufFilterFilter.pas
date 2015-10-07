@@ -49,11 +49,11 @@ end;
 procedure TfFilterFilter.cxGridTableView1Column2PropertiesInitPopup(Sender: TObject);
 var
   I: Integer;
-  ComponentID: TComponentID;
+  AControlID: TControlID;
   StringList: TStringList;
 begin
   with cxGridTableView1.DataController do
-    ComponentID := StringToTComponentID(Values[GetFocusedRecordIndex, cxGridTableView1Column1.index]);
+    AControlID := StringToControlID(Values[GetFocusedRecordIndex, cxGridTableView1Column1.index]);
 
   with TStringList.Create do
     try
@@ -64,7 +64,7 @@ begin
       begin
         StringList := TStringList.Create;
         try
-          StringList.Text := (Main as IAppController).GetControlValues(TTemplateTypeID(I), ComponentID);
+          StringList.Text := (Main as IAppController).GetControlValues(TTypeID(I), AControlID);
           AddStrings(StringList);
         finally
           StringList.Free;

@@ -10,7 +10,7 @@ uses
   // Utils
   uHTMLUtils,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -19,14 +19,14 @@ uses
 type
   T1advdCh = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -36,29 +36,29 @@ begin
   result := '1advd.ch';
 end;
 
-function T1advdCh.GetAvailableTemplateTypeIDs;
+function T1advdCh.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
-  _TemplateTypeIDs := [ low(TTemplateTypeID) .. high(TTemplateTypeID)];
+  _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)];
   result := Word(_TemplateTypeIDs);
 end;
 
-function T1advdCh.GetAvailableComponentIDs;
+function T1advdCh.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture, cGenre, cDescription];
 
   result := LongWord(_ComponentIDs);
 end;
 
-function T1advdCh.GetComponentIDDefaultValue;
+function T1advdCh.GetControlIDDefaultValue;
 begin
   result := True;
 end;
 
-function T1advdCh.GetLimitDefaultValue;
+function T1advdCh.GetResultsLimitDefaultValue;
 begin
   result := 5;
 end;
@@ -67,7 +67,7 @@ procedure T1advdCh.Exec;
 const
   website = 'http://www.1advd.ch/';
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _Title, _search_alias: string;
   _Count: Integer;
 
@@ -106,7 +106,7 @@ var
   var
     s: string;
   begin
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
@@ -118,7 +118,7 @@ var
 
             if (Pos('noch%5Fkein%5Fbild', s) = 0) then
             begin
-              if not(TTemplateTypeID(ATemplateTypeID) = cXXX) then
+              if not(TTypeID(ATypeID) = cXXX) then
               begin
                 s := ChangeFileExt(s, 'f' + ExtractFileExt(s));
                 s := StringReplace(s, '/imgCD/', '/imgCDbc/', []);
@@ -126,13 +126,13 @@ var
                 s := StringReplace(s, '/img/', '/imgbc/', []);
                 s := StringReplace(s, '/imgAx/', '/imgA/', []);
               end;
-              AComponentController.FindControl(cPicture).AddValue(HTTPDecode(s), GetName);
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, HTTPDecode(s));
             end;
           end;
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
@@ -141,13 +141,13 @@ var
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cGenre).AddValue(Match[1], GetName);
+              AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[1]);
             until not ExecNext;
           end;
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
@@ -157,7 +157,7 @@ var
           begin
             repeat
 
-              AComponentController.FindControl(cDescription).AddValue(Trim(HTML2Text(SpecialL(Match[1]))), GetName);
+              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(SpecialL(Match[1]))));
             until not ExecNext;
           end;
         finally
@@ -172,11 +172,11 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
   _Count := 0;
 
-  case TTemplateTypeID(ATemplateTypeID) of
+  case TTypeID(ATypeID) of
     cAudio:
       _search_alias := 'CD';
     cMovie:
@@ -205,7 +205,7 @@ begin
     with TRegExpr.Create do
       try
         InputString := ResponseStrSearchResult;
-        if TTemplateTypeID(ATemplateTypeID) = cMovie then
+        if TTypeID(ATypeID) = cMovie then
           Expression := '<td width=80% colspan="2"><font face="Arial, Helvetica, sans-serif" size="2"><b><a href="(.*?)"'
         else
           Expression := '<td rowspan=2 align="center" width=40><a href="(.*?)"';

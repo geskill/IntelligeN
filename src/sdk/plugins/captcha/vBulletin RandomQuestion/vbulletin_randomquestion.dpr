@@ -7,10 +7,10 @@ uses
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: ICAPTCHAPlugIn): Boolean; stdcall; export;
+function LoadPlugin(var APlugIn: ICAPTCHAPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := TvBulletin_RandomQuestion.Create;
+    APlugIn := TvBulletin_RandomQuestion.Create;
     Result := True;
   except
     Result := False;

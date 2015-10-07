@@ -10,7 +10,7 @@ uses
   // Utils,
   uHTMLUtils, uReleasenameUtils, uStringUtils,
   // Common
-  uConst, uWebsiteInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -45,13 +45,13 @@ type
     function SettingsClass: TCMSPlugInSettingsMeta; override;
     function GetSettings: TCMSPlugInSettings; override;
     procedure SetSettings(ACMSPlugInSettings: TCMSPlugInSettings); override;
-    function LoadSettings(const AWebsiteData: ICMSWebsiteData = nil): Boolean; override;
+    function LoadSettings(const AData: ITabSheetData = nil): Boolean; override;
 
     function NeedPreLogin(out ARequestURL: string): Boolean; override;
     function DoBuildLoginRequest(out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; ACAPTCHALogin: Boolean = False): Boolean; override;
     function DoAnalyzeLogin(AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; override;
 
-    function DoBuildPostRequest(const AWebsiteData: ICMSWebsiteData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
+    function DoBuildPostRequest(const AData: ITabSheetData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
     function DoAnalyzePost(AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; override;
   public
     function GetName: WideString; override; safecall;
@@ -81,10 +81,10 @@ end;
 
 function TN3m0CMS.LoadSettings;
 begin
-  Result := inherited LoadSettings(AWebsiteData);
+  Result := inherited LoadSettings(AData);
   with N3m0CMSSettings do
   begin
-    if Assigned(AWebsiteData) and (AWebsiteData.TemplateTypeID in [cAudio, cMovie, cXXX]) and (categorys = null) then
+    if Assigned(AData) and (AData.TypeID in [cAudio, cMovie, cXXX]) and (categorys = null) then
     begin
       ErrorMsg := 'category is undefined!';
       Result := False;
@@ -175,16 +175,16 @@ begin
   AHTTPParams := THTTPParams.Create;
   with AHTTPParams do
   begin
-    case AWebsiteData.TemplateTypeID of
+    case AData.TypeID of
       cAudio:
         begin
           AddFormField('Kategorie', 'Musik');
 
-          if MatchTextMask('VA%', AWebsiteData.FindControl(cReleaseName).Value) or MatchTextMask('%TOP%', AWebsiteData.FindControl(cReleaseName).Value) then
+          if MatchTextMask('VA%', AData.FindControl(cReleaseName).Value) or MatchTextMask('%TOP%', AData.FindControl(cReleaseName).Value) then
             AddFormField('submusik', 'Sampler')
-          else if MatchTextMask('%CDM%', AWebsiteData.FindControl(cReleaseName).Value) then
+          else if MatchTextMask('%CDM%', AData.FindControl(cReleaseName).Value) then
             AddFormField('submusik', 'Maxi')
-          else if MatchTextMask('%CDS%', AWebsiteData.FindControl(cReleaseName).Value) then
+          else if MatchTextMask('%CDS%', AData.FindControl(cReleaseName).Value) then
             AddFormField('submusik', 'Songs')
           else
             AddFormField('submusik', 'Alben');
@@ -194,7 +194,7 @@ begin
       cNintendoDS, cPCGames, cPlayStation2, cPlayStation3, cPlayStationPortable, cWii, cXbox, cXbox360:
         begin
           AddFormField('Kategorie', 'Games');
-          case AWebsiteData.TemplateTypeID of
+          case AData.TypeID of
             cNintendoDS:
               AddFormField('subgames', 'NDS');
             cPCGames:
@@ -215,7 +215,7 @@ begin
         end;
       cMovie:
         begin
-          if TReleasenameUtils.IsSeries(AWebsiteData.FindControl(cReleaseName).Value) then
+          if TReleasenameUtils.IsSeries(AData.FindControl(cReleaseName).Value) then
             AddFormField('Kategorie', 'Serien')
           else
           begin
@@ -229,9 +229,9 @@ begin
         begin
           AddFormField('Kategorie', 'XXX');
 
-          if MatchTextMask('%.iMAGESET%', AWebsiteData.FindControl(cReleaseName).Value) then
+          if MatchTextMask('%.iMAGESET%', AData.FindControl(cReleaseName).Value) then
             AddFormField('subxxx', 'Pictures')
-          else if MatchTextMask('%.XXX.%', AWebsiteData.FindControl(cReleaseName).Value) then
+          else if MatchTextMask('%.XXX.%', AData.FindControl(cReleaseName).Value) then
             AddFormField('subxxx', 'Movies')
           else
             AddFormField('subxxx', 'Clips');
@@ -244,18 +244,18 @@ begin
 
     AddFormField('Titel', Subject);
 
-    if Assigned(AWebsiteData.FindControl(cArtist)) then
-      AddFormField('Interpret', AWebsiteData.FindControl(cArtist).Value);
+    if Assigned(AData.FindControl(cArtist)) then
+      AddFormField('Interpret', AData.FindControl(cArtist).Value);
 
-    if Assigned(AWebsiteData.FindControl(cAudioBitrate)) then
-      AddFormField('Bitrate', NumbersOnly(AWebsiteData.FindControl(cAudioBitrate).Value));
+    if Assigned(AData.FindControl(cAudioBitrate)) then
+      AddFormField('Bitrate', NumbersOnly(AData.FindControl(cAudioBitrate).Value));
 
-    if Assigned(AWebsiteData.FindControl(cLanguage)) then
+    if Assigned(AData.FindControl(cLanguage)) then
     begin
-      if not(Pos(';', AWebsiteData.FindControl(cLanguage).Value) = 0) then
+      if not(Pos(';', AData.FindControl(cLanguage).Value) = 0) then
         AddFormField('Sprache', 'Multilanguage')
       else
-        case IndexText(AWebsiteData.FindControl(cLanguage).Value, ['GER', 'ENG', 'JPN', 'RUS']) of
+        case IndexText(AData.FindControl(cLanguage).Value, ['GER', 'ENG', 'JPN', 'RUS']) of
           0:
             AddFormField('Sprache', 'Deutsch');
           1:
@@ -267,54 +267,54 @@ begin
         end;
     end;
 
-    if Assigned(AWebsiteData.FindControl(cReleaseDate)) then
-      AddFormField('Jahr', FormatDateTime('yyyy', StrToDateTimeDef((AWebsiteData.FindControl(cReleaseDate).Value), Now, FormatSettings), FormatSettings))
+    if Assigned(AData.FindControl(cReleaseDate)) then
+      AddFormField('Jahr', FormatDateTime('yyyy', StrToDateTimeDef((AData.FindControl(cReleaseDate).Value), Now, FormatSettings), FormatSettings))
     else
       AddFormField('Jahr', FormatDateTime('yyyy', Now, FormatSettings));
 
     if not N3m0CMSSettings.use_textasdescription then
     begin
-      if Assigned(AWebsiteData.FindControl(cDescription)) then
-        AddFormField('Beschreibung', AWebsiteData.FindControl(cDescription).Value);
+      if Assigned(AData.FindControl(cDescription)) then
+        AddFormField('Beschreibung', AData.FindControl(cDescription).Value);
     end
     else
       AddFormField('Beschreibung', Message);
 
-    for I := 0 to AWebsiteData.MirrorCount - 1 do
-      if AWebsiteData.Mirror[I].Size > 0 then
+    for I := 0 to AData.MirrorCount - 1 do
+      if AData.Mirror[I].Size > 0 then
       begin
         if N3m0CMSSettings.round_size then
-          AddFormField('Groesse', IntToStr(round(AWebsiteData.Mirror[I].Size)))
+          AddFormField('Groesse', IntToStr(round(AData.Mirror[I].Size)))
         else
-          AddFormField('Groesse', FloatToStr(AWebsiteData.Mirror[I].Size));
+          AddFormField('Groesse', FloatToStr(AData.Mirror[I].Size));
         break;
       end;
 
-    if Assigned(AWebsiteData.FindControl(cPassword)) then
-      AddFormField('Passwort', AWebsiteData.FindControl(cPassword).Value);
+    if Assigned(AData.FindControl(cPassword)) then
+      AddFormField('Passwort', AData.FindControl(cPassword).Value);
 
-    if Assigned(AWebsiteData.FindControl(cPicture)) then
-      AddFormField('Cover', AWebsiteData.FindControl(cPicture).Value);
+    if Assigned(AData.FindControl(cPicture)) then
+      AddFormField('Cover', AData.FindControl(cPicture).Value);
 
-    AddFormField('Mirror', IntToStr(AWebsiteData.MirrorCount));
+    AddFormField('Mirror', IntToStr(AData.MirrorCount));
 
     // max 10 mirrors
-    for I := 0 to Min(10, AWebsiteData.MirrorCount) - 1 do
+    for I := 0 to Min(10, AData.MirrorCount) - 1 do
     begin
-      HosterPos := IndexText(AWebsiteData.Mirror[I].Hoster, HosterArray);
+      HosterPos := IndexText(AData.Mirror[I].Hoster, HosterArray);
 
       if HosterPos = -1 then
       begin
         AddFormField('Hoster' + IntToStr(I + 1), 'anderer Hoster');
-        AddFormField('AHoster' + IntToStr(I + 1), AWebsiteData.Mirror[I].Hoster);
+        AddFormField('AHoster' + IntToStr(I + 1), AData.Mirror[I].Hoster);
       end
       else
         AddFormField('Hoster' + IntToStr(I + 1), HosterArray[HosterPos]);
 
       if N3m0CMSSettings.use_plainlinks then
-        AddFormField('Mirror' + IntToStr(I + 1), Trim(AWebsiteData.Mirror[I].Directlink[0].Value))
-      else if (AWebsiteData.Mirror[I].CrypterCount > 0) then
-        AddFormField('Mirror' + IntToStr(I + 1), AWebsiteData.Mirror[I].Crypter[0].Value)
+        AddFormField('Mirror' + IntToStr(I + 1), Trim(AData.Mirror[I].Directlink[0].Value))
+      else if (AData.Mirror[I].CrypterCount > 0) then
+        AddFormField('Mirror' + IntToStr(I + 1), AData.Mirror[I].Crypter[0].Value)
       else
       begin
         ErrorMsg := 'No crypter initialized! (disable use_plainlinks or add a crypter)';

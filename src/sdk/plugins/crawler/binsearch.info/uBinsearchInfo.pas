@@ -10,7 +10,7 @@ uses
   // Utils
   uHTMLUtils,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -19,14 +19,14 @@ uses
 type
   TBinsearchInfo = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -36,28 +36,28 @@ begin
   Result := 'Binsearch.info';
 end;
 
-function TBinsearchInfo.GetAvailableTemplateTypeIDs;
+function TBinsearchInfo.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
-  _TemplateTypeIDs := [ low(TTemplateTypeID) .. high(TTemplateTypeID)];
+  _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TBinsearchInfo.GetAvailableComponentIDs;
+function TBinsearchInfo.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cNFO];
   Result := LongWord(_ComponentIDs);
 end;
 
-function TBinsearchInfo.GetComponentIDDefaultValue;
+function TBinsearchInfo.GetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TBinsearchInfo.GetLimitDefaultValue;
+function TBinsearchInfo.GetResultsLimitDefaultValue;
 begin
   Result := 5;
 end;
@@ -76,7 +76,7 @@ const
         if Exec(InputString) then
         begin
           repeat
-            AComponentController.FindControl(cNFO).AddValue(HTML2Text(Match[1]), GetName);
+            AControlController.FindControl(cNFO).AddProposedValue(GetName, HTML2Text(Match[1]));
           until not ExecNext;
         end;
       finally
@@ -85,16 +85,16 @@ const
   end;
 
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _ReleaseName: string;
 
   RequestID1, RequestID2: Double;
 
   ResponseStrSearchResult: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
+  LongWord(_ComponentIDs) := AControlIDs;
 
-  _ReleaseName := AComponentController.FindControl(cReleaseName).Value;
+  _ReleaseName := AControlController.FindControl(cReleaseName).Value;
 
   // '&m=n&max=25&adv_age=365&adv_sort=date&adv_nfo=on'
   RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + '/index.php?q=' + HTTPEncode(_ReleaseName) + '&max=250&adv_age=&server='),

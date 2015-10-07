@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -17,14 +17,14 @@ uses
 type
   TNfodbRu = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -34,28 +34,28 @@ begin
   result := 'Nfodb.ru';
 end;
 
-function TNfodbRu.GetAvailableTemplateTypeIDs;
+function TNfodbRu.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cAudio];
   result := Word(_TemplateTypeIDs);
 end;
 
-function TNfodbRu.GetAvailableComponentIDs;
+function TNfodbRu.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cNFO];
   result := LongWord(_ComponentIDs);
 end;
 
-function TNfodbRu.GetComponentIDDefaultValue;
+function TNfodbRu.GetControlIDDefaultValue;
 begin
   result := True;
 end;
 
-function TNfodbRu.GetLimitDefaultValue;
+function TNfodbRu.GetResultsLimitDefaultValue;
 begin
   result := 0;
 end;
@@ -70,7 +70,7 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  _Releasename := AComponentController.FindControl(cReleaseName).Value;
+  _Releasename := AControlController.FindControl(cReleaseName).Value;
 
   RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + '?do_search=Search&frelease=' + HTTPEncode(_Releasename)), TPlugInHTTPOptions.Create(Self));
 
@@ -96,7 +96,7 @@ begin
             sleep(50);
           until HTTPManager.HasResult(RequestID2);
 
-          AComponentController.FindControl(cNFO).AddValue(HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode, GetName);
+          AControlController.FindControl(cNFO).AddProposedValue(GetName, HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode);
         until not ExecNext;
       end;
     finally

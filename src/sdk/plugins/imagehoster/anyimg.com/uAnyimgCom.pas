@@ -4,11 +4,11 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, Classes, StrUtils, HTTPApp, DECFmt,
+  Windows, SysUtils, Classes, StrUtils, HTTPApp,
+  // DEC
+  DECFmt,
   // RegEx
   RegExpr,
-  // Common
-  uConst, uAppInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system

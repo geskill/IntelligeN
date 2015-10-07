@@ -14,7 +14,7 @@ uses
   // Mods
   uMyAdvmJScriptStyler,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Utils
   uStringUtils;
 

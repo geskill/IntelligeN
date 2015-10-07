@@ -3,8 +3,8 @@ unit uPlugInCrypterClass;
 interface
 
 uses
-  // Interface
-  uAppInterface,
+  // Common
+  uBaseInterface,
   // Plugin
   uPlugInInterface, uPlugInClass, uPlugInConst;
 
@@ -117,9 +117,10 @@ type
     property UseVisitorPassword: WordBool read GetUseVisitorPassword write SetUseVisitorPassword;
     property Visitorpassword: WideString read GetVisitorPassword write SetVisitorPassword;
 
-    function GenerateFolder(MirrorController: IMirrorControl): WideString; virtual; safecall; abstract;
-    function GetFolderInfo(FolderURL: WideString): TCrypterFolderInfo; virtual; safecall; abstract;
-    procedure GetFolderPicture(FolderURL: WideString; out Result: WideString; Small: WordBool = True); virtual; safecall; abstract;
+    function AddFolder(const AMirrorContainer: IMirrorContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; virtual; safecall; abstract;
+    function EditFolder(const AMirrorContainer: IMirrorContainer; ACrypterFolderInfo: TCrypterFolderInfo): WordBool; virtual; safecall; abstract;
+    function DeleteFolder(AFolderIdentifier: WideString): WordBool; virtual; safecall; abstract;
+    function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; virtual; safecall; abstract;
   end;
 
 implementation

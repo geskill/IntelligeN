@@ -8,7 +8,7 @@ uses
   // AdvMemo
   AdvMemo,
   // Common
-  uConst;
+  uBaseConst, uAppConst;
 
 const
   AllJScriptKeyWords = '"FOR","IMPORT","IF","THIS","DO","WHILE","BREAK","{","}","(",")","SWITCH","CASE","DEFAULT","ELSE","FUNCTION",";","RESULT","VAR"';
@@ -47,8 +47,8 @@ implementation
 
 constructor TAdvJScriptMemoStyler.Create(AOwner: TComponent);
 var
-  itm: TElementStyle;
-  I: Integer;
+  LItem: TElementStyle;
+  LControlID: TControlID;
 begin
   inherited;
   FVersion := '3.0';
@@ -72,48 +72,47 @@ begin
   NumberStyle.Style := [fsBold];
 
   // ------------Script Standard Default----------------
-  itm := AllStyles.Add;
-  itm.Info := 'Script Standard Default';
-  itm.Font.Color := $00A00000;
-  itm.Font.Style := [fsBold];
-  itm.KeyWords.CommaText := AllJScriptKeyWords;
+  LItem := AllStyles.Add;
+  LItem.Info := 'Script Standard Default';
+  LItem.Font.Color := $00A00000;
+  LItem.Font.Style := [fsBold];
+  LItem.KeyWords.CommaText := AllJScriptKeyWords;
   // ------------Simple Quote ' '----------------
-  itm := AllStyles.Add;
-  itm.StyleType := stBracket;
-  itm.Info := 'Simple Quote';
-  itm.Font.Color := clBlue;
-  itm.Font.Style := [];
-  itm.BracketStart := #39;
-  itm.BracketEnd := #39;
+  LItem := AllStyles.Add;
+  LItem.StyleType := stBracket;
+  LItem.Info := 'Simple Quote';
+  LItem.Font.Color := clBlue;
+  LItem.Font.Style := [];
+  LItem.BracketStart := #39;
+  LItem.BracketEnd := #39;
   // ------------Double Quote " "----------------
-  itm := AllStyles.Add;
-  itm.StyleType := stBracket;
-  itm.Info := 'Double Quote';
-  itm.Font.Color := clBlue;
-  itm.Font.Style := [];
-  itm.BracketStart := '"';
-  itm.BracketEnd := '"';
+  LItem := AllStyles.Add;
+  LItem.StyleType := stBracket;
+  LItem.Info := 'Double Quote';
+  LItem.Font.Color := clBlue;
+  LItem.Font.Style := [];
+  LItem.BracketStart := '"';
+  LItem.BracketEnd := '"';
   // ----------SYMBOL --------------
-  itm := AllStyles.Add;
-  itm.StyleType := stSymbol;
-  itm.Info := 'Symbols Delimiters';
-  itm.Font.Color := clBlack;
-  itm.Font.Style := [];
-  itm.Symbols := #32',;:.()[]=-*/^%<>#'#13 + #10;
+  LItem := AllStyles.Add;
+  LItem.StyleType := stSymbol;
+  LItem.Info := 'Symbols Delimiters';
+  LItem.Font.Color := clBlack;
+  LItem.Font.Style := [];
+  LItem.Symbols := #32',;:.()[]=-*/^%<>#'#13 + #10;
   // ----------Javascript functions --------------
-  itm := AllStyles.Add;
-  itm.Info := 'JScript Standard Functions';
-  itm.Font.Color := clPurple;
-  itm.Font.Style := [];
-  itm.KeyWords.CommaText := '"PRINT"';
+  LItem := AllStyles.Add;
+  LItem.Info := 'JScript Standard Functions';
+  LItem.Font.Color := clPurple;
+  LItem.Font.Style := [];
+  LItem.KeyWords.CommaText := '"PRINT"';
   // ----------Javascript functions --------------
-  itm := AllStyles.Add;
-  itm.Info := 'JScript Functions';
-  itm.Font.Color := clGreen;
-  itm.Font.Style := [];
-  itm.KeyWords.CommaText := '"INTTOSTR","FLOATTOSTR","BOOLTOSTR","VARTOSTR","STRTOINT","STRTOINT64","STRTOFLOAT","STRTOBOOL","FORMAT","FORMATFLOAT",' +
-    '"LENGTH","COPY","POS","DELETE","DELETESTR","INSERT","UPPERCASE","LOWERCASE","TRIM","NAMECASE","COMPARETEXT","CHR","ORD","SETLENGTH",' +
-    '"ROUND","TRUNC","INT","FRAC","SQRT","ABS","SIN","COS","ARCTAN","TAN","EXP","LN","PI","INC","DEC",' +
+  LItem := AllStyles.Add;
+  LItem.Info := 'JScript Functions';
+  LItem.Font.Color := clGreen;
+  LItem.Font.Style := [];
+  LItem.KeyWords.CommaText := '"INTTOSTR","FLOATTOSTR","BOOLTOSTR","VARTOSTR","STRTOINT","STRTOINT64","STRTOFLOAT","STRTOBOOL","FORMAT","FORMATFLOAT",' +
+    '"LENGTH","COPY","POS","DELETE","DELETESTR","INSERT","UPPERCASE","LOWERCASE","TRIM","NAMECASE","COMPARETEXT","CHR","ORD","SETLENGTH",' + '"ROUND","TRUNC","INT","FRAC","SQRT","ABS","SIN","COS","ARCTAN","TAN","EXP","LN","PI","INC","DEC",' +
     '"MATCHTEXT","REPLACEREGEXPR","CHARCOUNT","POSEX","EXTRACTURLFILENAME","EXTRACTURLPROTOCOL","EXTRACTURLHOST"';
 
   with HintParameter.Parameters do
@@ -241,8 +240,8 @@ begin
     Add('const ICMS: string');
     Add('const IWebsite: string');
 
-    for I := 0 to length(TStringComponentID) - 1 do
-      Add('const ' + TStringComponentID[I] + ': string');
+    for LControlID := Low(TControlID) to High(TControlID) do
+      Add('const ' + ControlIDToString(LControlID) + ': string');
 
     Add('property IMirror: [const IndexOrName: OleVariant]: IMirrorContainer');
   end;

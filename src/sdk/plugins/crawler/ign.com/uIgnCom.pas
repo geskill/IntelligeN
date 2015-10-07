@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // Utils
   uHTMLUtils,
   // HTTPManager
@@ -19,14 +19,14 @@ uses
 type
   TIgnCom = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -36,28 +36,28 @@ begin
   result := 'ign.com';
 end;
 
-function TIgnCom.GetAvailableTemplateTypeIDs;
+function TIgnCom.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cNintendoDS, cPCGames, cPlayStation2, cPlayStation3, cPlayStationPortable, cWii, cXbox, cXbox360];
   result := Word(_TemplateTypeIDs);
 end;
 
-function TIgnCom.GetAvailableComponentIDs;
+function TIgnCom.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture, cGenre, cDescription];
   result := LongWord(_ComponentIDs);
 end;
 
-function TIgnCom.GetComponentIDDefaultValue;
+function TIgnCom.GetControlIDDefaultValue;
 begin
   result := True;
 end;
 
-function TIgnCom.GetLimitDefaultValue;
+function TIgnCom.GetResultsLimitDefaultValue;
 begin
   result := 5;
 end;
@@ -66,13 +66,13 @@ procedure TIgnCom.Exec;
 const
   website = 'ign.com/';
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _Title: string;
   _Count: Integer;
 
-  function GetPlatform(ATemplateTypeID: TTemplateTypeID): string;
+  function GetPlatform(ATypeID: TTypeID): string;
   begin
-    case ATemplateTypeID of
+    case ATypeID of
       cAudio:
         ;
       cGameCube:
@@ -118,7 +118,7 @@ var
           begin
             repeat
               aGenrecode := Match[1];
-              AComponentController.FindControl(cGenre).AddValue(aGenrecode, GetName);
+              AControlController.FindControl(cGenre).AddProposedValue(GetName, aGenrecode);
             until not ExecNext;
           end;
         finally
@@ -127,7 +127,7 @@ var
     end;
 
   begin
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
       with TRegExpr.Create do
         try
           ModifierS := False;
@@ -135,12 +135,12 @@ var
           Expression := 'alt="(.*?)" title="(.*?)" src="(.*?)"';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cPicture).AddValue(Match[3], GetName);
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[3]);
         finally
           Free;
         end;
 
-    if (AComponentController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsitesourcecode;
@@ -152,7 +152,7 @@ var
           Free;
         end;
 
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
       with TRegExpr.Create do
         try
           ModifierS := True;
@@ -163,7 +163,7 @@ var
             Expression := '<div class="column-about-boxart">(.*?)<div';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cDescription).AddValue(Trim(HTML2Text(HTMLDecode(Match[1]))), GetName);
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(HTMLDecode(Match[1]))));
         finally
           Free;
         end;
@@ -174,12 +174,12 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
   _Count := 0;
 
   RequestID1 := HTTPManager.Get(THTTPRequest.Create('http://search.' + website + 'products?sort=relevance&so=exact&platform=' + HTTPEncode
-        (GetPlatform(TTemplateTypeID(ATemplateTypeID))) + '&query=' + HTTPEncode(_Title)), TPlugInHTTPOptions.Create(Self));
+        (GetPlatform(TTypeID(ATypeID))) + '&query=' + HTTPEncode(_Title)), TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);

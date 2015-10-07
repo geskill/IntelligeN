@@ -4,7 +4,7 @@ interface
 
 uses
   // Common
-  uBase, uConst;
+  uBaseConst, uAppConst;
 
 const
   ProgrammLibrary = Programm + '.dll';

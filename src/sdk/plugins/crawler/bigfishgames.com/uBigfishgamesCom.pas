@@ -10,7 +10,7 @@ uses
   // Utils
   uHTMLUtils, uStringUtils,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -23,14 +23,14 @@ type
     function BigfishgamesMaskTitle(ATitle: string): string;
     procedure BigfishgamesGamesList(AStrings: TStrings);
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -95,28 +95,28 @@ begin
   Result := 'bigfishgames.com';
 end;
 
-function TBigfishgamesCom.GetAvailableTemplateTypeIDs;
+function TBigfishgamesCom.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cPCGames];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TBigfishgamesCom.GetAvailableComponentIDs;
+function TBigfishgamesCom.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture, cDescription];
   Result := LongWord(_ComponentIDs);
 end;
 
-function TBigfishgamesCom.GetComponentIDDefaultValue;
+function TBigfishgamesCom.GetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TBigfishgamesCom.GetLimitDefaultValue;
+function TBigfishgamesCom.GetResultsLimitDefaultValue;
 begin
   Result := 1;
 end;
@@ -126,16 +126,16 @@ var
   I: Integer;
   GamesList: TStringList;
   _Title, _ImageCode: string;
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 
   RequestID: Double;
   ResponseStr: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
 
-  if Assigned(AComponentController.FindControl(cTitle)) and ((Assigned(AComponentController.FindControl(cPicture)) and (cPicture in _ComponentIDs)) or
-      (Assigned(AComponentController.FindControl(cDescription)) and (cDescription in _ComponentIDs))) then
+  if Assigned(AControlController.FindControl(cTitle)) and ((Assigned(AControlController.FindControl(cPicture)) and (cPicture in _ComponentIDs)) or
+      (Assigned(AControlController.FindControl(cDescription)) and (cDescription in _ComponentIDs))) then
   begin
     GamesList := TStringList.Create;
     try
@@ -153,7 +153,7 @@ begin
 
           ResponseStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
 
-          if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+          if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
           begin
             with TRegExpr.Create do
               try
@@ -161,13 +161,13 @@ begin
                 Expression := '<p class="dlgi_description_text">(.*?)<\/p>';
 
                 if Exec(InputString) then
-                  AComponentController.FindControl(cDescription).AddValue(Trim(HTML2Text(Match[1])), GetName);
+                  AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
               finally
                 Free;
               end;
           end;
 
-          if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+          if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
             with TRegExpr.Create do
               try
                 InputString := ResponseStr;
@@ -183,12 +183,12 @@ begin
                       Expression := 'data-src="(.*?)"';
 
                       if Exec(InputString) then
-                        AComponentController.FindControl(cPicture).AddValue(Match[1], GetName)
+                        AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1], GetName)
                       else
                       begin
                         Expression := 'src="(.*?)"';
                         if Exec(InputString) then
-                          AComponentController.FindControl(cPicture).AddValue(Match[1], GetName);
+                          AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
                       end;
                     finally
                       Free;

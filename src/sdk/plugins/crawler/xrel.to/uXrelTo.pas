@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // Utils
   uHTMLUtils,
   // HTTPManager
@@ -19,14 +19,14 @@ uses
 type
   TXrelTo = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override;
   end;
 
 implementation
@@ -43,20 +43,20 @@ begin
   Result := 'Xrel.to';
 end;
 
-function TXrelTo.GetAvailableTemplateTypeIDs;
+function TXrelTo.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cGameCube, cMovie, cNintendoDS, cPCGames, cPlayStation2, cPlayStation3, cPlayStationPortable, cSoftware, cWii, cXbox, cXbox360, cXXX];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TXrelTo.GetAvailableComponentIDs;
+function TXrelTo.GetAvailableControlIDs;
 var
-  _TemplateTypeID: TTemplateTypeID;
-  _ComponentIDs: TComponentIDs;
+  _TemplateTypeID: TTypeID;
+  _ComponentIDs: TControlIDs;
 begin
-  _TemplateTypeID := TTemplateTypeID(TemplateTypeID);
+  _TemplateTypeID := TTypeID(ATypeID);
 
   _ComponentIDs := [cReleaseDate, cTitle, cNFO];
 
@@ -75,11 +75,11 @@ begin
   Result := LongWord(_ComponentIDs);
 end;
 
-function TXrelTo.GetComponentIDDefaultValue;
+function TXrelTo.GetControlIDDefaultValue;
 var
-  _ComponentID: TComponentID;
+  _ComponentID: TControlID;
 begin
-  _ComponentID := TComponentID(ComponentID);
+  _ComponentID := TControlID(AControlID);
 
   Result := True;
 
@@ -87,7 +87,7 @@ begin
     Result := False;
 end;
 
-function TXrelTo.GetLimitDefaultValue;
+function TXrelTo.GetResultsLimitDefaultValue;
 begin
   Result := 0;
 end;
@@ -97,8 +97,8 @@ const
   xrelmonth: array [0 .. 11] of string = ('Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez');
   xrelurl = 'http://www.xrel.to/';
 var
-  _TemplateTypeID: TTemplateTypeID;
-  _ComponentIDs: TComponentIDs;
+  _TemplateTypeID: TTypeID;
+  _ComponentIDs: TControlIDs;
 
   HTTPRequest: IHTTPRequest;
 
@@ -106,10 +106,10 @@ var
 
   ReleaseName, ProductInformationPageLink, ResponseStrReleaseInformation, ResponseStrProductInformation, s: string;
 begin
-  _TemplateTypeID := TTemplateTypeID(ATemplateTypeID);
-  LongWord(_ComponentIDs) := AComponentIDs;
+  _TemplateTypeID := TTypeID(ATypeID);
+  LongWord(_ComponentIDs) := AControlIDs;
 
-  ReleaseName := AComponentController.FindControl(cReleaseName).Value;
+  ReleaseName := AControlController.FindControl(cReleaseName).Value;
 
   HTTPRequest := THTTPRequest.Create(xrelurl + 'search.html?xrel_search_query=' + ReleaseName);
   HTTPRequest.Referer := xrelurl + 'home.html';
@@ -124,7 +124,7 @@ begin
 
   if Pos('nfo_title', ResponseStrReleaseInformation) > 0 then
   begin
-    if (cReleaseDate in _ComponentIDs) and Assigned(AComponentController.FindControl(cReleaseDate)) then
+    if (cReleaseDate in _ComponentIDs) and Assigned(AControlController.FindControl(cReleaseDate)) then
     begin
       with TRegExpr.Create do
       begin
@@ -135,8 +135,8 @@ begin
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cReleaseDate).AddValue(FormatInt(StrToInt(Match[1]), 2) + '.' + FormatInt(IndexText(Match[2], xrelmonth) + 1,
-                  2) + '.' + Match[3], GetName);
+              AControlController.FindControl(cReleaseDate).AddProposedValue(GetName, FormatInt(StrToInt(Match[1]), 2) + '.' + FormatInt(IndexText(Match[2], xrelmonth) + 1,
+                  2) + '.' + Match[3]);
             until not ExecNext;
           end;
         finally
@@ -156,7 +156,7 @@ begin
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cNFO).AddValue(Trim(HTML2Text(Match[1], False)), GetName);
+              AControlController.FindControl(cNFO).AddProposedValue(GetName, Trim(HTML2Text(Match[1], False)));
             until not ExecNext;
           end;
         finally
@@ -184,25 +184,25 @@ begin
 
     if (_TemplateTypeID = cMovie) then
     begin
-      if (AComponentController.FindControl(cAudioStream) <> nil) and (cAudioStream in _ComponentIDs) then
+      if (AControlController.FindControl(cAudioStream) <> nil) and (cAudioStream in _ComponentIDs) then
         with TRegExpr.Create do
           try
             InputString := ResponseStrReleaseInformation;
             Expression := 'Audio-Stream: </div> <div class="l_right"> (.*?) </div>';
             if Exec(InputString) then
-              AComponentController.FindControl(cAudioStream).AddValue(Match[1], GetName);
+              AControlController.FindControl(cAudioStream).AddProposedValue(GetName, Match[1]);
           finally
             Free;
           end;
 
-      if (AComponentController.FindControl(cVideoStream) <> nil) and (cVideoStream in _ComponentIDs) then
+      if (AControlController.FindControl(cVideoStream) <> nil) and (cVideoStream in _ComponentIDs) then
         with TRegExpr.Create do
           try
             InputString := ResponseStrReleaseInformation;
             Expression := 'Video-Stream: </div> <div class="l_right"> (.*?) </div>';
 
             if Exec(InputString) then
-              AComponentController.FindControl(cVideoStream).AddValue(Match[1], GetName);
+              AControlController.FindControl(cVideoStream).AddProposedValue(GetName, Match[1]);
           finally
             Free;
           end;
@@ -218,7 +218,7 @@ begin
 
       ResponseStrProductInformation := HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode;
 
-      if (AComponentController.FindControl(cTitle) <> nil) and (cTitle in _ComponentIDs) then
+      if (AControlController.FindControl(cTitle) <> nil) and (cTitle in _ComponentIDs) then
       begin
         with TRegExpr.Create do
         begin
@@ -229,7 +229,7 @@ begin
             if Exec(InputString) then
             begin
               repeat
-                AComponentController.FindControl(cTitle).AddValue(HTML2Text(Match[1]), GetName);
+                AControlController.FindControl(cTitle).AddProposedValue(GetName, HTML2Text(Match[1]));
               until not ExecNext;
             end;
           finally
@@ -238,7 +238,7 @@ begin
         end;
       end;
 
-      if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+      if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
         with TRegExpr.Create do
           try
             InputString := ResponseStrProductInformation;
@@ -251,7 +251,7 @@ begin
                 begin
                   s := xrelurl + Match[1];
 
-                  AComponentController.FindControl(cPicture).AddValue(s, GetName);
+                  AControlController.FindControl(cPicture).AddProposedValue(GetName, s);
                 end;
               until not ExecNext;
             end;
@@ -259,19 +259,19 @@ begin
             Free;
           end;
 
-      if (AComponentController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
+      if (AControlController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
         with TRegExpr.Create do
           try
             InputString := ResponseStrProductInformation;
             Expression := 'Laufzeit:</div> <div class="l_right" title="(\d+) ';
 
             if Exec(InputString) then
-              AComponentController.FindControl(cRuntime).AddValue(Match[1], GetName);
+              AControlController.FindControl(cRuntime).AddProposedValue(GetName, Match[1]);
           finally
             Free;
           end;
 
-      if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+      if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
       begin
         with TRegExpr.Create do
         begin
@@ -282,7 +282,7 @@ begin
             if Exec(InputString) then
             begin
               repeat
-                AComponentController.FindControl(cDescription).AddValue(Trim(HTML2Text(Match[1])), GetName);
+                AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
               until not ExecNext;
             end;
           finally
@@ -291,7 +291,7 @@ begin
         end;
       end;
 
-      if (AComponentController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+      if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
       begin
         with TRegExpr.Create do
         begin
@@ -314,7 +314,7 @@ begin
                       if Exec(InputString) then
                       begin
                         repeat
-                          AComponentController.FindControl(cGenre).AddValue(Trim(Match[1]), GetName);
+                          AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(Match[1]));
                         until not ExecNext;
                       end;
                     finally
@@ -323,7 +323,7 @@ begin
                   end;
                 end
                 else
-                  AComponentController.FindControl(cGenre).AddValue(s, GetName);
+                  AControlController.FindControl(cGenre).AddProposedValue(GetName, s);
               until not ExecNext;
             end;
           finally

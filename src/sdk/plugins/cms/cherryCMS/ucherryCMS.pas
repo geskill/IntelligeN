@@ -10,7 +10,7 @@ uses
   // Utils,
   uHTMLUtils, uStringUtils,
   // Common
-  uConst, uWebsiteInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPConst,
   // Plugin system
@@ -41,12 +41,12 @@ type
     function SettingsClass: TCMSPlugInSettingsMeta; override;
     function GetSettings: TCMSPlugInSettings; override;
     procedure SetSettings(ACMSPlugInSettings: TCMSPlugInSettings); override;
-    function LoadSettings(const AWebsiteData: ICMSWebsiteData = nil): Boolean; override;
+    function LoadSettings(const AData: ITabSheetData = nil): Boolean; override;
 
     function DoBuildLoginRequest(out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; ACAPTCHALogin: Boolean = False): Boolean; override;
     function DoAnalyzeLogin(AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; override;
 
-    function DoBuildPostRequest(const AWebsiteData: ICMSWebsiteData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
+    function DoBuildPostRequest(const AData: ITabSheetData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
     function DoAnalyzePost(AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; override;
 
     function GetIDsRequestURL: string; override;
@@ -78,7 +78,7 @@ end;
 
 function TcherryCMS.LoadSettings;
 begin
-  Result := inherited LoadSettings(AWebsiteData);
+  Result := inherited LoadSettings(AData);
   with cherryCMSSettings do
   begin
     if (categorys = null) then
@@ -158,65 +158,65 @@ begin
 
     AddFormField('childgroup', cherryCMSSettings.categorys);
 
-    if Assigned(AWebsiteData.FindControl(cGenre)) then
-      AddFormField('genre', AWebsiteData.FindControl(cGenre).Value);
+    if Assigned(AData.FindControl(cGenre)) then
+      AddFormField('genre', AData.FindControl(cGenre).Value);
 
-    if Assigned(AWebsiteData.FindControl(cReleaseDate)) then
-      AddFormField('year', FormatDateTime('yyyy', StrToDate(AWebsiteData.FindControl(cReleaseDate).Value, FormatSettings), FormatSettings));
+    if Assigned(AData.FindControl(cReleaseDate)) then
+      AddFormField('year', FormatDateTime('yyyy', StrToDate(AData.FindControl(cReleaseDate).Value, FormatSettings), FormatSettings));
 
     if not cherryCMSSettings.use_textasdescription then
     begin
-      if Assigned(AWebsiteData.FindControl(cDescription)) then
-        AddFormField('description', AWebsiteData.FindControl(cDescription).Value)
+      if Assigned(AData.FindControl(cDescription)) then
+        AddFormField('description', AData.FindControl(cDescription).Value)
     end
     else
       AddFormField('description', Message);
 
-    if Assigned(AWebsiteData.FindControl(cLanguage)) then
+    if Assigned(AData.FindControl(cLanguage)) then
     begin
-      if (IndexText(AWebsiteData.FindControl(cLanguage).Value, languages) = -1) then
+      if (IndexText(AData.FindControl(cLanguage).Value, languages) = -1) then
         AddFormField('language', '3')
       else
-        AddFormField('language', IntToStr(IndexText(AWebsiteData.FindControl(cLanguage).Value, languages)));
+        AddFormField('language', IntToStr(IndexText(AData.FindControl(cLanguage).Value, languages)));
     end;
 
-    for I := 0 to AWebsiteData.MirrorCount - 1 do
-      if AWebsiteData.Mirror[I].Size > 0 then
+    for I := 0 to AData.MirrorCount - 1 do
+      if AData.Mirror[I].Size > 0 then
       begin
-        AddFormField('size', FloatToStr(AWebsiteData.Mirror[I].Size));
+        AddFormField('size', FloatToStr(AData.Mirror[I].Size));
         break;
       end;
 
     HosterList := '';
-    for I := 0 to AWebsiteData.MirrorCount - 1 do
+    for I := 0 to AData.MirrorCount - 1 do
     begin
-      HosterList := HosterList + AWebsiteData.Mirror[I].Hoster;
-      if not(I = AWebsiteData.MirrorCount - 1) then
+      HosterList := HosterList + AData.Mirror[I].Hoster;
+      if not(I = AData.MirrorCount - 1) then
         HosterList := HosterList + ', ';
     end;
     AddFormField('fdlhoster', HosterList);
 
-    if Assigned(AWebsiteData.FindControl(cPicture)) then
-      AddFormField('coverlink', AWebsiteData.FindControl(cPicture).Value);
+    if Assigned(AData.FindControl(cPicture)) then
+      AddFormField('coverlink', AData.FindControl(cPicture).Value);
 
-    if Assigned(AWebsiteData.FindControl(cNFO)) then
-      AddFormField('nfo', AWebsiteData.FindControl(cNFO).Value, 'nfo.nfo');
+    if Assigned(AData.FindControl(cNFO)) then
+      AddFormField('nfo', AData.FindControl(cNFO).Value, 'nfo.nfo');
 
-    if Assigned(AWebsiteData.FindControl(cPassword)) then
-      AddFormField('password', AWebsiteData.FindControl(cPassword).Value);
+    if Assigned(AData.FindControl(cPassword)) then
+      AddFormField('password', AData.FindControl(cPassword).Value);
 
-    if Assigned(AWebsiteData.FindControl(cSample)) then
-      AddFormField('sample', AWebsiteData.FindControl(cSample).Value);
+    if Assigned(AData.FindControl(cSample)) then
+      AddFormField('sample', AData.FindControl(cSample).Value);
 
     _count := 0;
-    for I := 0 to AWebsiteData.MirrorCount - 1 do
+    for I := 0 to AData.MirrorCount - 1 do
 
     begin
       if cherryCMSSettings.use_plainlinks then
       begin
         with TStringList.Create do
           try
-            Text := AWebsiteData.Mirror[I].Directlink[0].Value;
+            Text := AData.Mirror[I].Directlink[0].Value;
 
             for J := 0 to Count - 1 do
               AddFormField('url[' + IntToStr(_count) + '][]', Strings[J]);
@@ -227,14 +227,14 @@ begin
             Free;
           end;
       end
-      else if (AWebsiteData.Mirror[I].CrypterCount > 0) then
+      else if (AData.Mirror[I].CrypterCount > 0) then
       begin
-        for J := 0 to AWebsiteData.Mirror[I].CrypterCount - 1 do
+        for J := 0 to AData.Mirror[I].CrypterCount - 1 do
         begin
-          AddFormField('url[' + IntToStr(_count) + '][]', AWebsiteData.Mirror[I].Crypter[J].Value);
+          AddFormField('url[' + IntToStr(_count) + '][]', AData.Mirror[I].Crypter[J].Value);
 
           if _count = 0 then
-            AddFormField('parts', IntToStr(AWebsiteData.Mirror[I].CrypterCount));
+            AddFormField('parts', IntToStr(AData.Mirror[I].CrypterCount));
         end;
       end
       else
@@ -243,7 +243,7 @@ begin
         Result := False;
       end;
 
-      AddFormField('hoster[' + IntToStr(_count) + ']', AWebsiteData.Mirror[I].Hoster);
+      AddFormField('hoster[' + IntToStr(_count) + ']', AData.Mirror[I].Hoster);
 
       Inc(_count);
     end;

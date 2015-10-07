@@ -12,7 +12,7 @@ uses
   // Utils
   uFileUtils, uPathUtils,
   // Common
-  uConst,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // DLLs
   uExport,
   // Api
@@ -148,28 +148,28 @@ end;
 procedure TAddPlugin.CrawlerPluginLoaded;
 var
   I, J: Integer;
-  _TemplateTypeIDs: TTemplateTypeIDs;
-  _ComponentIDs: TComponentIDs;
+  _TemplateTypeIDs: TTypeIDs;
+  _ComponentIDs: TControlIDs;
 begin
   with aPlugInCollectionItem as TCrawlerCollectionItem do
   begin
-    Limit := ICrawlerPlugIn(aPlugIn).GetLimitDefaultValue;
+    Limit := ICrawlerPlugIn(aPlugIn).GetResultsLimitDefaultValue;
     Contingent.Clear;
 
-    Word(_TemplateTypeIDs) := ICrawlerPlugIn(aPlugIn).GetAvailableTemplateTypeIDs;
+    Word(_TemplateTypeIDs) := ICrawlerPlugIn(aPlugIn).GetAvailableTypeIDs;
 
-    for I := Ord( low(TTemplateTypeID)) to Ord( high(TTemplateTypeID)) do
-      if TTemplateTypeID(I) in _TemplateTypeIDs then
+    for I := Ord( low(TTypeID)) to Ord( high(TTypeID)) do
+      if TTypeID(I) in _TemplateTypeIDs then
       begin
-        Longword(_ComponentIDs) := ICrawlerPlugIn(aPlugIn).GetAvailableComponentIDs(I);
+        Longword(_ComponentIDs) := ICrawlerPlugIn(aPlugIn).GetAvailableControlIDs(I);
 
-        for J := Ord( low(TComponentID)) to Ord( high(TComponentID)) do
-          if TComponentID(J) in _ComponentIDs then
+        for J := Ord( low(TControlID)) to Ord( high(TControlID)) do
+          if TControlID(J) in _ComponentIDs then
             with TCrawlerContingentCollectionItem(Contingent.Add) do
             begin
-              TemplateTypeID := TTemplateTypeID(I);
-              ComponentID := TComponentID(J);
-              Status := ICrawlerPlugIn(aPlugIn).GetComponentIDDefaultValue(I, J);
+              ATypeID := TTypeID(I);
+              AControlID := TControlID(J);
+              Status := ICrawlerPlugIn(aPlugIn).GetControlIDDefaultValue(I, J);
             end;
       end;
   end;

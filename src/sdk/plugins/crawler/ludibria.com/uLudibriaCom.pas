@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -17,14 +17,14 @@ uses
 type
   TLudibriaCom = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -34,28 +34,28 @@ begin
   result := 'Ludibria.com';
 end;
 
-function TLudibriaCom.GetAvailableTemplateTypeIDs;
+function TLudibriaCom.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cGameCube, cNintendoDS, cPlayStation2, cPlayStation3, cPlayStationPortable, cWii, cXbox360];
   result := Word(_TemplateTypeIDs);
 end;
 
-function TLudibriaCom.GetAvailableComponentIDs;
+function TLudibriaCom.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cNFO];
   result := LongWord(_ComponentIDs);
 end;
 
-function TLudibriaCom.GetComponentIDDefaultValue;
+function TLudibriaCom.GetControlIDDefaultValue;
 begin
   result := True;
 end;
 
-function TLudibriaCom.GetLimitDefaultValue;
+function TLudibriaCom.GetResultsLimitDefaultValue;
 begin
   result := 0;
 end;
@@ -64,12 +64,12 @@ procedure TLudibriaCom.Exec;
 const
   website = 'http://www.ludibria.com/';
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _ReleaseName: WideString;
 
-  function TemplateTypeIDToSysId(TemplateTypeID: TTemplateTypeID): string;
+  function TemplateTypeIDToSysId(ATypeID: TTypeID): string;
   begin
-    case TemplateTypeID of
+    case ATypeID of
       cGameCube:
         result := 'ngc';
       cNintendoDS:
@@ -92,10 +92,10 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _ReleaseName := AComponentController.FindControl(cReleaseName).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
+  _ReleaseName := AControlController.FindControl(cReleaseName).Value;
 
-  RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + 'index.php?sys=' + TemplateTypeIDToSysId(TTemplateTypeID(ATemplateTypeID)) + '&srg=' + HTTPEncode
+  RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + 'index.php?sys=' + TemplateTypeIDToSysId(TTypeID(ATypeID)) + '&srg=' + HTTPEncode
         (_ReleaseName)), TPlugInHTTPOptions.Create(Self));
 
   repeat
@@ -125,7 +125,7 @@ begin
             sleep(50);
           until HTTPManager.HasResult(RequestID3);
 
-          AComponentController.FindControl(cNFO).AddValue(HTTPManager.GetResult(RequestID3).HTTPResult.SourceCode, GetName);
+          AControlController.FindControl(cNFO).AddProposedValue(GetName, HTTPManager.GetResult(RequestID3).HTTPResult.SourceCode);
 
         until not ExecNext;
       end;

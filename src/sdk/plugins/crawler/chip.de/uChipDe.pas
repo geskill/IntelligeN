@@ -10,21 +10,21 @@ uses
   // Utils
   uHTMLUtils,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // Plugin system
   uPlugInCrawlerClass;
 
 type
   TChipDe = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -36,33 +36,33 @@ begin
   Result := 'chip.de';
 end;
 
-function TChipDe.GetAvailableTemplateTypeIDs: Integer;
+function TChipDe.GetAvailableTypeIDs: Integer;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cSoftware];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TChipDe.GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer;
+function TChipDe.GetAvailableControlIDs(const ATypeID: Integer): Integer;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture, cDescription];
   Result := LongWord(_ComponentIDs);
 end;
 
-function TChipDe.GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool;
+function TChipDe.GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool;
 begin
   Result := True;
 end;
 
-function TChipDe.GetLimitDefaultValue: Integer;
+function TChipDe.GetResultsLimitDefaultValue: Integer;
 begin
   Result := 5;
 end;
 
-procedure TChipDe.Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController);
+procedure TChipDe.Exec;
 const
   website = 'http://www.chip.de/';
 begin

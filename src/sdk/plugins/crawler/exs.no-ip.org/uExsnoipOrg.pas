@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -17,14 +17,14 @@ uses
 type
   TExsnoipOrg = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -34,28 +34,28 @@ begin
   result := 'exs.no-ip.org';
 end;
 
-function TExsnoipOrg.GetAvailableTemplateTypeIDs;
+function TExsnoipOrg.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cMovie];
   result := Word(_TemplateTypeIDs);
 end;
 
-function TExsnoipOrg.GetAvailableComponentIDs;
+function TExsnoipOrg.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cNFO];
   result := LongWord(_ComponentIDs);
 end;
 
-function TExsnoipOrg.GetComponentIDDefaultValue;
+function TExsnoipOrg.GetControlIDDefaultValue;
 begin
   result := True;
 end;
 
-function TExsnoipOrg.GetLimitDefaultValue;
+function TExsnoipOrg.GetResultsLimitDefaultValue;
 begin
   result := 0;
 end;
@@ -71,7 +71,7 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  _ReleaseName := AComponentController.FindControl(cReleaseName).Value;
+  _ReleaseName := AControlController.FindControl(cReleaseName).Value;
   _Count := 0;
 
   RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + 'index.php?search_for=' + HTTPEncode(_ReleaseName)), TPlugInHTTPOptions.Create(Self));
@@ -97,7 +97,7 @@ begin
             sleep(50);
           until HTTPManager.HasResult(RequestID2);
 
-          AComponentController.FindControl(cNFO).AddValue(HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode, GetName);
+          AControlController.FindControl(cNFO).AddProposedValue(GetName, HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode);
           Inc(_Count);
         until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
       end;

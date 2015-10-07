@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface, uFileInterface,
+  uBaseConst, uAppConst, uAppInterface, uFileInterface,
   // DLLs
   uExport,
   // Api
@@ -18,7 +18,7 @@ uses
 
 type
   TTemplateInfo = record
-    TemplateType: TTemplateTypeID;
+    TemplateType: TTypeID;
     TemplateFileName: TFileName;
     TemplateChecksum: string;
   end;
@@ -74,7 +74,7 @@ type
     class function GetCodeDefinition(ACodeDefinition: string): TCodeDefinition;
   end;
 
-procedure GetControls(AFileName: string; const AComponentController: IComponentController; const APageController: IPageController);
+procedure GetControls(AFileName: string; const AComponentController: IControlController; const APageController: IPageController);
 
 implementation
 
@@ -99,7 +99,7 @@ begin
         begin
           with _TemplateInfo do
           begin
-            TemplateType := StringToTTemplateTypeID(VarToStr(NodeValue));
+            TemplateType := StringToTypeID(VarToStr(NodeValue));
             TemplateFileName := VarToStr(Attributes['filename']);
             TemplateChecksum := VarToStr(Attributes['checksum']);
           end;
@@ -669,7 +669,7 @@ begin
   FCS.Free;
 end;
 
-procedure GetControls(AFileName: string; const AComponentController: IComponentController; const APageController: IPageController);
+procedure GetControls(AFileName: string; const AComponentController: IControlController; const APageController: IPageController);
 var
   XMLDoc: IXMLDocument;
   I: Integer;
@@ -692,11 +692,11 @@ begin
             with ChildNodes.Nodes[I] do
               if HasChildNodes then
               begin
-                AComponentController.NewControl(StringToTComponentID(NodeName), VarToStr(ChildNodes.Nodes['title'].NodeValue), VarToStr(ChildNodes.Nodes['value'].NodeValue),
+                AComponentController.NewControl(StringToControlID(NodeName), VarToStr(ChildNodes.Nodes['title'].NodeValue), VarToStr(ChildNodes.Nodes['value'].NodeValue),
                   VarToStr(ChildNodes.Nodes['title'].Attributes['hint']), VarToStr(ChildNodes.Nodes['value'].Attributes['list']),
                   StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['left']), 0), StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['top']), 0),
                   StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['width']), 0), StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['height']), 0));
-                APageController.CallComponentParser;
+                APageController.CallControlParser;
               end;
 end;
 

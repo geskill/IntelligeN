@@ -1,16 +1,16 @@
 library linkgrabber;
 
 uses
-  uPlugInInterface,
+  uPlugInInterfaceAdv,
   uPlugInAppClass,
   uLinkGrabber in 'uLinkGrabber.pas';
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: IAppPlugIn): Boolean; stdcall; export;
+function LoadPlugin(var APlugIn: IAppPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := TLinkGrabber.Create;
+    APlugIn := TLinkGrabber.Create;
     Result := True;
   except
     Result := False;

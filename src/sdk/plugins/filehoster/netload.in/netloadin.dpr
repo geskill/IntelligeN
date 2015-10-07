@@ -9,10 +9,10 @@ uses
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: IFileHosterPlugIn): Boolean; stdcall; export;
+function LoadPlugin(var APlugIn: IFileHosterPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := TNetloadIn.Create;
+    APlugIn := TNetloadIn.Create;
     Result := True;
   except
     Result := False;

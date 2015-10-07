@@ -9,10 +9,10 @@ uses
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: ICMSPlugIn): Boolean; stdcall; export;
+function LoadPlugin(var APlugIn: ICMSPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := TXenForo.Create;
+    APlugIn := TXenForo.Create;
     Result := True;
   except
     Result := False;

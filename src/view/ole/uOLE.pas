@@ -55,7 +55,7 @@ var
   Picture: IPicture;
 begin
   if (Main.fMain.TabSheetCount > 0) then
-    Picture := Main.fMain.ActiveTabSheetController.ComponentController.FindControl(cPicture) as IPicture;
+    Picture := Main.fMain.ActiveTabSheetController.ControlController.FindControl(cPicture) as IPicture;
       if Assigned(Picture) then
         Picture.RemoteUpload();
 end;

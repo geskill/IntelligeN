@@ -8,7 +8,7 @@ uses
   // Spring Framework
   Spring.SystemUtils, Spring.Collections.Lists,
   // Common
-  uBase,
+  uBaseConst,
   // Api
   uApiServerInterface, uApiServerClasses, uApiUpdateModel, uApiUpdateInterface,
   // Utils

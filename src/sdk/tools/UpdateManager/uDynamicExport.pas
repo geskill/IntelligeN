@@ -6,7 +6,7 @@ uses
   // Delphi
   Windows, SysUtils, Classes,
   // Common
-  uBase,
+  uBaseConst,
   // Api
   uApiUpdateConst;
 

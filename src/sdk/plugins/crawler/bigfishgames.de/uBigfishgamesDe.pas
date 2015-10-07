@@ -10,7 +10,7 @@ uses
   // Utils
   uHTMLUtils, uStringUtils,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -21,7 +21,7 @@ type
   protected
     function BigfishgamesURL: string; override;
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
   end;
 
 implementation

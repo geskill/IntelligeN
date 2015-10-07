@@ -6,7 +6,7 @@ uses
   // Delphi
   Windows, SysUtils, Classes, Controls, Variants, XMLDoc, XMLIntf, ActiveX,
   // Common
-  uConst, uWebsiteInterface,
+  uBaseConst, uBaseInterface, uAppConst,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPConst,
   // Plugin system
@@ -29,7 +29,7 @@ type
     function DoBuildLoginRequest(out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; ACAPTCHALogin: Boolean = False): Boolean; override;
     function DoAnalyzeLogin(AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; override;
 
-    function DoBuildPostRequest(const AWebsiteData: ICMSWebsiteData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
+    function DoBuildPostRequest(const AData: ITabSheetData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
     function DoAnalyzePost(AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; override;
   public
     function GetName: WideString; override; safecall;
@@ -96,18 +96,18 @@ begin
 
     AddFormField('action', 'add_entry');
 
-    AddFormField('IType', TTemplateTypeIDToString(AWebsiteData.TemplateTypeID));
+    AddFormField('IType', TypeIDToString(AData.TypeID));
     AddFormField('ISubject', Subject);
     AddFormField('ITags', Tags);
     AddFormField('IMessage', Message);
 
-    for I := 0 to AWebsiteData.ControlCount - 1 do
-      with AWebsiteData.Control[I] do
-        AddFormField(TComponentIDToString(ComponentID), Value);
+    for I := 0 to AData.ControlCount - 1 do
+      with AData.Control[I] do
+        AddFormField(ControlIDToString(ControlID), Value);
 
-    AddFormField('MirrorCount', IntToStr(AWebsiteData.MirrorCount));
-    for I := 0 to AWebsiteData.MirrorCount - 1 do
-      with AWebsiteData.Mirror[I] do
+    AddFormField('MirrorCount', IntToStr(AData.MirrorCount));
+    for I := 0 to AData.MirrorCount - 1 do
+      with AData.Mirror[I] do
       begin
         MirrorPrefix := 'Mirror_' + IntToStr(I) + '_';
         AddFormField(MirrorPrefix + 'Size', FloatToStr(Size));

@@ -7,10 +7,10 @@ uses
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: ICrawlerPlugIn): Boolean; stdcall; export;
+function LoadPlugin(var APlugIn: ICrawlerPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := TWiiboxartCom.Create;
+    APlugIn := TWiiboxartCom.Create;
     Result := True;
   except
     Result := False;

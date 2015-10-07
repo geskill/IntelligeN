@@ -37,8 +37,9 @@ type
   end;
 
   TCrypterFolderInfo = packed record
+    Link: WideString;
     Status: Byte; { 0=offline|1=online|2=unknown;3=notyet;4=mixed;255=noinfo }
-    Size: Extended; { in Megabytes }
+    Size: Double; { in Megabytes }
     Hoster: WideString; { Uploaded.to or Uploaded or up.to }
     HosterShort: WideString;
     Parts: Integer;

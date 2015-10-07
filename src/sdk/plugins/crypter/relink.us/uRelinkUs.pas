@@ -6,7 +6,7 @@ uses
   // Delphi
   Windows, SysUtils, StrUtils, Classes, Variants, HTTPApp, Math,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // Utils
   uPathUtils, uStringUtils,
   // HTTPManager
@@ -24,9 +24,10 @@ type
     function GetFolderID(AFolderName: string): string;
   public
     function GetName: WideString; override;
-    function GenerateFolder(MirrorController: IMirrorControl): WideString; override;
-    function GetFolderInfo(FolderURL: WideString): TCrypterFolderInfo; override;
-    procedure GetFolderPicture(FolderURL: WideString; out Result: WideString; Small: WordBool = True); override;
+    function AddFolder(const AMirrorContainer: IMirrorContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function EditFolder(const AMirrorContainer: IMirrorContainer; ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function DeleteFolder(AFolderIdentifier: WideString): WordBool; override; safecall;
+    function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
   end;
 
 implementation
@@ -44,7 +45,7 @@ begin
   Result := 'Relink.us';
 end;
 
-function TRelinkUs.GenerateFolder;
+function TRelinkUs.AddFolder;
 var
   _Foldertypes: TFoldertypes;
   _Containertypes: TContainertypes;
@@ -74,7 +75,7 @@ begin
       else
         AddFormField('api', AccountName);
 
-    Links := StringReplace(MirrorController.DirectlinksMirror[0], sLineBreak, ';', [rfReplaceAll]);
+    Links := StringReplace(AMirrorContainer.Directlink[0].Value, sLineBreak, ';', [rfReplaceAll]);
 
     if (length(Links) > 0) and (Links[length(Links)] = ';') then
       System.Delete(Links, length(Links), 1);
@@ -131,7 +132,7 @@ begin
   if HTTPProcess.HTTPResult.HasError then
     ErrorMsg := HTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage
   else if not(Pos('relink.us', string(HTTPProcess.HTTPResult.SourceCode)) = 0) then
-    Result := copy(HTTPProcess.HTTPResult.SourceCode, 5)
+    ErrorMsg := copy(HTTPProcess.HTTPResult.SourceCode, 5)
   else
     ErrorMsg := HTTPProcess.HTTPResult.SourceCode;
 
@@ -162,7 +163,17 @@ begin
     }
 end;
 
-function TRelinkUs.GetFolderInfo;
+function TRelinkUs.EditFolder(const AMirrorContainer: IMirrorContainer; ACrypterFolderInfo: TCrypterFolderInfo): WordBool;
+begin
+  //
+end;
+
+function TRelinkUs.DeleteFolder(AFolderIdentifier: WideString): WordBool;
+begin
+  //
+end;
+
+function TRelinkUs.GetFolder;
 var
   CrypterFolderInfo: TCrypterFolderInfo;
 
@@ -182,7 +193,7 @@ begin
     Parts := 0;
   end;
 
-  RequestID := HTTPManager.Get(THTTPRequest.Create(website + 'container_link_info.php?id=' + GetFolderID(FolderURL)), TPlugInHTTPOptions.Create(Self));
+  RequestID := HTTPManager.Get(THTTPRequest.Create(website + 'container_link_info.php?id=' + GetFolderID(AFolderIdentifier)), TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
@@ -237,7 +248,7 @@ begin
 
   CrypterFolderInfo.Size := RoundTo((SizeInBytes / 1048576), -2);
 
-  Result := CrypterFolderInfo;
+  Result := False; // TODO
 
   {
     Wie benutze ich die Container Link-API?
@@ -252,9 +263,10 @@ begin
     Als Rückgabe bekommt man folgende Informationen getrennt mit ";", einzelne Links werden mit "|" getrennt:
     fortlaufende Nummer (1, 2, 3, ...);status (unknown, online, offline);hoster;filename;size in bytes|
     }
-end;
 
-procedure TRelinkUs.GetFolderPicture;
+
+  (*
+
 var
   l_view_snippet: string;
 begin
@@ -269,7 +281,6 @@ begin
       Result := StringReplace(FolderURL, l_view_snippet, 'std/', []) + '.png';
   end;
 
-  (*
     case Small of
     True:
     Result := StringReplace(FolderURL, 'view.php?id=', 'forumstatus.php?id=', []);

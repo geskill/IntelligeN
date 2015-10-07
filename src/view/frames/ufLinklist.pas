@@ -9,7 +9,7 @@ uses
   // Dev Express
   cxControls, cxListView, cxContainer, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters,
   // Api
-  uApiConst;
+  uApiConst, cxEdit;
 
 type
   TfLinklist = class(TFrame)

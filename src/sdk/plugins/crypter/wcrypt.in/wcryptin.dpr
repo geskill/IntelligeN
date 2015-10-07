@@ -7,10 +7,10 @@ uses
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: ICrypterPlugIn): Boolean; stdcall; export;
+function LoadPlugin(var APlugIn: ICrypterPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := TWcryptIn.Create;
+    APlugIn := TWcryptIn.Create;
     Result := True;
   except
     Result := False;

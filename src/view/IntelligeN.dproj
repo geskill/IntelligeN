@@ -133,10 +133,10 @@
 			<DCCReference Include="api\uApiXml.pas"/>
 			<DCCReference Include="api\uApiXmlSettings.pas"/>
 			<DCCReference Include="..\core\common\uAppInterface.pas"/>
-			<DCCReference Include="..\core\common\uBase.pas"/>
-			<DCCReference Include="..\core\common\uConst.pas"/>
+			<DCCReference Include="..\core\common\uBaseConst.pas"/>
+			<DCCReference Include="..\core\common\uAppConst.pas"/>
 			<DCCReference Include="..\core\common\uFileInterface.pas"/>
-			<DCCReference Include="..\core\common\uWebsiteInterface.pas"/>
+			<DCCReference Include="..\core\common\uBaseInterface.pas"/>
 			<DCCReference Include="frames\ufAddWebsiteWizard.pas">
 				<Form>fAddWebsiteWizard</Form>
 				<DesignClass>TFrame</DesignClass>
@@ -218,6 +218,8 @@
 			<DCCReference Include="ole\uOLE.pas">
 				<CoClasses>IntelligeN2009</CoClasses>
 			</DCCReference>
+			<DCCReference Include="..\sdk\plugins\uPlugInInterfaceAdv.pas"/>
+			<DCCReference Include="mods\uMycxTabSheet.pas"/>
 			<RidlCompile Include="IntelligeN.ridl"/>
 			<RcItem Include="..\..\res\barmanager.txt">
 				<ContainerId>ResourceItem</ContainerId>

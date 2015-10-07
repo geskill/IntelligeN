@@ -5,8 +5,6 @@ interface
 uses
   // Delphi
   Windows, SysUtils, XMLDoc, XMLIntf, ActiveX, Variants,
-  // Common
-  uConst, uAppInterface,
   // Plugin system
   uPlugInCAPTCHAClass, uPlugInConst;
 

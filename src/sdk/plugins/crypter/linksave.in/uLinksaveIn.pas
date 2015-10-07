@@ -6,7 +6,7 @@ uses
   // Delphi
   Windows, SysUtils, StrUtils, Classes, HTTPApp,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // Utils
   uPathUtils,
   // HTTPManager
@@ -18,9 +18,10 @@ type
   TLinksaveIn = class(TCrypterPlugIn)
   public
     function GetName: WideString; override;
-    function GenerateFolder(MirrorController: IMirrorControl): WideString; override;
-    function GetFolderInfo(FolderURL: WideString): TCrypterFolderInfo; override;
-    procedure GetFolderPicture(FolderURL: WideString; out Result: WideString; Small: WordBool = True); override;
+    function AddFolder(const AMirrorContainer: IMirrorContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function EditFolder(const AMirrorContainer: IMirrorContainer; ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function DeleteFolder(AFolderIdentifier: WideString): WordBool; override; safecall;
+    function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
   end;
 
 implementation
@@ -30,7 +31,7 @@ begin
   Result := 'Linksave.in';
 end;
 
-function TLinksaveIn.GenerateFolder;
+function TLinksaveIn.AddFolder;
 const
   curl = 'http://linksave.in/';
   purl = curl + 'protect?api=';
@@ -53,10 +54,10 @@ begin
   HTTPParams := THTTPParams.Create;
   with HTTPParams do
   begin
-    AddFormField('links', MirrorController.DirectlinksMirror[0]);
+    AddFormField('links', AMirrorContainer.Directlink[0].Value);
 
-    for I := 1 to MirrorController.DirectlinksMirrorCount - 1 do
-      AddFormField('mirrors[]', MirrorController.DirectlinksMirror[I]);
+    for I := 1 to AMirrorContainer.DirectlinkCount - 1 do
+      AddFormField('mirrors[]', AMirrorContainer.Directlink[I].Value);
 
     if _Foldertypes = [ftWeb, ftContainer] then
       AddFormField('myschutz', 'container_js')
@@ -151,12 +152,22 @@ begin
   if HTTPProcess.HTTPResult.HasError then
     ErrorMsg := HTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage
   else if (Pos('ERROR', string(HTTPProcess.HTTPResult.SourceCode)) = 0) then
-    Result := curl + HTTPProcess.HTTPResult.SourceCode
+    ErrorMsg := curl + HTTPProcess.HTTPResult.SourceCode
   else
     ErrorMsg := HTTPProcess.HTTPResult.SourceCode;
 end;
 
-function TLinksaveIn.GetFolderInfo;
+function TLinksaveIn.EditFolder(const AMirrorContainer: IMirrorContainer; ACrypterFolderInfo: TCrypterFolderInfo): WordBool;
+begin
+  //
+end;
+
+function TLinksaveIn.DeleteFolder(AFolderIdentifier: WideString): WordBool;
+begin
+  //
+end;
+
+function TLinksaveIn.GetFolder;
 var
   CrypterFolderInfo: TCrypterFolderInfo;
 
@@ -179,7 +190,7 @@ begin
   GetLocaleFormatSettings(GetThreadLocale, FormatSettings);
   FormatSettings.DecimalSeparator := '.';
 
-  RequestID := HTTPManager.Get(THTTPRequest.Create(FolderURL + '/api-more'), TPlugInHTTPOptions.Create(Self));
+  RequestID := HTTPManager.Get(THTTPRequest.Create(AFolderIdentifier + '/api-more'), TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
@@ -226,17 +237,16 @@ begin
     StringList.Free;
   end;
 
-  Result := CrypterFolderInfo;
-end;
-
-procedure TLinksaveIn.GetFolderPicture;
-begin
-  case Small of
+  (*
+    case Small of
     True:
       Result := ExcludeTrailingUrlDelimiter(FolderURL) + '.png';
     False:
       Result := ExcludeTrailingUrlDelimiter(FolderURL) + '-t.png';
   end;
+  *)
+
+  Result := False;
 end;
 
 end.

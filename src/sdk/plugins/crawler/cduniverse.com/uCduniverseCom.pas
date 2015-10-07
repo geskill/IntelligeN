@@ -10,7 +10,7 @@ uses
   // Utils
   uHTMLUtils,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -19,14 +19,14 @@ uses
 type
   TCduniverseCom = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 implementation
 
@@ -37,20 +37,20 @@ begin
   Result := 'cduniverse.com';
 end;
 
-function TCduniverseCom.GetAvailableTemplateTypeIDs;
+function TCduniverseCom.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
-  _TemplateTypeIDs := [ low(TTemplateTypeID) .. high(TTemplateTypeID)] - [cOther];
+  _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)] - [cOther];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TCduniverseCom.GetAvailableComponentIDs;
+function TCduniverseCom.GetAvailableControlIDs;
 var
-  _TemplateTypeID: TTemplateTypeID;
-  _ComponentIDs: TComponentIDs;
+  _TemplateTypeID: TTypeID;
+  _ComponentIDs: TControlIDs;
 begin
-  _TemplateTypeID := TTemplateTypeID(TemplateTypeID);
+  _TemplateTypeID := TTypeID(ATypeID);
 
   _ComponentIDs := [cPicture, cGenre, cDescription];
 
@@ -60,12 +60,12 @@ begin
   Result := LongWord(_ComponentIDs);
 end;
 
-function TCduniverseCom.GetComponentIDDefaultValue;
+function TCduniverseCom.GetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TCduniverseCom.GetLimitDefaultValue;
+function TCduniverseCom.GetResultsLimitDefaultValue;
 begin
   Result := 5;
 end;
@@ -74,8 +74,8 @@ procedure TCduniverseCom.Exec;
 const
   website = 'http://www.cduniverse.com/';
 var
-  _TemplateTypeID: TTemplateTypeID;
-  _ComponentIDs: TComponentIDs;
+  _TemplateTypeID: TTypeID;
+  _ComponentIDs: TControlIDs;
   _Count: Integer;
   _style, _Title, _tracklist: string;
 
@@ -89,7 +89,7 @@ var
         Expression := '<center><p><img src="(.*?)"';
 
         if Exec(InputString) then
-          AComponentController.FindControl(cPicture).AddValue(Match[1], GetName);
+          AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
       finally
         Free;
       end;
@@ -97,7 +97,7 @@ var
 
   procedure deep_search(aWebsitecode: string);
   begin
-    if (AComponentController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
+    if (AControlController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
@@ -105,12 +105,12 @@ var
 
           if Exec(InputString) then
           begin
-            AComponentController.FindControl(cRuntime).AddValue(Match[2], GetName)
+            AControlController.FindControl(cRuntime).AddProposedValue(GetName, Match[2], GetName)
           end;
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
@@ -119,13 +119,13 @@ var
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cGenre).AddValue(Match[2], GetName);
+              AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[2]);
             until not ExecNext;
           end;
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
     begin
       with TRegExpr.Create do
         try
@@ -138,7 +138,7 @@ var
             repeat
               _tracklist := _tracklist + Trim(Match[1]) + sLineBreak;
             until not ExecNext;
-            AComponentController.FindControl(cDescription).AddValue(copy(_tracklist, 1, length(_tracklist) - 2), GetName);
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, copy(_tracklist, 1, length(_tracklist) - 2));
           end;
         finally
           Free;
@@ -151,14 +151,14 @@ var
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cDescription).AddValue(Trim(HTML2Text(Match[1])), GetName);
+              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
             until not ExecNext;
           end;
         finally
           Free;
         end;
     end;
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
@@ -181,7 +181,7 @@ var
             Expression := '<table id="igcovera1" cellPadding="0" cellSpacing="0" border="0">\s+<tr>\s+<td><img src="(.*?)"';
 
             if Exec(InputString) and not SameText(Match[1], '/images/default_coverart.gif') then
-              AComponentController.FindControl(cPicture).AddValue(Match[1], GetName);
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
           end;
         finally
           Free;
@@ -193,10 +193,10 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  _TemplateTypeID := TTemplateTypeID(ATemplateTypeID);
-  LongWord(_ComponentIDs) := AComponentIDs;
+  _TemplateTypeID := TTypeID(ATypeID);
+  LongWord(_ComponentIDs) := AControlIDs;
   _Count := 0;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  _Title := AControlController.FindControl(cTitle).Value;
 
   case _TemplateTypeID of
     cAudio:

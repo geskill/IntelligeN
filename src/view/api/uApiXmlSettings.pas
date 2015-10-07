@@ -6,7 +6,7 @@ uses
   // Delphi
   Windows, SysUtils, Classes, Forms, Controls, TypInfo, Variants, XMLDoc, XMLIntf, ActiveX,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // DLLs
   uExport,
   // Api
@@ -75,20 +75,20 @@ begin
       for I := 0 to length(TStringTemplateTypeID) - 1 do
         with TControlsCollectionItem(AControlsTT.Add) do
         begin
-          TemplateTypeID := TTemplateTypeID(I);
+          ATypeID := TTypeID(I);
           for X := 0 to length(TStringComponentID) - 1 do
             with TControlCollectionItem(Controls.Add) do
             begin
-              ComponentID := TComponentID(X);
+              AControlID := TControlID(X);
 
-              with XMLDoc.DocumentElement.ChildNodes.Nodes[TComponentIDToString(TComponentID(X))].ChildNodes do
+              with XMLDoc.DocumentElement.ChildNodes.Nodes[ControlIDToString(TControlID(X))].ChildNodes do
               begin
                 Found := False;
                 for Y := 0 to Count - 1 do
                 begin
                   sl := SplittString('|', Nodes[Y].Attributes['name']);
                   try
-                    if sl.IndexOf(TTemplateTypeIDToString(TTemplateTypeID(I))) <> -1 then
+                    if sl.IndexOf(TypeIDToString(TTypeID(I))) <> -1 then
                     begin
                       internal(Nodes[Y], bTitle, bHelpText, bValue, Items);
 

@@ -6,7 +6,7 @@ uses
   // Delphi
   SysUtils, Variants, XMLDoc, XMLIntf, ActiveX,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uAppConst, uAppInterface,
   // DLLs
   uExport,
   // Utils
@@ -77,16 +77,16 @@ begin
         begin
           Attributes['filename'] := ExtractFileName(ChangeFileExt(ATemplateFileName, ''));
           Attributes['checksum'] := GetMD5FromFile(ATemplateFileName);
-          NodeValue := TTemplateTypeIDToString(ATabSheetController.ComponentController.TemplateTypeID);
+          NodeValue := TypeIDToString(ATabSheetController.ControlController.ATypeID);
         end;
       end
       else
         AddChild('templatetype').NodeValue := '#';
 
       with AddChild('controls') do
-        with ATabSheetController.ComponentController do
+        with ATabSheetController.ControlController do
           for I := 0 to ControlCount - 1 do
-            with AddChild(TComponentIDToString(Control[I].ComponentID)) do
+            with AddChild(ControlIDToString(Control[I].AControlID)) do
             begin
               AddChild('title').NodeValue := Control[I].Title;
               with AddChild('value') do
@@ -161,7 +161,7 @@ var
   I, X, Y: Integer;
   Control: IBasic;
   Picture: IPicture;
-  TemplateType: TTemplateTypeID;
+  TemplateType: TTypeID;
   _TemplateFile, _TemplateFileName: TFileName;
   _TemplateChecksum: string;
   _CrypterExists, _ImageMirrorExists: Boolean;
@@ -200,7 +200,7 @@ begin
             end
             else
             begin
-              TemplateType := StringToTTemplateTypeID(VarToStr(NodeValue));
+              TemplateType := StringToTypeID(VarToStr(NodeValue));
               _TemplateFileName := '';
               if HasAttribute('filename') then
                 _TemplateFileName := VarToStr(Attributes['filename']) + '.xml';
@@ -257,7 +257,7 @@ begin
           for I := 0 to ChildNodes.Nodes['controls'].ChildNodes.Count - 1 do
             with ChildNodes.Nodes['controls'].ChildNodes.Nodes[I] do
             begin
-              Control := ComponentController.FindControl(StringToTComponentID(NodeName));
+              Control := ControlController.FindControl(StringToControlID(NodeName));
               if Assigned(Control) then
               begin
                 Control.Value := VarToStr(ChildNodes.Nodes['value'].NodeValue);

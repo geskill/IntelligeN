@@ -10,7 +10,7 @@ uses
   // Utils
   uHTMLUtils, uStringUtils,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -19,14 +19,14 @@ uses
 type
   TYoutubeCom = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -38,29 +38,29 @@ begin
   result := 'Youtube.com';
 end;
 
-function TYoutubeCom.GetAvailableTemplateTypeIDs;
+function TYoutubeCom.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
-  _TemplateTypeIDs := [ low(TTemplateTypeID) .. high(TTemplateTypeID)] - [cXXX];
+  _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)] - [cXXX];
   result := Word(_TemplateTypeIDs);
 end;
 
-function TYoutubeCom.GetAvailableComponentIDs;
+function TYoutubeCom.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cTrailer];
 
   result := LongWord(_ComponentIDs);
 end;
 
-function TYoutubeCom.GetComponentIDDefaultValue;
+function TYoutubeCom.GetControlIDDefaultValue;
 begin
   result := True;
 end;
 
-function TYoutubeCom.GetLimitDefaultValue;
+function TYoutubeCom.GetResultsLimitDefaultValue;
 begin
   result := 5;
 end;
@@ -70,7 +70,7 @@ const
   website = 'https://www.youtube.com/';
 var
   _Title: string;
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _Count: Integer;
 
   HTTPRequest: IHTTPRequest;
@@ -79,11 +79,11 @@ var
 
   ResponeStr: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
   _Count := 0;
 
-  if (AComponentController.FindControl(cTrailer) <> nil) and (cTrailer in _ComponentIDs) then
+  if (AControlController.FindControl(cTrailer) <> nil) and (cTrailer in _ComponentIDs) then
   begin
     HTTPRequest := THTTPRequest.Create(website + 'results?search_type=videos&search_query=' + HTTPEncode(_Title + ' hd trailer'));
     HTTPRequest.Referer := website;
@@ -106,7 +106,7 @@ begin
         if Exec(InputString) then
         begin
           repeat
-            (AComponentController.FindControl(cTrailer) as ITrailer).AddValue(website + Match[2], HTML2Text(Match[4]), GetName);
+            AControlController.FindControl(cTrailer).AddProposedValue(GetName, website + Match[2], HTML2Text(Match[4]));
             Inc(_Count);
           until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
         end;

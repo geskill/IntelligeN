@@ -1,17 +1,17 @@
 library releasenamereader;
 
 uses
-  uPlugInInterface,
+  uPlugInInterfaceAdv,
   uPlugInFileFormatClass,
   uReleasenameReader in 'uReleasenameReader.pas',
   uSelectTemplateFileName in '..\uSelectTemplateFileName.pas' {SelectTemplateFileName};
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: IFileFormatPlugIn): Boolean; stdcall; export;
+function LoadPlugin(var APlugIn: IFileFormatPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := TReleasenameReader.Create;
+    APlugIn := TReleasenameReader.Create;
     Result := True;
   except
     Result := False;

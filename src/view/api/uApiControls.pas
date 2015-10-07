@@ -19,9 +19,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPManager,
   // Common
-  uConst, uAppInterface,
-  // Api
-  uApiConst,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Utils
   uImageUtils, uStringUtils;
 
@@ -32,8 +30,8 @@ type
   TIBasic = class(TInterfacedObject, IBasic)
   private
     FHandle: HWND;
-    FComponentController: IComponentController;
-    FComponentID: TComponentID;
+    FComponentController: IControlController;
+    FComponentID: TControlID;
     FValue: string;
     FBufferedValues: TQueue<string>; // Omni Queue implementieren
     FValueArray: array of array of string;
@@ -41,10 +39,10 @@ type
     FOleDrop: TOleDrop;
     procedure WndProc(var Msg: TMessage);
     // procedure WMControlValueChange(var Msg: TMessage); message WM_CONTROL_VALUE_CHANGE;
-    function GetComponentController: IComponentController;
-    procedure SetComponentController(const AComponentController: IComponentController);
-    function GetTemplateTypeID: TTemplateTypeID;
-    function GetComponentID: TComponentID;
+    function GetControlController: IControlController;
+    procedure SetControlController(const AComponentController: IControlController);
+    function GetTypeID: TTypeID;
+    function GetControlID: TControlID;
     function GetName: WideString;
     function GetTitle: WideString;
     function GetLeft: Integer;
@@ -87,14 +85,14 @@ type
     procedure ControlOnExit(Sender: TObject); virtual;
     procedure DefaultConfiguration; virtual;
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); virtual;
-    property ComponentController: IComponentController read GetComponentController write SetComponentController;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); virtual;
+    property ControlController: IControlController read GetControlController write SetControlController;
     procedure AddValue(AValue, ASenderName: WideString); overload; virtual;
     function GetValueName(AIndex: Integer): WideString;
     function GetValueContent(AIndex: Integer): WideString;
     function GetValueCount: Integer;
-    property TemplateTypeID: TTemplateTypeID read GetTemplateTypeID;
-    property ComponentID: TComponentID read GetComponentID;
+    property ATypeID: TTypeID read GetTypeID;
+    property AControlID: TControlID read GetControlID;
     property Name: WideString read GetName write SetName;
     property Title: WideString read GetTitle write SetTitle;
     property Left: Integer read GetLeft write SetLeft;
@@ -114,7 +112,7 @@ type
     function GetControlValue: WideString; override;
     procedure SetControlValue(AValue: WideString); override;
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
     destructor Destroy; override;
   end;
 
@@ -131,7 +129,7 @@ type
     procedure SetControlValue(AValue: WideString); override;
     procedure DefaultConfiguration; override;
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
     property List: WideString read GetList write SetList;
     property DropDownRows: Integer read GetDropDownRows write SetDropDownRows;
     destructor Destroy; override;
@@ -141,7 +139,7 @@ type
   protected
     procedure SetControlValue(AValue: WideString); override;
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
     procedure AddValue(AValue, ASenderName: WideString); override;
   end;
 
@@ -159,7 +157,7 @@ type
     procedure SetControlValue(AValue: WideString); override;
     procedure DefaultConfiguration; override;
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
     property List: WideString read GetList write SetList;
     property DropDownRows: Integer read GetDropDownRows write SetDropDownRows;
     destructor Destroy; override;
@@ -172,7 +170,7 @@ type
     function GetControlValue: WideString; override;
     procedure SetControlValue(AValue: WideString); override;
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
     destructor Destroy; override;
   end;
 
@@ -183,7 +181,7 @@ type
     function GetControlValue: WideString; override;
     procedure SetControlValue(AValue: WideString); override;
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
     destructor Destroy; override;
   end;
 
@@ -191,11 +189,11 @@ type
   protected
     procedure ControlOnChange(Sender: TObject); override;
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIReleaseDate = class(TIDateEdit)
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
   end;
 
   TITags = class(TIEdit)
@@ -214,12 +212,12 @@ type
   private
     procedure FCheckComboBoxPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIPassword = class(TIComboBox)
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
   end;
 
   TPictureMirror = class(TInterfacedObject, IPictureMirror)
@@ -283,7 +281,7 @@ type
     function GetValuePicture(AIndex: Integer): TPictureInfo;
     procedure SetValuePicture(AIndex: Integer; APictureInfo: TPictureInfo); overload;
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
     procedure AddValue(AValue, ASenderName: WideString); override;
     property Mirror[AIndex: Integer]: IPictureMirror read GetMirror write SetMirror;
     property MirrorCount: Integer read GetMirrorCount;
@@ -301,7 +299,7 @@ type
   protected
     procedure FPopupMenuPopup(Sender: TObject); override;
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
     procedure AddValue(AValue: WideString; ATitle: WideString; ASender: WideString); overload;
     function GetValueTitle(AIndex: Integer): WideString;
     procedure SetValueTitle(AIndex: Integer; ATitle: WideString);
@@ -314,7 +312,7 @@ type
 
   TIAudioBitrate = class(TIComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIAudioBitrateType = class(TIComboBoxList)
@@ -323,27 +321,27 @@ type
 
   TIAudioEncoder = class(TIComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIAudioSamplingRate = class(TIComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIAudioStream = class(TIComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIGenre = class(TIComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
   end;
 
   TILanguage = class(TICheckComboBox)
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIRuntime = class(TIEdit)
@@ -352,17 +350,17 @@ type
 
   TIVideoCodec = class(TIComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIVideoStream = class(TIComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIVideoSystem = class(TIComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
   end;
 
   TINFO = class(TIRichEdit)
@@ -373,7 +371,7 @@ type
   protected
     procedure ControlOnChange(Sender: TObject); override;
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
 
     destructor Destroy; override;
   end;
@@ -382,7 +380,7 @@ type
   protected
     procedure ControlOnChange(Sender: TObject); override;
   public
-    constructor Create(AOwner: TWinControl; AComponentController: IComponentController; AComponentID: TComponentID); override;
+    constructor Create(AOwner: TWinControl; AComponentController: IControlController; AComponentID: TControlID); override;
   end;
 
 implementation
@@ -422,22 +420,22 @@ end;
   end;
 }
 
-function TIBasic.GetComponentController;
+function TIBasic.GetControlController;
 begin
   Result := FComponentController;
 end;
 
-procedure TIBasic.SetComponentController(const AComponentController: IComponentController);
+procedure TIBasic.SetControlController(const AComponentController: IControlController);
 begin
   FComponentController := AComponentController;
 end;
 
-function TIBasic.GetTemplateTypeID;
+function TIBasic.GetTypeID;
 begin
-  Result := ComponentController.TemplateTypeID;
+  Result := ControlController.ATypeID;
 end;
 
-function TIBasic.GetComponentID;
+function TIBasic.GetControlID;
 begin
   Result := FComponentID;
 end;
@@ -525,8 +523,8 @@ end;
 
 procedure TIBasic.FPanelMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X: Integer; Y: Integer);
 begin
-  if Assigned(ComponentController.OnSpaceMouseDown) then
-    ComponentController.OnSpaceMouseDown.Invoke(Self);
+  if Assigned(ControlController.OnSpaceMouseDown) then
+    ControlController.OnSpaceMouseDown.Invoke(Self);
 end;
 
 procedure TIBasic.FPanelResize(Sender: TObject);
@@ -633,29 +631,29 @@ begin
     FValueLock.ExitWriteLock;
   end;
 
-  if Assigned(ComponentController.OnControlChange) then
-    ComponentController.OnControlChange.Invoke(Self);
+  if Assigned(ControlController.OnControlChange) then
+    ControlController.OnControlChange.Invoke(Self);
 end;
 
 procedure TIBasic.ControlOnEnter(Sender: TObject);
 begin
-  if Assigned(ComponentController.OnControlEnter) then
-    ComponentController.OnControlEnter.Invoke(Self);
-  if Assigned(ComponentController.OnPopupMenuChange) then
-    ComponentController.OnPopupMenuChange.Invoke(Integer(FPopupMenu.ItemLinks));
+  if Assigned(ControlController.OnControlEnter) then
+    ControlController.OnControlEnter.Invoke(Self);
+  if Assigned(ControlController.OnPopupMenuChange) then
+    ControlController.OnPopupMenuChange.Invoke(Integer(FPopupMenu.ItemLinks));
 end;
 
 procedure TIBasic.ControlOnExit(Sender: TObject);
 begin
-  if Assigned(ComponentController.OnPopupMenuChange) then
-    ComponentController.OnPopupMenuChange.Invoke(Integer(nil));
-  if Assigned(ComponentController.OnControlExit) then
-    ComponentController.OnControlExit.Invoke(Self);
+  if Assigned(ControlController.OnPopupMenuChange) then
+    ControlController.OnPopupMenuChange.Invoke(Integer(nil));
+  if Assigned(ControlController.OnControlExit) then
+    ControlController.OnControlExit.Invoke(Self);
 end;
 
 procedure TIBasic.DefaultConfiguration;
 begin
-  with SettingsManager.Settings.Controls.Controls[TemplateTypeID, ComponentID] do
+  with SettingsManager.Settings.Controls.Controls[ATypeID, AControlID] do
   begin
     SetTitle(Title);
     SetHint(HelpText);
@@ -950,7 +948,7 @@ end;
 procedure TIComboBox.DefaultConfiguration;
 begin
   inherited DefaultConfiguration;
-  with SettingsManager.Settings.Controls.Controls[TemplateTypeID, ComponentID] do
+  with SettingsManager.Settings.Controls.Controls[ATypeID, AControlID] do
     SetList(GetItems);
 end;
 
@@ -1003,7 +1001,7 @@ end;
 
 procedure TIComboBoxList.SetControlValue(AValue: WideString);
 begin
-  inherited SetControlValue(SettingsManager.Settings.Controls.GetCustomisedComponentValue(ComponentID, TemplateTypeID, AValue));
+  inherited SetControlValue(SettingsManager.Settings.Controls.GetCustomisedComponentValue(AControlID, ATypeID, AValue));
 end;
 
 constructor TIComboBoxList.Create;
@@ -1031,7 +1029,7 @@ end;
 
 procedure TIComboBoxList.AddValue(AValue, ASenderName: WideString);
 begin
-  inherited AddValue(SettingsManager.Settings.Controls.GetCustomisedComponentValue(ComponentID, TemplateTypeID, AValue), ASenderName);
+  inherited AddValue(SettingsManager.Settings.Controls.GetCustomisedComponentValue(AControlID, ATypeID, AValue), ASenderName);
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -1121,7 +1119,7 @@ begin
     try
       for I := 0 to Count - 1 do
       begin
-        findex := InternalIndexOf(SettingsManager.Settings.Controls.GetCustomisedComponentValue(ComponentID, TemplateTypeID, PChar(Strings[I])));
+        findex := InternalIndexOf(SettingsManager.Settings.Controls.GetCustomisedComponentValue(AControlID, ATypeID, PChar(Strings[I])));
 
         if findex <> -1 then
           FCheckComboBox.States[findex] := cbsChecked;
@@ -1134,7 +1132,7 @@ end;
 procedure TICheckComboBox.DefaultConfiguration;
 begin
   inherited DefaultConfiguration;
-  with SettingsManager.Settings.Controls.Controls[TemplateTypeID, ComponentID] do
+  with SettingsManager.Settings.Controls.Controls[ATypeID, AControlID] do
     SetList(GetItems);
 end;
 
@@ -1318,8 +1316,8 @@ procedure TIReleaseName.ControlOnChange(Sender: TObject);
 begin
   inherited ControlOnChange(Sender);
 
-  if Assigned(ComponentController.OnReleaseNameChange) then
-    ComponentController.OnReleaseNameChange.Invoke(FEdit.Text);
+  if Assigned(ControlController.OnReleaseNameChange) then
+    ControlController.OnReleaseNameChange.Invoke(FEdit.Text);
 end;
 
 constructor TIReleaseName.Create;
@@ -1503,12 +1501,12 @@ end;
 
 procedure TPictureMirror.LocalUpload(ALocalPath: WideString);
 begin
-  FPicture.ComponentController.TabSheetController.PageController.ImageHosterManager.AddLocalUploadJob(Self, ALocalPath);
+  FPicture.ControlController.TabSheetController.PageController.ImageHosterManager.AddLocalUploadJob(Self, ALocalPath);
 end;
 
 procedure TPictureMirror.RemoteUpload;
 begin
-  FPicture.ComponentController.TabSheetController.PageController.ImageHosterManager.AddRemoteUploadJob(Self);
+  FPicture.ControlController.TabSheetController.PageController.ImageHosterManager.AddRemoteUploadJob(Self);
 end;
 
 destructor TPictureMirror.Destroy;
@@ -1567,7 +1565,7 @@ procedure TIPicture.SaveImage(AMemoryStream: TMemoryStream);
     FileName, FileExt: string;
   begin
     FileName := '';
-    with ComponentController do
+    with ControlController do
       if not SameStr('', FindControl(cReleaseName).Value) then
         FileName := FindControl(cReleaseName).Value
       else
@@ -1982,7 +1980,7 @@ var
 begin
   for I := 0 to MirrorCount - 1 do
     if not AAfterCrawling or (AAfterCrawling and UploadAfterCrawling(Mirror[I].Name)) then
-      ComponentController.TabSheetController.PageController.ImageHosterManager.AddRemoteUploadJob(Mirror[I]);
+      ControlController.TabSheetController.PageController.ImageHosterManager.AddRemoteUploadJob(Mirror[I]);
 end;
 
 destructor TIPicture.Destroy;

@@ -8,7 +8,7 @@ uses
   // MultiEvent
   Generics.MultiEvents.NotifyEvent, Generics.MultiEvents.NotifyInterface,
   // Common
-  uAppInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
   uApiComponentParser, uApiMultiCastEvent;
 
@@ -122,10 +122,10 @@ begin
   with TComponentParser.Create do
   try
     WorkPanelWidth := FWorkPanel.Width;
-    ComponentController := TabSheetController.ComponentController;
+    ControlController := TabSheetController.ControlController;
     MirrorController := Self;
     Point := NextMirrorPosition;
-    ComponentController := nil;
+    ControlController := nil;
     MirrorController := nil;
   finally
     Free;

@@ -10,7 +10,7 @@ uses
   // Utils
   uHTMLUtils,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -21,14 +21,14 @@ type
   protected
     function ThaliaDetailedPageRequest(AFollowUpRequest: Double; AWebsite: string): string;
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -53,20 +53,20 @@ begin
   Result := 'Thalia.de';
 end;
 
-function TThaliaDe.GetAvailableTemplateTypeIDs;
+function TThaliaDe.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
-  _TemplateTypeIDs := [ low(TTemplateTypeID) .. high(TTemplateTypeID)] - [cXXX];
+  _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)] - [cXXX];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TThaliaDe.GetAvailableComponentIDs;
+function TThaliaDe.GetAvailableControlIDs;
 var
-  _TemplateTypeID: TTemplateTypeID;
-  _ComponentIDs: TComponentIDs;
+  _TemplateTypeID: TTypeID;
+  _ComponentIDs: TControlIDs;
 begin
-  _TemplateTypeID := TTemplateTypeID(TemplateTypeID);
+  _TemplateTypeID := TTypeID(ATypeID);
 
   _ComponentIDs := [cPicture, cLanguage, cDescription];
 
@@ -79,12 +79,12 @@ begin
   Result := LongWord(_ComponentIDs);
 end;
 
-function TThaliaDe.GetComponentIDDefaultValue;
+function TThaliaDe.GetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TThaliaDe.GetLimitDefaultValue;
+function TThaliaDe.GetResultsLimitDefaultValue;
 begin
   Result := 5;
 end;
@@ -93,14 +93,14 @@ procedure TThaliaDe.Exec;
 const
   website = 'http://www.thalia.de/';
 var
-  _TemplateTypeID: TTemplateTypeID;
-  _ComponentIDs: TComponentIDs;
+  _TemplateTypeID: TTypeID;
+  _ComponentIDs: TControlIDs;
   _Title, _SearchType, _Language, _Genre: string;
   _Count: Integer;
 
   procedure deep_search(aWebsitecode: string);
   begin
-    if (AComponentController.FindControl(cLanguage) <> nil) and (cLanguage in _ComponentIDs) then
+    if (AControlController.FindControl(cLanguage) <> nil) and (cLanguage in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
@@ -121,7 +121,7 @@ var
                     if Exec(InputString) then
                     begin
                       repeat
-                        AComponentController.FindControl(cLanguage).AddValue(Trim(Match[1]), GetName);
+                        AControlController.FindControl(cLanguage).AddProposedValue(GetName, Trim(Match[1]));
                       until not ExecNext;
                     end;
                   finally
@@ -130,13 +130,13 @@ var
                 end;
               end
               else
-                AComponentController.FindControl(cLanguage).AddValue(_Language, GetName);
+                AControlController.FindControl(cLanguage).AddProposedValue(GetName, _Language);
             until not ExecNext;
           end;
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
@@ -157,7 +157,7 @@ var
                     if Exec(InputString) then
                     begin
                       repeat
-                        AComponentController.FindControl(cGenre).AddValue(Trim(Match[1]), GetName);
+                        AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(Match[1]));
                       until not ExecNext;
                     end;
                   finally
@@ -166,42 +166,42 @@ var
                 end;
               end
               else
-                AComponentController.FindControl(cGenre).AddValue(_Genre, GetName);
+                AControlController.FindControl(cGenre).AddProposedValue(GetName, _Genre);
             until not ExecNext;
           end;
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
+    if (AControlController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
           Expression := 'Spieldauer:<\/strong> (\d+) Minuten<\/li>';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cRuntime).AddValue(Match[1], GetName)
+            AControlController.FindControl(cRuntime).AddProposedValue(GetName, Match[1], GetName)
           else
           begin
             Expression := 'Spieldauer:<\/strong> (\d+):(\d+):(\d+)<\/li>';
 
             if Exec(InputString) then
-              AComponentController.FindControl(cRuntime).AddValue(IntToStr(StrToInt(Match[1])) + Match[2], GetName);
+              AControlController.FindControl(cRuntime).AddProposedValue(GetName, IntToStr(StrToInt(Match[1])) + Match[2]);
           end;
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
           Expression := '<div id="tab-content_content" class="detailLayer">.*?<p>(.*?)<\/p>';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cDescription).AddValue(Trim(HTML2Text(Match[1])), GetName);
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
@@ -209,7 +209,7 @@ var
 
           if Exec(InputString) then
           begin
-            AComponentController.FindControl(cPicture).AddValue(Match[1], GetName);
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
           end;
         finally
           Free;
@@ -223,9 +223,9 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  _TemplateTypeID := TTemplateTypeID(ATemplateTypeID);
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  _TemplateTypeID := TTypeID(ATypeID);
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
   _Count := 0;
 
   (*

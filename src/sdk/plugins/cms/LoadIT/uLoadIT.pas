@@ -10,7 +10,7 @@ uses
   // Utils,
   uHTMLUtils, uPathUtils, uStringUtils,
   // Common
-  uConst, uWebsiteInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPConst,
   // Plugin system
@@ -34,13 +34,13 @@ type
     function SettingsClass: TCMSPlugInSettingsMeta; override;
     function GetSettings: TCMSPlugInSettings; override;
     procedure SetSettings(ACMSPlugInSettings: TCMSPlugInSettings); override;
-    function LoadSettings(const AWebsiteData: ICMSWebsiteData = nil): Boolean; override;
+    function LoadSettings(const AData: ITabSheetData = nil): Boolean; override;
 
     function DoBuildLoginRequest(out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; ACAPTCHALogin: Boolean = False): Boolean; override;
     function NeedPostLogin(out ARequestURL: string): Boolean; override;
     function DoAnalyzeLogin(AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; override;
 
-    function DoBuildPostRequest(const AWebsiteData: ICMSWebsiteData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
+    function DoBuildPostRequest(const AData: ITabSheetData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
     function DoAnalyzePost(AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; override;
 
     function GetIDsRequestURL: string; override;
@@ -70,10 +70,10 @@ end;
 
 function TLoadIT.LoadSettings;
 begin
-  Result := inherited LoadSettings(AWebsiteData);
+  Result := inherited LoadSettings(AData);
   with LoadITSettings do
   begin
-    if Assigned(AWebsiteData) and (categorys = null) then
+    if Assigned(AData) and (categorys = null) then
     begin
       ErrorMsg := 'category is undefined!';
       Result := False;
@@ -159,48 +159,48 @@ begin
 
     AddFormField('up_kat', LoadITSettings.categorys);
 
-    if Assigned(AWebsiteData.FindControl(cPassword)) then
-      AddFormField('up_pw', AWebsiteData.FindControl(cPassword).Value);
+    if Assigned(AData.FindControl(cPassword)) then
+      AddFormField('up_pw', AData.FindControl(cPassword).Value);
 
-    if Assigned(AWebsiteData.FindControl(cPicture)) then
-      AddFormField('up_cover', AWebsiteData.FindControl(cPicture).Value);
+    if Assigned(AData.FindControl(cPicture)) then
+      AddFormField('up_cover', AData.FindControl(cPicture).Value);
 
-    for I := 0 to AWebsiteData.MirrorCount - 1 do
-      if AWebsiteData.Mirror[I].Size > 0 then
+    for I := 0 to AData.MirrorCount - 1 do
+      if AData.Mirror[I].Size > 0 then
       begin
-        AddFormField('up_size', FloatToStr(AWebsiteData.Mirror[I].Size));
+        AddFormField('up_size', FloatToStr(AData.Mirror[I].Size));
         break;
       end;
 
-    if Assigned(AWebsiteData.FindControl(cAudioBitrate)) then
-      AddFormField('up_bitrate', AWebsiteData.FindControl(cAudioBitrate).Value);
+    if Assigned(AData.FindControl(cAudioBitrate)) then
+      AddFormField('up_bitrate', AData.FindControl(cAudioBitrate).Value);
 
-    if Assigned(AWebsiteData.FindControl(cGenre)) then
-      AddFormField('genre', AWebsiteData.FindControl(cGenre).Value);
+    if Assigned(AData.FindControl(cGenre)) then
+      AddFormField('genre', AData.FindControl(cGenre).Value);
 
-    if Assigned(AWebsiteData.FindControl(cTrailer)) then
-      AddFormField('up_trailer', AWebsiteData.FindControl(cTrailer).Value);
+    if Assigned(AData.FindControl(cTrailer)) then
+      AddFormField('up_trailer', AData.FindControl(cTrailer).Value);
 
     if not LoadITSettings.use_textasdescription then
     begin
-      if Assigned(AWebsiteData.FindControl(cDescription)) then
-        AddFormField('beschreibung', AWebsiteData.FindControl(cDescription).Value);
+      if Assigned(AData.FindControl(cDescription)) then
+        AddFormField('beschreibung', AData.FindControl(cDescription).Value);
     end
     else
       AddFormField('beschreibung', Message);
 
     // max 3 mirrors
-    for I := 0 to Min(3, AWebsiteData.MirrorCount) - 1 do
+    for I := 0 to Min(3, AData.MirrorCount) - 1 do
     begin
       if (I = 0) then
-        AddFormField('andererhoster', AWebsiteData.Mirror[I].Hoster);
+        AddFormField('andererhoster', AData.Mirror[I].Hoster);
 
-      AddFormField(DownloadArray[I][0], AWebsiteData.Mirror[I].Hoster);
+      AddFormField(DownloadArray[I][0], AData.Mirror[I].Hoster);
 
       if LoadITSettings.use_plainlinks then
-        AddFormField(DownloadArray[I][1], AWebsiteData.Mirror[I].Directlink[0].Value)
-      else if (AWebsiteData.Mirror[I].CrypterCount > 0) then
-        AddFormField(DownloadArray[I][1], AWebsiteData.Mirror[I].Crypter[0].Value)
+        AddFormField(DownloadArray[I][1], AData.Mirror[I].Directlink[0].Value)
+      else if (AData.Mirror[I].CrypterCount > 0) then
+        AddFormField(DownloadArray[I][1], AData.Mirror[I].Crypter[0].Value)
       else
       begin
         ErrorMsg := 'No crypter initialized! (disable use_plainlinks or add a crypter)';

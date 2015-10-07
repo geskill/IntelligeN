@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // Utils
   uHTMLUtils,
   // HTTPManager
@@ -19,14 +19,14 @@ uses
 type
   TGamingUniverseDe = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -38,28 +38,28 @@ begin
   Result := 'gaming-universe.de';
 end;
 
-function TGamingUniverseDe.GetAvailableTemplateTypeIDs;
+function TGamingUniverseDe.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cGameCube, cNintendoDS, cPlayStation2, cPlayStation3, cPlayStationPortable, cWii, cXbox, cXbox360];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TGamingUniverseDe.GetAvailableComponentIDs;
+function TGamingUniverseDe.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture, cGenre, cDescription];
   Result := LongWord(_ComponentIDs);
 end;
 
-function TGamingUniverseDe.GetComponentIDDefaultValue;
+function TGamingUniverseDe.GetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TGamingUniverseDe.GetLimitDefaultValue;
+function TGamingUniverseDe.GetResultsLimitDefaultValue;
 begin
   Result := 5;
 end;
@@ -68,13 +68,13 @@ procedure TGamingUniverseDe.Exec;
 const
   website = 'http://gaming-universe.de/spiele/';
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _Count: Integer;
   _Title, _Website: string;
 
-  function GetPlatform(ATemplateTypeID: TTemplateTypeID): string;
+  function GetPlatform(ATypeID: TTypeID): string;
   begin
-    case ATemplateTypeID of
+    case ATypeID of
       cGameCube:
         Result := 'gamecube';
       cNintendoDS:
@@ -96,7 +96,7 @@ var
 
   procedure deep_search(AWebsitesourcecode: string);
   begin
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
     begin
       with TRegExpr.Create do
         try
@@ -104,13 +104,13 @@ var
           Expression := ''', ''(.*?)'',';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cPicture).AddValue(Match[1], GetName);
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
     end;
 
-    if (AComponentController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
     begin
 
       with TRegExpr.Create do
@@ -120,14 +120,14 @@ var
 
           if Exec(InputString) then
           begin
-            AComponentController.FindControl(cGenre).AddValue(Match[1], GetName);
+            AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[1]);
           end;
         finally
           Free;
         end;
     end;
 
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
     begin
       with TRegExpr.Create do
         try
@@ -136,7 +136,7 @@ var
 
           if Exec(InputString) then
             if not(SameStr(Trim(Match[1]), '') or (copy(Match[1], 1, 1) = #$D)) then
-              AComponentController.FindControl(cDescription).AddValue(HTML2Text(Match[1]), GetName);
+              AControlController.FindControl(cDescription).AddProposedValue(GetName, HTML2Text(Match[1]));
         finally
           Free;
         end;
@@ -151,9 +151,9 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
-  _Website := 'http://' + GetPlatform(TTemplateTypeID(ATemplateTypeID)) + '.gaming-universe.de/';
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
+  _Website := 'http://' + GetPlatform(TTypeID(ATypeID)) + '.gaming-universe.de/';
   _Count := 0;
 
   HTTPRequest := THTTPRequest.Create(_Website + 'spiele/');

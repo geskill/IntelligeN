@@ -10,7 +10,7 @@ uses
   // Utils,
   uHTMLUtils, uStringUtils,
   // Common
-  uConst, uWebsiteInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPConst,
   // Plugin system
@@ -59,13 +59,13 @@ type
     function SettingsClass: TCMSPlugInSettingsMeta; override;
     function GetSettings: TCMSPlugInSettings; override;
     procedure SetSettings(ACMSPlugInSettings: TCMSPlugInSettings); override;
-    function LoadSettings(const AWebsiteData: ICMSWebsiteData = nil): Boolean; override;
+    function LoadSettings(const AData: ITabSheetData = nil): Boolean; override;
 
     function NeedPreLogin(out ARequestURL: string): Boolean; override;
     function DoBuildLoginRequest(out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; ACAPTCHALogin: Boolean = False): Boolean; override;
     function DoAnalyzeLogin(AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; override;
 
-    function DoBuildPostRequest(const AWebsiteData: ICMSWebsiteData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
+    function DoBuildPostRequest(const AData: ITabSheetData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
     function DoAnalyzePost(AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; override;
 
     function GetIDsRequestURL: string; override;
@@ -97,10 +97,10 @@ end;
 
 function TuCMS.LoadSettings;
 begin
-  Result := inherited LoadSettings(AWebsiteData);
+  Result := inherited LoadSettings(AData);
   with uCMSSettings do
   begin
-    if Assigned(AWebsiteData) and (categorys = null) then
+    if Assigned(AData) and (categorys = null) then
     begin
       ErrorMsg := 'category is undefined!';
       Result := False;
@@ -209,11 +209,11 @@ function TuCMS.DoBuildPostRequest;
   begin
     Result := '';
 
-    for MirrorIndex := 0 to Max(4, AWebsiteData.MirrorCount) - 1 do
+    for MirrorIndex := 0 to Max(4, AData.MirrorCount) - 1 do
     begin
-      Result := Result + AWebsiteData.Mirror[MirrorIndex].HosterShort;
+      Result := Result + AData.Mirror[MirrorIndex].HosterShort;
 
-      if not(MirrorIndex = AWebsiteData.MirrorCount - 1) then
+      if not(MirrorIndex = AData.MirrorCount - 1) then
         Result := Result + ',';
     end;
     while Result[length(Result)] = ',' do
@@ -301,88 +301,88 @@ begin
 
     AddFormField('uploader', AccountName);
 
-    if Assigned(AWebsiteData.FindControl(cPassword)) then
-      AddFormField('password', AWebsiteData.FindControl(cPassword).Value);
+    if Assigned(AData.FindControl(cPassword)) then
+      AddFormField('password', AData.FindControl(cPassword).Value);
 
     AddFormField('title', Subject);
 
     if uCMSSettings.oxygen_scene_com_special then
       AddFormField('release_title', oxygen_scene_com_hoster_list)
-    else if Assigned(AWebsiteData.FindControl(cReleaseName)) then
-      AddFormField('release_title', AWebsiteData.FindControl(cReleaseName).Value);
+    else if Assigned(AData.FindControl(cReleaseName)) then
+      AddFormField('release_title', AData.FindControl(cReleaseName).Value);
 
-    if Assigned(AWebsiteData.FindControl(cReleaseDate)) then
-      AddFormField('release_year', FormatDateTime('yyyy', StrToDate(AWebsiteData.FindControl(cReleaseDate).Value, FormatSettings), FormatSettings));
+    if Assigned(AData.FindControl(cReleaseDate)) then
+      AddFormField('release_year', FormatDateTime('yyyy', StrToDate(AData.FindControl(cReleaseDate).Value, FormatSettings), FormatSettings));
 
-    if Assigned(AWebsiteData.FindControl(cArtist)) then
-      AddFormField('interpreter', AWebsiteData.FindControl(cArtist).Value);
+    if Assigned(AData.FindControl(cArtist)) then
+      AddFormField('interpreter', AData.FindControl(cArtist).Value);
 
-    for I := 0 to AWebsiteData.MirrorCount - 1 do
-      if AWebsiteData.Mirror[I].Size > 0 then
+    for I := 0 to AData.MirrorCount - 1 do
+      if AData.Mirror[I].Size > 0 then
       begin
-        AddFormField('size', FloatToStr(AWebsiteData.Mirror[I].Size, FormatSettings));
+        AddFormField('size', FloatToStr(AData.Mirror[I].Size, FormatSettings));
         break;
       end;
 
-    if Assigned(AWebsiteData.FindControl(cRuntime)) then
-      AddFormField('playtime', AWebsiteData.FindControl(cRuntime).Value);
+    if Assigned(AData.FindControl(cRuntime)) then
+      AddFormField('playtime', AData.FindControl(cRuntime).Value);
 
-    if Assigned(AWebsiteData.FindControl(cGenre)) then
-      AddFormField('genre', AWebsiteData.FindControl(cGenre).Value);
+    if Assigned(AData.FindControl(cGenre)) then
+      AddFormField('genre', AData.FindControl(cGenre).Value);
 
-    if Assigned(AWebsiteData.FindControl(cLanguage)) then
-      AddFormField('language', AWebsiteData.FindControl(cLanguage).Value);
+    if Assigned(AData.FindControl(cLanguage)) then
+      AddFormField('language', AData.FindControl(cLanguage).Value);
 
-    if Assigned(AWebsiteData.FindControl(cVideoCodec)) then
-      AddFormField('filetype', AWebsiteData.FindControl(cVideoCodec).Value)
-    else if AWebsiteData.TemplateTypeID in [cAudio] then
+    if Assigned(AData.FindControl(cVideoCodec)) then
+      AddFormField('filetype', AData.FindControl(cVideoCodec).Value)
+    else if AData.TypeID in [cAudio] then
       AddFormField('filetype', 'MP3')
-    else if AWebsiteData.TemplateTypeID in [cOther] then
+    else if AData.TypeID in [cOther] then
       AddFormField('filetype', 'PDF')
     else
       AddFormField('filetype', 'ISO');
 
-    if Assigned(AWebsiteData.FindControl(cVideoStream)) then
-      AddFormField('source', AWebsiteData.FindControl(cVideoStream).Value)
-    else if AWebsiteData.TemplateTypeID in [cAudio] then
+    if Assigned(AData.FindControl(cVideoStream)) then
+      AddFormField('source', AData.FindControl(cVideoStream).Value)
+    else if AData.TypeID in [cAudio] then
       // "LAME @ 128 kBit/s VBR, 48 kHz"
       // IAudioEncoder @ IAudioBitrate IAudioBitrateType, IAudioSamplingRate
       ;
 
-    if Assigned(AWebsiteData.FindControl(cPicture)) then
-      AddFormField('thumb_url', AWebsiteData.FindControl(cPicture).Value);
+    if Assigned(AData.FindControl(cPicture)) then
+      AddFormField('thumb_url', AData.FindControl(cPicture).Value);
 
-    if Assigned(AWebsiteData.FindControl(cPicture)) and uCMSSettings.oxygen_scene_com_special then
-      AddFormField('image_url', AWebsiteData.FindControl(cPicture).Value)
+    if Assigned(AData.FindControl(cPicture)) and uCMSSettings.oxygen_scene_com_special then
+      AddFormField('image_url', AData.FindControl(cPicture).Value)
     else
       AddFormField('image_url', '');
 
     AddFormField('preview_url', '');
 
-    if Assigned(AWebsiteData.FindControl(cSample)) then
-      AddFormField('sample_url', AWebsiteData.FindControl(cSample).Value)
+    if Assigned(AData.FindControl(cSample)) then
+      AddFormField('sample_url', AData.FindControl(cSample).Value)
     else
       AddFormField('sample_url', '');
 
     if not uCMSSettings.use_textasdescription then
     begin
-      if Assigned(AWebsiteData.FindControl(cDescription)) then
-        AddFormField('description', AWebsiteData.FindControl(cDescription).Value);
+      if Assigned(AData.FindControl(cDescription)) then
+        AddFormField('description', AData.FindControl(cDescription).Value);
     end
     else
       AddFormField('description', Message);
 
-    if Assigned(AWebsiteData.FindControl(cNFO)) and not uCMSSettings.oxygen_scene_com_special then
-      AddFormField('nfo', AWebsiteData.FindControl(cNFO).Value);
+    if Assigned(AData.FindControl(cNFO)) and not uCMSSettings.oxygen_scene_com_special then
+      AddFormField('nfo', AData.FindControl(cNFO).Value);
 
     // max 4 mirrors
-    for I := 0 to Min(4, AWebsiteData.MirrorCount) - 1 do
+    for I := 0 to Min(4, AData.MirrorCount) - 1 do
     begin
 
       if uCMSSettings.use_plainlinks then
-        AddFormField(DownloadArray[I], AWebsiteData.Mirror[I].Directlink[0].Value)
-      else if (AWebsiteData.Mirror[I].CrypterCount > 0) then
-        AddFormField(DownloadArray[I], AWebsiteData.Mirror[I].Crypter[0].Value)
+        AddFormField(DownloadArray[I], AData.Mirror[I].Directlink[0].Value)
+      else if (AData.Mirror[I].CrypterCount > 0) then
+        AddFormField(DownloadArray[I], AData.Mirror[I].Crypter[0].Value)
       else
       begin
         ErrorMsg := 'No crypter initialized! (disable use_plainlinks or add a crypter)';
@@ -390,7 +390,7 @@ begin
       end;
 
       if uCMSSettings.extra_login then
-        AddFormField(DownloadArray[I] + '_hoster', AWebsiteData.Mirror[I].Hoster);
+        AddFormField(DownloadArray[I] + '_hoster', AData.Mirror[I].Hoster);
     end;
 
     if not(AccountName = '') then

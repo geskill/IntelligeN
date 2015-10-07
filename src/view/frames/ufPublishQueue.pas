@@ -8,8 +8,9 @@ uses
   // DevExpress
   cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxControls, cxContainer, cxEdit, cxProgressBar, cxButtons, cxStyles, cxCustomData, cxFilter, cxData,
   cxDataStorage, cxNavigator, cxLabel, cxButtonEdit, cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxClasses, cxGridLevel, cxGrid,
-  // Common
-  uAppInterface,
+  // MultiEvent
+  Generics.MultiEvents.NotifyEvent,
+  Generics.MultiEvents.NotifyInterface,
   // Api
   uApiPublish,
   // Utils

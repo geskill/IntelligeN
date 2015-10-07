@@ -10,7 +10,7 @@ uses
   // Utils
   uHTMLUtils,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -19,14 +19,14 @@ uses
 type
   TSexvideoallCom = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -38,32 +38,32 @@ begin
   result := 'sexvideoall.com';
 end;
 
-function TSexvideoallCom.GetAvailableTemplateTypeIDs;
+function TSexvideoallCom.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cXXX];
   result := Word(_TemplateTypeIDs);
 end;
 
-function TSexvideoallCom.GetAvailableComponentIDs;
+function TSexvideoallCom.GetAvailableControlIDs;
 var
-  // _TemplateTypeID: TTemplateTypeID;
-  _ComponentIDs: TComponentIDs;
+  // _TemplateTypeID: TTypeID;
+  _ComponentIDs: TControlIDs;
 begin
-  // _TemplateTypeID := TTemplateTypeID(TemplateTypeID);
+  // _TemplateTypeID := TTypeID(ATypeID);
 
   _ComponentIDs := [cPicture, cGenre];
 
   result := LongWord(_ComponentIDs);
 end;
 
-function TSexvideoallCom.GetComponentIDDefaultValue;
+function TSexvideoallCom.GetControlIDDefaultValue;
 begin
   result := True;
 end;
 
-function TSexvideoallCom.GetLimitDefaultValue: Integer;
+function TSexvideoallCom.GetResultsLimitDefaultValue: Integer;
 begin
   result := 5;
 end;
@@ -72,7 +72,7 @@ procedure TSexvideoallCom.Exec;
 const
   website = 'http://sexvideoall.com/';
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _Title, _FoundPictureFront: string;
   _Count: Integer;
 
@@ -86,7 +86,7 @@ var
         if Exec(InputString) then
         begin
           repeat
-            AComponentController.FindControl(cGenre).AddValue(Match[1], GetName);
+            AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[1]);
           until not ExecNext;
         end;
       finally
@@ -99,8 +99,8 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
   _Count := 0;
 
   RequestID := HTTPManager.Get(THTTPRequest.Create(website + 'DirectE/BrowseResults.asp?T88=0&T3=' + HTTPEncode(_Title) + '&act=viewCat&Submit=Go'),
@@ -120,13 +120,13 @@ begin
       if Exec(InputString) then
       begin
         repeat
-          if (cPicture in _ComponentIDs) and Assigned(AComponentController.FindControl(cPicture)) then
+          if (cPicture in _ComponentIDs) and Assigned(AControlController.FindControl(cPicture)) then
           begin
             _FoundPictureFront := StringReplace(Match[1], 'shop', 'SamplePhoto', [rfIgnoreCase]);
-            AComponentController.FindControl(cPicture).AddValue(_FoundPictureFront, GetName);
-            AComponentController.FindControl(cPicture).AddValue(StringReplace(_FoundPictureFront, '.jpg', 'f.jpg', [rfIgnoreCase]), GetName);
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, _FoundPictureFront);
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, StringReplace(_FoundPictureFront, '.jpg', 'f.jpg', [rfIgnoreCase]));
           end;
-          if (cGenre in _ComponentIDs) and Assigned(AComponentController.FindControl(cGenre)) then
+          if (cGenre in _ComponentIDs) and Assigned(AControlController.FindControl(cGenre)) then
             ExtractGenres(Match[3]);
           Inc(_Count);
         until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));

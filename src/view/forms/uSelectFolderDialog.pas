@@ -3,10 +3,13 @@ unit uSelectFolderDialog;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Menus, StdCtrls,
-  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, ComCtrls, ShlObj, cxShellCommon, cxTextEdit, cxMaskEdit, cxDropDownEdit,
-  cxShellTreeView, cxLabel, cxButtons,
-  RegExpr, cxShellControls, cxTreeView;
+  // Delphi
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Menus, StdCtrls, ComCtrls, ShlObj,
+  // Dev Express
+  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, cxShellCommon, cxTextEdit, cxMaskEdit, cxDropDownEdit,
+  cxShellTreeView, cxLabel, cxButtons, cxShellControls, cxTreeView,
+  // RegEx
+  RegExpr;
 
 type
   TSelectFolderDialog = class(TForm)

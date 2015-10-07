@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // plugin system
@@ -20,9 +20,10 @@ type
     website = 'http://ncrypt.in/';
   public
     function GetName: WideString; override;
-    function GenerateFolder(MirrorController: IMirrorControl): WideString; override;
-    function GetFolderInfo(FolderURL: WideString): TCrypterFolderInfo; override;
-    procedure GetFolderPicture(FolderURL: WideString; out Result: WideString; Small: WordBool = True); override;
+    function AddFolder(const AMirrorContainer: IMirrorContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function EditFolder(const AMirrorContainer: IMirrorContainer; ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function DeleteFolder(AFolderIdentifier: WideString): WordBool; override; safecall;
+    function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
   end;
 
 implementation
@@ -34,7 +35,7 @@ begin
   Result := 'nCrypt.in';
 end;
 
-function TNcryptIn.GenerateFolder;
+function TNcryptIn.AddFolder;
 var
   _Foldertypes: TFoldertypes;
   _Containertypes: TContainertypes;
@@ -56,10 +57,10 @@ begin
     if UseAccount then
       AddFormField('auth_code', AccountName);
 
-    AddFormField('links', MirrorController.DirectlinksMirror[0]);
+    AddFormField('links', AMirrorContainer.Directlink[0].Value);
 
-    for I := 1 to MirrorController.DirectlinksMirrorCount - 1 do
-      AddFormField('mirror[]', MirrorController.DirectlinksMirror[I]);
+    for I := 1 to AMirrorContainer.DirectlinkCount - 1 do
+      AddFormField('mirror[]', AMirrorContainer.Directlink[I].Value);
 
     AddFormField('show_mirrors', '0');
 
@@ -126,12 +127,22 @@ begin
   if HTTPProcess.HTTPResult.HasError then
     ErrorMsg := HTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage
   else if not(Pos('ncrypt.in', string(HTTPProcess.HTTPResult.SourceCode)) = 0) then
-    Result := copy(HTTPProcess.HTTPResult.SourceCode, 1, Pos(#$A, HTTPProcess.HTTPResult.SourceCode) - 1)
+    ErrorMsg := copy(HTTPProcess.HTTPResult.SourceCode, 1, Pos(#$A, HTTPProcess.HTTPResult.SourceCode) - 1)
   else
     ErrorMsg := HTTPProcess.HTTPResult.SourceCode;
 end;
 
-function TNcryptIn.GetFolderInfo;
+function TNcryptIn.EditFolder(const AMirrorContainer: IMirrorContainer; ACrypterFolderInfo: TCrypterFolderInfo): WordBool;
+begin
+  //
+end;
+
+function TNcryptIn.DeleteFolder(AFolderIdentifier: WideString): WordBool;
+begin
+  //
+end;
+
+function TNcryptIn.GetFolder;
 var
   CrypterFolderInfo: TCrypterFolderInfo;
 
@@ -151,7 +162,7 @@ begin
 
   HTTPParams := THTTPParams.Create;
   with HTTPParams do
-    AddFormField('link', FolderURL);
+    AddFormField('link', AFolderIdentifier);
 
   RequestID := HTTPManager.Post(THTTPRequest.Create(website + 'api_status.php'), HTTPParams, TPlugInHTTPOptions.Create(Self));
 
@@ -192,12 +203,9 @@ begin
       Free;
     end;
 
-  Result := CrypterFolderInfo;
-end;
+    // Result := StringReplace(FolderURL, '/folder-', '/status-', []);
 
-procedure TNcryptIn.GetFolderPicture;
-begin
-  Result := StringReplace(FolderURL, '/folder-', '/status-', []);
+  Result := False; // TODO
 end;
 
 end.

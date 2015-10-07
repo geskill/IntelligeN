@@ -9,10 +9,10 @@ uses
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: ICrawlerPlugIn): Boolean; stdcall; export;
+function LoadPlugin(var APlugIn: ICrawlerPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := T%FullName%.Create;
+    APlugIn := T%FullName%.Create;
     Result := True;
   except
     Result := False;

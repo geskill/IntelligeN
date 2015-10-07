@@ -10,7 +10,7 @@ uses
   // OmniThreadLibrary
   OtlCollections, OtlComm, OtlCommon, OtlEventMonitor, OtlSync, OtlTask, OtlTaskControl, OtlThreadPool,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
   uApiPlugins, uApiSettings, uApiThreadPoolManager;
 
@@ -19,23 +19,23 @@ type
   protected
     FOmniBlockingCollection: IOmniBlockingCollection;
     FFormatSettings: TFormatSettings;
-    FComponentController: IComponentController;
+    FComponentController: IControlController;
     FContingent: Integer;
     procedure UpdateControlValues;
     procedure InitiateImageRemoteUpload;
   public
-    constructor Create(const AComponentController: IComponentController);
+    constructor Create(const AComponentController: IControlController);
     function Initialize: Boolean; override;
     procedure Cleanup; override;
   end;
 
   // TCrawlerTasks = record
   // TaskID: Integer;
-  // ComponentController: Pointer;
+  // ControlController: Pointer;
   // end;
 
   TCrawlerTaskStatus = (ctsCREATED, ctsWORKING, ctsFINISHED);
-  TGUIInteractionEvent = procedure(AComponentController: IComponentController; Status: TCrawlerTaskStatus; AProgressPosition: Extended; msg: string) of object;
+  TGUIInteractionEvent = procedure(AComponentController: IControlController; Status: TCrawlerTaskStatus; AProgressPosition: Extended; msg: string) of object;
 
   TCrawlerManager = class(TThreadPoolManager, ICrawlerManager)
   private
@@ -48,8 +48,8 @@ type
   public
     constructor Create; reintroduce;
 
-    procedure AddCrawlerJob(const AComponentController: IComponentController);
-    procedure RemoveCrawlerJob(const AComponentController: IComponentController);
+    procedure AddCrawlerJob(const AComponentController: IControlController);
+    procedure RemoveCrawlerJob(const AComponentController: IControlController);
 
     property OnGUIInteraction: TGUIInteractionEvent read FOnGUIInteraction write FOnGUIInteraction;
   end;
@@ -72,7 +72,7 @@ begin
     begin
       _ControlValueCount := 0;
       // Problem, wenn Value gesetzt wurde, aber noch nicht als Message abgearbeitet wurde, dann ist Value noch leer
-      while (_ControlValueCount < GetValueCount) and ((Value = '') or ((ComponentID = cReleaseDate) and (Value = DateToStr(Date, FFormatSettings)))) do
+      while (_ControlValueCount < GetValueCount) and ((Value = '') or ((AControlID = cReleaseDate) and (Value = DateToStr(Date, FFormatSettings)))) do
       begin
         Value := GetValueContent(_ControlValueCount);
         sleep(0);
@@ -96,7 +96,7 @@ begin
   end;
 end;
 
-constructor TCrawlerThread.Create(const AComponentController: IComponentController);
+constructor TCrawlerThread.Create(const AComponentController: IControlController);
 var
   _CrawlerIndex, _ContingentIndex: Integer;
   _CrawlerCollectionItem: TCrawlerCollectionItem;
@@ -122,7 +122,7 @@ begin
       while not _found and (_ContingentIndex < _CrawlerCollectionItem.Contingent.Count) do
       begin
         _CrawlerContingentCollectionItem := TCrawlerContingentCollectionItem(_CrawlerCollectionItem.Contingent.Items[_ContingentIndex]);
-        _found := (FComponentController.TemplateTypeID = _CrawlerContingentCollectionItem.TemplateTypeID) and _CrawlerContingentCollectionItem.Status;
+        _found := (FComponentController.ATypeID = _CrawlerContingentCollectionItem.ATypeID) and _CrawlerContingentCollectionItem.Status;
         Inc(_ContingentIndex);
       end;
       if _found then
@@ -153,7 +153,7 @@ begin
 
     task.Comm.Send(MSG_CRAWLER_TASK_STARTED, [FComponentController, _CrawlerCollectionItem.name]);
 
-    TApiPlugin.CrawlerExec(_CrawlerCollectionItem, FComponentController.TemplateTypeID, FComponentController);
+    TApiPlugin.CrawlerExec(_CrawlerCollectionItem, FComponentController.ATypeID, FComponentController);
 
     /// access of control.value is now thread-safe and should be done by this thread
     UpdateControlValues;
@@ -187,19 +187,19 @@ begin
         FStartedTasks := 0;
 
         if Assigned(FOnGUIInteraction) then
-          FOnGUIInteraction(IComponentController(msg.MsgData[0].AsInterface), ctsCREATED, 0, '');
+          FOnGUIInteraction(IControlController(msg.MsgData[0].AsInterface), ctsCREATED, 0, '');
       end;
     MSG_CRAWLER_TASK_STARTED:
       begin
         if Assigned(FOnGUIInteraction) then
-          FOnGUIInteraction(IComponentController(msg.MsgData[0].AsInterface), ctsWORKING, FStartedTasks / FActiveContingent * 100, msg.MsgData[1].AsString);
+          FOnGUIInteraction(IControlController(msg.MsgData[0].AsInterface), ctsWORKING, FStartedTasks / FActiveContingent * 100, msg.MsgData[1].AsString);
 
         Inc(FStartedTasks);
       end;
     MSG_CRAWLER_TASK_FINISHED:
       begin
         if Assigned(FOnGUIInteraction) then
-          FOnGUIInteraction(IComponentController(msg.MsgData.AsInterface), ctsFINISHED, 100, '');
+          FOnGUIInteraction(IControlController(msg.MsgData.AsInterface), ctsFINISHED, 100, '');
       end
     else
       inherited OmniTEDTaskMessage(task, msg);

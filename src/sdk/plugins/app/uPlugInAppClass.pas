@@ -4,9 +4,9 @@ interface
 
 uses
   // Common
-  uConst, uAppInterface,
+  uAppInterface,
   // Plugin
-  uPlugInInterface, uPlugInClass;
+  uPlugInInterfaceAdv, uPlugInClass;
 
 type
   TAppPlugIn = class(TPlugIn, IAppPlugIn)

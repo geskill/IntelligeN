@@ -20,7 +20,7 @@ uses
   // LkJSON
   uLkJSON,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uAppInterface,
   // Utils
   uPathUtils, uStringUtils,
   // Plugin system
@@ -142,7 +142,7 @@ procedure TLinkGrabber.OnClick(const Sender: IInterface);
           else
             Mirror[_LinkListIndex].DirectlinksMirror[0] := _LinkList.Items[_LinkListIndex];
       end;
-      FAppController.PageController.CallComponentparser;
+      FAppController.PageController.CallControlParser;
     finally
       _LinkList.Free;
     end;

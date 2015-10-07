@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -17,14 +17,14 @@ uses
 type
   TCdLexikonDe = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -36,32 +36,32 @@ begin
   Result := 'cd-lexikon.de';
 end;
 
-function TCdLexikonDe.GetAvailableTemplateTypeIDs;
+function TCdLexikonDe.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cAudio];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TCdLexikonDe.GetAvailableComponentIDs;
+function TCdLexikonDe.GetAvailableControlIDs;
 var
-  // _TemplateTypeID: TTemplateTypeID;
-  _ComponentIDs: TComponentIDs;
+  // _TemplateTypeID: TTypeID;
+  _ComponentIDs: TControlIDs;
 begin
-  // _TemplateTypeID := TTemplateTypeID(TemplateTypeID);
+  // _TemplateTypeID := TTypeID(ATypeID);
 
   _ComponentIDs := [cArtist, cPicture, cDescription];
 
   Result := LongWord(_ComponentIDs);
 end;
 
-function TCdLexikonDe.GetComponentIDDefaultValue;
+function TCdLexikonDe.GetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TCdLexikonDe.GetLimitDefaultValue;
+function TCdLexikonDe.GetResultsLimitDefaultValue;
 begin
   Result := 5;
 end;
@@ -72,13 +72,13 @@ const
 var
   _Count: Integer;
   _Title: string;
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 
   procedure deep_search(ASourceCode: string);
   var
     _Tracklist: string;
   begin
-    if (AComponentController.FindControl(cArtist) <> nil) and (cArtist in _ComponentIDs) then
+    if (AControlController.FindControl(cArtist) <> nil) and (cArtist in _ComponentIDs) then
     begin
       with TRegExpr.Create do
         try
@@ -86,12 +86,12 @@ var
           Expression := 'Interpret: <td><td><font size=''2'' face=''Arial''>(.*?)<tr>';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cArtist).AddValue(Match[1], GetName);
+            AControlController.FindControl(cArtist).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
     end;
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
     begin
       with TRegExpr.Create do
         try
@@ -99,12 +99,12 @@ var
           Expression := '<tr><td valign=top><img src=''(.*?)''';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cPicture).AddValue(website + Match[1], GetName);
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, website + Match[1]);
         finally
           Free;
         end;
     end;
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
     begin
       _Tracklist := '';
       with TRegExpr.Create do
@@ -117,7 +117,7 @@ var
             repeat
               _Tracklist := _Tracklist + Match[2] + '. ' + Match[3] + sLineBreak;
             until not ExecNext;
-            AComponentController.FindControl(cDescription).AddValue(_Tracklist, GetName);
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, _Tracklist);
           end;
         finally
           Free;
@@ -131,8 +131,8 @@ var
   ResponseStrSearchResult: string;
 begin
   _Count := 0;
-  _Title := TrimLeft(Copy(AComponentController.FindControl(cTitle).Value, Pos('-', AComponentController.FindControl(cTitle).Value) + 1));
-  LongWord(_ComponentIDs) := AComponentIDs;
+  _Title := TrimLeft(Copy(AControlController.FindControl(cTitle).Value, Pos('-', AControlController.FindControl(cTitle).Value) + 1));
+  LongWord(_ComponentIDs) := AControlIDs;
 
   RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + '/suchen/albumsuche.php?r=0&q=' + HTTPEncode(_Title)), TPlugInHTTPOptions.Create(Self));
 

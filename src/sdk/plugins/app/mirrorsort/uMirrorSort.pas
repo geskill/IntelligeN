@@ -7,7 +7,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, StdCtrls, ComCtrls, Dialogs, Clipbrd, ShellAPI, Math,
   Generics.Collections, Menus,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uAppInterface,
   // RegExp
   RegExpr,
   // MultiEvent
@@ -349,7 +349,7 @@ begin
         else
           Mirror[_LinkListIndex].DirectlinksMirror[0] := _LinkList.Items[_LinkListIndex];
     end;
-    FAppController.PageController.CallComponentparser;
+    FAppController.PageController.CallControlParser;
   finally
     _LinkList.Free;
   end;

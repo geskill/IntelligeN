@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // Utils
   uHTMLUtils,
   // HTTPManager
@@ -19,14 +19,14 @@ uses
 type
   TSceperEu = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -38,20 +38,20 @@ begin
   Result := 'sceper.eu';
 end;
 
-function TSceperEu.GetAvailableTemplateTypeIDs;
+function TSceperEu.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
-  _TemplateTypeIDs := [ low(TTemplateTypeID) .. high(TTemplateTypeID)] - [cXXX];
+  _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)] - [cXXX];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TSceperEu.GetAvailableComponentIDs;
+function TSceperEu.GetAvailableControlIDs;
 var
-  _TemplateTypeID: TTemplateTypeID;
-  _ComponentIDs: TComponentIDs;
+  _TemplateTypeID: TTypeID;
+  _ComponentIDs: TControlIDs;
 begin
-  _TemplateTypeID := TTemplateTypeID(TemplateTypeID);
+  _TemplateTypeID := TTypeID(ATypeID);
 
   _ComponentIDs := [cReleaseDate, cPicture, cGenre, cDescription];
 
@@ -64,12 +64,12 @@ begin
   Result := LongWord(_ComponentIDs);
 end;
 
-function TSceperEu.GetComponentIDDefaultValue;
+function TSceperEu.GetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TSceperEu.GetLimitDefaultValue;
+function TSceperEu.GetResultsLimitDefaultValue;
 begin
   Result := 0;
 end;
@@ -78,7 +78,7 @@ procedure TSceperEu.Exec;
 const
   website = 'http://sceper.eu/';
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _ReleaseName: string;
   _Count: Integer;
 
@@ -96,7 +96,7 @@ var
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cGenre).AddValue(Trim(Match[1]), GetName);
+              AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(Match[1]));
             until not ExecNext;
           end;
         finally
@@ -104,37 +104,37 @@ var
         end;
     end
     else
-      AComponentController.FindControl(cGenre).AddValue(Trim(AGenreList), GetName);
+      AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(AGenreList));
   end;
 
   procedure deep_search(AWebsiteSourceCode: string);
   begin
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
           Expression := '<div class="meta">Release Info<\/div>\s+<p><a href="([^"]*?)"';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cPicture).AddValue(Match[1], GetName);
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
 
-    if (cReleaseDate in _ComponentIDs) and Assigned(AComponentController.FindControl(cReleaseDate)) then
+    if (cReleaseDate in _ComponentIDs) and Assigned(AControlController.FindControl(cReleaseDate)) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
           Expression := 'bold">Release Date:<\/span> (\d{2})-(\d{2})-(\d{4})<br \/>';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cReleaseDate).AddValue(DateToStr(EncodeDate(StrToIntDef(Match[3], 0), StrToIntDef(Match[2], 0),
-                  StrToIntDef(Match[1], 0)), FormatSettings), GetName);
+            AControlController.FindControl(cReleaseDate).AddProposedValue(GetName, DateToStr(EncodeDate(StrToIntDef(Match[3], 0), StrToIntDef(Match[2], 0),
+                  StrToIntDef(Match[1], 0)), FormatSettings));
         finally
           Free;
         end;
 
-    if (AComponentController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
@@ -146,73 +146,73 @@ var
           Free;
         end;
 
-    if (AComponentController.FindControl(cVideoCodec) <> nil) and (cVideoCodec in _ComponentIDs) then
+    if (AControlController.FindControl(cVideoCodec) <> nil) and (cVideoCodec in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
           Expression := 'bold">Video:<\/span> (\w+) |';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cVideoCodec).AddValue(Match[1], GetName);
+            AControlController.FindControl(cVideoCodec).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
 
-    if (AComponentController.FindControl(cVideoStream) <> nil) and (cVideoStream in _ComponentIDs) then
+    if (AControlController.FindControl(cVideoStream) <> nil) and (cVideoStream in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
           Expression := 'bold">Source:<\/span> (.*?)<br \/>';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cVideoStream).AddValue(Match[1], GetName);
+            AControlController.FindControl(cVideoStream).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
 
-    if (AComponentController.FindControl(cAudioStream) <> nil) and (cAudioStream in _ComponentIDs) then
+    if (AControlController.FindControl(cAudioStream) <> nil) and (cAudioStream in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
           Expression := 'bold">Audio:<\/span> \w+, (\w+), .*?<br \/>';
           if Exec(InputString) then
-            AComponentController.FindControl(cAudioStream).AddValue(Match[1], GetName);
+            AControlController.FindControl(cAudioStream).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
 
-    if (AComponentController.FindControl(cVideoSystem) <> nil) and (cVideoSystem in _ComponentIDs) then
+    if (AControlController.FindControl(cVideoSystem) <> nil) and (cVideoSystem in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
           Expression := 'Region:\s?<\/strong>\s?(.*?)<br \/>';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cVideoSystem).AddValue(Match[1], GetName);
+            AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
 
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
           Expression := '<div class="meta">Release Description<\/div>\s+<p>(.*?)<\/p>';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cDescription).AddValue(Trim(HTML2Text(Match[1])), GetName);
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
         finally
           Free;
         end;
 
-    if (AComponentController.FindControl(cTrailer) <> nil) and (cTrailer in _ComponentIDs) then
+    if (AControlController.FindControl(cTrailer) <> nil) and (cTrailer in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
           Expression := '<a href="([^"]*?)" target="_blank">Trailer<\/a>';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cTrailer).AddValue(Match[1], GetName);
+            AControlController.FindControl(cTrailer).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
@@ -223,8 +223,8 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _ReleaseName := AComponentController.FindControl(cReleaseName).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
+  _ReleaseName := AControlController.FindControl(cReleaseName).Value;
   // _Count := 0;
 
   GetLocaleFormatSettings(LOCALE_SYSTEM_DEFAULT, FormatSettings);

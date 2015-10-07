@@ -10,7 +10,7 @@ uses
   // MultiEvent
   Generics.MultiEvents.NotifyInterface,
   // Common
-  uAppInterface;
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface;
 
 type
   TStoredMenuItem = class
@@ -28,23 +28,22 @@ type
     FButton: TdxBarItem;
   public
     constructor Create(AButton: TdxBarItem);
-    function GetMenuItems: IMenuItems; stdcall;
-    function InsertMenuItem(aIndex: Integer; const aCaption: WideString; const aHint: WideString; aShortCut: Word; aImageIndex: Integer;
-      aTag: Integer; const aOnClick: INotifyEventHandler): IMenuItem; stdcall;
-    function GetIndex: Integer; stdcall;
-    function GetName: WideString; stdcall;
-    function GetCaption: WideString; stdcall;
-    procedure SetCaption(const aValue: WideString); stdcall;
-    function GetHint: WideString; stdcall;
-    procedure SetHint(const aValue: WideString); stdcall;
-    function GetShortCut: Word; stdcall;
-    procedure SetShortCut(aValue: Word); stdcall;
-    function GetImageIndex: Integer; stdcall;
-    procedure SetImageIndex(aImageIndex: Integer); stdcall;
-    function GetTag: Integer; stdcall;
-    procedure SetTag(aValue: Integer); stdcall;
-    function GetOnClick: INotifyEventHandler; stdcall;
-    procedure SetOnClick(const aValue: INotifyEventHandler); stdcall;
+    function GetMenuItems: IMenuItems; safecall;
+    function InsertMenuItem(AIndex: Integer; const ACaption: WideString; const AHint: WideString; AShortCut: Integer; AImageIndex: Integer; ATag: Integer; const AOnClick: INotifyEventHandler): IMenuItem; safecall;
+    function GetIndex: Integer; safecall;
+    function GetName: WideString; safecall;
+    function GetCaption: WideString; safecall;
+    procedure SetCaption(const AValue: WideString); safecall;
+    function GetHint: WideString; safecall;
+    procedure SetHint(const AValue: WideString); safecall;
+    function GetShortCut: Integer; safecall;
+    procedure SetShortCut(AValue: Integer); safecall;
+    function GetImageIndex: Integer; safecall;
+    procedure SetImageIndex(AImageIndex: Integer); safecall;
+    function GetTag: Integer; safecall;
+    procedure SetTag(AValue: Integer); safecall;
+    function GetOnClick: INotifyEventHandler; safecall;
+    procedure SetOnClick(const AValue: INotifyEventHandler); safecall;
   end;
 
   TIMenuItems = class(TInterfacedObject, IMenuItems)
@@ -52,9 +51,9 @@ type
     FMenuItems: TdxBarItemLinks;
   public
     constructor Create(AMenuItems: TdxBarItemLinks);
-    function GetCount: Integer; stdcall;
-    function GetItem(index: Integer): IMenuItem; stdcall;
-    function RemoveItem(const aMenuItem: IMenuItem): WordBool; stdcall;
+    function GetCount: Integer; safecall;
+    function GetItem(AIndex: Integer): IMenuItem; safecall;
+    function RemoveItem(const AMenuItem: IMenuItem): WordBool; safecall;
   end;
 
   TIMainMenu = class(TInterfacedObject, IMainMenu)
@@ -62,9 +61,8 @@ type
     FMainMenu: TdxBar;
   public
     constructor Create(AMainMenu: TdxBar);
-    function GetMenuItems: IMenuItems; stdcall;
-    function InsertMenuItem(aIndex: Integer; const aCaption: WideString; const aHint: WideString; aShortCut: Word; aImageIndex: Integer;
-      aTag: Integer; const aOnClick: INotifyEventHandler; const ASubMenuItem: WordBool = True): IMenuItem; stdcall;
+    function GetMenuItems: IMenuItems; safecall;
+    function InsertMenuItem(AIndex: Integer; const ACaption: WideString; const AHint: WideString; AShortCut: Integer; AImageIndex: Integer; ATag: Integer; const AOnClick: INotifyEventHandler; const ASubMenuItem: WordBool = True): IMenuItem; safecall;
   end;
 
 implementation
@@ -249,7 +247,7 @@ end;
 
 function TIMenuItems.GetItem;
 begin
-  Result := TIMenuItem.Create(FMenuItems.Items[index].Item);
+  Result := TIMenuItem.Create(FMenuItems.Items[AIndex].Item);
 end;
 
 function TIMenuItems.RemoveItem;

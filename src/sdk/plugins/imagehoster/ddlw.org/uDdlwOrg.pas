@@ -5,8 +5,6 @@ interface
 uses
   // Delphi
   Windows, SysUtils, Classes, StrUtils, HTTPApp,
-  // Common
-  uConst, uAppInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system

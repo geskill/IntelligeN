@@ -18,7 +18,7 @@ uses
   // PopupMenu Mod
   uMydxBarPopupMenu, uMycxRichEdit, // uMyPopupMenu,
   // Common
-  uAppInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
   uApiConst, uApiCrypter, uApiMody, uApiSettings, uApiXml,
   // Plugin

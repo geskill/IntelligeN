@@ -10,7 +10,7 @@ uses
   // Utils,
   uHTMLUtils, uStringUtils,
   // Common
-  uConst, uWebsiteInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPConst,
   // Plugin system
@@ -66,7 +66,7 @@ type
     function SettingsClass: TCMSPlugInSettingsMeta; override;
     function GetSettings: TCMSPlugInSettings; override;
     procedure SetSettings(ACMSPlugInSettings: TCMSPlugInSettings); override;
-    function LoadSettings(const AWebsiteData: ICMSWebsiteData = nil): Boolean; override;
+    function LoadSettings(const AData: ITabSheetData = nil): Boolean; override;
 
     function DoBuildLoginRequest(out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; ACAPTCHALogin: Boolean = False): Boolean; override;
     function DoAnalyzeLogin(AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; override;
@@ -77,7 +77,7 @@ type
     function NeedPrePost(out ARequestURL: string): Boolean; override;
     function DoAnalyzePrePost(AResponseStr: string): Boolean; override;
 
-    function DoBuildPostRequest(const AWebsiteData: ICMSWebsiteData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
+    function DoBuildPostRequest(const AData: ITabSheetData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
     function DoAnalyzePost(AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; override;
 
     function DoAnalyzeIDsRequest(AResponseStr: string): Integer; override;
@@ -107,13 +107,13 @@ end;
 function Tphpbb3.LoadSettings;
 begin
   Result := True;
-  phpbb3Settings.intelligent_posting_bounds := TPlugInCMSSettingsHelper.LoadSettingsToClass(SettingsFileName, phpbb3Settings, AWebsiteData);
+  phpbb3Settings.intelligent_posting_bounds := TPlugInCMSSettingsHelper.LoadSettingsToClass(SettingsFileName, phpbb3Settings, AData);
   with phpbb3Settings do
   begin
     if SameStr('', Charset) then
       Charset := DefaultCharset;
 
-    if Assigned(AWebsiteData) and (forums = null) then
+    if Assigned(AData) and (forums = null) then
     begin
       ErrorMsg := StrForumIdIsUndefine;
       Result := False;

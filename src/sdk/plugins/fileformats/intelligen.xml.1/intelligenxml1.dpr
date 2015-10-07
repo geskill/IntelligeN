@@ -1,16 +1,16 @@
 library intelligenxml1;
 
 uses
-  uPlugInInterface,
+  uPlugInInterfaceAdv,
   uPlugInFileFormatClass,
   uintelligenxml1 in 'uintelligenxml1.pas';
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: IFileFormatPlugIn): Boolean; stdcall; export;
+function LoadPlugin(var APlugIn: IFileFormatPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := Tintelligenxml1.Create;
+    APlugIn := Tintelligenxml1.Create;
     Result := True;
   except
     Result := False;

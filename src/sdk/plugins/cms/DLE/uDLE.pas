@@ -10,7 +10,7 @@ uses
   // Utils,
   uHTMLUtils, uPathUtils, uStringUtils,
   // Common
-  uConst, uWebsiteInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPConst,
   // Plugin system
@@ -56,7 +56,7 @@ type
     function SettingsClass: TCMSPlugInSettingsMeta; override;
     function GetSettings: TCMSPlugInSettings; override;
     procedure SetSettings(ACMSPlugInSettings: TCMSPlugInSettings); override;
-    function LoadSettings(const AWebsiteData: ICMSWebsiteData = nil): Boolean; override;
+    function LoadSettings(const AData: ITabSheetData = nil): Boolean; override;
 
     function DoBuildLoginRequest(out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; ACAPTCHALogin: Boolean = False): Boolean; override;
     function DoAnalyzeLogin(AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; override;
@@ -64,7 +64,7 @@ type
     function NeedPrePost(out ARequestURL: string): Boolean; override;
     function DoAnalyzePrePost(AResponseStr: string): Boolean; override;
 
-    function DoBuildPostRequest(const AWebsiteData: ICMSWebsiteData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
+    function DoBuildPostRequest(const AData: ITabSheetData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
     function DoAnalyzePost(AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; override;
 
     function GetIDsRequestURL: string; override;
@@ -94,7 +94,7 @@ end;
 
 function TDLE.LoadSettings;
 begin
-  Result := inherited LoadSettings(AWebsiteData);
+  Result := inherited LoadSettings(AData);
   with DLESettings do
   begin
     if (categorys = null) then
@@ -266,38 +266,38 @@ begin
 
     if DLESettings.dbase_ws_special then
     begin
-      AddFormField('xfield[releasename]', AWebsiteData.FindControl(cReleaseName).Value);
+      AddFormField('xfield[releasename]', AData.FindControl(cReleaseName).Value);
 
-      if Assigned(AWebsiteData.FindControl(cPicture)) then
-        AddFormField('xfield[cover1]', AWebsiteData.FindControl(cPicture).Value)
+      if Assigned(AData.FindControl(cPicture)) then
+        AddFormField('xfield[cover1]', AData.FindControl(cPicture).Value)
       else
         AddFormField('xfield[cover1]', '');
 
-      for I := 0 to AWebsiteData.MirrorCount - 1 do
-        if AWebsiteData.Mirror[I].Size > 0 then
+      for I := 0 to AData.MirrorCount - 1 do
+        if AData.Mirror[I].Size > 0 then
         begin
-          AddFormField('xfield[groesse]', FloatToStr(AWebsiteData.Mirror[I].Size) + ' MB');
+          AddFormField('xfield[groesse]', FloatToStr(AData.Mirror[I].Size) + ' MB');
           break;
         end;
 
-      if Assigned(AWebsiteData.FindControl(cPassword)) then
-        AddFormField('xfield[passwort]', AWebsiteData.FindControl(cPassword).Value)
+      if Assigned(AData.FindControl(cPassword)) then
+        AddFormField('xfield[passwort]', AData.FindControl(cPassword).Value)
       else
         AddFormField('xfield[passwort]', '');
 
-      HosterCount := AWebsiteData.MirrorCount;
+      HosterCount := AData.MirrorCount;
 
       if (HosterCount = 1) then
       begin
-        AddFormField('xfield[hoster]', AWebsiteData.Mirror[0].Hoster);
+        AddFormField('xfield[hoster]', AData.Mirror[0].Hoster);
       end
       else if (HosterCount > 1) and (HosterCount < 4) then
       begin
         ShortHosterList := '';
-        for I := 0 to AWebsiteData.MirrorCount - 1 do
+        for I := 0 to AData.MirrorCount - 1 do
         begin
-          ShortHosterList := ShortHosterList + AWebsiteData.Mirror[I].HosterShort;
-          if not(I = AWebsiteData.MirrorCount - 1) then
+          ShortHosterList := ShortHosterList + AData.Mirror[I].HosterShort;
+          if not(I = AData.MirrorCount - 1) then
             ShortHosterList := ShortHosterList + ' / ';
         end;
         AddFormField('xfield[hoster]', ShortHosterList);
@@ -305,12 +305,12 @@ begin
       else
         AddFormField('xfield[hoster]', 'Multi');
 
-      if Assigned(AWebsiteData.FindControl(cLanguage)) then
+      if Assigned(AData.FindControl(cLanguage)) then
       begin
-        if not(Pos(';', AWebsiteData.FindControl(cLanguage).Value) = 0) then
+        if not(Pos(';', AData.FindControl(cLanguage).Value) = 0) then
           AddFormField('xfield[sprache]', '3')
         else
-          case IndexText(AWebsiteData.FindControl(cLanguage).Value, ['GER', 'ENG']) of
+          case IndexText(AData.FindControl(cLanguage).Value, ['GER', 'ENG']) of
             0:
               AddFormField('xfield[sprache]', '1');
             1:
@@ -322,51 +322,51 @@ begin
       else
         AddFormField('xfield[sprache]', '4');
 
-      for I := 0 to AWebsiteData.MirrorCount - 1 do
-        if AWebsiteData.Mirror[I].Size > 0 then
+      for I := 0 to AData.MirrorCount - 1 do
+        if AData.Mirror[I].Size > 0 then
         begin
-          AddFormField('xfield[parts]', IntToStr(AWebsiteData.Mirror[I].Parts));
+          AddFormField('xfield[parts]', IntToStr(AData.Mirror[I].Parts));
           break;
         end;
 
-      if Assigned(AWebsiteData.FindControl(cRuntime)) then
-        AddFormField('xfield[laufzeit]', AWebsiteData.FindControl(cRuntime).Value)
+      if Assigned(AData.FindControl(cRuntime)) then
+        AddFormField('xfield[laufzeit]', AData.FindControl(cRuntime).Value)
       else
         AddFormField('xfield[laufzeit]', '');
 
-      if Assigned(AWebsiteData.FindControl(cAudioBitrate)) then
-        AddFormField('xfield[bitrate]', AWebsiteData.FindControl(cAudioBitrate).Value)
+      if Assigned(AData.FindControl(cAudioBitrate)) then
+        AddFormField('xfield[bitrate]', AData.FindControl(cAudioBitrate).Value)
       else
         AddFormField('xfield[bitrate]', '');
 
-      if Assigned(AWebsiteData.FindControl(cAudioStream)) then
-        AddFormField('xfield[audiostream]', AWebsiteData.FindControl(cAudioStream).Value)
+      if Assigned(AData.FindControl(cAudioStream)) then
+        AddFormField('xfield[audiostream]', AData.FindControl(cAudioStream).Value)
       else
         AddFormField('xfield[audiostream]', '');
 
-      if Assigned(AWebsiteData.FindControl(cVideoStream)) then
-        AddFormField('xfield[videostream]', AWebsiteData.FindControl(cVideoStream).Value)
+      if Assigned(AData.FindControl(cVideoStream)) then
+        AddFormField('xfield[videostream]', AData.FindControl(cVideoStream).Value)
       else
         AddFormField('xfield[videostream]', '');
 
-      if Assigned(AWebsiteData.FindControl(cVideoCodec)) then
-        AddFormField('xfield[codec]', AWebsiteData.FindControl(cVideoCodec).Value)
+      if Assigned(AData.FindControl(cVideoCodec)) then
+        AddFormField('xfield[codec]', AData.FindControl(cVideoCodec).Value)
       else
         AddFormField('xfield[codec]', '');
 
       AddFormField('xfield[linkmulti]', '');
 
-      for I := 0 to AWebsiteData.MirrorCount - 1 do
+      for I := 0 to AData.MirrorCount - 1 do
       begin
         if DLESettings.use_plainlinks then
         begin
-          if (AWebsiteData.Mirror[I].DirectlinkCount > 0) then
-            AddFormField('xfield[' + LowerCase(StringReplace(ChangeFileExt(AWebsiteData.Mirror[I].Hoster, ''), '-', '', [rfReplaceAll])) + ']', AWebsiteData.Mirror[I].Directlink[0].Value)
+          if (AData.Mirror[I].DirectlinkCount > 0) then
+            AddFormField('xfield[' + LowerCase(StringReplace(ChangeFileExt(AData.Mirror[I].Hoster, ''), '-', '', [rfReplaceAll])) + ']', AData.Mirror[I].Directlink[0].Value)
         end
         else
         begin
-          if (AWebsiteData.Mirror[I].CrypterCount > 0) then
-            AddFormField('xfield[' + LowerCase(StringReplace(ChangeFileExt(AWebsiteData.Mirror[I].Hoster, ''), '-', '', [rfReplaceAll])) + ']', AWebsiteData.Mirror[I].Crypter[0].Value)
+          if (AData.Mirror[I].CrypterCount > 0) then
+            AddFormField('xfield[' + LowerCase(StringReplace(ChangeFileExt(AData.Mirror[I].Hoster, ''), '-', '', [rfReplaceAll])) + ']', AData.Mirror[I].Crypter[0].Value)
           else
           begin
             ErrorMsg := 'No crypter initialized! (disable use_plainlinks or add a crypter)';
@@ -375,13 +375,13 @@ begin
         end;
       end;
 
-      if Assigned(AWebsiteData.FindControl(cTrailer)) then
-        AddFormField('xfield[trailer]', AWebsiteData.FindControl(cTrailer).Value)
+      if Assigned(AData.FindControl(cTrailer)) then
+        AddFormField('xfield[trailer]', AData.FindControl(cTrailer).Value)
       else
         AddFormField('xfield[trailer]', '');
 
-      if Assigned(AWebsiteData.FindControl(cNFO)) then
-        AddFormField('xfield[nfo]', AWebsiteData.FindControl(cNFO).Value)
+      if Assigned(AData.FindControl(cNFO)) then
+        AddFormField('xfield[nfo]', AData.FindControl(cNFO).Value)
       else
         AddFormField('xfield[nfo]', '');
     end;

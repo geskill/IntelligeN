@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -17,14 +17,14 @@ uses
 type
   TXonairCom = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -34,28 +34,28 @@ begin
   result := 'Xonair.com';
 end;
 
-function TXonairCom.GetAvailableTemplateTypeIDs;
+function TXonairCom.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cXXX];
   result := Word(_TemplateTypeIDs);
 end;
 
-function TXonairCom.GetAvailableComponentIDs;
+function TXonairCom.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture, cLanguage, cDescription];
   result := LongWord(_ComponentIDs);
 end;
 
-function TXonairCom.GetComponentIDDefaultValue;
+function TXonairCom.GetControlIDDefaultValue;
 begin
   result := True;
 end;
 
-function TXonairCom.GetLimitDefaultValue;
+function TXonairCom.GetResultsLimitDefaultValue;
 begin
   result := 5;
 end;
@@ -65,12 +65,12 @@ const
   website = 'http://xonair.com/';
   img = 'http://image3.imageservers.com/pdimages/';
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _Title: string;
 
   procedure deep_search(AWebsiteSourceCode: string);
   begin
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
     begin
       with TRegExpr.Create do
         try
@@ -80,7 +80,7 @@ var
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cDescription).AddValue(Match[3], GetName);
+              AControlController.FindControl(cDescription).AddProposedValue(GetName, Match[3]);
             until not ExecNext;
           end;
         finally
@@ -88,7 +88,7 @@ var
         end;
     end;
 
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
     begin
       with TRegExpr.Create do
         try
@@ -98,7 +98,7 @@ var
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cPicture).AddValue(img + Match[1], GetName);
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, img + Match[1]);
             until not ExecNext;
           end;
         finally
@@ -112,8 +112,8 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
 
   RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + 'search.cfm?lang=US&pid=home&str=' + HTTPEncode(_Title) + '&view=all&searchby=title'),
     TPlugInHTTPOptions.Create(Self));

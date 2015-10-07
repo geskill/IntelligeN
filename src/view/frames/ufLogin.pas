@@ -10,7 +10,7 @@ uses
   cxButtons, cxLookAndFeelPainters, cxCheckBox, cxControls, cxContainer, cxEdit, cxTextEdit, cxGraphics,
   cxLookAndFeels, cxLabel, dxBar,
   // Common
-  uBase,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
   uApiConst, uApiMain, uApiSettings,
   // Utils

@@ -128,10 +128,18 @@ object Settings: TSettings
         object cxTSApp: TcxTabSheet
           Caption = 'App'
           ImageIndex = 0
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
         object cxTSCAPTCHA: TcxTabSheet
           Caption = 'CAPTCHA'
           ImageIndex = 0
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
         object cxTSCMS: TcxTabSheet
           Caption = 'CMS'
@@ -420,6 +428,10 @@ object Settings: TSettings
         object cxTSCrawler: TcxTabSheet
           Caption = 'Crawler'
           ImageIndex = 0
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           DesignSize = (
             584
             273)
@@ -503,6 +515,10 @@ object Settings: TSettings
         object cxTSCrypter: TcxTabSheet
           Caption = 'Crypter'
           ImageIndex = 0
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           DesignSize = (
             584
             273)
@@ -907,6 +923,10 @@ object Settings: TSettings
         object cxTSFileFormats: TcxTabSheet
           Caption = 'File Formats'
           ImageIndex = 0
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           DesignSize = (
             584
             273)
@@ -940,6 +960,10 @@ object Settings: TSettings
         object cxTSFileHoster: TcxTabSheet
           Caption = 'File Hoster'
           ImageIndex = 0
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
         end
         object cxTSImageHoster: TcxTabSheet
           Caption = 'Image Hoster'
@@ -1269,6 +1293,10 @@ object Settings: TSettings
       Caption = 'Database'
       ImageIndex = 3
       TabVisible = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         598
         307)
@@ -1448,6 +1476,10 @@ object Settings: TSettings
     object cxTSControls: TcxTabSheet
       Caption = 'Controls'
       ImageIndex = 4
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         598
         307)
@@ -1469,6 +1501,10 @@ object Settings: TSettings
         object cxTSControls_: TcxTabSheet
           Caption = 'Controls'
           ImageIndex = 0
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           DesignSize = (
             584
             273)

@@ -6,7 +6,7 @@ uses
   // Delphi
   SysUtils, Classes, DB, Dialogs,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // DLLs
   uExport,
   // Api
@@ -71,16 +71,16 @@ var
   //I, J, maxid, relid: Integer;
 begin
   with ATabSheetController do
-    if not(ComponentController.FindControl(cReleaseName) = nil) then
+    if not(ControlController.FindControl(cReleaseName) = nil) then
     begin
-      StringTemplateTypeID := TTemplateTypeIDToString
-        (ComponentController.FindControl(cReleaseName).TemplateTypeID);
-      Releasename := ComponentController.FindControl(cReleaseName).Value;
+      StringTemplateTypeID := TypeIDToString
+        (ControlController.FindControl(cReleaseName).ATypeID);
+      Releasename := ControlController.FindControl(cReleaseName).Value;
 
       if Length(Releasename) > 3 then
       begin
 {$REGION 'releases'}{
-        FADQuery.Open('select id from ' + BackupReleases + ' where ' + TComponentIDToString
+        FADQuery.Open('select id from ' + BackupReleases + ' where ' + ControlIDToString
             (cReleaseName) + ' = ''' + Releasename + '''');
 
         if FADQuery.RecordCount = 0 then
@@ -91,22 +91,22 @@ begin
 
           s := 'insert into ' + BackupReleases + ' (id, IType, ';
 
-          for I := 0 to ComponentController.ControlCount - 1 do
+          for I := 0 to ControlController.ControlCount - 1 do
           begin
-            s := s + TComponentIDToString(ComponentController.Control[I].ComponentID);
+            s := s + ControlIDToString(ControlController.Control[I].AControlID);
 
-            if not(I = (ComponentController.ControlCount - 1)) then
+            if not(I = (ControlController.ControlCount - 1)) then
               s := s + ', ';
           end;
 
           s := s + ') values(' + IntToStr(maxid) + ', ''' + StringTemplateTypeID + ''', ';
 
-          for I := 0 to ComponentController.ControlCount - 1 do
+          for I := 0 to ControlController.ControlCount - 1 do
           begin
-            s := s + '''' + StringReplace(ComponentController.Control[I].Value, '''', '''''', [rfReplaceAll])
+            s := s + '''' + StringReplace(ControlController.Control[I].Value, '''', '''''', [rfReplaceAll])
               + '''';
 
-            if not(I = (ComponentController.ControlCount - 1)) then
+            if not(I = (ControlController.ControlCount - 1)) then
               s := s + ', ';
           end;
 
@@ -121,13 +121,13 @@ begin
 
           s := 'update ' + BackupReleases + ' set';
 
-          for I := 0 to ComponentController.ControlCount - 1 do
+          for I := 0 to ControlController.ControlCount - 1 do
           begin
-            s := s + ' ' + TComponentIDToString(ComponentController.Control[I].ComponentID)
-              + ' = ''' + StringReplace(ComponentController.Control[I].Value, '''', '''''', [rfReplaceAll])
+            s := s + ' ' + ControlIDToString(ControlController.Control[I].AControlID)
+              + ' = ''' + StringReplace(ControlController.Control[I].Value, '''', '''''', [rfReplaceAll])
               + '''';
 
-            if not(I = (ComponentController.ControlCount - 1)) then
+            if not(I = (ControlController.ControlCount - 1)) then
               s := s + ', ';
           end;
 

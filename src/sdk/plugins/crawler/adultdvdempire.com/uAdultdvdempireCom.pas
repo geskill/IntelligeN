@@ -10,7 +10,7 @@ uses
   // Utils
   uHTMLUtils, uStringUtils,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -19,14 +19,14 @@ uses
 type
   TAdultdvdempireCom = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -38,29 +38,29 @@ begin
   Result := 'adultdvdempire.com';
 end;
 
-function TAdultdvdempireCom.GetAvailableTemplateTypeIDs;
+function TAdultdvdempireCom.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cXXX];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TAdultdvdempireCom.GetAvailableComponentIDs;
+function TAdultdvdempireCom.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture, cGenre, cDescription];
 
   Result := LongWord(_ComponentIDs);
 end;
 
-function TAdultdvdempireCom.GetComponentIDDefaultValue;
+function TAdultdvdempireCom.GetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TAdultdvdempireCom.GetLimitDefaultValue;
+function TAdultdvdempireCom.GetResultsLimitDefaultValue;
 begin
   Result := 5;
 end;
@@ -69,7 +69,7 @@ procedure TAdultdvdempireCom.Exec;
 const
   website = 'http://www.adultdvdempire.com/';
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _Title: string;
   _Count: Integer;
 
@@ -85,7 +85,7 @@ var
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cGenre).AddValue(Trim(Match[1]), GetName);
+              AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(Match[1]));
             until not ExecNext;
           end;
         finally
@@ -93,7 +93,7 @@ var
         end;
     end
     else
-      AComponentController.FindControl(cGenre).AddValue(Trim(AGenreList), GetName);
+      AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(AGenreList));
   end;
 
   procedure deep_search(aWebsitecode: string);
@@ -104,7 +104,7 @@ var
     end;
 
   begin
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
     begin
       with TRegExpr.Create do
         try
@@ -114,14 +114,14 @@ var
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cDescription).AddValue(Trim(ReduceWhitespace(HTML2Text(MakeLinebreaks(Match[1])))), GetName);
+              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(ReduceWhitespace(HTML2Text(MakeLinebreaks(Match[1])))));
             until not ExecNext;
           end;
         finally
           Free;
         end;
     end;
-    if (AComponentController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
@@ -132,7 +132,7 @@ var
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
@@ -140,8 +140,8 @@ var
 
           if Exec(InputString) then
           begin
-            AComponentController.FindControl(cPicture).AddValue(StringReplace(Match[1], 'm.', 'h.', []), GetName);
-            AComponentController.FindControl(cPicture).AddValue(StringReplace(Match[1], 'm.', 'bh.', []), GetName);
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, StringReplace(Match[1], 'm.', 'h.', []));
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, StringReplace(Match[1], 'm.', 'bh.', []));
           end;
         finally
           Free;
@@ -155,8 +155,8 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
   _Count := 0;
 
   // http://www.adultdvdempire.com/allsearch/search?q=Mollys%20Life%2018

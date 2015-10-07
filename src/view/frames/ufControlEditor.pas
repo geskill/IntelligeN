@@ -9,8 +9,8 @@ uses
   cxStyles, cxCustomData, cxGraphics, cxFilter, cxData, cxDataStorage, cxEdit, cxLabel, cxImage,
   cxGridCustomTableView, cxGridTableView, cxControls, cxGridCustomView, cxClasses, cxGridLevel, cxGrid,
   cxLookAndFeels, cxLookAndFeelPainters, cxHint, dxScreenTip, dxCustomHint, cxNavigator,
-  // Interface
-  uAppInterface, uConst;
+  // Common
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface;
 
 type
   TfControlEditor = class(TFrame)

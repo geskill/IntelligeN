@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // plugin system
@@ -18,21 +18,40 @@ type
   TLinkcryptWs = class(TCrypterPlugIn)
   private const
     website = 'http://linkcrypt.ws/';
+
+    function GetFolderID(AFolderURL: string): string;
   public
     function GetName: WideString; override;
-    function GenerateFolder(MirrorController: IMirrorControl): WideString; override;
-    function GetFolderInfo(FolderURL: WideString): TCrypterFolderInfo; override;
-    procedure GetFolderPicture(FolderURL: WideString; out Result: WideString; Small: WordBool = True); override;
+    function AddFolder(const AMirrorContainer: IMirrorContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function EditFolder(const AMirrorContainer: IMirrorContainer; ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function DeleteFolder(AFolderIdentifier: WideString): WordBool; override; safecall;
+    function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
   end;
 
 implementation
+
+function TLinkcryptWs.GetFolderID(AFolderURL: string): string;
+begin
+  Result := '';
+
+  with TRegExpr.Create do
+    try
+      InputString := AFolderURL;
+      Expression := 'dir\/(\w+)';
+
+      if Exec(InputString) then
+        Result := Match[1];
+    finally
+      Free;
+    end;
+end;
 
 function TLinkcryptWs.GetName;
 begin
   Result := 'Linkcrypt.ws';
 end;
 
-function TLinkcryptWs.GenerateFolder;
+function TLinkcryptWs.AddFolder;
 var
   _Foldertypes: TFoldertypes;
   _Containertypes: TContainertypes;
@@ -53,10 +72,10 @@ begin
   HTTPParams := THTTPParams.Create;
   with HTTPParams do
   begin
-    AddFormField('urls', StringReplace(MirrorController.DirectlinksMirror[0], sLineBreak, ';', [rfReplaceAll]));
+    AddFormField('urls', StringReplace(AMirrorContainer.Directlink[0].Value, sLineBreak, ';', [rfReplaceAll]));
 
-    for I := 1 to MirrorController.DirectlinksMirrorCount - 1 do
-      AddFormField('mirror_' + IntToStr(I), StringReplace(MirrorController.DirectlinksMirror[I], sLineBreak, ';', [rfReplaceAll]));
+    for I := 1 to AMirrorContainer.DirectlinkCount - 1 do
+      AddFormField('mirror_' + IntToStr(I), StringReplace(AMirrorContainer.Directlink[I].Value, sLineBreak, ';', [rfReplaceAll]));
 
     if ftWeb in _Foldertypes then
       AddFormField('weburls', '0')
@@ -154,7 +173,17 @@ begin
     ErrorMsg := 'The Server response was empty!';
 end;
 
-function TLinkcryptWs.GetFolderInfo;
+function TLinkcryptWs.EditFolder;
+begin
+  Result := False;
+end;
+
+function TLinkcryptWs.DeleteFolder;
+begin
+  Result := False;
+end;
+
+function TLinkcryptWs.GetFolder;
 var
   CrypterFolderInfo: TCrypterFolderInfo;
 
@@ -164,21 +193,6 @@ var
 
   FormatSettings: TFormatSettings;
   XMLDoc: IXMLDocument;
-
-  function GetFolderID(AFolderURL: string): string;
-  begin
-    with TRegExpr.Create do
-      try
-        InputString := AFolderURL;
-        Expression := 'dir\/(\w+)';
-
-        if Exec(InputString) then
-          Result := Match[1];
-      finally
-        Free;
-      end;
-  end;
-
 begin
   with CrypterFolderInfo do
   begin
@@ -192,7 +206,7 @@ begin
   GetLocaleFormatSettings(LOCALE_SYSTEM_DEFAULT, FormatSettings);
   FormatSettings.DecimalSeparator := ',';
 
-  RequestID := HTTPManager.Get(THTTPRequest.Create(website + 'api.html?api=status_V1&detail=1&folderKey=' + GetFolderID(FolderURL)), TPlugInHTTPOptions.Create(Self));
+  RequestID := HTTPManager.Get(THTTPRequest.Create(website + 'api.html?api=status_V1&detail=1&folderKey=' + GetFolderID(AFolderIdentifier)), TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
@@ -236,7 +250,7 @@ begin
           on E: Exception do
           begin
             ErrorMsg := 'The XML from ' + GetName + ' was invaild: ' + E.message;
-            Exit(CrypterFolderInfo);
+            // Exit(CrypterFolderInfo);
           end;
         end;
       finally
@@ -249,17 +263,16 @@ begin
   else
     ErrorMsg := 'The Server response was empty!';
 
-  Result := CrypterFolderInfo;
-end;
-
-procedure TLinkcryptWs.GetFolderPicture;
-begin
-  case Small of
+  (*
+    case Small of
     True:
-      Result := StringReplace(FolderURL, '/dir/', '/png/', []);
+    Result := StringReplace(FolderURL, '/dir/', '/png/', []);
     False:
-      Result := StringReplace(FolderURL, '/dir/', '/textpng/', []);
-  end;
+    Result := StringReplace(FolderURL, '/dir/', '/textpng/', []);
+    end;
+    *)
+
+  // Result := CrypterFolderInfo;
 end;
 
 end.

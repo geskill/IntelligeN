@@ -9,16 +9,15 @@ uses
   // Dev Express
   cxGraphics, cxControls, cxContainer, cxEdit, cxProgressBar, dxStatusBar, cxLookAndFeels, cxLookAndFeelPainters,
   cxGridTableView, cxPC, cxHint, cxCustomData, cxButtonEdit, cxPCdxBarPopupMenu, dxBar, dxBarBuiltInMenu,
+  // MultiEvent
+  Generics.MultiEvents.NotifyEvent, Generics.MultiEvents.NotifyInterface,
   // Common
-  uAppInterface, uBase, uConst,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // DLLs
   uExport,
   // Api
   uApiConst, uApiMain, uApiMultiCastEvent, uApiBackupManager, uApiComponentparser, uApiSettings, uApiXml, uApiPlugins, uApiPublishController, uApiPublish,
   uApiCrawler, uApiHoster, uApiCrypter, uApiImageHoster, uApiTabSheetController,
-  // MultiEvent
-  Generics.MultiEvents.NotifyEvent,
-  Generics.MultiEvents.NotifyInterface,
   // Utils
   uFileUtils;
 
@@ -40,7 +39,7 @@ type
     procedure pcMainNewTabButtonClick(Sender: TObject; var AHandled: Boolean);
     procedure cxTCViewChange(Sender: TObject);
   private
-    FActiveCrawlerComponentController: IComponentController;
+    FActiveCrawlerComponentController: IControlController;
     FBackupManager: TBackupManager;
     FComponentParser: TComponentParser;
     FCrawlerManager: ICrawlerManager;
@@ -50,12 +49,12 @@ type
     FImageHosterManager: IImageHosterManager;
     FChange: INotifyEvent;
     FViewChange: IViewChangeEvent;
-    procedure CrawlerGUIInteraction(AComponentController: IComponentController; Status: TCrawlerTaskStatus; AProgressPosition: Extended; msg: string);
+    procedure CrawlerGUIInteraction(AComponentController: IControlController; Status: TCrawlerTaskStatus; AProgressPosition: Extended; msg: string);
     function GetPagesAvailable: Boolean;
     procedure SetPagesAvailable(APagesAvailable: Boolean);
-    function GetActiveViewType: TViewType;
-    procedure SetActiveViewType(AViewType: TViewType);
-    procedure CommonActiveViewTypeChange(AViewType: TViewType);
+    function GetActiveViewType: TTabViewType;
+    procedure SetActiveViewType(AViewType: TTabViewType);
+    procedure CommonActiveViewTypeChange(AViewType: TTabViewType);
     function GetCrawlerManager: ICrawlerManager;
     function GetHosterManager: IHosterManager;
     function GetCrypterManager: ICrypterManager;
@@ -86,10 +85,10 @@ type
     procedure SwitchDesignView(AEnabled: Boolean);
 
     property PagesAvailable: Boolean read GetPagesAvailable write SetPagesAvailable;
-    property ActiveViewType: TViewType read GetActiveViewType write SetActiveViewType;
+    property ActiveViewType: TTabViewType read GetActiveViewType write SetActiveViewType;
 
     function Add(AFileName: WideString): Integer; overload;
-    function Add(AFileName: WideString; ATemplateTypeID: TTemplateTypeID; AEmpty: WordBool = False): Integer; overload;
+    function Add(AFileName: WideString; ATypeID: TTypeID; AEmpty: WordBool = False): Integer; overload;
     procedure SaveTab(ATabIndex: Integer; ASaveDialog: Boolean = False);
     procedure SaveCurrentTab;
     procedure SaveCurrentTabAs;
@@ -137,7 +136,7 @@ procedure TfMain.pcMainCanCloseEx(Sender: TObject; ATabIndex: Integer; var ACanC
 var
   CrawlingActive: Boolean;
 begin
-  CrawlingActive := (TabSheetController[ATabIndex].ComponentController = FActiveCrawlerComponentController);
+  CrawlingActive := (TabSheetController[ATabIndex].ControlController = FActiveCrawlerComponentController);
 
   ACanClose := not CrawlingActive;
 
@@ -196,7 +195,7 @@ begin
   CommonActiveViewTypeChange(ActiveViewType);
 end;
 
-procedure TfMain.CrawlerGUIInteraction(AComponentController: IComponentController; Status: TCrawlerTaskStatus; AProgressPosition: Extended; msg: string);
+procedure TfMain.CrawlerGUIInteraction(AComponentController: IControlController; Status: TCrawlerTaskStatus; AProgressPosition: Extended; msg: string);
 begin
   case Status of
     ctsCREATED:
@@ -259,12 +258,12 @@ begin
   end;
 end;
 
-function TfMain.GetActiveViewType: TViewType;
+function TfMain.GetActiveViewType: TTabViewType;
 begin
-  Result := TViewType(cxTCView.TabIndex);
+  Result := TTabViewType(cxTCView.TabIndex);
 end;
 
-procedure TfMain.SetActiveViewType(AViewType: TViewType);
+procedure TfMain.SetActiveViewType(AViewType: TTabViewType);
 begin
   with cxTCView do
     TabIndex := Integer(AViewType);
@@ -272,7 +271,7 @@ begin
   CommonActiveViewTypeChange(AViewType);
 end;
 
-procedure TfMain.CommonActiveViewTypeChange(AViewType: TViewType);
+procedure TfMain.CommonActiveViewTypeChange(AViewType: TTabViewType);
 begin
   if AViewType = vtData then
     CallComponentParser;
@@ -376,7 +375,7 @@ procedure TfMain.CallAutoCompletion;
 begin
   CallBackupManager;
 
-  CrawlerManager.AddCrawlerJob(ActiveTabSheetController.ComponentController);
+  CrawlerManager.AddCrawlerJob(ActiveTabSheetController.ControlController);
 end;
 
 procedure TfMain.CallSeriesAutoCompletion;
@@ -384,7 +383,7 @@ var
   I: Integer;
 begin
   for I := 0 to TabSheetCount - 1 do
-    CrawlerManager.AddCrawlerJob(TabSheetController[I].ComponentController);
+    CrawlerManager.AddCrawlerJob(TabSheetController[I].ControlController);
 end;
 
 procedure TfMain.CallCrypterCrypt(ATabIndex: Integer);
@@ -469,7 +468,7 @@ begin
 
       WorkPanelWidth := pcMain.ActivePage.Width;
 
-      ComponentController := ActiveTabSheetController.ComponentController;
+      ControlController := ActiveTabSheetController.ControlController;
       MirrorController := ActiveTabSheetController.MirrorController;
       Start;
     end;
@@ -505,20 +504,20 @@ begin
   Result := Add(GetTemplatesTypeFolder + AFileName + '.xml', TApiXml.GetControlsTemplateInfo(GetTemplatesTypeFolder + AFileName + '.xml').TemplateType);
 end;
 
-function TfMain.Add(AFileName: WideString; ATemplateTypeID: TTemplateTypeID; AEmpty: WordBool = False): Integer;
+function TfMain.Add(AFileName: WideString; ATypeID: TTypeID; AEmpty: WordBool = False): Integer;
 var
   NewTabSheetController: TTabSheetController;
   I: Integer;
 begin
   pcMain.Properties.BeginUpdate;
   try
-    NewTabSheetController := TTabSheetController.Create(pcMain, Self, ATemplateTypeID);
+    NewTabSheetController := TTabSheetController.Create(pcMain, Self, ATypeID);
     with NewTabSheetController do
     begin
       PageControl := pcMain;
 
       // FileName := AFileName;
-      ImageIndex := Integer(ATemplateTypeID);
+      ImageIndex := Integer(ATypeID);
 
       TemplateFileName := ExtractFileName(ChangeFileExt(AFileName, ''));
 
@@ -539,25 +538,25 @@ begin
         NewTabSheetController.MirrorController.Mirror[NewTabSheetController.MirrorController.Add].Directlink.Add('');
         CallComponentParser;
       end;
-    GetControls(AFileName, NewTabSheetController.ComponentController, Self);
+    GetControls(AFileName, NewTabSheetController.ControlController, Self);
     with NewTabSheetController do
       if (MirrorController.MirrorCount > 0) then
         MirrorController.Mirror[0].Focus := True
       else
-        with ComponentController do
+        with ControlController do
           if ControlCount > 0 then
             Control[0].Focus := True;
   end
   else
   begin
-    GetControls(AFileName, NewTabSheetController.ComponentController, Self);
+    GetControls(AFileName, NewTabSheetController.ControlController, Self);
     if not AEmpty then
       for I := 0 to SettingsManager.Settings.ComponentParser.MirrorCount - 1 do
       begin
         NewTabSheetController.MirrorController.Mirror[NewTabSheetController.MirrorController.Add].Directlink.Add('');
         // CallComponentParser;
       end;
-    with NewTabSheetController.ComponentController do
+    with NewTabSheetController.ControlController do
       if ControlCount > 0 then
         Control[0].Focus := True;
   end;
@@ -598,7 +597,7 @@ procedure TfMain.SaveTab(ATabIndex: Integer; ASaveDialog: Boolean = False);
         Result := TrueFilename(ReleaseName)
       else
       begin
-        Control := ComponentController.FindControl(cTitle);
+        Control := ControlController.FindControl(cTitle);
         if Assigned(Control) and (length(Control.Value) > 0) then
           Result := TrueFilename(Control.Value);
       end;
@@ -703,8 +702,8 @@ begin
             begin
               if not(ReleaseName = '') then
                 AutoFileName := TrueFilename(ReleaseName)
-              else if not(ComponentController.FindControl(cTitle).Value = '') then
-                AutoFileName := TrueFilename(ComponentController.FindControl(cTitle).Value);
+              else if not(ControlController.FindControl(cTitle).Value = '') then
+                AutoFileName := TrueFilename(ControlController.FindControl(cTitle).Value);
               AutoFileName := Path + AutoFileName;
               if not(ExtractFileExt(AutoFileName) = '.xml') then
                 AutoFileName := AutoFileName + '.xml';

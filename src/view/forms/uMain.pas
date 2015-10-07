@@ -12,12 +12,12 @@ uses
   DECFmt,
   // OneInstance
   { OneInstance, }
-  // Api
-  uApiCodeTag, uApiConst, uApiDirectoryMonitor, uApiMainMenu, uApiMain, uApiSettings, uApiTabSheetController, uApiXml,
   // MultiEvent
   Generics.MultiEvents.NotifyInterface,
   // Common
-  uAppInterface, uBase, uConst,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
+  // Api
+  uApiCodeTag, uApiConst, uApiDirectoryMonitor, uApiMainMenu, uApiMain, uApiSettings, uApiTabSheetController, uApiXml,
   // DLLs
   uExport,
   // Forms
@@ -308,7 +308,7 @@ type
     function GetFileHosters: WideString;
     function GetImageHosters: WideString;
     function GetCustomisedHoster(const AHoster: WideString; AShortName: WordBool = False): WideString;
-    function GetControlValues(const ATemplateTypeID: TTemplateTypeID; const AComponentID: TComponentID): WideString;
+    function GetControlValues(const ATypeID: TTypeID; const AComponentID: TControlID): WideString;
   public
     procedure LoadLayout(ALayoutCollectionItem: TLayoutCollectionItem);
     procedure SaveLayout(ALayoutName: string);
@@ -963,9 +963,9 @@ begin
   Result := THosterConfiguration.GetCustomisedHoster(AHoster, AShortName);
 end;
 
-function TMain.GetControlValues(const ATemplateTypeID: TTemplateTypeID; const AComponentID: TComponentID): WideString;
+function TMain.GetControlValues(const ATypeID: TTypeID; const AComponentID: TControlID): WideString;
 begin
-  Result := SettingsManager.Settings.Controls.Controls[ATemplateTypeID, AComponentID].GetItems;
+  Result := SettingsManager.Settings.Controls.Controls[ATypeID, AComponentID].GetItems;
 end;
 
 procedure TMain.LoadLayout(ALayoutCollectionItem: TLayoutCollectionItem);

@@ -10,11 +10,11 @@ uses
   uBase, uAppInterface;
 
 type
-  TViewChangeMethod = procedure(const NewViewType: TViewType) of object;
+  TViewChangeMethod = procedure(const NewViewType: TTabViewType) of object;
 
   TIViewChangeEventHandler = class(TGenericEventHandler<TViewChangeMethod>, IViewChangeEventHandler)
   public
-    procedure Invoke(const NewViewType: TViewType); safecall;
+    procedure Invoke(const NewViewType: TTabViewType); safecall;
   end;
 
   TControlMethod = procedure(const Sender: IBasic) of object;
@@ -49,7 +49,7 @@ implementation
 
 { TIViewChangeEvent }
 
-procedure TIViewChangeEventHandler.Invoke(const NewViewType: TViewType);
+procedure TIViewChangeEventHandler.Invoke(const NewViewType: TTabViewType);
 begin
   if (@FHandler <> nil) then
     FHandler(NewViewType);

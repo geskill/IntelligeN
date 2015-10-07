@@ -10,7 +10,7 @@ uses
   // FastScript
   fs_iInterpreter, fs_iclassesrtti, fs_ijs, fs_itools,
   // Common
-  uConst, uWebsiteInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // DLLs
   uExport,
   // Utils
@@ -32,12 +32,12 @@ type
 
     TIMirror = class(TInterfacedObject, IMirror)
     private
-      FCMSWebsiteData: ICMSWebsiteData;
+      FCMSWebsiteData: ITabSheetData;
     protected
       function GetMirror(const IndexOrName: OleVariant): IMirrorContainer;
       function GetCount: Integer;
     public
-      constructor Create(ACMSWebsiteData: ICMSWebsiteData);
+      constructor Create(ACMSWebsiteData: ITabSheetData);
 
       property Mirror[const IndexOrName: OleVariant]: IMirrorContainer read GetMirror; default;
       property Count: Integer read GetCount;
@@ -51,7 +51,7 @@ type
     FResult: string;
 
     FWebsiteCMS, FWebsite: string;
-    FCMSWebsiteData: ICMSWebsiteData;
+    FCMSWebsiteData: ITabSheetData;
     FIMirror: TIMirror;
 
     function CallMethod(Instance: TObject; ClassType: TClass; const MethodName: string; var Params: Variant): Variant;
@@ -65,7 +65,7 @@ type
 
     function Compile(AIScript: string): Boolean;
   public
-    constructor Create(AWebsiteCMS, AWebsite: string; ACMSWebsiteData: ICMSWebsiteData);
+    constructor Create(AWebsiteCMS, AWebsite: string; ACMSWebsiteData: ITabSheetData);
     function Execute(AIScript: string): RIScriptResult;
     function ErrorAnalysis(AIScript: string): RIScriptResult;
     destructor Destroy; override;
@@ -78,7 +78,7 @@ uses
 
 { TIScirptParser.TIMirror }
 
-constructor TIScirptParser.TIMirror.Create(ACMSWebsiteData: ICMSWebsiteData);
+constructor TIScirptParser.TIMirror.Create(ACMSWebsiteData: ITabSheetData);
 begin
   inherited Create;
   FCMSWebsiteData := ACMSWebsiteData;
@@ -241,13 +241,13 @@ begin
     AddMethod('function ExtractUrlProtocol(const AUrl: string): string', CallMethod);
     AddMethod('function ExtractUrlHost(const AUrl: string): string', CallMethod);
 
-    AddConst('IType', 'string', TTemplateTypeIDToString(FCMSWebsiteData.TemplateTypeID));
+    AddConst('IType', 'string', TypeIDToString(FCMSWebsiteData.ATypeID));
     AddConst('ICMS', 'string', FWebsiteCMS);
     AddConst('IWebsite', 'string', FWebsite);
 
     with FCMSWebsiteData do
       for I := 0 to ControlCount - 1 do
-        AddConst(TComponentIDToString(Control[I].ComponentID), 'string', Control[I].Value);
+        AddConst(ControlIDToString(Control[I].AControlID), 'string', Control[I].Value);
 
     with AddClass(TICrypter, 'TICrypter') do
     begin

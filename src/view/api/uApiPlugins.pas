@@ -8,7 +8,7 @@ uses
   // Spring Framework
   Spring.Utils,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // DLLs
   uExport,
   // Api
@@ -23,6 +23,7 @@ uses
 type
   TErrorProc = reference to procedure(AErrorMsg: string);
   TPluginProc = reference to procedure(var APlugin: IPlugIn);
+  TCrypterPluginProc = reference to procedure(var ACrypterPlugin: ICrypterPlugIn);
   TFileFormatPluginProc = reference to procedure(var AFileFormatPlugin: IFileFormatPlugIn);
 
   TApiPlugin = class
@@ -30,6 +31,7 @@ type
     class procedure ReturnError(AErrorMsg: string; AErrorProc: TErrorProc = nil);
   private
     class procedure LoadPlugin(ARelativPluginPath: string; APluginProc: TPluginProc; AErrorProc: TErrorProc = nil);
+    class procedure LoadCrypterPlugin(ARelativPluginPath: string; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TErrorProc = nil);
     class procedure LoadFileFormatsPlugin(ARelativPluginPath: string; AFileFormatPluginProc: TFileFormatPluginProc; AErrorProc: TErrorProc = nil);
   public
     class procedure AppLoad(App: TAppCollectionItem; AppController: IAppController);
@@ -42,9 +44,9 @@ type
     class function CMSBelongsTo(ACMSPluginPath, AWebsiteSourceCode: string): Boolean;
     class procedure CMSShowWebsiteSettingsEditor(ACMSPluginPath: string; CMSWebsites: TCMSWebsitesCollectionItem; AppController: IAppController);
 
-    class procedure CrawlerExec(Crawler: TCrawlerCollectionItem; ATemplateTypeID: TTemplateTypeID; ComponentController: IComponentController);
+    class procedure CrawlerExec(Crawler: TCrawlerCollectionItem; ATypeID: TTypeID; ControlController: IControlController);
 
-    class function GenerateFolder(Crypter: TCrypterCollectionItem; MirrorControl: IMirrorControl; ComponentController: IComponentController; out AErrorMsg: string): string;
+    class function AddFolder(Crypter: TCrypterCollectionItem; MirrorControl: IMirrorControl; ControlController: IControlController; out AErrorMsg: string): string;
     class function GetCrypterFolderInfo(Crypter: TCrypterCollectionItem; FolderURL: string): TCrypterFolderInfo;
 
     class function GetSaveFileFormats: TStrings;
@@ -143,6 +145,29 @@ begin
   end
   else
     ReturnError('Plugin not found! (' + ARelativPluginPath + ')', AErrorProc);
+end;
+
+class procedure TApiPlugin.LoadCrypterPlugin(ARelativPluginPath: string; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TErrorProc);
+begin
+  LoadPlugin(ARelativPluginPath,
+    { } procedure(var APlugin: IPlugIn)
+    { } var
+    { . } _Plugin: ICrypterPlugIn;
+    { } begin
+    { . } if APlugin.QueryInterface(ICrypterPlugIn, _Plugin) = 0 then
+    { ... } try
+    { ..... } with _Plugin do
+    { ..... } begin
+    { ....... } try
+    { ......... } ACrypterPluginProc(_Plugin);
+    { ....... } except
+
+    { ....... } end;
+    { ..... } end;
+    { ... } finally
+    { ..... } _Plugin := nil;
+    { ... } end;
+    { } end, AErrorProc);
 end;
 
 class procedure TApiPlugin.LoadFileFormatsPlugin(ARelativPluginPath: string; AFileFormatPluginProc: TFileFormatPluginProc; AErrorProc: TErrorProc = nil);
@@ -398,7 +423,7 @@ begin
     { } procedure(var APlugin: IPlugIn)
     { } var
     { . } _Plugin: ICrawlerPlugIn;
-    { . } _ComponentIDs: TComponentIDs;
+    { . } _ComponentIDs: TControlIDs;
     { . } _CrawlerContingentIndex: Integer;
     { } begin
     { . } if APlugin.QueryInterface(ICrawlerPlugIn, _Plugin) = 0 then
@@ -410,11 +435,11 @@ begin
     { ....... } _ComponentIDs := [];
     { ....... } for _CrawlerContingentIndex := 0 to Crawler.Contingent.Count - 1 do
     { ......... } with TCrawlerContingentCollectionItem(Crawler.Contingent.Items[_CrawlerContingentIndex]) do
-    { ........... } if Status and (ATemplateTypeID = TemplateTypeID) then
-    { ............. } _ComponentIDs := _ComponentIDs + [ComponentID];
+    { ........... } if Status and (ATypeID = ATypeID) then
+    { ............. } _ComponentIDs := _ComponentIDs + [AControlID];
 
     { ....... } try
-    { ......... } Exec(Integer(ATemplateTypeID), Longword(_ComponentIDs), Crawler.Limit, ComponentController);
+    { ......... } Exec(Integer(ATypeID), Longword(_ComponentIDs), Crawler.Limit, ControlController);
     { ....... } except
 
     { ....... } end;
@@ -426,7 +451,7 @@ begin
     { } end);
 end;
 
-class function TApiPlugin.GenerateFolder;
+class function TApiPlugin.AddFolder;
 var
   _Result, _ErrorMsg: string;
 begin
@@ -464,9 +489,9 @@ begin
     { ......... } fnFilename:
     { ........... } FolderName := MirrorControl.Directlink.FileName;
     { ......... } fnReleasename:
-    { ........... } FolderName := ComponentController.FindControl(cReleaseName).Value;
+    { ........... } FolderName := ControlController.FindControl(cReleaseName).Value;
     { ......... } fnTitle:
-    { ........... } FolderName := ComponentController.FindControl(cTitle).Value;
+    { ........... } FolderName := ControlController.FindControl(cTitle).Value;
     { ....... } end;
 
     { ....... } AdvertismentType := Integer(Crypter.AdvertismentType);
@@ -478,11 +503,11 @@ begin
     { ....... } AdvertismentPicture := Crypter.AdvertismentPicture;
 
     { ....... } UseCoverLink := Crypter.UseCoverLink;
-    { ....... } if Assigned(ComponentController.FindControl(cPicture)) then
-    { ......... } CoverLink := ComponentController.FindControl(cPicture).Value;
+    { ....... } if Assigned(ControlController.FindControl(cPicture)) then
+    { ......... } CoverLink := ControlController.FindControl(cPicture).Value;
     { ....... } UseDescription := Crypter.UseDescription;
-    { ....... } if Assigned(ComponentController.FindControl(cDescription)) then
-    { ......... } Description := ComponentController.FindControl(cDescription).Value;
+    { ....... } if Assigned(ControlController.FindControl(cDescription)) then
+    { ......... } Description := ControlController.FindControl(cDescription).Value;
     { ....... } UseCNL := Crypter.UseCNL;
     { ....... } UseWebseiteLink := Crypter.UseWebseiteLink;
     { ....... } WebseiteLink := Crypter.WebseiteLink;
@@ -491,15 +516,15 @@ begin
     { ....... } EMailforStatusNotice := Crypter.EMailforStatusNotice;
 
     { ....... } UseFilePassword := Crypter.UseFilePassword;
-    { ....... } if Assigned(ComponentController.FindControl(cPassword)) then
-    { ......... } FilePassword := ComponentController.FindControl(cPassword).Value;
+    { ....... } if Assigned(ControlController.FindControl(cPassword)) then
+    { ......... } FilePassword := ControlController.FindControl(cPassword).Value;
     { ....... } UseAdminPassword := Crypter.UseAdminPassword;
     { ....... } AdminPassword := Crypter.AdminPassword;
     { ....... } UseVisitorPassword := Crypter.UseVisitorPassword;
     { ....... } Visitorpassword := Crypter.Visitorpassword;
 
     { ....... } try
-    { ......... } _Result := GenerateFolder(MirrorControl);
+    { ......... } _Result := AddFolder(MirrorControl);
     { ......... } _ErrorMsg := ErrorMsg;
     { ....... } except
     { ......... } on E: Exception do

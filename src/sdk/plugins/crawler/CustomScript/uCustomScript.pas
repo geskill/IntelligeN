@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // Utils
   uHTMLUtils,
   // Plugin system
@@ -17,14 +17,14 @@ uses
 type
   TCustomScript = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -34,28 +34,28 @@ begin
   Result := 'CustomScript';
 end;
 
-function TCustomScript.GetAvailableTemplateTypeIDs;
+function TCustomScript.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
-  _TemplateTypeIDs := [ low(TTemplateTypeID) .. high(TTemplateTypeID)];
+  _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TCustomScript.GetAvailableComponentIDs;
+function TCustomScript.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
-  _ComponentIDs := [ low(TComponentID) .. high(TComponentID)];
+  _ComponentIDs := [ low(TControlID) .. high(TControlID)];
   Result := LongWord(_ComponentIDs);
 end;
 
-function TCustomScript.GetComponentIDDefaultValue;
+function TCustomScript.GetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TCustomScript.GetLimitDefaultValue;
+function TCustomScript.GetResultsLimitDefaultValue;
 begin
   Result := 0;
 end;

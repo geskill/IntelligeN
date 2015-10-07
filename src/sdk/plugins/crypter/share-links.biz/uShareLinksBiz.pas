@@ -6,7 +6,7 @@ uses
   // Delphi
   Windows, SysUtils, Classes,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // plugin system
@@ -18,9 +18,10 @@ type
     website = 'http://share-links.biz/';
   public
     function GetName: WideString; override;
-    function GenerateFolder(MirrorController: IMirrorControl): WideString; override;
-    function GetFolderInfo(FolderURL: WideString): TCrypterFolderInfo; override;
-    procedure GetFolderPicture(FolderURL: WideString; out Result: WideString; Small: WordBool = True); override;
+    function AddFolder(const AMirrorContainer: IMirrorContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function EditFolder(const AMirrorContainer: IMirrorContainer; ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function DeleteFolder(AFolderIdentifier: WideString): WordBool; override; safecall;
+    function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
   end;
 
 implementation
@@ -30,7 +31,7 @@ begin
   Result := 'Share-Links.biz';
 end;
 
-function TShareLinksBiz.GenerateFolder;
+function TShareLinksBiz.AddFolder;
 var
   _Foldertypes: TFoldertypes;
   _Containertypes: TContainertypes;
@@ -55,18 +56,18 @@ begin
     if not(FolderName = '') then
       AddFormField('folderName', FolderName);
 
-    AddFormField('links', MirrorController.DirectlinksMirror[0]);
+    AddFormField('links', AMirrorContainer.Directlink[0].Value);
 
-    if MirrorController.DirectlinksMirrorCount > 1 then
+    if AMirrorContainer.DirectlinkCount > 1 then
     begin
       AddFormField('backup', '1');
       AddFormField('backup_mode', '0');
-      for I := 1 to MirrorController.DirectlinksMirrorCount - 1 do
+      for I := 1 to AMirrorContainer.DirectlinkCount - 1 do
       begin
         if I = 10 then
           break;
 
-        AddFormField('blinks' + IntToStr(I), MirrorController.DirectlinksMirror[I]);
+        AddFormField('blinks' + IntToStr(I), AMirrorContainer.Directlink[I].Value);
       end;
     end
     else
@@ -124,12 +125,22 @@ begin
   if HTTPProcess.HTTPResult.HasError then
     ErrorMsg := HTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage
   else if (Pos('***', string(HTTPProcess.HTTPResult.SourceCode)) = 0) then
-    Result := copy(HTTPProcess.HTTPResult.SourceCode, 6)
+    ErrorMsg := copy(HTTPProcess.HTTPResult.SourceCode, 6)
   else
     ErrorMsg := HTTPProcess.HTTPResult.SourceCode;
 end;
 
-function TShareLinksBiz.GetFolderInfo;
+function TShareLinksBiz.EditFolder;
+begin
+  //
+end;
+
+function TShareLinksBiz.DeleteFolder;
+begin
+  //
+end;
+
+function TShareLinksBiz.GetFolder;
 var
   CrypterFolderInfo: TCrypterFolderInfo;
 
@@ -149,7 +160,7 @@ begin
 
   HTTPParams := THTTPParams.Create;
   with HTTPParams do
-    AddFormField('folderCodes', copy(FolderURL, Pos('/_', string(FolderURL)) + 1));
+    AddFormField('folderCodes', copy(AFolderIdentifier, Pos('/_', string(AFolderIdentifier)) + 1));
 
   RequestID := HTTPManager.Post(THTTPRequest.Create(website + 'api/content'), HTTPParams, TPlugInHTTPOptions.Create(Self));
 
@@ -164,11 +175,8 @@ begin
 
   // see: http://the-lounge.org/share-links-vorschläge-wünsche/42811-kleine-erweiterungen-an-der-api/
 
-  Result := CrypterFolderInfo;
-end;
+  (*
 
-procedure TShareLinksBiz.GetFolderPicture;
-begin
   // A folder-status-is not possible because the link is not connected to the folder URL
   case Small of
     True:
@@ -176,6 +184,10 @@ begin
     False:
       Result := FolderURL;
   end;
+
+  *)
+
+  Result := False;
 end;
 
 end.

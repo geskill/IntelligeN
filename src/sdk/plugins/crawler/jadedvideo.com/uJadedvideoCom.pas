@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -17,14 +17,14 @@ uses
 type
   TJadedvideoCom = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -34,28 +34,28 @@ begin
   result := 'Jadedvideo.com';
 end;
 
-function TJadedvideoCom.GetAvailableTemplateTypeIDs;
+function TJadedvideoCom.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cXXX];
   result := Word(_TemplateTypeIDs);
 end;
 
-function TJadedvideoCom.GetAvailableComponentIDs;
+function TJadedvideoCom.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture, cGenre];
   result := LongWord(_ComponentIDs);
 end;
 
-function TJadedvideoCom.GetComponentIDDefaultValue;
+function TJadedvideoCom.GetControlIDDefaultValue;
 begin
   result := True;
 end;
 
-function TJadedvideoCom.GetLimitDefaultValue;
+function TJadedvideoCom.GetResultsLimitDefaultValue;
 begin
   result := 5;
 end;
@@ -64,7 +64,7 @@ procedure TJadedvideoCom.Exec;
 const
   jvurl = 'http://www.jadedvideo.com/';
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _Title: string;
   _Count: Integer;
 
@@ -80,7 +80,7 @@ var
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cGenre).AddValue(Match[1], GetName);
+              AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[1]);
             until not ExecNext;
           end;
         finally
@@ -89,18 +89,18 @@ var
     end;
 
   begin
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
           Expression := '<SPAN class="eight_pt">\s+<IMG src="(.*?)"';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cPicture).AddValue(Match[1], GetName);
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
@@ -120,8 +120,8 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
   _Count := 0;
 
   RequestID1 := HTTPManager.Get(THTTPRequest.Create(jvurl + 'vap/Adult_Content_Accept.html'), TPlugInHTTPOptions.Create(Self));

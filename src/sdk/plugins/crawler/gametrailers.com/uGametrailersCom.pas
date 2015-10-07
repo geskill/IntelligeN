@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // Utils
   uHTMLUtils,
   // HTTPManager
@@ -19,14 +19,14 @@ uses
 type
   TGametrailersCom = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -38,28 +38,28 @@ begin
   Result := 'gametrailers.com';
 end;
 
-function TGametrailersCom.GetAvailableTemplateTypeIDs;
+function TGametrailersCom.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := cGames;
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TGametrailersCom.GetAvailableComponentIDs;
+function TGametrailersCom.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cTrailer];
   Result := LongWord(_ComponentIDs);
 end;
 
-function TGametrailersCom.GetComponentIDDefaultValue;
+function TGametrailersCom.GetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TGametrailersCom.GetLimitDefaultValue;
+function TGametrailersCom.GetResultsLimitDefaultValue;
 begin
   Result := 5;
 end;
@@ -68,13 +68,13 @@ procedure TGametrailersCom.Exec;
 const
   website = 'http://www.gametrailers.com/';
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _Title: string;
   _Count: Integer;
 
-  function GetPlatform(ATemplateTypeID: TTemplateTypeID): string;
+  function GetPlatform(ATypeID: TTypeID): string;
   begin
-    case ATemplateTypeID of
+    case ATypeID of
       cGameCube:
         Result := '&s_platforms[gc]=on';
       cNintendoDS:
@@ -98,7 +98,7 @@ var
 
   procedure deep_search(AWebsitesourcecode: string);
   begin
-    if (AComponentController.FindControl(cTrailer) <> nil) and (cTrailer in _ComponentIDs) then
+    if (AControlController.FindControl(cTrailer) <> nil) and (cTrailer in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsitesourcecode;
@@ -106,8 +106,8 @@ var
 
           if Exec(InputString) then
           begin
-            repeat (AComponentController.FindControl(cTrailer) as ITrailer)
-              .AddValue(website + Match[1], Trim(Match[2]), GetName);
+            repeat
+              AControlController.FindControl(cTrailer).AddProposedValue(GetName, website + Match[1], Trim(Match[2]));
             until not ExecNext;
           end;
         finally
@@ -120,12 +120,11 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
   _Count := 0;
 
-  RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + 'search.php?platlogic=OR' + GetPlatform(TTemplateTypeID(ATemplateTypeID))
-        + '&orderby=rdate&s_order=DESC&search_type=advanced&s=' + HTTPEncode(_Title)), TPlugInHTTPOptions.Create(Self));
+  RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + 'search.php?platlogic=OR' + GetPlatform(TTypeID(ATypeID)) + '&orderby=rdate&s_order=DESC&search_type=advanced&s=' + HTTPEncode(_Title)), TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);

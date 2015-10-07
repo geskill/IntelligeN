@@ -6,7 +6,7 @@ uses
   // MultiEvent
   Generics.MultiEvents.NotifyInterface,
   // Common
-  uBase, uConst, uWebsiteInterface,
+  uBaseConst, uBaseInterface, uAppConst,
   // Plugin
   uPlugInConst;
 
@@ -17,7 +17,7 @@ type
   IMirrorControl = interface;
   IMirrorController = interface;
   IPicture = interface;
-  IComponentController = interface;
+  IControlController = interface;
   IPublishController = interface;
   IPublishItem = interface;
   IPublishTab = interface;
@@ -27,70 +27,55 @@ type
 
   IViewChangeEventHandler = interface(IUnknown)
     ['{5129F9C3-B9B5-4FE5-88E1-DB7284D55D93}']
-    procedure Invoke(const NewViewType: TViewType); safecall;
+    procedure Invoke(const ANewViewType: TTabViewType); safecall;
   end;
 
   IViewChangeEvent = interface(IUnknown)
     ['{4638F6A6-C775-4411-84A0-ED9277CB86D0}']
     procedure Add(const AHandler: IViewChangeEventHandler); safecall;
     procedure Remove(const AHandler: IViewChangeEventHandler); safecall;
-    procedure Invoke(const ANewViewType: TViewType); safecall;
+    procedure Invoke(const ANewViewType: TTabViewType); safecall;
   end;
 
   IPopupMenuChange = interface(IUnknown)
     ['{F672ACC7-3930-4112-8BC7-578A4E291C9D}']
-    procedure Invoke(const Sender: Integer); safecall;
+    procedure Invoke(const ASender: Integer); safecall;
   end;
 
   IMenuItem = interface(IUnknown)
     ['{EB29098A-A769-4E1D-91A0-F728A1C7C92D}']
-    function GetMenuItems: IMenuItems; stdcall;
-    function InsertMenuItem(AIndex: Integer; const aCaption: WideString; const AHint: WideString; aShortCut: Word; aImageIndex: Integer; aTag: Integer;
-      const aOnClick: INotifyEventHandler): IMenuItem; stdcall;
-    function GetIndex: Integer; stdcall;
-    function GetName: WideString; stdcall;
-    function GetCaption: WideString; stdcall;
-    procedure SetCaption(const AValue: WideString); stdcall;
-    function GetHint: WideString; stdcall;
-    procedure SetHint(const AValue: WideString); stdcall;
-    function GetShortCut: Word; stdcall;
-    procedure SetShortCut(AValue: Word); stdcall;
-    function GetImageIndex: Integer; stdcall;
-    procedure SetImageIndex(aImageIndex: Integer); stdcall;
-    function GetTag: Integer; stdcall;
-    procedure SetTag(AValue: Integer); stdcall;
-    function GetOnClick: INotifyEventHandler; stdcall;
-    procedure SetOnClick(const AValue: INotifyEventHandler); stdcall;
+    function GetMenuItems: IMenuItems; safecall;
+    function InsertMenuItem(AIndex: Integer; const ACaption: WideString; const AHint: WideString; AShortCut: Integer; AImageIndex: Integer; ATag: Integer; const AOnClick: INotifyEventHandler): IMenuItem; safecall;
+    function GetIndex: Integer; safecall;
+    function GetName: WideString; safecall;
+    function GetCaption: WideString; safecall;
+    procedure SetCaption(const AValue: WideString); safecall;
+    function GetHint: WideString; safecall;
+    procedure SetHint(const AValue: WideString); safecall;
+    function GetShortCut: Integer; safecall;
+    procedure SetShortCut(AValue: Integer); safecall;
+    function GetImageIndex: Integer; safecall;
+    procedure SetImageIndex(AImageIndex: Integer); safecall;
+    function GetTag: Integer; safecall;
+    procedure SetTag(AValue: Integer); safecall;
+    function GetOnClick: INotifyEventHandler; safecall;
+    procedure SetOnClick(const AValue: INotifyEventHandler); safecall;
   end;
 
   IMenuItems = interface(IUnknown)
     ['{9A35E2C0-792E-4372-9483-D779C92B0B07}']
-    function GetCount: Integer; stdcall;
-    function GetItem(index: Integer): IMenuItem; stdcall;
-    function RemoveItem(const aMenuItem: IMenuItem): WordBool; stdcall;
+    function GetCount: Integer; safecall;
+    function GetItem(AIndex: Integer): IMenuItem; safecall;
+    function RemoveItem(const AMenuItem: IMenuItem): WordBool; safecall;
   end;
 
   IMainMenu = interface(IUnknown)
     ['{B8435927-2FE9-4487-9955-4138579288D8}']
-    function GetMenuItems: IMenuItems; stdcall;
-    function InsertMenuItem(AIndex: Integer; const aCaption: WideString; const AHint: WideString; aShortCut: Word; aImageIndex: Integer; aTag: Integer; const aOnClick: INotifyEventHandler;
-      const ASubMenuItem: WordBool = True): IMenuItem; stdcall;
+    function GetMenuItems: IMenuItems; safecall;
+    function InsertMenuItem(AIndex: Integer; const ACaption: WideString; const AHint: WideString; AShortCut: Integer; AImageIndex: Integer; ATag: Integer; const AOnClick: INotifyEventHandler; const ASubMenuItem: WordBool = True): IMenuItem; safecall;
   end;
 
-  IWebsiteEditor = interface
-    ['{75F63C46-C88E-48C5-BDC1-C7D81BEFEC1A}']
-    function GetCustomFields: WordBool;
-    procedure SetCustomFields(ACustomFields: WordBool);
-
-    procedure AddEdit(AName: WideString; ADefaultValue: WideString = ''; ATopValue: WordBool = False);
-    procedure AddCheckbox(AName: WideString; ADefaultValue: WordBool = False; ATopValue: WordBool = False);
-    procedure AddCategoryTab(AName: WideString);
-    property CustomFields: WordBool read GetCustomFields write SetCustomFields;
-
-    function ShowModal: Integer;
-  end;
-
-  IDirectlinksMirror = interface
+  IDirectlinksMirror = interface(IDirectlink)
     ['{617FFD5F-82B1-443C-B535-0A7413069F76}']
     function GetDirectlinksPanel: IDirectlinksPanel;
     procedure SetDirectlinksPanel(ADirectlinksPanel: IDirectlinksPanel);
@@ -132,7 +117,7 @@ type
     property Focus: Boolean read GetFocus write SetFocus;
   end;
 
-  IDirectlinksPanel = interface
+  IDirectlinksPanel = interface(IDirectlink)
     ['{DBFC2ED7-FFB2-4611-9F69-05CD827F3A7A}']
     function GetMirrorControl: IMirrorControl;
     procedure SetMirrorControl(AMirrorControl: IMirrorControl);
@@ -168,7 +153,7 @@ type
     property Focus: Boolean read GetFocus write SetFocus;
   end;
 
-  ICrypterPanel = interface
+  ICrypterPanel = interface(ICrypter)
     ['{C29FF83C-BE8D-4E2A-93F7-660D749948FF}']
     function GetMirrorControl: IMirrorControl;
     procedure SetMirrorControl(AMirrorControl: IMirrorControl);
@@ -209,7 +194,7 @@ type
     property Focus: Boolean read GetFocus write SetFocus;
   end;
 
-  IMirrorControl = interface
+  IMirrorControl = interface(IMirrorContainer)
     ['{9E4D7459-1D7B-4E8E-9177-8365D631E5F5}']
     function GetMirrorController: IMirrorController;
     procedure SetMirrorController(const AMirrorController: IMirrorController);
@@ -261,7 +246,7 @@ type
     property Focus: Boolean read GetFocus write SetFocus;
   end;
 
-  IMirrorController = interface
+  IMirrorController = interface(IMirrorControllerBase)
     ['{230C0B4E-F11B-4DE9-B105-EED8D92B92CA}']
     function GetTabSheetController: ITabSheetController;
     procedure SetTabSheetController(const ATabSheetController: ITabSheetController);
@@ -288,12 +273,12 @@ type
     property OnPopupMenuChange: IPopupMenuChange read GetPopupMenuChange write SetPopupMenuChange; { only for internal usage }
   end;
 
-  IBasic = interface
+  IBasic = interface(IControlBase)
     ['{DE8F253F-D695-41D4-A350-3CF191644466}']
-    function GetComponentController: IComponentController;
-    procedure SetComponentController(const AComponentController: IComponentController);
-    function GetTemplateTypeID: TTemplateTypeID;
-    function GetComponentID: TComponentID;
+    function GetControlController: IControlController;
+    procedure SetControlController(const AComponentController: IControlController);
+    function GetTypeID: TTypeID;
+    function GetControlID: TControlID;
     function GetName: WideString;
     procedure SetName(AName: WideString);
     function GetTitle: WideString;
@@ -313,15 +298,15 @@ type
     function GetFocus: Boolean;
     procedure SetFocus(AFocus: Boolean);
 
-    property ComponentController: IComponentController read GetComponentController write SetComponentController;
+    property ControlController: IControlController read GetControlController write SetControlController;
 
     procedure AddValue(AValue: WideString; ASender: WideString); overload;
     function GetValueName(AIndex: Integer): WideString;
     function GetValueContent(AIndex: Integer): WideString;
     function GetValueCount: Integer;
 
-    property TemplateTypeID: TTemplateTypeID read GetTemplateTypeID;
-    property ComponentID: TComponentID read GetComponentID;
+    property TypeID: TTypeID read GetTypeID;
+    property ControlID: TControlID read GetControlID;
     property name: WideString read GetName write SetName;
     property Title: WideString read GetTitle write SetTitle;
     property Left: Integer read GetLeft write SetLeft;
@@ -437,12 +422,12 @@ type
     procedure Invoke(const ASender: IBasic); safecall;
   end;
 
-  IComponentController = interface
+  IControlController = interface(IControlControllerBase)
     ['{E9432D30-D4CA-4045-BEA3-55C02E56243A}']
     function GetTabSheetController: ITabSheetController;
     procedure SetTabSheetController(const ATabSheetController: ITabSheetController);
-    function GetTemplateTypeID: TTemplateTypeID;
-    procedure SetTemplateTypeID(ATemplateTypeID: TTemplateTypeID);
+    function GetTypeID: TTypeID;
+    procedure SetTypeID(ATypeID: TTypeID);
     function GetControl(index: Integer): IBasic;
     procedure SetControl(index: Integer; AControl: IBasic);
 
@@ -459,9 +444,9 @@ type
     procedure SetPopupMenuChange(APopupMenuChange: IPopupMenuChange);
 
     property TabSheetController: ITabSheetController read GetTabSheetController write SetTabSheetController;
-    property TemplateTypeID: TTemplateTypeID read GetTemplateTypeID write SetTemplateTypeID;
-    procedure NewControl(AType: TComponentID; ATitle, AValue, AHint, AList: WideString; ALeft, ATop, AWidth, AHeight: Integer);
-    function FindControl(ComponentID: TComponentID): IBasic;
+    property TypeID: TTypeID read GetTypeID write SetTypeID;
+    procedure NewControl(AType: TControlID; ATitle, AValue, AHint, AList: WideString; ALeft, ATop, AWidth, AHeight: Integer);
+    function FindControl(AControlID: TControlID): IBasic;
     property Control[index: Integer]: IBasic read GetControl write SetControl;
     function ControlCount: Integer;
 
@@ -521,7 +506,7 @@ type
 
     function CheckIScript(AIScript: WideString): RIScriptResult;
     function ParseIScript(AIScript: WideString): RIScriptResult;
-    function GenerateWebsiteData: ICMSWebsiteData;
+    function GenerateData: ITabSheetData;
 
     function GeneratePublishItem: IPublishItem;
     function GeneratePublishTab: IPublishTab;
@@ -629,17 +614,17 @@ type
     function GetPageController: IPageController;
     function GetIsTabActive: WordBool;
     function GetTabSheetIndex: Integer;
-    function GetViewType: TViewType;
-    procedure SetViewType(AViewType: TViewType);
+    function GetViewType: TTabViewType;
+    procedure SetViewType(AViewType: TTabViewType);
     function GetFileName: WideString;
     function GetFileType: WideString;
     function GetReleaseName: WideString;
     procedure SetReleaseName(AReleaseName: WideString);
-    function GetTemplateTypeID: TTemplateTypeID;
+    function GetTypeID: TTypeID;
     function GetActiveWebsite: WideString;
     procedure SetActiveWebsite(AWebsite: WideString);
 
-    function GetComponentController: IComponentController;
+    function GetControlController: IControlController;
     function GetMirrorController: IMirrorController;
     function GetPublishController: IPublishController;
 
@@ -648,7 +633,7 @@ type
     property IsTabActive: WordBool read GetIsTabActive;
     property TabSheetIndex: Integer read GetTabSheetIndex;
 
-    property ViewType: TViewType read GetViewType write SetViewType;
+    property ViewType: TTabViewType read GetViewType write SetViewType;
 
     property FileName: WideString read GetFileName;
     property FileType: WideString read GetFileType;
@@ -658,11 +643,11 @@ type
     procedure Save(AFileName, AFileType: WideString);
     procedure ResetDataChanged(AFileName, AFileType: WideString);
 
-    property TemplateTypeID: TTemplateTypeID read GetTemplateTypeID;
+    property TypeID: TTypeID read GetTypeID;
 
     property ActiveWebsite: WideString read GetActiveWebsite write SetActiveWebsite;
 
-    property ComponentController: IComponentController read GetComponentController;
+    property ControlController: IControlController read GetControlController;
     property MirrorController: IMirrorController read GetMirrorController;
     property PublishController: IPublishController read GetPublishController;
   end;
@@ -671,31 +656,31 @@ type
     ['{EC5351B9-7BF9-4317-88AB-DDAD6D9B8D8C}']
     function IsIdle: WordBool;
 
-    procedure AddCrawlerJob(const AComponentController: IComponentController);
-    procedure RemoveCrawlerJob(const AComponentController: IComponentController);
+    procedure AddCrawlerJob(const AControlController: IControlController);
+    procedure RemoveCrawlerJob(const AControlController: IControlController);
   end;
 
   IHosterManager = interface
     ['{03675561-B598-4929-B5C9-FBEF9FB52656}']
     function IsIdle: WordBool;
 
-    procedure AddHosterCheckJob(const ADirectlinksMirror: IDirectlinksMirror);
-    procedure RemoveHosterCheckJob(const ADirectlinksMirror: IDirectlinksMirror);
+    procedure AddHosterCheckJob(const ADirectlink: IDirectlink);
+    procedure RemoveHosterCheckJob(const ADirectlink: IDirectlink);
   end;
 
   ICrypterManager = interface
     ['{3ABA9E7F-6D3D-4F35-94E8-45ED37228710}']
-    procedure AddCrypterJob(const ACrypterPanel: ICrypterPanel);
-    procedure AddCrypterCheckJob(const ACrypterPanel: ICrypterPanel; const AUseCheckDelay: WordBool = False);
+    procedure AddCrypterJob(const ACrypter: ICrypter);
+    procedure AddCrypterCheckJob(const ACrypter: ICrypter; const AUseCheckDelay: WordBool = False);
   end;
 
   IPublishItem = interface(ICMSWebsite)
     ['{5AE2BAB5-6B50-40E7-85B7-C01D060C83DF}']
     function GetCMSPluginPath: WideString;
-    function GetWebsiteData: ICMSWebsiteData;
+    function GetData: ITabSheetData;
 
     property CMSPluginPath: WideString read GetCMSPluginPath;
-    property WebsiteData: ICMSWebsiteData read GetWebsiteData;
+    property Data: ITabSheetData read GetData;
   end;
 
   IPublishTab = interface
@@ -762,11 +747,11 @@ type
     procedure CallPublish;
     procedure CallSeriesPublish;
 
-    procedure CallComponentParser;
+    procedure CallControlParser;
 
     procedure OpenToNewTab(AFileName: WideString = '');
 
-    function Add(AFileName: WideString; ATemplateTypeID: TTemplateTypeID; AEmpty: WordBool = False): Integer;
+    function Add(AFileName: WideString; ATypeID: TTypeID; AEmpty: WordBool = False): Integer;
     property CrawlerManager: ICrawlerManager read GetCrawlerManager;
     property HosterManager: IHosterManager read GetHosterManager;
     property CrypterManager: ICrypterManager read GetCrypterManager;
@@ -789,7 +774,7 @@ type
     function GetFileHosters: WideString;
     function GetImageHosters: WideString;
     function GetCustomisedHoster(const AHoster: WideString; AShortName: WordBool = False): WideString;
-    function GetControlValues(const ATemplateTypeID: TTemplateTypeID; const AComponentID: TComponentID): WideString;
+    function GetControlValues(const ATypeID: TTypeID; const AControlID: TControlID): WideString;
 
     property MainMenu: IMainMenu read GetMainMenu;
     property PageController: IPageController read GetPageController;

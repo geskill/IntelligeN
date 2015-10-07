@@ -10,7 +10,7 @@ uses
   // Utils,
   uHTMLUtils, uPathUtils, uStringUtils,
   // Common
-  uConst, uWebsiteInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPConst,
   // Plugin system
@@ -47,11 +47,11 @@ type
     function SettingsClass: TCMSPlugInSettingsMeta; override;
     function GetSettings: TCMSPlugInSettings; override;
     procedure SetSettings(ACMSPlugInSettings: TCMSPlugInSettings); override;
-    function LoadSettings(const AWebsiteData: ICMSWebsiteData = nil): Boolean; override;
+    function LoadSettings(const AData: ITabSheetData = nil): Boolean; override;
     function DoBuildLoginRequest(out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; ACAPTCHALogin: Boolean = False): Boolean; override;
     function DoAnalyzeLogin(AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; override;
 
-    function DoBuildPostRequest(const AWebsiteData: ICMSWebsiteData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
+    function DoBuildPostRequest(const AData: ITabSheetData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
     function DoAnalyzePost(AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; override;
   public
     function GetName: WideString; override; safecall;
@@ -79,10 +79,10 @@ end;
 
 function THTW.LoadSettings;
 begin
-  Result := inherited LoadSettings(AWebsiteData);
+  Result := inherited LoadSettings(AData);
   with HTWSettings do
   begin
-    if Assigned(AWebsiteData) then
+    if Assigned(AData) then
     begin
       if (categorys = null) then
       begin
@@ -168,52 +168,52 @@ begin
 
     AddFormField('uploader', AccountName);
 
-    if Assigned(AWebsiteData.FindControl(cReleaseName)) then
-      AddFormField('rls_name', AWebsiteData.FindControl(cReleaseName).Value);
+    if Assigned(AData.FindControl(cReleaseName)) then
+      AddFormField('rls_name', AData.FindControl(cReleaseName).Value);
 
-    if Assigned(AWebsiteData.FindControl(cPassword)) then
+    if Assigned(AData.FindControl(cPassword)) then
     begin
-      AddFormField('pw', AWebsiteData.FindControl(cPassword).Value);
-      AddFormField('passwort', AWebsiteData.FindControl(cPassword).Value);
+      AddFormField('pw', AData.FindControl(cPassword).Value);
+      AddFormField('passwort', AData.FindControl(cPassword).Value);
     end;
 
-    if Assigned(AWebsiteData.FindControl(cPicture)) then
-      AddFormField('cover', AWebsiteData.FindControl(cPicture).Value);
+    if Assigned(AData.FindControl(cPicture)) then
+      AddFormField('cover', AData.FindControl(cPicture).Value);
 
     AddFormField(VarToStr(HTWSettings.category_field), HTWSettings.categorys);
     AddFormField(VarToStr(HTWSettings.subcategory_field), HTWSettings.subcategorys);
 
-    if Assigned(AWebsiteData.FindControl(cVideoCodec)) and (not(HTWSettings.category_field = 'format') and not(HTWSettings.subcategory_field = 'format')) then
-      AddFormField('format', AWebsiteData.FindControl(cVideoCodec).Value);
+    if Assigned(AData.FindControl(cVideoCodec)) and (not(HTWSettings.category_field = 'format') and not(HTWSettings.subcategory_field = 'format')) then
+      AddFormField('format', AData.FindControl(cVideoCodec).Value);
 
-    if Assigned(AWebsiteData.FindControl(cGenre)) and (not(HTWSettings.category_field = 'genre') and not(HTWSettings.subcategory_field = 'genre')) then
-      AddFormField('genre', AWebsiteData.FindControl(cGenre).Value);
+    if Assigned(AData.FindControl(cGenre)) and (not(HTWSettings.category_field = 'genre') and not(HTWSettings.subcategory_field = 'genre')) then
+      AddFormField('genre', AData.FindControl(cGenre).Value);
 
-    if Assigned(AWebsiteData.FindControl(cAudioStream)) then
-      AddFormField('qual_ton', AWebsiteData.FindControl(cAudioStream).Value);
+    if Assigned(AData.FindControl(cAudioStream)) then
+      AddFormField('qual_ton', AData.FindControl(cAudioStream).Value);
 
-    if Assigned(AWebsiteData.FindControl(cVideoSystem)) then
-      AddFormField('qual_bild', AWebsiteData.FindControl(cVideoSystem).Value);
+    if Assigned(AData.FindControl(cVideoSystem)) then
+      AddFormField('qual_bild', AData.FindControl(cVideoSystem).Value);
 
-    if Assigned(AWebsiteData.FindControl(cReleaseDate)) then
-      AddFormField('jahr', FormatDateTime('yyyy', StrToDate(AWebsiteData.FindControl(cReleaseDate).Value, FormatSettings), FormatSettings))
+    if Assigned(AData.FindControl(cReleaseDate)) then
+      AddFormField('jahr', FormatDateTime('yyyy', StrToDate(AData.FindControl(cReleaseDate).Value, FormatSettings), FormatSettings))
     else
       AddFormField('jahr', '');
 
-    for I := 0 to AWebsiteData.MirrorCount - 1 do
-      if AWebsiteData.Mirror[I].Size > 0 then
+    for I := 0 to AData.MirrorCount - 1 do
+      if AData.Mirror[I].Size > 0 then
       begin
-        AddFormField('groesse', FloatToStr(AWebsiteData.Mirror[I].Size));
-        AddFormField('size', FloatToStr(AWebsiteData.Mirror[I].Size));
+        AddFormField('groesse', FloatToStr(AData.Mirror[I].Size));
+        AddFormField('size', FloatToStr(AData.Mirror[I].Size));
         break;
       end;
 
-    if Assigned(AWebsiteData.FindControl(cLanguage)) then
+    if Assigned(AData.FindControl(cLanguage)) then
     begin
-      if not(Pos(';', AWebsiteData.FindControl(cLanguage).Value) = 0) then
+      if not(Pos(';', AData.FindControl(cLanguage).Value) = 0) then
         AddFormField('sprache', 'Multi (De, En, Fr, Ru)')
       else
-        case IndexText(AWebsiteData.FindControl(cLanguage).Value, ['GER', 'ENG', 'FRE', 'RUS']) of
+        case IndexText(AData.FindControl(cLanguage).Value, ['GER', 'ENG', 'FRE', 'RUS']) of
           0:
             AddFormField('sprache', 'Deutsch');
           1:
@@ -231,31 +231,31 @@ begin
 
     if not HTWSettings.use_textasdescription then
     begin
-      if Assigned(AWebsiteData.FindControl(cDescription)) then
-        AddFormField('beschreibung', AWebsiteData.FindControl(cDescription).Value)
+      if Assigned(AData.FindControl(cDescription)) then
+        AddFormField('beschreibung', AData.FindControl(cDescription).Value)
     end
     else
       AddFormField('beschreibung', Message);
 
     // max 5 mirrors
-    for I := 0 to Min(5, AWebsiteData.MirrorCount) - 1 do
+    for I := 0 to Min(5, AData.MirrorCount) - 1 do
     begin
       if HTWSettings.use_plainlinks then
       begin
-        AddFormField(DownloadArrayA[I], AWebsiteData.Mirror[I].Directlink[0].Value);
-        AddFormField(DownloadArrayB[I], AWebsiteData.Mirror[I].Directlink[0].Value);
+        AddFormField(DownloadArrayA[I], AData.Mirror[I].Directlink[0].Value);
+        AddFormField(DownloadArrayB[I], AData.Mirror[I].Directlink[0].Value);
       end
-      else if (AWebsiteData.Mirror[I].CrypterCount > 0) then
+      else if (AData.Mirror[I].CrypterCount > 0) then
       begin
-        AddFormField(DownloadArrayA[I], AWebsiteData.Mirror[I].Crypter[0].Value);
-        AddFormField(DownloadArrayB[I], AWebsiteData.Mirror[I].Crypter[0].Value);
+        AddFormField(DownloadArrayA[I], AData.Mirror[I].Crypter[0].Value);
+        AddFormField(DownloadArrayB[I], AData.Mirror[I].Crypter[0].Value);
       end
       else
       begin
         ErrorMsg := 'No crypter initialized! (disable use_plainlinks or add a crypter)';
         Result := False;
       end;
-      AddFormField(HosterArray[I], AWebsiteData.Mirror[I].Hoster);
+      AddFormField(HosterArray[I], AData.Mirror[I].Hoster);
       AddFormField(StatusArray[I], '');
     end;
 

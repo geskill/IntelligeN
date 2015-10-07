@@ -8,7 +8,7 @@ uses
   // Spring Framework
   Spring.Utils,
   // Common
-  uBase,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // DLLs
   uExport;
 

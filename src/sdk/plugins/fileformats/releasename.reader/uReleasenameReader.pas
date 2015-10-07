@@ -6,7 +6,7 @@ uses
   // Delphi
   Windows, SysUtils, Classes, Variants, StrUtils, XMLDoc, XMLIntf,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uAppInterface,
   // DLLs
   uExport,
   // Plugin system
@@ -58,7 +58,7 @@ end;
 function TReleasenameReader.LoadControls;
 var
   I: Integer;
-  TemplateType: TTemplateTypeID;
+  TemplateType: TTypeID;
   _TemplateFileName: TFileName;
 begin
   result := -1;
@@ -84,7 +84,7 @@ begin
         begin
           with APageController.TabSheetController[APageController.Add(ATemplateDirectory + _TemplateFileName, TemplateType)] do
           begin
-            ComponentController.FindControl(cReleaseName).Value := Strings[I];
+            ControlController.FindControl(cReleaseName).Value := Strings[I];
             PublishController.Active := True;
             ResetDataChanged('', '');
             result := TabSheetIndex;

@@ -8,10 +8,10 @@ uses
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: IImageHosterPlugIn): Boolean; stdcall; export;
+function LoadPlugin(var APlugIn: IImageHosterPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := TDirectuploadNet.Create;
+    APlugIn := TDirectuploadNet.Create;
     Result := True;
   except
     Result := False;

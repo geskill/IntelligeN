@@ -3,10 +3,10 @@ unit uFileInterface;
 interface
 
 uses
-  // Common
-  uConst,
   // Delphi
-  Classes, Generics.Collections;
+  Classes, Generics.Collections,
+  // Common
+  uBaseConst;
 
 type
   IChangeable = interface
@@ -23,7 +23,7 @@ type
     ['{4F712A84-D730-450E-9DF0-3DB206B2ADE9}']
     function GetControlName: WideString;
     procedure SetGetControlName(AGetControlName: WideString); overload;
-    procedure SetGetControlName(AComponentID: TComponentID); overload;
+    procedure SetGetControlName(AComponentID: TControlID); overload;
     function GetControlValue: WideString;
     procedure SetGetControlValue(AGetControlValue: WideString);
     function GetID: WideString;
@@ -40,7 +40,7 @@ type
     ['{8B2D299F-C826-4B05-B8AE-CE512DF322E2}']
     function GetName: WideString;
     procedure SetName(AName: WideString); overload;
-    procedure SetName(ATemplateTypeID: TTemplateTypeID); overload;
+    procedure SetName(ATypeID: TTypeID); overload;
     function GetID: WideString;
     procedure SetID(AID: WideString);
     function GetSubTypes: TList<ISubType>;
@@ -110,7 +110,7 @@ type
     function GetActive: WordBool;
     procedure SetActive(AActive: WordBool);
     function GetCategories: WideString;
-    function GetCategoriesAsTTemplateTypeIDs: TTemplateTypeIDs;
+    function GetCategoriesAsTTemplateTypeIDs: TTypeIDs;
     procedure SetCategories(ACategories: WideString);
     function GetControls: TList<IControl>;
     function GetHoster: TList<IHoster>;

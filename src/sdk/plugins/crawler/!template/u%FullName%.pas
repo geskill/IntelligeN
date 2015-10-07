@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // Utils
   uHTMLUtils,
   // HTTPManager
@@ -19,14 +19,14 @@ uses
 type
   T%FullName% = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -37,21 +37,21 @@ begin
   Result := '%FullName%';
 end;
 
-function T%FullName%.GetAvailableTemplateTypeIDs;
+function T%FullName%.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   { TODO : change categories }
   _TemplateTypeIDs := [cGameCube, cMovie, cNintendoDS, cPCGames, cPlayStation2, cPlayStation3, cPlayStationPortable, cSoftware, cWii, cXbox, cXbox360, cXXX];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function T%FullName%.GetAvailableComponentIDs;
+function T%FullName%.GetAvailableControlIDs;
 var
-  _TemplateTypeID: TTemplateTypeID;
-  _ComponentIDs: TComponentIDs;
+  _TemplateTypeID: TTypeID;
+  _ComponentIDs: TControlIDs;
 begin
-  _TemplateTypeID := TTemplateTypeID(TemplateTypeID);
+  _TemplateTypeID := TTypeID(ATypeID);
 
   { TODO : change elements }
   _ComponentIDs := [cReleaseDate, cTitle, cNFO];
@@ -71,11 +71,11 @@ begin
   Result := LongWord(_ComponentIDs);
 end;
 
-function T%FullName%.GetComponentIDDefaultValue;
+function T%FullName%.GetControlIDDefaultValue;
 var
-  _ComponentID: TComponentID;
+  _ComponentID: TControlID;
 begin
-  _ComponentID := TComponentID(ComponentID);
+  _ComponentID := TControlID(AControlID);
 
   Result := True;
 
@@ -84,7 +84,7 @@ begin
     Result := False;
 end;
 
-function T%FullName%.GetLimitDefaultValue;
+function T%FullName%.GetResultsLimitDefaultValue;
 begin
   { TODO : set default crawling site max }
   Result := 5;

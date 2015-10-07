@@ -10,7 +10,7 @@ uses
   // Utils
   uHTMLUtils, uStringUtils,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -24,14 +24,14 @@ type
     function SimpleGETRequest(AURL: string; AFollowUp: Double): string;
     function ThumbToLargeImage(AImageURL: string): string;
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -59,28 +59,28 @@ begin
   Result := 'Cinefacts.de';
 end;
 
-function TCinefactsDe.GetAvailableTemplateTypeIDs;
+function TCinefactsDe.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cMovie];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TCinefactsDe.GetAvailableComponentIDs;
+function TCinefactsDe.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture, cGenre, cRuntime, cDescription];
   Result := LongWord(_ComponentIDs);
 end;
 
-function TCinefactsDe.GetComponentIDDefaultValue;
+function TCinefactsDe.GetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TCinefactsDe.GetLimitDefaultValue;
+function TCinefactsDe.GetResultsLimitDefaultValue;
 begin
   Result := 5;
 end;
@@ -89,7 +89,7 @@ procedure TCinefactsDe.Exec;
 const
   curl = 'http://www.cinefacts.de';
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _Title: WideString;
 
   procedure MainMoviePage(AWebsitecode: string);
@@ -97,14 +97,14 @@ var
     LGenreList: TStrings;
     LFilmkritik, LGenre: string;
   begin
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsitecode;
           Expression := 'Inhalt:<\/strong>(.*?)<\/';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cDescription).AddValue(Trim(HTML2Text(Match[1])), GetName);
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
 
           InputString := ExtractTextBetween(AWebsitecode, '<article>', '</article>');
           Expression := '(class="item_text">|class="thisReview">)(.*?)(<span class="review|<\/span>)';
@@ -118,13 +118,13 @@ var
             until not ExecNext;
 
             if not SameStr('', LFilmkritik) then
-              AComponentController.FindControl(cDescription).AddValue(Trim(LFilmkritik), GetName);
+              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(LFilmkritik));
           end;
         finally
           Free;
         end;
 
-    if (AComponentController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsitecode;
@@ -135,7 +135,7 @@ var
             LGenreList := SplittString(',', Trim(Match[1]));
             try
               for LGenre in LGenreList do
-                AComponentController.FindControl(cGenre).AddValue(Trim(LGenre), GetName);
+                AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(LGenre));
             finally
               LGenreList.Free;
             end;
@@ -144,14 +144,14 @@ var
           Free;
         end;
 
-    if (AComponentController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
+    if (AControlController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsitecode;
           Expression := 'Laufzeit: (\d+) ';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cRuntime).AddValue(Match[1], GetName);
+            AControlController.FindControl(cRuntime).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
@@ -159,7 +159,7 @@ var
 
   procedure MainImagesPage(AWebsitecode: string);
   begin
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
     begin
       with TRegExpr.Create do
         try
@@ -169,7 +169,7 @@ var
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cPicture).AddValue(ThumbToLargeImage(Match[1]), GetName);
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, ThumbToLargeImage(Match[1]));
             until not ExecNext;
           end;
         finally
@@ -180,7 +180,7 @@ var
 
   procedure MainDVDBlurayPage(AWebsitecode: string);
   begin
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
     begin
       with TRegExpr.Create do
         try
@@ -190,7 +190,7 @@ var
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cPicture).AddValue(ThumbToLargeImage(Match[1]), GetName);
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, ThumbToLargeImage(Match[1]));
             until not ExecNext;
           end;
         finally
@@ -204,8 +204,8 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
   FCount := 0;
 
   RequestID := HTTPManager.Get(THTTPRequest.Create(curl + '/search/site/q/' + HTTPEncode(_Title)), TPlugInHTTPOptions.Create(Self));
@@ -227,7 +227,7 @@ begin
 
           MainMoviePage(SimpleGETRequest(curl + Match[1], RequestID));
 
-          if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+          if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
           begin
             MainImagesPage(SimpleGETRequest(curl + Match[1] + '/Bildergalerie', RequestID));
 

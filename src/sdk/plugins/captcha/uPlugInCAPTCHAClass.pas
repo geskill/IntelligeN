@@ -3,8 +3,6 @@ unit uPlugInCAPTCHAClass;
 interface
 
 uses
-  // Common
-  uConst, uAppInterface,
   // Plugin
   uPlugInInterface, uPlugInClass, uPlugInConst;
 

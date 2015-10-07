@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uAppInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Utils
   uPathUtils;
 

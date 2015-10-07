@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system

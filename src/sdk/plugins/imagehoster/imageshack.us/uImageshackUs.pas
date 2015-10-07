@@ -7,8 +7,6 @@ uses
   Windows,
   // RegEx
   RegExpr,
-  // Common
-  uConst, uAppInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system

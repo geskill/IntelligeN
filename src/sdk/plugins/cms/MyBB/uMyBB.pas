@@ -10,7 +10,7 @@ uses
   // Utils,
   uHTMLUtils, uPathUtils, uStringUtils,
   // Common
-  uConst, uWebsiteInterface,
+  uBaseConst, uBaseInterface, uAppConst,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -50,7 +50,7 @@ type
     function SettingsClass: TCMSPlugInSettingsMeta; override;
     function GetSettings: TCMSPlugInSettings; override;
     procedure SetSettings(ACMSPlugInSettings: TCMSPlugInSettings); override;
-    function LoadSettings(const AWebsiteData: ICMSWebsiteData = nil): Boolean; override;
+    function LoadSettings(const AData: ITabSheetData = nil): Boolean; override;
 
     function DoBuildLoginRequest(out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; ACAPTCHALogin: Boolean = False): Boolean; override;
     function DoAnalyzeLogin(AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; override;
@@ -60,7 +60,7 @@ type
     function NeedPrePost(out ARequestURL: string): Boolean; override;
     function DoAnalyzePrePost(AResponseStr: string): Boolean; override;
 
-    function DoBuildPostRequest(const AWebsiteData: ICMSWebsiteData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
+    function DoBuildPostRequest(const AData: ITabSheetData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
     function DoAnalyzePost(AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; override;
 
     function DoAnalyzeIDsRequest(AResponseStr: string): Integer; override;
@@ -102,12 +102,12 @@ begin
   Result := True;
   with MyBBSettings do
   begin
-    TPlugInCMSSettingsHelper.LoadSettingsToClass(SettingsFileName, MyBBSettings, AWebsiteData,
+    TPlugInCMSSettingsHelper.LoadSettingsToClass(SettingsFileName, MyBBSettings, AData,
       { } procedure(AXMLNode: IXMLNode)
       { } var
       { . } Y, K: Integer;
       { } begin
-      { . } if Assigned(AWebsiteData) and Assigned(AXMLNode.ChildNodes.FindNode('xthreads')) then
+      { . } if Assigned(AData) and Assigned(AXMLNode.ChildNodes.FindNode('xthreads')) then
       { . } begin
       { ... } with AXMLNode.ChildNodes.Nodes['xthreads'] do
       { ..... } for Y := 0 to ChildNodes.Count - 1 do
@@ -119,11 +119,11 @@ begin
       { ..... } with AXMLNode.ChildNodes.Nodes[TrueXMLNodeName(xthreads[K][0])] do
       { ..... } begin
       { ....... } for Y := 0 to ChildNodes.Count - 1 do
-      { ......... } if SameText(VarToStr(ChildNodes.Nodes[Y].Attributes['name']), TTemplateTypeIDToString(AWebsiteData.TemplateTypeID)) then
+      { ......... } if SameText(VarToStr(ChildNodes.Nodes[Y].Attributes['name']), TypeIDToString(AData.TypeID)) then
       { ......... } begin
       { ........... } xthreads[K][1] := TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[Y]);
 
-      { ........... } TPlugInCMSSettingsHelper.SubSearch(ChildNodes.Nodes[Y], AWebsiteData, xthreads[K][1]);
+      { ........... } TPlugInCMSSettingsHelper.SubSearch(ChildNodes.Nodes[Y], AData, xthreads[K][1]);
       { ........... } break;
       { ......... } end;
       { ..... } end;
@@ -132,7 +132,7 @@ begin
     if SameStr('', CharSet) then
       CharSet := DefaultCharset;
 
-    if Assigned(AWebsiteData) and (forums = null) then
+    if Assigned(AData) and (forums = null) then
     begin
       ErrorMsg := StrForumIdIsUndefine;
       Result := False;
@@ -428,17 +428,17 @@ begin
 
     AddFormField(MyBBSettings.prefix_field, VarToStr(MyBBSettings.prefix));
 
-    if MyBBSettings.use_coverlink and Assigned(AWebsiteData.FindControl(cPicture)) then
+    if MyBBSettings.use_coverlink and Assigned(AData.FindControl(cPicture)) then
     begin
       AddFormField('xtasel_pref_pic', 'url');
-      AddFormField('xtaurl_pref_pic', AWebsiteData.FindControl(cPicture).Value);
-      AddFormField('xthreads_pref_pic2', AWebsiteData.FindControl(cPicture).Value);
+      AddFormField('xtaurl_pref_pic', AData.FindControl(cPicture).Value);
+      AddFormField('xthreads_pref_pic2', AData.FindControl(cPicture).Value);
     end;
 
-    for I := 0 to AWebsiteData.MirrorCount - 1 do
-      if AWebsiteData.Mirror[I].Size > 0 then
+    for I := 0 to AData.MirrorCount - 1 do
+      if AData.Mirror[I].Size > 0 then
       begin
-        AddFormField('xthreads_pref_mb', FloatToStr(AWebsiteData.Mirror[I].Size, FormatSettings));
+        AddFormField('xthreads_pref_mb', FloatToStr(AData.Mirror[I].Size, FormatSettings));
         break;
       end;
 

@@ -4,7 +4,7 @@ uses
   // Delphi
   Windows, SysUtils, Classes, Variants,
   // Common
-  uBase,
+  uBaseConst,
   // Utils
   uPathUtils;
 

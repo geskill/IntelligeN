@@ -7,12 +7,12 @@ uses
   Generics.MultiEvents.Event,
   Generics.MultiEvents.Handler,
   // Common
-  uBase, uConst, uAppInterface;
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface;
 
 type
   TIViewChangeEvent = class(TGenericEvent<IViewChangeEventHandler>, IViewChangeEvent)
   public
-    procedure Invoke(const ANewViewType: TViewType); safecall;
+    procedure Invoke(const ANewViewType: TTabViewType); safecall;
   end;
 
   TIControlChangeEvent = class(TGenericEvent<IControlEventHandler>, IControlChangeEvent)
@@ -93,7 +93,7 @@ implementation
 
 { TIViewChangeEvent }
 
-procedure TIViewChangeEvent.Invoke(const ANewViewType: TViewType);
+procedure TIViewChangeEvent.Invoke(const ANewViewType: TTabViewType);
 var
   LViewChangeEvent: IViewChangeEventHandler;
 begin

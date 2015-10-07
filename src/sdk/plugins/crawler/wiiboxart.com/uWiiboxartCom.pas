@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPConst,
   // Plugin system
@@ -17,14 +17,14 @@ uses
 type
   TWiiboxartCom = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -34,32 +34,32 @@ begin
   result := 'wiiboxart.com';
 end;
 
-function TWiiboxartCom.GetAvailableTemplateTypeIDs;
+function TWiiboxartCom.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cWii];
   result := Word(_TemplateTypeIDs);
 end;
 
-function TWiiboxartCom.GetAvailableComponentIDs;
+function TWiiboxartCom.GetAvailableControlIDs;
 var
-  // _TemplateTypeID: TTemplateTypeID;
-  _ComponentIDs: TComponentIDs;
+  // _TemplateTypeID: TTypeID;
+  _ComponentIDs: TControlIDs;
 begin
-  // _TemplateTypeID := TTemplateTypeID(TemplateTypeID);
+  // _TemplateTypeID := TTypeID(ATypeID);
 
   _ComponentIDs := [cPicture];
 
   result := LongWord(_ComponentIDs);
 end;
 
-function TWiiboxartCom.GetComponentIDDefaultValue;
+function TWiiboxartCom.GetControlIDDefaultValue;
 begin
   result := True;
 end;
 
-function TWiiboxartCom.GetLimitDefaultValue;
+function TWiiboxartCom.GetResultsLimitDefaultValue;
 begin
   result := 5;
 end;
@@ -76,7 +76,7 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  _Title := AComponentController.FindControl(cTitle).Value;
+  _Title := AControlController.FindControl(cTitle).Value;
 
   HTTPParams := THTTPParams.Create(ptMultipartFormData);
   HTTPParams.AddFormField('search', _Title);
@@ -99,7 +99,7 @@ begin
       if Exec(InputString) then
       begin
         repeat
-          AComponentController.FindControl(cPicture).AddValue(website + 'artwork/cover/' + Match[1], GetName);
+          AControlController.FindControl(cPicture).AddProposedValue(GetName, website + 'artwork/cover/' + Match[1]);
         until not ExecNext;
       end;
     finally

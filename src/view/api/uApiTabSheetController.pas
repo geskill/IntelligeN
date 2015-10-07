@@ -8,7 +8,7 @@ uses
   // Dev Express
   cxPC,
   // Common
-  uBase, uConst, uAppInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // DLLs
   uExport,
   // Api
@@ -29,7 +29,7 @@ type
   TTabSheetController = class(TcxTabSheet, ITabSheetController)
   private
     FPageController: IPageController;
-    FTemplateTypeID: TTemplateTypeID;
+    FTemplateTypeID: TTypeID;
 
     FFileName, FFileType, FReleaseName, FTemplateFileName: string;
     FDataChanged: Boolean;
@@ -47,8 +47,8 @@ type
     function GetPageController: IPageController;
     function GetIsTabActive: WordBool;
     function GetTabSheetIndex: Integer;
-    function GetViewType: TViewType;
-    procedure SetViewType(AViewType: TViewType);
+    function GetViewType: TTabViewType;
+    procedure SetViewType(AViewType: TTabViewType);
     function GetFileName: WideString;
     procedure SetFileName(AFileName: WideString);
     function GetFileType: WideString;
@@ -57,7 +57,7 @@ type
     procedure SetReleaseName(AReleaseName: WideString);
     function GetDataChanged: Boolean;
     procedure SetDataChanged(ADataChanged: Boolean);
-    function GetTemplateTypeID: TTemplateTypeID;
+    function GetTypeID: TTypeID;
     function GetActiveWebsite: WideString;
     procedure SetActiveWebsite(AWebsite: WideString);
 
@@ -67,11 +67,11 @@ type
     procedure ControlChange(const Sender: IBasic);
     procedure MirrorChange(const Sender: IUnknown);
 
-    function GetComponentController: IComponentController;
+    function GetControlController: IControlController;
     function GetMirrorController: IMirrorController;
     function GetPublishController: IPublishController;
   public
-    constructor Create(AOwner: TComponent; APageController: IPageController; ATemplateTypeID: TTemplateTypeID); reintroduce;
+    constructor Create(AOwner: TComponent; APageController: IPageController; ATypeID: TTypeID); reintroduce;
     procedure Install;
     procedure AddEvents;
 
@@ -83,7 +83,7 @@ type
     property IsTabActive: WordBool read GetIsTabActive;
     property TabSheetIndex: Integer read GetTabSheetIndex;
 
-    property ViewType: TViewType read GetViewType write SetViewType;
+    property ViewType: TTabViewType read GetViewType write SetViewType;
 
     property FileName: WideString read GetFileName write SetFileName;
     property FileType: WideString read GetFileType write SetFileType;
@@ -96,11 +96,11 @@ type
     property DataChanged: Boolean read GetDataChanged write SetDataChanged;
 
     property TemplateFileName: string read FTemplateFileName write FTemplateFileName;
-    property TemplateTypeID: TTemplateTypeID read GetTemplateTypeID write FTemplateTypeID;
+    property ATypeID: TTypeID read GetTypeID write FTemplateTypeID;
 
     property ActiveWebsite: WideString read GetActiveWebsite write SetActiveWebsite;
 
-    property ComponentController: IComponentController read GetComponentController;
+    property ControlController: IControlController read GetControlController;
     property MirrorController: IMirrorController read GetMirrorController;
     property PublishController: IPublishController read GetPublishController;
 
@@ -149,7 +149,7 @@ begin
     Result := DesignTabSheetItem.ViewType;
 end;
 
-procedure TTabSheetController.SetViewType(AViewType: TViewType);
+procedure TTabSheetController.SetViewType(AViewType: TTabViewType);
 begin
   DataTabSheetItem.Visible := (AViewType = vtData);
   DesignTabSheetItem.Visible := (AViewType = vtCode) or (AViewType = vtPreview);
@@ -199,7 +199,7 @@ begin
   UpdateCaption;
 end;
 
-function TTabSheetController.GetTemplateTypeID: TTemplateTypeID;
+function TTabSheetController.GetTypeID: TTypeID;
 begin
   Result := FTemplateTypeID;
 end;
@@ -239,9 +239,9 @@ begin
   DataChanged := True;
 end;
 
-function TTabSheetController.GetComponentController;
+function TTabSheetController.GetControlController;
 begin
-  Result := DataTabSheetItem.ComponentController;
+  Result := DataTabSheetItem.ControlController;
 end;
 
 function TTabSheetController.GetMirrorController;
@@ -260,8 +260,8 @@ begin
 
   FPageController := APageController;
 
-  ImageIndex := Integer(ATemplateTypeID);
-  TemplateTypeID := ATemplateTypeID;
+  ImageIndex := Integer(ATypeID);
+  ATypeID := ATypeID;
 end;
 
 procedure TTabSheetController.Install;
@@ -278,10 +278,10 @@ end;
 procedure TTabSheetController.AddEvents;
 begin
   FIReleaseNameChange := TIReleaseNameChangeEventHandler.Create(ReleaseNameChange);
-  ComponentController.OnReleaseNameChange := FIReleaseNameChange;
+  ControlController.OnReleaseNameChange := FIReleaseNameChange;
 
   FIControlChange := TIControlEventHandler.Create(ControlChange);
-  ComponentController.OnControlChange.Add(FIControlChange);
+  ControlController.OnControlChange.Add(FIControlChange);
 
   FIMirrorChange := TINotifyEventHandler.Create(MirrorChange);
   MirrorController.OnChange.Add(FIMirrorChange);
@@ -312,21 +312,21 @@ end;
 procedure TTabSheetController.RemoveEvents;
 begin
   /// removing tabs with active crawler is forbidden, nevertheless additionally blacklist entry
-  PageController.CrawlerManager.RemoveCrawlerJob(ComponentController);
+  PageController.CrawlerManager.RemoveCrawlerJob(ControlController);
 
-  ComponentController.OnReleaseNameChange := nil;
+  ControlController.OnReleaseNameChange := nil;
 
   PublishController.OnUpdateCMSWebsiteList.Remove(FIUpdateCMSWebsiteListEvent);
   PublishController.OnUpdateCMSList.Remove(FIUpdateCMSListEvent);
 
   MirrorController.OnChange.Remove(FIMirrorChange);
-  ComponentController.OnControlChange.Remove(FIControlChange);
+  ControlController.OnControlChange.Remove(FIControlChange);
 end;
 
 destructor TTabSheetController.Destroy;
 begin
   /// doing this not in a separate function causes the interfaces MirrorController
-  /// and ComponentController not to destroy immediately
+  /// and ControlController not to destroy immediately
   RemoveEvents;
 
   FIUpdateCMSListEvent := nil;

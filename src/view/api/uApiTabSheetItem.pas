@@ -15,7 +15,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uBase, uConst, uAppInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
   uApiConst, uApiCodeTag, uApiComponentController, uApiIScriptFormatter, uApiMirrorController, uApiPublishController, uApiMultiCastEvent, uApiSettings,
   // HTTPManager
@@ -46,7 +46,7 @@ type
 
   TDataTabSheetItem = class(TTabSheetItem)
   private
-    FComponentController: IComponentController;
+    FComponentController: IControlController;
     FISpaceMouseDown: TINotifyEventHandler;
     FIPopupMenuChange: TIPopupMenuChangeEventHandler;
     FIControlEnter: TIControlEventHandler;
@@ -63,7 +63,7 @@ type
     constructor Create(AOwner: TComponent; ATabSheetController: ITabSheetController); override;
     procedure CreateInner(ATabSheetController: ITabSheetController);
 
-    property ComponentController: IComponentController read FComponentController write FComponentController;
+    property ControlController: IControlController read FComponentController write FComponentController;
     property MirrorController: IMirrorController read FMirrorController write FMirrorController;
 
     procedure DestroyInner;
@@ -120,20 +120,20 @@ type
     procedure FMemoExit(Sender: TObject);
 
     procedure CheckScript(AIScriptDesigner: TIScriptDesigner);
-    procedure ViewChange(const NewViewType: TViewType);
+    procedure ViewChange(const NewViewType: TTabViewType);
   protected
     FIViewChangeEvent: IViewChangeEventHandler;
 
     function GetActiveWebsite: WideString;
     procedure SetActiveWebsite(AWebsite: WideString);
     function GetActiveWebsiteData: ICMSWebsiteContainer;
-    procedure SetActiveWebsiteData(AWebsiteData: ICMSWebsiteContainer);
+    procedure SetActiveWebsiteData(AData: ICMSWebsiteContainer);
     procedure RegisterWebsite;
     procedure DeregisterWebsite;
     procedure UpdateActiveWebsite;
 
-    function GetViewType: TViewType;
-    procedure SetViewType(AViewType: TViewType);
+    function GetViewType: TTabViewType;
+    procedure SetViewType(AViewType: TTabViewType);
 
     procedure UpdateHTMLView(ASubject, AMessage: RIScriptResult);
     procedure RenderHTMLView;
@@ -145,7 +145,7 @@ type
 
     property PublishController: IPublishController read FPublishController write FPublishController;
 
-    property ViewType: TViewType read GetViewType write SetViewType;
+    property ViewType: TTabViewType read GetViewType write SetViewType;
 
     procedure InsertTextBetweenSelected(ACodeTag: TCodeTag);
 
@@ -240,11 +240,11 @@ end;
 
 procedure TDataTabSheetItem.CreateInner(ATabSheetController: ITabSheetController);
 begin
-  ComponentController := TComponentController.Create(Self);
-  with ComponentController do
+  ControlController := TComponentController.Create(Self);
+  with ControlController do
   begin
     TabSheetController := ATabSheetController;
-    TemplateTypeID := ATabSheetController.TemplateTypeID;
+    ATypeID := ATabSheetController.ATypeID;
 
     OnSpaceMouseDown := FISpaceMouseDown;
 
@@ -282,7 +282,7 @@ begin
   end;
   MirrorController := nil;
 
-  with ComponentController do
+  with ControlController do
   begin
     for I := 0 to ControlCount - 1 do
     begin
@@ -292,7 +292,7 @@ begin
           Picture.Mirror[J].Picture := nil;
         Picture := nil;
       end;
-      Control[I].ComponentController := nil;
+      Control[I].ControlController := nil;
     end;
 
     OnPopupMenuChange := nil;
@@ -305,7 +305,7 @@ begin
 
     TabSheetController := nil;
   end;
-  ComponentController := nil;
+  ControlController := nil;
 end;
 
 destructor TDataTabSheetItem.Destroy;
@@ -538,7 +538,7 @@ begin
     end;
 end;
 
-procedure TDesignTabSheetItem.ViewChange(const NewViewType: TViewType);
+procedure TDesignTabSheetItem.ViewChange(const NewViewType: TTabViewType);
 begin
   if FTabSheetController.IsTabActive then
   begin
@@ -578,9 +578,9 @@ begin
   result := FActiveWebsiteData;
 end;
 
-procedure TDesignTabSheetItem.SetActiveWebsiteData(AWebsiteData: ICMSWebsiteContainer);
+procedure TDesignTabSheetItem.SetActiveWebsiteData(AData: ICMSWebsiteContainer);
 begin
-  FActiveWebsiteData := AWebsiteData;
+  FActiveWebsiteData := AData;
 end;
 
 procedure TDesignTabSheetItem.RegisterWebsite;
@@ -619,7 +619,7 @@ begin
   end;
 end;
 
-function TDesignTabSheetItem.GetViewType: TViewType;
+function TDesignTabSheetItem.GetViewType: TTabViewType;
 begin
   Result := vtData;
   if FCodePanel.Visible then
@@ -628,7 +628,7 @@ begin
     Exit(vtPreview);
 end;
 
-procedure TDesignTabSheetItem.SetViewType(AViewType: TViewType);
+procedure TDesignTabSheetItem.SetViewType(AViewType: TTabViewType);
 begin
   FWebsitePanel.Visible := (AViewType = vtCode) or (AViewType = vtPreview);
 

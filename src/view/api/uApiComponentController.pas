@@ -7,22 +7,20 @@ uses
   SysUtils, Controls, Classes, ExtCtrls, Generics.Collections,
   // MultiEvent
   Generics.MultiEvents.NotifyInterface,
-  // Interface
-  uAppInterface,
   // Common
-  uConst,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
   uApiControls, uApiMultiCastEvent;
 
 type
-  TComponentController = class(TInterfacedObject, IComponentController)
+  TComponentController = class(TInterfacedObject, IControlController)
   type
     TIBasicMeta = class of TIBasic;
   private
     FWorkPanel: TComponent;
     FControlList: TInterfaceList;
     FTabSheetController: ITabSheetController;
-    FTemplateTypeID: TTemplateTypeID;
+    FTemplateTypeID: TTypeID;
 
     FSpaceMouseDown: INotifyEventHandler;
     FControlChange: IControlChangeEvent;
@@ -32,8 +30,8 @@ type
 
     function GetTabSheetController: ITabSheetController;
     procedure SetTabSheetController(const ATabSheetController: ITabSheetController);
-    function GetTemplateTypeID: TTemplateTypeID;
-    procedure SetTemplateTypeID(ATemplateTypeID: TTemplateTypeID);
+    function GetTypeID: TTypeID;
+    procedure SetTypeID(ATypeID: TTypeID);
     function GetControl(index: Integer): IBasic;
     procedure SetControl(index: Integer; AControl: IBasic);
 
@@ -49,14 +47,14 @@ type
     function GetPopupMenuChange: IPopupMenuChange;
     procedure SetPopupMenuChange(APopupMenuChange: IPopupMenuChange);
 
-    function GetClassType(AType: TComponentID): TIBasicMeta;
+    function GetClassType(AType: TControlID): TIBasicMeta;
   public
     constructor Create(AWorkPanel: TComponent);
     property TabSheetController: ITabSheetController read GetTabSheetController write SetTabSheetController;
-    property TemplateTypeID: TTemplateTypeID read GetTemplateTypeID write SetTemplateTypeID;
-    procedure NewControl(AType: TComponentID; ATitle, AValue, AHint, AList: WideString; ALeft, ATop, AWidth, AHeight: Integer); overload;
-    procedure NewControl(AClass: TIBasicMeta; AType: TComponentID; ATitle, AValue, AHint, AList: WideString; ALeft, ATop, AWidth, AHeight: Integer); overload;
-    function FindControl(ComponentID: TComponentID): IBasic;
+    property ATypeID: TTypeID read GetTypeID write SetTypeID;
+    procedure NewControl(AType: TControlID; ATitle, AValue, AHint, AList: WideString; ALeft, ATop, AWidth, AHeight: Integer); overload;
+    procedure NewControl(AClass: TIBasicMeta; AType: TControlID; ATitle, AValue, AHint, AList: WideString; ALeft, ATop, AWidth, AHeight: Integer); overload;
+    function FindControl(AControlID: TControlID): IBasic;
     property Control[index: Integer]: IBasic read GetControl write SetControl;
     function ControlCount: Integer;
 
@@ -84,14 +82,14 @@ begin
   FTabSheetController := ATabSheetController;
 end;
 
-function TComponentController.GetTemplateTypeID;
+function TComponentController.GetTypeID;
 begin
   Result := FTemplateTypeID;
 end;
 
-procedure TComponentController.SetTemplateTypeID(ATemplateTypeID: TTemplateTypeID);
+procedure TComponentController.SetTypeID(ATypeID: TTypeID);
 begin
-  FTemplateTypeID := ATemplateTypeID;
+  FTemplateTypeID := ATypeID;
 end;
 
 function TComponentController.GetControl(index: Integer): IBasic;
@@ -159,7 +157,7 @@ begin
   FPopupMenuChange := APopupMenuChange;
 end;
 
-function TComponentController.GetClassType(AType: TComponentID): TIBasicMeta;
+function TComponentController.GetClassType(AType: TControlID): TIBasicMeta;
 begin
   case AType of
     cReleaseName:
@@ -222,13 +220,13 @@ begin
   FControlChange := TIControlChangeEvent.Create;
 end;
 
-procedure TComponentController.NewControl(AType: TComponentID; ATitle, AValue, AHint, AList: WideString; ALeft: Integer; ATop: Integer; AWidth: Integer;
+procedure TComponentController.NewControl(AType: TControlID; ATitle, AValue, AHint, AList: WideString; ALeft: Integer; ATop: Integer; AWidth: Integer;
   AHeight: Integer);
 begin
   NewControl(GetClassType(AType), AType, ATitle, AValue, AHint, AList, ALeft, ATop, AWidth, AHeight);
 end;
 
-procedure TComponentController.NewControl(AClass: TIBasicMeta; AType: TComponentID; ATitle, AValue, AHint, AList: WideString; ALeft: Integer; ATop: Integer;
+procedure TComponentController.NewControl(AClass: TIBasicMeta; AType: TControlID; ATitle, AValue, AHint, AList: WideString; ALeft: Integer; ATop: Integer;
   AWidth: Integer; AHeight: Integer);
 var
   lBasic: TIBasic;
@@ -241,7 +239,7 @@ begin
   lBasicIntf := lBasic;
   with lBasicIntf do
   begin
-    name := TComponentIDToString(AType);
+    name := ControlIDToString(AType);
     if not(ATitle = '#') then
       Title := ATitle;
     if not(AHint = '#') then
@@ -266,7 +264,7 @@ begin
   FControlList.Add(lBasicIntf);
 end;
 
-function TComponentController.FindControl(ComponentID: TComponentID): IBasic;
+function TComponentController.FindControl(AControlID: TControlID): IBasic;
 var
   found: Boolean;
   I, Count: Integer;
@@ -280,7 +278,7 @@ begin
 
   while not found and (I < Count) do
   begin
-    if GetControl(I).ComponentID = ComponentID then
+    if GetControl(I).AControlID = AControlID then
     begin
       found := true;
       Result := GetControl(I);

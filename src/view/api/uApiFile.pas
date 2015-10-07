@@ -6,7 +6,7 @@ uses
   // Delphi
   SysUtils, Classes, Generics.Collections, StrUtils,
   // Common
-  uFileInterface, uConst,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface, uFileInterface,
   // Utils
   uStringUtils;
 
@@ -39,7 +39,7 @@ type
 
     function GetControlName: WideString;
     procedure SetGetControlName(AGetControlName: WideString); overload;
-    procedure SetGetControlName(AComponentID: TComponentID); overload;
+    procedure SetGetControlName(AComponentID: TControlID); overload;
 
     function GetControlValue: WideString;
     procedure SetGetControlValue(AGetControlValue: WideString);
@@ -48,7 +48,7 @@ type
     function GetSubTypes: TList<ISubType>;
   public
     constructor Create; overload; override;
-    constructor Create(AComponentID: TComponentID; AControlValue: WideString = ''; AID: WideString = ''); reintroduce; overload;
+    constructor Create(AComponentID: TControlID; AControlValue: WideString = ''; AID: WideString = ''); reintroduce; overload;
     property ControlName: WideString read GetControlName write SetGetControlName;
     property ControlValue: WideString read GetControlValue write SetGetControlValue;
     property ID: WideString read GetID write SetID;
@@ -67,13 +67,13 @@ type
 
     function GetName: WideString;
     procedure SetName(AName: WideString); overload;
-    procedure SetName(ATemplateTypeID: TTemplateTypeID); overload;
+    procedure SetName(ATypeID: TTypeID); overload;
     function GetID: WideString;
     procedure SetID(AID: WideString);
     function GetSubTypes: TList<ISubType>;
   public
     constructor Create; overload; override;
-    constructor Create(ATemplateTypeID: TTemplateTypeID; AID: WideString = ''); reintroduce; overload;
+    constructor Create(ATypeID: TTypeID; AID: WideString = ''); reintroduce; overload;
     property Name: WideString read GetName write SetName;
     property ID: WideString read GetID write SetID;
     property SubTypes: TList<ISubType>read GetSubTypes;
@@ -180,7 +180,7 @@ type
     function GetActive: WordBool;
     procedure SetActive(AActive: WordBool);
     function GetCategories: WideString;
-    function GetCategoriesAsTTemplateTypeIDs: TTemplateTypeIDs;
+    function GetCategoriesAsTTemplateTypeIDs: TTypeIDs;
     procedure SetCategories(ACategories: WideString);
     function GetControls: TList<IControl>;
     function GetHoster: TList<IHoster>;
@@ -298,9 +298,9 @@ begin
   Change;
 end;
 
-procedure TSubType.SetGetControlName(AComponentID: TComponentID);
+procedure TSubType.SetGetControlName(AComponentID: TControlID);
 begin
-  FControlValue := TComponentIDToString(AComponentID);
+  FControlValue := ControlIDToString(AComponentID);
   Change;
 end;
 
@@ -327,7 +327,7 @@ begin
   FSubTypes.OnNotify := SubTypesNotify;
 end;
 
-constructor TSubType.Create(AComponentID: TComponentID; AControlValue: WideString = ''; AID: WideString = '');
+constructor TSubType.Create(AComponentID: TControlID; AControlValue: WideString = ''; AID: WideString = '');
 begin
   Create;
   SetGetControlName(AComponentID);
@@ -373,9 +373,9 @@ begin
   Change;
 end;
 
-procedure TType.SetName(ATemplateTypeID: TTemplateTypeID);
+procedure TType.SetName(ATypeID: TTypeID);
 begin
-  FName := TTemplateTypeIDToString(ATemplateTypeID);
+  FName := TypeIDToString(ATypeID);
   Change;
 end;
 
@@ -402,10 +402,10 @@ begin
   FSubTypes.OnNotify := SubTypesNotify;
 end;
 
-constructor TType.Create(ATemplateTypeID: TTemplateTypeID; AID: WideString = '');
+constructor TType.Create(ATypeID: TTypeID; AID: WideString = '');
 begin
   Create;
-  SetName(ATemplateTypeID);
+  SetName(ATypeID);
   ID := AID;
 end;
 
@@ -677,7 +677,7 @@ begin
   Result := FCategories;
 end;
 
-function TFilter.GetCategoriesAsTTemplateTypeIDs: TTemplateTypeIDs;
+function TFilter.GetCategoriesAsTTemplateTypeIDs: TTypeIDs;
 var
   I: Integer;
 begin
@@ -686,7 +686,7 @@ begin
     try
       for I := 0 to Count - 1 do
         try
-          Result := Result + [StringToTTemplateTypeID(Strings[I])];
+          Result := Result + [StringToTypeID(Strings[I])];
         except
 
         end;

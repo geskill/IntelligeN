@@ -8,7 +8,7 @@ uses
   // OmniThreadLibrary
   OtlTaskControl, OtlThreadPool,
   // Common
-  uAppInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // API
   uApiPlugins, uApiSettings,
   // plugin system
@@ -103,8 +103,8 @@ var
 begin
   _ErrorMsg := '';
 
-  FFolderURL := TApiPlugin.GenerateFolder(FCrypter, FCrypterPanel.MirrorControl,
-    FCrypterPanel.MirrorControl.MirrorController.TabSheetController.ComponentController, _ErrorMsg);
+  FFolderURL := TApiPlugin.AddFolder(FCrypter, FCrypterPanel.MirrorControl,
+    FCrypterPanel.MirrorControl.MirrorController.TabSheetController.ControlController, _ErrorMsg);
 
   Task.Invoke(
     { } procedure

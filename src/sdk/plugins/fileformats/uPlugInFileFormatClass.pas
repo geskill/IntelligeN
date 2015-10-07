@@ -6,7 +6,7 @@ uses
   // Common
   uAppInterface,
   // Plugin system
-  uPlugInInterface, uPlugInClass;
+  uPlugInInterfaceAdv, uPlugInClass;
 
 type
   TFileFormatPlugIn = class(TPlugIn, IFileFormatPlugIn)

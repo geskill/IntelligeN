@@ -3,13 +3,14 @@ unit ufDatabase;
 interface
 
 uses
+  // Delphi
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, DB,
-
+  // DevExpress
   cxStyles, cxCustomData, cxGraphics, cxFilter, cxData, cxDataStorage, cxEdit, cxDBData, cxGridLevel, cxClasses,
   cxControls, cxGridCustomView, cxGridCustomTableView, cxGridTableView, cxGridDBTableView, cxGrid, cxLabel,
-  cxTextEdit, cxContainer, cxMaskEdit, cxDropDownEdit, cxButtonEdit, cxLookAndFeels, cxLookAndFeelPainters,
-
-  uApiSettings, cxNavigator;
+  cxTextEdit, cxContainer, cxMaskEdit, cxDropDownEdit, cxButtonEdit, cxLookAndFeels, cxLookAndFeelPainters, cxNavigator,
+  // API
+  uApiSettings;
 
 type
   TfDatabase = class(TFrame)

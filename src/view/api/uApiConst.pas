@@ -2,26 +2,6 @@ unit uApiConst;
 
 interface
 
-uses
-  // Delphi
-  Classes,
-  // Common
-  uConst;
-
-const
-  http: string = 'http://';
-
-{$IFDEF DEBUG}
-  Homepage = 'http://localhost/IntelligeN%202009/';
-{$ELSE}
-  Homepage = 'http://intelligen2009.com/';
-{$ENDIF}
-
-  BackupFilename = 'releases.sdb';
-
-type
-  TComponentParserMode = (cpNone, cpLight, cpFull);
-
 resourcestring
   StrClose = 'Close';
   StrDocument = 'document';

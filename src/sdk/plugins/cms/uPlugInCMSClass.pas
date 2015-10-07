@@ -6,7 +6,7 @@ uses
   // Delphi
   SysUtils, Classes, Generics.Collections,
   // Common
-  uConst, uAppInterface, uWebsiteInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPConst,
   // Plugin system
@@ -50,7 +50,7 @@ type
   TCMSPlugIn = class(TPlugIn, ICMSPlugIn)
   private
     FAccountname, FAccountpassword, FSettingsFileName, FSubject, FTags, FMessage, FWebsite: WideString;
-    FWebsiteData: ICMSWebsiteData;
+    FData: ITabSheetData;
     FArticleID: Integer;
     FIntelligentPostingHelper: TIntelligentPostingHelper;
   protected
@@ -59,7 +59,7 @@ type
     function SettingsClass: TCMSPlugInSettingsMeta; virtual; abstract;
     function GetSettings: TCMSPlugInSettings; virtual; abstract;
     procedure SetSettings(ACMSPlugInSettings: TCMSPlugInSettings); virtual; abstract;
-    function LoadSettings(const AWebsiteData: ICMSWebsiteData = nil): Boolean; virtual;
+    function LoadSettings(const AData: ITabSheetData = nil): Boolean; virtual;
 
     function NeedPreLogin(out ARequestURL: string): Boolean; virtual;
     function NeedLogin: Boolean; virtual;
@@ -71,7 +71,7 @@ type
     function NeedPrePost(out ARequestURL: string): Boolean; virtual;
     function DoAnalyzePrePost(AResponseStr: string): Boolean; virtual;
 
-    function DoBuildPostRequest(const AWebsiteData: ICMSWebsiteData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; virtual; abstract;
+    function DoBuildPostRequest(const AData: ITabSheetData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; virtual; abstract;
     function DoAnalyzePost(AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; virtual; abstract;
 
     function GetIDsRequestURL: string; virtual;
@@ -96,8 +96,8 @@ type
     procedure SetMessage(AMessage: WideString); safecall;
     function GetWebsite: WideString; safecall;
     procedure SetWebsite(AWebsite: WideString); safecall;
-    function GetWebsiteData: ICMSWebsiteData; safecall;
-    procedure SetWebsiteData(AWebsiteData: ICMSWebsiteData); safecall;
+    function GetData: ITabSheetData; safecall;
+    procedure SetData(const AData: ITabSheetData); safecall;
 
     function GetArticleID: Integer; safecall;
     procedure SetArticleID(AArticleID: Integer); safecall;
@@ -112,7 +112,7 @@ type
     property Tags: WideString read GetTags write SetTags;
     property Message: WideString read GetMessage write SetMessage;
     property Website: WideString read GetWebsite write SetWebsite;
-    property WebsiteData: ICMSWebsiteData read GetWebsiteData write SetWebsiteData;
+    property Data: ITabSheetData read GetData write SetData;
 
     property ArticleID: Integer read GetArticleID write SetArticleID;
 
@@ -125,7 +125,7 @@ type
     function ReadID(AIndex: Integer): TIDInfo; safecall;
     function Login(out ARequestID: Double): Boolean; virtual; safecall;
     function Exec: WordBool; virtual; safecall;
-    function ShowWebsiteSettingsEditor(AWebsiteEditor: IWebsiteEditor): WordBool; safecall;
+    function ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEditor): WordBool; safecall;
     destructor Destroy; override;
   end;
 
@@ -211,12 +211,12 @@ begin
   FCheckedIDsList.Add(IDInfo);
 end;
 
-function TCMSPlugIn.LoadSettings(const AWebsiteData: ICMSWebsiteData = nil): Boolean;
+function TCMSPlugIn.LoadSettings(const AData: ITabSheetData = nil): Boolean;
 begin
   Result := True;
-  TPlugInCMSSettingsHelper.LoadSettingsToClass(SettingsFileName, Settings, AWebsiteData);
+  TPlugInCMSSettingsHelper.LoadSettingsToClass(SettingsFileName, Settings, AData);
   with Settings do
-    if Assigned(AWebsiteData) and SameStr('', Charset) then
+    if Assigned(AData) and SameStr('', Charset) then
       Charset := DefaultCharset;
 end;
 
@@ -342,14 +342,14 @@ begin
   FWebsite := AWebsite;
 end;
 
-function TCMSPlugIn.GetWebsiteData: ICMSWebsiteData;
+function TCMSPlugIn.GetData: ITabSheetData;
 begin
-  Result := FWebsiteData;
+  Result := FData;
 end;
 
-procedure TCMSPlugIn.SetWebsiteData(AWebsiteData: ICMSWebsiteData);
+procedure TCMSPlugIn.SetData(const AData: ITabSheetData);
 begin
-  FWebsiteData := AWebsiteData;
+  FData := AData;
 end;
 
 function TCMSPlugIn.GetArticleID: Integer;
@@ -531,7 +531,7 @@ begin
   RequestID := -1;
   ResponseStr := '';
 
-  if LoadSettings(WebsiteData) then
+  if LoadSettings(Data) then
     if (not NeedLogin) xor (not SameStr('', AccountName) and NeedLogin and Login(RequestID)) xor SameStr('', AccountName) then
     begin
       if not _AfterLogin(RequestID, ResponseStr) then
@@ -554,7 +554,7 @@ begin
           Exit;
       end;
 
-      if DoBuildPostRequest(WebsiteData, HTTPRequest, HTTPParams, HTTPOptions, ResponseStr, RequestID) then
+      if DoBuildPostRequest(Data, HTTPRequest, HTTPParams, HTTPOptions, ResponseStr, RequestID) then
       begin
         HTTPRequest.Method := mPOST;
 
@@ -579,7 +579,7 @@ begin
     end;
 end;
 
-function TCMSPlugIn.ShowWebsiteSettingsEditor(AWebsiteEditor: IWebsiteEditor): WordBool;
+function TCMSPlugIn.ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEditor): WordBool;
 
 /// taken from Controls unit; saves ~3kb
   function IsPositiveResult(AModalResult: Integer): Boolean;
@@ -594,7 +594,7 @@ end;
 
 destructor TCMSPlugIn.Destroy;
 begin
-  FWebsiteData := nil;
+  FData := nil;
   Settings.Free;
   FCheckedIDsList.Free;
   inherited Destroy;

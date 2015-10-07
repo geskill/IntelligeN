@@ -8,7 +8,7 @@ uses
   // MultiEvent
   Generics.MultiEvents.NotifyInterface, Generics.MultiEvents.NotifyHandler,
   // Common
-  uAppInterface, uConst, uWebsiteInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // DLLs
   uExport,
   // Api
@@ -119,27 +119,27 @@ type
     FICMSWebsiteContainerActiveController: TICMSWebsiteContainerActiveController;
 
   type
-    TICMSWebsiteData = class(TInterfacedObject, ICMSWebsiteData)
+    TICMSWebsiteData = class(TInterfacedObject, ITabSheetData)
     private
-      FTemplateTypeID: TTemplateTypeID;
+      FTemplateTypeID: TTypeID;
       FControlList: TList<IControlContainer>;
       FMirrorList: TList<IMirrorContainer>;
     protected
-      function GetTemplateTypeID: TTemplateTypeID; safecall;
+      function GetTypeID: TTypeID; safecall;
 
       function GetControl(const IndexOrName: OleVariant): IControlContainer; safecall;
       function GetControlCount: Integer; safecall;
       function GetMirror(const IndexOrName: OleVariant): IMirrorContainer; safecall;
       function GetMirrorCount: Integer; safecall;
     public
-      constructor Create(ATemplateTypeID: TTemplateTypeID);
+      constructor Create(ATypeID: TTypeID);
 
-      property TemplateTypeID: TTemplateTypeID read GetTemplateTypeID;
+      property ATypeID: TTypeID read GetTypeID;
 
       property ControlList: TList<IControlContainer>read FControlList;
       property MirrorList: TList<IMirrorContainer>read FMirrorList;
 
-      function FindControl(ComponentID: TComponentID): IControlContainer; safecall;
+      function FindControl(AControlID: TControlID): IControlContainer; safecall;
 
       property Control[const IndexOrName: OleVariant]: IControlContainer read GetControl;
       property ControlCount: Integer read GetControlCount;
@@ -151,15 +151,15 @@ type
     TIPublishItem = class(TICMSWebsite, IPublishItem)
     private
       FCMSPluginPath: WideString;
-      FCMSWebsiteData: ICMSWebsiteData;
+      FCMSWebsiteData: ITabSheetData;
     protected
       function GetCMSPluginPath: WideString;
-      function GetWebsiteData: ICMSWebsiteData;
+      function GetWebsiteData: ITabSheetData;
     public
       constructor Create(AAccountName, AAccountPassword, ASettingsFileName, AWebsite, ASubject, ATags, AMessage, ACMSPluginPath: WideString;
-        ACMSWebsiteData: ICMSWebsiteData);
+        ACMSWebsiteData: ITabSheetData);
       property CMSPluginPath: WideString read GetCMSPluginPath;
-      property WebsiteData: ICMSWebsiteData read GetWebsiteData;
+      property WebsiteData: ITabSheetData read GetWebsiteData;
       destructor Destroy; override;
     end;
 
@@ -220,7 +220,7 @@ type
 
     function CheckIScript(AIScript: WideString): RIScriptResult;
     function ParseIScript(AIScript: WideString): RIScriptResult;
-    function GenerateWebsiteData: ICMSWebsiteData;
+    function GenerateWebsiteData: ITabSheetData;
 
     function GeneratePublishItem: IPublishItem;
     function GeneratePublishTab: IPublishTab;
@@ -510,7 +510,7 @@ begin
     if Active then
     begin
       if not CanUpdatePartly then
-        FControlsCategories := FTabConnection.ComponentController.TemplateTypeID in FACMSCollectionItem.Filter.GetCategoriesAsTTemplateTypeIDs;
+        FControlsCategories := FTabConnection.ControlController.ATypeID in FACMSCollectionItem.Filter.GetCategoriesAsTTemplateTypeIDs;
       Result := FControlsCategories and FControlsSide;
     end;
 end;
@@ -533,7 +533,7 @@ var
 begin
   Result := True;
   for I := 0 to FACMSCollectionItem.Filter.Controls.Count - 1 do
-    if AControl.ComponentID = StringToTComponentID(FACMSCollectionItem.Filter.Controls.Items[I].Name) then
+    if AControl.AControlID = StringToControlID(FACMSCollectionItem.Filter.Controls.Items[I].Name) then
     begin
       Allowed := RelToBool(FACMSCollectionItem.Filter.Controls.Items[I].Relation) = MatchTextMask(FACMSCollectionItem.Filter.Controls.Items[I].Value,
         AControl.Value);
@@ -561,9 +561,9 @@ var
   Allowed: Boolean;
 begin
   Result := True;
-  for I := 0 to FTabConnection.ComponentController.ControlCount - 1 do
+  for I := 0 to FTabConnection.ControlController.ControlCount - 1 do
   begin
-    Allowed := IsControlValueAllowed(FTabConnection.ComponentController.Control[I]);
+    Allowed := IsControlValueAllowed(FTabConnection.ControlController.Control[I]);
     if not Allowed then
       Exit(False);
   end;
@@ -621,7 +621,7 @@ end;
 
 { TICMSWebsiteContainer.TICMSWebsiteData }
 
-function TICMSWebsiteContainer.TICMSWebsiteData.GetTemplateTypeID: TTemplateTypeID;
+function TICMSWebsiteContainer.TICMSWebsiteData.GetTypeID: TTypeID;
 begin
   Result := FTemplateTypeID;
 end;
@@ -635,7 +635,7 @@ function TICMSWebsiteContainer.TICMSWebsiteData.GetControl(const IndexOrName: Ol
     Result := -1;
     with FControlList do
       for I := 0 to Count - 1 do
-        if MatchText(AName, [TComponentIDToString(Items[I].ComponentID), TComponentIDToReadableStringComponentID(Items[I].ComponentID)]) then
+        if MatchText(AName, [ControlIDToString(Items[I].AControlID), ControlIDToReadableString(Items[I].AControlID)]) then
           Exit(I);
   end;
 
@@ -698,16 +698,16 @@ begin
   Result := FMirrorList.Count;
 end;
 
-constructor TICMSWebsiteContainer.TICMSWebsiteData.Create(ATemplateTypeID: TTemplateTypeID);
+constructor TICMSWebsiteContainer.TICMSWebsiteData.Create(ATypeID: TTypeID);
 begin
-  FTemplateTypeID := ATemplateTypeID;
+  FTemplateTypeID := ATypeID;
   FControlList := TList<IControlContainer>.Create;
   FMirrorList := TList<IMirrorContainer>.Create;
 end;
 
-function TICMSWebsiteContainer.TICMSWebsiteData.FindControl(ComponentID: TComponentID): IControlContainer;
+function TICMSWebsiteContainer.TICMSWebsiteData.FindControl(AControlID: TControlID): IControlContainer;
 begin
-  Result := Control[TComponentIDToString(ComponentID)];
+  Result := Control[ControlIDToString(AControlID)];
 end;
 
 destructor TICMSWebsiteContainer.TICMSWebsiteData.Destroy;
@@ -732,7 +732,7 @@ begin
   FCMSWebsiteData := ACMSWebsiteData;
 end;
 
-function TICMSWebsiteContainer.TIPublishItem.GetWebsiteData: ICMSWebsiteData;
+function TICMSWebsiteContainer.TIPublishItem.GetWebsiteData: ITabSheetData;
 begin
   Result := FCMSWebsiteData;
 end;
@@ -898,8 +898,8 @@ end;
 function TICMSWebsiteContainer.GetTags: WideString;
 begin
   Result := '';
-  if Assigned(FTabConnection.ComponentController.FindControl(cTags)) then
-    Result := FTabConnection.ComponentController.FindControl(cTags).Value;
+  if Assigned(FTabConnection.ControlController.FindControl(cTags)) then
+    Result := FTabConnection.ControlController.FindControl(cTags).Value;
 end;
 
 function TICMSWebsiteContainer.GetMessage: WideString;
@@ -928,7 +928,7 @@ begin
   FCMSWebsiteCollectionItem := ACMSWebsitesCollectionItem;
 
   FIControlChange := TIControlEventHandler.Create(ControlChange);
-  FTabConnection.ComponentController.OnControlChange.Add(FIControlChange);
+  FTabConnection.ControlController.OnControlChange.Add(FIControlChange);
 
   FIMirrorChange := TINotifyEventHandler.Create(MirrorChange);
   FTabConnection.MirrorController.OnChange.Add(FIMirrorChange);
@@ -954,7 +954,7 @@ begin
     end;
 end;
 
-function TICMSWebsiteContainer.GenerateWebsiteData: ICMSWebsiteData;
+function TICMSWebsiteContainer.GenerateWebsiteData: ITabSheetData;
 var
   CMSWebsiteData: TICMSWebsiteData;
 
@@ -1014,16 +1014,16 @@ var
   end;
 
 begin
-  CMSWebsiteData := TICMSWebsiteData.Create(TabSheetController.TemplateTypeID);
+  CMSWebsiteData := TICMSWebsiteData.Create(TabSheetController.ATypeID);
 
-  for I := 0 to TabSheetController.ComponentController.ControlCount - 1 do
+  for I := 0 to TabSheetController.ControlController.ControlCount - 1 do
   begin
 
-    if not(TabSheetController.ComponentController.Control[I].ComponentID = cPicture) then
-      CMSWebsiteData.ControlList.Add(TIControlContainer.Create(TabSheetController.ComponentController.Control[I].ComponentID,
-          TabSheetController.ComponentController.Control[I].Value))
+    if not(TabSheetController.ControlController.Control[I].AControlID = cPicture) then
+      CMSWebsiteData.ControlList.Add(TIControlContainer.Create(TabSheetController.ControlController.Control[I].AControlID,
+          TabSheetController.ControlController.Control[I].Value))
     else
-      HandlePicture(TabSheetController.ComponentController.Control[I] as IPicture);
+      HandlePicture(TabSheetController.ControlController.Control[I] as IPicture);
   end;
 
   WL := nil;
@@ -1099,7 +1099,7 @@ end;
 destructor TICMSWebsiteContainer.Destroy;
 begin
   FTabConnection.MirrorController.OnChange.Remove(FIMirrorChange);
-  FTabConnection.ComponentController.OnControlChange.Remove(FIControlChange);
+  FTabConnection.ControlController.OnControlChange.Remove(FIControlChange);
   FIMirrorChange := nil;
   FIControlChange := nil;
   FTabConnection := nil;

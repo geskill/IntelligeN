@@ -1,18 +1,17 @@
 library intelligenxml2;
 
 uses
-  Forms,
-  uPlugInInterface,
+  uPlugInInterfaceAdv,
   uPlugInFileFormatClass,
   uintelligenxml2 in 'uintelligenxml2.pas',
   uSelectTemplateFileName in '..\uSelectTemplateFileName.pas' {SelectTemplateFileName};
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: IFileFormatPlugIn): Boolean; stdcall; export;
+function LoadPlugin(var APlugIn: IFileFormatPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := Tintelligenxml2.Create;
+    APlugIn := Tintelligenxml2.Create;
     Result := True;
   except
     Result := False;

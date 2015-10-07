@@ -4,7 +4,7 @@ interface
 
 uses
   // Common
-  uAppInterface, uWebsiteInterface,
+  uBaseInterface,
   // HTTPManager
   uHTTPInterface,
   // Plugin
@@ -34,12 +34,6 @@ type
     property ConnectTimeout: Integer read GetConnectTimeout write SetConnectTimeout;
     property ReadTimeout: Integer read GetReadTimeout write SetReadTimeout;
     property ErrorMsg: WideString read GetErrorMsg write SetErrorMsg;
-  end;
-
-  IAppPlugIn = interface(IPlugIn)
-    ['{DB81AD44-5514-4F6E-BF24-663E8A0AD66A}']
-    function Start(const AAppController: IAppController): WordBool; safecall;
-    procedure Stop; safecall;
   end;
 
   ICAPTCHAPlugIn = interface(IPlugIn)
@@ -80,8 +74,8 @@ type
     procedure SetMessage(AMessage: WideString); safecall;
     function GetWebsite: WideString; safecall;
     procedure SetWebsite(AWebsite: WideString); safecall;
-    function GetWebsiteData: ICMSWebsiteData; safecall;
-    procedure SetWebsiteData(AWebsiteData: ICMSWebsiteData); safecall;
+    function GetData: ITabSheetData; safecall;
+    procedure SetData(const AData: ITabSheetData); safecall;
 
     function GetArticleID: Integer; safecall;
     procedure SetArticleID(AArticleID: Integer); safecall;
@@ -96,7 +90,7 @@ type
     property Tags: WideString read GetTags write SetTags;
     property Message: WideString read GetMessage write SetMessage;
     property Website: WideString read GetWebsite write SetWebsite;
-    property WebsiteData: ICMSWebsiteData read GetWebsiteData write SetWebsiteData;
+    property Data: ITabSheetData read GetData write SetData;
 
     property ArticleID: Integer read GetArticleID write SetArticleID;
 
@@ -109,7 +103,7 @@ type
     function ReadID(AIndex: Integer): TIDInfo; safecall;
     function Login(out ARequestID: Double): Boolean; safecall;
     function Exec: WordBool; safecall;
-    function ShowWebsiteSettingsEditor(AWebsiteEditor: IWebsiteEditor): WordBool; safecall;
+    function ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEditor): WordBool; safecall;
   end;
 
   ICrawlerPlugIn = interface(IPlugIn)
@@ -121,16 +115,16 @@ type
     function GetAccountPassword: WideString; safecall;
     procedure SetAccountPassword(AAccountPassword: WideString); safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; safecall;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; safecall;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; safecall;
-    function GetLimitDefaultValue: Integer; safecall;
+    function GetAvailableTypeIDs: Integer; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; safecall;
+    function GetResultsLimitDefaultValue: Integer; safecall;
 
     property UseAccount: WordBool read GetUseAccount write SetUseAccount;
     property AccountName: WideString read GetAccountName write SetAccountName;
     property AccountPassword: WideString read GetAccountPassword write SetAccountPassword;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); safecall;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); safecall;
   end;
 
   ICrypterPlugIn = interface(IPlugIn)
@@ -232,25 +226,10 @@ type
     property UseVisitorPassword: WordBool read GetUseVisitorPassword write SetUseVisitorPassword;
     property VisitorPassword: WideString read GetVisitorPassword write SetVisitorPassword;
 
-    function GenerateFolder(MirrorController: IMirrorControl): WideString; safecall;
-    function GetFolderInfo(FolderURL: WideString): TCrypterFolderInfo; safecall;
-    procedure GetFolderPicture(FolderURL: WideString; out Result: WideString; Small: WordBool = True); safecall;
-  end;
-
-  IFileFormatPlugIn = interface(IPlugIn)
-    ['{8A7373D1-51F3-4A98-912F-D3480274A715}']
-    function GetForceAddCrypter: WordBool; safecall;
-    procedure SetForceAddCrypter(AForceAddCrypter: WordBool); safecall;
-    function GetForceAddImageMirror: WordBool; safecall;
-    procedure SetForceAddImageMirror(AForceAddImageMirror: WordBool); safecall;
-
-    function GetFileFormatName: WideString; safecall;
-    function CanSaveControls: WordBool; safecall;
-    procedure SaveControls(AFileName, ATemplateFileName: WideString; const ATabSheetController: ITabSheetController); safecall;
-    function CanLoadControls: WordBool; safecall;
-    function LoadControls(AFileName, ATemplateDirectory: WideString; const APageController: IPageController): Integer; safecall;
-    property ForceAddCrypter: WordBool read GetForceAddCrypter write SetForceAddCrypter;
-    property ForceAddImageMirror: WordBool read GetForceAddImageMirror write SetForceAddImageMirror;
+    function AddFolder(const AMirrorContainer: IMirrorContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; safecall;
+    function EditFolder(const AMirrorContainer: IMirrorContainer; ACrypterFolderInfo: TCrypterFolderInfo): WordBool; safecall;
+    function DeleteFolder(AFolderIdentifier: WideString): WordBool; safecall;
+    function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; safecall;
   end;
 
   IFileHosterPlugIn = interface(IPlugIn)
@@ -281,15 +260,13 @@ type
     property ImageHostResize: TImageHostResize read GetImageHostResize write SetImageHostResize;
   end;
 
-  TLoadPlugIn = function(var PlugIn: IPlugIn): WordBool; stdcall;
-  TLoadAppPlugIn = function(var PlugIn: IAppPlugIn): WordBool; stdcall;
-  TLoadCAPTCHAPlugIn = function(var PlugIn: ICAPTCHAPlugIn): WordBool; stdcall;
-  TLoadCMSPlugIn = function(var PlugIn: ICMSPlugIn): WordBool; stdcall;
-  TLoadCrawlerPlugIn = function(var PlugIn: ICrawlerPlugIn): WordBool; stdcall;
-  TLoadCrypterPlugIn = function(var PlugIn: ICrypterPlugIn): WordBool; stdcall;
-  TLoadFileFormatPlugIn = function(var PlugIn: IFileFormatPlugIn): WordBool; stdcall;
-  TLoadFileHosterPlugIn = function(var PlugIn: IFileHosterPlugIn): WordBool; stdcall;
-  TLoadImageHosterPlugIn = function(var PlugIn: IImageHosterPlugIn): WordBool; stdcall;
+  TLoadPlugIn = function(var APlugIn: IPlugIn): WordBool; safecall;
+  TLoadCAPTCHAPlugIn = function(var APlugIn: ICAPTCHAPlugIn): WordBool; safecall;
+  TLoadCMSPlugIn = function(var APlugIn: ICMSPlugIn): WordBool; safecall;
+  TLoadCrawlerPlugIn = function(var APlugIn: ICrawlerPlugIn): WordBool; safecall;
+  TLoadCrypterPlugIn = function(var APlugIn: ICrypterPlugIn): WordBool; safecall;
+  TLoadFileHosterPlugIn = function(var APlugIn: IFileHosterPlugIn): WordBool; safecall;
+  TLoadImageHosterPlugIn = function(var APlugIn: IImageHosterPlugIn): WordBool; safecall;
 
 implementation
 

@@ -6,7 +6,7 @@ uses
   // Delphi
   SysUtils, Variants, Generics.Collections,
   // Common
-  uAppInterface, uConst, uWebsiteInterface;
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface;
 
 type
   TIMirrorData = class(TInterfacedObject, IMirrorData)
@@ -31,14 +31,14 @@ type
 
   TIControlContainer = class(TInterfacedObject, IControlContainer)
   private
-    FComponentID: TComponentID;
+    FComponentID: TControlID;
     FValue: WideString;
   protected
-    function GetComponentID: TComponentID; safecall;
+    function GetControlID: TControlID; safecall;
     function GetValue: WideString; safecall;
   public
-    constructor Create(AComponentID: TComponentID; AValue: WideString);
-    property ComponentID: TComponentID read GetComponentID;
+    constructor Create(AComponentID: TControlID; AValue: WideString);
+    property AControlID: TControlID read GetControlID;
     property Value: WideString read GetValue;
   end;
 
@@ -134,7 +134,7 @@ end;
 {$REGION 'TIControlContainer'}
 
 { TIControlContainer }
-function TIControlContainer.GetComponentID: TComponentID;
+function TIControlContainer.GetControlID: TControlID;
 begin
   Result := FComponentID;
 end;

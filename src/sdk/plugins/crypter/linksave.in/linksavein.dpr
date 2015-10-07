@@ -9,10 +9,10 @@ uses
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: ICrypterPlugIn): WordBool; stdcall; export;
+function LoadPlugin(var APlugIn: ICrypterPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := TLinksaveIn.Create;
+    APlugIn := TLinksaveIn.Create;
     Result := True;
   except
     Result := False;

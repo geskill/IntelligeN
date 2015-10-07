@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -17,14 +17,14 @@ uses
 type
   TPornofilmVertriebDe = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -36,28 +36,28 @@ begin
   Result := 'pornofilm-vertrieb.de';
 end;
 
-function TPornofilmVertriebDe.GetAvailableTemplateTypeIDs;
+function TPornofilmVertriebDe.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cXXX];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TPornofilmVertriebDe.GetAvailableComponentIDs;
+function TPornofilmVertriebDe.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture, cRuntime, cDescription];
   Result := LongWord(_ComponentIDs);
 end;
 
-function TPornofilmVertriebDe.GetComponentIDDefaultValue;
+function TPornofilmVertriebDe.GetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TPornofilmVertriebDe.GetLimitDefaultValue;
+function TPornofilmVertriebDe.GetResultsLimitDefaultValue;
 begin
   Result := 5;
 end;
@@ -66,42 +66,42 @@ procedure TPornofilmVertriebDe.Exec;
 const
   website = 'http://www.pornofilm-vertrieb.de/';
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _Title: string;
   _Count: Integer;
 
   procedure deep_search(AWebsiteSourceCode: string);
   begin
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
           Expression := '<img id="showCover" src="(.*?)"';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cPicture).AddValue(website + Match[1], GetName);
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, website + Match[1]);
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
+    if (AControlController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
           Expression := '<span>(\d+) min<\/span>';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cRuntime).AddValue(Match[1], GetName);
+            AControlController.FindControl(cRuntime).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
           Expression := '10px;overflow:auto;padding:3px">(.*?)<\/div>';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cDescription).AddValue(Match[1], GetName);
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
@@ -112,8 +112,8 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
   _Count := 0;
 
   RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + 'index.php?shopid=2&action=catalog&search=' + HTTPEncode(_Title)),

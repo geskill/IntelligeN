@@ -4,7 +4,7 @@ interface
 
 uses
   // Common
-  uBase;
+  uBaseConst;
 
 type
   IFile = interface(IUnknown)

@@ -9,12 +9,12 @@ uses
   GpStuff, OtlCollections, OtlComm, OtlCommon, OtlEventMonitor, OtlParallel, OtlTask, OtlTaskControl, OtlThreadPool,
   // ThreadStringList
   uThreadStringList,
-  // Utils
-  uPathUtils, uStringUtils,
   // Common
-  uAppInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // API
-  uApiCAPTCHA, uApiPlugins, uApiSettings, uApiThreadPoolManager;
+  uApiCAPTCHA, uApiPlugins, uApiSettings, uApiThreadPoolManager,
+  // Utils
+  uPathUtils, uStringUtils;
 
 type
   TPublishManagerStatus = (pmsRESUMING, pmsPAUSING, pmsSTOPPING);

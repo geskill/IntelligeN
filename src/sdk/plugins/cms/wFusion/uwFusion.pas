@@ -10,7 +10,7 @@ uses
   // Utils,
   uHTMLUtils, uStringUtils,
   // Common
-  uConst, uWebsiteInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -34,12 +34,12 @@ type
     function SettingsClass: TCMSPlugInSettingsMeta; override;
     function GetSettings: TCMSPlugInSettings; override;
     procedure SetSettings(ACMSPlugInSettings: TCMSPlugInSettings); override;
-    function LoadSettings(const AWebsiteData: ICMSWebsiteData = nil): Boolean; override;
+    function LoadSettings(const AData: ITabSheetData = nil): Boolean; override;
 
     function DoBuildLoginRequest(out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; ACAPTCHALogin: Boolean = False): Boolean; override;
     function DoAnalyzeLogin(AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; override;
 
-    function DoBuildPostRequest(const AWebsiteData: ICMSWebsiteData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
+    function DoBuildPostRequest(const AData: ITabSheetData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
     function DoAnalyzePost(AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; override;
   public
     function GetName: WideString; override; safecall;
@@ -67,10 +67,10 @@ end;
 
 function TwFusion.LoadSettings;
 begin
-  Result := inherited LoadSettings(AWebsiteData);
+  Result := inherited LoadSettings(AData);
   with wFusionSettings do
   begin
-    if Assigned(AWebsiteData) and (categorys = null) then
+    if Assigned(AData) and (categorys = null) then
     begin
       ErrorMsg := 'category is undefined!';
       Result := False;
@@ -135,23 +135,23 @@ begin
   AHTTPParams := THTTPParams.Create;
   with AHTTPParams do
   begin
-    if Assigned(AWebsiteData.FindControl(cReleaseName)) then
-      AddFormField('title', AWebsiteData.FindControl(cReleaseName).Value);
+    if Assigned(AData.FindControl(cReleaseName)) then
+      AddFormField('title', AData.FindControl(cReleaseName).Value);
 
     AddFormField('category', VarToStr(wFusionSettings.categorys));
 
-    if Assigned(AWebsiteData.FindControl(cPicture)) then
-      AddFormField('cover', AWebsiteData.FindControl(cPicture).Value);
+    if Assigned(AData.FindControl(cPicture)) then
+      AddFormField('cover', AData.FindControl(cPicture).Value);
 
-    if Assigned(AWebsiteData.FindControl(cGenre)) then
-      AddFormField('genre', AWebsiteData.FindControl(cGenre).Value);
+    if Assigned(AData.FindControl(cGenre)) then
+      AddFormField('genre', AData.FindControl(cGenre).Value);
 
-    if Assigned(AWebsiteData.FindControl(cPassword)) then
-      AddFormField('password', AWebsiteData.FindControl(cPassword).Value);
+    if Assigned(AData.FindControl(cPassword)) then
+      AddFormField('password', AData.FindControl(cPassword).Value);
 
-    if Assigned(AWebsiteData.FindControl(cLanguage)) then
+    if Assigned(AData.FindControl(cLanguage)) then
     begin
-      _lang := AWebsiteData.FindControl(cLanguage).Value;
+      _lang := AData.FindControl(cLanguage).Value;
 
       if (Pos('GER', _lang) > 0) and not(Pos('ENG', _lang) > 0) and not(Pos('FRE', _lang) > 0) and not(Pos('SPA', _lang) > 0) and not(Pos('JPN', _lang) > 0) then
         AddFormField('lang', '1')
@@ -169,21 +169,21 @@ begin
 
     if not wFusionSettings.use_textasdescription then
     begin
-      if Assigned(AWebsiteData.FindControl(cDescription)) then
-        AddFormField('description', AWebsiteData.FindControl(cDescription).Value);
+      if Assigned(AData.FindControl(cDescription)) then
+        AddFormField('description', AData.FindControl(cDescription).Value);
     end
     else
       AddFormField('description', Message);
 
-    if Assigned(AWebsiteData.FindControl(cNFO)) then
-      AddFormField('nfo', AWebsiteData.FindControl(cNFO).Value);
+    if Assigned(AData.FindControl(cNFO)) then
+      AddFormField('nfo', AData.FindControl(cNFO).Value);
 
-    for I := 0 to AWebsiteData.MirrorCount - 1 do
+    for I := 0 to AData.MirrorCount - 1 do
     begin
       if wFusionSettings.use_plainlinks then
-        AddFormField('urls[]', AWebsiteData.Mirror[I].Directlink[0].Value)
-      else if (AWebsiteData.Mirror[I].CrypterCount > 0) then
-        AddFormField('urls[]', AWebsiteData.Mirror[I].Crypter[0].Value)
+        AddFormField('urls[]', AData.Mirror[I].Directlink[0].Value)
+      else if (AData.Mirror[I].CrypterCount > 0) then
+        AddFormField('urls[]', AData.Mirror[I].Crypter[0].Value)
       else
       begin
         ErrorMsg := 'No crypter initialized! (disable use_plainlinks or add a crypter)';
@@ -191,7 +191,7 @@ begin
       end;
     end;
 
-    AddFormField('mirror_count', IntToStr(AWebsiteData.MirrorCount));
+    AddFormField('mirror_count', IntToStr(AData.MirrorCount));
 
     AddFormField('upload', 'Download eintragen');
   end;

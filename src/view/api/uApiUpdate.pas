@@ -15,8 +15,10 @@ uses
   AbArcTyp, AbUnZper,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPManager, uHTTPIndyHelper,
+  // Common
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uBase, uApiConst, uApiUpdateInterfaceBase, uApiUpdateModelBase,
+  uApiConst, uApiUpdateInterfaceBase, uApiUpdateModelBase,
   // DLLs
   uExport,
   // plugin system

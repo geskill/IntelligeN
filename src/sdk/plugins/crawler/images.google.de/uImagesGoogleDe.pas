@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface, uAppConst,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -17,14 +17,14 @@ uses
 type
   TImagesGoogleDe = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -34,28 +34,28 @@ begin
   result := 'images.google.de';
 end;
 
-function TImagesGoogleDe.GetAvailableTemplateTypeIDs;
+function TImagesGoogleDe.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
-  _TemplateTypeIDs := [ low(TTemplateTypeID) .. high(TTemplateTypeID)];
+  _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)];
   result := Word(_TemplateTypeIDs);
 end;
 
-function TImagesGoogleDe.GetAvailableComponentIDs;
+function TImagesGoogleDe.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture];
   result := LongWord(_ComponentIDs);
 end;
 
-function TImagesGoogleDe.GetComponentIDDefaultValue;
+function TImagesGoogleDe.GetControlIDDefaultValue;
 begin
   result := True;
 end;
 
-function TImagesGoogleDe.GetLimitDefaultValue;
+function TImagesGoogleDe.GetResultsLimitDefaultValue;
 begin
   result := 5;
 end;
@@ -64,7 +64,7 @@ procedure TImagesGoogleDe.Exec;
 const
   website = 'https://www.google.de/';
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _Title, _RequestURL: string;
   _Count: Integer;
 
@@ -72,14 +72,14 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
   _Count := 0;
 
-  if TTemplateTypeID(ATemplateTypeID) = cMovie then
+  if TTypeID(ATypeID) = cMovie then
     _RequestURL := website + 'search?tbm=isch&q=' + HTTPEncode(_Title + ' cover')
   else
-    _RequestURL := website + 'search?tbm=isch&q=' + HTTPEncode(TTemplateTypeIDToString(TTemplateTypeID(ATemplateTypeID)) + ' ' + _Title + ' cover');
+    _RequestURL := website + 'search?tbm=isch&q=' + HTTPEncode(TypeIDToString(TTypeID(ATypeID)) + ' ' + _Title + ' cover');
 
   RequestID := HTTPManager.Get(THTTPRequest.Create(_RequestURL), TPlugInHTTPOptions.Create(Self));
 
@@ -97,7 +97,7 @@ begin
       if Exec(InputString) then
       begin
         repeat
-          AComponentController.FindControl(cPicture).AddValue(Match[1], GetName);
+          AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
           Inc(_Count);
         until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
       end;

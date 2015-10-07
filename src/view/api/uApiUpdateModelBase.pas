@@ -6,7 +6,7 @@ uses
   // Delphi
   SysUtils,
   // Common
-  uBase,
+  uBaseConst,
   // Api
   uApiUpdateInterfaceBase;
 

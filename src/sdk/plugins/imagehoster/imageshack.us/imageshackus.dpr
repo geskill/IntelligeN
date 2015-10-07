@@ -9,10 +9,10 @@ uses
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: IImageHosterPlugIn): Boolean; stdcall; export;
+function LoadPlugin(var APlugIn: IImageHosterPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := TImageshackUs.Create;
+    APlugIn := TImageshackUs.Create;
     Result := True;
   except
     Result := False;

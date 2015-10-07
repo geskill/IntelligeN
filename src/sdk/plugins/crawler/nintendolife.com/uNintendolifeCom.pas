@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // Utils
   uHTMLUtils,
   // HTTPManager
@@ -19,42 +19,42 @@ uses
 type
   TNintendolifeCom = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
 
 { TNintendolifeCom }
 
-function TNintendolifeCom.GetAvailableTemplateTypeIDs;
+function TNintendolifeCom.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cGameCube, cNintendoDS, cWii, cOther];
   result := Word(_TemplateTypeIDs);
 end;
 
-function TNintendolifeCom.GetAvailableComponentIDs;
+function TNintendolifeCom.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture, cGenre, cDescription];
   result := LongWord(_ComponentIDs);
 end;
 
-function TNintendolifeCom.GetComponentIDDefaultValue;
+function TNintendolifeCom.GetControlIDDefaultValue;
 begin
   result := True;
 end;
 
-function TNintendolifeCom.GetLimitDefaultValue;
+function TNintendolifeCom.GetResultsLimitDefaultValue;
 begin
   result := 5;
 end;
@@ -68,43 +68,43 @@ procedure TNintendolifeCom.Exec;
 const
   website = 'http://www.nintendolife.com/';
 var
-  _TemplateTypeID: TTemplateTypeID;
-  _ComponentIDs: TComponentIDs;
+  _TemplateTypeID: TTypeID;
+  _ComponentIDs: TControlIDs;
   _Title: string;
   _Count: Integer;
 
   procedure deep_search(aWebsitecode: string);
   begin
-    if (AComponentController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
           Expression := 'Genre<\/strong>:<\/p>\s+<p class="definition">(.*?)<\/p>';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cGenre).AddValue(Match[1], GetName);
+            AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
           Expression := '<span>Overview<\/span><\/p><div class="text">(.*?)<\/div>';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cDescription).AddValue(Trim(HTML2Text(StringReplace(Match[1], '<br />', #13#10, [rfReplaceAll]))), GetName);
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(StringReplace(Match[1], '<br />', #13#10, [rfReplaceAll]))));
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
           Expression := '<div class="cover">.*?class="framed" src="(.*?)"';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cPicture).AddValue(StringReplace(Match[1], 'cover_small', 'cover_large', []), GetName);
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, StringReplace(Match[1], 'cover_small', 'cover_large', []));
         finally
           Free;
         end;
@@ -115,9 +115,9 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  _TemplateTypeID := TTemplateTypeID(ATemplateTypeID);
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  _TemplateTypeID := TTypeID(ATypeID);
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
   _Count := 0;
 
   RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + 'games?title=' + HTTPEncode(_Title)), TPlugInHTTPOptions.Create(Self));

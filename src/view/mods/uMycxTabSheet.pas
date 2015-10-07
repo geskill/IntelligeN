@@ -8,7 +8,7 @@ uses
   // Dev Express
   cxControls, dxBar, cxPC, cxScrollBox,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
   uApiConst, uApiMirrorController, uApiComponentController, uApiPublishController, uApiSettings, uApiPlugins,
   // Plugin
@@ -43,7 +43,7 @@ type
     FmiAddMirror: TMenuItem;
     FFileName, FFileType, FReleaseName, FTemplateFileName: string;
     FDataChanged: Boolean;
-    FTemplateTypeID: TTemplateTypeID;
+    FTemplateTypeID: TTypeID;
     FComponentController: IComponentController;
     FISpaceMouseDown, FIMirrorChange: TINotifyEvent;
     FIPopupMenuChange: TIPopupMenuChange;
@@ -63,8 +63,8 @@ type
     procedure MirrorChange(const Sender: IUnknown);
     procedure PopupMenuChange(const Sender: Integer);
     function GetPageController: IPageController;
-    function GetViewType: TViewType;
-    procedure SetViewType(AViewType: TViewType);
+    function GetViewType: TTabViewType;
+    procedure SetViewType(AViewType: TTabViewType);
     function GetFileName: WideString;
     procedure SetFileName(AFileName: WideString);
     function GetFileType: WideString;
@@ -74,17 +74,17 @@ type
     procedure SetDataChanged(ADataChanged: Boolean);
     procedure UpdateCaption;
     procedure MoveWorkWhileHoldingLeftMouse;
-    function GetComponentController: IComponentController;
-    procedure SetComponentController(const AComponentController: IComponentController);
+    function GetControlController: IComponentController;
+    procedure SetControlController(const AComponentController: IComponentController);
     function GetMirrorController: IMirrorController;
     procedure SetMirrorController(const AMirrorController: IMirrorController);
     function GetPublishController: IPublishController;
     procedure SetPublishController(const APublishController: IPublishController);
   public
-    constructor Create(AOwner: TComponent; APageController: IPageController; ATemplateTypeID: TTemplateTypeID); reintroduce;
+    constructor Create(AOwner: TComponent; APageController: IPageController; ATypeID: TTypeID); reintroduce;
     property WorkPanel: TcxScrollBox read FScrollBoxData;
     property PageController: IPageController read GetPageController;
-    property ViewType: TViewType read GetViewType;
+    property ViewType: TTabViewType read GetViewType;
     property FileName: WideString read GetFileName write SetFileName;
     property FileType: WideString read GetFileType write SetFileType;
     property ReleaseName: WideString read GetReleaseName write SetReleaseName;
@@ -92,8 +92,8 @@ type
     procedure ResetDataChanged(AFileName, AFileType: WideString);
     property DataChanged: Boolean read FDataChanged write SetDataChanged;
     property TemplateFileName: string read FTemplateFileName write FTemplateFileName;
-    property TemplateTypeID: TTemplateTypeID read FTemplateTypeID write FTemplateTypeID;
-    property ComponentController: IComponentController read GetComponentController write SetComponentController;
+    property ATypeID: TTypeID read FTemplateTypeID write FTemplateTypeID;
+    property ControlController: IComponentController read GetControlController write SetControlController;
     property MirrorController: IMirrorController read GetMirrorController write SetMirrorController;
     property PublishController: IPublishController read GetPublishController write SetPublishController;
     destructor Destroy; override;
@@ -186,7 +186,7 @@ begin
   //
 end;
 
-procedure TMycxTabSheet.SetViewType(AViewType: TViewType);
+procedure TMycxTabSheet.SetViewType(AViewType: TTabViewType);
 begin
   //
 end;
@@ -248,12 +248,12 @@ begin
   end;
 end;
 
-function TMycxTabSheet.GetComponentController;
+function TMycxTabSheet.GetControlController;
 begin
   Result := FComponentController;
 end;
 
-procedure TMycxTabSheet.SetComponentController(const AComponentController: IComponentController);
+procedure TMycxTabSheet.SetControlController(const AComponentController: IComponentController);
 begin
   FComponentController := AComponentController;
 end;
@@ -284,8 +284,8 @@ begin
 
   FPageController := APageController;
 
-  ImageIndex := Integer(ATemplateTypeID);
-  TemplateTypeID := ATemplateTypeID;
+  ImageIndex := Integer(ATypeID);
+  ATypeID := ATypeID;
 
   OnShow := MycxTabSheetShow;
 
@@ -323,11 +323,11 @@ begin
   FIPopupMenuChange := TIPopupMenuChange.Create;
   FIPopupMenuChange.OnNotifyHandler := PopupMenuChange;
 
-  ComponentController := TComponentController.Create(FScrollBoxData);
-  with ComponentController do
+  ControlController := TComponentController.Create(FScrollBoxData);
+  with ControlController do
   begin
     TabSheetController := Self;
-    TemplateTypeID := Self.TemplateTypeID;
+    ATypeID := Self.ATypeID;
 
     OnSpaceMouseDown := FISpaceMouseDown;
 
@@ -390,7 +390,7 @@ var
   I, J: Integer;
   Picture: IPicture;
 begin
-  PageController.CrawlerManager.RemoveCrawlerJob(ComponentController);
+  PageController.CrawlerManager.RemoveCrawlerJob(ControlController);
 
   with Main do
   begin
@@ -416,7 +416,7 @@ begin
   end;
   MirrorController := nil;
 
-  with ComponentController do
+  with ControlController do
   begin
     for I := 0 to ControlCount - 1 do
     begin
@@ -426,7 +426,7 @@ begin
           Picture.Mirror[J].Picture := nil;
         Picture := nil;
       end;
-      Control[I].ComponentController := nil;
+      Control[I].ControlController := nil;
     end;
 
     OnSpaceMouseDown := nil;
@@ -444,7 +444,7 @@ begin
 
     TabSheetController := nil;
   end;
-  ComponentController := nil;
+  ControlController := nil;
 
   FISpaceMouseDown := nil;
   FIMirrorChange := nil;

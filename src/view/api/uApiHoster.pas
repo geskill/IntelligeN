@@ -8,7 +8,7 @@ uses
   // OmniThreadLibrary
   OtlTaskControl, OtlThreadPool,
   // Common
-  uAppInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // API
   uApiPlugins, uApiSettings, uApiThreadPoolManager,
   // Plugin system

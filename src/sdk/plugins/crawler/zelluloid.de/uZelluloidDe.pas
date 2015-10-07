@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // Utils
   uHTMLUtils,
   // HTTPManager
@@ -19,14 +19,14 @@ uses
 type
   TZelluloidDe = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -41,28 +41,28 @@ begin
   Result := 'Zelluloid.de';
 end;
 
-function TZelluloidDe.GetAvailableTemplateTypeIDs;
+function TZelluloidDe.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cMovie];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TZelluloidDe.GetAvailableComponentIDs;
+function TZelluloidDe.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture, cGenre, cDescription];
   Result := LongWord(_ComponentIDs);
 end;
 
-function TZelluloidDe.GetComponentIDDefaultValue;
+function TZelluloidDe.GetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TZelluloidDe.GetLimitDefaultValue;
+function TZelluloidDe.GetResultsLimitDefaultValue;
 begin
   Result := 5;
 end;
@@ -72,7 +72,7 @@ const
   zurl = 'http://www.zelluloid.de';
   zsurl = zurl + '/suche';
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _Title: WideString;
   _Count: Integer;
 
@@ -81,7 +81,7 @@ var
     s: string;
     des: TStringList;
   begin
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
     begin
       with TRegExpr.Create do
         try
@@ -91,7 +91,7 @@ var
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cPicture).AddValue(zurl + Match[1], GetName);
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, zurl + Match[1]);
             until not ExecNext;
           end;
         finally
@@ -99,7 +99,7 @@ var
         end;
     end;
 
-    if (AComponentController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
     begin
       with TRegExpr.Create do
         try
@@ -112,7 +112,7 @@ var
               s := Match[2];
               if Pos(',', s) > 0 then
                 s := copy(s, 1, Pos(',', s) - 1);
-              AComponentController.FindControl(cGenre).AddValue(s, GetName);
+              AControlController.FindControl(cGenre).AddProposedValue(GetName, s);
             until not ExecNext;
           end;
         finally
@@ -120,7 +120,7 @@ var
         end;
     end;
 
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
     begin
       with TRegExpr.Create do
         try
@@ -133,7 +133,7 @@ var
               des := TStringList.Create;
               try
                 ALUTF8ExtractHTMLText(Match[1], des);
-                AComponentController.FindControl(cDescription).AddValue(des.Text, GetName);
+                AControlController.FindControl(cDescription).AddProposedValue(GetName, des.Text);
               finally
                 des.Free;
               end;
@@ -152,8 +152,8 @@ var
 
   ResponeStr: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
   _Count := 0;
 
   HTTPRequest := THTTPRequest.Create(zsurl + '/index.php3?qstring=' + HTTPEncode(_Title));

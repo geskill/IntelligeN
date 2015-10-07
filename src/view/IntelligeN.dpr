@@ -74,10 +74,10 @@ uses
   uApiXml in 'api\uApiXml.pas',
   uApiXmlSettings in 'api\uApiXmlSettings.pas',
   uAppInterface in '..\core\common\uAppInterface.pas',
-  uBase in '..\core\common\uBase.pas',
-  uConst in '..\core\common\uConst.pas',
+  uBaseConst in '..\core\common\uBaseConst.pas',
+  uAppConst in '..\core\common\uAppConst.pas',
   uFileInterface in '..\core\common\uFileInterface.pas',
-  uWebsiteInterface in '..\core\common\uWebsiteInterface.pas',
+  uBaseInterface in '..\core\common\uBaseInterface.pas',
   ufAddWebsiteWizard in 'frames\ufAddWebsiteWizard.pas' {fAddWebsiteWizard: TFrame},
   ufControlEditor in 'frames\ufControlEditor.pas' {fControlEditor: TFrame},
   ufDesigner in 'frames\ufDesigner.pas' {fDesigner: TFrame},
@@ -120,7 +120,9 @@ uses
   uStringUtils in '..\core\utils\uStringUtils.pas',
   uImageUtils in '..\core\utils\uImageUtils.pas',
   IntelligeN_TLB in 'ole\IntelligeN_TLB.pas',
-  uOLE in 'ole\uOLE.pas' {IntelligeN2009: CoClass};
+  uOLE in 'ole\uOLE.pas' {IntelligeN2009: CoClass},
+  uPlugInInterfaceAdv in '..\sdk\plugins\uPlugInInterfaceAdv.pas',
+  uMycxTabSheet in 'mods\uMycxTabSheet.pas';
 
 {$R *.res}
 

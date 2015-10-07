@@ -3,8 +3,9 @@ unit uSelectDialog;
 interface
 
 uses
+  // Delphi
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Menus, StdCtrls,
-
+  // Dev Express
   cxLookAndFeelPainters, cxButtons, cxControls, cxContainer, cxEdit, cxTextEdit, cxMaskEdit, cxDropDownEdit,
   cxGraphics, cxLookAndFeels;
 

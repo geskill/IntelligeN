@@ -12,15 +12,15 @@ uses
   // Utils
   uFileUtils, uPathUtils,
   // Common
-  uAppInterface, uFileInterface, uConst, uHTTPConst,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface, uFileInterface,
   // DLLs
   uExport,
   // Api
   uApiConst, uApiMultiCastEvent, uApiSettingsManager, uApiXML, uApiXmlSettings,
   // HTTPManager
-  uHTTPInterface, uHTTPClasses,
+  uHTTPConst, uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInInterface, uPlugInConst;
+  uPlugInConst, uPlugInInterface, uPlugInInterfaceAdv;
 
 type
 {$REGION 'T...PlugInCollectionItem'}
@@ -97,12 +97,12 @@ type
 
   TCrawlerContingentCollectionItem = class(TCollectionItem)
   private
-    FTemplateTypeID: TTemplateTypeID;
-    FComponentID: TComponentID;
+    FTemplateTypeID: TTypeID;
+    FComponentID: TControlID;
     FStatus: Boolean;
   published
-    property TemplateTypeID: TTemplateTypeID read FTemplateTypeID write FTemplateTypeID;
-    property ComponentID: TComponentID read FComponentID write FComponentID;
+    property ATypeID: TTypeID read FTemplateTypeID write FTemplateTypeID;
+    property AControlID: TControlID read FComponentID write FComponentID;
     property Status: Boolean read FStatus write FStatus;
   end;
 
@@ -110,11 +110,11 @@ type
   private
     FContingent: TCollection;
     FLimit: Integer;
-    function GetContingentStatus(ATemplateTypeID: TTemplateTypeID; AComponentID: TComponentID): Boolean;
-    procedure SetContingentStatus(ATemplateTypeID: TTemplateTypeID; AComponentID: TComponentID; Status: Boolean);
+    function GetContingentStatus(ATypeID: TTypeID; AComponentID: TControlID): Boolean;
+    procedure SetContingentStatus(ATypeID: TTypeID; AComponentID: TControlID; Status: Boolean);
   public
     constructor Create(Collection: TCollection); override;
-    property ContingentStatus[TemplateTypeID: TTemplateTypeID; ComponentID: TComponentID]: Boolean read GetContingentStatus write SetContingentStatus;
+    property ContingentStatus[ATypeID: TTypeID; AControlID: TControlID]: Boolean read GetContingentStatus write SetContingentStatus;
     destructor Destroy; override;
   published
     property Name;
@@ -272,7 +272,7 @@ type
 
   TControlCollectionItem = class(TCollectionItem)
   private
-    FComponentID: TComponentID;
+    FComponentID: TControlID;
     FTitle, FHelpText, FValue: string;
     FItems: TCollection;
   public
@@ -280,7 +280,7 @@ type
     function GetItems: string;
     destructor Destroy; override;
   published
-    property ComponentID: TComponentID read FComponentID write FComponentID;
+    property AControlID: TControlID read FComponentID write FComponentID;
     property Title: string read FTitle write FTitle;
     property HelpText: string read FHelpText write FHelpText;
     property Value: string read FValue write FValue;
@@ -289,13 +289,13 @@ type
 
   TControlsCollectionItem = class(TCollectionItem)
   private
-    FTemplateTypeID: TTemplateTypeID;
+    FTemplateTypeID: TTypeID;
     FControls: TCollection;
   public
     constructor Create(Collection: TCollection); override;
     destructor Destroy; override;
   published
-    property TemplateTypeID: TTemplateTypeID read FTemplateTypeID write FTemplateTypeID;
+    property ATypeID: TTypeID read FTemplateTypeID write FTemplateTypeID;
     property Controls: TCollection read FControls write FControls;
   end;
 
@@ -304,11 +304,11 @@ type
     FControlsTT: TCollection;
     FIRichEditWrapText: Boolean;
     FDropDownRows: Integer;
-    function GetControls(ATemplateTypeID: TTemplateTypeID; AComponentID: TComponentID): TControlCollectionItem;
+    function GetControls(ATypeID: TTypeID; AComponentID: TControlID): TControlCollectionItem;
   public
     constructor Create;
-    property Controls[ATemplateTypeID: TTemplateTypeID; AComponentID: TComponentID]: TControlCollectionItem read GetControls;
-    function GetCustomisedComponentValue(const AComponentID: TComponentID; const ATemplateTypeID: TTemplateTypeID; const AValue: string): string;
+    property Controls[ATypeID: TTypeID; AComponentID: TControlID]: TControlCollectionItem read GetControls;
+    function GetCustomisedComponentValue(const AComponentID: TControlID; const ATypeID: TTypeID; const AValue: string): string;
     destructor Destroy; override;
   published
     property ControlsTT: TCollection read FControlsTT write FControlsTT;
@@ -701,7 +701,7 @@ begin
   inherited Destroy;
 end;
 
-function TCrawlerCollectionItem.GetContingentStatus(ATemplateTypeID: TTemplateTypeID; AComponentID: TComponentID): Boolean;
+function TCrawlerCollectionItem.GetContingentStatus(ATypeID: TTypeID; AComponentID: TControlID): Boolean;
 var
   I: Integer;
 begin
@@ -709,7 +709,7 @@ begin
 
   for I := 0 to FContingent.Count - 1 do
   begin
-    if (TCrawlerContingentCollectionItem(FContingent.Items[I]).TemplateTypeID = ATemplateTypeID) and (TCrawlerContingentCollectionItem(FContingent.Items[I]).ComponentID = AComponentID) then
+    if (TCrawlerContingentCollectionItem(FContingent.Items[I]).ATypeID = ATypeID) and (TCrawlerContingentCollectionItem(FContingent.Items[I]).AControlID = AComponentID) then
     begin
       Result := TCrawlerContingentCollectionItem(FContingent.Items[I]).Status;
       break;
@@ -717,13 +717,13 @@ begin
   end;
 end;
 
-procedure TCrawlerCollectionItem.SetContingentStatus(ATemplateTypeID: TTemplateTypeID; AComponentID: TComponentID; Status: Boolean);
+procedure TCrawlerCollectionItem.SetContingentStatus(ATypeID: TTypeID; AComponentID: TControlID; Status: Boolean);
 var
   I: Integer;
 begin
   for I := 0 to FContingent.Count - 1 do
   begin
-    if (TCrawlerContingentCollectionItem(FContingent.Items[I]).TemplateTypeID = ATemplateTypeID) and (TCrawlerContingentCollectionItem(FContingent.Items[I]).ComponentID = AComponentID) then
+    if (TCrawlerContingentCollectionItem(FContingent.Items[I]).ATypeID = ATypeID) and (TCrawlerContingentCollectionItem(FContingent.Items[I]).AControlID = AComponentID) then
     begin
       TCrawlerContingentCollectionItem(FContingent.Items[I]).Status := Status;
       break;
@@ -897,12 +897,12 @@ end;
 
 { ****************************************************************************** }
 
-function TSettings_Controls.GetControls(ATemplateTypeID: TTemplateTypeID; AComponentID: TComponentID): TControlCollectionItem;
+function TSettings_Controls.GetControls(ATypeID: TTypeID; AComponentID: TControlID): TControlCollectionItem;
 var
   I, X: Integer;
 begin
   for I := 0 to FControlsTT.Count - 1 do
-    if (TControlsCollectionItem(FControlsTT.Items[I]).FTemplateTypeID = ATemplateTypeID) then
+    if (TControlsCollectionItem(FControlsTT.Items[I]).FTemplateTypeID = ATypeID) then
       for X := 0 to TControlsCollectionItem(FControlsTT.Items[I]).Controls.Count - 1 do
         with TControlCollectionItem(TControlsCollectionItem(FControlsTT.Items[I]).Controls.Items[X]) do
           if (AComponentID = FComponentID) then
@@ -919,11 +919,11 @@ begin
   FControlsTT := TCollection.Create(TControlsCollectionItem);
 end;
 
-function TSettings_Controls.GetCustomisedComponentValue(const AComponentID: TComponentID; const ATemplateTypeID: TTemplateTypeID; const AValue: string): string;
+function TSettings_Controls.GetCustomisedComponentValue(const AComponentID: TControlID; const ATypeID: TTypeID; const AValue: string): string;
 var
   I, J: Integer;
 begin
-  with Controls[ATemplateTypeID, AComponentID].Items do
+  with Controls[ATypeID, AComponentID].Items do
     for I := 0 to Count - 1 do
       if LowerCase(AValue) = LowerCase(TControlItemsCollectionItem(Items[I]).ItemName) then
       begin

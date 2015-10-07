@@ -7,10 +7,10 @@ uses
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: IImageHosterPlugIn): Boolean; stdcall; export;
+function LoadPlugin(var APlugIn: IImageHosterPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := TYoupicIn.Create;
+    APlugIn := TYoupicIn.Create;
     Result := True;
   except
     Result := False;

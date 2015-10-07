@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // Utils
   uHTMLUtils,
   // HTTPManager
@@ -19,14 +19,14 @@ uses
 type
   TPcgdbDe = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -36,28 +36,28 @@ begin
   result := 'pcgdb.de';
 end;
 
-function TPcgdbDe.GetAvailableTemplateTypeIDs;
+function TPcgdbDe.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cPCGames];
   result := Word(_TemplateTypeIDs);
 end;
 
-function TPcgdbDe.GetAvailableComponentIDs;
+function TPcgdbDe.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture, cGenre, cDescription];
   result := LongWord(_ComponentIDs);
 end;
 
-function TPcgdbDe.GetComponentIDDefaultValue;
+function TPcgdbDe.GetControlIDDefaultValue;
 begin
   result := True;
 end;
 
-function TPcgdbDe.GetLimitDefaultValue;
+function TPcgdbDe.GetResultsLimitDefaultValue;
 begin
   result := 5;
 end;
@@ -66,13 +66,13 @@ procedure TPcgdbDe.Exec;
 const
   website = 'http://www.pcgdb.de/';
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _Title: string;
   _Count: Integer;
 
   procedure deep_search(aWebsitecode: string);
   begin
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
@@ -81,13 +81,13 @@ var
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cPicture).AddValue(website + 'titles' + Match[1], GetName);
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, website + 'titles' + Match[1]);
             until not ExecNext;
           end;
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
@@ -96,13 +96,13 @@ var
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cGenre).AddValue(Match[1], GetName);
+              AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[1]);
             until not ExecNext;
           end;
         finally
           Free;
         end;
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := aWebsitecode;
@@ -111,7 +111,7 @@ var
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cDescription).AddValue(Trim(HTML2Text(Match[1])), GetName);
+              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
             until not ExecNext;
           end;
         finally
@@ -126,8 +126,8 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
   _Count := 0;
 
   HTTPParams := THTTPParams.Create;

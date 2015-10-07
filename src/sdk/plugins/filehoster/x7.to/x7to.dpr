@@ -7,10 +7,10 @@ uses
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: IFileHosterPlugIn): Boolean; stdcall; export;
+function LoadPlugin(var APlugIn: IFileHosterPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := TX7To.Create;
+    APlugIn := TX7To.Create;
     Result := True;
   except
     Result := False;

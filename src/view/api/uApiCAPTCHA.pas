@@ -5,10 +5,12 @@ interface
 uses
   // Delphi
   SysUtils, Classes, Controls, AxCtrls, ActiveX,
+  // Common
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPManager,
   // API
-  uApiConst, uApiSettings,
+  uApiSettings,
   // Plugin
   uPlugInConst;
 

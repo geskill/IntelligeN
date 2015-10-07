@@ -5,8 +5,8 @@ interface
 uses
   // Delphi
   Types,
-  // Interface
-  uAppInterface,
+  // Common
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
   uApiSettings,
   // DevExpress
@@ -17,7 +17,7 @@ type
   private
     I: Integer;
     FWorkPanelWidth: Integer;
-    FComponentController: IComponentController;
+    FComponentController: IControlController;
     FMirrorController: IMirrorController;
     FProgressBar: TcxProgressBar;
     PreviousControl, CurrentControl: IBasic;
@@ -32,7 +32,7 @@ type
     property WorkPanelWidth: Integer read FWorkPanelWidth write FWorkPanelWidth;
     function NextControlPosition: TPoint;
     function NextMirrorPosition: TPoint;
-    property ComponentController: IComponentController read FComponentController write FComponentController;
+    property ControlController: IControlController read FComponentController write FComponentController;
     property MirrorController: IMirrorController read FMirrorController write FMirrorController;
     property ProgressBar: TcxProgressBar read FProgressBar write FProgressBar;
     destructor Destroy; override;
@@ -65,7 +65,7 @@ begin
   NewTop := 0;
   for Z := 0 to I - 1 do
   begin
-    ZTop := ComponentController.Control[Z].Top + ComponentController.Control[Z].Height;
+    ZTop := ControlController.Control[Z].Top + ControlController.Control[Z].Height;
     if (NewTop < ZTop) then
       NewTop := ZTop;
   end;
@@ -92,7 +92,7 @@ begin
     begin
       result.X := PaddingLeft;
 
-      _LastControl := ComponentController.Control[ComponentController.ControlCount - 1];
+      _LastControl := ControlController.Control[ControlController.ControlCount - 1];
 
       if (MirrorPosition = mpButtom) then
         result.Y := _LastControl.Top + _LastControl.Height + PaddingHeight
@@ -194,9 +194,9 @@ begin
     end;
 
     // Das erste Control positionieren
-    if (ComponentController.ControlCount > 0) then
+    if (ControlController.ControlCount > 0) then
     begin
-      CurrentControl := ComponentController.Control[0];
+      CurrentControl := ControlController.Control[0];
       with CurrentControl do
       begin
         Left := PaddingLeft;
@@ -210,16 +210,16 @@ begin
   end;
 
   // Alle weiteren Controls positionieren
-  for _ControlIndex := 1 to ComponentController.ControlCount - 1 do
+  for _ControlIndex := 1 to ControlController.ControlCount - 1 do
   begin
     I := _ControlIndex;
 
-    PreviousControl := ComponentController.Control[I - 1];
-    CurrentControl := ComponentController.Control[I];
+    PreviousControl := ControlController.Control[I - 1];
+    CurrentControl := ControlController.Control[I];
 
     MoveLeft;
 
-    NewPBPosition := (_ControlIndex) * (50 / ComponentController.ControlCount);
+    NewPBPosition := (_ControlIndex) * (50 / ControlController.ControlCount);
     if SettingsManager.Settings.ComponentParser.MirrorPosition = mpTop then
       NewPBPosition := NewPBPosition + 50;
     SetProgressBarPosition(NewPBPosition);
@@ -261,7 +261,7 @@ begin
   PreviousMirrorControl := nil;
   CurrentMirrorControl := nil;
 
-  ComponentController := nil;
+  ControlController := nil;
   MirrorController := nil;
 end;
 
@@ -273,7 +273,7 @@ begin
   PreviousMirrorControl := nil;
   CurrentMirrorControl := nil;
 
-  ComponentController := nil;
+  ControlController := nil;
   MirrorController := nil;
 
   inherited Destroy;

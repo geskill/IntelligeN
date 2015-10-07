@@ -6,7 +6,7 @@ uses
   // Delphi
   SysUtils, Variants, XMLDoc, XMLIntf, DECFmt,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uAppConst, uAppInterface,
   // Plugin system
   uPlugInFileFormatClass;
 
@@ -81,9 +81,9 @@ begin
   begin
     with AddChild(ExtractFileName(ChangeFileExt(ATemplateFileName, ''))) do
     begin
-      with ATabSheetController.ComponentController do
+      with ATabSheetController.ControlController do
       begin
-        case TemplateTypeID of
+        case TypeID of
           cAudio:
             with AddChild('cobAudioType') do
             begin
@@ -127,8 +127,8 @@ begin
         end;
 
         for I := 0 to ControlCount - 1 do
-          if not(TStringComponentIDEx[Integer(Control[I].ComponentID)] = '') then
-            with AddChild(TStringComponentIDEx[Integer(Control[I].ComponentID)]) do
+          if not(TStringComponentIDEx[Integer(Control[I].ControlID)] = '') then
+            with AddChild(TStringComponentIDEx[Integer(Control[I].ControlID)]) do
               NodeValue := Control[I].Value;
       end;
       with ATabSheetController.MirrorController do
@@ -158,7 +158,7 @@ function Tintelligenxml1.LoadControls;
 var
   XMLDoc: IXMLDocument;
   I, J, K, CompPos: Integer;
-  TemplateType: TTemplateTypeID;
+  TemplateType: TTypeID;
   Base64, _CrypterExists: Boolean;
   _value: string;
 begin
@@ -179,7 +179,7 @@ begin
         for I := 0 to ChildNodes.Count - 1 do
           with ChildNodes.Nodes[I] do
           begin
-            TemplateType := StringToTTemplateTypeID(NodeName);
+            TemplateType := StringToTypeID(NodeName);
 
             if HasAttribute('BASE64') then
               Base64 := Attributes['BASE64'] = VarToStr('1');
@@ -198,7 +198,7 @@ begin
                     if Base64 then
                       _value := TFormat_MIME64.Decode(_value);
 
-                    ComponentController.FindControl(TComponentID(CompPos)).Value := _value;
+                    ControlController.FindControl(TControlID(CompPos)).Value := _value;
                   end
                   else if copy(NodeName, 0, length(eDownloadLink)) = eDownloadLink then
                     with MirrorController.Mirror[MirrorController.Add] do
@@ -232,7 +232,7 @@ begin
               Result := TabSheetIndex;
             end;
 
-            APageController.CallComponentparser;
+            APageController.CallControlParser;
           end;
       end
       else

@@ -1,16 +1,16 @@
 library extractedpostcode1;
 
 uses
-  uPlugInInterface,
+  uPlugInInterfaceAdv,
   uPlugInFileFormatClass,
   uExtractedPostCode1 in 'uExtractedPostCode1.pas';
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: IFileFormatPlugIn): Boolean; stdcall; export;
+function LoadPlugin(var APlugIn: IFileFormatPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := Textractedpostcode.Create;
+    APlugIn := Textractedpostcode.Create;
     Result := True;
   except
     Result := False;

@@ -6,7 +6,7 @@ uses
   // Delphi
   Variants,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // Plugin system
   uPlugInConst, uPlugInCMSClass;
 

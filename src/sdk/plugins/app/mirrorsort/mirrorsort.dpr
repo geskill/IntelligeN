@@ -1,16 +1,16 @@
 library mirrorsort;
 
 uses
-  uPlugInInterface,
+  uPlugInInterfaceAdv,
   uPlugInAppClass,
   uMirrorSort in 'uMirrorSort.pas' {fMirrorSort};
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: IAppPlugIn): Boolean; stdcall; export;
+function LoadPlugin(var APlugIn: IAppPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := TMirrorSort.Create;
+    APlugIn := TMirrorSort.Create;
     Result := True;
   except
     Result := False;

@@ -9,8 +9,9 @@ uses
   cxCustomData, cxGraphics, cxFilter, cxData, cxButtons, cxDataStorage, cxEdit, cxControls, cxGridCustomView, cxGridCustomTableView, cxGridCardView, cxClasses,
   cxGridLevel, cxGrid, cxGridTableView, cxCheckBox, cxLabel, cxButtonEdit, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, cxContainer, cxSplitter,
   cxTextEdit, cxMemo, cxRichEdit, ExtCtrls, cxMaskEdit, cxDropDownEdit, dxBar, cxNavigator,
-  // Common
-  uAppInterface, uBase,
+  // MultiEvent
+  Generics.MultiEvents.NotifyEvent,
+  Generics.MultiEvents.NotifyInterface,
   // DLLs
   uExport,
   // Api

@@ -7,10 +7,10 @@ uses
 
 {$R *.res}
 
-function LoadPlugin(var PlugIn: ICrawlerPlugIn): Boolean; stdcall; export;
+function LoadPlugin(var APlugIn: ICrawlerPlugIn): WordBool; safecall; export;
 begin
   try
-    PlugIn := TBinsearchInfo.Create;
+    APlugIn := TBinsearchInfo.Create;
     Result := True;
   except
     Result := False;

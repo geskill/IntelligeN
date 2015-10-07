@@ -6,7 +6,7 @@ uses
   // Delphi
   SysUtils, Classes, Variants, StrUtils, XMLDoc, XMLIntf, ActiveX,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uAppInterface,
   // Utils
   uStringUtils,
   // Plugin system
@@ -62,9 +62,9 @@ begin
     with XMLDoc.DocumentElement do
     begin
       with AddChild('Title') do
-        NodeValue := ATabSheetController.ComponentController.FindControl(cTitle).Value;
+        NodeValue := ATabSheetController.ControlController.FindControl(cTitle).Value;
       with AddChild('SelectedArea') do
-        case ATabSheetController.ComponentController.TemplateTypeID of
+        case ATabSheetController.ControlController.TypeID of
           cAudio:
             NodeValue := '24';
           cGameCube:
@@ -100,33 +100,33 @@ begin
             try
               Add('.');
               Add('[center]');
-              if Assigned(ComponentController.FindControl(cPicture)) then
-                Add('[img]' + ComponentController.FindControl(cPicture).Value + '[/img]');
+              if Assigned(ControlController.FindControl(cPicture)) then
+                Add('[img]' + ControlController.FindControl(cPicture).Value + '[/img]');
 
               Add('');
 
-              if Assigned(ComponentController.FindControl(cVideoSystem)) then
-                Add('[b]Video System:[/b] ' + ComponentController.FindControl(cVideoSystem).Value);
-              if Assigned(ComponentController.FindControl(cVideoStream)) then
-                Add('[b]Video Stream:[/b] ' + ComponentController.FindControl(cVideoStream).Value);
-              if Assigned(ComponentController.FindControl(cAudioStream)) then
-                Add('[b]Audio Stream:[/b] ' + ComponentController.FindControl(cAudioStream).Value);
-              if Assigned(ComponentController.FindControl(cAudioBitrate)) then
-                Add('[b]Audio Bitrate:[/b] ' + ComponentController.FindControl(cAudioBitrate).Value);
-              if Assigned(ComponentController.FindControl(cVideoCodec)) then
-                Add('[b]Video Codec:[/b] ' + ComponentController.FindControl(cVideoCodec).Value);
-              if Assigned(ComponentController.FindControl(cAudioEncoder)) then
-                Add('[b]Audio Encoder:[/b] ' + ComponentController.FindControl(cAudioEncoder).Value);
-              if Assigned(ComponentController.FindControl(cAudioSamplingRate)) then
-                Add('[b]Audio Sampling Rate:[/b] ' + ComponentController.FindControl(cAudioSamplingRate).Value);
+              if Assigned(ControlController.FindControl(cVideoSystem)) then
+                Add('[b]Video System:[/b] ' + ControlController.FindControl(cVideoSystem).Value);
+              if Assigned(ControlController.FindControl(cVideoStream)) then
+                Add('[b]Video Stream:[/b] ' + ControlController.FindControl(cVideoStream).Value);
+              if Assigned(ControlController.FindControl(cAudioStream)) then
+                Add('[b]Audio Stream:[/b] ' + ControlController.FindControl(cAudioStream).Value);
+              if Assigned(ControlController.FindControl(cAudioBitrate)) then
+                Add('[b]Audio Bitrate:[/b] ' + ControlController.FindControl(cAudioBitrate).Value);
+              if Assigned(ControlController.FindControl(cVideoCodec)) then
+                Add('[b]Video Codec:[/b] ' + ControlController.FindControl(cVideoCodec).Value);
+              if Assigned(ControlController.FindControl(cAudioEncoder)) then
+                Add('[b]Audio Encoder:[/b] ' + ControlController.FindControl(cAudioEncoder).Value);
+              if Assigned(ControlController.FindControl(cAudioSamplingRate)) then
+                Add('[b]Audio Sampling Rate:[/b] ' + ControlController.FindControl(cAudioSamplingRate).Value);
 
-              if Assigned(ComponentController.FindControl(cGenre)) then
-                Add('[b]Genre:[/b] ' + ComponentController.FindControl(cGenre).Value);
-              if Assigned(ComponentController.FindControl(cLanguage)) then
-                Add('[b]Language/s:[/b] ' + ComponentController.FindControl(cLanguage).Value);
+              if Assigned(ControlController.FindControl(cGenre)) then
+                Add('[b]Genre:[/b] ' + ControlController.FindControl(cGenre).Value);
+              if Assigned(ControlController.FindControl(cLanguage)) then
+                Add('[b]Language/s:[/b] ' + ControlController.FindControl(cLanguage).Value);
               Add('[b]Parts:[/b] ' + IntToStr(CharCount('http://', MirrorController.Mirror[0].DirectlinksMirror[0])));
-              if Assigned(ComponentController.FindControl(cPassword)) and (ComponentController.FindControl(cPassword).Value <> '') then
-                Add('[b]Password:[/b] ' + ComponentController.FindControl(cPassword).Value);
+              if Assigned(ControlController.FindControl(cPassword)) and (ControlController.FindControl(cPassword).Value <> '') then
+                Add('[b]Password:[/b] ' + ControlController.FindControl(cPassword).Value);
 
               for I := 0 to MirrorController.MirrorCount - 1 do
                 if MirrorController.Mirror[I].Size > 0 then
@@ -144,10 +144,10 @@ begin
               end;
               Add(_hoster);
 
-              if Assigned(ComponentController.FindControl(cDescription)) then
+              if Assigned(ControlController.FindControl(cDescription)) then
               begin
                 Add('');
-                Add(ComponentController.FindControl(cDescription).Value);
+                Add(ControlController.FindControl(cDescription).Value);
               end;
 
               Add('');

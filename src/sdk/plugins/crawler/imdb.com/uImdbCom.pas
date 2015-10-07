@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // Utils
   uHTMLUtils,
   // HTTPManager
@@ -19,14 +19,14 @@ uses
 type
   TImdbCom = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -38,28 +38,28 @@ begin
   Result := 'Imdb.com';
 end;
 
-function TImdbCom.GetAvailableTemplateTypeIDs;
+function TImdbCom.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cMovie];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TImdbCom.GetAvailableComponentIDs;
+function TImdbCom.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture, cGenre, cDescription];
   Result := LongWord(_ComponentIDs);
 end;
 
-function TImdbCom.GetComponentIDDefaultValue;
+function TImdbCom.GetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TImdbCom.GetLimitDefaultValue: Integer;
+function TImdbCom.GetResultsLimitDefaultValue: Integer;
 begin
   Result := 0;
 end;
@@ -68,7 +68,7 @@ procedure TImdbCom.Exec;
 const
   website = 'http://www.imdb.com/';
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
   _Title: string;
 
   procedure CrawlDetailedGenre(AGenreList: string);
@@ -83,7 +83,7 @@ var
           if Exec(InputString) then
           begin
             repeat
-              AComponentController.FindControl(cGenre).AddValue(Trim(Match[1]), GetName);
+              AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(Match[1]));
             until not ExecNext;
           end;
         finally
@@ -91,7 +91,7 @@ var
         end;
     end
     else
-      AComponentController.FindControl(cGenre).AddValue(Trim(AGenreList), GetName);
+      AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(AGenreList));
   end;
 
   function GetIMDBLargePicture(ASmallPicture: string): string;
@@ -102,19 +102,19 @@ var
   procedure deep_search(AWebsiteSourceCode: string);
   begin
 
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
           Expression := '<span class="outline">(.*?)<\/span>';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cDescription).AddValue(Trim(HTML2Text(Match[1])), GetName);
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
         finally
           Free;
         end;
 
-    if (AComponentController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
@@ -126,7 +126,7 @@ var
           Free;
         end;
 
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
@@ -134,7 +134,7 @@ var
 
           if Exec(InputString) then
             if Pos('@', string(Match[1])) > 0 then // some films have two @@ some single @
-              AComponentController.FindControl(cPicture).AddValue(GetIMDBLargePicture(Match[1]), GetName);
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, GetIMDBLargePicture(Match[1]));
         finally
           Free;
         end;
@@ -145,8 +145,8 @@ var
 
   ResponseStrSearchResult: string;
 begin
-  LongWord(_ComponentIDs) := AComponentIDs;
-  _Title := AComponentController.FindControl(cTitle).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
   // _Count := 0;
 
   RequestID := HTTPManager.Get(THTTPRequest.Create(website + 'search/title?title=' + HTTPEncode(_Title)), TPlugInHTTPOptions.Create(Self));

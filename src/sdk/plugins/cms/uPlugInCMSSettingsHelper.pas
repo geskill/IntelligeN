@@ -6,7 +6,7 @@ uses
   // Delphi
   Windows, SysUtils, Variants, XMLDoc, XMLIntf, ActiveX, TypInfo, Rtti,
   // Common
-  uConst, uAppInterface, uWebsiteInterface,
+  uBaseConst, uBaseInterface, uAppConst,
   // Utils,
   uStringUtils,
   // Plugin system
@@ -23,9 +23,8 @@ type
   TPlugInCMSSettingsHelper = class
   public
     class function GetID(ANode: IXMLNode): string;
-    class procedure SubSearch(ANode: IXMLNode; const AWebsiteData: ICMSWebsiteData; var AID: Variant);
-    class function LoadSettingsToClass(AFileName: TFileName; ASettings: TCMSPlugInSettings; const AWebsiteData: ICMSWebsiteData = nil;
-      AXMLAccess: TXMLAccess = nil): TIntegerArray;
+    class procedure SubSearch(ANode: IXMLNode; const AData: ITabSheetData; var AID: Variant);
+    class function LoadSettingsToClass(AFileName: TFileName; ASettings: TCMSPlugInSettings; const AData: ITabSheetData = nil; AXMLAccess: TXMLAccess = nil): TIntegerArray;
     class procedure LoadSettingsToWebsiteEditor(AFileName: TFileName; AClass: TClass; AWebsiteEditor: IWebsiteEditor);
   end;
 
@@ -94,24 +93,24 @@ end;
 class procedure TPlugInCMSSettingsHelper.SubSearch;
 var
   z: Integer;
-  controltype: string;
-  control: IControlContainer;
+  LControlID: string;
+  LControl: IControlData;
 begin
   with ANode do
     if HasChildNodes then
       for z := 0 to ChildNodes.Count - 1 do
       begin
-        controltype := VarToStr(ChildNodes.Nodes[z].Attributes['type']);
+        LControlID := VarToStr(ChildNodes.Nodes[z].Attributes['type']);
 
-        control := AWebsiteData.Control[controltype];// AComponentController.FindControl(StringToTComponentID(controltype));
-        if Assigned(control) then
-          if MatchTextMask(VarToStr(ChildNodes.Nodes[z].Attributes['value']), control.Value) then
+        LControl := AData.Control[LControlID]; // AComponentController.FindControl(StringToControlID(controltype));
+        if Assigned(LControl) then
+          if MatchTextMask(VarToStr(ChildNodes.Nodes[z].Attributes['value']), LControl.Value) then
           begin
             if (ChildNodes.Nodes[z].AttributeNodes.Count = 0) then
               raise Exception.Create('no ID attribute');
 
             AID := TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[z]);
-            TPlugInCMSSettingsHelper.SubSearch(ChildNodes.Nodes[z], AWebsiteData, AID);
+            TPlugInCMSSettingsHelper.SubSearch(ChildNodes.Nodes[z], AData, AID);
             Break;
           end;
       end;
@@ -201,14 +200,14 @@ begin
           begin
             IDValue := null;
 
-            if Assigned(AWebsiteData) then
+            if Assigned(AData) then
             begin
               with XMLDoc.DocumentElement do
                 if HasChildNodes then
                   with ChildNodes.Nodes[rttiProperty.Name] do
                     if HasChildNodes then
                       for I := 0 to ChildNodes.Count - 1 do
-                        if SameText(VarToStr(ChildNodes.Nodes[I].Attributes['name']), TTemplateTypeIDToString(AWebsiteData.TemplateTypeID)) then
+                        if SameText(VarToStr(ChildNodes.Nodes[I].Attributes['name']), TypeIDToString(AData.TypeID)) then
                         begin
                           if (ChildNodes.Nodes[I].AttributeNodes.Count = 0) then
                             raise Exception.Create('no ID attribute');
@@ -225,7 +224,7 @@ begin
                             SubAllSearch(ChildNodes.Nodes[I], Result);
                           end;
 
-                          TPlugInCMSSettingsHelper.SubSearch(ChildNodes.Nodes[I], AWebsiteData, IDValue);
+                          TPlugInCMSSettingsHelper.SubSearch(ChildNodes.Nodes[I], AData, IDValue);
                           Break;
                         end;
             end;
@@ -291,8 +290,7 @@ begin
                       rttiProperty.SetValue(ASettings, TValue.FromVariant(DefaultValue))
                     else
                     begin
-                      rttiProperty.SetValue(ASettings, TValue.FromVariant(VariantFix(ChildNodes.Nodes[rttiProperty.Name].NodeValue,
-                            rttiProperty.PropertyType.TypeKind)));
+                      rttiProperty.SetValue(ASettings, TValue.FromVariant(VariantFix(ChildNodes.Nodes[rttiProperty.Name].NodeValue, rttiProperty.PropertyType.TypeKind)));
                     end;
                 end;
               end;

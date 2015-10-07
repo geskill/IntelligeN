@@ -10,7 +10,7 @@ uses
   // DLLs
   uExport,
   // Api
-  uApiConst, uApiSettings,
+  uApiSettings,
   // Utils
   uFileUtils, uPathUtils;
 

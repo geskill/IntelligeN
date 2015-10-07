@@ -18,7 +18,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPManager,
   // Common
-  uBase,
+  uBaseConst,
   // Export
   uDynamicExport,
   // Api

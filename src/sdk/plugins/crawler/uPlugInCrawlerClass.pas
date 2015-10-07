@@ -4,7 +4,7 @@ interface
 
 uses
   // Common
-  uAppInterface,
+  uBaseInterface,
   // Plugin
   uPlugInInterface, uPlugInClass;
 
@@ -21,16 +21,16 @@ type
     function GetAccountPassword: WideString; safecall;
     procedure SetAccountPassword(AAccountPassword: WideString); safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; virtual; safecall; abstract;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; virtual; safecall; abstract;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; virtual; safecall; abstract;
-    function GetLimitDefaultValue: Integer; virtual; safecall; abstract;
+    function GetAvailableTypeIDs: Integer; virtual; safecall; abstract;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; virtual; safecall; abstract;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; virtual; safecall; abstract;
+    function GetResultsLimitDefaultValue: Integer; virtual; safecall; abstract;
 
     property UseAccount: WordBool read GetUseAccount write SetUseAccount;
     property AccountName: WideString read GetAccountName write SetAccountName;
     property AccountPassword: WideString read GetAccountPassword write SetAccountPassword;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); virtual; safecall; abstract;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); virtual; safecall; abstract;
   end;
 
 implementation

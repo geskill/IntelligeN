@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Common
-  uConst, uAppInterface,
+  uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -17,14 +17,14 @@ uses
 type
   TGamestarDe = class(TCrawlerPlugIn)
   public
-    function GetName: WideString; override;
+    function GetName: WideString; override; safecall;
 
-    function GetAvailableTemplateTypeIDs: Integer; override;
-    function GetAvailableComponentIDs(const TemplateTypeID: Integer): Integer; override;
-    function GetComponentIDDefaultValue(const TemplateTypeID, ComponentID: Integer): WordBool; override;
-    function GetLimitDefaultValue: Integer; override;
+    function GetAvailableTypeIDs: Integer; override; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATemplateTypeID, AComponentIDs, ALimit: Integer; const AComponentController: IComponentController); override;
+    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
   end;
 
 implementation
@@ -36,28 +36,28 @@ begin
   Result := 'gamestar.de';
 end;
 
-function TGamestarDe.GetAvailableTemplateTypeIDs;
+function TGamestarDe.GetAvailableTypeIDs;
 var
-  _TemplateTypeIDs: TTemplateTypeIDs;
+  _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cPCGames];
   Result := Word(_TemplateTypeIDs);
 end;
 
-function TGamestarDe.GetAvailableComponentIDs;
+function TGamestarDe.GetAvailableControlIDs;
 var
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 begin
   _ComponentIDs := [cPicture, cGenre, cDescription];
   Result := LongWord(_ComponentIDs);
 end;
 
-function TGamestarDe.GetComponentIDDefaultValue;
+function TGamestarDe.GetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TGamestarDe.GetLimitDefaultValue;
+function TGamestarDe.GetResultsLimitDefaultValue;
 begin
   Result := 5;
 end;
@@ -68,11 +68,11 @@ const
 var
   _Count: Integer;
   _Title: string;
-  _ComponentIDs: TComponentIDs;
+  _ComponentIDs: TControlIDs;
 
   procedure deep_search(ASourceCode: string);
   begin
-    if (AComponentController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
     begin
 
       with TRegExpr.Create do
@@ -84,14 +84,14 @@ var
           begin
             repeat
               if not(Match[2] = '-</td>') then
-                AComponentController.FindControl(cGenre).AddValue(Match[3], GetName);
+                AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[3]);
             until not ExecNext;
           end;
         finally
           Free;
         end;
     end;
-    if (AComponentController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
     begin
 
       with TRegExpr.Create do
@@ -100,7 +100,7 @@ var
           Expression := '<div class="productFooterDescription">(.*?)<\/div>';
 
           if Exec(InputString) and (Match[1] <> '') then
-            AComponentController.FindControl(cDescription).AddValue(Match[1], GetName);
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
@@ -109,7 +109,7 @@ var
 
   procedure deep_image_search(ASourceCode: string);
   begin
-    if (AComponentController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
     begin
       with TRegExpr.Create do
         try
@@ -117,7 +117,7 @@ var
           Expression := '<p style="border:1px solid #C9C9C9">\s+<img src="(.*?)"';
 
           if Exec(InputString) then
-            AComponentController.FindControl(cPicture).AddValue(Match[1], GetName);
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
@@ -130,8 +130,8 @@ var
   ResponseStrSearchResult, ImageRequestURL: string;
 begin
   _Count := 0;
-  _Title := AComponentController.FindControl(cTitle).Value;
-  LongWord(_ComponentIDs) := AComponentIDs;
+  _Title := AControlController.FindControl(cTitle).Value;
+  LongWord(_ComponentIDs) := AControlIDs;
 
   RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + 'index.cfm?pid=1669&filter=search&s=' + HTTPEncode(_Title)), TPlugInHTTPOptions.Create(Self));
 
