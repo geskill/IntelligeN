@@ -3,7 +3,7 @@
 			<ProjectGuid>{EA17A186-1DD1-40F0-9E9B-5557FD8128C8}</ProjectGuid>
 			<ProjectVersion>12.0</ProjectVersion>
 			<MainSource>UpdateManager.dpr</MainSource>
-			<Config Condition="'$(Config)'==''">Debug</Config>
+			<Config Condition="'$(Config)'==''">Release</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Basis' or '$(Base)'!=''">
@@ -31,10 +31,11 @@
 			<CfgDependentOn>..\tools.optset</CfgDependentOn>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
-			<DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+			<DCC_MapFile>3</DCC_MapFile>
+			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
+			<DCC_Define>RELEASE;EUREKALOG;EUREKALOG_VER7;$(DCC_Define)</DCC_Define>
 			<DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
 			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
-			<DCC_DebugInformation>false</DCC_DebugInformation>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
 			<DCC_MapFile>3</DCC_MapFile>
@@ -57,6 +58,9 @@
 			<DCCReference Include="uApiServerXMLReader.pas"/>
 			<DCCReference Include="uApiServerInterface.pas"/>
 			<DCCReference Include="uApiServerClasses.pas"/>
+			<DCCReference Include="uHTTPLogger.pas">
+				<Form>HTTPLogger</Form>
+			</DCCReference>
 			<None Include="ModelSupport_UpdateManager\default.txaPackage"/>
 			<None Include="ModelSupport_UpdateManager\default.txvpck"/>
 			<None Include="ModelSupport_UpdateManager\uApiUpdateInterface\default.txvpck"/>

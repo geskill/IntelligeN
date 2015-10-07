@@ -1,7 +1,7 @@
 object fMain: TfMain
   Left = 0
   Top = 0
-  ActiveControl = JvWizardInteriorPagePublish
+  ActiveControl = rbAddNewServer
   Caption = 'Update Manager'
   ClientHeight = 338
   ClientWidth = 635
@@ -21,7 +21,7 @@ object fMain: TfMain
     Top = 0
     Width = 635
     Height = 338
-    ActivePage = JvWizardInteriorPagePublish
+    ActivePage = JvWizardInteriorPageServer
     ButtonBarHeight = 42
     ButtonStart.Caption = 'To &Start Page'
     ButtonStart.NumGlyphs = 1
@@ -746,6 +746,17 @@ object fMain: TfMain
       Font.Height = -11
       Font.Name = 'Tahoma'
       Font.Style = []
+    end
+    object bShowHTTPLogger: TButton
+      Left = 16
+      Top = 306
+      Width = 75
+      Height = 25
+      Anchors = [akLeft, akBottom]
+      Caption = 'HTTP Logger'
+      TabOrder = 16
+      Visible = False
+      OnClick = bShowHTTPLoggerClick
     end
   end
 end

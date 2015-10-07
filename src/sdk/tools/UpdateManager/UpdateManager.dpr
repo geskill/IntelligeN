@@ -25,7 +25,8 @@ uses
   uApiUpdateSettings in 'uApiUpdateSettings.pas',
   uApiServerXMLReader in 'uApiServerXMLReader.pas',
   uApiServerInterface in 'uApiServerInterface.pas',
-  uApiServerClasses in 'uApiServerClasses.pas';
+  uApiServerClasses in 'uApiServerClasses.pas',
+  uHTTPLogger in 'uHTTPLogger.pas' {HTTPLogger};
 
 {$R *.res}
 
@@ -38,5 +39,8 @@ begin
   ReportMemoryLeaksOnShutdown := True;
 {$ENDIF}
   Application.CreateForm(TfMain, fMain);
+{$IFDEF DEBUG}
+  Application.CreateForm(THTTPLogger, HTTPLogger);
+{$ENDIF}
   Application.Run;
 end.

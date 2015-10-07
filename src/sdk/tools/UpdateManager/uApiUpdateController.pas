@@ -643,7 +643,12 @@ begin
 end;
 
 function TLocalUploadController.AddSystems(ASystemFileBaseList: TUpdateSystemFileBaseList; out AErrorMsg: WideString): WordBool;
+const
+  MAX_INPUT_VARS = 1000;
+  FILES_COUNT = 3;
 var
+  LResult: Boolean;
+
   LHTTPParams: IHTTPParams;
   LSystemFileBaseIndex: Integer;
 
@@ -652,57 +657,103 @@ var
   LBasicServerResponse: IBasicServerResponse;
   LVersionsResponse: IVersionsResponse;
 begin
-  LHTTPParams := THTTPParams.Create;
-  with LHTTPParams do
-  begin
-    for LSystemFileBaseIndex := 0 to ASystemFileBaseList.Count - 1 do
-      with ASystemFileBaseList[LSystemFileBaseIndex] do
+  // php max_input_vars is by default 1000. 1000/3 = 333,3333333333333.
+
+  LSystemFileBaseIndex := 0;
+  LResult := True;
+
+  repeat
+
+    LHTTPParams := THTTPParams.Create;
+    with LHTTPParams do
+    begin
+      while ((LSystemFileBaseIndex < ASystemFileBaseList.Count) and ((LHTTPParams.Count + FILES_COUNT) < MAX_INPUT_VARS)) do
       begin
-        AddFormField('systems[' + IntToStr(LSystemFileBaseIndex) + '][name]', FileName);
-        AddFormField('systems[' + IntToStr(LSystemFileBaseIndex) + '][filesystem_id]', TEnum.GetName<TFileSystem>(FileSystem));
-        AddFormField('systems[' + IntToStr(LSystemFileBaseIndex) + '][path_appendix]', FilePathAppendix);
+
+        with ASystemFileBaseList[LSystemFileBaseIndex] do
+        begin
+          AddFormField('systems[' + IntToStr(LSystemFileBaseIndex) + '][name]', FileName);
+          AddFormField('systems[' + IntToStr(LSystemFileBaseIndex) + '][filesystem_id]', TEnum.GetName<TFileSystem>(FileSystem));
+          AddFormField('systems[' + IntToStr(LSystemFileBaseIndex) + '][path_appendix]', FilePathAppendix);
+        end;
+
+        Inc(LSystemFileBaseIndex);
       end;
-  end;
+    end;
 
-  Request(THTTPManager.Instance().Post(THTTPRequest.Create(FServer.Name + 'p.php?action=upload_v2&upload=add_systems_v2&access_token=' + HTTPEncode(FServer.AccessToken)), LHTTPParams), { }
-    RequestSystemsAdd, { }
-    LBasicServerResponse, { }
-    AErrorMsg);
+    Request(THTTPManager.Instance().Post(THTTPRequest.Create(FServer.Name + 'p.php?action=upload_v2&upload=add_systems_v2&access_token=' + HTTPEncode(FServer.AccessToken)), LHTTPParams), { }
+      RequestSystemsAdd, { }
+      LBasicServerResponse, { }
+      AErrorMsg);
 
-  Result := Assigned(LBasicServerResponse);
+    Result := Assigned(LBasicServerResponse);
+    LHTTPParams := nil;
+
+    if not LResult then
+      break;
+
+  until (LSystemFileBaseIndex >= ASystemFileBaseList.Count);
+
+  Result := LResult;
 end;
 
 function TLocalUploadController.AddFiles(AVersionID: Integer; AList: TUpdateManagerLocalFileList; out AErrorMsg: WideString): WordBool;
+const
+  MAX_INPUT_VARS = 1000;
+  FILES_COUNT = 7;
 var
+  LResult: Boolean;
+
   LHTTPParams: IHTTPParams;
   LFileIndex: Integer;
 
   LBasicServerResponse: IBasicServerResponse;
   LVersionsResponse: IVersionsResponse;
 begin
-  LHTTPParams := THTTPParams.Create;
-  with LHTTPParams do
-  begin
-    AddFormField('version_id', IntToStr(AVersionID));
-    for LFileIndex := 0 to AList.Count - 1 do
-      with AList[LFileIndex] do
+  // php max_input_vars is by default 1000. 1000/7 = 142,8571428571429.
+
+  LFileIndex := 0;
+  LResult := True;
+
+  repeat
+
+    LHTTPParams := THTTPParams.Create;
+    with LHTTPParams do
+    begin
+      AddFormField('version_id', IntToStr(AVersionID));
+
+      while ((LFileIndex < AList.Count) and ((LHTTPParams.Count + FILES_COUNT) < MAX_INPUT_VARS)) do
       begin
-        AddFormField('files[' + IntToStr(LFileIndex) + '][system_id]', IntToStr(FileBase.ID));
-        AddFormField('files[' + IntToStr(LFileIndex) + '][major_version]', IntToStr(FileVersion.MajorVersion));
-        AddFormField('files[' + IntToStr(LFileIndex) + '][minor_version]', IntToStr(FileVersion.MinorVersion));
-        AddFormField('files[' + IntToStr(LFileIndex) + '][major_build]', IntToStr(FileVersion.MajorBuild));
-        AddFormField('files[' + IntToStr(LFileIndex) + '][minor_build]', IntToStr(FileVersion.MinorBuild));
-        AddFormField('files[' + IntToStr(LFileIndex) + '][size_compressed]', IntToStr(FileSizeCompressed));
-        AddFormField('files[' + IntToStr(LFileIndex) + '][checksum]', FileChecksum);
+        with AList[LFileIndex] do
+        begin
+          AddFormField('files[' + IntToStr(LFileIndex) + '][system_id]', IntToStr(FileBase.ID));
+          AddFormField('files[' + IntToStr(LFileIndex) + '][major_version]', IntToStr(FileVersion.MajorVersion));
+          AddFormField('files[' + IntToStr(LFileIndex) + '][minor_version]', IntToStr(FileVersion.MinorVersion));
+          AddFormField('files[' + IntToStr(LFileIndex) + '][major_build]', IntToStr(FileVersion.MajorBuild));
+          AddFormField('files[' + IntToStr(LFileIndex) + '][minor_build]', IntToStr(FileVersion.MinorBuild));
+          AddFormField('files[' + IntToStr(LFileIndex) + '][size_compressed]', IntToStr(FileSizeCompressed));
+          AddFormField('files[' + IntToStr(LFileIndex) + '][checksum]', FileChecksum);
+        end;
+
+        Inc(LFileIndex);
       end;
-  end;
+    end;
 
-  Request(THTTPManager.Instance().Post(THTTPRequest.Create(FServer.Name + 'p.php?action=upload_v2&upload=add_files_v2&access_token=' + HTTPEncode(FServer.AccessToken)), LHTTPParams), { }
-    RequestFilesAdd, { }
-    LBasicServerResponse, { }
-    AErrorMsg);
+    Request(THTTPManager.Instance().Post(THTTPRequest.Create(FServer.Name + 'p.php?action=upload_v2&upload=add_files_v2&access_token=' + HTTPEncode(FServer.AccessToken)), LHTTPParams), { }
+      RequestFilesAdd, { }
+      LBasicServerResponse, { }
+      AErrorMsg);
 
-  Result := Assigned(LBasicServerResponse);
+    LResult := Assigned(LBasicServerResponse);
+
+    LHTTPParams := nil;
+
+    if not LResult then
+      break;
+
+  until (LFileIndex >= AList.Count);
+
+  Result := LResult;
 end;
 
 function TLocalUploadController.ActivateVersion(AVersionID: Integer; out AErrorMsg: WideString): WordBool;

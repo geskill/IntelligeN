@@ -5,7 +5,7 @@ interface
 uses
   // Delphi
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Buttons, StdCtrls, TypInfo, Generics.Collections,
-  ShellAPI,
+  ShellAPI, ComCtrls,
   // JEDI VCL
   JvWizard, JvWizardRouteMapNodes, JvExControls, JvLED,
   // DevExpress
@@ -19,7 +19,7 @@ uses
   // Api
   uApiUpdateConst, uApiUpdateInterface, uApiUpdateSettings, uApiUpdateController,
   // Utils
-  uFileUtils, uPathUtils, uSetUtils, uStringUtils, ComCtrls;
+  uFileUtils, uPathUtils, uSetUtils, uStringUtils;
 
 type
   TfMain = class(TForm)
@@ -93,6 +93,7 @@ type
     pbUploadProgress: TProgressBar;
     lUploadInfoError: TLabel;
     eUploadInfoError: TEdit;
+    bShowHTTPLogger: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure JvWizardCancelButtonClick(Sender: TObject);
@@ -135,9 +136,10 @@ type
     procedure lbSelectVersionClick(Sender: TObject);
     { *************************************** STEP - 6 *************************************** }
     procedure JvWizardInteriorPageUploadFilesPage(Sender: TObject);
-
     { *************************************** STEP - 7 *************************************** }
     procedure JvWizardInteriorPagePublishFinishButtonClick(Sender: TObject; var Stop: Boolean);
+    { **************************************************************************************** }
+    procedure bShowHTTPLoggerClick(Sender: TObject);
   private
   var
     FStoreUpdateFilesPath: string;
@@ -179,9 +181,19 @@ var
 implementation
 
 {$R *.dfm}
+{ }
+{ }
+{$IFDEF DEBUG}
+
+uses
+  uHTTPLogger;
+{$ENDIF}
 
 procedure TfMain.FormCreate(Sender: TObject);
 begin
+{$IFDEF DEBUG}
+  bShowHTTPLogger.Visible := True;
+{$ENDIF}
   FStoreUpdateFilesPath := IncludeTrailingPathDelimiter(ExtractFilePath(ParamStr(0))) + 'update_files\';
   ForceDirectories(FStoreUpdateFilesPath);
   cxGLocalFilesTableView.DataController.OnDataChanged := nil;
@@ -1079,6 +1091,13 @@ begin
   end;
 
   Result := LStatus;
+end;
+
+procedure TfMain.bShowHTTPLoggerClick(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  HTTPLogger.Show;
+{$ENDIF}
 end;
 
 end.
