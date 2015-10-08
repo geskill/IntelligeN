@@ -101,8 +101,8 @@ type
     FComponentID: TControlID;
     FStatus: Boolean;
   published
-    property ATypeID: TTypeID read FTemplateTypeID write FTemplateTypeID;
-    property AControlID: TControlID read FComponentID write FComponentID;
+    property TypeID: TTypeID read FTemplateTypeID write FTemplateTypeID;
+    property ControlID: TControlID read FComponentID write FComponentID;
     property Status: Boolean read FStatus write FStatus;
   end;
 

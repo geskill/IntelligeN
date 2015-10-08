@@ -17,7 +17,7 @@ type
   public
     function GetName: WideString; override; safecall;
 
-    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
+    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
   end;
 
 implementation
@@ -29,7 +29,7 @@ begin
   Result := 'Amazon.de';
 end;
 
-procedure TAmazonDe.Exec;
+function TAmazonDe.Exec;
 const
   website = 'http://www.amazon.de/';
 var

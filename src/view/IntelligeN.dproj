@@ -205,7 +205,6 @@
 			<DCCReference Include="..\sdk\plugins\cms\uPlugInCMSFormbasedClass.pas"/>
 			<DCCReference Include="..\sdk\plugins\cms\uPlugInCMSBlogClass.pas"/>
 			<DCCReference Include="..\sdk\plugins\crawler\uPlugInCrawlerClass.pas"/>
-			<DCCReference Include="..\sdk\plugins\crawler\uPlugInCrawlerConst.pas"/>
 			<DCCReference Include="..\sdk\plugins\crypter\uPlugInCrypterClass.pas"/>
 			<DCCReference Include="..\sdk\plugins\fileformats\uPlugInFileFormatClass.pas"/>
 			<DCCReference Include="..\sdk\plugins\filehoster\uPlugInFileHosterClass.pas"/>

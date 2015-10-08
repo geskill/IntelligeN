@@ -26,7 +26,7 @@ type
     function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
     function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override;
+    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override;
   end;
 
 implementation
@@ -92,7 +92,7 @@ begin
   Result := 0;
 end;
 
-procedure TXrelTo.Exec;
+function TXrelTo.Exec;
 const
   xrelmonth: array [0 .. 11] of string = ('Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez');
   xrelurl = 'http://www.xrel.to/';

@@ -6,20 +6,22 @@ uses
   // Common
   uBaseInterface,
   // Plugin
-  uPlugInInterface, uPlugInClass;
+  uPlugInConst, uPlugInInterface, uPlugInClass;
 
 type
   TCrawlerPlugIn = class(TPlugIn, ICrawlerPlugIn)
   private
     FUseAccount: WordBool;
     FAccountname, FAccountpassword: WideString;
-  public
+  protected
     function GetUseAccount: WordBool; safecall;
     procedure SetUseAccount(AUseAccount: WordBool); safecall;
     function GetAccountName: WideString; safecall;
     procedure SetAccountName(AAccountName: WideString); safecall;
     function GetAccountPassword: WideString; safecall;
     procedure SetAccountPassword(AAccountPassword: WideString); safecall;
+  public
+    function GetType: TPlugInType; override; safecall;
 
     function GetAvailableTypeIDs: Integer; virtual; safecall; abstract;
     function GetAvailableControlIDs(const ATypeID: Integer): Integer; virtual; safecall; abstract;
@@ -30,7 +32,7 @@ type
     property AccountName: WideString read GetAccountName write SetAccountName;
     property AccountPassword: WideString read GetAccountPassword write SetAccountPassword;
 
-    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); virtual; safecall; abstract;
+    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; virtual; safecall; abstract;
   end;
 
 implementation
@@ -63,6 +65,11 @@ end;
 procedure TCrawlerPlugIn.SetAccountPassword(AAccountPassword: WideString);
 begin
   FAccountpassword := AAccountPassword;
+end;
+
+function TCrawlerPlugIn.GetType: TPlugInType;
+begin
+  Result := ptCrawler;
 end;
 
 end.

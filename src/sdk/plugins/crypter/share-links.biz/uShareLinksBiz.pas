@@ -18,8 +18,8 @@ type
     website = 'http://share-links.biz/';
   public
     function GetName: WideString; override;
-    function AddFolder(const AMirrorContainer: IMirrorContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
-    function EditFolder(const AMirrorContainer: IMirrorContainer; ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function AddFolder(const AMirrorContainer: ISubMirrorContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function EditFolder(const AMirrorContainer: ISubMirrorContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
     function DeleteFolder(AFolderIdentifier: WideString): WordBool; override; safecall;
     function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
   end;

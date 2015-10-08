@@ -17,10 +17,10 @@ uses
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // API
   uApiFile,
-  // Utils,
-  uStringUtils,
   // Plugin system
-  uPlugInConst, uPlugInInterface, uPlugInCMSSettingsHelper;
+  uPlugInConst, uPlugInInterface, uPlugInCMSSettingsHelper,
+  // Utils,
+  uStringUtils;
 
 type
   TTextA = record
@@ -274,6 +274,13 @@ type
   public
     constructor Create(ACMSPlugIn: ICMSPlugIn; AAppController: IAppController; AWebsiteSettingsFileName: TFileName); override;
     destructor Destroy; override;
+  end;
+
+  TWebsiteEditorFactory = class
+  type
+    TWebsiteEditorMeta = class of TBasisWebsiteEditor;
+  public
+    class function GetClassType(ACMSType: TCMSType): TWebsiteEditorMeta;
   end;
 
 implementation
@@ -624,7 +631,7 @@ end;
 
 procedure TIDEditBPanel.FcxCOBControlValueInitPopup(Sender: TObject);
 begin
-  if (IndexStr(FStringTypeID, TStringTemplateTypeID) <> -1) and (IndexStr(FcxCOBControlName.Text, TStringComponentID) <> -1) then
+  if StringInTypeID(FStringTypeID) and StringInControlID(FcxCOBControlName.Text) then
     FcxCOBControlValue.Properties.Items.Text := FAppController.GetControlValues(StringToTypeID(FStringTypeID), StringToControlID(FcxCOBControlName.Text));
 end;
 
@@ -2852,6 +2859,20 @@ begin
   // FcxTSHosterBlacklist.Free;
 
   inherited Destroy;
+end;
+
+class function TWebsiteEditorFactory.GetClassType(ACMSType: TCMSType): TWebsiteEditorMeta;
+begin
+  case ACMSType of
+    cmsBoard:
+      result := TBoardWebsiteEditor;
+    cmsBlog:
+      result := TBlogWebsiteEditor;
+    cmsFormbased:
+      result := TFormbasedWebsiteEditor;
+  else
+    raise Exception.Create('Unknown component');
+  end;
 end;
 
 end.

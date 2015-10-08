@@ -24,7 +24,7 @@ uses
   Generics.MultiEvents.Handler, Generics.MultiEvents.NotifyHandler,
   // Utils
   uPathUtils, uStringUtils,
-  // Plugin
+  // Plugin system
   uPlugInEvent,
   // Forms
   uSelectDialog,

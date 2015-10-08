@@ -24,8 +24,8 @@ type
     function GetFolderID(AFolderName: string): string;
   public
     function GetName: WideString; override;
-    function AddFolder(const AMirrorContainer: IMirrorContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
-    function EditFolder(const AMirrorContainer: IMirrorContainer; ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function AddFolder(const AMirrorContainer: ISubMirrorContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function EditFolder(const AMirrorContainer: ISubMirrorContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
     function DeleteFolder(AFolderIdentifier: WideString): WordBool; override; safecall;
     function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
   end;
@@ -163,12 +163,12 @@ begin
     }
 end;
 
-function TRelinkUs.EditFolder(const AMirrorContainer: IMirrorContainer; ACrypterFolderInfo: TCrypterFolderInfo): WordBool;
+function TRelinkUs.EditFolder;
 begin
   //
 end;
 
-function TRelinkUs.DeleteFolder(AFolderIdentifier: WideString): WordBool;
+function TRelinkUs.DeleteFolder;
 begin
   //
 end;

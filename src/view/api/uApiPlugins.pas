@@ -16,7 +16,7 @@ uses
   // HTTPManager
   uHTTPManager,
   // Plugin system
-  uPlugInInterface, uPlugInConst,
+  uPlugInConst, uPlugInInterface, uPlugInInterfaceAdv,
   // Utils
   uPathUtils;
 
@@ -31,7 +31,7 @@ type
     class procedure ReturnError(AErrorMsg: string; AErrorProc: TErrorProc = nil);
   private
     class procedure LoadPlugin(ARelativPluginPath: string; APluginProc: TPluginProc; AErrorProc: TErrorProc = nil);
-    class procedure LoadCrypterPlugin(ARelativPluginPath: string; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TErrorProc = nil);
+    class procedure LoadCrypterPlugin(ACrypter: TCrypterCollectionItem; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TErrorProc = nil);
     class procedure LoadFileFormatsPlugin(ARelativPluginPath: string; AFileFormatPluginProc: TFileFormatPluginProc; AErrorProc: TErrorProc = nil);
   public
     class procedure AppLoad(App: TAppCollectionItem; AppController: IAppController);
@@ -44,10 +44,10 @@ type
     class function CMSBelongsTo(ACMSPluginPath, AWebsiteSourceCode: string): Boolean;
     class procedure CMSShowWebsiteSettingsEditor(ACMSPluginPath: string; CMSWebsites: TCMSWebsitesCollectionItem; AppController: IAppController);
 
-    class procedure CrawlerExec(Crawler: TCrawlerCollectionItem; ATypeID: TTypeID; ControlController: IControlController);
+    class function CrawlerExec(ACrawler: TCrawlerCollectionItem; const AControlController: IControlController; out AErrorMsg: string): Boolean;
 
-    class function AddFolder(Crypter: TCrypterCollectionItem; MirrorControl: IMirrorControl; ControlController: IControlController; out AErrorMsg: string): string;
-    class function GetCrypterFolderInfo(Crypter: TCrypterCollectionItem; FolderURL: string): TCrypterFolderInfo;
+    class function CrypterAddFolder(ACrypter: TCrypterCollectionItem; const AMirrorContainer: ISubMirrorContainer; const AControlController: IControlControllerBase; out AFolderInfo: TCrypterFolderInfo; out AErrorMsg: string): Boolean;
+    class function CrypterGetFolder(ACrypter: TCrypterCollectionItem; AFolderIdentifier: string; out AFolderInfo: TCrypterFolderInfo; out AErrorMsg: string): Boolean;
 
     class function GetSaveFileFormats: TStrings;
     class function GetLoadFileFormats: TStrings;
@@ -64,29 +64,7 @@ implementation
 
 uses
   uIntelligentPosting;
-
-type
-  TWebsiteEditorController = class
-  type
-    TWebsiteEditorMeta = class of TBasisWebsiteEditor;
-  public
-    class function GetClassType(ACMSType: TCMSType): TWebsiteEditorMeta;
-  end;
-
-class function TWebsiteEditorController.GetClassType(ACMSType: TCMSType): TWebsiteEditorMeta;
-begin
-  case ACMSType of
-    cmsBoard:
-      Result := TBoardWebsiteEditor;
-    cmsBlog:
-      Result := TBlogWebsiteEditor;
-    cmsFormbased:
-      Result := TFormbasedWebsiteEditor;
-  else
-    raise Exception.Create('Unknown component');
-  end;
-end;
-{$REGION 'TApiPlugin'}
+{$REGION 'TApiPlugin private'}
 
 class procedure TApiPlugin.ReturnError;
 begin
@@ -110,7 +88,7 @@ begin
   if FileExists(PluginPath) then
   begin
     LPluginMinorVersion := TFileVersionInfo.GetVersionInfo(PluginPath).FileVersionNumber.Minor;
-    if not (MINOR_VERSION = LPluginMinorVersion) then
+    if not(MINOR_VERSION = LPluginMinorVersion) then
       ReturnError(Format(StrThisPluginIsIncom, [MINOR_VERSION, LPluginMinorVersion]), AErrorProc);
 
     hLib := LoadLibrary(PChar(PluginPath));
@@ -122,6 +100,21 @@ begin
         if MLoadPlugIn(Plugin) then
           try
             Plugin.SetHTTPManager(THTTPManager.Instance);
+
+            case Plugin.GetType of
+              ptApp, ptCAPTCHA, ptFileFormats:
+                Plugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaMain);
+              ptCMS:
+                Plugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaCMS);
+              ptCrawler:
+                Plugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaCMS);
+              ptCrypter:
+                Plugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaCrypter);
+              ptFileHoster:
+                Plugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaFileHoster);
+              ptImageHoster:
+                Plugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaImageHoster);
+            end;
 
             Plugin.ConnectTimeout := SettingsManager.Settings.HTTP.ConnectTimeout;
             Plugin.ReadTimeout := SettingsManager.Settings.HTTP.ReadTimeout;
@@ -147,25 +140,37 @@ begin
     ReturnError('Plugin not found! (' + ARelativPluginPath + ')', AErrorProc);
 end;
 
-class procedure TApiPlugin.LoadCrypterPlugin(ARelativPluginPath: string; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TErrorProc);
+class procedure TApiPlugin.LoadCrypterPlugin(ACrypter: TCrypterCollectionItem; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TErrorProc);
 begin
-  LoadPlugin(ARelativPluginPath,
+  LoadPlugin(ACrypter.Path,
     { } procedure(var APlugin: IPlugIn)
     { } var
-    { . } _Plugin: ICrypterPlugIn;
+    { . } LPlugin: ICrypterPlugIn;
     { } begin
-    { . } if APlugin.QueryInterface(ICrypterPlugIn, _Plugin) = 0 then
+    { . } if APlugin.QueryInterface(ICrypterPlugIn, LPlugin) = 0 then
     { ... } try
-    { ..... } with _Plugin do
+    { ..... } with LPlugin do
     { ..... } begin
+    { ....... } UseAccount := ACrypter.UseAccount;
+    { ....... } if ACrypter.UseAccount then
+    { ....... } begin
+    { ......... } Accountname := ACrypter.Accountname;
+    { ......... } Accountpassword := ACrypter.Accountpassword;
+    { ....... } end
+    { ....... } else
+    { ....... } begin
+    { ......... } Accountname := '';
+    { ......... } Accountpassword := '';
+    { ....... } end;
+
     { ....... } try
-    { ......... } ACrypterPluginProc(_Plugin);
+    { ......... } ACrypterPluginProc(LPlugin);
     { ....... } except
 
     { ....... } end;
     { ..... } end;
     { ... } finally
-    { ..... } _Plugin := nil;
+    { ..... } LPlugin := nil;
     { ... } end;
     { } end, AErrorProc);
 end;
@@ -192,6 +197,7 @@ begin
     { ... } end;
     { } end, AErrorProc);
 end;
+{$ENDREGION}
 
 class procedure TApiPlugin.AppLoad;
 var
@@ -293,8 +299,6 @@ begin
     { ... } try
     { ..... } with _Plugin do
     { ..... } begin
-    { ....... } Proxy := SettingsManager.Settings.HTTP.GetProxy(psaCMS);
-
     { ....... } if Assigned(ACAPTCHAInput) then
     { ......... } SetCAPTCHAInput(ACAPTCHAInput)
     { ....... } else
@@ -320,7 +324,7 @@ begin
     { ....... } Tags := APublishItem.Tags;
     { ....... } Message := APublishItem.Message;
     { ....... } Website := APublishItem.Website;
-    { ....... } WebsiteData := APublishItem.WebsiteData;
+    { ....... } Data := APublishItem.Data;
 
     { ....... } try
     { ......... } _Result := Exec;
@@ -403,7 +407,7 @@ begin
 
     { ....... } Website := CMSWebsites.name;
 
-    { ....... } _WebsiteEditor := TWebsiteEditorController.GetClassType(_Plugin.CMSType).Create(_Plugin, AppController, CMSWebsites.GetPath);
+    { ....... } _WebsiteEditor := TWebsiteEditorFactory.GetClassType(_Plugin.CMSType).Create(_Plugin, AppController, CMSWebsites.GetPath);
     { ....... } try
     { ......... } if ShowWebsiteSettingsEditor(_WebsiteEditor) then
     { ........... } ;
@@ -417,164 +421,158 @@ begin
     { } end);
 end;
 
-class procedure TApiPlugin.CrawlerExec;
-begin
-  LoadPlugin(Crawler.Path,
-    { } procedure(var APlugin: IPlugIn)
-    { } var
-    { . } _Plugin: ICrawlerPlugIn;
-    { . } _ComponentIDs: TControlIDs;
-    { . } _CrawlerContingentIndex: Integer;
-    { } begin
-    { . } if APlugin.QueryInterface(ICrawlerPlugIn, _Plugin) = 0 then
-    { ... } try
-    { ..... } with _Plugin do
-    { ..... } begin
-    { ....... } Proxy := SettingsManager.Settings.HTTP.GetProxy(psaCrawler);
-
-    { ....... } _ComponentIDs := [];
-    { ....... } for _CrawlerContingentIndex := 0 to Crawler.Contingent.Count - 1 do
-    { ......... } with TCrawlerContingentCollectionItem(Crawler.Contingent.Items[_CrawlerContingentIndex]) do
-    { ........... } if Status and (ATypeID = ATypeID) then
-    { ............. } _ComponentIDs := _ComponentIDs + [AControlID];
-
-    { ....... } try
-    { ......... } Exec(Integer(ATypeID), Longword(_ComponentIDs), Crawler.Limit, ControlController);
-    { ....... } except
-
-    { ....... } end;
-
-    { ..... } end;
-    { ... } finally
-    { ..... } _Plugin := nil;
-    { ... } end;
-    { } end);
-end;
-
-class function TApiPlugin.AddFolder;
+class function TApiPlugin.CrawlerExec;
 var
-  _Result, _ErrorMsg: string;
+  LResult: Boolean;
+  LFolderInfo: TCrypterFolderInfo;
+  LErrorMsg: string;
 begin
-  _Result := '';
-  LoadPlugin(Crypter.Path,
+  LResult := False;
+  LoadPlugin(ACrawler.Path,
     { } procedure(var APlugin: IPlugIn)
     { } var
-    { . } _Plugin: ICrypterPlugIn;
+    { . } LPlugin: ICrawlerPlugIn;
+    { . } LComponentIDs: TControlIDs;
+    { . } LCrawlerContingentIndex: Integer;
     { } begin
-    { . } if APlugin.QueryInterface(ICrypterPlugIn, _Plugin) = 0 then
+    { . } if APlugin.QueryInterface(ICrawlerPlugIn, LPlugin) = 0 then
     { ... } try
-    { ..... } with _Plugin do
+    { ..... } with LPlugin do
     { ..... } begin
-    { ....... } Proxy := SettingsManager.Settings.HTTP.GetProxy(psaCrypter);
-
-    { ....... } UseAccount := Crypter.UseAccount;
-    { ....... } if Crypter.UseAccount then
-    { ....... } begin
-    { ......... } Accountname := Crypter.Accountname;
-    { ......... } Accountpassword := Crypter.Accountpassword;
-    { ....... } end
-    { ....... } else
-    { ....... } begin
-    { ......... } Accountname := '';
-    { ......... } Accountpassword := '';
-    { ....... } end;
-
-    { ....... } Foldertypes := Byte(Crypter.Foldertypes);
-
-    { ....... } ContainerTypes := Byte(Crypter.ContainerTypes);
-
-    { ....... } UseCaptcha := Crypter.UseCaptcha;
-
-    { ....... } case Crypter.FolderName of
-    { ......... } fnFilename:
-    { ........... } FolderName := MirrorControl.Directlink.FileName;
-    { ......... } fnReleasename:
-    { ........... } FolderName := ControlController.FindControl(cReleaseName).Value;
-    { ......... } fnTitle:
-    { ........... } FolderName := ControlController.FindControl(cTitle).Value;
-    { ....... } end;
-
-    { ....... } AdvertismentType := Integer(Crypter.AdvertismentType);
-    { ....... } AdvertismentLayerName := Crypter.AdvertismentLayerName;
-    { ....... } AdvertismentLayerValue := Crypter.AdvertismentLayerValue;
-    { ....... } UseAdvertismentLink := Crypter.UseAdvertismentLink;
-    { ....... } AdvertismentLink := Crypter.AdvertismentLink;
-    { ....... } UseAdvertismentLink := Crypter.UseAdvertismentPicture;
-    { ....... } AdvertismentPicture := Crypter.AdvertismentPicture;
-
-    { ....... } UseCoverLink := Crypter.UseCoverLink;
-    { ....... } if Assigned(ControlController.FindControl(cPicture)) then
-    { ......... } CoverLink := ControlController.FindControl(cPicture).Value;
-    { ....... } UseDescription := Crypter.UseDescription;
-    { ....... } if Assigned(ControlController.FindControl(cDescription)) then
-    { ......... } Description := ControlController.FindControl(cDescription).Value;
-    { ....... } UseCNL := Crypter.UseCNL;
-    { ....... } UseWebseiteLink := Crypter.UseWebseiteLink;
-    { ....... } WebseiteLink := Crypter.WebseiteLink;
-
-    { ....... } UseEMailforStatusNotice := Crypter.UseEMailforStatusNotice;
-    { ....... } EMailforStatusNotice := Crypter.EMailforStatusNotice;
-
-    { ....... } UseFilePassword := Crypter.UseFilePassword;
-    { ....... } if Assigned(ControlController.FindControl(cPassword)) then
-    { ......... } FilePassword := ControlController.FindControl(cPassword).Value;
-    { ....... } UseAdminPassword := Crypter.UseAdminPassword;
-    { ....... } AdminPassword := Crypter.AdminPassword;
-    { ....... } UseVisitorPassword := Crypter.UseVisitorPassword;
-    { ....... } Visitorpassword := Crypter.Visitorpassword;
+    { ....... } LComponentIDs := [];
+    { ....... } for LCrawlerContingentIndex := 0 to ACrawler.Contingent.Count - 1 do
+    { ......... } with TCrawlerContingentCollectionItem(ACrawler.Contingent.Items[LCrawlerContingentIndex]) do
+    { ........... } if Status and (TypeID = AControlController.TypeID) then
+    { ............. } LComponentIDs := LComponentIDs + [ControlID];
 
     { ....... } try
-    { ......... } _Result := AddFolder(MirrorControl);
-    { ......... } _ErrorMsg := ErrorMsg;
+    { ......... } LResult:= Exec(Integer(AControlController.TypeID), Longword(LComponentIDs), ACrawler.Limit, AControlController);
+    { ......... } LErrorMsg := ErrorMsg;
     { ....... } except
     { ......... } on E: Exception do
     { ......... } begin
-    { ........... } _ErrorMsg := E.message;
+    { ........... } LErrorMsg := E.message;
     { ......... } end;
     { ....... } end;
 
     { ..... } end;
     { ... } finally
-    { ..... } _Plugin := nil;
+    { ..... } LPlugin := nil;
     { ... } end;
     { } end,
     { } procedure(AErrorMsg: string)
     { } begin
-    { . } _ErrorMsg := AErrorMsg;
+    { . } LErrorMsg := AErrorMsg;
     { } end);
 
-  AErrorMsg := _ErrorMsg;
-  Result := _Result;
+  AErrorMsg := LErrorMsg;
+  Result := LResult;
 end;
 
-class function TApiPlugin.GetCrypterFolderInfo(Crypter: TCrypterCollectionItem; FolderURL: string): TCrypterFolderInfo;
+class function TApiPlugin.CrypterAddFolder;
 var
-  _Result: TCrypterFolderInfo;
+  LResult: Boolean;
+  LFolderInfo: TCrypterFolderInfo;
+  LErrorMsg: string;
 begin
-  LoadPlugin(Crypter.Path,
-    { } procedure(var APlugin: IPlugIn)
-    { } var
-    { . } _Plugin: ICrypterPlugIn;
+  LResult := False;
+  LoadCrypterPlugin(ACrypter,
+    { } procedure(var ACrypterPlugin: ICrypterPlugIn)
     { } begin
-    { . } if APlugin.QueryInterface(ICrypterPlugIn, _Plugin) = 0 then
-    { ... } try
-    { ..... } with _Plugin do
-    { ..... } begin
-    { ....... } Proxy := SettingsManager.Settings.HTTP.GetProxy(psaCrypter);
+    { . } with ACrypterPlugin do
+    { . } begin
+    { ... } Foldertypes := Byte(ACrypter.Foldertypes);
 
-    { ....... } _Result := GetFolderInfo(FolderURL);
-    { ....... } _Result.Hoster := THosterConfiguration.GetCustomisedHoster(_Result.Hoster);
-    { ....... } _Result.HosterShort := THosterConfiguration.GetCustomisedHoster(_Result.Hoster, True);
-    { ....... } GetFolderPicture(FolderURL, _Result.StatusImage, True);
-    { ....... } GetFolderPicture(FolderURL, _Result.StatusImageText, False);
+    { ... } ContainerTypes := Byte(ACrypter.ContainerTypes);
 
-    { ..... } end;
+    { ... } UseCaptcha := ACrypter.UseCaptcha;
 
-    { ... } finally
-    { ..... } _Plugin := nil;
+    { ... } case ACrypter.FolderName of
+    { ..... } fnFilename:
+    { ....... } FolderName := AMirrorContainer.Directlink[0].FileName;
+    { ..... } fnReleasename:
+    { ....... } FolderName := AControlController.FindControl(cReleaseName).Value;
+    { ..... } fnTitle:
+    { ....... } FolderName := AControlController.FindControl(cTitle).Value;
     { ... } end;
+
+    { ... } AdvertismentType := Integer(ACrypter.AdvertismentType);
+    { ... } AdvertismentLayerName := ACrypter.AdvertismentLayerName;
+    { ... } AdvertismentLayerValue := ACrypter.AdvertismentLayerValue;
+    { ... } UseAdvertismentLink := ACrypter.UseAdvertismentLink;
+    { ... } AdvertismentLink := ACrypter.AdvertismentLink;
+    { ... } UseAdvertismentLink := ACrypter.UseAdvertismentPicture;
+    { ... } AdvertismentPicture := ACrypter.AdvertismentPicture;
+
+    { ... } UseCoverLink := ACrypter.UseCoverLink;
+    { ... } if Assigned(AControlController.FindControl(cPicture)) then
+    { ..... } CoverLink := AControlController.FindControl(cPicture).Value;
+    { ... } UseDescription := ACrypter.UseDescription;
+    { ... } if Assigned(AControlController.FindControl(cDescription)) then
+    { ..... } Description := AControlController.FindControl(cDescription).Value;
+    { ... } UseCNL := ACrypter.UseCNL;
+    { ... } UseWebseiteLink := ACrypter.UseWebseiteLink;
+    { ... } WebseiteLink := ACrypter.WebseiteLink;
+
+    { ... } UseEMailforStatusNotice := ACrypter.UseEMailforStatusNotice;
+    { ... } EMailforStatusNotice := ACrypter.EMailforStatusNotice;
+
+    { ... } UseFilePassword := ACrypter.UseFilePassword;
+    { ... } if Assigned(AControlController.FindControl(cPassword)) then
+    { ..... } FilePassword := AControlController.FindControl(cPassword).Value;
+    { ... } UseAdminPassword := ACrypter.UseAdminPassword;
+    { ... } AdminPassword := ACrypter.AdminPassword;
+    { ... } UseVisitorPassword := ACrypter.UseVisitorPassword;
+    { ... } Visitorpassword := ACrypter.Visitorpassword;
+
+    { ... } try
+    { ..... } LResult := AddFolder(AMirrorContainer, LFolderInfo);
+    { ..... } LErrorMsg := ErrorMsg;
+    { ... } except
+    { ..... } on E: Exception do
+    { ..... } begin
+    { ...... } LErrorMsg := E.message;
+    { ..... } end;
+    { ... } end;
+
+    { . } end;
+    { } end,
+    { } procedure(AErrorMsg: string)
+    { } begin
+    { . } LErrorMsg := AErrorMsg;
     { } end);
-  Result := _Result;
+  AFolderInfo := LFolderInfo;
+  AErrorMsg := LErrorMsg;
+  Result := LResult;
+end;
+
+class function TApiPlugin.CrypterGetFolder;
+var
+  LResult: Boolean;
+  LFolderInfo: TCrypterFolderInfo;
+  LErrorMsg: string;
+begin
+  LResult := False;
+  LoadCrypterPlugin(ACrypter,
+    { } procedure(var ACrypterPlugin: ICrypterPlugIn)
+    { } begin
+    { . } with ACrypterPlugin do
+    { . } begin
+    { ... } LResult := GetFolder(AFolderIdentifier, LFolderInfo);
+    { ... } if LResult then
+    { ... } begin
+    { ..... } LFolderInfo.Hoster := THosterConfiguration.GetCustomisedHoster(LFolderInfo.Hoster);
+    { ..... } LFolderInfo.HosterShort := THosterConfiguration.GetCustomisedHoster(LFolderInfo.Hoster, True);
+    { ... } end;
+    { . } end;
+    { } end,
+    { } procedure(AErrorMsg: string)
+    { } begin
+    { . } LErrorMsg := AErrorMsg;
+    { } end);
+  AFolderInfo := LFolderInfo;
+  AErrorMsg := LErrorMsg;
+  Result := LResult;
 end;
 
 class function TApiPlugin.GetSaveFileFormats: TStrings;
@@ -693,7 +691,6 @@ begin
     { ... } try
     { ..... } with _Plugin do
     { ..... } begin
-    { ....... } Proxy := SettingsManager.Settings.HTTP.GetProxy(psaFileHoster);
     { ....... } try
     { ......... } _Links := CheckLinks(ALinks);
     { ......... } for _LinksIndex := 0 to _Links - 1 do
@@ -754,8 +751,6 @@ begin
     { ... } try
     { ..... } with _Plugin do
     { ..... } begin
-    { ....... } Proxy := SettingsManager.Settings.HTTP.GetProxy(psaFileHoster);
-
     { ....... } if Assigned(ACAPTCHAInput) then
     { ......... } SetCAPTCHAInput(ACAPTCHAInput)
     { ....... } else
@@ -810,8 +805,6 @@ begin
     { ... } try
     { ..... } with _Plugin do
     { ..... } begin
-    { ....... } Proxy := SettingsManager.Settings.HTTP.GetProxy(psaFileHoster);
-
     { ....... } if Assigned(ACAPTCHAInput) then
     { ......... } SetCAPTCHAInput(ACAPTCHAInput)
     { ....... } else
@@ -851,6 +844,5 @@ begin
 
   Result := _Result;
 end;
-{$ENDREGION}
 
 end.

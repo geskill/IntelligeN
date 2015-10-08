@@ -44,40 +44,57 @@ type
     procedure Clear;
   end;
   { ****************************************************************************** }
-
+{$REGION 'Documentation'}
+  /// <remarks>
+  /// Expects AStringTypeID in format "Audio" not "cAudio"
+  /// </remarks>
+{$ENDREGION}
+function StringInTypeID(AStringTypeID: string): Boolean;
 {$REGION 'Documentation'}
 /// <remarks>
-///   Expects AStringTypeID in format "Audio" not "cAudio"
+/// Expects AStringTypeID in format "Audio" not "cAudio"
 /// </remarks>
 {$ENDREGION}
 function StringToTypeID(AStringTypeID: string): TTypeID;
 {$REGION 'Documentation'}
 /// <remarks>
-///   Returns TTypeID in format "Audio" not "cAudio"
+/// Returns TTypeID in format "Audio" not "cAudio"
 /// </remarks>
 {$ENDREGION}
 function TypeIDToString(ATypeID: TTypeID): string;
-
 {$REGION 'Documentation'}
 /// <remarks>
-///   Expects AStringControlID in format "IReleaseName" not "cReleaseName"
+/// Expects AStringControlID in format "IReleaseName" not "cReleaseName"
+/// </remarks>
+{$ENDREGION}
+function StringInControlID(AStringControlID: string): Boolean;
+{$REGION 'Documentation'}
+/// <remarks>
+/// Expects AStringControlID in format "IReleaseName" not "cReleaseName"
 /// </remarks>
 {$ENDREGION}
 function StringToControlID(AStringControlID: string): TControlID;
 {$REGION 'Documentation'}
 /// <remarks>
-///   Returns TControlID in format "IReleaseName" not "cReleaseName"
+/// Returns TControlID in format "IReleaseName" not "cReleaseName"
 /// </remarks>
 {$ENDREGION}
 function ControlIDToString(AControlID: TControlID): string;
 {$REGION 'Documentation'}
 /// <remarks>
-///   Returns TControlID in format "ReleaseName" not "IReleaseName" or "cReleaseName"
+/// Returns TControlID in format "ReleaseName" not "IReleaseName" or "cReleaseName"
 /// </remarks>
 {$ENDREGION}
 function ControlIDToReadableString(AControlID: TControlID): string;
 
 implementation
+
+function StringInTypeID(AStringTypeID: string): Boolean;
+var
+  LTypeID: TTypeID;
+begin
+  Result := TEnum.TryParse<TTypeID>('c' + AStringTypeID, LTypeID);
+end;
 
 function StringToTypeID(AStringTypeID: string): TTypeID;
 begin
@@ -88,6 +105,13 @@ end;
 function TypeIDToString(ATypeID: TTypeID): string;
 begin
   Result := copy(TEnum.GetName<TTypeID>(ATypeID), 2, MaxInt);
+end;
+
+function StringInControlID(AStringControlID: string): Boolean;
+var
+  LControlID: TControlID;
+begin
+  Result := TEnum.TryParse<TControlID>('c' + copy(AStringControlID, 2, MaxInt), LControlID);
 end;
 
 function StringToControlID(AStringControlID: string): TControlID;

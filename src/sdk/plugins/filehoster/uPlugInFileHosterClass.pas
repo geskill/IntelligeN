@@ -6,7 +6,7 @@ uses
   // Delphi
   SysUtils, Classes, Generics.Collections,
   // Plugin
-  uPlugInInterface, uPlugInClass, uPlugInConst;
+  uPlugInConst, uPlugInInterface, uPlugInClass;
 
 type
   TFileHosterPlugIn = class(TPlugIn, IFileHosterPlugIn)
@@ -15,10 +15,13 @@ type
     procedure AddLink(ALink, AFileName: string; AStatus: TLinkStatus; ASize: Int64; AChecksum: string = ''; AChecksumType: TChecksumType = ctMD5);
   public
     constructor Create; override;
+    destructor Destroy; override;
+
+    function GetType: TPlugInType; override; safecall;
+
     function CheckLink(AFile: WideString): TLinkInfo; virtual; safecall; abstract;
     function CheckLinks(AFiles: WideString): Integer; virtual; safecall;
     function CheckedLink(AIndex: Integer): TLinkInfo; safecall;
-    destructor Destroy; override;
   end;
 
 implementation
@@ -48,6 +51,17 @@ begin
   FCheckedLinksList := TList<TLinkInfo>.Create;
 end;
 
+destructor TFileHosterPlugIn.Destroy;
+begin
+  FCheckedLinksList.Free;
+  inherited Destroy;
+end;
+
+function TFileHosterPlugIn.GetType: TPlugInType;
+begin
+  Result := ptFileHoster;
+end;
+
 function TFileHosterPlugIn.CheckLinks(AFiles: WideString): Integer;
 var
   _FileIndex: Integer;
@@ -69,12 +83,6 @@ end;
 function TFileHosterPlugIn.CheckedLink(AIndex: Integer): TLinkInfo;
 begin
   Result := FCheckedLinksList.Items[AIndex];
-end;
-
-destructor TFileHosterPlugIn.Destroy;
-begin
-  FCheckedLinksList.Free;
-  inherited Destroy;
 end;
 
 end.

@@ -11,7 +11,7 @@ uses
   uHTTPInterface, uHTTPClasses, uHTTPManager,
   // API
   uApiSettings,
-  // Plugin
+  // Plugin system
   uPlugInConst;
 
 type

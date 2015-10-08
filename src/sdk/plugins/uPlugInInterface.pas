@@ -27,6 +27,7 @@ type
     procedure SetErrorMsg(AErrorMsg: WideString); safecall;
 
     function GetName: WideString; safecall;
+    function GetType: TPlugInType; safecall;
     property CAPTCHAInput: TCAPTCHAInput read GetCAPTCHAInput;
 
     property HTTPManager: IHTTPManager read GetHTTPManager;
@@ -124,7 +125,7 @@ type
     property AccountName: WideString read GetAccountName write SetAccountName;
     property AccountPassword: WideString read GetAccountPassword write SetAccountPassword;
 
-    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); safecall;
+    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; safecall;
   end;
 
   ICrypterPlugIn = interface(IPlugIn)
@@ -226,8 +227,8 @@ type
     property UseVisitorPassword: WordBool read GetUseVisitorPassword write SetUseVisitorPassword;
     property VisitorPassword: WideString read GetVisitorPassword write SetVisitorPassword;
 
-    function AddFolder(const AMirrorContainer: IMirrorContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; safecall;
-    function EditFolder(const AMirrorContainer: IMirrorContainer; ACrypterFolderInfo: TCrypterFolderInfo): WordBool; safecall;
+    function AddFolder(const AMirrorContainer: ISubMirrorContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; safecall;
+    function EditFolder(const AMirrorContainer: ISubMirrorContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; safecall;
     function DeleteFolder(AFolderIdentifier: WideString): WordBool; safecall;
     function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; safecall;
   end;

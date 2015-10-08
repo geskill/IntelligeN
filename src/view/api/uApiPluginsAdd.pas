@@ -17,8 +17,8 @@ uses
   uExport,
   // Api
   uApiConst, uApiMultiCastEvent, uApiMain, uApiSettings,
-  // Plugin
-  uPlugInInterface;
+  // Plugin system
+  uPlugInConst, uPlugInInterface, uPlugInInterfaceAdv;
 
 type
   TOnPluginLoaded = procedure(aSender: TObject; aPlugIn: IPlugIn; aPlugInCollectionItem: TPlugInCollectionItem; aHandle: Integer) of object;

@@ -110,7 +110,6 @@ uses
   uPlugInCMSFormbasedClass in '..\sdk\plugins\cms\uPlugInCMSFormbasedClass.pas',
   uPlugInCMSBlogClass in '..\sdk\plugins\cms\uPlugInCMSBlogClass.pas',
   uPlugInCrawlerClass in '..\sdk\plugins\crawler\uPlugInCrawlerClass.pas',
-  uPlugInCrawlerConst in '..\sdk\plugins\crawler\uPlugInCrawlerConst.pas',
   uPlugInCrypterClass in '..\sdk\plugins\crypter\uPlugInCrypterClass.pas',
   uPlugInFileFormatClass in '..\sdk\plugins\fileformats\uPlugInFileFormatClass.pas',
   uPlugInFileHosterClass in '..\sdk\plugins\filehoster\uPlugInFileHosterClass.pas',

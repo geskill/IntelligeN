@@ -10,7 +10,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPConst,
   // Plugin system
-  uPlugInInterface, uPlugInClass, uPlugInConst, uPlugInHTTPClasses;
+  uPlugInConst, uPlugInInterface, uPlugInClass, uPlugInHTTPClasses;
 
 type
   TCMSCustomField = class(TPersistent)
@@ -80,8 +80,7 @@ type
     function _AfterLogin(var ARequestID: Double; out AResponseStr: string): Boolean; virtual;
 
     property Settings: TCMSPlugInSettings read GetSettings write SetSettings;
-  public
-    constructor Create; override;
+
     function GetAccountName: WideString; safecall;
     procedure SetAccountName(AAccountName: WideString); safecall;
     function GetAccountPassword: WideString; safecall;
@@ -104,6 +103,11 @@ type
 
     function GetIntelligentPostingHelper: TIntelligentPostingHelper; safecall;
     procedure SetIntelligentPostingHelper(AIntelligentPostingHelper: TIntelligentPostingHelper); safecall;
+  public
+    constructor Create; override;
+    destructor Destroy; override;
+
+    function GetType: TPlugInType; override; safecall;
 
     property AccountName: WideString read GetAccountName write SetAccountName;
     property AccountPassword: WideString read GetAccountPassword write SetAccountPassword;
@@ -126,7 +130,6 @@ type
     function Login(out ARequestID: Double): Boolean; virtual; safecall;
     function Exec: WordBool; virtual; safecall;
     function ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEditor): WordBool; safecall;
-    destructor Destroy; override;
   end;
 
   AttrTopValue = class(TCustomAttribute)
@@ -265,13 +268,6 @@ begin
   Result := True;
 end;
 
-constructor TCMSPlugIn.Create;
-begin
-  inherited Create;
-  FCheckedIDsList := TList<TIDInfo>.Create;
-  Settings := SettingsClass.Create;
-end;
-
 function TCMSPlugIn.GetAccountName: WideString;
 begin
   Result := FAccountname;
@@ -370,6 +366,26 @@ end;
 procedure TCMSPlugIn.SetIntelligentPostingHelper(AIntelligentPostingHelper: TIntelligentPostingHelper);
 begin
   FIntelligentPostingHelper := AIntelligentPostingHelper;
+end;
+
+constructor TCMSPlugIn.Create;
+begin
+  inherited Create;
+  FCheckedIDsList := TList<TIDInfo>.Create;
+  Settings := SettingsClass.Create;
+end;
+
+destructor TCMSPlugIn.Destroy;
+begin
+  FData := nil;
+  Settings.Free;
+  FCheckedIDsList.Free;
+  inherited Destroy;
+end;
+
+function TCMSPlugIn.GetType: TPlugInType;
+begin
+  Result := ptCMS;
 end;
 
 function TCMSPlugIn.GetIDs: Integer;
@@ -590,14 +606,6 @@ function TCMSPlugIn.ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEdit
 begin
   TPlugInCMSSettingsHelper.LoadSettingsToWebsiteEditor(SettingsFileName, SettingsClass, AWebsiteEditor);
   Result := IsPositiveResult(AWebsiteEditor.ShowModal);
-end;
-
-destructor TCMSPlugIn.Destroy;
-begin
-  FData := nil;
-  Settings.Free;
-  FCheckedIDsList.Free;
-  inherited Destroy;
 end;
 
 { AttrDefaultValue }

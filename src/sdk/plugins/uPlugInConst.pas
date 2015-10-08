@@ -3,6 +3,7 @@ unit uPlugInConst;
 interface
 
 type
+  TPlugInType = (ptApp, ptCAPTCHA, ptCMS, ptCrawler, ptCrypter, ptFileFormats, ptFileHoster, ptImageHoster);
   TCAPTCHAInput = function(const ACAPTCHA: WideString; const AName: WideString; out AText: WideString; var ACookies: WideString): WordBool of object; safecall;
   TCAPTCHAType = (ctImage, ctText);
   TIntelligentPostingHelper = function(var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool of object; safecall;

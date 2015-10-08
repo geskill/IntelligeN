@@ -10,12 +10,13 @@ uses
 
 type
   TPlugIn = class(TInterfacedObject, IPlugIn)
-  protected
+  private
     FCAPTCHAInput: TCAPTCHAInput;
     FProxy: IProxy;
     FConnectTimeout, FReadTimeout: Integer;
     FHTTPManager: IHTTPManager;
     FErrorMsg: WideString;
+  protected
     function GetCAPTCHAInput: TCAPTCHAInput; safecall;
     procedure SetCAPTCHAInput(ACAPTCHAInput: TCAPTCHAInput); safecall;
     function GetHTTPManager: IHTTPManager; safecall;
@@ -31,7 +32,9 @@ type
   public
     constructor Create; virtual;
     destructor Destroy; override;
+
     function GetName: WideString; virtual; safecall; abstract;
+    function GetType: TPlugInType; virtual; safecall; abstract;
     property CAPTCHAInput: TCAPTCHAInput read GetCAPTCHAInput;
 
     property HTTPManager: IHTTPManager read GetHTTPManager;

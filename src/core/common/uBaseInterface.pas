@@ -49,6 +49,18 @@ type
 
   IDirectlink = interface(IMirrorData)
     ['{F8592097-8D2E-4EC6-AE2F-B74092641096}']
+    function GetFileName: WideString; safecall;
+
+    property FileName: WideString read GetFileName;
+  end;
+
+  ISubMirrorContainer = interface(IMirrorData)
+    ['{8D4E5551-1DC6-4AE3-BC6E-C16045277C52}']
+    function GetDirectlink(const Index: Integer): IDirectlink; safecall;
+    function GetDirectlinkCount: Integer; safecall;
+
+    property Directlink[const Index: Integer]: IDirectlink read GetDirectlink;
+    property DirectlinkCount: Integer read GetDirectlinkCount;
   end;
 
   IMirrorContainer = interface(IMirrorData)
@@ -57,11 +69,13 @@ type
     function GetCrypterCount: Integer; safecall;
     function GetDirectlink(const Index: Integer): IDirectlink; safecall;
     function GetDirectlinkCount: Integer; safecall;
+    function GetSubMirror(const Index: Integer): ISubMirrorContainer; safecall;
 
     property Crypter[const IndexOrName: OleVariant]: ICrypter read GetCrypter;
     property CrypterCount: Integer read GetCrypterCount;
     property Directlink[const Index: Integer]: IDirectlink read GetDirectlink;
     property DirectlinkCount: Integer read GetDirectlinkCount;
+    property SubMirror[const Index: Integer]: ISubMirrorContainer read GetSubMirror;
   end;
 
   IControlBase = interface(IControlData)

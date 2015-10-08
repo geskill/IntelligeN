@@ -11,7 +11,7 @@ uses
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // API
   uApiPlugins, uApiSettings,
-  // plugin system
+  // Plugin system
   uPlugInConst;
 
 const
@@ -156,7 +156,7 @@ begin
   if FCheckDelay > 0 then
     FEvent.WaitFor(FCheckDelay);
 
-  CrypterFolderInfo := TApiPlugin.GetCrypterFolderInfo(FCrypter, FFolderURL);
+  CrypterFolderInfo := TApiPlugin.CrypterGetFolder(FCrypter, FFolderURL);
 
   Task.Invoke(
     { } procedure

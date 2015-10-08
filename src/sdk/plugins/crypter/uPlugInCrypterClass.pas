@@ -6,7 +6,7 @@ uses
   // Common
   uBaseInterface,
   // Plugin
-  uPlugInInterface, uPlugInClass, uPlugInConst;
+  uPlugInConst, uPlugInInterface, uPlugInClass;
 
 type
   TCrypterPlugIn = class(TPlugIn, ICrypterPlugIn)
@@ -18,7 +18,7 @@ type
       FCoverLink, FWebseiteLink, FEMailforStatusNotice, FFilePassword, FAdminPassword, FVisitorPassword: WideString;
 
     FFoldertypes, FContainerTypes, FAdvertismentTyp: Integer;
-  public
+  protected
     function GetUseAccount: WordBool; safecall;
     procedure SetUseAccount(AUseAccount: WordBool); safecall;
     function GetAccountName: WideString; safecall;
@@ -81,6 +81,8 @@ type
     procedure SetUseVisitorPassword(AUseVisitorPassword: WordBool); safecall;
     function GetVisitorPassword: WideString; safecall;
     procedure SetVisitorPassword(AVisitorPassword: WideString); safecall;
+  public
+    function GetType: TPlugInType; override; safecall;
 
     property UseAccount: WordBool read GetUseAccount write SetUseAccount;
     property AccountName: WideString read GetAccountName write SetAccountName;
@@ -117,8 +119,8 @@ type
     property UseVisitorPassword: WordBool read GetUseVisitorPassword write SetUseVisitorPassword;
     property Visitorpassword: WideString read GetVisitorPassword write SetVisitorPassword;
 
-    function AddFolder(const AMirrorContainer: IMirrorContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; virtual; safecall; abstract;
-    function EditFolder(const AMirrorContainer: IMirrorContainer; ACrypterFolderInfo: TCrypterFolderInfo): WordBool; virtual; safecall; abstract;
+    function AddFolder(const AMirrorContainer: ISubMirrorContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; virtual; safecall; abstract;
+    function EditFolder(const AMirrorContainer: ISubMirrorContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; virtual; safecall; abstract;
     function DeleteFolder(AFolderIdentifier: WideString): WordBool; virtual; safecall; abstract;
     function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; virtual; safecall; abstract;
   end;
@@ -415,6 +417,11 @@ end;
 procedure TCrypterPlugIn.SetVisitorPassword(AVisitorPassword: WideString);
 begin
   FVisitorPassword := AVisitorPassword;
+end;
+
+function TCrypterPlugIn.GetType: TPlugInType;
+begin
+  Result := ptCrypter;
 end;
 
 end.

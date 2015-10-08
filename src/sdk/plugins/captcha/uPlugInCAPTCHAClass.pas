@@ -4,14 +4,14 @@ interface
 
 uses
   // Plugin
-  uPlugInInterface, uPlugInClass, uPlugInConst;
+  uPlugInConst, uPlugInInterface, uPlugInClass;
 
 type
   TCAPTCHAPlugIn = class(TPlugIn, ICAPTCHAPlugIn)
   private
     FCAPTCHA, FGetCAPTCHAName, FCAPTCHAResult, FCookies: WideString;
     FCAPTCHAType: TCAPTCHAType;
-  public
+  protected
     function GetCAPTCHA: WideString; safecall;
     procedure SetCAPTCHA(ACAPTCHA: WideString); safecall;
     function GetCAPTCHAType: TCAPTCHAType; safecall;
@@ -22,6 +22,8 @@ type
     procedure SetCAPTCHAResult(ACAPTCHAResult: WideString); safecall;
     function GetCookies: WideString; safecall;
     procedure SetCookies(ACookies: WideString); safecall;
+  public
+    function GetType: TPlugInType; override; safecall;
 
     property CAPTCHA: WideString read GetCAPTCHA write SetCAPTCHA;
     property CAPTCHAType: TCAPTCHAType read GetCAPTCHAType write SetCAPTCHAType;
@@ -84,6 +86,11 @@ end;
 procedure TCAPTCHAPlugIn.SetCookies(ACookies: WideString);
 begin
   FCookies := ACookies;
+end;
+
+function TCAPTCHAPlugIn.GetType: TPlugInType;
+begin
+  Result := ptCAPTCHA;
 end;
 
 end.

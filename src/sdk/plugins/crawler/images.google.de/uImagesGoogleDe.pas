@@ -24,7 +24,7 @@ type
     function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
     function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
+    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
   end;
 
 implementation
@@ -60,7 +60,7 @@ begin
   result := 5;
 end;
 
-procedure TImagesGoogleDe.Exec;
+function TImagesGoogleDe.Exec;
 const
   website = 'https://www.google.de/';
 var

@@ -4,7 +4,7 @@ interface
 
 uses
   // Plugin
-  uPlugInInterface, uPlugInClass, uPlugInConst;
+  uPlugInConst, uPlugInInterface, uPlugInClass;
 
 type
 
@@ -15,6 +15,7 @@ type
     FAccountName, FAccountPassword: WideString;
 
     FImageHostResize: TImageHostResize;
+  protected
     function GetUseAccount: WordBool; safecall;
     procedure SetUseAccount(AUseAccount: WordBool); safecall;
     function GetAccountName: WideString; safecall;
@@ -24,6 +25,8 @@ type
     function GetImageHostResize: TImageHostResize; safecall;
     procedure SetImageHostResize(AImageHostResize: TImageHostResize); safecall;
   public
+    function GetType: TPlugInType; override; safecall;
+
     property UseAccount: WordBool read GetUseAccount write SetUseAccount;
     property AccountName: WideString read GetAccountName write SetAccountName;
     property AccountPassword: WideString read GetAccountPassword write SetAccountPassword;
@@ -76,6 +79,11 @@ end;
 procedure TImageHosterPlugIn.SetImageHostResize(AImageHostResize: TImageHostResize);
 begin
   FImageHostResize := AImageHostResize;
+end;
+
+function TImageHosterPlugIn.GetType: TPlugInType;
+begin
+  Result := ptImageHoster;
 end;
 
 end.

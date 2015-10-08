@@ -21,7 +21,7 @@ uses
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
   uApiConst, uApiCrypter, uApiMody, uApiSettings, uApiXml,
-  // Plugin
+  // Plugin system
   uPlugInConst,
   // Utils
   uApiDLMF, uPathUtils, uStringUtils;

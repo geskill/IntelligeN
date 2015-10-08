@@ -28,7 +28,7 @@ type
     function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
     function GetResultsLimitDefaultValue: Integer; override; safecall;
 
-    procedure Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase); override; safecall;
+    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
   end;
 
 implementation
@@ -78,7 +78,7 @@ begin
   Result := 5;
 end;
 
-procedure TMoviemazeDe.Exec;
+function TMoviemazeDe.Exec;
 const
   website: string = 'http://www.moviemaze.de/';
 var

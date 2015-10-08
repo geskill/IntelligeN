@@ -13,7 +13,7 @@ uses
   uExport,
   // Api
   uApiConst, uApiFile, uApiIScriptParser, uApiMultiCastEvent, uApiPublishModel, uApiSettings,
-  // Plugin
+  // Plugin system
   uPlugInEvent,
   // Utils
   uPathUtils, uStringUtils;

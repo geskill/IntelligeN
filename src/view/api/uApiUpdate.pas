@@ -21,8 +21,6 @@ uses
   uApiConst, uApiUpdateInterfaceBase, uApiUpdateModelBase,
   // DLLs
   uExport,
-  // plugin system
-  uPlugInInterface, uPlugInClass,
   // Utils
   uFileUtils, uPathUtils, uStringUtils;
 

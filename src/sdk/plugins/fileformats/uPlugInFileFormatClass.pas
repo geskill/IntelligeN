@@ -6,7 +6,7 @@ uses
   // Common
   uAppInterface,
   // Plugin system
-  uPlugInInterfaceAdv, uPlugInClass;
+  uPlugInConst, uPlugInInterfaceAdv, uPlugInClass;
 
 type
   TFileFormatPlugIn = class(TPlugIn, IFileFormatPlugIn)
@@ -18,6 +18,8 @@ type
     function GetForceAddImageMirror: WordBool; safecall;
     procedure SetForceAddImageMirror(AForceAddImageMirror: WordBool); safecall;
   public
+    function GetType: TPlugInType; override; safecall;
+
     function GetFileFormatName: WideString; virtual; safecall; abstract;
     function CanSaveControls: WordBool; virtual; safecall; abstract;
     procedure SaveControls(AFileName, ATemplateFileName: WideString; const ATabSheetController: ITabSheetController); virtual; safecall; abstract;
@@ -49,6 +51,11 @@ end;
 procedure TFileFormatPlugIn.SetForceAddImageMirror(AForceAddImageMirror: WordBool);
 begin
   FForceAddImageMirror := AForceAddImageMirror;
+end;
+
+function TFileFormatPlugIn.GetType: TPlugInType;
+begin
+  Result := ptFileFormats;
 end;
 
 end.
