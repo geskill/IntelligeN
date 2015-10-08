@@ -17,11 +17,11 @@ type
     procedure Invoke(const NewViewType: TTabViewType); safecall;
   end;
 
-  TControlMethod = procedure(const Sender: IBasic) of object;
+  TControlMethod = procedure(const Sender: IControlBasic) of object;
 
   TIControlEventHandler = class(TGenericEventHandler<TControlMethod>, IControlEventHandler)
   public
-    procedure Invoke(const Sender: IBasic); safecall;
+    procedure Invoke(const Sender: IControlBasic); safecall;
   end;
 
   TUpdateCMSListMethod = procedure(const Sender: IPublishController) of object;

@@ -74,7 +74,7 @@ type
     class function GetCodeDefinition(ACodeDefinition: string): TCodeDefinition;
   end;
 
-procedure GetControls(AFileName: string; const AComponentController: IControlController; const APageController: IPageController);
+procedure GetControls(AFileName: string; const AControlController: IControlController; const APageController: IPageController);
 
 implementation
 
@@ -669,7 +669,7 @@ begin
   FCS.Free;
 end;
 
-procedure GetControls(AFileName: string; const AComponentController: IControlController; const APageController: IPageController);
+procedure GetControls(AFileName: string; const AControlController: IControlController; const APageController: IPageController);
 var
   XMLDoc: IXMLDocument;
   I: Integer;
@@ -692,11 +692,11 @@ begin
             with ChildNodes.Nodes[I] do
               if HasChildNodes then
               begin
-                AComponentController.NewControl(StringToControlID(NodeName), VarToStr(ChildNodes.Nodes['title'].NodeValue), VarToStr(ChildNodes.Nodes['value'].NodeValue),
+                AControlController.NewControl(StringToControlID(NodeName), VarToStr(ChildNodes.Nodes['title'].NodeValue), VarToStr(ChildNodes.Nodes['value'].NodeValue),
                   VarToStr(ChildNodes.Nodes['title'].Attributes['hint']), VarToStr(ChildNodes.Nodes['value'].Attributes['list']),
                   StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['left']), 0), StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['top']), 0),
                   StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['width']), 0), StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['height']), 0));
-                APageController.CallControlParser;
+                APageController.CallControlAligner;
               end;
 end;
 

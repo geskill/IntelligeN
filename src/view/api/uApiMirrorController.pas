@@ -4,28 +4,39 @@ interface
 
 uses
   // Delphi
-  Classes, Controls, Types,
+  Classes, Controls, Types, Variants,
+  // Spring Framework
+  Spring.Collections.Lists,
   // MultiEvent
   Generics.MultiEvents.NotifyEvent, Generics.MultiEvents.NotifyInterface,
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiComponentParser, uApiMultiCastEvent;
+  uApiMirrorControllerBase, uApiControlAligner, uApiMultiCastEvent;
 
 type
-  TMirrorController = class(TInterfacedObject, IMirrorController)
+  TMirrorController = class(TIMirrorControllerBase, IMirrorController)
   private
-    FMirrorList: TInterfaceList;
+    FMirrorList: TInterfaceList<IMirrorControl>;
+
     FWorkPanel: TControl;
     FTabSheetController: ITabSheetController;
+
     FSpaceMouseDown: INotifyEventHandler;
     FChange: INotifyEvent;
     FPopupMenuChange: IPopupMenuChange;
+  protected
+    // Base
+    function GetMirror(const IndexOrName: OleVariant): IMirrorContainer; safecall;
+    function GetMirrorControl(const IndexOrName: OleVariant): IMirrorControl; safecall;
+    function IMirrorController.GetMirror = GetMirrorControl;
+    function GetMirrorCount: Integer; safecall;
+
+    // Additional
     function GetTabSheetController: ITabSheetController;
     procedure SetTabSheetController(const ATabSheetController: ITabSheetController);
-    function GetMirror(index: Integer): IMirrorControl;
-    function GetMirrorCount: Integer;
 
+    // Events
     function GetSpaceMouseDown: INotifyEventHandler;
     procedure SetSpaceMouseDown(ASpaceMouseDown: INotifyEventHandler);
     function GetChange: INotifyEvent;
@@ -33,20 +44,32 @@ type
     procedure SetPopupMenuChange(APopupMenuChange: IPopupMenuChange);
   public
     constructor Create(AWorkPanel: TControl);
+    destructor Destroy; override;
+
+    // Base
+    function FindMirror(const AHoster: WideString): IMirrorContainer; safecall;
+    function FindMirrorControl(const AHoster: WideString): IMirrorControl; safecall;
+    function IMirrorController.FindMirror = FindMirrorControl;
+
+    property Mirror[const IndexOrName: OleVariant]: IMirrorControl read GetMirrorControl; default;
+    property MirrorCount: Integer read GetMirrorCount;
+
+    // Additional
     property TabSheetController: ITabSheetController read GetTabSheetController write SetTabSheetController;
+
     function IndexOf(const Item: IMirrorControl): Integer;
     function Add: Integer;
     procedure Insert(index: Integer; const Item: IMirrorControl); overload;
     function Insert(index: Integer): IMirrorControl; overload;
     function Remove(index: Integer): Boolean;
-    property Mirror[index: Integer]: IMirrorControl read GetMirror;
-    property MirrorCount: Integer read GetMirrorCount;
 
+    // Cloning
+    function CloneInstance(): IMirrorControllerBase;
+
+    // Events
     property OnSpaceMouseDown: INotifyEventHandler read GetSpaceMouseDown write SetSpaceMouseDown;
     property OnChange: INotifyEvent read GetChange;
     property OnPopupMenuChange: IPopupMenuChange read GetPopupMenuChange write SetPopupMenuChange;
-
-    destructor Destroy; override;
   end;
 
 implementation
@@ -57,6 +80,29 @@ uses
 
 { TMirrorController }
 
+function TMirrorController.GetMirror(const IndexOrName: OleVariant): IMirrorContainer;
+begin
+  Result := GetMirrorControl(IndexOrName);
+end;
+
+function TMirrorController.GetMirrorControl(const IndexOrName: OleVariant): IMirrorControl;
+begin
+  Result := nil;
+
+  if not VarIsNull(IndexOrName) then
+  begin
+    if VarIsNumeric(IndexOrName) then
+      Result := FMirrorList[IndexOrName]
+    else
+      Result := FindMirrorControl(IndexOrName);
+  end;
+end;
+
+function TMirrorController.GetMirrorCount;
+begin
+  Result := FMirrorList.Count;
+end;
+
 function TMirrorController.GetTabSheetController: ITabSheetController;
 begin
   Result := FTabSheetController;
@@ -65,16 +111,6 @@ end;
 procedure TMirrorController.SetTabSheetController(const ATabSheetController: ITabSheetController);
 begin
   FTabSheetController := ATabSheetController;
-end;
-
-function TMirrorController.GetMirror(index: Integer): IMirrorControl;
-begin
-  Result := (FMirrorList[index] as IMirrorControl);
-end;
-
-function TMirrorController.GetMirrorCount;
-begin
-  Result := FMirrorList.Count;
 end;
 
 function TMirrorController.GetSpaceMouseDown;
@@ -104,9 +140,50 @@ end;
 
 constructor TMirrorController.Create;
 begin
-  FMirrorList := TInterfaceList.Create;
+  inherited Create;
+
   FWorkPanel := AWorkPanel;
+  FMirrorList := TInterfaceList<IMirrorControl>.Create;
+
   FChange := TINotifyEvent.Create;
+end;
+
+destructor TMirrorController.Destroy;
+begin
+  FPopupMenuChange := nil;
+  FChange := nil;
+  FSpaceMouseDown := nil;
+
+  TabSheetController := nil;
+
+  FMirrorList.Free;
+  FWorkPanel := nil;
+
+  inherited Destroy;
+end;
+
+function TMirrorController.FindMirror(const AHoster: WideString): IMirrorContainer;
+begin
+  Result := FindMirrorControl(AHoster);
+end;
+
+function TMirrorController.FindMirrorControl(const AHoster: WideString): IMirrorControl;
+var
+  LIndex: Integer;
+  LMirror: IMirrorContainer;
+begin
+  Result := nil;
+
+  for LIndex := 0 to FMirrorList.Count - 1 do
+  begin
+    LMirror := FMirrorList[LIndex];
+
+    if (LMirror.Hoster = AHoster) then
+    begin
+      Result := LMirror;
+      break;
+    end;
+  end;
 end;
 
 function TMirrorController.IndexOf(const Item: IMirrorControl): Integer;
@@ -119,7 +196,7 @@ var
   MirrorControl: IMirrorControl;
   Point: TPoint;
 begin
-  with TComponentParser.Create do
+  with TControlAligner.Create do
   try
     WorkPanelWidth := FWorkPanel.Width;
     ControlController := TabSheetController.ControlController;
@@ -171,14 +248,13 @@ begin
   end;
 end;
 
-destructor TMirrorController.Destroy;
+function TMirrorController.CloneInstance: IMirrorControllerBase;
+var
+  LMirrorControllerBase: IMirrorControllerBase;
 begin
-  FPopupMenuChange := nil;
-  FChange := nil;
-  FSpaceMouseDown := nil;
-  TabSheetController := nil;
-  FWorkPanel := nil;
-  FMirrorList.Free;
+  LMirrorControllerBase := TIMirrorControllerBase.Clone(Self);
+
+  Result := LMirrorControllerBase;
 end;
 
 end.

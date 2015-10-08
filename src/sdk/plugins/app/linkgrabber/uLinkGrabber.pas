@@ -142,7 +142,7 @@ procedure TLinkGrabber.OnClick(const Sender: IInterface);
           else
             Mirror[_LinkListIndex].DirectlinksMirror[0] := _LinkList.Items[_LinkListIndex];
       end;
-      FAppController.PageController.CallControlParser;
+      FAppController.PageController.CallControlAligner;
     finally
       _LinkList.Free;
     end;

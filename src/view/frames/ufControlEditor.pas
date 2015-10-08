@@ -26,14 +26,14 @@ type
     procedure cxGridTableViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure HintTimerTimer(Sender: TObject);
   private
-    FControl: IBasic;
+    FControl: IControlBasic;
     FHintDisplayed: Boolean;
     FGridRecord: TcxCustomGridRecord;
     FItem: TcxCustomGridTableItem;
-    procedure SetControl(AControl: IBasic);
+    procedure SetControl(AControl: IControlBasic);
   public
     constructor Create(AOwner: TComponent); override;
-    property Control: IBasic read FControl write SetControl;
+    property Control: IControlBasic read FControl write SetControl;
   end;
 
 implementation
@@ -113,7 +113,7 @@ begin
   FHintDisplayed := False;
 end;
 
-procedure TfControlEditor.SetControl(AControl: IBasic);
+procedure TfControlEditor.SetControl(AControl: IControlBasic);
 var
   RecordIndex: Integer;
 begin

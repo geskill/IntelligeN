@@ -71,6 +71,8 @@ type
     function GetDirectlinkCount: Integer; safecall;
     function GetSubMirror(const Index: Integer): ISubMirrorContainer; safecall;
 
+    function FindCrypter(const AName: WideString): ICrypter; safecall;
+
     property Crypter[const IndexOrName: OleVariant]: ICrypter read GetCrypter;
     property CrypterCount: Integer read GetCrypterCount;
     property Directlink[const Index: Integer]: IDirectlink read GetDirectlink;
@@ -83,6 +85,7 @@ type
     procedure AddProposedValue(const ASender: WideString; AValue: WideString; ATitle: WideString = ''); safecall;
     function GetProposedValue(const AIndex: Integer): WideString; safecall;
     function GetProposedValueSender(const AIndex: Integer): WideString; safecall;
+    function GetProposedValueTitle(const AIndex: Integer): WideString; safecall;
     function GetProposedCount: Integer; safecall;
 
     property ProposedCount: Integer read GetProposedCount;
@@ -104,6 +107,8 @@ type
     function GetMirror(const IndexOrName: OleVariant): IMirrorContainer; safecall;
     function GetMirrorCount: Integer; safecall;
 
+    function FindMirror(const AHoster: WideString): IMirrorContainer; safecall;
+
     property Mirror[const IndexOrName: OleVariant]: IMirrorContainer read GetMirror;
     property MirrorCount: Integer read GetMirrorCount;
   end;
@@ -120,6 +125,7 @@ type
     property TypeID: TTypeID read GetTypeID;
 
     function FindControl(const AControlID: TControlID): IControlData; safecall;
+    function FindMirror(const AHoster: WideString): IMirrorContainer; safecall;
 
     property Control[const IndexOrName: OleVariant]: IControlData read GetControl;
     property ControlCount: Integer read GetControlCount;

@@ -77,7 +77,7 @@ begin
         begin
           Attributes['filename'] := ExtractFileName(ChangeFileExt(ATemplateFileName, ''));
           Attributes['checksum'] := GetMD5FromFile(ATemplateFileName);
-          NodeValue := TypeIDToString(ATabSheetController.ControlController.ATypeID);
+          NodeValue := TypeIDToString(ATabSheetController.ControlController.TypeID);
         end;
       end
       else
@@ -86,7 +86,7 @@ begin
       with AddChild('controls') do
         with ATabSheetController.ControlController do
           for I := 0 to ControlCount - 1 do
-            with AddChild(ControlIDToString(Control[I].AControlID)) do
+            with AddChild(ControlIDToString(Control[I].ControlID)) do
             begin
               AddChild('title').NodeValue := Control[I].Title;
               with AddChild('value') do
@@ -158,8 +158,8 @@ end;
 function Tintelligenxml2.LoadControls;
 var
   XMLDoc: IXMLDocument;
+  LBasicControl: IControlBasic;
   I, X, Y: Integer;
-  Control: IBasic;
   Picture: IPicture;
   TemplateType: TTypeID;
   _TemplateFile, _TemplateFileName: TFileName;
@@ -229,7 +229,7 @@ begin
                     StrToFloatDef(VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['size']), 0);
 
                   // Workaround for: http://www.devexpress.com/issue=B202502
-                  APageController.CallComponentparser;
+                  APageController.CallControlAligner;
                 end
                 else if ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeName = 'crypter' then
                 begin
@@ -257,12 +257,12 @@ begin
           for I := 0 to ChildNodes.Nodes['controls'].ChildNodes.Count - 1 do
             with ChildNodes.Nodes['controls'].ChildNodes.Nodes[I] do
             begin
-              Control := ControlController.FindControl(StringToControlID(NodeName));
-              if Assigned(Control) then
+              LBasicControl := ControlController.FindControl(StringToControlID(NodeName));
+              if Assigned(LBasicControl) then
               begin
-                Control.Value := VarToStr(ChildNodes.Nodes['value'].NodeValue);
+                LBasicControl.Value := VarToStr(ChildNodes.Nodes['value'].NodeValue);
 
-                if Control.QueryInterface(IPicture, Picture) = 0 then
+                if LBasicControl.QueryInterface(IPicture, Picture) = 0 then
                 begin
                   for X := 0 to ChildNodes.Nodes['hosters'].ChildNodes.Count - 1 do
                   begin
@@ -288,7 +288,7 @@ begin
                 end;
                 Picture := nil;
               end;
-              Control := nil;
+              LBasicControl := nil;
             end;
           ResetDataChanged(AFileName, GetName);
           result := TabSheetIndex;

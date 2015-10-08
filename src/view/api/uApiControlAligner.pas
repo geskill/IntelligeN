@@ -1,26 +1,26 @@
-unit uApiComponentParser;
+unit uApiControlAligner;
 
 interface
 
 uses
   // Delphi
   Types,
+  // DevExpress
+  cxProgressBar,
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiSettings,
-  // DevExpress
-  cxProgressBar;
+  uApiSettings;
 
 type
-  TComponentParser = class
+  TControlAligner = class
   private
     I: Integer;
     FWorkPanelWidth: Integer;
     FComponentController: IControlController;
     FMirrorController: IMirrorController;
     FProgressBar: TcxProgressBar;
-    PreviousControl, CurrentControl: IBasic;
+    PreviousControl, CurrentControl: IControlBasic;
     PreviousMirrorControl, CurrentMirrorControl: IMirrorControl;
     procedure SetProgressBarPosition(ANewPosition: Extended);
     procedure MoveLeft;
@@ -40,7 +40,7 @@ type
 
 implementation
 
-procedure TComponentParser.SetProgressBarPosition(ANewPosition: Extended);
+procedure TControlAligner.SetProgressBarPosition(ANewPosition: Extended);
 begin
   with FProgressBar do
   begin
@@ -50,7 +50,7 @@ begin
   end;
 end;
 
-procedure TComponentParser.MoveLeft;
+procedure TControlAligner.MoveLeft;
 begin
   if (PreviousControl.Top = CurrentControl.Top) then
     CurrentControl.Left := (PreviousControl.Left + PreviousControl.Width + SettingsManager.Settings.ComponentParser.PaddingWidth)
@@ -58,7 +58,7 @@ begin
     CurrentControl.Left := SettingsManager.Settings.ComponentParser.PaddingWidth;
 end;
 
-procedure TComponentParser.MoveDown;
+procedure TControlAligner.MoveDown;
 var
   Z, ZTop, NewTop: Integer;
 begin
@@ -72,19 +72,19 @@ begin
   CurrentControl.Top := NewTop + SettingsManager.Settings.ComponentParser.PaddingHeight;
 end;
 
-procedure TComponentParser.MoveUp;
+procedure TControlAligner.MoveUp;
 begin
   CurrentControl.Top := PreviousControl.Top;
 end;
 
-function TComponentParser.NextControlPosition: TPoint;
+function TControlAligner.NextControlPosition: TPoint;
 begin
   //
 end;
 
-function TComponentParser.NextMirrorPosition: TPoint;
+function TControlAligner.NextMirrorPosition: TPoint;
 var
-  _LastControl: IBasic;
+  _LastControl: IControlBasic;
   _PreviousMirrorControl: IMirrorControl;
 begin
   with SettingsManager.Settings.ComponentParser do
@@ -119,7 +119,7 @@ begin
     end;
 end;
 
-procedure TComponentParser.MoveMirrors;
+procedure TControlAligner.MoveMirrors;
 var
   _MirrorControlIndex, _MirrorControlsWidth: Integer;
   _NewPBPosition: Extended;
@@ -178,7 +178,7 @@ begin
   end;
 end;
 
-procedure TComponentParser.Start;
+procedure TControlAligner.Start;
 var
   _ControlIndex: Integer;
   NewPBPosition: Extended;
@@ -265,7 +265,7 @@ begin
   MirrorController := nil;
 end;
 
-destructor TComponentParser.Destroy;
+destructor TControlAligner.Destroy;
 begin
   PreviousControl := nil;
   CurrentControl := nil;

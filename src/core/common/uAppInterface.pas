@@ -117,7 +117,7 @@ type
     property Focus: Boolean read GetFocus write SetFocus;
   end;
 
-  IDirectlinksPanel = interface(IDirectlink)
+  IDirectlinksPanel = interface(ISubMirrorContainer)
     ['{DBFC2ED7-FFB2-4611-9F69-05CD827F3A7A}']
     function GetMirrorControl: IMirrorControl;
     procedure SetMirrorControl(AMirrorControl: IMirrorControl);
@@ -248,35 +248,47 @@ type
 
   IMirrorController = interface(IMirrorControllerBase)
     ['{230C0B4E-F11B-4DE9-B105-EED8D92B92CA}']
+    // Base
+    function GetMirror(const IndexOrName: OleVariant): IMirrorControl; safecall;
+
+    // Additional
     function GetTabSheetController: ITabSheetController;
     procedure SetTabSheetController(const ATabSheetController: ITabSheetController);
-    function GetMirror(index: Integer): IMirrorControl;
-    function GetMirrorCount: Integer;
 
+    // Events
     function GetSpaceMouseDown: INotifyEventHandler;
     procedure SetSpaceMouseDown(ASpaceMouseDown: INotifyEventHandler);
     function GetChange: INotifyEvent;
     function GetPopupMenuChange: IPopupMenuChange;
     procedure SetPopupMenuChange(APopupMenuChange: IPopupMenuChange);
 
+    // Base
+    function FindMirror(const AHoster: WideString): IMirrorControl; safecall;
+
+    property Mirror[const IndexOrName: OleVariant]: IMirrorControl read GetMirror; default;
+
+    // Additional
     property TabSheetController: ITabSheetController read GetTabSheetController write SetTabSheetController;
+
     function IndexOf(const Item: IMirrorControl): Integer;
     function Add: Integer;
     procedure Insert(index: Integer; const Item: IMirrorControl); overload;
     function Insert(index: Integer): IMirrorControl; overload;
     function Remove(index: Integer): Boolean;
-    property Mirror[index: Integer]: IMirrorControl read GetMirror;
-    property MirrorCount: Integer read GetMirrorCount;
 
+    // Cloning
+    function CloneInstance(): IMirrorControllerBase;
+
+    // Events
     property OnSpaceMouseDown: INotifyEventHandler read GetSpaceMouseDown write SetSpaceMouseDown; { only for internal usage }
     property OnChange: INotifyEvent read GetChange;
     property OnPopupMenuChange: IPopupMenuChange read GetPopupMenuChange write SetPopupMenuChange; { only for internal usage }
   end;
 
-  IBasic = interface(IControlBase)
+  IControlBasic = interface(IControlBase)
     ['{DE8F253F-D695-41D4-A350-3CF191644466}']
     function GetControlController: IControlController;
-    procedure SetControlController(const AComponentController: IControlController);
+    procedure SetControlController(const AControlController: IControlController);
     function GetTypeID: TTypeID;
     function GetControlID: TControlID;
     function GetName: WideString;
@@ -293,17 +305,11 @@ type
     procedure SetHeight(AHeight: Integer);
     function GetHint: WideString;
     procedure SetHint(AHint: WideString);
-    function GetValue: WideString;
     procedure SetValue(AValue: WideString);
     function GetFocus: Boolean;
     procedure SetFocus(AFocus: Boolean);
 
     property ControlController: IControlController read GetControlController write SetControlController;
-
-    procedure AddValue(AValue: WideString; ASender: WideString); overload;
-    function GetValueName(AIndex: Integer): WideString;
-    function GetValueContent(AIndex: Integer): WideString;
-    function GetValueCount: Integer;
 
     property TypeID: TTypeID read GetTypeID;
     property ControlID: TControlID read GetControlID;
@@ -318,11 +324,11 @@ type
     property Focus: Boolean read GetFocus write SetFocus;
   end;
 
-  IEdit = interface(IBasic)
+  IEdit = interface(IControlBasic)
     ['{3AB76C7D-3EB8-499F-9258-BE97296A7ECB}']
   end;
 
-  IComboBox = interface(IBasic)
+  IComboBox = interface(IControlBasic)
     ['{C8536847-A684-44B8-9CA0-428459E157D6}']
     function GetDropDownRows: Integer;
     procedure SetDropDownRows(ADropDownRows: Integer);
@@ -337,7 +343,7 @@ type
     ['{06F8C809-6FF0-4CC8-B057-F42802759581}']
   end;
 
-  ICheckComboBox = interface(IBasic)
+  ICheckComboBox = interface(IControlBasic)
     ['{5F2E9174-0AB9-4936-94E1-7021F79EB4BC}']
     function GetDropDownRows: Integer;
     procedure SetDropDownRows(ADropDownRows: Integer);
@@ -348,11 +354,11 @@ type
     property DropDownRows: Integer read GetDropDownRows write SetDropDownRows;
   end;
 
-  IDateEdit = interface(IBasic)
+  IDateEdit = interface(IControlBasic)
     ['{7441FAFF-6C09-43D0-96C7-4E1FED109D83}']
   end;
 
-  IRichEdit = interface(IBasic)
+  IRichEdit = interface(IControlBasic)
     ['{C4878DD0-57BF-4A32-809A-9F7AC7B6CC5E}']
   end;
 
@@ -407,7 +413,7 @@ type
 
   IControlEventHandler = interface(IUnknown)
     ['{207E1DBF-69A1-4E05-9CEA-BE5BA4091EF9}']
-    procedure Invoke(const Sender: IBasic); safecall;
+    procedure Invoke(const Sender: IControlBasic); safecall;
   end;
 
   IReleaseNameChange = interface(IUnknown)
@@ -419,18 +425,21 @@ type
     ['{2713C4FB-6F32-4862-8C64-3EFC9F804B53}']
     procedure Add(const AHandler: IControlEventHandler); safecall;
     procedure Remove(const AHandler: IControlEventHandler); safecall;
-    procedure Invoke(const ASender: IBasic); safecall;
+    procedure Invoke(const ASender: IControlBasic); safecall;
   end;
 
   IControlController = interface(IControlControllerBase)
     ['{E9432D30-D4CA-4045-BEA3-55C02E56243A}']
+    // Base
+    function GetControl(const IndexOrName: OleVariant): IControlBasic; safecall;
+
+    // Additional
     function GetTabSheetController: ITabSheetController;
     procedure SetTabSheetController(const ATabSheetController: ITabSheetController);
     function GetTypeID: TTypeID;
     procedure SetTypeID(ATypeID: TTypeID);
-    function GetControl(index: Integer): IBasic;
-    procedure SetControl(index: Integer; AControl: IBasic);
 
+    // Events
     function GetSpaceMouseDown: INotifyEventHandler;
     procedure SetSpaceMouseDown(ASpaceMouseDown: INotifyEventHandler);
     function GetControlChange: IControlChangeEvent;
@@ -443,13 +452,21 @@ type
     function GetPopupMenuChange: IPopupMenuChange;
     procedure SetPopupMenuChange(APopupMenuChange: IPopupMenuChange);
 
+    // Base
+    function FindControl(const AControlID: TControlID): IControlBasic; safecall;
+
+    property Control[const IndexOrName: OleVariant]: IControlBasic read GetControl; default;
+
+    // Additional
     property TabSheetController: ITabSheetController read GetTabSheetController write SetTabSheetController;
     property TypeID: TTypeID read GetTypeID write SetTypeID;
-    procedure NewControl(AType: TControlID; ATitle, AValue, AHint, AList: WideString; ALeft, ATop, AWidth, AHeight: Integer);
-    function FindControl(AControlID: TControlID): IBasic;
-    property Control[index: Integer]: IBasic read GetControl write SetControl;
-    function ControlCount: Integer;
 
+    procedure NewControl(AType: TControlID; ATitle, AValue, AHint, AList: WideString; ALeft, ATop, AWidth, AHeight: Integer);
+
+    // Cloning
+    function CloneInstance(): IControlControllerBase;
+
+    // Events
     property OnSpaceMouseDown: INotifyEventHandler read GetSpaceMouseDown write SetSpaceMouseDown; { only for internal usage }
     property OnControlChange: IControlChangeEvent read GetControlChange;
     property OnControlEnter: IControlEventHandler read GetControlEnter write SetControlEnter; { only for internal usage }
@@ -747,7 +764,7 @@ type
     procedure CallPublish;
     procedure CallSeriesPublish;
 
-    procedure CallControlParser;
+    procedure CallControlAligner;
 
     procedure OpenToNewTab(AFileName: WideString = '');
 

@@ -35,8 +35,8 @@ uses
   uApiBackupManager in 'api\uApiBackupManager.pas',
   uApiCAPTCHA in 'api\uApiCAPTCHA.pas',
   uApiCodeTag in 'api\uApiCodeTag.pas',
-  uApiComponentController in 'api\uApiComponentController.pas',
-  uApiComponentParser in 'api\uApiComponentParser.pas',
+  uApiControlController in 'api\uApiControlController.pas',
+  uApiControlAligner in 'api\uApiControlAligner.pas',
   uApiConst in 'api\uApiConst.pas',
   uApiControls in 'api\uApiControls.pas',
   uApiCrawler in 'api\uApiCrawler.pas',
@@ -121,7 +121,11 @@ uses
   IntelligeN_TLB in 'ole\IntelligeN_TLB.pas',
   uOLE in 'ole\uOLE.pas' {IntelligeN2009: CoClass},
   uPlugInInterfaceAdv in '..\sdk\plugins\uPlugInInterfaceAdv.pas',
-  uMycxTabSheet in 'mods\uMycxTabSheet.pas';
+  uMycxTabSheet in 'mods\uMycxTabSheet.pas',
+  uApiControlsBase in 'api\uApiControlsBase.pas',
+  uApiControlControllerBase in 'api\uApiControlControllerBase.pas',
+  uApiMirrorControllerBase in 'api\uApiMirrorControllerBase.pas',
+  uApiMirrorControlBase in 'api\uApiMirrorControlBase.pas';
 
 {$R *.res}
 

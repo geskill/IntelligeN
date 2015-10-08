@@ -3,6 +3,7 @@ unit uApiConst;
 interface
 
 resourcestring
+  StrClear = 'Clear';
   StrClose = 'Close';
   StrDocument = 'document';
   StrSettings = 'Settings';

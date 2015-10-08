@@ -17,7 +17,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiConst, uApiCodeTag, uApiComponentController, uApiIScriptFormatter, uApiMirrorController, uApiPublishController, uApiMultiCastEvent, uApiSettings,
+  uApiConst, uApiCodeTag, uApiControlController, uApiIScriptFormatter, uApiMirrorController, uApiPublishController, uApiMultiCastEvent, uApiSettings,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPManager,
   // MultiEvent
@@ -56,7 +56,7 @@ type
   protected
     procedure SpaceMouseDown(const Sender: IUnknown);
 
-    procedure ControlEnter(const Sender: IBasic);
+    procedure ControlEnter(const Sender: IControlBasic);
 
     procedure PopupMenuChange(const Sender: Integer);
   public
@@ -207,7 +207,7 @@ begin
   MoveWorkWhileHoldingLeftMouse;
 end;
 
-procedure TDataTabSheetItem.ControlEnter(const Sender: IBasic);
+procedure TDataTabSheetItem.ControlEnter(const Sender: IControlBasic);
 begin
   Main.fControlEditor.Control := Sender;
 end;
@@ -240,7 +240,7 @@ end;
 
 procedure TDataTabSheetItem.CreateInner(ATabSheetController: ITabSheetController);
 begin
-  ControlController := TComponentController.Create(Self);
+  ControlController := TControlController.Create(Self);
   with ControlController do
   begin
     TabSheetController := ATabSheetController;

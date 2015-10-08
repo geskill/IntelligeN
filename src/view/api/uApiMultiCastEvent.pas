@@ -17,7 +17,7 @@ type
 
   TIControlChangeEvent = class(TGenericEvent<IControlEventHandler>, IControlChangeEvent)
   public
-    procedure Invoke(const ASender: IBasic); safecall;
+    procedure Invoke(const ASender: IControlBasic); safecall;
   end;
 
   TIUpdateCMSListEvent = class(TGenericEvent<IUpdateCMSListEventHandler>, IUpdateCMSListEvent)
@@ -103,7 +103,7 @@ end;
 
 { TIControlChangeEvent }
 
-procedure TIControlChangeEvent.Invoke(const ASender: IBasic);
+procedure TIControlChangeEvent.Invoke(const ASender: IControlBasic);
 var
   LControlEvent: IControlEventHandler;
 begin

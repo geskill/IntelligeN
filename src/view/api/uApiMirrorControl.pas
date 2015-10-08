@@ -2062,20 +2062,20 @@ end;
 procedure TMirrorControl.FmiAddMirrorClick(Sender: TObject);
 begin
   MirrorController.Add;
-  Main.fMain.CallComponentparser;
+  Main.fMain.CallControlAligner;
 end;
 
 procedure TMirrorControl.FmiMirrorIndexClick(Sender: TObject);
 begin
   index := (Sender as TMenuItem).Tag;
-  Main.fMain.CallComponentparser;
+  Main.fMain.CallControlAligner;
 end;
 
 procedure TMirrorControl.FmiRemoveMirrorClick(Sender: TObject);
 begin
   MirrorController.Remove(Self.index);
   // FcxTabControl.Free; // ???
-  Main.fMain.CallComponentparser;
+  Main.fMain.CallControlAligner;
 end;
 
 procedure TMirrorControl.FmiMirrorColumnsClick(Sender: TObject);
@@ -2083,7 +2083,7 @@ begin
   with SettingsManager.Settings.ComponentParser do
     MirrorColumns := (Sender as TMenuItem).Tag;
   Settings.cxSEMirrorColumns.Value := (Sender as TMenuItem).Tag;
-  Main.fMain.CallComponentparser;
+  Main.fMain.CallControlAligner;
 end;
 
 procedure TMirrorControl.FmiMirrorPositionClick(Sender: TObject);
@@ -2091,7 +2091,7 @@ begin
   with SettingsManager.Settings.ComponentParser do
     MirrorPosition := TMirrorPosition((Sender as TMenuItem).Tag);
   Settings.cxCOBMirrorPosition.ItemIndex := (Sender as TMenuItem).Tag;
-  Main.fMain.CallComponentparser;
+  Main.fMain.CallControlAligner;
 end;
 
 procedure TMirrorControl.FmiCrypterClick(Sender: TObject);

@@ -16,7 +16,7 @@ uses
   // DLLs
   uExport,
   // Api
-  uApiConst, uApiMain, uApiMultiCastEvent, uApiBackupManager, uApiComponentparser, uApiSettings, uApiXml, uApiPlugins, uApiPublishController, uApiPublish,
+  uApiConst, uApiMain, uApiMultiCastEvent, uApiBackupManager, uApiControlAligner, uApiSettings, uApiXml, uApiPlugins, uApiPublishController, uApiPublish,
   uApiCrawler, uApiHoster, uApiCrypter, uApiImageHoster, uApiTabSheetController,
   // Utils
   uFileUtils;
@@ -41,7 +41,7 @@ type
   private
     FActiveCrawlerComponentController: IControlController;
     FBackupManager: TBackupManager;
-    FComponentParser: TComponentParser;
+    FControlAligner: TControlAligner;
     FCrawlerManager: ICrawlerManager;
     FHosterManager: IHosterManager;
     FCrypterManager: ICrypterManager;
@@ -49,7 +49,7 @@ type
     FImageHosterManager: IImageHosterManager;
     FChange: INotifyEvent;
     FViewChange: IViewChangeEvent;
-    procedure CrawlerGUIInteraction(AComponentController: IControlController; Status: TCrawlerTaskStatus; AProgressPosition: Extended; msg: string);
+    procedure CrawlerGUIInteraction(AControlController: IControlController; Status: TCrawlerTaskStatus; AProgressPosition: Extended; msg: string);
     function GetPagesAvailable: Boolean;
     procedure SetPagesAvailable(APagesAvailable: Boolean);
     function GetActiveViewType: TTabViewType;
@@ -80,7 +80,7 @@ type
     procedure CallPublish(ATabIndex: Integer); overload;
     procedure CallPublish; overload;
     procedure CallSeriesPublish;
-    procedure CallComponentParser;
+    procedure CallControlAligner;
 
     procedure SwitchDesignView(AEnabled: Boolean);
 
@@ -129,7 +129,7 @@ type
 
 procedure TfMain.FrameResize(Sender: TObject);
 begin
-  CallComponentParser;
+  CallControlAligner;
 end;
 
 procedure TfMain.pcMainCanCloseEx(Sender: TObject; ATabIndex: Integer; var ACanClose: Boolean);
@@ -195,11 +195,11 @@ begin
   CommonActiveViewTypeChange(ActiveViewType);
 end;
 
-procedure TfMain.CrawlerGUIInteraction(AComponentController: IControlController; Status: TCrawlerTaskStatus; AProgressPosition: Extended; msg: string);
+procedure TfMain.CrawlerGUIInteraction(AControlController: IControlController; Status: TCrawlerTaskStatus; AProgressPosition: Extended; msg: string);
 begin
   case Status of
     ctsCREATED:
-      FActiveCrawlerComponentController := AComponentController;
+      FActiveCrawlerComponentController := AControlController;
 
     ctsFINISHED:
       FActiveCrawlerComponentController := nil;
@@ -274,7 +274,7 @@ end;
 procedure TfMain.CommonActiveViewTypeChange(AViewType: TTabViewType);
 begin
   if AViewType = vtData then
-    CallComponentParser;
+    CallControlAligner;
 
   FViewChange.Invoke(AViewType);
 end;
@@ -350,8 +350,8 @@ begin
     OnGUIInteractionItem := Main.fPublishQueue.GUIInteractionItemEvent;
   end;
   FPublishManager := PublishManager;
-  FComponentParser := TComponentParser.Create;
-  with FComponentParser do
+  FControlAligner := TControlAligner.Create;
+  with FControlAligner do
     ProgressBar := cxPBComponentparser;
   CrawlerManager := TCrawlerManager.Create;
   CrawlerManager.OnGUIInteraction := CrawlerGUIInteraction;
@@ -459,10 +459,10 @@ begin
   PublishManager.AddPublishJob(PublishJob);
 end;
 
-procedure TfMain.CallComponentParser;
+procedure TfMain.CallControlAligner;
 begin
   if (TabSheetCount > 0) and (SettingsManager.Settings.ComponentParser.Mode <> cpNone) then
-    with FComponentParser do
+    with FControlAligner do
     begin
       TTabSheetController(pcMain.ActivePage).DataTabSheetItem.VertScrollBar.Position := 0;
 
@@ -536,7 +536,7 @@ begin
       for I := 0 to SettingsManager.Settings.ComponentParser.MirrorCount - 1 do
       begin
         NewTabSheetController.MirrorController.Mirror[NewTabSheetController.MirrorController.Add].Directlink.Add('');
-        CallComponentParser;
+        CallControlAligner;
       end;
     GetControls(AFileName, NewTabSheetController.ControlController, Self);
     with NewTabSheetController do
@@ -554,7 +554,7 @@ begin
       for I := 0 to SettingsManager.Settings.ComponentParser.MirrorCount - 1 do
       begin
         NewTabSheetController.MirrorController.Mirror[NewTabSheetController.MirrorController.Add].Directlink.Add('');
-        // CallComponentParser;
+        // CallControlAligner;
       end;
     with NewTabSheetController.ControlController do
       if ControlCount > 0 then
@@ -588,7 +588,7 @@ procedure TfMain.SaveTab(ATabIndex: Integer; ASaveDialog: Boolean = False);
 
   function GetFileName: string;
   var
-    Control: IBasic;
+    Control: IControlBasic;
   begin
     with TabSheetController[ATabIndex] do
       if length(FileName) > 0 then
@@ -817,7 +817,7 @@ begin
   FViewChange := nil;
   FChange := nil;
 
-  FComponentParser.Free;
+  FControlAligner.Free;
   FBackupManager.Free;
 
   inherited Destroy;

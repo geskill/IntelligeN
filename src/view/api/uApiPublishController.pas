@@ -99,7 +99,7 @@ type
       function GetControlsSide: Boolean;
       procedure SetControlsSide(AControlsSide: Boolean);
 
-      function IsControlValueAllowed(AControl: IBasic): Boolean;
+      function IsControlValueAllowed(AControl: IControlBasic): Boolean;
       function IsHosterAllowed(AHoster: IMirrorControl): Boolean;
 
       function AllControlsAllowed: Boolean;
@@ -175,7 +175,7 @@ type
     function ValidateFiles: Boolean;
     function LoadFromFile(AFileName: string): string;
 
-    procedure ControlChange(const Sender: IBasic);
+    procedure ControlChange(const Sender: IControlBasic);
     procedure MirrorChange(const Sender: IUnknown);
   protected
     function GetTabSheetController: ITabSheetController;
@@ -520,7 +520,7 @@ begin
   FControlsSide := AControlsSide;
 end;
 
-function TICMSWebsiteContainer.TICMSWebsiteContainerActiveController.IsControlValueAllowed(AControl: IBasic): Boolean;
+function TICMSWebsiteContainer.TICMSWebsiteContainerActiveController.IsControlValueAllowed(AControl: IControlBasic): Boolean;
 
   function RelToBool(ARel: string): Boolean;
   begin
@@ -780,7 +780,7 @@ begin
     end;
 end;
 
-procedure TICMSWebsiteContainer.ControlChange(const Sender: IBasic);
+procedure TICMSWebsiteContainer.ControlChange(const Sender: IControlBasic);
 begin
   with FICMSWebsiteContainerActiveController do
     if CanUpdatePartly then

@@ -10,7 +10,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiConst, uApiMirrorController, uApiComponentController, uApiPublishController, uApiSettings, uApiPlugins,
+  uApiConst, uApiMirrorController, uApiControlController, uApiPublishController, uApiSettings, uApiPlugins,
   // Plugin
   uPlugInEvent;
 
@@ -44,7 +44,7 @@ type
     FFileName, FFileType, FReleaseName, FTemplateFileName: string;
     FDataChanged: Boolean;
     FTemplateTypeID: TTypeID;
-    FComponentController: IComponentController;
+    FComponentController: IControlController;
     FISpaceMouseDown, FIMirrorChange: TINotifyEvent;
     FIPopupMenuChange: TIPopupMenuChange;
     FIControlChange, FIControlEnter, FIControlExit: TIControlEvent;
@@ -57,9 +57,9 @@ type
     procedure FmiAddMirrorClick(Sender: TObject);
     procedure SpaceMouseDown(const Sender: IUnknown);
     procedure ReleaseNameChange(const AReleaseName: WideString);
-    procedure ControlChange(const Sender: IBasic);
-    procedure ControlEnter(const Sender: IBasic);
-    procedure ControlExit(const Sender: IBasic);
+    procedure ControlChange(const Sender: IControlBasic);
+    procedure ControlEnter(const Sender: IControlBasic);
+    procedure ControlExit(const Sender: IControlBasic);
     procedure MirrorChange(const Sender: IUnknown);
     procedure PopupMenuChange(const Sender: Integer);
     function GetPageController: IPageController;
@@ -74,8 +74,8 @@ type
     procedure SetDataChanged(ADataChanged: Boolean);
     procedure UpdateCaption;
     procedure MoveWorkWhileHoldingLeftMouse;
-    function GetControlController: IComponentController;
-    procedure SetControlController(const AComponentController: IComponentController);
+    function GetControlController: IControlController;
+    procedure SetControlController(const AControlController: IControlController);
     function GetMirrorController: IMirrorController;
     procedure SetMirrorController(const AMirrorController: IMirrorController);
     function GetPublishController: IPublishController;
@@ -93,7 +93,7 @@ type
     property DataChanged: Boolean read FDataChanged write SetDataChanged;
     property TemplateFileName: string read FTemplateFileName write FTemplateFileName;
     property ATypeID: TTypeID read FTemplateTypeID write FTemplateTypeID;
-    property ControlController: IComponentController read GetControlController write SetControlController;
+    property ControlController: IControlController read GetControlController write SetControlController;
     property MirrorController: IMirrorController read GetMirrorController write SetMirrorController;
     property PublishController: IPublishController read GetPublishController write SetPublishController;
     destructor Destroy; override;
@@ -138,7 +138,7 @@ end;
 procedure TMycxTabSheet.FmiAddMirrorClick(Sender: TObject);
 begin
   MirrorController.Add;
-  Main.fMain.CallComponentparser;
+  Main.fMain.CallControlAligner;
 end;
 
 procedure TMycxTabSheet.SpaceMouseDown(const Sender: IInterface);
@@ -156,17 +156,17 @@ begin
   Main.SetEditMenu(TdxBarItemLinks(Sender));
 end;
 
-procedure TMycxTabSheet.ControlChange(const Sender: IBasic);
+procedure TMycxTabSheet.ControlChange(const Sender: IControlBasic);
 begin
   DataChanged := True;
 end;
 
-procedure TMycxTabSheet.ControlEnter(const Sender: IBasic);
+procedure TMycxTabSheet.ControlEnter(const Sender: IControlBasic);
 begin
   Main.fControlEditor.Control := Sender;
 end;
 
-procedure TMycxTabSheet.ControlExit(const Sender: IBasic);
+procedure TMycxTabSheet.ControlExit(const Sender: IControlBasic);
 begin
   // unused
 end;
@@ -253,9 +253,9 @@ begin
   Result := FComponentController;
 end;
 
-procedure TMycxTabSheet.SetControlController(const AComponentController: IComponentController);
+procedure TMycxTabSheet.SetControlController(const AControlController: IControlController);
 begin
-  FComponentController := AComponentController;
+  FComponentController := AControlController;
 end;
 
 function TMycxTabSheet.GetMirrorController;
@@ -323,7 +323,7 @@ begin
   FIPopupMenuChange := TIPopupMenuChange.Create;
   FIPopupMenuChange.OnNotifyHandler := PopupMenuChange;
 
-  ControlController := TComponentController.Create(FScrollBoxData);
+  ControlController := TControlController.Create(FScrollBoxData);
   with ControlController do
   begin
     TabSheetController := Self;

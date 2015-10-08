@@ -64,7 +64,7 @@ type
     procedure UpdateCaption;
 
     procedure ReleaseNameChange(const AReleaseName: WideString);
-    procedure ControlChange(const Sender: IBasic);
+    procedure ControlChange(const Sender: IControlBasic);
     procedure MirrorChange(const Sender: IUnknown);
 
     function GetControlController: IControlController;
@@ -229,7 +229,7 @@ begin
   ReleaseName := AReleaseName;
 end;
 
-procedure TTabSheetController.ControlChange(const Sender: IBasic);
+procedure TTabSheetController.ControlChange(const Sender: IControlBasic);
 begin
   DataChanged := True;
 end;

@@ -102,7 +102,7 @@ begin
       begin
         LControlID := VarToStr(ChildNodes.Nodes[z].Attributes['type']);
 
-        LControl := AData.Control[LControlID]; // AComponentController.FindControl(StringToControlID(controltype));
+        LControl := AData.Control[LControlID]; // AControlController.FindControl(StringToControlID(controltype));
         if Assigned(LControl) then
           if MatchTextMask(VarToStr(ChildNodes.Nodes[z].Attributes['value']), LControl.Value) then
           begin

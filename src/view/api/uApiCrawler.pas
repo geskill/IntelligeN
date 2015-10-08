@@ -24,7 +24,7 @@ type
     procedure UpdateControlValues;
     procedure InitiateImageRemoteUpload;
   public
-    constructor Create(const AComponentController: IControlController);
+    constructor Create(const AControlController: IControlController);
     function Initialize: Boolean; override;
     procedure Cleanup; override;
   end;
@@ -35,7 +35,7 @@ type
   // end;
 
   TCrawlerTaskStatus = (ctsCREATED, ctsWORKING, ctsFINISHED);
-  TGUIInteractionEvent = procedure(AComponentController: IControlController; Status: TCrawlerTaskStatus; AProgressPosition: Extended; msg: string) of object;
+  TGUIInteractionEvent = procedure(AControlController: IControlController; Status: TCrawlerTaskStatus; AProgressPosition: Extended; msg: string) of object;
 
   TCrawlerManager = class(TThreadPoolManager, ICrawlerManager)
   private
@@ -48,8 +48,8 @@ type
   public
     constructor Create; reintroduce;
 
-    procedure AddCrawlerJob(const AComponentController: IControlController);
-    procedure RemoveCrawlerJob(const AComponentController: IControlController);
+    procedure AddCrawlerJob(const AControlController: IControlController);
+    procedure RemoveCrawlerJob(const AControlController: IControlController);
 
     property OnGUIInteraction: TGUIInteractionEvent read FOnGUIInteraction write FOnGUIInteraction;
   end;
@@ -96,7 +96,7 @@ begin
   end;
 end;
 
-constructor TCrawlerThread.Create(const AComponentController: IControlController);
+constructor TCrawlerThread.Create(const AControlController: IControlController);
 var
   _CrawlerIndex, _ContingentIndex: Integer;
   _CrawlerCollectionItem: TCrawlerCollectionItem;
@@ -108,7 +108,7 @@ begin
 
   GetLocaleFormatSettings(GetThreadLocale, FFormatSettings);
 
-  FComponentController := AComponentController;
+  FComponentController := AControlController;
   FContingent := 0;
 
   for _CrawlerIndex := 0 to SettingsManager.Settings.Plugins.Crawler.Count - 1 do
@@ -213,8 +213,8 @@ end;
 
 procedure TCrawlerManager.AddCrawlerJob;
 begin
-  FInList.Add(AComponentController);
-  CreateTask(TCrawlerThread.Create(AComponentController), 'TCrawlerThread (' + AComponentController.FindControl(cReleaseName).Value + ')').MonitorWith(FOmniTED)
+  FInList.Add(AControlController);
+  CreateTask(TCrawlerThread.Create(AControlController), 'TCrawlerThread (' + AControlController.FindControl(cReleaseName).Value + ')').MonitorWith(FOmniTED)
     .Schedule(FThreadPool);
 end;
 
@@ -222,12 +222,12 @@ procedure TCrawlerManager.RemoveCrawlerJob;
 var
   indxA, indxB: Integer;
 begin
-  indxA := FInList.IndexOf(AComponentController);
+  indxA := FInList.IndexOf(AControlController);
   if indxA <> -1 then
   begin
-    indxB := FBlackList.IndexOf(AComponentController);
+    indxB := FBlackList.IndexOf(AControlController);
     if indxB = -1 then
-      FBlackList.Add(AComponentController);
+      FBlackList.Add(AControlController);
   end;
 end;
 

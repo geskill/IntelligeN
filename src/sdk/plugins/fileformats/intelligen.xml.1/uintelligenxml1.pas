@@ -232,7 +232,7 @@ begin
               Result := TabSheetIndex;
             end;
 
-            APageController.CallControlParser;
+            APageController.CallControlAligner;
           end;
       end
       else

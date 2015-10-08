@@ -94,8 +94,8 @@
 			<DCCReference Include="api\uApiBackupManager.pas"/>
 			<DCCReference Include="api\uApiCAPTCHA.pas"/>
 			<DCCReference Include="api\uApiCodeTag.pas"/>
-			<DCCReference Include="api\uApiComponentController.pas"/>
-			<DCCReference Include="api\uApiComponentParser.pas"/>
+			<DCCReference Include="api\uApiControlController.pas"/>
+			<DCCReference Include="api\uApiControlAligner.pas"/>
 			<DCCReference Include="api\uApiConst.pas"/>
 			<DCCReference Include="api\uApiControls.pas"/>
 			<DCCReference Include="api\uApiCrawler.pas"/>
@@ -219,6 +219,10 @@
 			</DCCReference>
 			<DCCReference Include="..\sdk\plugins\uPlugInInterfaceAdv.pas"/>
 			<DCCReference Include="mods\uMycxTabSheet.pas"/>
+			<DCCReference Include="api\uApiControlsBase.pas"/>
+			<DCCReference Include="api\uApiControlControllerBase.pas"/>
+			<DCCReference Include="api\uApiMirrorControllerBase.pas"/>
+			<DCCReference Include="api\uApiMirrorControlBase.pas"/>
 			<RidlCompile Include="IntelligeN.ridl"/>
 			<RcItem Include="..\..\res\barmanager.txt">
 				<ContainerId>ResourceItem</ContainerId>
@@ -240,6 +244,20 @@
 				<ResourceType>RCData</ResourceType>
 				<ResourceId>sleep64</ResourceId>
 			</RcItem>
+			<None Include="ModelSupport_IntelligeN\default.txaPackage"/>
+			<None Include="ModelSupport_IntelligeN\default.txvpck"/>
+			<None Include="ModelSupport_IntelligeN\uApiControlsBase\default.txvpck"/>
+			<None Include="ModelSupport_IntelligeN\IntelligeN\default.txvpck"/>
+			<None Include="ModelSupport_IntelligeN\uApiControlsBase\default.txaPackage"/>
+			<None Include="ModelSupport_IntelligeN\uBaseInterface\default.txvpck"/>
+			<None Include="ModelSupport_IntelligeN\uApiControlControllerBase\default.txvpck"/>
+			<None Include="ModelSupport_IntelligeN\uApiControlControllerBase\default.txaPackage"/>
+			<None Include="ModelSupport_IntelligeN\uAppInterface\default.txvpck"/>
+			<None Include="ModelSupport_IntelligeN\uMycxTabSheet\default.txvpck"/>
+			<None Include="ModelSupport_IntelligeN\uApiTabSheetItem\default.txvpck"/>
+			<None Include="ModelSupport_IntelligeN\uApiControlController\default.txvpck"/>
+			<None Include="ModelSupport_IntelligeN\uApiMirrorControllerBase\default.txaPackage"/>
+			<None Include="ModelSupport_IntelligeN\uApiMirrorControllerBase\default.txvpck"/>
 			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
 			</BuildConfiguration>
@@ -302,6 +320,7 @@
 				<ActiveXProjectInfo>
 					<version>1</version>
 				</ActiveXProjectInfo>
+				<ModelSupport>True</ModelSupport>
 			</BorlandProject>
 			<ProjectFileVersion>12</ProjectFileVersion>
 		</ProjectExtensions>

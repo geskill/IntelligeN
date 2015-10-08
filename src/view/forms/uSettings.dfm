@@ -107,6 +107,10 @@ object Settings: TSettings
     object cxTSPlugins: TcxTabSheet
       Caption = 'Plugins'
       ImageIndex = 3
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         598
         307)
