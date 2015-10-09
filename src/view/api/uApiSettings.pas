@@ -456,7 +456,7 @@ type
     property TypeE: string read FTE write FTE;
   end;
 
-  TMirrorPosition = (mpTop, mpButtom);
+  TMirrorPosition = (mpTop, mpBottom);
   TDirectlinksView = (dlvGrid, dlvIcon);
 
   TSettings_ControlAligner = class(TPersistent)
@@ -1426,7 +1426,7 @@ begin
       MirrorCount := 1;
       MirrorColumns := 1;
       MirrorHeight := 120;
-      MirrorPosition := mpButtom;
+      MirrorPosition := mpBottom;
       DirectlinksView := dlvGrid;
       DefaultMirrorTabIndex := StrDirectlinks;
       Mode := cpLight;

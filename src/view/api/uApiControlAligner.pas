@@ -94,7 +94,7 @@ begin
 
       _LastControl := ControlController.Control[ControlController.ControlCount - 1];
 
-      if (MirrorPosition = mpButtom) then
+      if (MirrorPosition = mpBottom) then
         result.Y := _LastControl.Top + _LastControl.Height + PaddingHeight
       else
         result.Y := 0;
@@ -141,7 +141,7 @@ begin
       begin
         Left := PaddingLeft;
         Width := _MirrorControlsWidth;
-        if (MirrorPosition = mpButtom) then
+        if (MirrorPosition = mpBottom) then
           Top := CurrentControl.Top + CurrentControl.Height + PaddingHeight
         else
           Top := 0;
@@ -155,7 +155,7 @@ begin
           CurrentMirrorControl := Mirror[_MirrorControlIndex];
 
           _NewPBPosition := (_MirrorControlIndex) * (50 / MirrorCount);
-          if (MirrorPosition = mpButtom) then
+          if (MirrorPosition = mpBottom) then
             _NewPBPosition := _NewPBPosition + 50;
           SetProgressBarPosition(_NewPBPosition);
 
@@ -246,7 +246,7 @@ begin
   end;
 
   with SettingsManager.Settings.ControlAligner do
-    if (MirrorPosition = mpButtom) then
+    if (MirrorPosition = mpBottom) then
     begin
       SetProgressBarPosition(50);
 

@@ -2215,7 +2215,7 @@ begin
       FmiMirrorIndex.Add(NewMenuItem);
     end;
 
-    FmiMirrorPosition_Buttom.Checked := MirrorPosition = mpButtom;
+    FmiMirrorPosition_Buttom.Checked := MirrorPosition = mpBottom;
     FmiMirrorPosition_Top.Checked := MirrorPosition = mpTop;
 
     FmiMirrorColumns1.Checked := MirrorColumns = 1;
