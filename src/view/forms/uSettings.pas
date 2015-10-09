@@ -41,7 +41,7 @@ type
     cxcbCheckForUpdates: TcxCheckBox;
     cxTSPlugins: TcxTabSheet;
     cxPCPlugins: TcxPageControl;
-    cxTSComponentParser: TcxTabSheet;
+    cxTSControlAligner: TcxTabSheet;
     cxSEMirrorCount: TcxSpinEdit;
     cxSEMirrorColumns: TcxSpinEdit;
     cxBSaveSettings: TcxButton;
@@ -1000,12 +1000,12 @@ end;
 
 procedure TSettings.cxSEMirrorCountPropertiesChange(Sender: TObject);
 begin
-  SettingsManager.Settings.ComponentParser.MirrorCount := cxSEMirrorCount.Value;
+  SettingsManager.Settings.ControlAligner.MirrorCount := cxSEMirrorCount.Value;
 end;
 
 procedure TSettings.cxSEMirrorColumnsPropertiesChange(Sender: TObject);
 begin
-  SettingsManager.Settings.ComponentParser.MirrorColumns := cxSEMirrorColumns.Value;
+  SettingsManager.Settings.ControlAligner.MirrorColumns := cxSEMirrorColumns.Value;
   Main.fMain.CallControlAligner;
 end;
 
@@ -1013,7 +1013,7 @@ procedure TSettings.cxSEMirrorHeightPropertiesChange(Sender: TObject);
 var
   I, J: Integer;
 begin
-  SettingsManager.Settings.ComponentParser.MirrorHeight := cxSEMirrorHeight.Value;
+  SettingsManager.Settings.ControlAligner.MirrorHeight := cxSEMirrorHeight.Value;
   with Main.fMain do
   begin
     for I := 0 to TabSheetCount - 1 do
@@ -1025,7 +1025,7 @@ end;
 
 procedure TSettings.cxCOBMirrorPositionPropertiesChange(Sender: TObject);
 begin
-  SettingsManager.Settings.ComponentParser.MirrorPosition := TMirrorPosition(cxCOBMirrorPosition.ItemIndex);
+  SettingsManager.Settings.ControlAligner.MirrorPosition := TMirrorPosition(cxCOBMirrorPosition.ItemIndex);
   Main.fMain.CallControlAligner;
 end;
 
@@ -1033,7 +1033,7 @@ procedure TSettings.cxCOBDirectlinksViewPropertiesChange(Sender: TObject);
 var
   I, J: Integer;
 begin
-  SettingsManager.Settings.ComponentParser.DirectlinksView := TDirectlinksView(cxCOBDirectlinksView.ItemIndex);
+  SettingsManager.Settings.ControlAligner.DirectlinksView := TDirectlinksView(cxCOBDirectlinksView.ItemIndex);
   with Main.fMain do
   begin
     for I := 0 to TabSheetCount - 1 do
@@ -1045,7 +1045,7 @@ end;
 
 procedure TSettings.cxcobDefaultMirrorTabIndexPropertiesChange(Sender: TObject);
 begin
-  SettingsManager.Settings.ComponentParser.DefaultMirrorTabIndex := cxcobDefaultMirrorTabIndex.Text;
+  SettingsManager.Settings.ControlAligner.DefaultMirrorTabIndex := cxcobDefaultMirrorTabIndex.Text;
 end;
 
 procedure TSettings.cxcobDefaultMirrorTabIndexPropertiesInitPopup(Sender: TObject);
@@ -1055,12 +1055,12 @@ end;
 
 procedure TSettings.cxCBModyBeforeCryptPropertiesChange(Sender: TObject);
 begin
-  SettingsManager.Settings.ComponentParser.ModyBeforeCrypt := cxCBModyBeforeCrypt.Checked;
+  SettingsManager.Settings.ControlAligner.ModyBeforeCrypt := cxCBModyBeforeCrypt.Checked;
 end;
 
 procedure TSettings.cxCBSwichAfterCryptPropertiesChange(Sender: TObject);
 begin
-  SettingsManager.Settings.ComponentParser.SwichAfterCrypt := cxCBSwichAfterCrypt.Checked;
+  SettingsManager.Settings.ControlAligner.SwichAfterCrypt := cxCBSwichAfterCrypt.Checked;
 end;
 
 procedure TSettings.cxCBDefaultStartupActivePropertiesChange(Sender: TObject);
@@ -1068,27 +1068,27 @@ begin
   case (Sender as TcxCheckBox).Tag of
     0:
       begin
-        SettingsManager.Settings.ComponentParser.DefaultStartup.ActiveA := (Sender as TcxCheckBox).Checked;
+        SettingsManager.Settings.ControlAligner.DefaultStartup.ActiveA := (Sender as TcxCheckBox).Checked;
         cxCOBDefaultStartupAType.Enabled := (Sender as TcxCheckBox).Checked;
       end;
     1:
       begin
-        SettingsManager.Settings.ComponentParser.DefaultStartup.ActiveB := (Sender as TcxCheckBox).Checked;
+        SettingsManager.Settings.ControlAligner.DefaultStartup.ActiveB := (Sender as TcxCheckBox).Checked;
         cxCOBDefaultStartupBType.Enabled := (Sender as TcxCheckBox).Checked;
       end;
     2:
       begin
-        SettingsManager.Settings.ComponentParser.DefaultStartup.ActiveC := (Sender as TcxCheckBox).Checked;
+        SettingsManager.Settings.ControlAligner.DefaultStartup.ActiveC := (Sender as TcxCheckBox).Checked;
         cxCOBDefaultStartupCType.Enabled := (Sender as TcxCheckBox).Checked;
       end;
     3:
       begin
-        SettingsManager.Settings.ComponentParser.DefaultStartup.ActiveD := (Sender as TcxCheckBox).Checked;
+        SettingsManager.Settings.ControlAligner.DefaultStartup.ActiveD := (Sender as TcxCheckBox).Checked;
         cxCOBDefaultStartupDType.Enabled := (Sender as TcxCheckBox).Checked;
       end;
     4:
       begin
-        SettingsManager.Settings.ComponentParser.DefaultStartup.ActiveE := (Sender as TcxCheckBox).Checked;
+        SettingsManager.Settings.ControlAligner.DefaultStartup.ActiveE := (Sender as TcxCheckBox).Checked;
         cxCOBDefaultStartupEType.Enabled := (Sender as TcxCheckBox).Checked;
       end;
   end;
@@ -1098,15 +1098,15 @@ procedure TSettings.cxCOBDefaultStartupTypePropertiesChange(Sender: TObject);
 begin
   case (Sender as TcxComboBox).Tag of
     0:
-      SettingsManager.Settings.ComponentParser.DefaultStartup.TypeA := (Sender as TcxComboBox).Text;
+      SettingsManager.Settings.ControlAligner.DefaultStartup.TypeA := (Sender as TcxComboBox).Text;
     1:
-      SettingsManager.Settings.ComponentParser.DefaultStartup.TypeB := (Sender as TcxComboBox).Text;
+      SettingsManager.Settings.ControlAligner.DefaultStartup.TypeB := (Sender as TcxComboBox).Text;
     2:
-      SettingsManager.Settings.ComponentParser.DefaultStartup.TypeC := (Sender as TcxComboBox).Text;
+      SettingsManager.Settings.ControlAligner.DefaultStartup.TypeC := (Sender as TcxComboBox).Text;
     3:
-      SettingsManager.Settings.ComponentParser.DefaultStartup.TypeD := (Sender as TcxComboBox).Text;
+      SettingsManager.Settings.ControlAligner.DefaultStartup.TypeD := (Sender as TcxComboBox).Text;
     4:
-      SettingsManager.Settings.ComponentParser.DefaultStartup.TypeE := (Sender as TcxComboBox).Text;
+      SettingsManager.Settings.ControlAligner.DefaultStartup.TypeE := (Sender as TcxComboBox).Text;
   end;
 end;
 
@@ -2708,19 +2708,19 @@ begin
     end;
   end;
 
-  cxSEMirrorCount.Value := SettingsManager.Settings.ComponentParser.MirrorCount;
-  cxSEMirrorColumns.Value := SettingsManager.Settings.ComponentParser.MirrorColumns;
-  cxSEMirrorHeight.Value := SettingsManager.Settings.ComponentParser.MirrorHeight;
-  cxCOBMirrorPosition.ItemIndex := Integer(SettingsManager.Settings.ComponentParser.MirrorPosition);
-  cxCOBDirectlinksView.ItemIndex := Integer(SettingsManager.Settings.ComponentParser.DirectlinksView);
+  cxSEMirrorCount.Value := SettingsManager.Settings.ControlAligner.MirrorCount;
+  cxSEMirrorColumns.Value := SettingsManager.Settings.ControlAligner.MirrorColumns;
+  cxSEMirrorHeight.Value := SettingsManager.Settings.ControlAligner.MirrorHeight;
+  cxCOBMirrorPosition.ItemIndex := Integer(SettingsManager.Settings.ControlAligner.MirrorPosition);
+  cxCOBDirectlinksView.ItemIndex := Integer(SettingsManager.Settings.ControlAligner.DirectlinksView);
   cxcobDefaultMirrorTabIndexItemsRefresh(True);
-  cxCBModyBeforeCrypt.Checked := SettingsManager.Settings.ComponentParser.ModyBeforeCrypt;
-  cxCBSwichAfterCrypt.Checked := SettingsManager.Settings.ComponentParser.SwichAfterCrypt;
-  cxCBDefaultStartupAActive.Checked := SettingsManager.Settings.ComponentParser.DefaultStartup.ActiveA;
-  cxCBDefaultStartupBActive.Checked := SettingsManager.Settings.ComponentParser.DefaultStartup.ActiveB;
-  cxCBDefaultStartupCActive.Checked := SettingsManager.Settings.ComponentParser.DefaultStartup.ActiveC;
-  cxCBDefaultStartupDActive.Checked := SettingsManager.Settings.ComponentParser.DefaultStartup.ActiveD;
-  cxCBDefaultStartupEActive.Checked := SettingsManager.Settings.ComponentParser.DefaultStartup.ActiveE;
+  cxCBModyBeforeCrypt.Checked := SettingsManager.Settings.ControlAligner.ModyBeforeCrypt;
+  cxCBSwichAfterCrypt.Checked := SettingsManager.Settings.ControlAligner.SwichAfterCrypt;
+  cxCBDefaultStartupAActive.Checked := SettingsManager.Settings.ControlAligner.DefaultStartup.ActiveA;
+  cxCBDefaultStartupBActive.Checked := SettingsManager.Settings.ControlAligner.DefaultStartup.ActiveB;
+  cxCBDefaultStartupCActive.Checked := SettingsManager.Settings.ControlAligner.DefaultStartup.ActiveC;
+  cxCBDefaultStartupDActive.Checked := SettingsManager.Settings.ControlAligner.DefaultStartup.ActiveD;
+  cxCBDefaultStartupEActive.Checked := SettingsManager.Settings.ControlAligner.DefaultStartup.ActiveE;
   StringList := GetTemplateList;
   try
     cxCOBDefaultStartupAType.Properties.Items.Text := StringList.Text;
@@ -2731,11 +2731,11 @@ begin
   finally
     StringList.Free;
   end;
-  cxCOBDefaultStartupAType.Text := SettingsManager.Settings.ComponentParser.DefaultStartup.TypeA;
-  cxCOBDefaultStartupBType.Text := SettingsManager.Settings.ComponentParser.DefaultStartup.TypeB;
-  cxCOBDefaultStartupCType.Text := SettingsManager.Settings.ComponentParser.DefaultStartup.TypeC;
-  cxCOBDefaultStartupDType.Text := SettingsManager.Settings.ComponentParser.DefaultStartup.TypeD;
-  cxCOBDefaultStartupEType.Text := SettingsManager.Settings.ComponentParser.DefaultStartup.TypeE;
+  cxCOBDefaultStartupAType.Text := SettingsManager.Settings.ControlAligner.DefaultStartup.TypeA;
+  cxCOBDefaultStartupBType.Text := SettingsManager.Settings.ControlAligner.DefaultStartup.TypeB;
+  cxCOBDefaultStartupCType.Text := SettingsManager.Settings.ControlAligner.DefaultStartup.TypeC;
+  cxCOBDefaultStartupDType.Text := SettingsManager.Settings.ControlAligner.DefaultStartup.TypeD;
+  cxCOBDefaultStartupEType.Text := SettingsManager.Settings.ControlAligner.DefaultStartup.TypeE;
 
   cxTBConnectTimeout.Hint := FloatToStr(SettingsManager.Settings.HTTP.ConnectTimeout / 1000) + ' seconds';
   cxTBConnectTimeout.Position := SettingsManager.Settings.HTTP.ConnectTimeout;
@@ -2870,7 +2870,7 @@ begin
         if Items[I].Enabled and Items[I].Checked then
           Properties.Items.Add(Items[I].Text);
     if ALoadFormSettings then
-      ItemIndex := Max(0, Properties.Items.IndexOf(SettingsManager.Settings.ComponentParser.DefaultMirrorTabIndex))
+      ItemIndex := Max(0, Properties.Items.IndexOf(SettingsManager.Settings.ControlAligner.DefaultMirrorTabIndex))
     else
       ItemIndex := Max(0, Properties.Items.IndexOf(_Text));
   end;

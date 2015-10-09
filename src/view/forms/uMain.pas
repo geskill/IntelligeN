@@ -172,8 +172,8 @@ type
     cxBEILayout: TcxBarEditItem;
     dxBBSaveActiveDesktop: TdxBarButton;
 
-    dxBpmComponentparser: TdxBarPopupMenu;
-    dxBCComponentparser: TdxBarCombo;
+    dxBpmControlAligner: TdxBarPopupMenu;
+    dxBCControlAligner: TdxBarCombo;
 
     dxDockingManager: TdxDockingManager;
     dxDockSite: TdxDockSite;
@@ -288,8 +288,8 @@ type
     procedure cxBarEditItemEditorTypePropertiesInitPopup(Sender: TObject);
     procedure cxBEILayoutPropertiesCloseUp(Sender: TObject);
     procedure cxBEILayoutPropertiesInitPopup(Sender: TObject);
-    procedure dxBpmComponentparserPopup(Sender: TObject);
-    procedure dxBCComponentparserChange(Sender: TObject);
+    procedure dxBpmControlAlignerPopup(Sender: TObject);
+    procedure dxBCControlAlignerChange(Sender: TObject);
   private
     FOnStartup: INotifyEvent;
     FMainMenu: IMainMenu;
@@ -426,7 +426,7 @@ end;
 
 procedure TMain.FormShow(Sender: TObject);
 begin
-  with SettingsManager.Settings.ComponentParser.DefaultStartup do
+  with SettingsManager.Settings.ControlAligner.DefaultStartup do
   begin
     if ActiveA and FileExists(GetTemplatesTypeFolder + TypeA + '.xml') then
       fMain.Add(GetTemplatesTypeFolder + TypeA + '.xml', TApiXml.GetControlsTemplateInfo(GetTemplatesTypeFolder + TypeA + '.xml').TemplateType, False);
@@ -822,14 +822,14 @@ begin
   end;
 end;
 
-procedure TMain.dxBpmComponentparserPopup(Sender: TObject);
+procedure TMain.dxBpmControlAlignerPopup(Sender: TObject);
 begin
-  dxBCComponentparser.ItemIndex := Integer(SettingsManager.Settings.ComponentParser.Mode);
+  dxBCControlAligner.ItemIndex := Integer(SettingsManager.Settings.ControlAligner.Mode);
 end;
 
-procedure TMain.dxBCComponentparserChange(Sender: TObject);
+procedure TMain.dxBCControlAlignerChange(Sender: TObject);
 begin
-  SettingsManager.Settings.ComponentParser.Mode := TComponentParserMode(dxBCComponentparser.ItemIndex);
+  SettingsManager.Settings.ControlAligner.Mode := TControlAlignerMode(dxBCControlAligner.ItemIndex);
 end;
 
 procedure TMain.WMSysCommand(var Msg: TWMSysCommand);

@@ -11,7 +11,7 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, StrUtils, // TODO: check dependency
+  SysUtils,
   // Spring Framework
   Spring.SystemUtils,
   // Common
@@ -27,7 +27,7 @@ const
   BackupFilename = 'releases.sdb';
 
 type
-  TComponentParserMode = (cpNone, cpLight, cpFull);
+  TControlAlignerMode = (cpNone, cpLight, cpFull);
 
   RTemplateFileInfo = packed record
     TemplateType: TTypeID;

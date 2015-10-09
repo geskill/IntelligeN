@@ -63,10 +63,10 @@ object fMain: TfMain
       Top = 2
       Width = 127
       Height = 18
-      object cxPBComponentparser: TcxProgressBar
+      object cxPBControlAligner: TcxProgressBar
         Left = 0
         Top = 0
-        Hint = 'Componentparser'
+        Hint = 'ControlAligner'
         Align = alClient
         ParentShowHint = False
         Properties.BeginColor = clSkyBlue

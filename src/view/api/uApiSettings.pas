@@ -459,7 +459,7 @@ type
   TMirrorPosition = (mpTop, mpButtom);
   TDirectlinksView = (dlvGrid, dlvIcon);
 
-  TSettings_ComponentParser = class(TPersistent)
+  TSettings_ControlAligner = class(TPersistent)
   private
     FTSettings_DefaultStartup: TSettings_DefaultStartup;
     FMirrorCount, FMirrorColumns, FMirrorHeight: Integer;
@@ -467,7 +467,7 @@ type
     FModyBeforeCrypt, FSwichAfterCrypt: Boolean;
     FMirrorPosition: TMirrorPosition;
     FDirectlinksView: TDirectlinksView;
-    FComponentParserMode: TComponentParserMode;
+    FControlAlignerMode: TControlAlignerMode;
     FPaddingLeft: Integer;
     FPaddingHeight: Integer;
     FPaddingWidth: Integer;
@@ -484,7 +484,7 @@ type
     property DefaultMirrorTabIndex: string read FDefaultMirrorTabIndex write FDefaultMirrorTabIndex;
     property ModyBeforeCrypt: Boolean read FModyBeforeCrypt write FModyBeforeCrypt;
     property SwichAfterCrypt: Boolean read FSwichAfterCrypt write FSwichAfterCrypt;
-    property Mode: TComponentParserMode read FComponentParserMode write FComponentParserMode;
+    property Mode: TControlAlignerMode read FControlAlignerMode write FControlAlignerMode;
     property PaddingLeft: Integer read FPaddingLeft write FPaddingLeft;
     property PaddingHeight: Integer read FPaddingHeight write FPaddingHeight;
     property PaddingWidth: Integer read FPaddingWidth write FPaddingWidth;
@@ -524,7 +524,7 @@ type
     FSettings_HTTP: TSettings_HTTP;
     FSettings_Publish: TSettings_Publish;
     FSettings_Layout: TSettings_Layout;
-    FSettings_ComponentParser: TSettings_ComponentParser;
+    FSettings_ControlAligner: TSettings_ControlAligner;
     FSettings_Mody: TSettings_Mody;
     FSettings_Login: TSettings_Login;
 
@@ -555,7 +555,7 @@ type
     property HTTP: TSettings_HTTP read FSettings_HTTP write FSettings_HTTP;
     property Publish: TSettings_Publish read FSettings_Publish write FSettings_Publish;
     property Layout: TSettings_Layout read FSettings_Layout write FSettings_Layout;
-    property ComponentParser: TSettings_ComponentParser read FSettings_ComponentParser write FSettings_ComponentParser;
+    property ControlAligner: TSettings_ControlAligner read FSettings_ControlAligner write FSettings_ControlAligner;
     property Mody: TSettings_Mody read FSettings_Mody write FSettings_Mody;
     property Login: TSettings_Login read FSettings_Login write FSettings_Login;
 
@@ -1274,13 +1274,13 @@ end;
 {$ENDREGION}
 { ****************************************************************************** }
 
-constructor TSettings_ComponentParser.Create;
+constructor TSettings_ControlAligner.Create;
 begin
   inherited Create;
   FTSettings_DefaultStartup := TSettings_DefaultStartup.Create;
 end;
 
-destructor TSettings_ComponentParser.Destroy;
+destructor TSettings_ControlAligner.Destroy;
 begin
   FTSettings_DefaultStartup.Free;
   inherited Destroy;
@@ -1296,7 +1296,7 @@ begin
   HTTP := TSettings_HTTP.Create;
   Publish := TSettings_Publish.Create;
   Layout := TSettings_Layout.Create;
-  ComponentParser := TSettings_ComponentParser.Create;
+  ControlAligner := TSettings_ControlAligner.Create;
   Mody := TSettings_Mody.Create;
   Login := TSettings_Login.Create;
 end;
@@ -1309,7 +1309,7 @@ begin
   HTTP.Free;
   Publish.Free;
   Layout.Free;
-  ComponentParser.Free;
+  ControlAligner.Free;
   Mody.Free;
   Login.Free;
 end;
@@ -1421,7 +1421,7 @@ begin
       ActiveLayoutName := 'default';
     end;
 
-    with ComponentParser do
+    with ControlAligner do
     begin
       MirrorCount := 1;
       MirrorColumns := 1;

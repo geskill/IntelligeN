@@ -26,7 +26,7 @@ type
     pcMain: TcxPageControl;
     dxStatusBar: TdxStatusBar;
     dxStatusBarContainer0: TdxStatusBarContainerControl;
-    cxPBComponentparser: TcxProgressBar;
+    cxPBControlAligner: TcxProgressBar;
     dxStatusBarContainer3: TdxStatusBarContainerControl;
     cxPBAutocompletion: TcxProgressBar;
     dxStatusBarContainer6: TdxStatusBarContainerControl;
@@ -351,7 +351,7 @@ begin
   FPublishManager := PublishManager;
   FControlAligner := TControlAligner.Create;
   with FControlAligner do
-    ProgressBar := cxPBComponentparser;
+    ProgressBar := cxPBControlAligner;
   CrawlerManager := TCrawlerManager.Create;
   CrawlerManager.OnGUIInteraction := CrawlerGUIInteraction;
   FCrawlerManager := CrawlerManager;
@@ -460,7 +460,7 @@ end;
 
 procedure TfMain.CallControlAligner;
 begin
-  if (TabSheetCount > 0) and (SettingsManager.Settings.ComponentParser.Mode <> cpNone) then
+  if (TabSheetCount > 0) and (SettingsManager.Settings.ControlAligner.Mode <> cpNone) then
     with FControlAligner do
     begin
       TTabSheetController(pcMain.ActivePage).DataTabSheetItem.VertScrollBar.Position := 0;
@@ -529,10 +529,10 @@ begin
   pcMain.ActivePage := NewTabSheetController;
   Application.ProcessMessages;
 
-  if SettingsManager.Settings.ComponentParser.MirrorPosition = mpTop then
+  if SettingsManager.Settings.ControlAligner.MirrorPosition = mpTop then
   begin
     if not AEmpty then
-      for I := 0 to SettingsManager.Settings.ComponentParser.MirrorCount - 1 do
+      for I := 0 to SettingsManager.Settings.ControlAligner.MirrorCount - 1 do
       begin
         NewTabSheetController.MirrorController.Mirror[NewTabSheetController.MirrorController.Add].GetDirectlink.Add('');
         CallControlAligner;
@@ -550,7 +550,7 @@ begin
   begin
     GetControls(AFileName, NewTabSheetController.ControlController, Self);
     if not AEmpty then
-      for I := 0 to SettingsManager.Settings.ComponentParser.MirrorCount - 1 do
+      for I := 0 to SettingsManager.Settings.ControlAligner.MirrorCount - 1 do
       begin
         NewTabSheetController.MirrorController.Mirror[NewTabSheetController.MirrorController.Add].GetDirectlink.Add('');
         // CallControlAligner;

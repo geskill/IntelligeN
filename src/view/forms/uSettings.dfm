@@ -1070,8 +1070,8 @@ object Settings: TSettings
         end
       end
     end
-    object cxTSComponentParser: TcxTabSheet
-      Caption = 'Componentparser'
+    object cxTSControlAligner: TcxTabSheet
+      Caption = 'ControlAligner'
       ImageIndex = 2
       object cxSEMirrorCount: TcxSpinEdit
         Left = 16

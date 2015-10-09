@@ -1098,7 +1098,7 @@ begin
         end;
     end;
 
-    Visible := (SettingsManager.Settings.ComponentParser.DirectlinksView = dlvGrid);
+    Visible := (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvGrid);
   end;
 
   FStatusImage := TImage.Create(FTransparentPanel);
@@ -1112,7 +1112,7 @@ begin
     Width := 16;
     Height := 16;
 
-    Visible := (SettingsManager.Settings.ComponentParser.DirectlinksView = dlvIcon);
+    Visible := (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvIcon);
   end;
 
   FHosterImage := TImage.Create(FTransparentPanel);
@@ -1126,7 +1126,7 @@ begin
     Width := 16;
     Height := 16;
 
-    Visible := (SettingsManager.Settings.ComponentParser.DirectlinksView = dlvIcon);
+    Visible := (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvIcon);
   end;
 
   FPartsLabel := TLabel.Create(FTransparentPanel);
@@ -1144,7 +1144,7 @@ begin
 
     Font.Style := [fsBold];
 
-    Visible := (SettingsManager.Settings.ComponentParser.DirectlinksView = dlvIcon);
+    Visible := (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvIcon);
   end;
 
   FSizeLabel := TLabel.Create(FTransparentPanel);
@@ -1162,7 +1162,7 @@ begin
 
     // Font.Style := [fsBold];
 
-    Visible := (SettingsManager.Settings.ComponentParser.DirectlinksView = dlvIcon);
+    Visible := (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvIcon);
   end;
 
   FModyHintStyleController := TcxHintStyleController.Create(Self);
@@ -1259,17 +1259,17 @@ var
   end;
 
 begin
-  FcxGridLinksInfo.Visible := (SettingsManager.Settings.ComponentParser.DirectlinksView = dlvGrid);
+  FcxGridLinksInfo.Visible := (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvGrid);
 
-  FStatusImage.Visible := (SettingsManager.Settings.ComponentParser.DirectlinksView = dlvIcon);
-  FHosterImage.Visible := (SettingsManager.Settings.ComponentParser.DirectlinksView = dlvIcon);
-  FPartsLabel.Visible := (SettingsManager.Settings.ComponentParser.DirectlinksView = dlvIcon);
-  FSizeLabel.Visible := (SettingsManager.Settings.ComponentParser.DirectlinksView = dlvIcon);
+  FStatusImage.Visible := (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvIcon);
+  FHosterImage.Visible := (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvIcon);
+  FPartsLabel.Visible := (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvIcon);
+  FSizeLabel.Visible := (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvIcon);
 
   _Hoster := Hoster;
   _LinksInfo := LinksInfo;
 
-  if (SettingsManager.Settings.ComponentParser.DirectlinksView = dlvGrid) then
+  if (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvGrid) then
   begin
     _FieldIndex := FindRecordIndexByText('Status');
     if (_FieldIndex > -1) then
@@ -1309,7 +1309,7 @@ begin
     if (_FieldIndex > -1) then
       FcxGridLinksInfoTableView.DataController.Values[_FieldIndex, 1] := IntToStr(Parts);
   end
-  else if (SettingsManager.Settings.ComponentParser.DirectlinksView = dlvIcon) then
+  else if (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvIcon) then
   begin
     Main.ILContainerStatusImages.GetIcon(Integer(_LinksInfo.Status), FStatusImage.Picture.Icon);
 
@@ -2194,7 +2194,7 @@ var
   I: Integer;
   NewMenuItem: TMenuItem;
 begin
-  with SettingsManager.Settings.ComponentParser do
+  with SettingsManager.Settings.ControlAligner do
   begin
     FmiMirrorIndex.Clear;
     for I := 0 to MirrorController.MirrorCount - 1 do
@@ -2245,7 +2245,7 @@ end;
 
 procedure TMirrorControl.FmiMirrorColumnsClick(Sender: TObject);
 begin
-  with SettingsManager.Settings.ComponentParser do
+  with SettingsManager.Settings.ControlAligner do
     MirrorColumns := (Sender as TMenuItem).Tag;
   Settings.cxSEMirrorColumns.Value := (Sender as TMenuItem).Tag;
   Main.fMain.CallControlAligner;
@@ -2253,7 +2253,7 @@ end;
 
 procedure TMirrorControl.FmiMirrorPositionClick(Sender: TObject);
 begin
-  with SettingsManager.Settings.ComponentParser do
+  with SettingsManager.Settings.ControlAligner do
     MirrorPosition := TMirrorPosition((Sender as TMenuItem).Tag);
   Settings.cxCOBMirrorPosition.ItemIndex := (Sender as TMenuItem).Tag;
   Main.fMain.CallControlAligner;
@@ -2675,7 +2675,7 @@ begin
   begin
     Left := ALeft;
     Top := ATop;
-    Height := SettingsManager.Settings.ComponentParser.MirrorHeight;
+    Height := SettingsManager.Settings.ControlAligner.MirrorHeight;
 
     Focusable := False;
     // Workaround for: http://www.devexpress.com/issue=B202502
@@ -2714,7 +2714,7 @@ begin
         if TPlugInCollectionItem(Items[I]).Enabled then
           AddCrypter(TPlugInCollectionItem(Items[I]).name);
 
-    with ComponentParser do
+    with ControlAligner do
       if not(DefaultMirrorTabIndex = StrDirectlinks) then
         for I := 1 to FcxTabControl.Tabs.Count - 1 do
           if (DefaultMirrorTabIndex = FcxTabControl.Tabs[I].Caption) then

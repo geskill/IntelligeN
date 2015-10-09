@@ -137,16 +137,6 @@ object Main: TMain
                   end>
                 ExplicitTop = 573
                 ExplicitWidth = 516
-                inherited dxStatusBarContainer0: TdxStatusBarContainerControl
-                  inherited cxPBComponentparser: TcxProgressBar
-                    ExplicitHeight = 18
-                  end
-                end
-                inherited dxStatusBarContainer3: TdxStatusBarContainerControl
-                  inherited cxPBAutocompletion: TcxProgressBar
-                    ExplicitHeight = 18
-                  end
-                end
               end
               inherited pcMain: TcxPageControl
                 Width = 516
@@ -892,7 +882,7 @@ object Main: TMain
       'Series'
       'Help'
       'QuickBar'
-      'ComponentParserRightClick'
+      'ControlAlignerRightClick'
       'PageControlRightClick'
       'PublishDropDownClick')
     Categories.ItemsVisibles = (
@@ -1632,10 +1622,10 @@ object Main: TMain
       Action = aAutoCompletion
       Category = 7
     end
-    object dxBCComponentparser: TdxBarCombo
+    object dxBCControlAligner: TdxBarCombo
       Category = 8
       Visible = ivAlways
-      OnChange = dxBCComponentparserChange
+      OnChange = dxBCControlAlignerChange
       ShowEditor = False
       Items.Strings = (
         'Disable'
@@ -1668,15 +1658,15 @@ object Main: TMain
       Category = 10
     end
   end
-  object dxBpmComponentparser: TdxBarPopupMenu
+  object dxBpmControlAligner: TdxBarPopupMenu
     BarManager = dxBarManager
     ItemLinks = <
       item
         Visible = True
-        ItemName = 'dxBCComponentparser'
+        ItemName = 'dxBCControlAligner'
       end>
     UseOwnFont = False
-    OnPopup = dxBpmComponentparserPopup
+    OnPopup = dxBpmControlAlignerPopup
     Left = 264
     Top = 560
   end

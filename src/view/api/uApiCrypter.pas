@@ -92,7 +92,7 @@ var
 begin
   inherited Create(ACrypterPanel);
 
-  if SettingsManager.Settings.ComponentParser.ModyBeforeCrypt then
+  if SettingsManager.Settings.ControlAligner.ModyBeforeCrypt then
     for _SubMirrorIndex := 0 to FCrypterPanel.MirrorControl.DirectlinkCount - 1 do
       FCrypterPanel.MirrorControl.Directlink[_SubMirrorIndex].Mody;
 end;
@@ -120,7 +120,7 @@ begin
     { . } else
     { ... } MessageDlg(_ErrorMsg, mtError, [mbOK], 0);
 
-    { . } if SettingsManager.Settings.ComponentParser.SwichAfterCrypt then
+    { . } if SettingsManager.Settings.ControlAligner.SwichAfterCrypt then
     { . } begin
     { ... } for _CrypterIndex := 0 to FCrypterPanel.MirrorControl.CrypterCount - 1 do
     { ..... } if SameText(FCrypterPanel.name, FCrypterPanel.MirrorControl.Crypter[_CrypterIndex].name) then
