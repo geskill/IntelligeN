@@ -6,13 +6,13 @@ uses
   // Delphi
   Windows, Forms, SysUtils, Classes, Math, Graphics,
   // Spring Framework
-  Spring.Utils,
+  Spring.SystemUtils,
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // DLLs
   uExport,
   // Api
-  uApiCAPTCHA, uApiConst, uApiMain, uApiSettings, uApiWebsiteEditor, uApiXml,
+  uApiConst, uApiPluginsBase, uApiCAPTCHA, uApiSettings, uApiWebsiteEditor, uApiXml,
   // HTTPManager
   uHTTPManager,
   // Plugin system
@@ -21,25 +21,31 @@ uses
   uPathUtils;
 
 type
-  TErrorProc = reference to procedure(AErrorMsg: string);
-  TPluginProc = reference to procedure(var APlugin: IPlugIn);
   TCrypterPluginProc = reference to procedure(var ACrypterPlugin: ICrypterPlugIn);
   TFileFormatPluginProc = reference to procedure(var AFileFormatPlugin: IFileFormatPlugIn);
 
-  TApiPlugin = class
-  strict private
-    class procedure ReturnError(AErrorMsg: string; AErrorProc: TErrorProc = nil);
-  private
-    class procedure LoadPlugin(ARelativPluginPath: string; APluginProc: TPluginProc; AErrorProc: TErrorProc = nil);
-    class procedure LoadCrypterPlugin(ACrypter: TCrypterCollectionItem; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TErrorProc = nil);
-    class procedure LoadFileFormatsPlugin(ARelativPluginPath: string; AFileFormatPluginProc: TFileFormatPluginProc; AErrorProc: TErrorProc = nil);
+  TApiPlugin = class(TPluginBase)
+  protected
+    class procedure InitializePlugin(const APlugin: IPlugIn);
+    class procedure UninitializePlugin(const APlugin: IPlugIn);
+
+    class function RelativToAbsolutePath(const ARelativPluginPath: string): string;
+
+    class function PluginTypeToString(const APluginType: TPlugInType): string;
+
+    class function IncorrectPluginTypeErrorMsg(const ARelativPluginPath: string; const APlugin: IPlugIn; AExpectedPlugin: TPlugInType): string;
+
+    class procedure LoadPlugin(const ARelativPluginPath: string; APluginProc: TPluginProc; AErrorProc: TPluginErrorProc = nil);
+
+    class procedure LoadCrypterPlugin(ACrypter: TCrypterCollectionItem; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TPluginErrorProc = nil);
+    class procedure LoadFileFormatsPlugin(ARelativPluginPath: string; AFileFormatPluginProc: TFileFormatPluginProc; AErrorProc: TPluginErrorProc = nil);
   public
-    class procedure AppLoad(App: TAppCollectionItem; AppController: IAppController);
+    class function AppLoad(App: TAppCollectionItem; const AppController: IAppController): Boolean;
     class procedure AppUnLoad(App: TAppCollectionItem);
 
     class function CAPTCHAExec(ACAPTCHAPluginPath: string; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA, CAPTCHAName: string; out AText: string; var ACookies: string): Boolean;
 
-    class function CMSExec(const APublishItem: IPublishItem; AErrorProc: TErrorProc = nil; ACAPTCHAInput: TCAPTCHAInput = nil; AIntelligentPostingHandler: TIntelligentPostingHelper = nil): Boolean;
+    class function CMSExec(const APublishItem: IPublishItem; AErrorProc: TPluginErrorProc = nil; ACAPTCHAInput: TCAPTCHAInput = nil; AIntelligentPostingHandler: TIntelligentPostingHelper = nil): Boolean;
     class function CMSDefaultCharset(ACMSPluginPath: string): string;
     class function CMSBelongsTo(ACMSPluginPath, AWebsiteSourceCode: string): Boolean;
     class procedure CMSShowWebsiteSettingsEditor(ACMSPluginPath: string; CMSWebsites: TCMSWebsitesCollectionItem; AppController: IAppController);
@@ -56,91 +62,82 @@ type
 
     class function CheckFiles(FileHoster: TPlugInCollectionItem; ALinks: string): TLinksInfo;
 
-    class function ImageHosterLocalUpload(ImageHoster: TImageHosterCollectionItem; LocalPath: string; AErrorProc: TErrorProc = nil; ACAPTCHAInput: TCAPTCHAInput = nil): string;
-    class function ImageHosterRemoteUpload(ImageHoster: TImageHosterCollectionItem; ImageUrl: string; AErrorProc: TErrorProc = nil; ACAPTCHAInput: TCAPTCHAInput = nil): string;
+    class function ImageHosterLocalUpload(ImageHoster: TImageHosterCollectionItem; LocalPath: string; AErrorProc: TPluginErrorProc = nil; ACAPTCHAInput: TCAPTCHAInput = nil): string;
+    class function ImageHosterRemoteUpload(ImageHoster: TImageHosterCollectionItem; ImageUrl: string; AErrorProc: TPluginErrorProc = nil; ACAPTCHAInput: TCAPTCHAInput = nil): string;
   end;
 
 implementation
 
 uses
   uIntelligentPosting;
-{$REGION 'TApiPlugin private'}
 
-class procedure TApiPlugin.ReturnError;
+class procedure TApiPlugin.InitializePlugin(const APlugin: IPlugIn);
 begin
-  if Assigned(AErrorProc) then
-    AErrorProc(AErrorMsg)
-  else
-    raise Exception.Create(AErrorMsg);
+  APlugin.SetHTTPManager(THTTPManager.Instance());
+
+  case APlugin.GetType of
+    ptApp, ptCAPTCHA, ptFileFormats:
+      APlugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaMain);
+    ptCMS:
+      APlugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaCMS);
+    ptCrawler:
+      APlugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaCMS);
+    ptCrypter:
+      APlugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaCrypter);
+    ptFileHoster:
+      APlugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaFileHoster);
+    ptImageHoster:
+      APlugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaImageHoster);
+  end;
+
+  APlugin.ConnectTimeout := SettingsManager.Settings.HTTP.ConnectTimeout;
+  APlugin.ReadTimeout := SettingsManager.Settings.HTTP.ReadTimeout;
 end;
 
-class procedure TApiPlugin.LoadPlugin(ARelativPluginPath: string; APluginProc: TPluginProc; AErrorProc: TErrorProc = nil);
+class procedure TApiPlugin.UninitializePlugin(const APlugin: IPlugIn);
+begin
+  APlugin.SetHTTPManager(nil);
+end;
+
+class function TApiPlugin.RelativToAbsolutePath(const ARelativPluginPath: string): string;
+begin
+  Result := PathCombineEx(GetPluginFolder, ARelativPluginPath);
+end;
+
+class function TApiPlugin.PluginTypeToString(const APluginType: TPlugInType): string;
+begin
+  Result := copy(TEnum.GetName<TPlugInType>(APluginType), 3, MaxInt);
+end;
+
+class function TApiPlugin.IncorrectPluginTypeErrorMsg(const ARelativPluginPath: string; const APlugin: IPlugIn; AExpectedPlugin: TPlugInType): string;
 var
-  LPluginMinorVersion: Integer;
-  PluginPath: string;
-  hLib: Cardinal;
-  MLoadPlugIn: TLoadPlugIn;
-  Plugin: IPlugIn;
+  LPluginFileName: string;
+  LExpectedPluginType: string;
+  LFoundPluginType: string;
 begin
-  // OutputDebugString(PChar('LoadPlugin() START ' + IntToStr(GetCurrentThreadId)));
-  PluginPath := PathCombineEx(GetPluginFolder, ARelativPluginPath);
-  // OutputDebugString(PChar('LoadPlugin() after PathCombineEx() ' + IntToStr(GetCurrentThreadId)));
-  if FileExists(PluginPath) then
-  begin
-    LPluginMinorVersion := TFileVersionInfo.GetVersionInfo(PluginPath).FileVersionNumber.Minor;
-    if not(MINOR_VERSION = LPluginMinorVersion) then
-      ReturnError(Format(StrThisPluginIsIncom, [MINOR_VERSION, LPluginMinorVersion]), AErrorProc);
+  LPluginFileName := ExtractFileName(ARelativPluginPath);
+  LExpectedPluginType := TApiPlugin.PluginTypeToString(AExpectedPlugin);
+  LFoundPluginType := TApiPlugin.PluginTypeToString(APlugin.GetType);
 
-    hLib := LoadLibrary(PChar(PluginPath));
-    try
-      if not(hLib = 0) then
-      begin
-        @MLoadPlugIn := GetProcAddress(hLib, 'LoadPlugIn');
-
-        if MLoadPlugIn(Plugin) then
-          try
-            Plugin.SetHTTPManager(THTTPManager.Instance);
-
-            case Plugin.GetType of
-              ptApp, ptCAPTCHA, ptFileFormats:
-                Plugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaMain);
-              ptCMS:
-                Plugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaCMS);
-              ptCrawler:
-                Plugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaCMS);
-              ptCrypter:
-                Plugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaCrypter);
-              ptFileHoster:
-                Plugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaFileHoster);
-              ptImageHoster:
-                Plugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaImageHoster);
-            end;
-
-            Plugin.ConnectTimeout := SettingsManager.Settings.HTTP.ConnectTimeout;
-            Plugin.ReadTimeout := SettingsManager.Settings.HTTP.ReadTimeout;
-
-            APluginProc(Plugin);
-
-            Plugin.SetHTTPManager(nil);
-          finally
-            Plugin := nil;
-          end;
-      end
-      else
-        ReturnError(Format(StrPluginDamaged, [SysErrorMessage(GetLastError())]), AErrorProc);
-    finally
-      { TODO :
-        Free library opened in threads, too! somewhere memory leak?
-        => freeze error! }
-      // if (GetCurrentThreadId = MainThreadID) then
-      FreeLibrary(hLib);
-    end;
-  end
-  else
-    ReturnError('Plugin not found! (' + ARelativPluginPath + ')', AErrorProc);
+  Result := Format(StrPluginIncorrectType, [LExpectedPluginType, LFoundPluginType, LPluginFileName]);
 end;
 
-class procedure TApiPlugin.LoadCrypterPlugin(ACrypter: TCrypterCollectionItem; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TErrorProc);
+class procedure TApiPlugin.LoadPlugin(const ARelativPluginPath: string; APluginProc: TPluginProc; AErrorProc: TPluginErrorProc);
+var
+  LPluginHandle: Cardinal;
+  LPluginFileName: string;
+begin
+  LPluginFileName := TApiPlugin.RelativToAbsolutePath(ARelativPluginPath);
+  TApiPlugin.LoadPluginBase(LPluginFileName, LPluginHandle,
+    { } procedure(var APlugin: IPlugIn)
+    { } begin
+    { . } TApiPlugin.InitializePlugin(APlugin);
+    { . } APluginProc(APlugin);
+    { . } TApiPlugin.UninitializePlugin(APlugin);
+    { } end, True, AErrorProc);
+end;
+
+class procedure TApiPlugin.LoadCrypterPlugin(ACrypter: TCrypterCollectionItem; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TPluginErrorProc);
 begin
   LoadPlugin(ACrypter.Path,
     { } procedure(var APlugin: IPlugIn)
@@ -175,7 +172,7 @@ begin
     { } end, AErrorProc);
 end;
 
-class procedure TApiPlugin.LoadFileFormatsPlugin(ARelativPluginPath: string; AFileFormatPluginProc: TFileFormatPluginProc; AErrorProc: TErrorProc = nil);
+class procedure TApiPlugin.LoadFileFormatsPlugin(ARelativPluginPath: string; AFileFormatPluginProc: TFileFormatPluginProc; AErrorProc: TPluginErrorProc = nil);
 begin
   LoadPlugin(ARelativPluginPath,
     { } procedure(var APlugin: IPlugIn)
@@ -197,51 +194,83 @@ begin
     { ... } end;
     { } end, AErrorProc);
 end;
-{$ENDREGION}
 
-class procedure TApiPlugin.AppLoad;
+class function TApiPlugin.AppLoad(App: TAppCollectionItem; const AppController: IAppController): Boolean;
 var
-  hLib: Cardinal;
-  MLoadPlugIn: TLoadAppPlugIn;
-  _Error: Boolean;
+  LLibraryHandle: Cardinal;
+  LPluginFile: string;
+  LResult, LStatus: Boolean;
 begin
-  _Error := False;
-  hLib := LoadLibrary(PChar(PathCombineEx(GetPluginFolder, App.Path)));
-  if not(hLib = 0) then
-  begin
-    @MLoadPlugIn := GetProcAddress(hLib, 'LoadPlugIn');
-    App.LibraryID := hLib;
-    if MLoadPlugIn(App.Plugin) then
-      try
-        App.Plugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaMain);
-        App.Plugin.ConnectTimeout := SettingsManager.Settings.HTTP.ConnectTimeout;
-        App.Plugin.ReadTimeout := SettingsManager.Settings.HTTP.ReadTimeout;
-        _Error := not App.Plugin.Start(AppController);
-        if _Error then
-          App.Plugin.Stop;
-      except
-        App.Plugin := nil;
-      end;
+  LPluginFile := TApiPlugin.RelativToAbsolutePath(App.Path);
+  try
+    TApiPlugin.LoadPluginBase(LPluginFile, LLibraryHandle,
+      { } procedure(var APlugin: IPlugIn)
+      { } var
+      { . } LAppPlugin: IAppPlugin;
+      { } begin
+      { . } App.LibraryID := LLibraryHandle;
+      { . } TApiPlugin.InitializePlugin(APlugin);
+      { . } if APlugin.QueryInterface(IAppPlugin, LAppPlugin) = 0 then
+      { . } begin
+      { ... } try
+      { ..... } try
+      { ....... } LResult := True;
+      { ....... } LStatus := LAppPlugin.Start(AppController);
+      { ..... } except
+      { ....... } LResult := False;
+      { ....... } LAppPlugin.Stop;
+      { ....... } TApiPlugin.UninitializePlugin(LAppPlugin);
+      { ..... } end;
+      { ... } except
+      { ..... } LAppPlugin.Stop;
+      { ..... } TApiPlugin.UninitializePlugin(LAppPlugin);
+      { ..... } TApiPlugin.UnLoadPluginBase(LLibraryHandle);
+      { ..... } LStatus := True;
+      { ... } end;
+
+      { ... } if not LStatus then
+      { ... } begin
+      { ..... } LResult := False;
+      { ..... } TApiPlugin.ReturnError(Format(StrPluginInternalError, [LAppPlugin.ErrorMsg, ExtractFileName(LPluginFile)]));
+      { ... } end
+      { ... } else
+      { ... } begin
+      { ..... } App.Plugin := LAppPlugin;
+      { ... } end;
+
+      { ... } LAppPlugin := nil;
+      { . } end
+      { . } else
+      { . } begin
+      { ... } TApiPlugin.ReturnError(IncorrectPluginTypeErrorMsg(App.Path, APlugin, ptApp));
+      { . } end;
+      { } end, False);
+
+  except
+    if not LStatus then
+    begin
+      TApiPlugin.UnLoadPluginBase(LLibraryHandle);
+    end;
   end;
-  if _Error then
-    FreeLibrary(hLib);
+
+  Result := LResult;
 end;
 
 class procedure TApiPlugin.AppUnLoad(App: TAppCollectionItem);
 var
-  hLib: Cardinal;
-  // _Error: Boolean;
+  LLibraryHandle: Cardinal;
 begin
-  hLib := App.LibraryID;
-  if not(hLib = 0) then
+  LLibraryHandle := App.LibraryID;
+  if not(LLibraryHandle = 0) then
   begin
     try
+      TApiPlugin.UninitializePlugin(App.Plugin);
       App.Plugin.Stop;
     finally
       App.Plugin := nil;
     end;
   end;
-  FreeLibrary(hLib);
+  TApiPlugin.UnLoadPluginBase(LLibraryHandle);
 end;
 
 class function TApiPlugin.CAPTCHAExec;
@@ -328,11 +357,11 @@ begin
 
     { ....... } try
     { ......... } _Result := Exec;
-    { ......... } ReturnError(ErrorMsg, AErrorProc);
+    { ......... } // TApiPlugin.ReturnError(ErrorMsg, AErrorProc);
     { ....... } except
     { ......... } on E: Exception do
     { ......... } begin
-    { ........... } ReturnError('Unhandled exception (' + E.message + ') occurred', AErrorProc);
+    { ........... } TPluginBase.ReturnError('Unhandled exception (' + E.message + ') occurred', AErrorProc);
     { ......... } end;
     { ....... } end;
     { ..... } end;
@@ -446,7 +475,7 @@ begin
     { ............. } LComponentIDs := LComponentIDs + [ControlID];
 
     { ....... } try
-    { ......... } LResult:= Exec(Integer(AControlController.TypeID), Longword(LComponentIDs), ACrawler.Limit, AControlController);
+    { ......... } LResult := Exec(Integer(AControlController.TypeID), Longword(LComponentIDs), ACrawler.Limit, AControlController);
     { ......... } LErrorMsg := ErrorMsg;
     { ....... } except
     { ......... } on E: Exception do
@@ -737,7 +766,7 @@ begin
   Result := _Result;
 end;
 
-class function TApiPlugin.ImageHosterLocalUpload(ImageHoster: TImageHosterCollectionItem; LocalPath: string; AErrorProc: TErrorProc; ACAPTCHAInput: TCAPTCHAInput): string;
+class function TApiPlugin.ImageHosterLocalUpload(ImageHoster: TImageHosterCollectionItem; LocalPath: string; AErrorProc: TPluginErrorProc; ACAPTCHAInput: TCAPTCHAInput): string;
 var
   _Result: string;
 begin
@@ -774,11 +803,11 @@ begin
 
     { ....... } try
     { ......... } _Result := LocalUpload(LocalPath);
-    { ......... } ReturnError(ErrorMsg, AErrorProc);
+    { ......... } // TApiPlugin.ReturnError(ErrorMsg, AErrorProc);
     { ....... } except
     { ......... } on E: Exception do
     { ......... } begin
-    { ........... } ReturnError('Unhandled exception (' + E.message + ') occurred', AErrorProc);
+    { ........... } TApiPlugin.ReturnError('Unhandled exception (' + E.message + ') occurred', AErrorProc);
     { ......... } end;
     { ....... } end;
 
@@ -828,11 +857,11 @@ begin
 
     { ....... } try
     { ......... } _Result := RemoteUpload(ImageUrl);
-    { ......... } ReturnError(ErrorMsg, AErrorProc);
+    { ......... } // TApiPlugin.ReturnError(ErrorMsg, AErrorProc);
     { ....... } except
     { ......... } on E: Exception do
     { ......... } begin
-    { ........... } ReturnError('Unhandled exception (' + E.message + ') occurred', AErrorProc);
+    { ........... } TApiPlugin.ReturnError('Unhandled exception (' + E.message + ') occurred', AErrorProc);
     { ......... } end;
     { ....... } end;
 

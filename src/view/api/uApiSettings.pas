@@ -6,7 +6,7 @@ uses
   // Delphi
   Windows, SysUtils, Classes, Forms, Graphics,
   // Dev Express
-  dxDockControl,
+  dxDockControl, cxCheckListBox,
   // AnyDAC
   // uADStanIntf,
   // Utils
@@ -34,6 +34,7 @@ type
     function GetIcon: TIcon;
   public
     function GetPath: string; virtual;
+    property IconHandle: Cardinal read GetIconHandle write FIconHandle;
     property Icon: TIcon read GetIcon;
     destructor Destroy; override;
   published
@@ -127,8 +128,7 @@ type
 
   TCrypterCollectionItem = class(TPlugInCollectionItem)
   private
-    FUseAccount, FUseCaptcha, FUseAdvertismentLink, FUseAdvertismentPicture, FUseCoverLink, FUseDescription, FUseCNL, FUseWebseiteLink, FUseEMailforStatusNotice, FUseFilePassword, FUseAdminPassword,
-      FUseVisitorPassword: Boolean;
+    FUseAccount, FUseCaptcha, FUseAdvertismentLink, FUseAdvertismentPicture, FUseCoverLink, FUseDescription, FUseCNL, FUseWebseiteLink, FUseEMailforStatusNotice, FUseFilePassword, FUseAdminPassword, FUseVisitorPassword: Boolean;
 
     FAccountName, FAccountPassword, FAdvertismentLayerName, FAdvertismentLayerValue, FAdvertismentLink, FAdvertismentPicture,
     { FDescription,FCoverLink, } FWebseiteLink, FEMailforStatusNotice, FAdminPassword, FVisitorPassword: string;
@@ -574,6 +574,7 @@ type
   protected
     procedure LoadDefaultSettings; override;
   public
+    function GetDefaultPluginLoadedFunc(const APluginType: TPlugInType; var ACollection: TCollection; var ACheckListBox: TcxCheckListBox): Boolean;
     procedure PreLoadPlugins;
   end;
 
@@ -593,18 +594,18 @@ end;
 
 function TPlugInCollectionItem.GetIconHandle: Cardinal;
 var
-  hLib: Cardinal;
+  LLibraryHandle: Cardinal;
 begin
   if (FIconHandle = 0) then
   begin
     if FileExists(GetPath) then
     begin
-      hLib := LoadLibrary(PChar(GetPath));
+      LLibraryHandle := LoadLibrary(PChar(GetPath));
       try
-        if not(hLib = 0) then
-          FIconHandle := LoadImage(hLib, MakeIntResource('icon'), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR);
+        if not(LLibraryHandle = 0) then
+          FIconHandle := LoadImage(LLibraryHandle, MakeIntResource('icon'), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR);
       finally
-        FreeLibrary(hLib);
+        FreeLibrary(LLibraryHandle);
       end;
     end
   end;
@@ -617,7 +618,7 @@ begin
   if not Assigned(FIcon) then
   begin
     FIcon := TIcon.Create;
-    FIcon.Handle := GetIconHandle;
+    FIcon.Handle := IconHandle;
   end;
   Result := FIcon;
 end;
@@ -1448,82 +1449,55 @@ begin
   end;
 end;
 
+function TSettingsManager.GetDefaultPluginLoadedFunc(const APluginType: TPlugInType; var ACollection: TCollection; var ACheckListBox: TcxCheckListBox): Boolean;
+begin
+  ACheckListBox := nil;
+
+  case APluginType of
+    ptNone:
+      Exit(False);
+    ptApp:
+      ACollection := SettingsManager.Settings.Plugins.App;
+    ptCAPTCHA:
+      ACollection := SettingsManager.Settings.Plugins.CAPTCHA;
+    ptCMS:
+      ACollection := SettingsManager.Settings.Plugins.CMS;
+    ptCrawler:
+      ACollection := SettingsManager.Settings.Plugins.Crawler;
+    ptCrypter:
+      ACollection := SettingsManager.Settings.Plugins.Crypter;
+    ptFileFormats:
+      ACollection := SettingsManager.Settings.Plugins.FileFormats;
+    ptFileHoster:
+      ACollection := SettingsManager.Settings.Plugins.FileHoster;
+    ptImageHoster:
+      ACollection := SettingsManager.Settings.Plugins.ImageHoster;
+  end;
+
+  Result := True;
+end;
+
 procedure TSettingsManager.PreLoadPlugins;
 var
-  PlugInCollectionItem: TPlugInCollectionItem;
+  LPlugInCollectionItem: TPlugInCollectionItem;
 begin
   with SettingsManager.Settings.Plugins do
   begin
-    with TAddPlugin.Create do
-      try
-        ExecuteFolder(IAppPlugIn, SettingsManager.Settings.Plugins.App, nil, 'applications (apps)', GetPluginFolder);
-      finally
-        Free;
-      end;
+    TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptCrawler, GetPluginFolder + 'xrelto.dll', False, { make the error message silent } procedure(AErrorMsg: string)begin end);
 
-    with TAddPlugin.Create do
-      try
-        ExecuteFolder(ICAPTCHAPlugIn, SettingsManager.Settings.Plugins.CAPTCHA, nil, 'CAPTCHA', GetPluginFolder);
-      finally
-        Free;
-      end;
+    TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptCrawler, GetPluginFolder + 'releasename.dll', False, { make the error message silent } procedure(AErrorMsg: string)begin end);
 
-    with TAddPlugin.Create do
-      try
-        ExecuteFolder(ICMSPlugIn, SettingsManager.Settings.Plugins.CMS, nil, 'content management system (CMS)', GetPluginFolder);
-      finally
-        Free;
-      end;
+    LPlugInCollectionItem := FindPlugInCollectionItemFromCollection('Releasename', Crawler);
+    if Assigned(LPlugInCollectionItem) then
+      LPlugInCollectionItem.Enabled := True;
 
-    with TAddPlugin.Create do
-      try
-        OnPluginLoaded := CrawlerPluginLoaded;
+    TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptFileFormats, GetPluginFolder + 'intelligenxml2.dll', False, { make the error message silent } procedure(AErrorMsg: string)begin end);
 
-        Execute(ICrawlerPlugIn, Crawler, nil, 'crawler', GetPluginFolder + 'xrelto.dll');
+    LPlugInCollectionItem := FindPlugInCollectionItemFromCollection('intelligen.xml.2', FileFormats);
+    if Assigned(LPlugInCollectionItem) then
+      LPlugInCollectionItem.Enabled := True;
 
-        Execute(ICrawlerPlugIn, Crawler, nil, 'crawler', GetPluginFolder + 'releasename.dll');
-        PlugInCollectionItem := FindPlugInCollectionItemFromCollection('Releasename', Crawler);
-        if Assigned(PlugInCollectionItem) then
-          PlugInCollectionItem.Enabled := True;
-
-        ExecuteFolder(ICrawlerPlugIn, SettingsManager.Settings.Plugins.Crawler, nil, 'crawler', GetPluginFolder);
-      finally
-        Free;
-      end;
-
-    with TAddPlugin.Create do
-      try
-        ExecuteFolder(ICrypterPlugIn, SettingsManager.Settings.Plugins.Crypter, nil, 'crypter', GetPluginFolder);
-      finally
-        Free;
-      end;
-
-    with TAddPlugin.Create do
-      try
-        Execute(IFileFormatPlugIn, FileFormats, nil, 'file formats', GetPluginFolder + 'intelligenxml2.dll');
-
-        PlugInCollectionItem := FindPlugInCollectionItemFromCollection('intelligen.xml.2', FileFormats);
-        if Assigned(PlugInCollectionItem) then
-          PlugInCollectionItem.Enabled := True;
-
-        ExecuteFolder(IFileFormatPlugIn, SettingsManager.Settings.Plugins.FileFormats, nil, 'file formats', GetPluginFolder);
-      finally
-        Free;
-      end;
-
-    with TAddPlugin.Create do
-      try
-        ExecuteFolder(IFileHosterPlugIn, SettingsManager.Settings.Plugins.FileHoster, nil, 'file hoster', GetPluginFolder);
-      finally
-        Free;
-      end;
-
-    with TAddPlugin.Create do
-      try
-        ExecuteFolder(IImageHosterPlugIn, SettingsManager.Settings.Plugins.ImageHoster, nil, 'image hoster', GetPluginFolder);
-      finally
-        Free;
-      end;
+    TAddPlugin.ExecuteFolder(GetDefaultPluginLoadedFunc, GetPluginFolder);
   end;
 end;
 

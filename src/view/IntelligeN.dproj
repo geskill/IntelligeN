@@ -94,10 +94,12 @@
 			<DCCReference Include="api\uApiBackupManager.pas"/>
 			<DCCReference Include="api\uApiCAPTCHA.pas"/>
 			<DCCReference Include="api\uApiCodeTag.pas"/>
-			<DCCReference Include="api\uApiControlController.pas"/>
-			<DCCReference Include="api\uApiControlAligner.pas"/>
 			<DCCReference Include="api\uApiConst.pas"/>
+			<DCCReference Include="api\uApiControlAligner.pas"/>
+			<DCCReference Include="api\uApiControlController.pas"/>
+			<DCCReference Include="api\uApiControlControllerBase.pas"/>
 			<DCCReference Include="api\uApiControls.pas"/>
+			<DCCReference Include="api\uApiControlsBase.pas"/>
 			<DCCReference Include="api\uApiCrawler.pas"/>
 			<DCCReference Include="api\uApiCrypter.pas"/>
 			<DCCReference Include="api\uApiDirectoryMonitor.pas"/>
@@ -110,10 +112,13 @@
 			<DCCReference Include="api\uApiMain.pas"/>
 			<DCCReference Include="api\uApiMainMenu.pas"/>
 			<DCCReference Include="api\uApiMirrorControl.pas"/>
+			<DCCReference Include="api\uApiMirrorControlBase.pas"/>
 			<DCCReference Include="api\uApiMirrorController.pas"/>
+			<DCCReference Include="api\uApiMirrorControllerBase.pas"/>
 			<DCCReference Include="api\uApiMody.pas"/>
 			<DCCReference Include="api\uApiMultiCastEvent.pas"/>
 			<DCCReference Include="api\uApiPlugins.pas"/>
+			<DCCReference Include="api\uApiPluginsBase.pas"/>
 			<DCCReference Include="api\uApiPluginsAdd.pas"/>
 			<DCCReference Include="api\uApiPrerequisite.pas"/>
 			<DCCReference Include="api\uApiPublishController.pas"/>
@@ -193,6 +198,7 @@
 			<DCCReference Include="mods\uMyTMonospaceHint.pas"/>
 			<DCCReference Include="..\sdk\dlls\uExport.pas"/>
 			<DCCReference Include="..\sdk\plugins\uPlugInInterface.pas"/>
+			<DCCReference Include="..\sdk\plugins\uPlugInInterfaceAdv.pas"/>
 			<DCCReference Include="..\sdk\plugins\uPlugInClass.pas"/>
 			<DCCReference Include="..\sdk\plugins\uPlugInConst.pas"/>
 			<DCCReference Include="..\sdk\plugins\uPlugInEvent.pas"/>
@@ -217,11 +223,6 @@
 			<DCCReference Include="ole\uOLE.pas">
 				<CoClasses>IntelligeN2009</CoClasses>
 			</DCCReference>
-			<DCCReference Include="..\sdk\plugins\uPlugInInterfaceAdv.pas"/>
-			<DCCReference Include="api\uApiControlsBase.pas"/>
-			<DCCReference Include="api\uApiControlControllerBase.pas"/>
-			<DCCReference Include="api\uApiMirrorControllerBase.pas"/>
-			<DCCReference Include="api\uApiMirrorControlBase.pas"/>
 			<RidlCompile Include="IntelligeN.ridl"/>
 			<RcItem Include="..\..\res\barmanager.txt">
 				<ContainerId>ResourceItem</ContainerId>

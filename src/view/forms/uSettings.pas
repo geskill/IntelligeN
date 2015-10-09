@@ -431,6 +431,7 @@ type
     procedure RemoveImageHosterClick(Sender: TObject);
     procedure RemovedImageHosterClick(Sender: TObject);
 
+    function GetDefaultPluginLoadedFunc(const APluginType: TPlugInType; var ACollection: TCollection; var ACheckListBox: TcxCheckListBox): Boolean;
     function GetCMSCheckAllStatus: Byte;
     procedure SetCMSCheckAllStatus;
     procedure RefreshAccountlist;
@@ -1912,22 +1913,12 @@ end;
 
 procedure TSettings.AddAppClick(Sender: TObject);
 begin
-  with TAddPlugin.Create do
-    try
-      Execute(IAppPlugIn, SettingsManager.Settings.Plugins.App, FAppPluginsCheckListBox.InnerCheckListBox, 'applications (apps)');
-    finally
-      Free;
-    end;
+  TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptApp);
 end;
 
 procedure TSettings.AppAddAllClick(Sender: TObject);
 begin
-  with TAddPlugin.Create do
-    try
-      ExecuteFolder(IAppPlugIn, SettingsManager.Settings.Plugins.App, FAppPluginsCheckListBox.InnerCheckListBox, 'applications (apps)', GetPluginFolder);
-    finally
-      Free;
-    end;
+  TAddPlugin.ExecuteFolder(GetDefaultPluginLoadedFunc, GetPluginFolder, ptApp);
 end;
 
 procedure TSettings.RemoveAppClick(Sender: TObject);
@@ -1936,7 +1927,6 @@ begin
   begin
     if Enabled then
       TApiPlugin.AppUnLoad(TAppCollectionItem(SettingsManager.Settings.Plugins.App.Items[FAppPluginsCheckListBox.InnerCheckListBox.ItemIndex]));
-    FreeLibrary(LibraryID);
     Free;
   end;
 end;
@@ -1955,22 +1945,12 @@ end;
 
 procedure TSettings.CAPTCHAAddClick(Sender: TObject);
 begin
-  with TAddPlugin.Create do
-    try
-      Execute(ICAPTCHAPlugIn, SettingsManager.Settings.Plugins.CAPTCHA, FCAPTCHAPluginsCheckListBox.InnerCheckListBox, 'CAPTCHA');
-    finally
-      Free;
-    end;
+  TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptCAPTCHA);
 end;
 
 procedure TSettings.CAPTCHAAddAllClick(Sender: TObject);
 begin
-  with TAddPlugin.Create do
-    try
-      ExecuteFolder(ICAPTCHAPlugIn, SettingsManager.Settings.Plugins.CAPTCHA, FCAPTCHAPluginsCheckListBox.InnerCheckListBox, 'CAPTCHA', GetPluginFolder);
-    finally
-      Free;
-    end;
+  TAddPlugin.ExecuteFolder(GetDefaultPluginLoadedFunc, GetPluginFolder, ptCAPTCHA);
 end;
 
 procedure TSettings.RemoveCAPTCHAClick(Sender: TObject);
@@ -2051,30 +2031,20 @@ end;
 
 procedure TSettings.AddCMSClick(Sender: TObject);
 begin
-  with TAddPlugin.Create do
-    try
-      if Execute(ICMSPlugIn, SettingsManager.Settings.Plugins.CMS, FCMSPluginsCheckListBox.InnerCheckListBox, 'content management system (CMS)') then
-      begin
-        CMSClick(nil);
-        // Main.fPublish.GenerateColumns;
-      end;
-    finally
-      Free;
-    end;
+  if TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptCMS) then
+  begin
+    CMSClick(nil);
+    // Main.fPublish.GenerateColumns;
+  end;
 end;
 
 procedure TSettings.CMSAddAllClick(Sender: TObject);
 begin
-  with TAddPlugin.Create do
-    try
-      if ExecuteFolder(ICMSPlugIn, SettingsManager.Settings.Plugins.CMS, FCMSPluginsCheckListBox.InnerCheckListBox, 'content management system (CMS)', GetPluginFolder) then
-      begin
-        CMSClick(nil);
-        // Main.fPublish.GenerateColumns;
-      end;
-    finally
-      Free;
-    end;
+  if TAddPlugin.ExecuteFolder(GetDefaultPluginLoadedFunc, GetPluginFolder, ptCMS) then
+  begin
+    CMSClick(nil);
+    // Main.fPublish.GenerateColumns;
+  end;
 end;
 
 procedure TSettings.RemoveCMSClick(Sender: TObject);
@@ -2192,28 +2162,14 @@ end;
 
 procedure TSettings.AddCrawlerClick(Sender: TObject);
 begin
-  with TAddPlugin.Create do
-    try
-      OnPluginLoaded := CrawlerPluginLoaded;
-
-      if Execute(ICrawlerPlugIn, SettingsManager.Settings.Plugins.Crawler, FCrawlerPluginsCheckListBox.InnerCheckListBox, 'crawler') then
-        CrawlerClick(nil);
-    finally
-      Free;
-    end;
+  if TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptCrawler) then
+    CrawlerClick(nil);
 end;
 
 procedure TSettings.CrawlerAddAllClick(Sender: TObject);
 begin
-  with TAddPlugin.Create do
-    try
-      OnPluginLoaded := CrawlerPluginLoaded;
-
-      if ExecuteFolder(ICrawlerPlugIn, SettingsManager.Settings.Plugins.Crawler, FCrawlerPluginsCheckListBox.InnerCheckListBox, 'crawler', GetPluginFolder) then
-        CrawlerClick(nil);
-    finally
-      Free;
-    end;
+  if TAddPlugin.ExecuteFolder(GetDefaultPluginLoadedFunc, GetPluginFolder, ptCrawler) then
+    CrawlerClick(nil);
 end;
 
 procedure TSettings.RemoveCrawlerClick(Sender: TObject);
@@ -2350,24 +2306,14 @@ end;
 
 procedure TSettings.AddCrypterClick(Sender: TObject);
 begin
-  with TAddPlugin.Create do
-    try
-      if Execute(ICrypterPlugIn, SettingsManager.Settings.Plugins.Crypter, FCrypterPluginsCheckListBox.InnerCheckListBox, 'crypter') then
-        CrypterClick(nil);
-    finally
-      Free;
-    end;
+  if TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptCrypter) then
+    CrypterClick(nil);
 end;
 
 procedure TSettings.CrypterAddAllClick(Sender: TObject);
 begin
-  with TAddPlugin.Create do
-    try
-      if ExecuteFolder(ICrypterPlugIn, SettingsManager.Settings.Plugins.Crypter, FCrypterPluginsCheckListBox.InnerCheckListBox, 'crypter', GetPluginFolder) then
-        CrypterClick(nil);
-    finally
-      Free;
-    end;
+  if TAddPlugin.ExecuteFolder(GetDefaultPluginLoadedFunc, GetPluginFolder, ptCrypter) then
+    CrypterClick(nil);
 end;
 
 procedure TSettings.RemoveCrypterClick(Sender: TObject);
@@ -2406,24 +2352,14 @@ end;
 
 procedure TSettings.FileFormatsAddClick(Sender: TObject);
 begin
-  with TAddPlugin.Create do
-    try
-      if Execute(IFileFormatPlugIn, SettingsManager.Settings.Plugins.FileFormats, FFileFormatsPluginsCheckListBox.InnerCheckListBox, 'file formats') then
-        FileFormatsClick(nil);
-    finally
-      Free;
-    end;
+  if TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptFileFormats) then
+    FileFormatsClick(nil);
 end;
 
 procedure TSettings.FileFormatsAddAllClick(Sender: TObject);
 begin
-  with TAddPlugin.Create do
-    try
-      if ExecuteFolder(IFileFormatPlugIn, SettingsManager.Settings.Plugins.FileFormats, FFileFormatsPluginsCheckListBox.InnerCheckListBox, 'file formats', GetPluginFolder) then
-        FileFormatsClick(nil);
-    finally
-      Free;
-    end;
+  if TAddPlugin.ExecuteFolder(GetDefaultPluginLoadedFunc, GetPluginFolder, ptFileFormats) then
+    FileFormatsClick(nil);
 end;
 
 procedure TSettings.RemoveFileFormatsClick(Sender: TObject);
@@ -2445,22 +2381,12 @@ end;
 
 procedure TSettings.FileHosterAddClick(Sender: TObject);
 begin
-  with TAddPlugin.Create do
-    try
-      Execute(IFileHosterPlugIn, SettingsManager.Settings.Plugins.FileHoster, FFileHosterPluginsCheckListBox.InnerCheckListBox, 'file hoster');
-    finally
-      Free;
-    end;
+  TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptFileHoster);
 end;
 
 procedure TSettings.FileHosterAddAllClick(Sender: TObject);
 begin
-  with TAddPlugin.Create do
-    try
-      ExecuteFolder(IFileHosterPlugIn, SettingsManager.Settings.Plugins.FileHoster, FFileHosterPluginsCheckListBox.InnerCheckListBox, 'file formats', GetPluginFolder);
-    finally
-      Free;
-    end;
+  TAddPlugin.ExecuteFolder(GetDefaultPluginLoadedFunc, GetPluginFolder, ptFileHoster);
 end;
 
 procedure TSettings.RemoveFileHosterClick(Sender: TObject);
@@ -2523,24 +2449,15 @@ end;
 
 procedure TSettings.ImageHosterAddClick(Sender: TObject);
 begin
-  with TAddPlugin.Create do
-    try
-      if Execute(IImageHosterPlugIn, SettingsManager.Settings.Plugins.ImageHoster, FImageHosterPluginsCheckListBox.InnerCheckListBox, 'image hoster') then
-        ImageHosterClick(nil);
-    finally
-      Free;
-    end;
+  if TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptImageHoster) then
+    ImageHosterClick(nil);
+
 end;
 
 procedure TSettings.ImageHosterAddAllClick(Sender: TObject);
 begin
-  with TAddPlugin.Create do
-    try
-      if ExecuteFolder(IImageHosterPlugIn, SettingsManager.Settings.Plugins.ImageHoster, FImageHosterPluginsCheckListBox.InnerCheckListBox, 'image hoster', GetPluginFolder) then
-        ImageHosterClick(nil);
-    finally
-      Free;
-    end;
+  if TAddPlugin.ExecuteFolder(GetDefaultPluginLoadedFunc, GetPluginFolder, ptImageHoster) then
+    ImageHosterClick(nil);
 end;
 
 procedure TSettings.RemoveImageHosterClick(Sender: TObject);
@@ -2553,6 +2470,34 @@ begin
   pImageHosterSettings.Visible := FCrypterPluginsCheckListBox.InnerCheckListBox.ItemIndex <> -1;
 end;
 {$ENDREGION}
+
+function TSettings.GetDefaultPluginLoadedFunc(const APluginType: TPlugInType; var ACollection: TCollection; var ACheckListBox: TcxCheckListBox): Boolean;
+begin
+  SettingsManager.GetDefaultPluginLoadedFunc(APluginType, ACollection, ACheckListBox);
+
+  case APluginType of
+    ptNone:
+      Exit(False);
+    ptApp:
+      ACheckListBox := FAppPluginsCheckListBox.InnerCheckListBox;
+    ptCAPTCHA:
+      ACheckListBox := FCAPTCHAPluginsCheckListBox.InnerCheckListBox;
+    ptCMS:
+      ACheckListBox := FCMSPluginsCheckListBox.InnerCheckListBox;
+    ptCrawler:
+      ACheckListBox := FCrawlerPluginsCheckListBox.InnerCheckListBox;
+    ptCrypter:
+      ACheckListBox := FCrypterPluginsCheckListBox.InnerCheckListBox;
+    ptFileFormats:
+      ACheckListBox := FFileFormatsPluginsCheckListBox.InnerCheckListBox;
+    ptFileHoster:
+      ACheckListBox := FFileHosterPluginsCheckListBox.InnerCheckListBox;
+    ptImageHoster:
+      ACheckListBox := FImageHosterPluginsCheckListBox.InnerCheckListBox;
+  end;
+
+  Result := True;
+end;
 
 function TSettings.GetCMSCheckAllStatus;
 var

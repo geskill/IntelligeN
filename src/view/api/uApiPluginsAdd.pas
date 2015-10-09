@@ -10,221 +10,216 @@ uses
   // Spring Framework
   Spring.Utils,
   // Utils
-  uFileUtils, uPathUtils,
+  uFileUtils,
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // DLLs
   uExport,
   // Api
-  uApiConst, uApiMultiCastEvent, uApiMain, uApiSettings,
+  uApiConst, uApiPluginsBase, uApiPlugins, uApiMultiCastEvent, uApiSettings,
   // Plugin system
-  uPlugInConst, uPlugInInterface, uPlugInInterfaceAdv;
+  uPlugInConst, uPlugInInterface;
 
 type
-  TOnPluginLoaded = procedure(aSender: TObject; aPlugIn: IPlugIn; aPlugInCollectionItem: TPlugInCollectionItem; aHandle: Integer) of object;
+  TPluginOnLoadedFunc = reference to function(const APluginType: TPlugInType; var ACollection: TCollection; var ACheckListBox: TcxCheckListBox): Boolean;
 
-  TAddPlugin = class
+  TAddPlugin = class(TApiPlugin)
   private
-    FOnPluginLoaded: TOnPluginLoaded;
-    function LoadPlugin(aPlugIn: TGUID; ACollection: TCollection; ACheckListBox: TcxCheckListBox; APlugInName, APlugInNameFile: string; AErrorMsg: Boolean = True): Boolean;
+    class function AddPlugin(const APluginFile: string; const APluginHandle: Cardinal; const APlugin: IPlugIn; const ACollection: TCollection; const ACheckListBox: TcxCheckListBox; AHandleOverride: Boolean = True): Boolean;
+  protected
+    class function ExecuteBase(const APluginFile: string; APluginOnLoadedFunc: TPluginOnLoadedFunc; AHandleOverride: Boolean = True; const ARestrictToType: TPlugInType = ptNone; AErrorProc: TPluginErrorProc = nil): Boolean;
   public
-    constructor Create;
-
-    procedure CrawlerPluginLoaded(aSender: TObject; aPlugIn: IPlugIn; aPlugInCollectionItem: TPlugInCollectionItem; aHandle: Integer);
-
-    function Execute(aPlugIn: TGUID; ACollection: TCollection; ACheckListBox: TcxCheckListBox; APlugInName: string; APlugInPath: string = ''): Boolean;
-    function ExecuteFolder(aPlugIn: TGUID; ACollection: TCollection; ACheckListBox: TcxCheckListBox; APlugInName, AFolderPath: string): Boolean;
-    property OnPluginLoaded: TOnPluginLoaded read FOnPluginLoaded write FOnPluginLoaded;
-    destructor Destroy; override;
+    class function Execute(APluginOnLoadedFunc: TPluginOnLoadedFunc; const ARestrictToType: TPlugInType; APluginFile: string = ''; AHandleOverride: Boolean = True; AErrorProc: TPluginErrorProc = nil): Boolean;
+    class function ExecuteFolder(APluginOnLoadedFunc: TPluginOnLoadedFunc; AFolderPath: string; const ARestrictToType: TPlugInType = ptNone): Boolean;
   end;
 
 implementation
 
-{ ****************************************************************************** }
-{$REGION 'TAddPlugin'}
-
-function TAddPlugin.LoadPlugin;
+class function TAddPlugin.AddPlugin(const APluginFile: string; const APluginHandle: Cardinal; const APlugin: IPlugIn; const ACollection: TCollection; const ACheckListBox: TcxCheckListBox; AHandleOverride: Boolean = True): Boolean;
 var
-  LPluginMinorVersion: Integer;
+  LPlugInCollectionItem: TPlugInCollectionItem;
+  LReplacedEntry: Boolean;
+  LCheckListBoxItem: TcxCheckListBoxItem;
 
-  hLib: Cardinal;
-  MLoadPlugIn: TLoadPlugIn;
-  PlugIn: IPlugIn;
-  PlugInCollectionItem: TPlugInCollectionItem;
-  OverridePlugin: Boolean;
-  CheckListBoxItem: TcxCheckListBoxItem;
+  LCrawlerPlugin: ICrawlerPlugIn;
+  LCrawlerCollectionItem: TCrawlerCollectionItem;
+
+  LTypeID: TTypeID;
+  LTypeIDs: TTypeIDs;
+  LControlID: TControlID;
+  LControlIDs: TControlIDs;
 begin
-  LPluginMinorVersion := TFileVersionInfo.GetVersionInfo(APlugInNameFile).FileVersionNumber.Minor;
+  LPlugInCollectionItem := SettingsManager.Settings.Plugins.FindPlugInCollectionItemFromCollection(APlugin.GetName, ACollection);
 
-  OverridePlugin := False;
-
-  if (MINOR_VERSION = LPluginMinorVersion) then
+  LReplacedEntry := False;
+  if not Assigned(LPlugInCollectionItem) then
   begin
-    hLib := LoadLibrary(PChar(APlugInNameFile));
-    try
-      if not(hLib = 0) then
-      begin
-        @MLoadPlugIn := GetProcAddress(hLib, 'LoadPlugIn');
-        if not(@MLoadPlugIn = nil) then
-        begin
-          MLoadPlugIn(PlugIn);
-          try
-            if Supports(PlugIn, aPlugIn) then
-            begin
-              // plugin hinzufügen
-              PlugInCollectionItem := SettingsManager.Settings.Plugins.FindPlugInCollectionItemFromCollection(PlugIn.GetName, ACollection);
-
-              if not Assigned(PlugInCollectionItem) then
-                PlugInCollectionItem := TPlugInCollectionItem(ACollection.Add)
-              else if AErrorMsg and (MessageDlg(Format(StrOverrideSPlugin, [APlugInName]), mtConfirmation, [mbyes, mbno, mbcancel], 0) = ID_YES) then
-              begin
-                OverridePlugin := True;
-                with SettingsManager.Settings.Plugins do
-                  if Assigned(OnCMSChange) then
-                    OnCMSChange.Invoke(pctEnabled, PlugInCollectionItem.Index, 0);
-              end
-              else
-                Exit;
-
-              with PlugInCollectionItem do
-              begin
-                name := PlugIn.GetName;
-                Enabled := False;
-                Path := ExtractRelativePath(GetPluginFolder, APlugInNameFile);
-
-                if Assigned(FOnPluginLoaded) then
-                  FOnPluginLoaded(self, PlugIn, PlugInCollectionItem, hLib);
-              end;
-
-              if Supports(PlugIn, ICMSPlugIn) then
-                with SettingsManager.Settings.Plugins do
-                  if Assigned(OnCMSChange) and not OverridePlugin then
-                    OnCMSChange.Invoke(pctAdd, PlugInCollectionItem.Index, -1);
-
-              if Assigned(ACheckListBox) then
-              begin
-                if OverridePlugin then
-                  CheckListBoxItem := ACheckListBox.Items[ACheckListBox.Items.IndexOf(PlugInCollectionItem.name)]
-                else
-                  CheckListBoxItem := ACheckListBox.Items.Add;
-
-                with CheckListBoxItem do
-                begin
-                  Checked := PlugInCollectionItem.Enabled;
-                  Text := PlugInCollectionItem.name;
-                  ImageIndex := ACheckListBox.Images.AddIcon(PlugInCollectionItem.Icon);
-
-                  if not FileExists(PlugInCollectionItem.GetPath) then
-                    Enabled := False;
-                end;
-              end;
-
-              Result := True;
-            end
-            else if AErrorMsg then
-              raise Exception.Create(StrThisPluginBelongs);
-          finally
-            PlugIn := nil;
-          end;
-        end
-        else if AErrorMsg then
-          raise Exception.Create(Format(StrUnknownSPlugin, [APlugInName]));
-      end
-      else if AErrorMsg then
-        raise Exception.Create(Format(StrPluginDamaged, [SysErrorMessage(GetLastError())]));
-    finally
-      FreeLibrary(hLib);
-    end;
+    LPlugInCollectionItem := TPlugInCollectionItem(ACollection.Add);
   end
-  else if AErrorMsg then
-    raise Exception.Create(Format(StrThisPluginIsIncom, [MINOR_VERSION, LPluginMinorVersion]))
-end;
-
-constructor TAddPlugin.Create;
-begin
-  inherited Create;
-end;
-
-procedure TAddPlugin.CrawlerPluginLoaded;
-var
-  I, J: Integer;
-  _TemplateTypeIDs: TTypeIDs;
-  _ComponentIDs: TControlIDs;
-begin
-  with aPlugInCollectionItem as TCrawlerCollectionItem do
+  else if AHandleOverride and (MessageDlg(Format(StrPluginOverrideSettings, [APlugin.GetName]), mtConfirmation, [mbyes, mbno, mbcancel], 0) = ID_YES) then
   begin
-    Limit := ICrawlerPlugIn(aPlugIn).GetResultsLimitDefaultValue;
-    Contingent.Clear;
+    LReplacedEntry := True;
+  end
+  else
+  begin
+    Exit(False);
+  end;
 
-    Word(_TemplateTypeIDs) := ICrawlerPlugIn(aPlugIn).GetAvailableTypeIDs;
+  // For the internal data storage
+  with LPlugInCollectionItem do
+  begin
+    Name := APlugin.GetName;
+    Enabled := False;
+    Path := ExtractRelativePath(GetPluginFolder, APluginFile);
+    IconHandle := LoadImage(APluginHandle, MakeIntResource('icon'), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR);
+  end;
 
-    for I := Ord( low(TTypeID)) to Ord( high(TTypeID)) do
-      if TTypeID(I) in _TemplateTypeIDs then
+  if Supports(APlugin, ICMSPlugIn) then
+  begin
+    with SettingsManager.Settings.Plugins do
+      if Assigned(OnCMSChange) then
       begin
-        Longword(_ComponentIDs) := ICrawlerPlugIn(aPlugIn).GetAvailableControlIDs(I);
-
-        for J := Ord( low(TControlID)) to Ord( high(TControlID)) do
-          if TControlID(J) in _ComponentIDs then
-            with TCrawlerContingentCollectionItem(Contingent.Add) do
-            begin
-              TypeID := TTypeID(I);
-              ControlID := TControlID(J);
-              Status := ICrawlerPlugIn(aPlugIn).GetControlIDDefaultValue(I, J);
-            end;
+        if LReplacedEntry then
+        begin
+          OnCMSChange.Invoke(pctEnabled, LPlugInCollectionItem.Index, 0);
+        end
+        else
+        begin
+          OnCMSChange.Invoke(pctAdd, LPlugInCollectionItem.Index, -1);
+        end;
       end;
+  end;
+
+  if Supports(APlugin, ICrawlerPlugIn) then
+  begin
+    LCrawlerCollectionItem := LPlugInCollectionItem as TCrawlerCollectionItem;
+    with LCrawlerCollectionItem do
+      if APlugin.QueryInterface(ICrawlerPlugIn, LCrawlerPlugin) = 0 then
+      begin
+        // Reset content
+        Contingent.Clear;
+
+        // Load content from crawler plugin
+        Word(LTypeIDs) := LCrawlerPlugin.GetAvailableTypeIDs;
+        for LTypeID := Low(TTypeID) to High(TTypeID) do
+        begin
+          if LTypeID in LTypeIDs then
+          begin
+            Longword(LControlIDs) := LCrawlerPlugin.GetAvailableControlIDs(Integer(LTypeID));
+
+            for LControlID := Low(TControlID) to High(TControlID) do
+              if LControlID in LControlIDs then
+                with TCrawlerContingentCollectionItem(Contingent.Add) do
+                begin
+                  TypeID := LTypeID;
+                  ControlID := LControlID;
+                  Status := LCrawlerPlugin.GetControlIDDefaultValue(Integer(LTypeID), Integer(LControlID));
+                end;
+          end;
+        end;
+        Limit := LCrawlerPlugin.GetResultsLimitDefaultValue;
+
+        // Free crawler plugin variable
+        LCrawlerPlugin := nil;
+      end;
+  end;
+
+  // For the GUI
+  if Assigned(ACheckListBox) then
+  begin
+    if LReplacedEntry then
+      LCheckListBoxItem := ACheckListBox.Items[ACheckListBox.Items.IndexOf(LPlugInCollectionItem.Name)]
+    else
+      LCheckListBoxItem := ACheckListBox.Items.Add;
+
+    with LCheckListBoxItem do
+    begin
+      Checked := LPlugInCollectionItem.Enabled;
+      Text := LPlugInCollectionItem.Name;
+      ImageIndex := ACheckListBox.Images.AddIcon(LPlugInCollectionItem.Icon);
+      Enabled := FileExists(LPlugInCollectionItem.GetPath);
+    end;
   end;
 end;
 
-function TAddPlugin.Execute;
+class function TAddPlugin.ExecuteBase(const APluginFile: string; APluginOnLoadedFunc: TPluginOnLoadedFunc; AHandleOverride: Boolean = True; const ARestrictToType: TPlugInType = ptNone; AErrorProc: TPluginErrorProc = nil): Boolean;
 var
-  I: Integer;
+  LResult: Boolean;
+  LPluginHandle: Cardinal;
+begin
+  LResult := False;
+  TAddPlugin.LoadPluginBase(APluginFile, LPluginHandle,
+    { } procedure(var APlugin: IPlugIn)
+    { } var
+    { . } LCollection: TCollection;
+    { . } LCheckListBox: TcxCheckListBox;
+    { } begin
+    { . } if (ARestrictToType = ptNone) or ((not(ARestrictToType = ptNone)) and (ARestrictToType = APlugin.GetType)) then
+    { . } begin
+    { ... } if APluginOnLoadedFunc(APlugin.GetType, LCollection, LCheckListBox) then
+    { ... } begin
+    { ..... } LResult := TAddPlugin.AddPlugin(APluginFile, LPluginHandle, APlugin, LCollection, LCheckListBox, AHandleOverride);
+    { ... } end;
+    { . } end
+    { . } else
+    { . } begin
+    { ... } TAddPlugin.ReturnError(TAddPlugin.IncorrectPluginTypeErrorMsg(APluginFile, APlugin, ARestrictToType), AErrorProc);
+    { . } end;
+    { } end, True, AErrorProc);
+
+  Result := LResult;
+end;
+
+class function TAddPlugin.Execute(APluginOnLoadedFunc: TPluginOnLoadedFunc; const ARestrictToType: TPlugInType; APluginFile: string = ''; AHandleOverride: Boolean = True; AErrorProc: TPluginErrorProc = nil): Boolean;
+var
+  LFileIndex: Integer;
 begin
   Result := True;
 
-  if SameStr('', APlugInPath) then
+  if not FileExists(APluginFile) then
   begin
     with TOpenDialog.Create(nil) do
       try
         Options := Options + [ofAllowMultiSelect];
-        Filter := APlugInName + ' plugin (*.dll)|*.dll';
+        Filter := TAddPlugin.PluginTypeToString(ARestrictToType) + ' plugin (*.dll)|*.dll';
         InitialDir := ExcludeTrailingPathDelimiter(GetPluginFolder);
         if Execute then
         begin
-          for I := 0 to Files.Count - 1 do
-            if not LoadPlugin(aPlugIn, ACollection, ACheckListBox, APlugInName, Files.Strings[I], True) then
+          for LFileIndex := 0 to Files.Count - 1 do
+            if not TAddPlugin.ExecuteBase(Files.Strings[LFileIndex], APluginOnLoadedFunc, True, ARestrictToType, AErrorProc) then
+            begin
               Result := False;
+            end;
         end;
       finally
         Free;
       end;
   end
   else
-    Result := LoadPlugin(aPlugIn, ACollection, ACheckListBox, APlugInName, APlugInPath, False);
-end;
-
-function TAddPlugin.ExecuteFolder;
-var
-  _StringList: TStringList;
-  I: Integer;
-begin
-  Result := True;
-
-  _StringList := TStringList.Create;
-  try
-    GetFilesInDirectory(AFolderPath, '*.dll', _StringList, True, True, True, True);
-
-    for I := 0 to _StringList.Count - 1 do
-      if not LoadPlugin(aPlugIn, ACollection, ACheckListBox, APlugInName, _StringList.Strings[I], False) then
-        Result := False;
-  finally
-    _StringList.Free;
+  begin
+    Result := TAddPlugin.ExecuteBase(APluginFile, APluginOnLoadedFunc, False, ARestrictToType);
   end;
 end;
 
-destructor TAddPlugin.Destroy;
+class function TAddPlugin.ExecuteFolder(APluginOnLoadedFunc: TPluginOnLoadedFunc; AFolderPath: string; const ARestrictToType: TPlugInType = ptNone): Boolean;
+var
+  LStringList: TStringList;
+  LFileIndex: Integer;
 begin
-  inherited Destroy;
+  Result := True;
+
+  LStringList := TStringList.Create;
+  try
+    GetFilesInDirectory(AFolderPath, '*.dll', LStringList, True, True, True, True);
+
+    for LFileIndex := 0 to LStringList.Count - 1 do
+      if not TAddPlugin.ExecuteBase(LStringList.Strings[LFileIndex], APluginOnLoadedFunc, False, ARestrictToType, {make the error message silent} procedure(AErrorMsg: string)begin end) then
+      begin
+        Result := False;
+      end;
+  finally
+    LStringList.Free;
+  end;
 end;
-{$ENDREGION}
 
 end.

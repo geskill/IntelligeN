@@ -27,9 +27,7 @@ resourcestring
   StrNotChecked = 'Not checked';
   StrOffline = 'Offline';
   StrOnline = 'Online';
-  StrOverrideSPlugin = 'Override %s plugin?';
   StrParts = 'Parts';
-  StrPluginDamaged = 'Plugin damaged! (%s)';
   StrRemove = 'Remove';
   StrRemovedLinks = 'Removed links:';
   StrRemoveDouble = 'Remove double';
@@ -40,11 +38,16 @@ resourcestring
   StrSort = 'Sort';
   StrTemporaryOffline = 'Temporary offline';
   StrTextFiles = 'Text files';
-  StrThisPluginBelongs = 'This plugin belongs to another plugin interface';
-  StrThisPluginIsIncom = 'This plugin is incompatible for this version %s ! (Plugin build: %s)';
   StrTop = 'Top';
   StrUnknown = 'Unknown';
-  StrUnknownSPlugin = 'Unknown %s plugin';
+  StrPluginOverrideSettings = 'Do you want to override %s plugin? The plugin settings will be reseted';
+  StrPluginInternalError = 'Internal plugin error (%s) ~ %s ~';
+  StrPluginIncorrectType = 'Plugin interface (%s) expected, but another interface (%s) found ~ %s ~';
+  StrPluginStartupError = 'Startup error for %s plugin ~ %s ~';
+  StrPluginUnknown = 'Unknown %s plugin [%s]';
+  StrPluginDefect = 'DDL file of %s plugin defect [%s]';
+  StrPluginIncompatible = 'Plugin version (%s) by definition incompatible for this version (%s) ~ %s ~';
+  StrPluginFileNotFound = 'Plugin file not found ~ %s ~';
 
 implementation
 

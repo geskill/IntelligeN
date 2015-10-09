@@ -4,7 +4,7 @@ uses
   // Delphi
   Windows, SysUtils, Variants, XMLDoc, XMLIntf, ActiveX,
   // Common
-  uConst;
+  uAppConst;
 
 {$R *.res}
 
@@ -31,7 +31,7 @@ begin
         begin
           with LTemplateInfo do
           begin
-            TemplateType := StringToTTemplateTypeID(VarToStr(NodeValue));
+            TemplateType := StringToTypeID(VarToStr(NodeValue));
             FileName := VarToStr(Attributes['filename']);
             Checksum := VarToStr(Attributes['checksum']);
           end;
