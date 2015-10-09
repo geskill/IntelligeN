@@ -56,9 +56,9 @@ function TUploadspacePl.CheckLink(AFile: WideString): TLinkInfo;
 
   function APIResultToStatus(AValue: string): TLinkStatus;
   begin
-    Result := lsOffline;
+    Result := csOffline;
     if (AValue = '1') then
-      Result := lsOnline;
+      Result := csOnline;
   end;
 
 var
@@ -71,7 +71,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -99,7 +99,7 @@ begin
         LinkInfo.FileName := Match[2];
       end
       else
-        LinkInfo.Status := lsOffline;
+        LinkInfo.Status := csOffline;
     finally
       Free;
     end;

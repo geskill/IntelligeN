@@ -4,7 +4,12 @@ unit uOLE;
 interface
 
 uses
-  SysUtils, ComObj, ActiveX, IntelligeN_TLB, StdVcl;
+  // Delphi
+  SysUtils, ComServ, ComObj, ActiveX, StdVcl,
+  // Common
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
+  //
+  IntelligeN_TLB;
 
 type
   TIntelligeN2009 = class(TAutoObject, IIntelligeN2009)
@@ -24,7 +29,8 @@ type
 
 implementation
 
-uses ComServ, uMain, uConst, uAppInterface;
+uses
+  uMain;
 
 procedure TIntelligeN2009.openfile(const AFileName: WideString);
 begin
@@ -56,8 +62,8 @@ var
 begin
   if (Main.fMain.TabSheetCount > 0) then
     Picture := Main.fMain.ActiveTabSheetController.ControlController.FindControl(cPicture) as IPicture;
-      if Assigned(Picture) then
-        Picture.RemoteUpload();
+  if Assigned(Picture) then
+    Picture.RemoteUpload();
 end;
 
 procedure TIntelligeN2009.callcheckdirectlinks;
@@ -67,8 +73,8 @@ begin
   if (Main.fMain.TabSheetCount > 0) then
     with Main.fMain.ActiveTabSheetController.MirrorController do
       for I := 0 to MirrorCount - 1 do
-        for J := 0 to Mirror[I].DirectlinksMirrorCount - 1 do
-          Mirror[I].Directlink.Mirror[J].CheckStatus;
+        for J := 0 to Mirror[I].DirectlinkCount - 1 do
+          Mirror[I].Directlink[J].CheckStatus;
 end;
 
 procedure TIntelligeN2009.callcrypter;

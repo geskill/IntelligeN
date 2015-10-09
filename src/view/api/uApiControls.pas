@@ -33,7 +33,7 @@ type
   private
     FHandle: HWND;
     FComponentController: IControlController;
-    FComponentID: TControlID;
+    FControlID: TControlID;
     FBufferedValues: TQueue<string>; // Omni Queue implementieren
     FTitleLabel, FHintLabel, FClearLabel: TcxLabel;
     FOleDrop: TOleDrop;
@@ -435,7 +435,7 @@ end;
 
 function TIControlBasic.GetControlID;
 begin
-  Result := FComponentID;
+  Result := FControlID;
 end;
 
 function TIControlBasic.GetName;
@@ -668,7 +668,7 @@ begin
   FBufferedValues := TQueue<string>.Create;
 
   FComponentController := AControlController;
-  FComponentID := AComponentID;
+  FControlID := AComponentID;
 
   SetLength(FValueArray, 0);
 

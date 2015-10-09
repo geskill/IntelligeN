@@ -287,7 +287,7 @@ begin
     with ATabSheetController.MirrorController do
     begin
       for _MirrorIndex := 0 to MirrorCount - 1 do
-        _LinkList.Add(Mirror[_MirrorIndex].DirectlinksMirror[0]);
+        _LinkList.Add(Mirror[_MirrorIndex].Directlink[0].Value);
     end;
 
     for _LinksToSortIndex := 0 to ALines.Count - 1 do
@@ -345,9 +345,9 @@ begin
     begin
       with ATabSheetController.MirrorController do
         if MirrorCount <= _LinkListIndex then
-          Mirror[Add].Directlink.Add(_LinkList.Items[_LinkListIndex])
+          Mirror[Add].GetDirectlink.Add(_LinkList.Items[_LinkListIndex])
         else
-          Mirror[_LinkListIndex].DirectlinksMirror[0] := _LinkList.Items[_LinkListIndex];
+          Mirror[_LinkListIndex].Directlink[0].Value := _LinkList.Items[_LinkListIndex];
     end;
     FAppController.PageController.CallControlAligner;
   finally

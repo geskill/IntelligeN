@@ -1,3 +1,10 @@
+{ ********************************************************
+  *                            IntelligeN PLUGIN SYSTEM  *
+  *  PlugIn constants                                    *
+  *  Version 2.5.0.0                                     *
+  *  Copyright (c) 2015 Sebastian Klatte                 *
+  *                                                      *
+  ******************************************************** }
 unit uPlugInConst;
 
 interface
@@ -15,8 +22,9 @@ type
   TContainertypes = set of TContainertype;
   TAdvertismenttype = (atLayer, atLink, atBanner);
   TImageHostResize = (irNone, ir320x240, ir450x338, ir640x480, ir800x600);
-  TLinkStatus = (lsOffline, lsOnline, lsUnknown, lsTemporaryOffline);
-  TChecksumType = (ctMD5);
+  TContentStatus = (csOffline, csOnline, csUnknown, csTemporaryOffline, csMixedOnOffline, csNotChecked);
+  TLinkStatus = csOffline..csTemporaryOffline;
+  TChecksumType = (ctMD5, ctSHA512);
 
   TIDInfo = packed record
     ID, Path: WideString;
@@ -25,13 +33,13 @@ type
   TLinkInfo = packed record
     Link: WideString;
     Status: TLinkStatus;
-    Size: Int64; { in Bytes }
+    Size: Double; { in Bytes }
     FileName, Checksum: WideString;
     ChecksumType: TChecksumType;
   end;
 
   TLinksInfo = packed record
-    Status: Byte; { 0=offline|1=online|2=unknown;3=notyet;4=mixed;255=noinfo }
+    Status: TContentStatus;
     Size: Double;
     PartSize: Double;
     Links: array of TLinkInfo;
@@ -39,10 +47,10 @@ type
 
   TCrypterFolderInfo = packed record
     Link: WideString;
-    Status: Byte; { 0=offline|1=online|2=unknown;3=notyet;4=mixed;255=noinfo }
+    Status: TContentStatus;
     Size: Double; { in Megabytes }
     PartSize: Double; { in Megabytes }
-    Hoster: WideString; { Uploaded.to or Uploaded or up.to }
+    Hoster: WideString; { Uploaded.to or Uploaded or up.to (will be converted in MAIN APP) }
     HosterShort: WideString;
     Parts: Integer;
     StatusImage, StatusImageText: WideString;

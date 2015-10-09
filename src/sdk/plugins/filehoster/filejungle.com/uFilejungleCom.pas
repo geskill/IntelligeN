@@ -45,7 +45,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -124,9 +124,9 @@ begin
             Expression := '\/f\/' + GetDownloadlinkID(Strings[I]) + '<\/.*?col2">(.*?)<\/.*?col3">([\d\.]+) (\w+)<\/';
 
             if Exec(InputString) then
-              AddLink(Strings[I], Match[1], lsOnline, TSizeFormatter.SizeToByte(Match[2], Match[3]))
+              AddLink(Strings[I], Match[1], csOnline, TSizeFormatter.SizeToByte(Match[2], Match[3]))
             else
-              AddLink(Strings[I], '', lsOffline, 0);
+              AddLink(Strings[I], '', csOffline, 0);
           end;
         finally
           Free;

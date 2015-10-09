@@ -1,3 +1,10 @@
+{ ********************************************************
+  *                            IntelligeN PLUGIN SYSTEM  *
+  *  PlugIn interface advanced                           *
+  *  Version 2.5.0.0                                     *
+  *  Copyright (c) 2015 Sebastian Klatte                 *
+  *                                                      *
+  ******************************************************** }
 unit uPlugInInterfaceAdv;
 
 interface

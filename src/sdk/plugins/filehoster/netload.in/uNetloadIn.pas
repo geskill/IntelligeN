@@ -45,7 +45,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -100,9 +100,9 @@ function TNetloadIn.CheckLinks(AFiles: WideString): Integer;
 
   function APIResultToStatus(AValue: string): TLinkStatus;
   begin
-    Result := lsOffline;
+    Result := csOffline;
     if (AValue = 'online') then
-      Result := lsOnline;
+      Result := csOnline;
   end;
 
 var

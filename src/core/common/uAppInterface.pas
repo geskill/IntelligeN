@@ -1,3 +1,10 @@
+{ ********************************************************
+  *                                     IntelligeN CORE  *
+  *  Application interface                               *
+  *  Version 2.5.0.0                                     *
+  *  Copyright (c) 2015 Sebastian Klatte                 *
+  *                                                      *
+  ******************************************************** }
 unit uAppInterface;
 
 interface
@@ -11,7 +18,7 @@ uses
   uPlugInConst;
 
 type
-  IMenuItem = interface;
+  // Required "name-only" definition for access before definition.
   IMenuItems = interface;
   IDirectlinksPanel = interface;
   IMirrorControl = interface;
@@ -24,6 +31,8 @@ type
   IPublishJob = interface;
   ITabSheetController = interface;
   IPageController = interface;
+
+  // // // Basic Events // // //
 
   IViewChangeEventHandler = interface(IUnknown)
     ['{5129F9C3-B9B5-4FE5-88E1-DB7284D55D93}']
@@ -41,6 +50,8 @@ type
     ['{F672ACC7-3930-4112-8BC7-578A4E291C9D}']
     procedure Invoke(const ASender: Integer); safecall;
   end;
+
+  // // // Menu // // //
 
   IMenuItem = interface(IUnknown)
     ['{EB29098A-A769-4E1D-91A0-F728A1C7C92D}']
@@ -75,200 +86,7 @@ type
     function InsertMenuItem(AIndex: Integer; const ACaption: WideString; const AHint: WideString; AShortCut: Integer; AImageIndex: Integer; ATag: Integer; const AOnClick: INotifyEventHandler; const ASubMenuItem: WordBool = True): IMenuItem; safecall;
   end;
 
-  IDirectlinksMirror = interface(IDirectlink)
-    ['{617FFD5F-82B1-443C-B535-0A7413069F76}']
-    function GetDirectlinksPanel: IDirectlinksPanel;
-    procedure SetDirectlinksPanel(ADirectlinksPanel: IDirectlinksPanel);
-
-    function GetLinksInfo: TLinksInfo;
-    procedure SetLinksInfo(ALinksInfo: TLinksInfo);
-
-    function GetTitle: WideString;
-    procedure SetTitle(ATitle: WideString);
-
-    procedure SetValue(AValue: WideString);
-
-    function GetFocus: Boolean;
-    procedure SetFocus(AFocus: Boolean);
-
-    procedure UpdateGUI;
-    procedure Mody;
-    procedure CheckStatus;
-
-    function GetPartName(AFileName: WideString): WideString;
-
-    property DirectlinksPanel: IDirectlinksPanel read GetDirectlinksPanel write SetDirectlinksPanel;
-
-    property LinksInfo: TLinksInfo read GetLinksInfo write SetLinksInfo;
-
-    property Title: WideString read GetTitle write SetTitle;
-    property Value: WideString read GetValue write SetValue;
-    property Focus: Boolean read GetFocus write SetFocus;
-  end;
-
-  IDirectlinksPanel = interface(IDirectlinkContainer)
-    ['{DBFC2ED7-FFB2-4611-9F69-05CD827F3A7A}']
-    // Base
-    function GetDirectlink(const Index: Integer): IDirectlinksMirror; safecall;
-
-    // Additional
-    function GetMirrorControl: IMirrorControl;
-    procedure SetMirrorControl(AMirrorControl: IMirrorControl);
-
-    function GetActiveDirectlinkIndex: Integer;
-    function GetActiveDirectlink: IDirectlinksMirror;
-
-    function GetVisible: Boolean;
-    procedure SetVisible(AVisible: Boolean);
-    function GetFocus: Boolean;
-    procedure SetFocus(AFocus: Boolean);
-
-    // Base
-    property Directlink[const Index: Integer]: IDirectlinksMirror read GetDirectlink;
-
-    // Additional
-    property MirrorControl: IMirrorControl read GetMirrorControl write SetMirrorControl;
-
-    function Add(ALinks: WideString = ''): Integer;
-    procedure Remove(ATabIndex: Integer);
-
-    property ActiveMirrorIndex: Integer read GetActiveDirectlinkIndex;
-    property ActiveMirror: IDirectlinksMirror read GetActiveDirectlink;
-
-    property FileName: WideString read GetFileName;
-
-    property Visible: Boolean read GetVisible write SetVisible;
-    property Focus: Boolean read GetFocus write SetFocus;
-  end;
-
-  ICrypterPanel = interface(ICrypter)
-    ['{C29FF83C-BE8D-4E2A-93F7-660D749948FF}']
-    // Additional
-    function GetMirrorControl: IMirrorControl;
-    procedure SetMirrorControl(AMirrorControl: IMirrorControl);
-
-    procedure SetValue(AValue: WideString);
-
-    function GetStatus: Byte;
-
-    function GetCrypterFolderInfo: TCrypterFolderInfo;
-    procedure SetCrypterFolderInfo(ACrypterFolderInfo: TCrypterFolderInfo);
-
-    function GetVisible: Boolean;
-    procedure SetVisible(AVisible: Boolean);
-
-    function GetFocus: Boolean;
-    procedure SetFocus(AFocus: Boolean);
-
-    procedure UpdateGUI;
-
-    // Base
-    property Value: WideString read GetValue write SetValue;
-
-    // Additional
-    property MirrorControl: IMirrorControl read GetMirrorControl write SetMirrorControl;
-
-    property Status: Byte read GetStatus;
-
-    property CrypterFolderInfo: TCrypterFolderInfo read GetCrypterFolderInfo write SetCrypterFolderInfo;
-
-    procedure CreateFolder;
-    procedure CheckFolder(const AUseCheckDelay: Boolean = False);
-
-    property Visible: Boolean read GetVisible write SetVisible;
-    property Focus: Boolean read GetFocus write SetFocus;
-  end;
-
-  IMirrorControl = interface(IMirrorContainer)
-    ['{9E4D7459-1D7B-4E8E-9177-8365D631E5F5}']
-    // Base
-    function GetDirectlink(const Index: Integer): IDirectlinksMirror; overload; safecall;
-
-    function GetCrypter(const IndexOrName: OleVariant): ICrypterPanel; safecall;
-
-    // Additional
-    function GetMirrorController: IMirrorController;
-    procedure SetMirrorController(const AMirrorController: IMirrorController);
-
-    function GetIndex: Integer;
-    procedure SetIndex(AIndex: Integer);
-
-    function GetTabIndex: Integer;
-    procedure SetTabIndex(ATabIndex: Integer);
-
-    function GetDirectlink: IDirectlinksPanel; overload;
-
-    function GetLeft: Integer;
-    procedure SetLeft(ALeft: Integer);
-    function GetTop: Integer;
-    procedure SetTop(ATop: Integer);
-    function GetWidth: Integer;
-    procedure SetWidth(AWidth: Integer);
-    function GetHeight: Integer;
-    procedure SetHeight(AHeight: Integer);
-    function GetFocus: Boolean;
-    procedure SetFocus(AFocus: Boolean);
-
-    // Base
-    property Directlink[const Index: Integer]: IDirectlinksMirror read GetDirectlink;
-
-    function FindCrypter(const AName: WideString): ICrypterPanel; safecall;
-
-    property Crypter[const IndexOrName: OleVariant]: ICrypterPanel read GetCrypter;
-
-    // Additional
-    property MirrorController: IMirrorController read GetMirrorController write SetMirrorController;
-    property Index: Integer read GetIndex write SetIndex;
-    property TabIndex: Integer read GetTabIndex write SetTabIndex;
-
-    property Left: Integer read GetLeft write SetLeft;
-    property Top: Integer read GetTop write SetTop;
-    property Width: Integer read GetWidth write SetWidth;
-    property Height: Integer read GetHeight write SetHeight;
-    property Focus: Boolean read GetFocus write SetFocus;
-
-    function AddCrypter(AName: WideString): Integer;
-    function RemoveCrypter(AIndex: Integer): Boolean;
-  end;
-
-  IMirrorController = interface(IMirrorControllerBase)
-    ['{230C0B4E-F11B-4DE9-B105-EED8D92B92CA}']
-    // Base
-    function GetMirror(const IndexOrName: OleVariant): IMirrorControl; safecall;
-
-    // Additional
-    function GetTabSheetController: ITabSheetController;
-    procedure SetTabSheetController(const ATabSheetController: ITabSheetController);
-
-    // Events
-    function GetSpaceMouseDown: INotifyEventHandler;
-    procedure SetSpaceMouseDown(ASpaceMouseDown: INotifyEventHandler);
-    function GetChange: INotifyEvent;
-    function GetPopupMenuChange: IPopupMenuChange;
-    procedure SetPopupMenuChange(APopupMenuChange: IPopupMenuChange);
-
-    // Base
-    function FindMirror(const AHoster: WideString): IMirrorControl; safecall;
-
-    property Mirror[const IndexOrName: OleVariant]: IMirrorControl read GetMirror; default;
-
-    // Additional
-    property TabSheetController: ITabSheetController read GetTabSheetController write SetTabSheetController;
-
-    function IndexOf(const Item: IMirrorControl): Integer;
-    function Add: Integer;
-    procedure Insert(index: Integer; const Item: IMirrorControl); overload;
-    function Insert(index: Integer): IMirrorControl; overload;
-    function Remove(index: Integer): Boolean;
-
-    // Cloning
-    function CloneInstance(): IMirrorControllerBase;
-
-    // Events
-    property OnSpaceMouseDown: INotifyEventHandler read GetSpaceMouseDown write SetSpaceMouseDown; { only for internal usage }
-    property OnChange: INotifyEvent read GetChange;
-    property OnPopupMenuChange: IPopupMenuChange read GetPopupMenuChange write SetPopupMenuChange; { only for internal usage }
-  end;
+  // // // Controls // // //
 
   IControlBasic = interface(IControlBase)
     ['{DE8F253F-D695-41D4-A350-3CF191644466}']
@@ -381,20 +199,20 @@ type
 
     procedure RemoteUpload(const AAfterCrawling: WordBool = False);
   end;
-{$IFDEF MAINAPP}
 
   IPictureEx = interface(IPicture)
     ['{F686511D-EC7D-4FB1-AD88-121511434F93}']
     function GetValuePicture(AIndex: Integer): TPictureInfo;
     procedure SetValuePicture(AIndex: Integer; APictureInfo: TPictureInfo);
   end;
-{$ENDIF}
 
   ITrailer = interface(IComboBox)
     ['{7D38C9A3-16BD-4550-A383-61C5A4E04A4D}']
     procedure AddValue(AValue: WideString; ATitle: WideString; ASender: WideString); overload;
     function GetValueTitle(AIndex: Integer): WideString;
   end;
+
+  // // // Controls Events // // //
 
   IControlEventHandler = interface(IUnknown)
     ['{207E1DBF-69A1-4E05-9CEA-BE5BA4091EF9}']
@@ -412,6 +230,8 @@ type
     procedure Remove(const AHandler: IControlEventHandler); safecall;
     procedure Invoke(const ASender: IControlBasic); safecall;
   end;
+
+  // // // Controls Controller // // //
 
   IControlController = interface(IControlControllerBase)
     ['{E9432D30-D4CA-4045-BEA3-55C02E56243A}']
@@ -459,6 +279,227 @@ type
     property OnReleaseNameChange: IReleaseNameChange read GetReleaseNameChange write SetReleaseNameChange; { only for internal usage }
     property OnPopupMenuChange: IPopupMenuChange read GetPopupMenuChange write SetPopupMenuChange; { only for internal usage }
   end;
+
+  // // // Mirror Controls // // //
+
+  IDirectlinksMirror = interface(IDirectlink)
+    ['{617FFD5F-82B1-443C-B535-0A7413069F76}']
+    // Additional
+    function GetDirectlinksPanel: IDirectlinksPanel;
+    procedure SetDirectlinksPanel(ADirectlinksPanel: IDirectlinksPanel);
+
+    function GetStatus: TContentStatus;
+
+    procedure SetSize(ASize: Double);
+    procedure SetPartSize(APartSize: Double);
+
+    function GetHoster(AShortName: Boolean): WideString; overload;
+
+    function GetLinksInfo: TLinksInfo;
+    procedure SetLinksInfo(ALinksInfo: TLinksInfo);
+
+    function GetTitle: WideString;
+    procedure SetTitle(ATitle: WideString);
+
+    procedure SetValue(AValue: WideString);
+
+    function GetFocus: Boolean;
+    procedure SetFocus(AFocus: Boolean);
+
+    // Additional
+    procedure UpdateGUI;
+    procedure Mody;
+    procedure CheckStatus;
+
+    function GetPartName(AFileName: WideString): WideString;
+
+    property DirectlinksPanel: IDirectlinksPanel read GetDirectlinksPanel write SetDirectlinksPanel;
+
+    property Size: Double read GetSize { . } write SetSize;
+    property PartSize: Double read GetPartSize { . } write SetPartSize;
+    property Status: TContentStatus read GetStatus;
+
+    property LinksInfo: TLinksInfo read GetLinksInfo write SetLinksInfo;
+
+    property Title: WideString read GetTitle write SetTitle;
+    property Value: WideString read GetValue write SetValue;
+    property Focus: Boolean read GetFocus write SetFocus;
+  end;
+
+  IDirectlinksPanel = interface(IDirectlinkContainer)
+    ['{DBFC2ED7-FFB2-4611-9F69-05CD827F3A7A}']
+    // Base
+    function GetDirectlink(const Index: Integer): IDirectlinksMirror; safecall;
+
+    // Additional
+    function GetMirrorControl: IMirrorControl;
+    procedure SetMirrorControl(AMirrorControl: IMirrorControl);
+
+    function GetHoster(AShortName: Boolean): WideString; overload;
+
+    function GetActiveDirectlinkIndex: Integer;
+    function GetActiveDirectlink: IDirectlinksMirror;
+
+    function GetVisible: Boolean;
+    procedure SetVisible(AVisible: Boolean);
+    function GetFocus: Boolean;
+    procedure SetFocus(AFocus: Boolean);
+
+    // Base
+    property Directlink[const Index: Integer]: IDirectlinksMirror read GetDirectlink;
+
+    // Additional
+    property MirrorControl: IMirrorControl read GetMirrorControl write SetMirrorControl;
+
+    function Add(ALinks: WideString = ''): Integer;
+    procedure Remove(ATabIndex: Integer);
+
+    property ActiveMirrorIndex: Integer read GetActiveDirectlinkIndex;
+    property ActiveMirror: IDirectlinksMirror read GetActiveDirectlink;
+
+    property FileName: WideString read GetFileName;
+
+    property Visible: Boolean read GetVisible write SetVisible;
+    property Focus: Boolean read GetFocus write SetFocus;
+  end;
+
+  ICrypterPanel = interface(ICrypter)
+    ['{C29FF83C-BE8D-4E2A-93F7-660D749948FF}']
+    // Additional
+    function GetMirrorControl: IMirrorControl;
+    procedure SetMirrorControl(AMirrorControl: IMirrorControl);
+
+    procedure SetValue(AValue: WideString);
+
+    procedure SetSize(ASize: Double);
+    procedure SetPartSize(APartSize: Double);
+
+    function GetStatus: TContentStatus;
+
+    function GetCrypterFolderInfo: TCrypterFolderInfo;
+    procedure SetCrypterFolderInfo(ACrypterFolderInfo: TCrypterFolderInfo);
+
+    function GetVisible: Boolean;
+    procedure SetVisible(AVisible: Boolean);
+
+    function GetFocus: Boolean;
+    procedure SetFocus(AFocus: Boolean);
+
+    procedure UpdateGUI;
+
+    // Base
+    property Value: WideString read GetValue { . } write SetValue;
+    property Size: Double read GetSize { . } write SetSize;
+    property PartSize: Double read GetPartSize { . } write SetPartSize;
+
+    // Additional
+    property MirrorControl: IMirrorControl read GetMirrorControl write SetMirrorControl;
+
+    property Status: TContentStatus read GetStatus;
+
+    property CrypterFolderInfo: TCrypterFolderInfo read GetCrypterFolderInfo write SetCrypterFolderInfo;
+
+    procedure CreateFolder;
+    procedure CheckFolder(const AUseCheckDelay: Boolean = False);
+
+    property Visible: Boolean read GetVisible write SetVisible;
+    property Focus: Boolean read GetFocus write SetFocus;
+  end;
+
+  IMirrorControl = interface(IMirrorContainer)
+    ['{9E4D7459-1D7B-4E8E-9177-8365D631E5F5}']
+    // Base
+    function GetDirectlink(const Index: Integer): IDirectlinksMirror; overload; safecall;
+
+    function GetCrypter(const IndexOrName: OleVariant): ICrypterPanel; safecall;
+
+    // Additional
+    function GetMirrorController: IMirrorController;
+    procedure SetMirrorController(const AMirrorController: IMirrorController);
+
+    function GetHoster(AShortName: Boolean): WideString; overload;
+
+    function GetIndex: Integer;
+    procedure SetIndex(AIndex: Integer);
+
+    function GetTabIndex: Integer;
+    procedure SetTabIndex(ATabIndex: Integer);
+
+    function GetDirectlink: IDirectlinksPanel; overload;
+
+    function GetLeft: Integer;
+    procedure SetLeft(ALeft: Integer);
+    function GetTop: Integer;
+    procedure SetTop(ATop: Integer);
+    function GetWidth: Integer;
+    procedure SetWidth(AWidth: Integer);
+    function GetHeight: Integer;
+    procedure SetHeight(AHeight: Integer);
+    function GetFocus: Boolean;
+    procedure SetFocus(AFocus: Boolean);
+
+    // Base
+    property Directlink[const Index: Integer]: IDirectlinksMirror read GetDirectlink;
+
+    function FindCrypter(const AName: WideString): ICrypterPanel; safecall;
+
+    property Crypter[const IndexOrName: OleVariant]: ICrypterPanel read GetCrypter;
+
+    // Additional
+    property MirrorController: IMirrorController read GetMirrorController write SetMirrorController;
+    property Index: Integer read GetIndex write SetIndex;
+    property TabIndex: Integer read GetTabIndex write SetTabIndex;
+
+    property Left: Integer read GetLeft write SetLeft;
+    property Top: Integer read GetTop write SetTop;
+    property Width: Integer read GetWidth write SetWidth;
+    property Height: Integer read GetHeight write SetHeight;
+    property Focus: Boolean read GetFocus write SetFocus;
+
+    function AddCrypter(AName: WideString): Integer;
+    function RemoveCrypter(AIndex: Integer): Boolean;
+  end;
+
+  IMirrorController = interface(IMirrorControllerBase)
+    ['{230C0B4E-F11B-4DE9-B105-EED8D92B92CA}']
+    // Base
+    function GetMirror(const IndexOrName: OleVariant): IMirrorControl; safecall;
+
+    // Additional
+    function GetTabSheetController: ITabSheetController;
+    procedure SetTabSheetController(const ATabSheetController: ITabSheetController);
+
+    // Events
+    function GetSpaceMouseDown: INotifyEventHandler;
+    procedure SetSpaceMouseDown(ASpaceMouseDown: INotifyEventHandler);
+    function GetChange: INotifyEvent;
+    function GetPopupMenuChange: IPopupMenuChange;
+    procedure SetPopupMenuChange(APopupMenuChange: IPopupMenuChange);
+
+    // Base
+    function FindMirror(const AHoster: WideString): IMirrorControl; safecall;
+
+    property Mirror[const IndexOrName: OleVariant]: IMirrorControl read GetMirror; default;
+
+    // Additional
+    property TabSheetController: ITabSheetController read GetTabSheetController write SetTabSheetController;
+
+    function IndexOf(const Item: IMirrorControl): Integer;
+    function Add: Integer;
+    procedure Insert(index: Integer; const Item: IMirrorControl); overload;
+    function Insert(index: Integer): IMirrorControl; overload;
+    function Remove(index: Integer): Boolean;
+
+    // Cloning
+    function CloneInstance(): IMirrorControllerBase;
+
+    // Events
+    property OnSpaceMouseDown: INotifyEventHandler read GetSpaceMouseDown write SetSpaceMouseDown; { only for internal usage }
+    property OnChange: INotifyEvent read GetChange;
+    property OnPopupMenuChange: IPopupMenuChange read GetPopupMenuChange write SetPopupMenuChange; { only for internal usage }
+  end;
+
+  // // // Publish Controls // // //
 
   ICMSWebsite = interface
     ['{6E5EEC82-3E30-41AF-99B1-D99140A170E1}']
@@ -535,6 +576,8 @@ type
     function Count: Integer;
   end;
 
+  // // // Publish Controls Events // // //
+
   IUpdateCMSListEventHandler = interface(IUnknown)
     ['{65FF1964-E1A9-4580-A228-028F51DE7EA1}']
     procedure Invoke(const Sender: IPublishController); safecall;
@@ -571,6 +614,8 @@ type
     procedure Invoke(ACMSIndex, AWebsiteIndex: Integer; ANewStatus: WordBool); safecall;
   end;
 
+  // // // Publish Controls Controller // // //
+
   IPublishController = interface
     ['{D7D1CA65-ED2D-4854-AEE6-E6E3D9DD801F}']
     function GetTabSheetController: ITabSheetController;
@@ -600,6 +645,8 @@ type
     property OnUpdateCMSWebsite: IUpdateCMSWebsiteEvent read GetUpdateCMSWebsite;
   end;
 
+  // // // IScript // // //
+
   IIScriptController = interface
     ['{CC20CAD1-9847-45D2-ABE4-272B2C659F4F}']
     function GetDataChanged: WordBool;
@@ -610,6 +657,8 @@ type
 
     procedure InsertText(AText: WideString);
   end;
+
+  // // // Tab Controller // // //
 
   ITabSheetController = interface
     ['{1973A687-DD39-472A-8B07-D541CFA08780}']
@@ -653,6 +702,8 @@ type
     property MirrorController: IMirrorController read GetMirrorController;
     property PublishController: IPublishController read GetPublishController;
   end;
+
+  // // // Multithreading Manager // // //
 
   ICrawlerManager = interface
     ['{EC5351B9-7BF9-4317-88AB-DDAD6D9B8D8C}']
@@ -727,6 +778,8 @@ type
     procedure AddRemoteUploadJob(const APictureMirror: IPictureMirror);
   end;
 
+  // // // Page Controller // // //
+
   IPageController = interface
     ['{735F0449-3C70-4701-BBC3-9FE3F229DD96}']
     function GetCrawlerManager: ICrawlerManager;
@@ -767,6 +820,8 @@ type
     property OnChange: INotifyEvent read GetChange;
     property OnViewChange: IViewChangeEvent read GetViewChange;
   end;
+
+  // // // App Controller // // //
 
   IAppController = interface
     ['{80AF47FD-847E-429D-922C-0F3B812AB637}']

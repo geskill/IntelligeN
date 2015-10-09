@@ -368,3 +368,12 @@
 
 + Fixed possible bug inside HTTPManager (THTTPOptions.Create could be nil)
 
+
+		== BETA 5 ==
+
+	~~~~~~ major enhancements ~~~~~~
+
++ Tremendous interface changes
+
+	~~~~~~ minor enhancements ~~~~~~
+

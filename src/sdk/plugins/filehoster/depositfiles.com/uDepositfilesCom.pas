@@ -53,7 +53,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -71,7 +71,7 @@ begin
   ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
 
   if (Pos('html_download_api-not_exists', ResponeStr) > 0) then
-    LinkInfo.Status := lsOffline
+    LinkInfo.Status := csOffline
   else
     with TRegExpr.Create do
       try
@@ -82,7 +82,7 @@ begin
 
         if Exec(InputString) then
         begin
-          LinkInfo.Status := lsOnline;
+          LinkInfo.Status := csOnline;
           LinkInfo.Size := TSizeFormatter.SizeToByte(Match[2], Match[3]);
           LinkInfo.FileName := Match[1];
         end;
@@ -135,11 +135,11 @@ end;
   with _lkJSONobject.Field['links_existed'] do
   for I := 0 to Count - 1 do
   with Child[I] do
-  AddLink(Field['download_url'].Value, Field['filename'].Value, lsOnline, Field['size'].Value);
+  AddLink(Field['download_url'].Value, Field['filename'].Value, csOnline, Field['size'].Value);
   with _lkJSONobject.Field['links_deleted'] do
   for I := 0 to Count - 1 do
   with Child[I] do
-  AddLink(Field['download_url'].Value, Field['filename'].Value, lsOffline, Field['size'].Value);
+  AddLink(Field['download_url'].Value, Field['filename'].Value, csOffline, Field['size'].Value);
   finally
   _lkJSONobject.Free;
   end;

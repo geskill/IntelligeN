@@ -14,7 +14,7 @@ uses
   // OmniThreadLibrary
   OtlParallel, OtlTaskControl,
   // Common
-  uFileInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface, uFileInterface,
   // DLLs
   uExport,
   // API

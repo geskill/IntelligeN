@@ -152,7 +152,7 @@ var
 begin
   with CrypterFolderInfo do
   begin
-    Status := 255;
+    Status := csNotChecked;
     Size := 0;
     Hoster := '';
     Parts := 0;

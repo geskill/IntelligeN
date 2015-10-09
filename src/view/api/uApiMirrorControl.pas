@@ -4,8 +4,8 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, Messages, Classes, Controls, Graphics, ExtCtrls, StdCtrls, Menus,
-  ShellAPI, Clipbrd, Math, Dialogs, Forms,
+  Windows, SysUtils, Messages, Classes, Controls, Menus, StdCtrls, ExtCtrls, Graphics, Variants, Dialogs,
+  Clipbrd, ShellAPI, Math,
   // Spring Framework
   Spring.Collections.Lists,
   // Dev Express
@@ -101,10 +101,11 @@ type
     function GetFileName: WideString; safecall;
 
     // Additional
-    function GetStatus: Byte;
     function GetDirectlinksPanel: IDirectlinksPanel;
     procedure SetDirectlinksPanel(ADirectlinksPanel: IDirectlinksPanel);
     procedure SetSize(ASize: Double);
+    procedure SetPartSize(APartSize: Double);
+    function GetStatus: TContentStatus;
     function GetHoster(AShortName: Boolean): WideString; overload;
     function GetLinksInfo: TLinksInfo;
     procedure SetLinksInfo(ALinksInfo: TLinksInfo);
@@ -125,7 +126,7 @@ type
     // Base
     property Value: WideString read GetValue { . } write SetValue;
     property Size: Double read GetSize { . } write SetSize;
-    property PartSize: Double read GetPartSize;
+    property PartSize: Double read GetPartSize { . } write SetPartSize;
     property Hoster: WideString read GetHoster;
     property HosterShort: WideString read GetHosterShort;
     property Parts: Integer read GetParts;
@@ -134,7 +135,7 @@ type
     // Additional
     property DirectlinksPanel: IDirectlinksPanel read GetDirectlinksPanel write SetDirectlinksPanel;
 
-    property Status: Byte read GetStatus;
+    property Status: TContentStatus read GetStatus;
     property LinksInfo: TLinksInfo read GetLinksInfo write SetLinksInfo;
 
     property Title: WideString read GetTitle write SetTitle;
@@ -199,6 +200,14 @@ type
     destructor Destroy; override;
 
     // Base
+    property Value: WideString read GetValue;
+    property Size: Double read GetSize;
+    property PartSize: Double read GetPartSize;
+    property Hoster: WideString read GetHoster;
+    property HosterShort: WideString read GetHosterShort;
+    property Parts: Integer read GetParts;
+    property FileName: WideString read GetFileName;
+
     property Directlink[const Index: Integer]: IDirectlinksMirror read GetDirectlinkMirror; default;
     property DirectlinkCount: Integer read GetDirectlinkCount;
 
@@ -258,7 +267,10 @@ type
 
     procedure SetValue(AValue: WideString);
 
-    function GetStatus: Byte;
+    procedure SetSize(ASize: Double);
+    procedure SetPartSize(APartSize: Double);
+
+    function GetStatus: TContentStatus;
 
     procedure SetCrypter(ACrypter: TCrypterCollectionItem); // TODO: Implement better?
 
@@ -278,12 +290,20 @@ type
     procedure UpdateGUI;
 
     // Base
-    property Value: WideString read GetValue write SetValue;
+    property Value: WideString read GetValue { . } write SetValue;
+    property Size: Double read GetSize { . } write SetSize;
+    property PartSize: Double read GetPartSize { . } write SetPartSize;
+    property Hoster: WideString read GetHoster;
+    property HosterShort: WideString read GetHosterShort;
+    property Parts: Integer read GetParts;
+    property Name: WideString read GetName;
+    property StatusImage: WideString read GetStatusImage;
+    property StatusImageText: WideString read GetStatusImageText;
 
     // Additional
     property MirrorControl: IMirrorControl read GetMirrorControl write SetMirrorControl;
 
-    property Status: Byte read GetStatus;
+    property Status: TContentStatus read GetStatus;
 
     property Crypter: TCrypterCollectionItem read FCrypter write SetCrypter;
 
@@ -384,12 +404,14 @@ type
 
     // Base
     property Directlink[const Index: Integer]: IDirectlinksMirror read GetDirectlinkMirror;
+    property DirectlinkCount: Integer read GetDirectlinkCount;
 
     function FindCrypter(const AName: WideString): ICrypter; safecall;
     function FindCrypterMirror(const AName: WideString): ICrypterPanel; safecall;
     function IMirrorControl.FindCrypter = FindCrypterMirror;
 
     property Crypter[const IndexOrName: OleVariant]: ICrypterPanel read GetCrypterMirror;
+    property CrypterCount: Integer read GetCrypterCount;
 
     // Additional
     property MirrorController: IMirrorController read GetMirrorController write SetMirrorController;
@@ -722,21 +744,6 @@ end;
 
 ///
 
-function TMycxTabSheet.GetStatus;
-begin
-  if not(FLinksChecked or SameStr(Hoster, '')) then
-  begin
-    FLinksChecked := True;
-    CheckStatus;
-  end;
-  FLinksInfoLock.EnterReadLock;
-  try
-    Result := FLinksInfo.Status;
-  finally
-    FLinksInfoLock.ExitReadLock;
-  end;
-end;
-
 function TMycxTabSheet.GetDirectlinksPanel;
 begin
   Result := FDirectlinksPanel;
@@ -754,6 +761,31 @@ begin
     FLinksInfo.Size := ASize;
   finally
     FLinksInfoLock.ExitWriteLock;
+  end;
+end;
+
+procedure TMycxTabSheet.SetPartSize(APartSize: Double);
+begin
+  FLinksInfoLock.EnterWriteLock;
+  try
+    FLinksInfo.PartSize := APartSize;
+  finally
+    FLinksInfoLock.ExitWriteLock;
+  end;
+end;
+
+function TMycxTabSheet.GetStatus;
+begin
+  if not(FLinksChecked or SameStr(Hoster, '')) then
+  begin
+    FLinksChecked := True;
+    CheckStatus;
+  end;
+  FLinksInfoLock.EnterReadLock;
+  try
+    Result := FLinksInfo.Status;
+  finally
+    FLinksInfoLock.ExitReadLock;
   end;
 end;
 
@@ -957,7 +989,7 @@ begin
 
   with FLinksInfo do
   begin
-    Status := 255;
+    Status := csNotChecked;
     Size := 0;
     PartSize := 0;
   end;
@@ -1202,6 +1234,7 @@ begin
 end;
 
 procedure TMycxTabSheet.UpdateGUI;
+// TODO: Merge with TCrypterPanel
 var
   _FieldIndex: Integer;
   _StringStatus, _Hoster: string;
@@ -1242,18 +1275,18 @@ begin
     if (_FieldIndex > -1) then
     begin
       case _LinksInfo.Status of
-        0:
+        csOffline:
           _StringStatus := StrOffline;
-        1:
+        csOnline:
           _StringStatus := StrOnline;
-        2:
+        csUnknown:
           _StringStatus := StrUnknown;
-        3:
-          _StringStatus := StrNotyet;
-        4:
+        csTemporaryOffline:
+          _StringStatus := StrTemporaryOffline;
+        csMixedOnOffline:
           _StringStatus := StrMixed;
-        255:
-          _StringStatus := StrNoinfo;
+        csNotChecked:
+          _StringStatus := StrNotChecked;
       end;
 
       FcxGridLinksInfoTableView.DataController.Values[_FieldIndex, 1] := _StringStatus;
@@ -1278,7 +1311,7 @@ begin
   end
   else if (SettingsManager.Settings.ComponentParser.DirectlinksView = dlvIcon) then
   begin
-    Main.ILContainerStatusImages.GetIcon(_LinksInfo.Status, FStatusImage.Picture.Icon);
+    Main.ILContainerStatusImages.GetIcon(Integer(_LinksInfo.Status), FStatusImage.Picture.Icon);
 
     with SettingsManager.Settings.Plugins do
       _PlugInCollectionItem := TPlugInCollectionItem(FindPlugInCollectionItemFromCollection(_Hoster, FileHoster));
@@ -1329,7 +1362,7 @@ procedure TMycxTabSheet.CheckStatus;
 begin
   // TODO: Fix this
   // if not SameStr(Hoster, '') then
-  //  FDirectlinksPanel.MirrorControl.MirrorController.TabSheetController.PageController.HosterManager.AddHosterCheckJob(Self);
+  // FDirectlinksPanel.MirrorControl.MirrorController.TabSheetController.PageController.HosterManager.AddHosterCheckJob(Self);
 end;
 
 function TMycxTabSheet.GetPartName(AFileName: WideString): WideString;
@@ -1706,35 +1739,27 @@ begin
 end;
 
 procedure TCrypterPanel.FcxGridFolderInfoTableViewColumn2CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
-
 const
   ImageIndent = 3;
-
 var
-  AImageRect, ATextRect: TRect;
-  AImageIndex: Integer;
+  LImageRect, LTextRect: TRect;
+  LImageIndex: Integer;
 begin
   if FcxGridFolderInfoTableView.DataController.Values[AViewInfo.GridRecord.index, 0] = 'Status' then
   begin
     ACanvas.Brush.Color := AViewInfo.Params.Color;
     ACanvas.FillRect(AViewInfo.Bounds);
-    AImageRect := AViewInfo.ContentBounds;
-    AImageRect.Left := AImageRect.Left + ImageIndent;
-    AImageRect.Right := AImageRect.Left + Main.ILContainerStatusImages.Width + 2;
-    ATextRect := AViewInfo.ContentBounds;
-    ATextRect.Left := AImageRect.Right + ImageIndent;
+    LImageRect := AViewInfo.ContentBounds;
+    LImageRect.Left := LImageRect.Left + ImageIndent;
+    LImageRect.Right := LImageRect.Left + Main.ILContainerStatusImages.Width + 2;
+    LTextRect := AViewInfo.ContentBounds;
+    LTextRect.Left := LImageRect.Right + ImageIndent;
+    LImageIndex := Integer(Status);
 
-    case Status of
-      255:
-        AImageIndex := -1;
-    else
-      AImageIndex := Status;
-    end;
-
-    cxDrawImage(ACanvas.Handle, AImageRect, AImageRect, nil, Main.ILContainerStatusImages, AImageIndex, idmNormal, False, 0, Main.ImageList.BkColor, False);
+    cxDrawImage(ACanvas.Handle, LImageRect, LImageRect, nil, Main.ILContainerStatusImages, LImageIndex, idmNormal, False, 0, Main.ImageList.BkColor, False);
 
     // ACanvas.DrawImage(Main.ImageList, AImageRect.Left, AImageRect.Top, AImageIndex);
-    ACanvas.DrawTexT(AViewInfo.Text, ATextRect, DT_SINGLELINE or DT_LEFT);
+    ACanvas.DrawTexT(AViewInfo.Text, LTextRect, DT_SINGLELINE or DT_LEFT);
     ADone := True;
   end;
 end;
@@ -1848,7 +1873,27 @@ begin
   FcxTextEditLink.Text := AValue;
 end;
 
-function TCrypterPanel.GetStatus: Byte;
+procedure TCrypterPanel.SetSize(ASize: Double);
+begin
+  FCrypterFolderInfoLock.EnterWriteLock;
+  try
+    FCrypterFolderInfo.Size := ASize;
+  finally
+    FCrypterFolderInfoLock.ExitWriteLock;
+  end;
+end;
+
+procedure TCrypterPanel.SetPartSize(APartSize: Double);
+begin
+  FCrypterFolderInfoLock.EnterWriteLock;
+  try
+    FCrypterFolderInfo.PartSize := APartSize;
+  finally
+    FCrypterFolderInfoLock.ExitWriteLock;
+  end;
+end;
+
+function TCrypterPanel.GetStatus: TContentStatus;
 begin
   FCrypterFolderInfoLock.EnterReadLock;
   try
@@ -1924,7 +1969,7 @@ begin
   end;
 
   with FCrypterFolderInfo do
-    Status := 255;
+    Status := csNotChecked;
 
   FcxTextEditLink := TcxTextEdit.Create(FPanel);
   with FcxTextEditLink do
@@ -2040,6 +2085,7 @@ begin
 end;
 
 procedure TCrypterPanel.UpdateGUI;
+// TODO: Merge with TMycxTabSheet
 var
   I: Integer;
   StatusString, _Hoster: string;
@@ -2066,18 +2112,18 @@ begin
   if (I > -1) then
   begin
     case Status of
-      0:
+      csOffline:
         StatusString := StrOffline;
-      1:
+      csOnline:
         StatusString := StrOnline;
-      2:
+      csUnknown:
         StatusString := StrUnknown;
-      3:
-        StatusString := StrNotyet;
-      4:
+      csTemporaryOffline:
+        StatusString := StrTemporaryOffline;
+      csMixedOnOffline:
         StatusString := StrMixed;
-      255:
-        StatusString := StrNoinfo;
+      csNotChecked:
+        StatusString := StrNotChecked;
     end;
 
     FcxGridFolderInfoTableView.DataController.Values[I, 1] := StatusString;
@@ -2252,8 +2298,8 @@ var
 begin
   with TList<Extended>.Create do
     try
-      if Directlink.Size > 0 then
-        Add(Directlink.Size);
+      if GetDirectlink.Size > 0 then
+        Add(GetDirectlink.Size);
 
       for I := 0 to CrypterCount - 1 do
       begin
@@ -2278,10 +2324,10 @@ end;
 
 function TMirrorControl.GetPartSize;
 begin
-  Result := Directlink.PartSize;
+  Result := GetDirectlink.PartSize;
 end;
 
-function TMirrorControl.GetHoster;
+function TMirrorControl.GetHoster: WideString;
 begin
   Result := GetHoster(False);
 end;
@@ -2298,8 +2344,8 @@ var
 begin
   with TList<Integer>.Create do
     try
-      if Directlink.Parts > -1 then
-        Add(Directlink.Parts);
+      if GetDirectlink.Parts > -1 then
+        Add(GetDirectlink.Parts);
 
       for I := 0 to CrypterCount - 1 do
       begin
@@ -2324,7 +2370,7 @@ end;
 
 function TMirrorControl.GetFileName;
 begin
-  Result := Directlink.FileName;
+  Result := GetDirectlink.FileName;
 end;
 
 function TMirrorControl.GetDirectlink(const Index: Integer): IDirectlink;
@@ -2339,7 +2385,7 @@ end;
 
 function TMirrorControl.GetDirectlinkCount: Integer;
 begin
-  Result := FDirectlinksPanel.MirrorCount;
+  Result := FDirectlinksPanel.DirectlinkCount;
 end;
 
 function TMirrorControl.GetCrypter(const IndexOrName: OleVariant): ICrypter;
@@ -2382,7 +2428,7 @@ function TMirrorControl.GetHoster(AShortName: Boolean): WideString;
 var
   I: Integer;
 begin
-  Result := Directlink.GetHoster(AShortName);
+  Result := GetDirectlink.GetHoster(AShortName);
 
   if (Result = '') then
     for I := 0 to CrypterCount - 1 do
@@ -2409,21 +2455,21 @@ var
 begin
   with MirrorController.Insert(AIndex) do
   begin
-    for I := 0 to Self.DirectlinksMirrorCount - 1 do
-      Directlink.Add(Self.DirectlinksMirror[I]);
+    for I := 0 to Self.DirectlinkCount - 1 do
+      GetDirectlink.Add(Self.Directlink[I].Value);
     for I := 0 to Self.CrypterCount - 1 do
     begin
       CrypterFound := False;
       for J := 0 to CrypterCount - 1 do
         if SameText(Self.Crypter[I].name, Crypter[J].name) then
         begin
-          Crypter[J].Link := Self.Crypter[I].Link;
+          Crypter[J].Value := Self.Crypter[I].Value;
           CrypterFound := True;
         end;
       if not CrypterFound then
         with Crypter[AddCrypter(Self.Crypter[I].name)] do
         begin
-          Link := Self.Crypter[I].Link;
+          Value := Self.Crypter[I].Value;
           CheckFolder;
         end;
     end;
@@ -2498,7 +2544,7 @@ end;
 function TMirrorControl.GetFocus: Boolean;
 begin
   if TabIndex = 0 then
-    Result := Directlink.Focus
+    Result := GetDirectlink.Focus
   else
     Result := Crypter[TabIndex - 1].Focus;
 end;
@@ -2507,7 +2553,7 @@ procedure TMirrorControl.SetFocus(AFocus: Boolean);
 begin
   if AFocus then
     if TabIndex = 0 then
-      Directlink.Focus := True
+      GetDirectlink.Focus := True
     else
       Crypter[TabIndex - 1].Focus := True;
 end;

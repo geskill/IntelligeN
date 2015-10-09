@@ -45,7 +45,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -102,9 +102,9 @@ begin
                   Expression := '&id' + IntToStr(I) + '=(\d+)&s=(\d+)&d=0&n=(.*?)(&|\Z)';
 
                   if Exec(InputString) then
-                    AddLink(Strings[I], Match[3], lsOnline, StrToInt64Def(Match[2], 0))
+                    AddLink(Strings[I], Match[3], csOnline, StrToInt64Def(Match[2], 0))
                   else
-                    AddLink(Strings[I], '', lsOffline, 0);
+                    AddLink(Strings[I], '', csOffline, 0);
                 end;
               finally
                 Free;

@@ -41,9 +41,9 @@ function TFilefrogTo.CheckLink(AFile: WideString): TLinkInfo;
 
   function APIResultToStatus(AValue: string): TLinkStatus;
   begin
-    Result := lsOffline;
+    Result := csOffline;
     if (AValue = 'online') then
-      Result := lsOnline;
+      Result := csOnline;
   end;
 
 var
@@ -53,7 +53,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';

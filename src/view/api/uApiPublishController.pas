@@ -502,7 +502,7 @@ var
 begin
   Result := True;
   for I := 0 to FACMSCollectionItem.Filter.Controls.Count - 1 do
-    if AControl.AControlID = StringToControlID(FACMSCollectionItem.Filter.Controls.Items[I].Name) then
+    if AControl.ControlID = StringToControlID(FACMSCollectionItem.Filter.Controls.Items[I].Name) then
     begin
       Allowed := RelToBool(FACMSCollectionItem.Filter.Controls.Items[I].Relation) = MatchTextMask(FACMSCollectionItem.Filter.Controls.Items[I].Value, AControl.Value);
 
@@ -804,7 +804,7 @@ end;
 
 function TICMSWebsiteContainer.CheckIScript(AIScript: WideString): RIScriptResult;
 begin
-  with TIScirptParser.Create(CMS, Name, GenerateWebsiteData) do
+  with TIScirptParser.Create(CMS, Name, GenerateData) do
     try
       Result := ErrorAnalysis(AIScript);
     finally
@@ -814,7 +814,7 @@ end;
 
 function TICMSWebsiteContainer.ParseIScript(AIScript: WideString): RIScriptResult;
 begin
-  with TIScirptParser.Create(CMS, Name, GenerateWebsiteData) do
+  with TIScirptParser.Create(CMS, Name, GenerateData) do
     try
       Result := Execute(AIScript);
     finally
@@ -857,12 +857,14 @@ var
             for J := 0 to APicture.MirrorCount - 1 do
               if SameText(WL.Strings[I], APicture.Mirror[J].Name) then
               begin
-                CMSWebsiteData.ControlList.Add(TIControlContainer.Create(cPicture, APicture.Mirror[J].Value));
+                // TODO
+                // CMSWebsiteData.ControlList.Add(TIControlContainer.Create(cPicture, APicture.Mirror[J].Value));
                 Exit;
               end
               else if SameText(WL.Strings[I], 'OriginalValue') then
               begin
-                CMSWebsiteData.ControlList.Add(TIControlContainer.Create(cPicture, APicture.Value));
+                // TODO
+                // CMSWebsiteData.ControlList.Add(TIControlContainer.Create(cPicture, APicture.Value));
                 Exit;
               end;
           end;
@@ -872,25 +874,27 @@ var
       for J := 0 to APicture.MirrorCount - 1 do
         if (BL.IndexOf(APicture.Mirror[J].Name) = -1) then
         begin
-          CMSWebsiteData.ControlList.Add(TIControlContainer.Create(cPicture, APicture.Mirror[J].Value));
+          // TODO
+          // CMSWebsiteData.ControlList.Add(TIControlContainer.Create(cPicture, APicture.Mirror[J].Value));
           Exit;
         end;
     finally
       BL.Free;
     end;
-    CMSWebsiteData.ControlList.Add(TIControlContainer.Create(cPicture, APicture.Value));
+    // TODO
+    // CMSWebsiteData.ControlList.Add(TIControlContainer.Create(cPicture, APicture.Value));
   end;
 
 begin
-  CMSWebsiteData := TICMSWebsiteData.Create(TabSheetController.ATypeID);
+  CMSWebsiteData := TICMSWebsiteData.Create(TabSheetController.TypeID);
 
   for I := 0 to TabSheetController.ControlController.ControlCount - 1 do
   begin
-
-    if not(TabSheetController.ControlController.Control[I].AControlID = cPicture) then
-      CMSWebsiteData.ControlList.Add(TIControlContainer.Create(TabSheetController.ControlController.Control[I].AControlID, TabSheetController.ControlController.Control[I].Value))
-    else
-      HandlePicture(TabSheetController.ControlController.Control[I] as IPicture);
+    // TODO
+    //if not(TabSheetController.ControlController.Control[I].ControlID = cPicture) then
+    //  CMSWebsiteData.ControlList.Add(TIControlContainer.Create(TabSheetController.ControlController.Control[I].ControlID, TabSheetController.ControlController.Control[I].Value))
+    //else
+    //  HandlePicture(TabSheetController.ControlController.Control[I] as IPicture);
   end;
 
   WL := nil;
@@ -916,7 +920,8 @@ begin
           for J := 0 to TabSheetController.MirrorController.MirrorCount - 1 do
             if SameText(WL.Strings[I], TabSheetController.MirrorController.Mirror[J].Hoster) then
             begin
-              CMSWebsiteData.MirrorList.Add(TIMirrorContainer.Create(TabSheetController.MirrorController.Mirror[J]));
+              // TODO
+              // CMSWebsiteData.MirrorList.Add(TIMirrorContainer.Create(TabSheetController.MirrorController.Mirror[J]));
               Break;
             end;
         end;
@@ -924,8 +929,9 @@ begin
         WL.Free;
       end;
     for J := 0 to TabSheetController.MirrorController.MirrorCount - 1 do
-      if (BL.IndexOf(TabSheetController.MirrorController.Mirror[J].Hoster) = -1) and not Assigned(CMSWebsiteData.Mirror[TabSheetController.MirrorController.Mirror[J].Hoster]) then
-        CMSWebsiteData.MirrorList.Add(TIMirrorContainer.Create(TabSheetController.MirrorController.Mirror[J]));
+      // TODO
+      //if (BL.IndexOf(TabSheetController.MirrorController.Mirror[J].Hoster) = -1) and not Assigned(CMSWebsiteData.Mirror[TabSheetController.MirrorController.Mirror[J].Hoster]) then
+        // CMSWebsiteData.MirrorList.Add(TIMirrorContainer.Create(TabSheetController.MirrorController.Mirror[J]));
   finally
     BL.Free;
   end;
@@ -937,7 +943,7 @@ function TICMSWebsiteContainer.GeneratePublishItem: IPublishItem;
 begin
   Result := nil;
   if ValidateFiles then
-    Result := TIPublishItem.Create(AccountName, AccountPassword, SettingsFileName, Website, Subject, Tags, Message, GetCMSPluginPath, GenerateWebsiteData);
+    Result := TIPublishItem.Create(AccountName, AccountPassword, SettingsFileName, Website, Subject, Tags, Message, GetCMSPluginPath, GenerateData);
 end;
 
 function TICMSWebsiteContainer.GeneratePublishTab: IPublishTab;

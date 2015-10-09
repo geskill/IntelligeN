@@ -124,7 +124,7 @@ begin
                 Add('[b]Genre:[/b] ' + ControlController.FindControl(cGenre).Value);
               if Assigned(ControlController.FindControl(cLanguage)) then
                 Add('[b]Language/s:[/b] ' + ControlController.FindControl(cLanguage).Value);
-              Add('[b]Parts:[/b] ' + IntToStr(CharCount('http://', MirrorController.Mirror[0].DirectlinksMirror[0])));
+              Add('[b]Parts:[/b] ' + IntToStr(CharCount('http://', MirrorController.Mirror[0].Directlink[0].Value)));
               if Assigned(ControlController.FindControl(cPassword)) and (ControlController.FindControl(cPassword).Value <> '') then
                 Add('[b]Password:[/b] ' + ControlController.FindControl(cPassword).Value);
 
@@ -157,7 +157,7 @@ begin
                 Add('[b]Mirror: ' + IntToStr(I + 1) + '[/b]');
                 Add('');
                 Add('[b]' + MirrorController.Mirror[I].Hoster + '[/b]');
-                Add('[code]' + MirrorController.Mirror[I].DirectlinksMirror[0] + '[/code]');
+                Add('[code]' + MirrorController.Mirror[I].Directlink[0].Value + '[/code]');
                 if not(I = MirrorController.MirrorCount - 1) then
                   Add('');
               end;

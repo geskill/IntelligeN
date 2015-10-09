@@ -61,7 +61,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -80,13 +80,13 @@ begin
 
             if Exec(InputString) then
             begin
-              LinkInfo.Status := lsOnline;
+              LinkInfo.Status := csOnline;
               LinkInfo.Size := StrToInt64Def(Match[2], 0);
               LinkInfo.FileName := Match[1];
               LinkInfo.Checksum := Match[3];
             end
             else
-              LinkInfo.Status := lsOffline;
+              LinkInfo.Status := csOffline;
           finally
             Free;
           end;

@@ -49,7 +49,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -64,7 +64,7 @@ begin
   ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
 
   if (Pos('Datei existiert nicht oder', ResponeStr) > 0) then
-    LinkInfo.Status := lsOffline
+    LinkInfo.Status := csOffline
   else
     with TRegExpr.Create do
       try
@@ -74,7 +74,7 @@ begin
 
         if Exec(InputString) then
         begin
-          LinkInfo.Status := lsOnline;
+          LinkInfo.Status := csOnline;
           LinkInfo.Size := TSizeFormatter.SizeToByte(Match[4], Match[5]);
           LinkInfo.FileName := Match[2];
         end;

@@ -1,3 +1,10 @@
+{ ********************************************************
+  *                            IntelligeN PLUGIN SYSTEM  *
+  *  PlugIn application class                            *
+  *  Version 2.5.0.0                                     *
+  *  Copyright (c) 2015 Sebastian Klatte                 *
+  *                                                      *
+  ******************************************************** }
 unit uPlugInAppClass;
 
 interface

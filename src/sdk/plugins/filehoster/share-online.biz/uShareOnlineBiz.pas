@@ -45,7 +45,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -83,9 +83,9 @@ function TShareOnlineBiz.CheckLinks(AFiles: WideString): Integer;
 
   function APIResultToStatus(AValue: string): TLinkStatus;
   begin
-    Result := lsOffline;
+    Result := csOffline;
     if (AValue = 'OK') then
-      Result := lsOnline;
+      Result := csOnline;
   end;
 
   function GetRequestString(AIDs: string): string;
@@ -151,7 +151,7 @@ begin
                   if SameText(Match[6], '') then
                     AddLink(Strings[I], Match[3], APIResultToStatus(Match[2]), StrToInt64Def(Match[4], 0), Match[5])
                   else
-                    AddLink(Strings[I], '', lsOffline, 0);
+                    AddLink(Strings[I], '', csOffline, 0);
                   break;
                 end;
             until not ExecNext;

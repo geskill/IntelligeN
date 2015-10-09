@@ -52,9 +52,12 @@ procedure LoadDefaultControlValues(AControlsTT: TCollection);
   end;
 
 var
-  I, X, Y: Integer;
+  LXMLDoc: IXMLDocument;
+  LTypeID: TTypeID;
+  LControlID: TControlID;
+
+  Y: Integer;
   sl: TStrings;
-  XMLDoc: IXMLDocument;
   Found: Boolean;
   bTitle, bHelpText, bValue: string;
 begin
@@ -64,31 +67,31 @@ begin
   begin
     OleInitialize(nil);
     try
-      XMLDoc := NewXMLDocument;
+      LXMLDoc := NewXMLDocument;
 
-      with XMLDoc do
+      with LXMLDoc do
       begin
         LoadFromFile(GetConfigurationFolder + 'controls.xml');
         Active := True;
       end;
 
-      for I := 0 to length(TStringTemplateTypeID) - 1 do
+      for LTypeID := Low(TTypeID) to High(TTypeID) do
         with TControlsCollectionItem(AControlsTT.Add) do
         begin
-          ATypeID := TTypeID(I);
-          for X := 0 to length(TStringComponentID) - 1 do
+          TypeID := LTypeID;
+          for LControlID := Low(TControlID) to High(TControlID) do
             with TControlCollectionItem(Controls.Add) do
             begin
-              AControlID := TControlID(X);
+              ControlID := LControlID;
 
-              with XMLDoc.DocumentElement.ChildNodes.Nodes[ControlIDToString(TControlID(X))].ChildNodes do
+              with LXMLDoc.DocumentElement.ChildNodes.Nodes[ControlIDToString(LControlID)].ChildNodes do
               begin
                 Found := False;
                 for Y := 0 to Count - 1 do
                 begin
                   sl := SplittString('|', Nodes[Y].Attributes['name']);
                   try
-                    if sl.IndexOf(TypeIDToString(TTypeID(I))) <> -1 then
+                    if sl.IndexOf(TypeIDToString(LTypeID)) <> -1 then
                     begin
                       internal(Nodes[Y], bTitle, bHelpText, bValue, Items);
 
@@ -119,7 +122,7 @@ begin
             end;
         end;
     finally
-      XMLDoc := nil;
+      LXMLDoc := nil;
       OleUninitialize;
     end;
   end;

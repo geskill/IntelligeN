@@ -260,13 +260,12 @@ end;
 
 function TfMain.GetActiveViewType: TTabViewType;
 begin
-  Result := TTabViewType(cxTCView.TabIndex);
+  Result := TTabViewType(cxTCView.TabIndex + 1);
 end;
 
 procedure TfMain.SetActiveViewType(AViewType: TTabViewType);
 begin
-  with cxTCView do
-    TabIndex := Integer(AViewType);
+  cxTCView.TabIndex := Integer(AViewType) - 1;
 
   CommonActiveViewTypeChange(AViewType);
 end;
@@ -707,8 +706,7 @@ begin
               AutoFileName := Path + AutoFileName;
               if not(ExtractFileExt(AutoFileName) = '.xml') then
                 AutoFileName := AutoFileName + '.xml';
-              if (FileExists(AutoFileName) and (MessageDlg('Override "' + ExtractFileName(AutoFileName) + '" ?', mtConfirmation, [mbyes, mbno], 0) = mrYes)) or
-                (not FileExists(AutoFileName)) then
+              if (FileExists(AutoFileName) and (MessageDlg('Override "' + ExtractFileName(AutoFileName) + '" ?', mtConfirmation, [mbyes, mbno], 0) = mrYes)) or (not FileExists(AutoFileName)) then
                 Save(AutoFileName, FileFormats.Names[FilterIndex - 1]);
             end;
       finally

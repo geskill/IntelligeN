@@ -19,15 +19,14 @@ resourcestring
   StrImageFiles = 'Image files';
   StrLoadFromFile = 'Load from file';
   StrMissingParts = 'Missing parts:';
-  StrMixed = 'mixed';
+  StrMixed = 'Mixed on- and offline';
   StrNewDatabaseConnect = 'New database connection';
   StrNewItem = 'New item';
   StrNewItemValue = 'New item value:';
-  StrNoinfo = 'noinfo';
   StrNotifyMissing = 'Notify missing';
-  StrNotyet = 'notyet';
-  StrOffline = 'offline';
-  StrOnline = 'online';
+  StrNotChecked = 'Not checked';
+  StrOffline = 'Offline';
+  StrOnline = 'Online';
   StrOverrideSPlugin = 'Override %s plugin?';
   StrParts = 'Parts';
   StrPluginDamaged = 'Plugin damaged! (%s)';
@@ -39,11 +38,12 @@ resourcestring
   StrSettings = 'Settings';
   StrSize = 'Size';
   StrSort = 'Sort';
+  StrTemporaryOffline = 'Temporary offline';
   StrTextFiles = 'Text files';
   StrThisPluginBelongs = 'This plugin belongs to another plugin interface';
   StrThisPluginIsIncom = 'This plugin is incompatible for this version %s ! (Plugin build: %s)';
   StrTop = 'Top';
-  StrUnknown = 'unknown';
+  StrUnknown = 'Unknown';
   StrUnknownSPlugin = 'Unknown %s plugin';
 
 implementation

@@ -699,27 +699,27 @@ begin
     { ........... } _LinkInfo := CheckedLink(_LinksIndex);
 
     { ........... } case _LinkInfo.Status of
-    { ............. } lsOffline: Inc(offline);
-    { ............. } lsOnline: Inc(online);
-    { ............. } lsUnknown: Inc(unknown);
-    { ............. } lsTemporaryOffline: Inc(temporaryoffline);
+    { ............. } csOffline: Inc(offline);
+    { ............. } csOnline: Inc(online);
+    { ............. } csUnknown: Inc(unknown);
+    { ............. } csTemporaryOffline: Inc(temporaryoffline);
     { ........... } end;
 
-    { ........... } _GlobalSize := _GlobalSize + _LinkInfo.Size;
+    { ........... } _GlobalSize := _GlobalSize + Round(_LinkInfo.Size);
     { ........... } if (_MaxPartSize < _LinkInfo.Size) then
-    { ............. } _MaxPartSize := _LinkInfo.Size;
+    { ............. } _MaxPartSize := Round(_LinkInfo.Size);
 
     { ........... } _Result.Links[_LinksIndex] := _LinkInfo;
     { ......... } end;
 
     { ......... } if (unknown = 0) and (online = 0) and (temporaryoffline = 0) then
-    { ........... } _Result.Status := 0
+    { ........... } _Result.Status := csOffline
     { ......... } else if (unknown = 0) and (offline = 0) then
-    { ........... } _Result.Status := 1
+    { ........... } _Result.Status := csOnline
     { ......... } else if (offline > 0) and (online > 0) then
-    { ........... } _Result.Status := 4
+    { ........... } _Result.Status := csMixedOnOffline
     { ......... } else
-    { ........... } _Result.Status := 2;
+    { ........... } _Result.Status := csUnknown;
 
     { ......... } _Result.Size := RoundTo((_GlobalSize / 1048576), -2);
     { ......... } _Result.PartSize := RoundTo((_MaxPartSize / 1048576), -2);

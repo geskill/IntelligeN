@@ -53,9 +53,8 @@ var
 
   function RemoveSpecialChars(s: string): string;
   begin
-    result := StringReplaceMultiple(s, [#$01, #$02, #$03, #$04, #$05, #$06, #$07, #$08, #$b, #$c, #$e, #$f, #$9, #$10, #$11, #$12, #$13, #$14, #$15, #$16,
-      #$17, #$18, #$19, #$1a, #$1b, #$1c, #$1d, #$1e, #$1f], [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ',
-      ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], False);
+    result := StringReplaceMultiple(s, [#$01, #$02, #$03, #$04, #$05, #$06, #$07, #$08, #$b, #$c, #$e, #$f, #$9, #$10, #$11, #$12, #$13, #$14, #$15, #$16, #$17, #$18, #$19, #$1a, #$1b, #$1c, #$1d, #$1e, #$1f],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], False);
   end;
 
 begin
@@ -118,19 +117,19 @@ begin
           for I := 0 to MirrorCount - 1 do
             with AddChild('mirror') do
             begin
-              for X := 0 to Mirror[I].DirectlinksMirrorCount - 1 do
+              for X := 0 to Mirror[I].DirectlinkCount - 1 do
                 with AddChild('directlink') do
                 begin
-                  Attributes['size'] := Mirror[I].Directlink.GetSize(X);
-                  Attributes['partsize'] := Mirror[I].PartSize;
-                  Attributes['hoster'] := Mirror[I].Hoster;
-                  Attributes['parts'] := Mirror[I].Parts;
-                  NodeValue := Mirror[I].DirectlinksMirror[X];
+                  Attributes['size'] := Round(Mirror[I].Directlink[X].Size);
+                  Attributes['partsize'] := Mirror[I].Directlink[X].PartSize;
+                  Attributes['hoster'] := Mirror[I].Directlink[X].Hoster;
+                  Attributes['parts'] := Mirror[I].Directlink[X].Parts;
+                  NodeValue := Mirror[I].Directlink[X].Value;
                 end;
               for X := 0 to Mirror[I].CrypterCount - 1 do
                 with AddChild('crypter') do
                 begin
-                  Attributes['name'] := Mirror[I].Crypter[X].name;
+                  Attributes['name'] := Mirror[I].Crypter[X].Name;
                   Attributes['status'] := Mirror[I].Crypter[X].Status;
                   Attributes['partsize'] := Mirror[I].Crypter[X].PartSize;
                   Attributes['size'] := Mirror[I].Crypter[X].Size;
@@ -138,7 +137,7 @@ begin
                   Attributes['parts'] := Mirror[I].Crypter[X].Parts;
                   Attributes['statusimage'] := Mirror[I].Crypter[X].StatusImage;
                   Attributes['statusimagetext'] := Mirror[I].Crypter[X].StatusImageText;
-                  NodeValue := Mirror[I].Crypter[X].Link;
+                  NodeValue := Mirror[I].Crypter[X].Value;
                 end;
             end;
     end;
@@ -210,8 +209,7 @@ begin
         else
           raise Exception.Create('');
 
-      if (FileExists(ATemplateDirectory + _TemplateFileName)) and (SameText(_TemplateChecksum, GetMD5FromFile(ATemplateDirectory + _TemplateFileName))
-          or SameText('#', _TemplateChecksum)) then
+      if (FileExists(ATemplateDirectory + _TemplateFileName)) and (SameText(_TemplateChecksum, GetMD5FromFile(ATemplateDirectory + _TemplateFileName)) or SameText('#', _TemplateChecksum)) then
         _TemplateFile := ATemplateDirectory + _TemplateFileName
       else
         _TemplateFile := AFileName;
@@ -225,8 +223,11 @@ begin
               for X := 0 to ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Count - 1 do
                 if SameText('directlink', ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeName) then
                 begin
-                  Directlink.Mirror[Directlink.Add(VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeValue))].Size :=
-                    StrToFloatDef(VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['size']), 0);
+                  Directlink[GetDirectlink.Add(VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeValue))].Size
+                  { . } := StrToFloatDef(VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['size']), 0);
+
+                  Directlink[GetDirectlink.Add(VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeValue))].PartSize
+                  { . } := StrToFloatDef(VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['partsize']), 0);
 
                   // Workaround for: http://www.devexpress.com/issue=B202502
                   APageController.CallControlAligner;
@@ -237,7 +238,7 @@ begin
                   begin
                     _CrypterExists := False;
                     for Y := 0 to CrypterCount - 1 do
-                      if SameText(Crypter[Y].name, VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['name'])) then
+                      if SameText(Crypter[Y].Name, VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['name'])) then
                       begin
                         _CrypterExists := True;
                         break;
@@ -248,7 +249,7 @@ begin
                   for Y := 0 to CrypterCount - 1 do
                     if SameText(Crypter[Y].name, VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['name'])) then
                     begin
-                      Crypter[Y].Link := VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeValue);
+                      Crypter[Y].Value := VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeValue);
                       Crypter[Y].CheckFolder;
                       break;
                     end;

@@ -47,7 +47,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -86,9 +86,9 @@ var
 
   function APIResultToStatus(AValue: string): TLinkStatus;
   begin
-    result := lsOffline;
+    result := csOffline;
     if (AValue = 'AVAILABLE') then
-      result := lsOnline;
+      result := csOnline;
   end;
 
 begin

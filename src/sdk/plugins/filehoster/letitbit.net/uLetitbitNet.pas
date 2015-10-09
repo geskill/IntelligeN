@@ -51,7 +51,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -69,7 +69,7 @@ begin
   ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
 
   if (Pos('<title>404</title>', ResponeStr) > 0) or (Pos('File not found', ResponeStr) > 0) then
-    LinkInfo.Status := lsOffline
+    LinkInfo.Status := csOffline
   else
     with TRegExpr.Create do
       try
@@ -78,7 +78,7 @@ begin
         Expression := 'name="realname" value="(.*?)"';
         if Exec(InputString) then
         begin
-          LinkInfo.Status := lsOnline;
+          LinkInfo.Status := csOnline;
           LinkInfo.FileName := Match[1];
         end;
 

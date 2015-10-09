@@ -68,7 +68,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -82,7 +82,7 @@ begin
   ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
 
   if (HTTPManager.GetResult(RequestID).HTTPResult.HTTPResponse.Code = 404) or (HTTPManager.GetResult(RequestID).HTTPResult.HTTPResponse.Code = 410) then
-    LinkInfo.Status := lsOffline
+    LinkInfo.Status := csOffline
   else
     with TRegExpr.Create do
       try
@@ -91,7 +91,7 @@ begin
 
         if Exec(InputString) then
         begin
-          LinkInfo.Status := lsOnline;
+          LinkInfo.Status := csOnline;
           LinkInfo.Size := TSizeFormatter.SizeToByte(Match[2], Match[3], False);
           LinkInfo.FileName := Match[1];
         end;
@@ -106,9 +106,9 @@ function TUploadedNet.CheckLinks(AFiles: WideString): Integer;
 
   function APIResultToStatus(AValue: string): TLinkStatus;
   begin
-    Result := lsOffline;
+    Result := csOffline;
     if (AValue = 'online') then
-      Result := lsOnline;
+      Result := csOnline;
   end;
 
 var

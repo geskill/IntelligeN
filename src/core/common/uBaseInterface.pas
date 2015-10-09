@@ -1,3 +1,10 @@
+{ ********************************************************
+  *                                     IntelligeN CORE  *
+  *  Global base interface                               *
+  *  Version 2.5.0.0                                     *
+  *  Copyright (c) 2015 Sebastian Klatte                 *
+  *                                                      *
+  ******************************************************** }
 unit uBaseInterface;
 
 interface

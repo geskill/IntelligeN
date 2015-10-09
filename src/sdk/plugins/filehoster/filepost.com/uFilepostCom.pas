@@ -47,7 +47,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -73,9 +73,9 @@ function TFilepostCom.CheckLinks(AFiles: WideString): Integer;
 
   function APIResultToStatus(AValue: string): TLinkStatus;
   begin
-    Result := lsOffline;
+    Result := csOffline;
     if (AValue = 'x') then
-      Result := lsOnline;
+      Result := csOnline;
   end;
 
 var
@@ -146,7 +146,7 @@ begin
             if Exec(InputString) then
               AddLink(Strings[I], HTTPDecode(Match[1]), APIResultToStatus(Match[4]), TSizeFormatter.SizeToByte(Match[2], Match[3]))
             else
-              AddLink(Strings[I], '', lsOffline, 0);
+              AddLink(Strings[I], '', csOffline, 0);
           end;
         finally
           Free;

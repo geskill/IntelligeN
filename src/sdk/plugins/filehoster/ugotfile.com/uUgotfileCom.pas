@@ -45,7 +45,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -71,9 +71,9 @@ function TUgotfileCom.CheckLinks(AFiles: WideString): Integer;
 
   function APIResultToStatus(AValue: string): TLinkStatus;
   begin
-    Result := lsOffline;
+    Result := csOffline;
     if (AValue = 'Alive') then
-      Result := lsOnline;
+      Result := csOnline;
   end;
 
 var
@@ -131,7 +131,7 @@ begin
                 if Exec(InputString) then
                   AddLink(Strings[I], ExtractUrlFileName(Strings[I]), APIResultToStatus(Match[3]), TSizeFormatter.SizeToByte(Match[1], Match[2]))
                 else
-                  AddLink(Strings[I], '', lsOffline, 0);
+                  AddLink(Strings[I], '', csOffline, 0);
               end;
             finally
               Free;

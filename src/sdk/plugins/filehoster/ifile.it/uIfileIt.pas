@@ -46,7 +46,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -59,7 +59,7 @@ begin
         Get(AFile, _postreply);
 
         if (Pos('file not found', _postreply.DataString) > 0) or (Pos('no such file', _postreply.DataString) > 0) then
-          LinkInfo.Status := lsOffline
+          LinkInfo.Status := csOffline
         else
           with TRegExpr.Create do
             try
@@ -70,7 +70,7 @@ begin
 
               if Exec(InputString) then
               begin
-                LinkInfo.Status := lsOnline;
+                LinkInfo.Status := csOnline;
                 LinkInfo.Size := TSizeFormatter.SizeToByte(Match[2], Match[3]);
                 LinkInfo.FileName := Match[1];
               end;

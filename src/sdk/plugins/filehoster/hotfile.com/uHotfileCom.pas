@@ -45,7 +45,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -92,9 +92,9 @@ var
 
   function APIResultToStatus(AValue: string): TLinkStatus;
   begin
-    Result := lsOffline;
+    Result := csOffline;
     if (AValue = '1') or (AValue = '2') then
-      Result := lsOnline;
+      Result := csOnline;
   end;
 
 var
@@ -149,7 +149,7 @@ begin
             if Exec(InputString) then
               AddLink(Strings[I], Match[2], APIResultToStatus(Match[1]), StrToInt64Def(Match[3], 0), Match[4])
             else
-              AddLink(Strings[I], '', lsOffline, 0);
+              AddLink(Strings[I], '', csOffline, 0);
           end;
         finally
           Free;

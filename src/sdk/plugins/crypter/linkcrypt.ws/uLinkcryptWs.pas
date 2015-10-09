@@ -15,6 +15,7 @@ uses
   uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst;
 
 type
+  // see: http://linkcrypt.ws/image/Linkcrypt.ws_API-Create_folder_DE.pdf
   TLinkcryptWs = class(TCrypterPlugIn)
   private const
     website = 'http://linkcrypt.ws/';
@@ -196,7 +197,7 @@ var
 begin
   with CrypterFolderInfo do
   begin
-    Status := 255;
+    Status := csNotChecked;
     Size := 0;
     Hoster := '';
     Parts := 0;
@@ -232,15 +233,15 @@ begin
           begin
             case IndexText(VarToStr(Nodes['folderStatus'].NodeValue), ['1', '3', '2', '0']) of
               0:
-                CrypterFolderInfo.Status := 1;
+                CrypterFolderInfo.Status := csOnline;
               1:
-                CrypterFolderInfo.Status := 4;
+                CrypterFolderInfo.Status := csMixedOnOffline;
               2:
-                CrypterFolderInfo.Status := 0;
+                CrypterFolderInfo.Status := csOffline;
               3:
-                CrypterFolderInfo.Status := 3;
+                CrypterFolderInfo.Status := csNotChecked;
             else
-              CrypterFolderInfo.Status := 255;
+              CrypterFolderInfo.Status := csNotChecked;
             end;
             CrypterFolderInfo.Hoster := VarToStr(Nodes['folderHoster'].NodeValue);
             CrypterFolderInfo.Size := StrToFloatDef(StringReplace(VarToStr(Nodes['folderSize'].NodeValue), '.', ',', [rfReplaceAll]), 0, FormatSettings);

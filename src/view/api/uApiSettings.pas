@@ -97,12 +97,12 @@ type
 
   TCrawlerContingentCollectionItem = class(TCollectionItem)
   private
-    FTemplateTypeID: TTypeID;
-    FComponentID: TControlID;
+    FTypeID: TTypeID;
+    FControlID: TControlID;
     FStatus: Boolean;
   published
-    property TypeID: TTypeID read FTemplateTypeID write FTemplateTypeID;
-    property ControlID: TControlID read FComponentID write FComponentID;
+    property TypeID: TTypeID read FTypeID write FTypeID;
+    property ControlID: TControlID read FControlID write FControlID;
     property Status: Boolean read FStatus write FStatus;
   end;
 
@@ -272,7 +272,7 @@ type
 
   TControlCollectionItem = class(TCollectionItem)
   private
-    FComponentID: TControlID;
+    FControlID: TControlID;
     FTitle, FHelpText, FValue: string;
     FItems: TCollection;
   public
@@ -280,7 +280,7 @@ type
     function GetItems: string;
     destructor Destroy; override;
   published
-    property AControlID: TControlID read FComponentID write FComponentID;
+    property ControlID: TControlID read FControlID write FControlID;
     property Title: string read FTitle write FTitle;
     property HelpText: string read FHelpText write FHelpText;
     property Value: string read FValue write FValue;
@@ -289,13 +289,13 @@ type
 
   TControlsCollectionItem = class(TCollectionItem)
   private
-    FTemplateTypeID: TTypeID;
+    FTypeID: TTypeID;
     FControls: TCollection;
   public
     constructor Create(Collection: TCollection); override;
     destructor Destroy; override;
   published
-    property ATypeID: TTypeID read FTemplateTypeID write FTemplateTypeID;
+    property TypeID: TTypeID read FTypeID write FTypeID;
     property Controls: TCollection read FControls write FControls;
   end;
 
@@ -709,7 +709,7 @@ begin
 
   for I := 0 to FContingent.Count - 1 do
   begin
-    if (TCrawlerContingentCollectionItem(FContingent.Items[I]).ATypeID = ATypeID) and (TCrawlerContingentCollectionItem(FContingent.Items[I]).AControlID = AComponentID) then
+    if (TCrawlerContingentCollectionItem(FContingent.Items[I]).TypeID = ATypeID) and (TCrawlerContingentCollectionItem(FContingent.Items[I]).ControlID = AComponentID) then
     begin
       Result := TCrawlerContingentCollectionItem(FContingent.Items[I]).Status;
       break;
@@ -723,7 +723,7 @@ var
 begin
   for I := 0 to FContingent.Count - 1 do
   begin
-    if (TCrawlerContingentCollectionItem(FContingent.Items[I]).ATypeID = ATypeID) and (TCrawlerContingentCollectionItem(FContingent.Items[I]).AControlID = AComponentID) then
+    if (TCrawlerContingentCollectionItem(FContingent.Items[I]).TypeID = ATypeID) and (TCrawlerContingentCollectionItem(FContingent.Items[I]).ControlID = AComponentID) then
     begin
       TCrawlerContingentCollectionItem(FContingent.Items[I]).Status := Status;
       break;
@@ -902,10 +902,10 @@ var
   I, X: Integer;
 begin
   for I := 0 to FControlsTT.Count - 1 do
-    if (TControlsCollectionItem(FControlsTT.Items[I]).FTemplateTypeID = ATypeID) then
+    if (TControlsCollectionItem(FControlsTT.Items[I]).FTypeID = ATypeID) then
       for X := 0 to TControlsCollectionItem(FControlsTT.Items[I]).Controls.Count - 1 do
         with TControlCollectionItem(TControlsCollectionItem(FControlsTT.Items[I]).Controls.Items[X]) do
-          if (AComponentID = FComponentID) then
+          if (AComponentID = FControlID) then
           begin
             Result := TControlCollectionItem(TControlsCollectionItem(FControlsTT.Items[I]).Controls.Items[X]);
             break;

@@ -139,9 +139,9 @@ begin
               with AddChild('cobDownloadHostername' + IntToStr(I)) do
                 NodeValue := ChangeFileExt(Mirror[I].Crypter[X].Hoster, '');
               with AddChild('eDownloadFilename' + IntToStr(I)) do
-                NodeValue := Mirror[I].Directlink.FileName;
+                NodeValue := Mirror[I].Directlink[X].FileName;
               with AddChild(eDownloadLink + IntToStr(I)) do
-                NodeValue := Mirror[I].Crypter[X].Link;
+                NodeValue := Mirror[I].Crypter[X].Value;
             end;
     end;
   end;
@@ -223,7 +223,7 @@ begin
                           if Base64 then
                             _value := TFormat_MIME64.Decode(_value);
 
-                          Crypter[K].Link := _value;
+                          Crypter[K].Value := _value;
                           Crypter[K].CheckFolder;
                         end;
                     end;

@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Classes, Controls, Types, Variants,
+  SysUtils, Classes, Controls, Types, Variants,
   // Spring Framework
   Spring.Collections.Lists,
   // MultiEvent
@@ -171,7 +171,7 @@ end;
 function TMirrorController.FindMirrorControl(const AHoster: WideString): IMirrorControl;
 var
   LIndex: Integer;
-  LMirror: IMirrorContainer;
+  LMirror: IMirrorControl;
 begin
   Result := nil;
 
@@ -233,14 +233,14 @@ var
 begin
   Result := True;
   try
-    for I := 0 to Mirror[index].DirectlinksMirrorCount - 1 do
+    for I := 0 to Mirror[index].DirectlinkCount - 1 do
     begin
-      TabSheetController.PageController.HosterManager.RemoveHosterCheckJob(Mirror[index].Directlink.Mirror[I]);
-      Mirror[index].Directlink.Mirror[I].DirectlinksPanel := nil;
+      TabSheetController.PageController.HosterManager.RemoveHosterCheckJob(Mirror[index].Directlink[I]);
+      Mirror[index].Directlink[I].DirectlinksPanel := nil;
     end;
     for I := 0 to Mirror[index].CrypterCount - 1 do
       Mirror[index].Crypter[I].MirrorControl := nil;
-    Mirror[index].Directlink.MirrorControl := nil;
+    Mirror[index].GetDirectlink.MirrorControl := nil;
     Mirror[index].MirrorController := nil;
 
     FMirrorList.Delete(index);

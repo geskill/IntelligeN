@@ -46,7 +46,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -60,7 +60,7 @@ begin
 
         if (Pos('<h1 style="text-align:left;">', _postreply.DataString) > 0) then
         begin
-          LinkInfo.Status := lsOffline;
+          LinkInfo.Status := csOffline;
           Exit;
         end;
 
@@ -71,7 +71,7 @@ begin
             InputString := _postreply.DataString;
             Expression := '<title>(.*?)\.html</title>';
 
-            LinkInfo.Status := lsOnline;
+            LinkInfo.Status := csOnline;
             LinkInfo.Size := 0;
 
             if Exec(InputString) then

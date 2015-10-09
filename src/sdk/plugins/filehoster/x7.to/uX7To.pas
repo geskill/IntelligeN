@@ -46,7 +46,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -63,7 +63,7 @@ begin
         end;
 
         if (Pos('404', _postreply.DataString) > 0) then
-          LinkInfo.Status := lsOffline
+          LinkInfo.Status := csOffline
         else
           with TRegExpr.Create do
             try
@@ -72,7 +72,7 @@ begin
 
               if Exec(InputString) then
               begin
-                LinkInfo.Status := lsOnline;
+                LinkInfo.Status := csOnline;
                 LinkInfo.Size := TSizeFormatter.SizeToByte(Match[1], Match[2], False);
                 LinkInfo.FileName := HTML2Text(Match[3]);
               end;
@@ -109,9 +109,9 @@ end;
 
   function APIResultToStatus(AValue: string): TLinkStatus;
   begin
-  Result := lsOffline;
+  Result := csOffline;
   if (AValue = 'online') then
-  Result := lsOnline;
+  Result := csOnline;
   end;
 
   var

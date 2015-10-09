@@ -45,7 +45,7 @@ begin
   with LinkInfo do
   begin
     Link := AFile;
-    Status := lsUnknown;
+    Status := csUnknown;
     Size := 0;
     FileName := '';
     Checksum := '';
@@ -88,7 +88,7 @@ begin
           if Exec(InputString) then
           begin
             repeat
-              AddLink('http' + Match[1], Match[2], lsOnline, TSizeFormatter.SizeToByte(Match[3], Match[4]));
+              AddLink('http' + Match[1], Match[2], csOnline, TSizeFormatter.SizeToByte(Match[3], Match[4]));
             until not ExecNext;
           end;
 
@@ -97,7 +97,7 @@ begin
           if Exec(InputString) then
           begin
             repeat
-              AddLink('http' + Match[1], Match[2], lsOffline, 0);
+              AddLink('http' + Match[1], Match[2], csOffline, 0);
             until not ExecNext;
           end;
 

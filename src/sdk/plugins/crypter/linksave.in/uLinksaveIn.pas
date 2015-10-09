@@ -180,7 +180,7 @@ var
 begin
   with CrypterFolderInfo do
   begin
-    Status := 255;
+    Status := csNotChecked;
     Size := 0;
     Hoster := '';
     Parts := 0;
@@ -216,15 +216,15 @@ begin
     begin
       case IndexText(StringList[0], ['online', 'unknown', 'offline', 'notyet', '']) of
         0:
-          CrypterFolderInfo.Status := 1;
+          CrypterFolderInfo.Status := csOnline;
         1:
-          CrypterFolderInfo.Status := 2;
+          CrypterFolderInfo.Status := csUnknown;
         2:
-          CrypterFolderInfo.Status := 0;
+          CrypterFolderInfo.Status := csOffline;
         3, 4:
-          CrypterFolderInfo.Status := 3;
+          CrypterFolderInfo.Status := csNotChecked;
       else
-        CrypterFolderInfo.Status := 255;
+        CrypterFolderInfo.Status := csNotChecked;
       end;
 
       CrypterFolderInfo.Hoster := StringList[2];

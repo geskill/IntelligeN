@@ -187,7 +187,7 @@ var
 begin
   with CrypterFolderInfo do
   begin
-    Status := 255;
+    Status := csNotChecked;
     Size := 0;
     Hoster := '';
     Parts := 0;
@@ -238,13 +238,13 @@ begin
     CompleteList.Free;
   end;
   if (unknown = 0) and (online = 0) then
-    CrypterFolderInfo.Status := 0
+    CrypterFolderInfo.Status := csOffline
   else if (unknown = 0) and (offline = 0) then
-    CrypterFolderInfo.Status := 1
+    CrypterFolderInfo.Status := csOnline
   else if (offline > 0) and (online > 0) then
-    CrypterFolderInfo.Status := 4
+    CrypterFolderInfo.Status := csMixedOnOffline
   else
-    CrypterFolderInfo.Status := 2;
+    CrypterFolderInfo.Status := csUnknown;
 
   CrypterFolderInfo.Size := RoundTo((SizeInBytes / 1048576), -2);
 

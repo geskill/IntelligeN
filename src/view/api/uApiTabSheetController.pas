@@ -29,7 +29,7 @@ type
   TTabSheetController = class(TcxTabSheet, ITabSheetController)
   private
     FPageController: IPageController;
-    FTemplateTypeID: TTypeID;
+    FTypeID: TTypeID;
 
     FFileName, FFileType, FReleaseName, FTemplateFileName: string;
     FDataChanged: Boolean;
@@ -96,7 +96,7 @@ type
     property DataChanged: Boolean read GetDataChanged write SetDataChanged;
 
     property TemplateFileName: string read FTemplateFileName write FTemplateFileName;
-    property ATypeID: TTypeID read GetTypeID write FTemplateTypeID;
+    property ATypeID: TTypeID read GetTypeID write FTypeID;
 
     property ActiveWebsite: WideString read GetActiveWebsite write SetActiveWebsite;
 
@@ -201,7 +201,7 @@ end;
 
 function TTabSheetController.GetTypeID: TTypeID;
 begin
-  Result := FTemplateTypeID;
+  Result := FTypeID;
 end;
 
 function TTabSheetController.GetActiveWebsite: WideString;

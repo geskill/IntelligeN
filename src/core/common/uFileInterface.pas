@@ -1,3 +1,10 @@
+{ ********************************************************
+  *                                     IntelligeN CORE  *
+  *  File interface                                      *
+  *  Version 2.0.0.0                                     *
+  *  Copyright (c) 2015 Sebastian Klatte                 *
+  *                                                      *
+  ******************************************************** }
 unit uFileInterface;
 
 interface
