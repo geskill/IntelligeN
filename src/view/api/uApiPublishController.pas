@@ -119,47 +119,17 @@ type
     FICMSWebsiteContainerActiveController: TICMSWebsiteContainerActiveController;
 
   type
-    TICMSWebsiteData = class(TInterfacedObject, ITabSheetData)
-    private
-      FTemplateTypeID: TTypeID;
-      FControlList: TList<IControlContainer>;
-      FMirrorList: TList<IMirrorContainer>;
-    protected
-      function GetTypeID: TTypeID; safecall;
-
-      function GetControl(const IndexOrName: OleVariant): IControlContainer; safecall;
-      function GetControlCount: Integer; safecall;
-      function GetMirror(const IndexOrName: OleVariant): IMirrorContainer; safecall;
-      function GetMirrorCount: Integer; safecall;
-    public
-      constructor Create(ATypeID: TTypeID);
-
-      property ATypeID: TTypeID read GetTypeID;
-
-      property ControlList: TList<IControlContainer>read FControlList;
-      property MirrorList: TList<IMirrorContainer>read FMirrorList;
-
-      function FindControl(AControlID: TControlID): IControlContainer; safecall;
-
-      property Control[const IndexOrName: OleVariant]: IControlContainer read GetControl;
-      property ControlCount: Integer read GetControlCount;
-      property Mirror[const IndexOrName: OleVariant]: IMirrorContainer read GetMirror;
-      property MirrorCount: Integer read GetMirrorCount;
-      destructor Destroy; override;
-    end;
-
     TIPublishItem = class(TICMSWebsite, IPublishItem)
     private
       FCMSPluginPath: WideString;
       FCMSWebsiteData: ITabSheetData;
     protected
       function GetCMSPluginPath: WideString;
-      function GetWebsiteData: ITabSheetData;
+      function GetData: ITabSheetData;
     public
-      constructor Create(AAccountName, AAccountPassword, ASettingsFileName, AWebsite, ASubject, ATags, AMessage, ACMSPluginPath: WideString;
-        ACMSWebsiteData: ITabSheetData);
+      constructor Create(AAccountName, AAccountPassword, ASettingsFileName, AWebsite, ASubject, ATags, AMessage, ACMSPluginPath: WideString; ACMSWebsiteData: ITabSheetData);
       property CMSPluginPath: WideString read GetCMSPluginPath;
-      property WebsiteData: ITabSheetData read GetWebsiteData;
+      property WebsiteData: ITabSheetData read GetData;
       destructor Destroy; override;
     end;
 
@@ -206,8 +176,7 @@ type
     function GetMessageFileName: WideString;
     procedure SetMessageFileName(AMessageFileName: WideString);
   public
-    constructor Create(const ATabConnection: ITabSheetController; ACMSCollectionItem: TCMSCollectionItem;
-      ACMSWebsitesCollectionItem: TCMSWebsitesCollectionItem);
+    constructor Create(const ATabConnection: ITabSheetController; ACMSCollectionItem: TCMSCollectionItem; ACMSWebsitesCollectionItem: TCMSWebsitesCollectionItem);
     property TabSheetController: ITabSheetController read GetTabSheetController write SetTabSheetController;
     property CMS: WideString read GetCMS;
     property Name: WideString read GetName;
@@ -220,7 +189,7 @@ type
 
     function CheckIScript(AIScript: WideString): RIScriptResult;
     function ParseIScript(AIScript: WideString): RIScriptResult;
-    function GenerateWebsiteData: ITabSheetData;
+    function GenerateData: ITabSheetData;
 
     function GeneratePublishItem: IPublishItem;
     function GeneratePublishTab: IPublishTab;
@@ -276,7 +245,7 @@ type
     FUpdateCMSWebsiteList: IUpdateCMSWebsiteListEvent;
     FUpdateCMSWebsite: IUpdateCMSWebsiteEvent;
     FIChange: TINotifyEventHandler;
-    FPluginChangeEventHandler :IPluginChangeEventHandler;
+    FPluginChangeEventHandler: IPluginChangeEventHandler;
     function CreateNewCMSContainer(ACMSIndex: Integer): ICMSContainer;
     procedure CMSUpdate(ACMSChangeType: TPluginChangeType; AIndex: Integer; AParam: Integer);
     procedure TabChange(const Sender: IUnknown);
@@ -510,7 +479,7 @@ begin
     if Active then
     begin
       if not CanUpdatePartly then
-        FControlsCategories := FTabConnection.ControlController.ATypeID in FACMSCollectionItem.Filter.GetCategoriesAsTTemplateTypeIDs;
+        FControlsCategories := FTabConnection.ControlController.TypeID in FACMSCollectionItem.Filter.GetCategoriesAsTTemplateTypeIDs;
       Result := FControlsCategories and FControlsSide;
     end;
 end;
@@ -535,8 +504,7 @@ begin
   for I := 0 to FACMSCollectionItem.Filter.Controls.Count - 1 do
     if AControl.AControlID = StringToControlID(FACMSCollectionItem.Filter.Controls.Items[I].Name) then
     begin
-      Allowed := RelToBool(FACMSCollectionItem.Filter.Controls.Items[I].Relation) = MatchTextMask(FACMSCollectionItem.Filter.Controls.Items[I].Value,
-        AControl.Value);
+      Allowed := RelToBool(FACMSCollectionItem.Filter.Controls.Items[I].Relation) = MatchTextMask(FACMSCollectionItem.Filter.Controls.Items[I].Value, AControl.Value);
 
       if not Allowed then
         Exit(False);
@@ -619,105 +587,6 @@ begin
   inherited Destroy;
 end;
 
-{ TICMSWebsiteContainer.TICMSWebsiteData }
-
-function TICMSWebsiteContainer.TICMSWebsiteData.GetTypeID: TTypeID;
-begin
-  Result := FTemplateTypeID;
-end;
-
-function TICMSWebsiteContainer.TICMSWebsiteData.GetControl(const IndexOrName: OleVariant): IControlContainer;
-
-  function Find(AName: string): Integer;
-  var
-    I: Integer;
-  begin
-    Result := -1;
-    with FControlList do
-      for I := 0 to Count - 1 do
-        if MatchText(AName, [ControlIDToString(Items[I].AControlID), ControlIDToReadableString(Items[I].AControlID)]) then
-          Exit(I);
-  end;
-
-var
-  Index: Integer;
-begin
-  Result := nil;
-
-  if not VarIsNull(IndexOrName) then
-  begin
-    Index := -1;
-    if VarIsNumeric(IndexOrName) then
-      Index := IndexOrName
-    else
-      Index := Find(IndexOrName);
-
-    if not((Index < 0) or (Index > FControlList.Count)) then
-      Result := FControlList.Items[Index];
-  end;
-end;
-
-function TICMSWebsiteContainer.TICMSWebsiteData.GetControlCount: Integer;
-begin
-  Result := FControlList.Count;
-end;
-
-function TICMSWebsiteContainer.TICMSWebsiteData.GetMirror(const IndexOrName: OleVariant): IMirrorContainer;
-
-  function Find(AName: string): Integer;
-  var
-    I: Integer;
-  begin
-    Result := -1;
-    with FMirrorList do
-      for I := 0 to Count - 1 do
-        if SameText(AName, Items[I].Hoster) then
-          Exit(I);
-  end;
-
-var
-  Index: Integer;
-begin
-  Result := nil;
-
-  if not VarIsNull(IndexOrName) then
-  begin
-    Index := -1;
-    if VarIsNumeric(IndexOrName) then
-      Index := IndexOrName
-    else
-      Index := Find(IndexOrName);
-
-    if not((Index < 0) or (Index > FMirrorList.Count)) then
-      Result := FMirrorList.Items[Index];
-  end;
-end;
-
-function TICMSWebsiteContainer.TICMSWebsiteData.GetMirrorCount: Integer;
-begin
-  Result := FMirrorList.Count;
-end;
-
-constructor TICMSWebsiteContainer.TICMSWebsiteData.Create(ATypeID: TTypeID);
-begin
-  FTemplateTypeID := ATypeID;
-  FControlList := TList<IControlContainer>.Create;
-  FMirrorList := TList<IMirrorContainer>.Create;
-end;
-
-function TICMSWebsiteContainer.TICMSWebsiteData.FindControl(AControlID: TControlID): IControlContainer;
-begin
-  Result := Control[ControlIDToString(AControlID)];
-end;
-
-destructor TICMSWebsiteContainer.TICMSWebsiteData.Destroy;
-begin
-  FMirrorList.Free;
-  FControlList.Free;
-
-  inherited Destroy;
-end;
-
 { TICMSWebsiteContainer.TIPublishItem }
 
 function TICMSWebsiteContainer.TIPublishItem.GetCMSPluginPath: WideString;
@@ -732,7 +601,7 @@ begin
   FCMSWebsiteData := ACMSWebsiteData;
 end;
 
-function TICMSWebsiteContainer.TIPublishItem.GetWebsiteData: ITabSheetData;
+function TICMSWebsiteContainer.TIPublishItem.GetData: ITabSheetData;
 begin
   Result := FCMSWebsiteData;
 end;
@@ -750,8 +619,7 @@ begin
   if SameStr('', ARelativeFileName) then
     raise Exception.Create('You have to define a ' + AFileType + ' file for ' + Name + ' [' + CMS + '] inside CMS/website settings');
   if not FileExists(AFileName) then
-    raise Exception.Create('The defined ' + AFileType + ' file for ' + Name + ' [' + CMS + '] was not found (relative path: ' + ARelativeFileName + ')' +
-        sLineBreak + sLineBreak + 'Full path: ' + AFileName);
+    raise Exception.Create('The defined ' + AFileType + ' file for ' + Name + ' [' + CMS + '] was not found (relative path: ' + ARelativeFileName + ')' + sLineBreak + sLineBreak + 'Full path: ' + AFileName);
 end;
 
 function TICMSWebsiteContainer.ValidateFiles: Boolean;
@@ -954,7 +822,7 @@ begin
     end;
 end;
 
-function TICMSWebsiteContainer.GenerateWebsiteData: ITabSheetData;
+function TICMSWebsiteContainer.GenerateData: ITabSheetData;
 var
   CMSWebsiteData: TICMSWebsiteData;
 
@@ -1020,8 +888,7 @@ begin
   begin
 
     if not(TabSheetController.ControlController.Control[I].AControlID = cPicture) then
-      CMSWebsiteData.ControlList.Add(TIControlContainer.Create(TabSheetController.ControlController.Control[I].AControlID,
-          TabSheetController.ControlController.Control[I].Value))
+      CMSWebsiteData.ControlList.Add(TIControlContainer.Create(TabSheetController.ControlController.Control[I].AControlID, TabSheetController.ControlController.Control[I].Value))
     else
       HandlePicture(TabSheetController.ControlController.Control[I] as IPicture);
   end;
@@ -1057,8 +924,7 @@ begin
         WL.Free;
       end;
     for J := 0 to TabSheetController.MirrorController.MirrorCount - 1 do
-      if (BL.IndexOf(TabSheetController.MirrorController.Mirror[J].Hoster) = -1) and not Assigned
-        (CMSWebsiteData.Mirror[TabSheetController.MirrorController.Mirror[J].Hoster]) then
+      if (BL.IndexOf(TabSheetController.MirrorController.Mirror[J].Hoster) = -1) and not Assigned(CMSWebsiteData.Mirror[TabSheetController.MirrorController.Mirror[J].Hoster]) then
         CMSWebsiteData.MirrorList.Add(TIMirrorContainer.Create(TabSheetController.MirrorController.Mirror[J]));
   finally
     BL.Free;

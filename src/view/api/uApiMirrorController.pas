@@ -57,6 +57,7 @@ type
     // Additional
     property TabSheetController: ITabSheetController read GetTabSheetController write SetTabSheetController;
 
+    // TODO: Re-work this needed?
     function IndexOf(const Item: IMirrorControl): Integer;
     function Add: Integer;
     procedure Insert(index: Integer; const Item: IMirrorControl); overload;
@@ -178,7 +179,7 @@ begin
   begin
     LMirror := FMirrorList[LIndex];
 
-    if (LMirror.Hoster = AHoster) then
+    if SameText(AHoster, LMirror.Hoster) then
     begin
       Result := LMirror;
       break;

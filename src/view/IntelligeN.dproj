@@ -218,7 +218,6 @@
 				<CoClasses>IntelligeN2009</CoClasses>
 			</DCCReference>
 			<DCCReference Include="..\sdk\plugins\uPlugInInterfaceAdv.pas"/>
-			<DCCReference Include="mods\uMycxTabSheet.pas"/>
 			<DCCReference Include="api\uApiControlsBase.pas"/>
 			<DCCReference Include="api\uApiControlControllerBase.pas"/>
 			<DCCReference Include="api\uApiMirrorControllerBase.pas"/>
@@ -258,6 +257,8 @@
 			<None Include="ModelSupport_IntelligeN\uApiControlController\default.txvpck"/>
 			<None Include="ModelSupport_IntelligeN\uApiMirrorControllerBase\default.txaPackage"/>
 			<None Include="ModelSupport_IntelligeN\uApiMirrorControllerBase\default.txvpck"/>
+			<None Include="ModelSupport_IntelligeN\uApiMirrorControlBase\default.txvpck"/>
+			<None Include="ModelSupport_IntelligeN\uApiMirrorControlBase\default.txaPackage"/>
 			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
 			</BuildConfiguration>

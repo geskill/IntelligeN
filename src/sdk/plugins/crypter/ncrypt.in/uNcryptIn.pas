@@ -20,8 +20,8 @@ type
     website = 'http://ncrypt.in/';
   public
     function GetName: WideString; override;
-    function AddFolder(const AMirrorContainer: ISubMirrorContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
-    function EditFolder(const AMirrorContainer: ISubMirrorContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function AddFolder(const AMirrorContainer: IDirectlinkContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function EditFolder(const AMirrorContainer: IDirectlinkContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
     function DeleteFolder(AFolderIdentifier: WideString): WordBool; override; safecall;
     function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
   end;

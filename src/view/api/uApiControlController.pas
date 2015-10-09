@@ -287,7 +287,7 @@ begin
   begin
     LControl := FControlList[LIndex];
 
-    if (LControl.ControlID = AControlID) then
+    if (AControlID = LControl.ControlID) then
     begin
       Result := LControl;
       break;

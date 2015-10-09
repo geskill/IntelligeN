@@ -44,7 +44,7 @@ procedure TfControlEditor.cxGridTableViewCellDblClick(Sender: TcxCustomGridTable
   AShift: TShiftState; var AHandled: Boolean);
 begin
   with cxGridTableView.DataController do
-    FControl.Value := FControl.GetValueContent(FocusedRowIndex);
+    FControl.Value := FControl.GetProposedValue(FocusedRowIndex);
   // if not Supports(FControl, IPicture) then
   // FControl.Value := Values[FocusedRowIndex,1]
 end;
@@ -153,18 +153,18 @@ begin
 
         with DataController do
         begin
-          RecordCount := FControl.GetValueCount;
+          RecordCount := FControl.ProposedCount;
 
           for RecordIndex := 0 to RecordCount - 1 do
           begin
-            Values[RecordIndex, 0] := FControl.GetValueName(RecordIndex);
+            Values[RecordIndex, 0] := FControl.GetProposedValue(RecordIndex);
 
             if Supports(FControl, IPicture) then
               Values[RecordIndex, 1] := (FControl as IPictureEx).GetValuePicture(RecordIndex).Picture
             else if Supports(FControl, ITrailer) then
               Values[RecordIndex, 1] := (FControl as ITrailer).GetValueTitle(RecordIndex)
             else
-              Values[RecordIndex, 1] := FControl.GetValueContent(RecordIndex);
+              Values[RecordIndex, 1] := FControl.GetProposedValue(RecordIndex);
           end;
         end;
       finally
@@ -173,7 +173,7 @@ begin
 
       with DataController do
         for RecordIndex := 0 to RecordCount - 1 do
-          if SameText(FControl.GetValueContent(RecordIndex), FControl.Value) then
+          if SameText(FControl.GetProposedValue(RecordIndex), FControl.Value) then
           begin
             FocusedRecordIndex := RecordIndex;
             Break;

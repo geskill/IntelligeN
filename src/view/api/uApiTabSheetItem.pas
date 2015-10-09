@@ -244,7 +244,7 @@ begin
   with ControlController do
   begin
     TabSheetController := ATabSheetController;
-    ATypeID := ATabSheetController.ATypeID;
+    TypeID := ATabSheetController.TypeID;
 
     OnSpaceMouseDown := FISpaceMouseDown;
 

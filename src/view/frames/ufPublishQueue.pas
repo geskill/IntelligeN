@@ -11,6 +11,8 @@ uses
   // MultiEvent
   Generics.MultiEvents.NotifyEvent,
   Generics.MultiEvents.NotifyInterface,
+  // Common
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
   uApiPublish,
   // Utils

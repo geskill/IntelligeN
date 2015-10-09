@@ -11,6 +11,8 @@ uses
   fs_iInterpreter, fs_iclassesrtti, fs_ijs, fs_itools,
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
+  // Api
+  uApiControlsBase, uApiMirrorControlBase,
   // DLLs
   uExport,
   // Utils
@@ -72,9 +74,6 @@ type
   end;
 
 implementation
-
-uses
-  uApiPublishModel;
 
 { TIScirptParser.TIMirror }
 
@@ -241,13 +240,13 @@ begin
     AddMethod('function ExtractUrlProtocol(const AUrl: string): string', CallMethod);
     AddMethod('function ExtractUrlHost(const AUrl: string): string', CallMethod);
 
-    AddConst('IType', 'string', TypeIDToString(FCMSWebsiteData.ATypeID));
+    AddConst('IType', 'string', TypeIDToString(FCMSWebsiteData.TypeID));
     AddConst('ICMS', 'string', FWebsiteCMS);
     AddConst('IWebsite', 'string', FWebsite);
 
     with FCMSWebsiteData do
       for I := 0 to ControlCount - 1 do
-        AddConst(ControlIDToString(Control[I].AControlID), 'string', Control[I].Value);
+        AddConst(ControlIDToString(Control[I].ControlID), 'string', Control[I].Value);
 
     with AddClass(TICrypter, 'TICrypter') do
     begin

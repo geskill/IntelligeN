@@ -17,7 +17,7 @@ uses
   uExport,
   // Api
   uApiConst, uApiMain, uApiMultiCastEvent, uApiBackupManager, uApiControlAligner, uApiSettings, uApiXml, uApiPlugins, uApiPublishController, uApiPublish,
-  uApiCrawler, uApiHoster, uApiCrypter, uApiImageHoster, uApiTabSheetController,
+  uApiCrawler, uApiCrypter, uApiHoster, uApiImageHoster, uApiTabSheetController,
   // Utils
   uFileUtils;
 
@@ -393,7 +393,7 @@ begin
   for I := 0 to TabSheetController[ATabIndex].MirrorController.MirrorCount - 1 do
     for J := 0 to TabSheetController[ATabIndex].MirrorController.Mirror[I].CrypterCount - 1 do
       with TabSheetController[ATabIndex].MirrorController.Mirror[I] do
-        if SameStr('', Crypter[J].Link) then
+        if SameStr('', Crypter[J].Value) then
           CrypterManager.AddCrypterJob(Crypter[J]);
 end;
 
@@ -417,7 +417,7 @@ begin
   for I := 0 to TabSheetController[ATabIndex].MirrorController.MirrorCount - 1 do
     for J := 0 to TabSheetController[ATabIndex].MirrorController.Mirror[I].CrypterCount - 1 do
       with TabSheetController[ATabIndex].MirrorController.Mirror[I] do
-        if not SameStr('', Crypter[J].Link) then
+        if not SameStr('', Crypter[J].Value) then
           CrypterManager.AddCrypterCheckJob(Crypter[J]);
 end;
 
@@ -535,7 +535,7 @@ begin
     if not AEmpty then
       for I := 0 to SettingsManager.Settings.ComponentParser.MirrorCount - 1 do
       begin
-        NewTabSheetController.MirrorController.Mirror[NewTabSheetController.MirrorController.Add].Directlink.Add('');
+        NewTabSheetController.MirrorController.Mirror[NewTabSheetController.MirrorController.Add].GetDirectlink.Add('');
         CallControlAligner;
       end;
     GetControls(AFileName, NewTabSheetController.ControlController, Self);
@@ -553,7 +553,7 @@ begin
     if not AEmpty then
       for I := 0 to SettingsManager.Settings.ComponentParser.MirrorCount - 1 do
       begin
-        NewTabSheetController.MirrorController.Mirror[NewTabSheetController.MirrorController.Add].Directlink.Add('');
+        NewTabSheetController.MirrorController.Mirror[NewTabSheetController.MirrorController.Add].GetDirectlink.Add('');
         // CallControlAligner;
       end;
     with NewTabSheetController.ControlController do

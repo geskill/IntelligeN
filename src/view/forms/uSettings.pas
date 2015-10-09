@@ -27,11 +27,10 @@ uses
   // Api
   uApiConst, uApiMultiCastEvent, uApiMain, uApiPlugins, uApiPluginsAdd, uApiSettings, uApiSettingsExport, uApiSettingsPluginsCheckListBox, uApiXml, uApiXmlSettings,
   // Plugin
-  uPlugInInterface, uPlugInClass, uPlugInConst;
+  uPlugInInterface, uPlugInInterfaceAdv, uPlugInClass, uPlugInConst;
 
 type
-  TControlsValues = reference to procedure(const ATypeID: TTypeID; const AComponentID: TControlID;
-    AControlCollectionItem: TControlCollectionItem);
+  TControlsValues = reference to procedure(const ATypeID: TTypeID; const AComponentID: TControlID; AControlCollectionItem: TControlCollectionItem);
   TActiveControlAccess = reference to procedure(const AControl: IControlBasic);
 
   TSettings = class(TForm)
@@ -252,8 +251,7 @@ type
     procedure cxGCMSTableView1Column6PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure cxGCMSTableView1Column7PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure cxGCMSTableView1DataControllerDataChanged(Sender: TObject);
-    procedure cxGCMSTableView1FocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord;
-      ANewItemRecordFocusingChanged: Boolean);
+    procedure cxGCMSTableView1FocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
     procedure cxBAddCMSWebsiteClick(Sender: TObject);
     procedure cxBRemoveCMSWebsiteClick(Sender: TObject);
     procedure cxGCrawlerTableView1DataControllerDataChanged(Sender: TObject);
@@ -374,8 +372,8 @@ type
 
   private
     FOnCrawlerContingentChange: Boolean;
-    FAppPluginsCheckListBox, FCAPTCHAPluginsCheckListBox, FCMSPluginsCheckListBox, FCrawlerPluginsCheckListBox, FCrypterPluginsCheckListBox,
-      FFileFormatsPluginsCheckListBox, FFileHosterPluginsCheckListBox, FImageHosterPluginsCheckListBox: TPluginsCheckListBox;
+    FAppPluginsCheckListBox, FCAPTCHAPluginsCheckListBox, FCMSPluginsCheckListBox, FCrawlerPluginsCheckListBox, FCrypterPluginsCheckListBox, FFileFormatsPluginsCheckListBox, FFileHosterPluginsCheckListBox,
+      FImageHosterPluginsCheckListBox: TPluginsCheckListBox;
     cxLBControlsItemsIndex: Integer;
 
     procedure AppClickCheck(Sender: TObject; AIndex: Integer; APrevState, ANewState: TcxCheckBoxState);
@@ -457,7 +455,6 @@ implementation
 
 uses
   uMain;
-
 {$R *.dfm}
 
 procedure TSettings.cxcbNativeStylePropertiesChange(Sender: TObject);
@@ -507,24 +504,24 @@ procedure TSettings.cxCBCMSAllPropertiesChange(Sender: TObject);
 
       BeginUpdate;
       try
-      for LFileIndex := 0 to RecordCount - 1 do
-      begin
-        with TCMSCollectionItem(SettingsManager.Settings.Plugins.CMS.Items[FCMSPluginsCheckListBox.InnerCheckListBox.ItemIndex]) do
+        for LFileIndex := 0 to RecordCount - 1 do
         begin
-          LCMSWebsitesCollectionItem := FindCMSWebsite(Values[LFileIndex, cxGCMSTableView1Column2.index]);
-
-          if not(LCMSWebsitesCollectionItem.Enabled = AStatus) then
+          with TCMSCollectionItem(SettingsManager.Settings.Plugins.CMS.Items[FCMSPluginsCheckListBox.InnerCheckListBox.ItemIndex]) do
           begin
-            Values[LFileIndex, cxGCMSTableView1Column1.index] := AStatus;
+            LCMSWebsitesCollectionItem := FindCMSWebsite(Values[LFileIndex, cxGCMSTableView1Column2.index]);
 
-            // Do here everything EXCEPT "SetCMSCheckAllStatus" from "cxGCMSTableView1DataControllerDataChanged"
-            LCMSWebsitesCollectionItem.Enabled := AStatus;
+            if not(LCMSWebsitesCollectionItem.Enabled = AStatus) then
+            begin
+              Values[LFileIndex, cxGCMSTableView1Column1.index] := AStatus;
 
-            if Assigned(OnWebsitesChange) then
-              OnWebsitesChange.Invoke(cctEnabled, LCMSWebsitesCollectionItem.Index, IfThen(AStatus, 1));
+              // Do here everything EXCEPT "SetCMSCheckAllStatus" from "cxGCMSTableView1DataControllerDataChanged"
+              LCMSWebsitesCollectionItem.Enabled := AStatus;
+
+              if Assigned(OnWebsitesChange) then
+                OnWebsitesChange.Invoke(cctEnabled, LCMSWebsitesCollectionItem.Index, IfThen(AStatus, 1));
+            end;
           end;
         end;
-      end;
       finally
         EndUpdate;
       end;
@@ -597,8 +594,7 @@ var
   FileName: string;
 begin
   with cxGCMSTableView1.DataController do
-    if (FocusedRecordIndex <> -1) and (FCMSPluginsCheckListBox.InnerCheckListBox.ItemIndex <> -1) and
-      (Values[FocusedRecordIndex, cxGCMSTableView1Column2.index] <> Null) then
+    if (FocusedRecordIndex <> -1) and (FCMSPluginsCheckListBox.InnerCheckListBox.ItemIndex <> -1) and (Values[FocusedRecordIndex, cxGCMSTableView1Column2.index] <> Null) then
     begin
       CMSCollectionItem := TCMSCollectionItem(SettingsManager.Settings.Plugins.CMS.Items[FCMSPluginsCheckListBox.InnerCheckListBox.ItemIndex]);
       with CMSCollectionItem do
@@ -661,8 +657,7 @@ begin
     end;
 end;
 
-procedure TSettings.cxGCMSTableView1FocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord;
-  ANewItemRecordFocusingChanged: Boolean);
+procedure TSettings.cxGCMSTableView1FocusedRecordChanged(Sender: TcxCustomGridTableView; APrevFocusedRecord, AFocusedRecord: TcxCustomGridRecord; ANewItemRecordFocusingChanged: Boolean);
 begin
   cxBRemoveCMSWebsite.Enabled := (cxGCMSTableView1.Controller.SelectedRecordCount > 0);
 end;
@@ -725,10 +720,8 @@ begin
           AControlID := StringToControlID('I' + CustomDataController.Values[X, cxGCrawlerTableView2Column1.index]);
           Status := CustomDataController.Values[X, cxGCrawlerTableView2Column2.index];
 
-          if not(TCrawlerCollectionItem(SettingsManager.Settings.Plugins.Crawler.Items[FCrawlerPluginsCheckListBox.InnerCheckListBox.ItemIndex])
-              .ContingentStatus[ATypeID, AControlID] = Status) then
-            TCrawlerCollectionItem(SettingsManager.Settings.Plugins.Crawler.Items[FCrawlerPluginsCheckListBox.InnerCheckListBox.ItemIndex])
-              .ContingentStatus[ATypeID, AControlID] := Status;
+          if not(TCrawlerCollectionItem(SettingsManager.Settings.Plugins.Crawler.Items[FCrawlerPluginsCheckListBox.InnerCheckListBox.ItemIndex]).ContingentStatus[ATypeID, AControlID] = Status) then
+            TCrawlerCollectionItem(SettingsManager.Settings.Plugins.Crawler.Items[FCrawlerPluginsCheckListBox.InnerCheckListBox.ItemIndex]).ContingentStatus[ATypeID, AControlID] := Status;
         end;
       end;
     end;
@@ -757,8 +750,7 @@ procedure TSettings.cxCBCrypterUseAccountPropertiesChange(Sender: TObject);
 begin
   cxTECrypterAccountName.Enabled := cxCBCrypterUseAccount.Checked;
   cxTECrypterAccountPassword.Enabled := cxCBCrypterUseAccount.Checked;
-  TCrypterCollectionItem(SettingsManager.Settings.Plugins.Crypter.Items[FCrypterPluginsCheckListBox.InnerCheckListBox.ItemIndex])
-    .UseAccount := cxCBCrypterUseAccount.Checked;
+  TCrypterCollectionItem(SettingsManager.Settings.Plugins.Crypter.Items[FCrypterPluginsCheckListBox.InnerCheckListBox.ItemIndex]).UseAccount := cxCBCrypterUseAccount.Checked;
 end;
 
 procedure TSettings.cxCGCrypterFoldertypesPropertiesChange(Sender: TObject);
@@ -1045,8 +1037,8 @@ begin
   begin
     for I := 0 to TabSheetCount - 1 do
       for J := 0 to TabSheetController[I].MirrorController.MirrorCount - 1 do
-        if TabSheetController[I].MirrorController.Mirror[J].Directlink.MirrorCount > 0 then
-          TabSheetController[I].MirrorController.Mirror[J].Directlink.ActiveMirror.RefreshInfo;
+        if TabSheetController[I].MirrorController.Mirror[J].DirectlinkCount > 0 then
+          TabSheetController[I].MirrorController.Mirror[J].GetDirectlink.ActiveMirror.UpdateGUI;
   end;
 end;
 
@@ -1328,8 +1320,7 @@ procedure TSettings.cxTEControlsTitlePropertiesValidate(Sender: TObject; var Dis
 begin
   if not(cxTCControls.TabIndex = -1) then
   begin
-    ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID;
-        AControlCollectionItem: TControlCollectionItem)begin AControlCollectionItem.Title := cxTEControlsTitle.Text;
+    ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID; AControlCollectionItem: TControlCollectionItem)begin AControlCollectionItem.Title := cxTEControlsTitle.Text;
       UpdateAllOpenedTabs(ATypeID, AComponentID, procedure(const AControl: IControlBasic)begin AControl.Title := cxTEControlsTitle.Text; end); end);
   end;
 end;
@@ -1343,8 +1334,7 @@ procedure TSettings.cxBEControlsHelpPropertiesValidate(Sender: TObject; var Disp
 begin
   if not(cxTCControls.TabIndex = -1) then
   begin
-    ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID;
-        AControlCollectionItem: TControlCollectionItem)begin AControlCollectionItem.HelpText := cxBEControlsHelp.Text;
+    ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID; AControlCollectionItem: TControlCollectionItem)begin AControlCollectionItem.HelpText := cxBEControlsHelp.Text;
       UpdateAllOpenedTabs(ATypeID, AComponentID, procedure(const AControl: IControlBasic)begin AControl.Hint := cxBEControlsHelp.Text; end); end);
   end;
 end;
@@ -1353,8 +1343,7 @@ procedure TSettings.cxTEControlsValuePropertiesValidate(Sender: TObject; var Dis
 begin
   if not(cxTCControls.TabIndex = -1) then
   begin
-    ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID;
-        AControlCollectionItem: TControlCollectionItem)begin AControlCollectionItem.Value := cxTEControlsValue.Text;
+    ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID; AControlCollectionItem: TControlCollectionItem)begin AControlCollectionItem.Value := cxTEControlsValue.Text;
       UpdateAllOpenedTabs(ATypeID, AComponentID, procedure(const AControl: IControlBasic)begin AControl.Value := cxTEControlsValue.Text; end); end);
   end;
 end;
@@ -1379,11 +1368,8 @@ var
       begin
         if (Items.IndexOf(NewItem) = -1) and not(NewItem = '') then
         begin
-          ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID;
-              AControlCollectionItem: TControlCollectionItem)begin TControlItemsCollectionItem(AControlCollectionItem.Items.Add).ItemName := NewItem;
-            UpdateAllOpenedTabs(ATypeID, TControlID(cxTCControls.TabIndex),
-              procedure(const AControl: IControlBasic)begin if AControl.QueryInterface(IComboBox,
-                _ComboBoxIntf) = 0 then _ComboBoxIntf.List := _ComboBoxIntf.List + NewItem;
+          ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID; AControlCollectionItem: TControlCollectionItem)begin TControlItemsCollectionItem(AControlCollectionItem.Items.Add).ItemName := NewItem;
+            UpdateAllOpenedTabs(ATypeID, TControlID(cxTCControls.TabIndex), procedure(const AControl: IControlBasic)begin if AControl.QueryInterface(IComboBox, _ComboBoxIntf) = 0 then _ComboBoxIntf.List := _ComboBoxIntf.List + NewItem;
               if AControl.QueryInterface(ICheckComboBox, _CheckComboBoxIntf) = 0 then _CheckComboBoxIntf.List := _CheckComboBoxIntf.List + NewItem; end); end);
           Items.Add(NewItem);
         end
@@ -1414,12 +1400,9 @@ begin
   begin
     _SelectedItem := cxLBControlsItems.Items[cxLBControlsItems.ItemIndex];
 
-    ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID;
-        AControlCollectionItem: TControlCollectionItem)var I: Integer; _ComboBoxIntf: IComboBox; _CheckComboBoxIntf: ICheckComboBox;
-      begin for I := AControlCollectionItem.Items.Count - 1 downto 0 do with TControlItemsCollectionItem(AControlCollectionItem.Items.Items[I]) do if
-        (_SelectedItem = ItemName) then Free;
-      UpdateAllOpenedTabs(ATypeID, AComponentID, procedure(const AControl: IControlBasic)begin if AControl.QueryInterface(IComboBox,
-          _ComboBoxIntf) = 0 then _ComboBoxIntf.List := AControlCollectionItem.GetItems;
+    ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID; AControlCollectionItem: TControlCollectionItem)var I: Integer; _ComboBoxIntf: IComboBox; _CheckComboBoxIntf: ICheckComboBox;
+      begin for I := AControlCollectionItem.Items.Count - 1 downto 0 do with TControlItemsCollectionItem(AControlCollectionItem.Items.Items[I]) do if (_SelectedItem = ItemName) then Free;
+      UpdateAllOpenedTabs(ATypeID, AComponentID, procedure(const AControl: IControlBasic)begin if AControl.QueryInterface(IComboBox, _ComboBoxIntf) = 0 then _ComboBoxIntf.List := AControlCollectionItem.GetItems;
         if AControl.QueryInterface(ICheckComboBox, _CheckComboBoxIntf) = 0 then _CheckComboBoxIntf.List := AControlCollectionItem.GetItems; end); end);
     with cxLBControlsItems do
       Items.Delete(ItemIndex);
@@ -1448,15 +1431,13 @@ begin
 
     ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID; AControlCollectionItem: TControlCollectionItem)
 
-        function Y(oldstr, newstr: string): string; var I, J: Integer; OldStringList, NewStringList: TStringList;
-      begin with TStringList.Create do try OldStringList := TStringList.Create; NewStringList := TStringList.Create; try OldStringList.Text := oldstr;
-      NewStringList.Text := newstr;
+        function Y(oldstr, newstr: string): string; var I, J: Integer; OldStringList, NewStringList: TStringList; begin with TStringList.Create do try OldStringList := TStringList.Create; NewStringList := TStringList.Create;
+      try OldStringList.Text := oldstr; NewStringList.Text := newstr;
 
-      for I := 0 to OldStringList.Count - 1 do for J := 0 to NewStringList.Count - 1 do if OldStringList[I] = NewStringList[J] then Add(OldStringList[I]);
-      finally NewStringList.Free; OldStringList.Free; end; Result := Text; finally Free; end; end;
+      for I := 0 to OldStringList.Count - 1 do for J := 0 to NewStringList.Count - 1 do if OldStringList[I] = NewStringList[J] then Add(OldStringList[I]); finally NewStringList.Free; OldStringList.Free; end; Result := Text; finally Free; end; end;
 
-      var I: Integer; begin for I := 0 to AControlCollectionItem.Items.Count - 1 do with TControlItemsCollectionItem(AControlCollectionItem.Items.Items[I])
-        do if _SelectedItem = ItemName then if _AlsoKnownAs = _clear then _AlsoKnownAs := AlsoKnownAs else _AlsoKnownAs := Y(_AlsoKnownAs, AlsoKnownAs); end);
+      var I: Integer; begin for I := 0 to AControlCollectionItem.Items.Count - 1 do with TControlItemsCollectionItem(AControlCollectionItem.Items.Items[I]) do if _SelectedItem = ItemName then if _AlsoKnownAs = _clear then _AlsoKnownAs :=
+        AlsoKnownAs else _AlsoKnownAs := Y(_AlsoKnownAs, AlsoKnownAs); end);
 
     if _AlsoKnownAs = _clear then
       cxMControlsItemAlsoKnownAs.Lines.Text := ''
@@ -1509,10 +1490,8 @@ begin
   begin
     _SelectedItem := cxLBControlsItems.Items[cxLBControlsItems.ItemIndex];
 
-    ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID;
-        AControlCollectionItem: TControlCollectionItem)var I: Integer;
-      begin for I := 0 to AControlCollectionItem.Items.Count - 1 do with TControlItemsCollectionItem(AControlCollectionItem.Items.Items[I])
-        do if _SelectedItem = ItemName then AlsoKnownAs := cxMControlsItemAlsoKnownAs.Lines.Text; end);
+    ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID; AControlCollectionItem: TControlCollectionItem)var I: Integer;
+      begin for I := 0 to AControlCollectionItem.Items.Count - 1 do with TControlItemsCollectionItem(AControlCollectionItem.Items.Items[I]) do if _SelectedItem = ItemName then AlsoKnownAs := cxMControlsItemAlsoKnownAs.Lines.Text; end);
   end;
 end;
 
@@ -1527,8 +1506,7 @@ var
   _CheckComboBoxIntf: ICheckComboBox;
 begin
   SettingsManager.Settings.Controls.DropDownRows := cxSEDropDownRows.Value;
-  UpdateAllOpenedTabs( procedure(const AControl: IControlBasic)begin if AControl.QueryInterface(IComboBox,
-      _ComboBoxIntf) = 0 then _ComboBoxIntf.DropDownRows := cxSEDropDownRows.Value;
+  UpdateAllOpenedTabs( procedure(const AControl: IControlBasic)begin if AControl.QueryInterface(IComboBox, _ComboBoxIntf) = 0 then _ComboBoxIntf.DropDownRows := cxSEDropDownRows.Value;
     if AControl.QueryInterface(ICheckComboBox, _CheckComboBoxIntf) = 0 then _CheckComboBoxIntf.DropDownRows := cxSEDropDownRows.Value; end);
 end;
 
@@ -1603,8 +1581,7 @@ procedure TSettings.cxTBPublishDelaybetweenUploadsPropertiesChange(Sender: TObje
 begin
   cxTBPublishDelaybetweenUploads.Hint := IntToStr(cxTBPublishDelaybetweenUploads.Position) + ' seconds';
   if cxTBPublishDelaybetweenUploads.Position > 60 then
-    cxTBPublishDelaybetweenUploads.Hint := cxTBPublishDelaybetweenUploads.Hint + ' (' + FloatToStr(RoundTo(cxTBPublishDelaybetweenUploads.Position / 60, -2))
-      + ' minutes)';
+    cxTBPublishDelaybetweenUploads.Hint := cxTBPublishDelaybetweenUploads.Hint + ' (' + FloatToStr(RoundTo(cxTBPublishDelaybetweenUploads.Position / 60, -2)) + ' minutes)';
   SettingsManager.Settings.Publish.PublishDelaybetweenUploads := cxTBPublishDelaybetweenUploads.Position;
 end;
 
@@ -1621,7 +1598,8 @@ procedure TSettings.FormCreate(Sender: TObject);
 
   procedure A;
   var
-    I: Integer;
+    LTypeID: TTypeID;
+    LControlID: TControlID;
   begin
     FAppPluginsCheckListBox := TPluginsCheckListBox.Create(Self);
     with FAppPluginsCheckListBox do
@@ -1779,12 +1757,12 @@ procedure TSettings.FormCreate(Sender: TObject);
     // for I := 1 to Ord( High(TADRDBMSKind)) - 1 do
     // cxCOBDatabaseType.Properties.Items.Add(C_AD_PhysRDBMSKinds[TADRDBMSKind(I)]);
 
-    for I := 0 to length(TStringTemplateTypeID) - 1 do
+    for LTypeID := Low(TTypeID) to High(TTypeID) do
       with cxLVControlsTemplateType.Items.Add do
-        Caption := TStringTemplateTypeID[I];
+        Caption := TypeIDToString(LTypeID);
 
-    for I := 0 to length(TStringComponentID) - 1 do
-      cxTCControls.Tabs.Add(TStringComponentID[I]);
+    for LControlID := Low(TControlID) to High(TControlID) do
+      cxTCControls.Tabs.Add(ControlIDToString(LControlID));
   end;
 
   function internalGetTabControlTabWidth: Integer;
@@ -2089,8 +2067,7 @@ procedure TSettings.CMSAddAllClick(Sender: TObject);
 begin
   with TAddPlugin.Create do
     try
-      if ExecuteFolder(ICMSPlugIn, SettingsManager.Settings.Plugins.CMS, FCMSPluginsCheckListBox.InnerCheckListBox, 'content management system (CMS)',
-        GetPluginFolder) then
+      if ExecuteFolder(ICMSPlugIn, SettingsManager.Settings.Plugins.CMS, FCMSPluginsCheckListBox.InnerCheckListBox, 'content management system (CMS)', GetPluginFolder) then
       begin
         CMSClick(nil);
         // Main.fPublish.GenerateColumns;
@@ -2139,7 +2116,7 @@ begin
       with TCrawlerCollectionItem(SettingsManager.Settings.Plugins.Crawler.Items[FCrawlerPluginsCheckListBox.InnerCheckListBox.ItemIndex]) do
         for I := 0 to Contingent.Count - 1 do
         begin
-          NewContingentItem := TypeIDToString(TCrawlerContingentCollectionItem(Contingent.Items[I]).ATypeID);
+          NewContingentItem := TypeIDToString(TCrawlerContingentCollectionItem(Contingent.Items[I]).TypeID);
           if ContingentList.IndexOf(NewContingentItem) = -1 then
             ContingentList.Add(NewContingentItem);
         end;
@@ -2167,10 +2144,8 @@ begin
         try
           with TCrawlerCollectionItem(SettingsManager.Settings.Plugins.Crawler.Items[FCrawlerPluginsCheckListBox.InnerCheckListBox.ItemIndex]) do
             for X := 0 to Contingent.Count - 1 do
-              if SameText(TypeIDToString(TCrawlerContingentCollectionItem(Contingent.Items[X]).ATypeID),
-                Values[I, cxGCrawlerTableView1Column1.index]) then
-                ContingentList.Add(ControlIDToReadableString(TCrawlerContingentCollectionItem(Contingent.Items[X]).AControlID) + '=' + BoolToStr
-                    (TCrawlerContingentCollectionItem(Contingent.Items[X]).Status));
+              if SameText(TypeIDToString(TCrawlerContingentCollectionItem(Contingent.Items[X]).TypeID), Values[I, cxGCrawlerTableView1Column1.index]) then
+                ContingentList.Add(ControlIDToReadableString(TCrawlerContingentCollectionItem(Contingent.Items[X]).ControlID) + '=' + BoolToStr(TCrawlerContingentCollectionItem(Contingent.Items[X]).Status));
 
           CustomDataController := GetDetailDataController(I, 0);
           with CustomDataController do
@@ -2444,8 +2419,7 @@ procedure TSettings.FileFormatsAddAllClick(Sender: TObject);
 begin
   with TAddPlugin.Create do
     try
-      if ExecuteFolder(IFileFormatPlugIn, SettingsManager.Settings.Plugins.FileFormats, FFileFormatsPluginsCheckListBox.InnerCheckListBox, 'file formats',
-        GetPluginFolder) then
+      if ExecuteFolder(IFileFormatPlugIn, SettingsManager.Settings.Plugins.FileFormats, FFileFormatsPluginsCheckListBox.InnerCheckListBox, 'file formats', GetPluginFolder) then
         FileFormatsClick(nil);
     finally
       Free;
@@ -2483,8 +2457,7 @@ procedure TSettings.FileHosterAddAllClick(Sender: TObject);
 begin
   with TAddPlugin.Create do
     try
-      ExecuteFolder(IFileHosterPlugIn, SettingsManager.Settings.Plugins.FileHoster, FFileHosterPluginsCheckListBox.InnerCheckListBox, 'file formats',
-        GetPluginFolder);
+      ExecuteFolder(IFileHosterPlugIn, SettingsManager.Settings.Plugins.FileHoster, FFileHosterPluginsCheckListBox.InnerCheckListBox, 'file formats', GetPluginFolder);
     finally
       Free;
     end;
@@ -2563,8 +2536,7 @@ procedure TSettings.ImageHosterAddAllClick(Sender: TObject);
 begin
   with TAddPlugin.Create do
     try
-      if ExecuteFolder(IImageHosterPlugIn, SettingsManager.Settings.Plugins.ImageHoster, FImageHosterPluginsCheckListBox.InnerCheckListBox, 'image hoster',
-        GetPluginFolder) then
+      if ExecuteFolder(IImageHosterPlugIn, SettingsManager.Settings.Plugins.ImageHoster, FImageHosterPluginsCheckListBox.InnerCheckListBox, 'image hoster', GetPluginFolder) then
         ImageHosterClick(nil);
     finally
       Free;
@@ -2839,8 +2811,7 @@ begin
   cxTBPublishMaxCount.Hint := IntToStr(cxTBPublishMaxCount.Position);
   cxTBPublishDelaybetweenUploads.Hint := IntToStr(cxTBPublishDelaybetweenUploads.Position) + ' seconds';
   if cxTBPublishDelaybetweenUploads.Position > 60 then
-    cxTBPublishDelaybetweenUploads.Hint := cxTBPublishDelaybetweenUploads.Hint + ' (' + FloatToStr(RoundTo(cxTBPublishDelaybetweenUploads.Position / 60, -2))
-      + ' minutes)';
+    cxTBPublishDelaybetweenUploads.Hint := cxTBPublishDelaybetweenUploads.Hint + ' (' + FloatToStr(RoundTo(cxTBPublishDelaybetweenUploads.Position / 60, -2)) + ' minutes)';
   cxTBPublishDelaybetweenUploads.Position := SettingsManager.Settings.Publish.PublishDelaybetweenUploads;
   cxTBRetryCount.Position := SettingsManager.Settings.Publish.RetryCount;
   cxTBRetryCount.Hint := IntToStr(cxTBRetryCount.Position);
@@ -2934,8 +2905,7 @@ begin
       for J := 0 to TCMSCollectionItem(Items[I]).Websites.Count - 1 do
       begin
         _accountname := TCMSWebsitesCollectionItem(TCMSCollectionItem(Items[I]).Websites.Items[J]).AccountName;
-        if (not(_accountname = '')) and ((cxGCMSTableView1Column3.Properties as TcxComboBoxProperties).Items.IndexOf(_accountname) = -1) then
-  (cxGCMSTableView1Column3.Properties as TcxComboBoxProperties)
+        if (not(_accountname = '')) and ((cxGCMSTableView1Column3.Properties as TcxComboBoxProperties).Items.IndexOf(_accountname) = -1) then (cxGCMSTableView1Column3.Properties as TcxComboBoxProperties)
           .Items.Add(_accountname);
       end;
 end;
@@ -2996,16 +2966,13 @@ begin
 
         function Y(oldstr, newstr: string): string;
 
-      var I, J: Integer; OldStringList, NewStringList: TStringList; begin with TStringList.Create do try OldStringList := TStringList.Create;
-      NewStringList := TStringList.Create; try OldStringList.Text := oldstr; NewStringList.Text := newstr;
+      var I, J: Integer; OldStringList, NewStringList: TStringList; begin with TStringList.Create do try OldStringList := TStringList.Create; NewStringList := TStringList.Create; try OldStringList.Text := oldstr; NewStringList.Text := newstr;
 
-      for I := 0 to OldStringList.Count - 1 do for J := 0 to NewStringList.Count - 1 do if OldStringList[I] = NewStringList[J] then Add(OldStringList[I]);
-      finally NewStringList.Free; OldStringList.Free; end; Result := Text; finally Free; end; end;
+      for I := 0 to OldStringList.Count - 1 do for J := 0 to NewStringList.Count - 1 do if OldStringList[I] = NewStringList[J] then Add(OldStringList[I]); finally NewStringList.Free; OldStringList.Free; end; Result := Text; finally Free; end; end;
 
       procedure Z(const Value: string; var NewValue: string);
 
-      function InSplittString(substr, s: string): Boolean; begin with TStringList.Create do try Text := s;
-      Text := StringReplace(Text, ';', sLineBreak, [rfReplaceAll]); Result := (IndexOf(substr) <> -1); finally Free; end; end;
+      function InSplittString(substr, s: string): Boolean; begin with TStringList.Create do try Text := s; Text := StringReplace(Text, ';', sLineBreak, [rfReplaceAll]); Result := (IndexOf(substr) <> -1); finally Free; end; end;
 
       begin if (NewValue = _clear) then NewValue := Value else if ((NewValue = '') and (Value = '')) or InSplittString(Value, NewValue) then
 
@@ -3044,8 +3011,7 @@ begin
 
   for I := Ord( low(TTypeID)) to Ord( high(TTypeID)) do
     if TTypeID(I) in _TemplateTypeIDs then
-      AControlsValues(TTypeID(I), TControlID(cxTCControls.TabIndex), SettingsManager.Settings.Controls.Controls[TTypeID(I),
-        TControlID(cxTCControls.TabIndex)]);
+      AControlsValues(TTypeID(I), TControlID(cxTCControls.TabIndex), SettingsManager.Settings.Controls.Controls[TTypeID(I), TControlID(cxTCControls.TabIndex)]);
 end;
 
 procedure TSettings.ControlsItemsEdit;
@@ -3059,12 +3025,9 @@ begin
 
     if InputQuery(StrEditItem, StrNewItemValue, _NewName) then
     begin
-      ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID;
-          AControlCollectionItem: TControlCollectionItem)var I: Integer; _ComboBoxIntf: IComboBox; _CheckComboBoxIntf: ICheckComboBox;
-        begin for I := 0 to AControlCollectionItem.Items.Count - 1 do with TControlItemsCollectionItem(AControlCollectionItem.Items.Items[I]) do if
-          (_OldName = ItemName) then ItemName := _NewName;
-        UpdateAllOpenedTabs(ATypeID, AComponentID, procedure(const AControl: IControlBasic)begin if AControl.QueryInterface(IComboBox,
-            _ComboBoxIntf) = 0 then _ComboBoxIntf.List := AControlCollectionItem.GetItems;
+      ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID; AControlCollectionItem: TControlCollectionItem)var I: Integer; _ComboBoxIntf: IComboBox; _CheckComboBoxIntf: ICheckComboBox;
+        begin for I := 0 to AControlCollectionItem.Items.Count - 1 do with TControlItemsCollectionItem(AControlCollectionItem.Items.Items[I]) do if (_OldName = ItemName) then ItemName := _NewName;
+        UpdateAllOpenedTabs(ATypeID, AComponentID, procedure(const AControl: IControlBasic)begin if AControl.QueryInterface(IComboBox, _ComboBoxIntf) = 0 then _ComboBoxIntf.List := AControlCollectionItem.GetItems;
           if AControl.QueryInterface(ICheckComboBox, _CheckComboBoxIntf) = 0 then _CheckComboBoxIntf.List := AControlCollectionItem.GetItems; end); end);
       Items.Strings[ItemIndex] := _NewName;
     end;
@@ -3088,10 +3051,10 @@ var
 begin
   with (Main.fMain as IPageController) do
     for _TabIndex := 0 to TabSheetCount - 1 do
-      if (ATypeID = TabSheetController[_TabIndex].ControlController.ATypeID) then
+      if (ATypeID = TabSheetController[_TabIndex].ControlController.TypeID) then
         with TabSheetController[_TabIndex].ControlController do
           for _ControlIndex := 0 to ControlCount - 1 do
-            if (AComponentID = Control[_ControlIndex].AControlID) then
+            if (AComponentID = Control[_ControlIndex].ControlID) then
               AActiveControlAccess(Control[_ControlIndex]);
 end;
 

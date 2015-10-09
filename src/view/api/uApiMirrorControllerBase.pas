@@ -87,7 +87,7 @@ begin
   begin
     LMirror := FMirrorList[LIndex];
 
-    if (LMirror.Hoster = AHoster) then
+    if SameText(AHoster, LMirror.Hoster) then
     begin
       Result := LMirror;
       break;

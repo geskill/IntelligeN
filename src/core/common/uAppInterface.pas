@@ -80,35 +80,24 @@ type
     function GetDirectlinksPanel: IDirectlinksPanel;
     procedure SetDirectlinksPanel(ADirectlinksPanel: IDirectlinksPanel);
 
-    function GetSize: Extended;
-    procedure SetSize(ASize: Extended);
-    function GetPartSize: Extended;
-    function GetHoster: WideString; overload;
-    function GetHoster(AShortName: Boolean): WideString; overload;
-    function GetParts: Integer;
-
     function GetLinksInfo: TLinksInfo;
     procedure SetLinksInfo(ALinksInfo: TLinksInfo);
+
     function GetTitle: WideString;
     procedure SetTitle(ATitle: WideString);
-    function GetValue: WideString;
+
     procedure SetValue(AValue: WideString);
+
     function GetFocus: Boolean;
     procedure SetFocus(AFocus: Boolean);
 
-    property DirectlinksPanel: IDirectlinksPanel read GetDirectlinksPanel write SetDirectlinksPanel;
-
+    procedure UpdateGUI;
     procedure Mody;
-    procedure RefreshInfo;
     procedure CheckStatus;
 
-    function GetFileName: WideString;
     function GetPartName(AFileName: WideString): WideString;
 
-    property Size: Extended read GetSize write SetSize;
-    property PartSize: Extended read GetPartSize;
-    property Hoster: WideString read GetHoster;
-    property Parts: Integer read GetParts;
+    property DirectlinksPanel: IDirectlinksPanel read GetDirectlinksPanel write SetDirectlinksPanel;
 
     property LinksInfo: TLinksInfo read GetLinksInfo write SetLinksInfo;
 
@@ -117,104 +106,97 @@ type
     property Focus: Boolean read GetFocus write SetFocus;
   end;
 
-  IDirectlinksPanel = interface(ISubMirrorContainer)
+  IDirectlinksPanel = interface(IDirectlinkContainer)
     ['{DBFC2ED7-FFB2-4611-9F69-05CD827F3A7A}']
+    // Base
+    function GetDirectlink(const Index: Integer): IDirectlinksMirror; safecall;
+
+    // Additional
     function GetMirrorControl: IMirrorControl;
     procedure SetMirrorControl(AMirrorControl: IMirrorControl);
-    function GetFileName: WideString;
-    function GetActiveMirrorIndex: Integer;
-    function GetActiveMirror: IDirectlinksMirror;
-    function GetMirror(index: Integer): IDirectlinksMirror;
-    function GetMirrorCount: Integer;
-    function GetSize: Extended; overload;
-    function GetSize(index: Integer): Extended; overload;
-    function GetPartSize: Extended;
-    function GetHoster: WideString; overload;
-    function GetHoster(AShortName: Boolean): WideString; overload;
-    function GetParts: Integer;
+
+    function GetActiveDirectlinkIndex: Integer;
+    function GetActiveDirectlink: IDirectlinksMirror;
+
     function GetVisible: Boolean;
     procedure SetVisible(AVisible: Boolean);
     function GetFocus: Boolean;
     procedure SetFocus(AFocus: Boolean);
 
+    // Base
+    property Directlink[const Index: Integer]: IDirectlinksMirror read GetDirectlink;
+
+    // Additional
     property MirrorControl: IMirrorControl read GetMirrorControl write SetMirrorControl;
+
     function Add(ALinks: WideString = ''): Integer;
     procedure Remove(ATabIndex: Integer);
+
+    property ActiveMirrorIndex: Integer read GetActiveDirectlinkIndex;
+    property ActiveMirror: IDirectlinksMirror read GetActiveDirectlink;
+
     property FileName: WideString read GetFileName;
-    property ActiveMirrorIndex: Integer read GetActiveMirrorIndex;
-    property ActiveMirror: IDirectlinksMirror read GetActiveMirror;
-    property Mirror[index: Integer]: IDirectlinksMirror read GetMirror;
-    property MirrorCount: Integer read GetMirrorCount;
-    property Size: Extended read GetSize;
-    property PartSize: Extended read GetPartSize;
-    property Hoster: WideString read GetHoster;
-    property Parts: Integer read GetParts;
+
     property Visible: Boolean read GetVisible write SetVisible;
     property Focus: Boolean read GetFocus write SetFocus;
   end;
 
   ICrypterPanel = interface(ICrypter)
     ['{C29FF83C-BE8D-4E2A-93F7-660D749948FF}']
+    // Additional
     function GetMirrorControl: IMirrorControl;
     procedure SetMirrorControl(AMirrorControl: IMirrorControl);
-    function GetName: WideString;
-    function GetLink: WideString;
-    procedure SetLink(ALink: WideString);
+
+    procedure SetValue(AValue: WideString);
+
     function GetStatus: Byte;
-    function GetSize: Extended;
-    function GetPartSize: Extended;
-    function GetHoster: WideString;
-    function GetHosterShort: WideString;
-    function GetParts: Integer;
-    function GetStatusImage: WideString;
-    function GetStatusImageText: WideString;
+
     function GetCrypterFolderInfo: TCrypterFolderInfo;
     procedure SetCrypterFolderInfo(ACrypterFolderInfo: TCrypterFolderInfo);
+
     function GetVisible: Boolean;
     procedure SetVisible(AVisible: Boolean);
+
     function GetFocus: Boolean;
     procedure SetFocus(AFocus: Boolean);
 
+    procedure UpdateGUI;
+
+    // Base
+    property Value: WideString read GetValue write SetValue;
+
+    // Additional
     property MirrorControl: IMirrorControl read GetMirrorControl write SetMirrorControl;
-    property name: WideString read GetName;
-    property Link: WideString read GetLink write SetLink;
+
     property Status: Byte read GetStatus;
-    property Size: Extended read GetSize;
-    property PartSize: Extended read GetPartSize;
-    property Hoster: WideString read GetHoster;
-    property HosterShort: WideString read GetHosterShort;
-    property Parts: Integer read GetParts;
-    property StatusImage: WideString read GetStatusImage;
-    property StatusImageText: WideString read GetStatusImageText;
+
     property CrypterFolderInfo: TCrypterFolderInfo read GetCrypterFolderInfo write SetCrypterFolderInfo;
-    procedure RefreshGrid;
+
     procedure CreateFolder;
     procedure CheckFolder(const AUseCheckDelay: Boolean = False);
+
     property Visible: Boolean read GetVisible write SetVisible;
     property Focus: Boolean read GetFocus write SetFocus;
   end;
 
   IMirrorControl = interface(IMirrorContainer)
     ['{9E4D7459-1D7B-4E8E-9177-8365D631E5F5}']
+    // Base
+    function GetDirectlink(const Index: Integer): IDirectlinksMirror; overload; safecall;
+
+    function GetCrypter(const IndexOrName: OleVariant): ICrypterPanel; safecall;
+
+    // Additional
     function GetMirrorController: IMirrorController;
     procedure SetMirrorController(const AMirrorController: IMirrorController);
+
     function GetIndex: Integer;
     procedure SetIndex(AIndex: Integer);
+
     function GetTabIndex: Integer;
     procedure SetTabIndex(ATabIndex: Integer);
-    function GetSize: Extended;
-    function GetPartSize: Extended;
-    function GetHoster: WideString; overload;
-    function GetHoster(AShortName: Boolean): WideString; overload;
-    function GetParts: Integer;
-    function GetDirectlink: IDirectlinksPanel;
-    function GetDirectlinksMirror(index: Integer): WideString;
-    procedure SetDirectlinksMirror(index: Integer; ADirectlinks: WideString);
-    function GetDirectlinksMirrorCount: Integer;
-    function GetCrypter(index: Integer): ICrypterPanel;
-    function GetCrypterCount: Integer;
-    function AddCrypter(AName: WideString): Integer;
-    function RemoveCrypter(AIndex: Integer): Boolean;
+
+    function GetDirectlink: IDirectlinksPanel; overload;
 
     function GetLeft: Integer;
     procedure SetLeft(ALeft: Integer);
@@ -226,24 +208,27 @@ type
     procedure SetHeight(AHeight: Integer);
     function GetFocus: Boolean;
     procedure SetFocus(AFocus: Boolean);
+
+    // Base
+    property Directlink[const Index: Integer]: IDirectlinksMirror read GetDirectlink;
+
+    function FindCrypter(const AName: WideString): ICrypterPanel; safecall;
+
+    property Crypter[const IndexOrName: OleVariant]: ICrypterPanel read GetCrypter;
+
+    // Additional
     property MirrorController: IMirrorController read GetMirrorController write SetMirrorController;
-    property index: Integer read GetIndex write SetIndex;
+    property Index: Integer read GetIndex write SetIndex;
     property TabIndex: Integer read GetTabIndex write SetTabIndex;
-    property Size: Extended read GetSize;
-    property PartSize: Extended read GetPartSize;
-    property Hoster: WideString read GetHoster;
-    property Parts: Integer read GetParts;
-    property Directlink: IDirectlinksPanel read GetDirectlink;
-    property DirectlinksMirror[index: Integer]: WideString read GetDirectlinksMirror write SetDirectlinksMirror;
-    property DirectlinksMirrorCount: Integer read GetDirectlinksMirrorCount;
-    property Crypter[index: Integer]: ICrypterPanel read GetCrypter;
-    property CrypterCount: Integer read GetCrypterCount;
 
     property Left: Integer read GetLeft write SetLeft;
     property Top: Integer read GetTop write SetTop;
     property Width: Integer read GetWidth write SetWidth;
     property Height: Integer read GetHeight write SetHeight;
     property Focus: Boolean read GetFocus write SetFocus;
+
+    function AddCrypter(AName: WideString): Integer;
+    function RemoveCrypter(AIndex: Integer): Boolean;
   end;
 
   IMirrorController = interface(IMirrorControllerBase)
@@ -687,8 +672,8 @@ type
 
   ICrypterManager = interface
     ['{3ABA9E7F-6D3D-4F35-94E8-45ED37228710}']
-    procedure AddCrypterJob(const ACrypter: ICrypter);
-    procedure AddCrypterCheckJob(const ACrypter: ICrypter; const AUseCheckDelay: WordBool = False);
+    procedure AddCrypterJob(const ACrypterPanel: ICrypterPanel);
+    procedure AddCrypterCheckJob(const ACrypterPanel: ICrypterPanel; const AUseCheckDelay: WordBool = False);
   end;
 
   IPublishItem = interface(ICMSWebsite)

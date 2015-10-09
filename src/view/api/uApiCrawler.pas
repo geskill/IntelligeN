@@ -72,11 +72,11 @@ begin
     begin
       _ControlValueCount := 0;
       // Problem, wenn Value gesetzt wurde, aber noch nicht als Message abgearbeitet wurde, dann ist Value noch leer
-      while (_ControlValueCount < GetValueCount) and ((Value = '') or ((AControlID = cReleaseDate) and (Value = DateToStr(Date, FFormatSettings)))) do
+      while (_ControlValueCount < GetProposedCount) and ((Value = '') or ((ControlID = cReleaseDate) and (Value = DateToStr(Date, FFormatSettings)))) do
       begin
-        Value := GetValueContent(_ControlValueCount);
+        Value := GetProposedValue(_ControlValueCount);
         sleep(0);
-        if not(GetValueContent(_ControlValueCount) = '') then
+        if not(GetProposedValue(_ControlValueCount) = '') then
           break;
         Inc(_ControlValueCount);
       end;
@@ -122,7 +122,7 @@ begin
       while not _found and (_ContingentIndex < _CrawlerCollectionItem.Contingent.Count) do
       begin
         _CrawlerContingentCollectionItem := TCrawlerContingentCollectionItem(_CrawlerCollectionItem.Contingent.Items[_ContingentIndex]);
-        _found := (FComponentController.ATypeID = _CrawlerContingentCollectionItem.ATypeID) and _CrawlerContingentCollectionItem.Status;
+        _found := (FComponentController.TypeID = _CrawlerContingentCollectionItem.TypeID) and _CrawlerContingentCollectionItem.Status;
         Inc(_ContingentIndex);
       end;
       if _found then
@@ -153,7 +153,8 @@ begin
 
     task.Comm.Send(MSG_CRAWLER_TASK_STARTED, [FComponentController, _CrawlerCollectionItem.name]);
 
-    TApiPlugin.CrawlerExec(_CrawlerCollectionItem, FComponentController.ATypeID, FComponentController);
+    // TODO: Update
+    //TApiPlugin.CrawlerExec(_CrawlerCollectionItem, FComponentController.TypeID, FComponentController);
 
     /// access of control.value is now thread-safe and should be done by this thread
     UpdateControlValues;

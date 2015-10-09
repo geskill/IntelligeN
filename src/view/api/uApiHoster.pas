@@ -15,13 +15,14 @@ uses
   uPlugInConst;
 
 type
+  // TODO: Rework
   THosterCheckThread = class(TMyOmniWorker)
   protected
-    FDirectlinksMirror: IDirectlinksMirror;
+    FDirectlink: IDirectlink;
     FDirectlinks: string;
     FHoster: TPlugInCollectionItem;
   public
-    constructor Create(const ADirectlinksMirror: IDirectlinksMirror);
+    constructor Create(const ADirectlink: IDirectlink);
     function Initialize: Boolean; override;
     procedure Cleanup; override;
   end;
@@ -30,30 +31,30 @@ type
   public
     constructor Create; reintroduce;
 
-    procedure AddHosterCheckJob(const ADirectlinksMirror: IDirectlinksMirror);
-    procedure RemoveHosterCheckJob(const ADirectlinksMirror: IDirectlinksMirror);
+    procedure AddHosterCheckJob(const ADirectlink: IDirectlink);
+    procedure RemoveHosterCheckJob(const ADirectlink: IDirectlink);
   end;
 
 implementation
 
 { THosterCheckThread }
 
-constructor THosterCheckThread.Create(const ADirectlinksMirror: IDirectlinksMirror);
+constructor THosterCheckThread.Create(const ADirectlink: IDirectlink);
 begin
   inherited Create;
 
-  FDirectlinksMirror := ADirectlinksMirror;
-  FDirectlinks := FDirectlinksMirror.Value;
+  FDirectlink := ADirectlink;
+  FDirectlinks := FDirectlink.Value;
 
   with SettingsManager.Settings.Plugins do
-    FHoster := TPlugInCollectionItem(FindPlugInCollectionItemFromCollection(FDirectlinksMirror.Hoster, FileHoster));
+    FHoster := TPlugInCollectionItem(FindPlugInCollectionItemFromCollection(FDirectlink.Hoster, FileHoster));
 end;
 
 function THosterCheckThread.Initialize: Boolean;
 var
   LinksInfo: TLinksInfo;
 begin
-  if CheckforBlacklist(FDirectlinksMirror) then
+  if CheckforBlacklist(FDirectlink) then
     Exit(False);
 
   if Assigned(FHoster) then
@@ -62,16 +63,16 @@ begin
 
     if not task.Terminated then
     begin
-      if CheckforBlacklist(FDirectlinksMirror) then
+      if CheckforBlacklist(FDirectlink) then
         Exit(False);
 
-      FDirectlinksMirror.LinksInfo := LinksInfo;
+      // FDirectlink.LinksInfo := LinksInfo;
 
       task.Invoke(
         { } procedure
         { } begin
         { . } try
-        { ... } FDirectlinksMirror.RefreshInfo;
+        { ... } // FDirectlink.UpdateGUI;
         { . } except
         { . } end;
 
@@ -85,8 +86,8 @@ end;
 
 procedure THosterCheckThread.Cleanup;
 begin
-  task.Comm.Send(MSG_TASK_QUIT, FDirectlinksMirror);
-  FDirectlinksMirror := nil;
+  task.Comm.Send(MSG_TASK_QUIT, FDirectlink);
+  FDirectlink := nil;
 end;
 
 { THosterManager }
@@ -98,20 +99,20 @@ end;
 
 procedure THosterManager.AddHosterCheckJob;
 begin
-  FInList.Add(ADirectlinksMirror);
-  CreateTask(THosterCheckThread.Create(ADirectlinksMirror), 'THosterCheckThread ' + ADirectlinksMirror.Hoster).MonitorWith(FOmniTED).Schedule(FThreadPool);
+  FInList.Add(ADirectlink);
+  CreateTask(THosterCheckThread.Create(ADirectlink), 'THosterCheckThread ' + ADirectlink.Hoster).MonitorWith(FOmniTED).Schedule(FThreadPool);
 end;
 
 procedure THosterManager.RemoveHosterCheckJob;
 var
   indxA, indxB: Integer;
 begin
-  indxA := FInList.IndexOf(ADirectlinksMirror);
+  indxA := FInList.IndexOf(ADirectlink);
   if indxA <> -1 then
   begin
-    indxB := FBlackList.IndexOf(ADirectlinksMirror);
+    indxB := FBlackList.IndexOf(ADirectlink);
     if indxB = -1 then
-      FBlackList.Add(ADirectlinksMirror);
+      FBlackList.Add(ADirectlink);
   end;
 end;
 

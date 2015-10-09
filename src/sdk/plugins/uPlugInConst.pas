@@ -32,8 +32,8 @@ type
 
   TLinksInfo = packed record
     Status: Byte; { 0=offline|1=online|2=unknown;3=notyet;4=mixed;255=noinfo }
-    Size: Extended;
-    PartSize: Extended;
+    Size: Double;
+    PartSize: Double;
     Links: array of TLinkInfo;
   end;
 
@@ -41,6 +41,7 @@ type
     Link: WideString;
     Status: Byte; { 0=offline|1=online|2=unknown;3=notyet;4=mixed;255=noinfo }
     Size: Double; { in Megabytes }
+    PartSize: Double; { in Megabytes }
     Hoster: WideString; { Uploaded.to or Uploaded or up.to }
     HosterShort: WideString;
     Parts: Integer;

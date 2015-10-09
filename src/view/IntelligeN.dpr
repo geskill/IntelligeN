@@ -121,7 +121,6 @@ uses
   IntelligeN_TLB in 'ole\IntelligeN_TLB.pas',
   uOLE in 'ole\uOLE.pas' {IntelligeN2009: CoClass},
   uPlugInInterfaceAdv in '..\sdk\plugins\uPlugInInterfaceAdv.pas',
-  uMycxTabSheet in 'mods\uMycxTabSheet.pas',
   uApiControlsBase in 'api\uApiControlsBase.pas',
   uApiControlControllerBase in 'api\uApiControlControllerBase.pas',
   uApiMirrorControllerBase in 'api\uApiMirrorControllerBase.pas',

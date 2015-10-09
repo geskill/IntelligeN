@@ -14,6 +14,24 @@ type
     property Value: WideString read GetValue;
   end;
 
+  IControlData = interface(IValueItem)
+    ['{CE74BD5F-80B2-4D4F-AB2D-F29AA0773F58}']
+    function GetControlID: TControlID; safecall;
+
+    property ControlID: TControlID read GetControlID;
+  end;
+
+  IControlBase = interface(IControlData)
+    ['{06C360E4-BBFB-462E-A2AD-54BE875635AE}']
+    procedure AddProposedValue(const ASender: WideString; AValue: WideString; ATitle: WideString = ''); safecall;
+    function GetProposedValue(const AIndex: Integer): WideString; safecall;
+    function GetProposedValueSender(const AIndex: Integer): WideString; safecall;
+    function GetProposedValueTitle(const AIndex: Integer): WideString; safecall;
+    function GetProposedCount: Integer; safecall;
+
+    property ProposedCount: Integer read GetProposedCount;
+  end;
+
   IMirrorData = interface(IValueItem)
     ['{BD6E30EB-EC6F-476C-8C57-51ADEBB75156}']
     function GetSize: Double; safecall;
@@ -29,11 +47,11 @@ type
     property Parts: Integer read GetParts;
   end;
 
-  IControlData = interface(IValueItem)
-    ['{CE74BD5F-80B2-4D4F-AB2D-F29AA0773F58}']
-    function GetControlID: TControlID; safecall;
+  IDirectlink = interface(IMirrorData)
+    ['{F8592097-8D2E-4EC6-AE2F-B74092641096}']
+    function GetFileName: WideString; safecall;
 
-    property ControlID: TControlID read GetControlID;
+    property FileName: WideString read GetFileName;
   end;
 
   ICrypter = interface(IMirrorData)
@@ -47,14 +65,7 @@ type
     property StatusImageText: WideString read GetStatusImageText;
   end;
 
-  IDirectlink = interface(IMirrorData)
-    ['{F8592097-8D2E-4EC6-AE2F-B74092641096}']
-    function GetFileName: WideString; safecall;
-
-    property FileName: WideString read GetFileName;
-  end;
-
-  ISubMirrorContainer = interface(IMirrorData)
+  IDirectlinkContainer = interface(IDirectlink)
     ['{8D4E5551-1DC6-4AE3-BC6E-C16045277C52}']
     function GetDirectlink(const Index: Integer): IDirectlink; safecall;
     function GetDirectlinkCount: Integer; safecall;
@@ -63,32 +74,15 @@ type
     property DirectlinkCount: Integer read GetDirectlinkCount;
   end;
 
-  IMirrorContainer = interface(IMirrorData)
+  IMirrorContainer = interface(IDirectlinkContainer)
     ['{0FC2EC0F-D5E8-42A7-8C75-0F4BBDD48089}']
     function GetCrypter(const IndexOrName: OleVariant): ICrypter; safecall;
     function GetCrypterCount: Integer; safecall;
-    function GetDirectlink(const Index: Integer): IDirectlink; safecall;
-    function GetDirectlinkCount: Integer; safecall;
-    function GetSubMirror(const Index: Integer): ISubMirrorContainer; safecall;
 
     function FindCrypter(const AName: WideString): ICrypter; safecall;
 
     property Crypter[const IndexOrName: OleVariant]: ICrypter read GetCrypter;
     property CrypterCount: Integer read GetCrypterCount;
-    property Directlink[const Index: Integer]: IDirectlink read GetDirectlink;
-    property DirectlinkCount: Integer read GetDirectlinkCount;
-    property SubMirror[const Index: Integer]: ISubMirrorContainer read GetSubMirror;
-  end;
-
-  IControlBase = interface(IControlData)
-    ['{06C360E4-BBFB-462E-A2AD-54BE875635AE}']
-    procedure AddProposedValue(const ASender: WideString; AValue: WideString; ATitle: WideString = ''); safecall;
-    function GetProposedValue(const AIndex: Integer): WideString; safecall;
-    function GetProposedValueSender(const AIndex: Integer): WideString; safecall;
-    function GetProposedValueTitle(const AIndex: Integer): WideString; safecall;
-    function GetProposedCount: Integer; safecall;
-
-    property ProposedCount: Integer read GetProposedCount;
   end;
 
   IControlControllerBase = interface

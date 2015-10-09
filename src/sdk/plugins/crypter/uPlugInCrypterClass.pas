@@ -119,8 +119,8 @@ type
     property UseVisitorPassword: WordBool read GetUseVisitorPassword write SetUseVisitorPassword;
     property Visitorpassword: WideString read GetVisitorPassword write SetVisitorPassword;
 
-    function AddFolder(const AMirrorContainer: ISubMirrorContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; virtual; safecall; abstract;
-    function EditFolder(const AMirrorContainer: ISubMirrorContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; virtual; safecall; abstract;
+    function AddFolder(const AMirrorContainer: IDirectlinkContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; virtual; safecall; abstract;
+    function EditFolder(const AMirrorContainer: IDirectlinkContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; virtual; safecall; abstract;
     function DeleteFolder(AFolderIdentifier: WideString): WordBool; virtual; safecall; abstract;
     function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; virtual; safecall; abstract;
   end;

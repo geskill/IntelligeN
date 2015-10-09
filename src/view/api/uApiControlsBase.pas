@@ -13,10 +13,10 @@ type
   private
     FValue: WideString;
   protected
-    function GetValue: WideString; safecall;
+    function GetValue: WideString; virtual; safecall;
     procedure SetValue(AValue: WideString); virtual; safecall;
   public
-    constructor Create(AValue: WideString);
+    constructor Create(AValue: WideString); virtual;
     constructor Clone(const AValueItem: IValueItem);
     destructor Destroy; override;
 
@@ -168,7 +168,7 @@ constructor TIControlBase.Clone(const AControlBase: IControlBase);
 var
   LIndex: Integer;
 begin
-  inherited Clone(AControlBase);
+  Create(AControlBase.ControlID, AControlBase.Value);
 
   for LIndex := 0 to AControlBase.ProposedCount - 1 do
     AddProposedValue(AControlBase.GetProposedValueSender(LIndex), AControlBase.GetProposedValue(LIndex), AControlBase.GetProposedValueTitle(LIndex));

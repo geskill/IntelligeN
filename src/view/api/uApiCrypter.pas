@@ -64,7 +64,7 @@ begin
   inherited Create;
 
   FCrypterPanel := ACrypterPanel;
-  FFolderURL := FCrypterPanel.Link;
+  FFolderURL := FCrypterPanel.Value;
 
   with SettingsManager.Settings.Plugins do
     FCrypter := TCrypterCollectionItem(FindPlugInCollectionItemFromCollection(FCrypterPanel.name, Crypter));
@@ -93,8 +93,8 @@ begin
   inherited Create(ACrypterPanel);
 
   if SettingsManager.Settings.ComponentParser.ModyBeforeCrypt then
-    for _SubMirrorIndex := 0 to FCrypterPanel.MirrorControl.Directlink.MirrorCount - 1 do
-      FCrypterPanel.MirrorControl.Directlink.Mirror[_SubMirrorIndex].Mody;
+    for _SubMirrorIndex := 0 to FCrypterPanel.MirrorControl.DirectlinkCount - 1 do
+      FCrypterPanel.MirrorControl.Directlink[_SubMirrorIndex].Mody;
 end;
 
 function TCrypterCryptThread.Initialize: Boolean;
@@ -103,8 +103,9 @@ var
 begin
   _ErrorMsg := '';
 
-  FFolderURL := TApiPlugin.AddFolder(FCrypter, FCrypterPanel.MirrorControl,
-    FCrypterPanel.MirrorControl.MirrorController.TabSheetController.ControlController, _ErrorMsg);
+  // TODO: Fix CrypterAddFolder
+  //FFolderURL := TApiPlugin.CrypterAddFolder(FCrypter, FCrypterPanel.MirrorControl,
+  //  FCrypterPanel.MirrorControl.MirrorController.TabSheetController.ControlController, _ErrorMsg);
 
   Task.Invoke(
     { } procedure
@@ -113,7 +114,7 @@ begin
     { } begin
     { . } if SameText(_ErrorMsg, '') then
     { . } begin
-    { ... } FCrypterPanel.Link := FFolderURL;
+    { ... } FCrypterPanel.Value := FFolderURL;
     { ... } FCrypterPanel.CheckFolder(True);
     { . } end
     { . } else
@@ -156,13 +157,14 @@ begin
   if FCheckDelay > 0 then
     FEvent.WaitFor(FCheckDelay);
 
-  CrypterFolderInfo := TApiPlugin.CrypterGetFolder(FCrypter, FFolderURL);
+  // TODO: Implement
+  //CrypterFolderInfo := TApiPlugin.CrypterGetFolder(FCrypter, FFolderURL);
 
   Task.Invoke(
     { } procedure
     { } begin
     { . } FCrypterPanel.CrypterFolderInfo := CrypterFolderInfo;
-    { . } FCrypterPanel.RefreshGrid;
+    { . } FCrypterPanel.UpdateGUI;
     { . } Task.SetTimer(1, MSG_SLEEP);
     { } end);
 

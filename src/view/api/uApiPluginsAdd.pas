@@ -167,8 +167,8 @@ begin
           if TControlID(J) in _ComponentIDs then
             with TCrawlerContingentCollectionItem(Contingent.Add) do
             begin
-              ATypeID := TTypeID(I);
-              AControlID := TControlID(J);
+              TypeID := TTypeID(I);
+              ControlID := TControlID(J);
               Status := ICrawlerPlugIn(aPlugIn).GetControlIDDefaultValue(I, J);
             end;
       end;

@@ -46,7 +46,7 @@ type
 
     class function CrawlerExec(ACrawler: TCrawlerCollectionItem; const AControlController: IControlController; out AErrorMsg: string): Boolean;
 
-    class function CrypterAddFolder(ACrypter: TCrypterCollectionItem; const AMirrorContainer: ISubMirrorContainer; const AControlController: IControlControllerBase; out AFolderInfo: TCrypterFolderInfo; out AErrorMsg: string): Boolean;
+    class function CrypterAddFolder(ACrypter: TCrypterCollectionItem; const AMirrorContainer: IDirectlinkContainer; const AControlController: IControlControllerBase; out AFolderInfo: TCrypterFolderInfo; out AErrorMsg: string): Boolean;
     class function CrypterGetFolder(ACrypter: TCrypterCollectionItem; AFolderIdentifier: string; out AFolderInfo: TCrypterFolderInfo; out AErrorMsg: string): Boolean;
 
     class function GetSaveFileFormats: TStrings;

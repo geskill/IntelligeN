@@ -4,12 +4,11 @@ interface
 
 uses
   // Delphi
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ShellAPI, ComCtrls, Menus,
-  ImgList,
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ShellAPI, ComCtrls, Menus, ImgList,
   // Dev Express
-  cxControls, cxListView, cxContainer, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters,
+  cxControls, cxListView, cxContainer, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxEdit,
   // Api
-  uApiConst, cxEdit;
+  uAppConst;
 
 type
   TfLinklist = class(TFrame)

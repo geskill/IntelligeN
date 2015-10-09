@@ -430,7 +430,7 @@ end;
 
 function TIControlBasic.GetTypeID;
 begin
-  Result := ControlController.ATypeID;
+  Result := ControlController.TypeID;
 end;
 
 function TIControlBasic.GetControlID;
@@ -502,7 +502,8 @@ function TIControlBasic.GetValue;
 begin
   FValueLock.EnterReadLock;
   try
-    Result := FValue;
+    // TODO: Fix this
+    // Result := FValue;
   finally
     FValueLock.ExitReadLock;
   end;
@@ -624,7 +625,8 @@ procedure TIControlBasic.ControlOnChange(Sender: TObject);
 begin
   FValueLock.EnterWriteLock;
   try
-    FValue := GetControlValue;
+    // TODO: Fix thi
+    // FValue := GetControlValue;
   finally
     FValueLock.ExitWriteLock;
   end;
