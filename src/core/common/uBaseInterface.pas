@@ -34,9 +34,9 @@ type
     function GetProposedValue(const AIndex: Integer): WideString; safecall;
     function GetProposedValueSender(const AIndex: Integer): WideString; safecall;
     function GetProposedValueTitle(const AIndex: Integer): WideString; safecall;
-    function GetProposedCount: Integer; safecall;
+    function GetProposedValuesCount: Integer; safecall;
 
-    property ProposedCount: Integer read GetProposedCount;
+    property ProposedValuesCount: Integer read GetProposedValuesCount;
   end;
 
   IMirrorData = interface(IValueItem)

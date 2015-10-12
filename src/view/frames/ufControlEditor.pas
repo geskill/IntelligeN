@@ -144,16 +144,16 @@ begin
         with OptionsView do
           if Supports(FControl, IPicture) then
             DataRowHeight := 200
-          else if Supports(FControl, IEdit) then
+          else if Supports(FControl, IControlEdit) then
             DataRowHeight := 18
-          else if Supports(FControl, IComboBox) then
+          else if Supports(FControl, IControlComboBox) then
             DataRowHeight := 18
           else if Supports(FControl, IRichEdit) then
             DataRowHeight := 50;
 
         with DataController do
         begin
-          RecordCount := FControl.ProposedCount;
+          RecordCount := FControl.ProposedValuesCount;
 
           for RecordIndex := 0 to RecordCount - 1 do
           begin
@@ -162,7 +162,7 @@ begin
             if Supports(FControl, IPicture) then
               Values[RecordIndex, 1] := (FControl as IPictureEx).GetValuePicture(RecordIndex).Picture
             else if Supports(FControl, ITrailer) then
-              Values[RecordIndex, 1] := (FControl as ITrailer).GetValueTitle(RecordIndex)
+              Values[RecordIndex, 1] := (FControl as ITrailer).GetProposedValueTitle(RecordIndex)
             else
               Values[RecordIndex, 1] := FControl.GetProposedValue(RecordIndex);
           end;

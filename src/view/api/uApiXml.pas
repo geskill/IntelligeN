@@ -120,8 +120,7 @@ type
 
   function GetForumType(AWebsiteType: string): string;
   const
-    ForumType: array [0 .. 5, 0 .. 2] of string = (('ipb2', 'IPBv2', '2'), ('ipb3', 'IPBv3', '3'), ('MyBB', '', ''), ('phpbb2', 'phpbb2', '0'), ('phpbb3', 'phpbb3', '1'),
-      ('vBulletin', 'vBulletin', '4'));
+    ForumType: array [0 .. 5, 0 .. 2] of string = (('ipb2', 'IPBv2', '2'), ('ipb3', 'IPBv3', '3'), ('MyBB', '', ''), ('phpbb2', 'phpbb2', '0'), ('phpbb3', 'phpbb3', '1'), ('vBulletin', 'vBulletin', '4'));
 
     function GetForumIndex(AWebsiteType: string): Integer;
     var
@@ -692,9 +691,8 @@ begin
             with ChildNodes.Nodes[I] do
               if HasChildNodes then
               begin
-                AControlController.NewControl(StringToControlID(NodeName), VarToStr(ChildNodes.Nodes['title'].NodeValue), VarToStr(ChildNodes.Nodes['value'].NodeValue),
-                  VarToStr(ChildNodes.Nodes['title'].Attributes['hint']), VarToStr(ChildNodes.Nodes['value'].Attributes['list']),
-                  StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['left']), 0), StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['top']), 0),
+                AControlController.NewControl(StringToControlID(NodeName), VarToStr(ChildNodes.Nodes['title'].NodeValue), VarToStr(ChildNodes.Nodes['value'].NodeValue), VarToStr(ChildNodes.Nodes['title'].Attributes['hint']),
+                  VarToStr(ChildNodes.Nodes['value'].Attributes['list']), StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['left']), 0), StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['top']), 0),
                   StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['width']), 0), StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['height']), 0));
                 APageController.CallControlAligner;
               end;
@@ -764,11 +762,9 @@ begin
     { ....... } for J := 0 to Nodes[I].AttributeNodes.Count - 1 do
     { ....... } begin
     { ......... } if EndsText('value', Nodes[I].AttributeNodes.Nodes[J].NodeName) then
-    { ........... } _Result.CodeTags[I].ParamValues.Add(Nodes[I].AttributeNodes.Nodes[J].NodeName + _Result.CodeTags[I].ParamValues.NameValueSeparator + VarToStr
-        (Nodes[I].AttributeNodes.Nodes[J].NodeValue))
+    { ........... } _Result.CodeTags[I].ParamValues.Add(Nodes[I].AttributeNodes.Nodes[J].NodeName + _Result.CodeTags[I].ParamValues.NameValueSeparator + VarToStr(Nodes[I].AttributeNodes.Nodes[J].NodeValue))
     { ......... } else
-    { ........... } _Result.CodeTags[I].Params.Add(Nodes[I].AttributeNodes.Nodes[J].NodeName + _Result.CodeTags[I].ParamValues.NameValueSeparator + VarToStr(Nodes[I].AttributeNodes.Nodes[J].NodeValue)
-      );
+    { ........... } _Result.CodeTags[I].Params.Add(Nodes[I].AttributeNodes.Nodes[J].NodeName + _Result.CodeTags[I].ParamValues.NameValueSeparator + VarToStr(Nodes[I].AttributeNodes.Nodes[J].NodeValue));
     { ....... } end;
     { ..... } end;
     { ... } end;

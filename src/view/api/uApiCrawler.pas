@@ -72,7 +72,7 @@ begin
     begin
       _ControlValueCount := 0;
       // Problem, wenn Value gesetzt wurde, aber noch nicht als Message abgearbeitet wurde, dann ist Value noch leer
-      while (_ControlValueCount < GetProposedCount) and ((Value = '') or ((ControlID = cReleaseDate) and (Value = DateToStr(Date, FFormatSettings)))) do
+      while (_ControlValueCount < ProposedValuesCount) and ((Value = '') or ((ControlID = cReleaseDate) and (Value = DateToStr(Date, FFormatSettings)))) do
       begin
         Value := GetProposedValue(_ControlValueCount);
         sleep(0);

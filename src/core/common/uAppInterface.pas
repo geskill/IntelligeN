@@ -116,7 +116,7 @@ type
 
     property TypeID: TTypeID read GetTypeID;
     property ControlID: TControlID read GetControlID;
-    property name: WideString read GetName write SetName;
+    property Name: WideString read GetName write SetName;
     property Title: WideString read GetTitle write SetTitle;
     property Left: Integer read GetLeft write SetLeft;
     property Top: Integer read GetTop write SetTop;
@@ -127,11 +127,11 @@ type
     property Focus: Boolean read GetFocus write SetFocus;
   end;
 
-  IEdit = interface(IControlBasic)
+  IControlEdit = interface(IControlBasic)
     ['{3AB76C7D-3EB8-499F-9258-BE97296A7ECB}']
   end;
 
-  IComboBox = interface(IControlBasic)
+  IControlComboBox = interface(IControlBasic)
     ['{C8536847-A684-44B8-9CA0-428459E157D6}']
     function GetDropDownRows: Integer;
     procedure SetDropDownRows(ADropDownRows: Integer);
@@ -142,11 +142,11 @@ type
     property DropDownRows: Integer read GetDropDownRows write SetDropDownRows;
   end;
 
-  IComboBoxList = interface(IComboBox)
+  IControlComboBoxList = interface(IControlComboBox)
     ['{06F8C809-6FF0-4CC8-B057-F42802759581}']
   end;
 
-  ICheckComboBox = interface(IControlBasic)
+  IControlCheckComboBox = interface(IControlBasic)
     ['{5F2E9174-0AB9-4936-94E1-7021F79EB4BC}']
     function GetDropDownRows: Integer;
     procedure SetDropDownRows(ADropDownRows: Integer);
@@ -186,7 +186,7 @@ type
     procedure RemoteUpload;
   end;
 
-  IPicture = interface(IComboBox)
+  IPicture = interface(IControlComboBox)
     ['{F686511D-EC7D-4FB1-AD88-121511434F93}']
     function GetMirror(AIndex: Integer): IPictureMirror;
     procedure SetMirror(AIndex: Integer; APictureMirror: IPictureMirror);
@@ -206,10 +206,8 @@ type
     procedure SetValuePicture(AIndex: Integer; APictureInfo: TPictureInfo);
   end;
 
-  ITrailer = interface(IComboBox)
+  ITrailer = interface(IControlComboBox)
     ['{7D38C9A3-16BD-4550-A383-61C5A4E04A4D}']
-    procedure AddValue(AValue: WideString; ATitle: WideString; ASender: WideString); overload;
-    function GetValueTitle(AIndex: Integer): WideString;
   end;
 
   // // // Controls Events // // //

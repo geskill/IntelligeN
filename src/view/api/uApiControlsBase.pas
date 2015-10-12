@@ -43,18 +43,18 @@ type
 
     procedure ResetValueArray;
 
-    function GetProposedCount: Integer; safecall;
+    function GetProposedValuesCount: Integer; safecall;
   public
     constructor Create(AControlID: TControlID; AValue: WideString = '');
     constructor Clone(const AControlBase: IControlBase);
     destructor Destroy; override;
 
-    procedure AddProposedValue(const ASender: WideString; AValue: WideString; ATitle: WideString); safecall;
+    procedure AddProposedValue(const ASender: WideString; AValue: WideString; ATitle: WideString); virtual; safecall;
     function GetProposedValue(const AIndex: Integer): WideString; safecall;
     function GetProposedValueSender(const AIndex: Integer): WideString; safecall;
     function GetProposedValueTitle(const AIndex: Integer): WideString; safecall;
 
-    property ProposedCount: Integer read GetProposedCount;
+    property ProposedValuesCount: Integer read GetProposedValuesCount;
   end;
 
 implementation
@@ -121,12 +121,12 @@ procedure TIControlBase.ResetValueArray;
 var
   LIndex: Integer;
 begin
-  for LIndex := GetProposedCount - 1 downto 0 do
+  for LIndex := GetProposedValuesCount - 1 downto 0 do
     SetLength(FValueArray[LIndex], 0);
   SetLength(FValueArray, 0);
 end;
 
-function TIControlBase.GetProposedCount: Integer;
+function TIControlBase.GetProposedValuesCount: Integer;
 begin
   Result := length(FValueArray);
 end;
@@ -137,7 +137,7 @@ var
 begin
   SetLength(FValueArray, length(FValueArray) + 1, 3);
 
-  LNewIndex := GetProposedCount - 1;
+  LNewIndex := GetProposedValuesCount - 1;
 
   FValueArray[LNewIndex][0] := ASender;
   FValueArray[LNewIndex][1] := AValue;
@@ -170,7 +170,7 @@ var
 begin
   Create(AControlBase.ControlID, AControlBase.Value);
 
-  for LIndex := 0 to AControlBase.ProposedCount - 1 do
+  for LIndex := 0 to AControlBase.ProposedValuesCount - 1 do
     AddProposedValue(AControlBase.GetProposedValueSender(LIndex), AControlBase.GetProposedValue(LIndex), AControlBase.GetProposedValueTitle(LIndex));
 end;
 

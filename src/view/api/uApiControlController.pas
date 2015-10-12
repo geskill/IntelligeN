@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  SysUtils, Controls, Classes, Variants,
+  SysUtils, Controls, Classes, Types, Variants,
   // Spring Framework
   Spring.Collections.Lists,
   // MultiEvent
@@ -12,7 +12,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiControls, uApiControlControllerBase, uApiMultiCastEvent;
+  uApiControls, uApiControlControllerBase, uApiControlAligner, uApiMultiCastEvent;
 
 type
   TControlController = class(TIControlControllerBase, IControlController)
@@ -21,7 +21,7 @@ type
   private
     FControlList: TInterfaceList<IControlBasic>;
 
-    FWorkPanel: TComponent;
+    FWorkPanel: TControl;
     FTabSheetController: ITabSheetController;
     FTypeID: TTypeID;
 
@@ -58,7 +58,7 @@ type
     function GetPopupMenuChange: IPopupMenuChange;
     procedure SetPopupMenuChange(APopupMenuChange: IPopupMenuChange);
   public
-    constructor Create(AWorkPanel: TComponent);
+    constructor Create(AWorkPanel: TControl);
     destructor Destroy; override;
 
     // Base (see above on stackoverflow.com)
@@ -304,15 +304,30 @@ procedure TControlController.NewControl(AClass: TIControlBasicMeta; AType: TCont
 var
   LBasicControl: TIControlBasic;
   LBasicControlInterface: IControlBasic;
-  LComboBoxInterface: IComboBox;
-  LCheckComboBoxInterface: ICheckComboBox;
+  LComboBoxInterface: IControlComboBox;
+  LCheckComboBoxInterface: IControlCheckComboBox;
+  // LPoint: TPoint;
 begin
   LBasicControl := AClass.Create(TWinControl(FWorkPanel), Self, AType);
+
+  (*
+  with TControlAligner.Create do
+  try
+    WorkPanelWidth := FWorkPanel.Width;
+    ControlController := Self;
+    MirrorController := TabSheetController.MirrorController;
+    LPoint := NextControlPosition(AHeight, AWidth);
+    ControlController := nil;
+    MirrorController := nil;
+  finally
+    Free;
+  end;
+  *)
 
   LBasicControlInterface := LBasicControl;
   with LBasicControlInterface do
   begin
-    name := ControlIDToString(AType);
+    Name := ControlIDToString(AType);
     if not(ATitle = '#') then
       Title := ATitle;
     if not(AHint = '#') then
@@ -327,10 +342,10 @@ begin
 
   if not(AList = '#') then
   begin
-    if LBasicControlInterface.QueryInterface(IComboBox, LComboBoxInterface) = 0 then
+    if LBasicControlInterface.QueryInterface(IControlComboBox, LComboBoxInterface) = 0 then
       LComboBoxInterface.List := AList;
 
-    if LBasicControlInterface.QueryInterface(ICheckComboBox, LCheckComboBoxInterface) = 0 then
+    if LBasicControlInterface.QueryInterface(IControlCheckComboBox, LCheckComboBoxInterface) = 0 then
       LCheckComboBoxInterface.List := AList;
   end;
 

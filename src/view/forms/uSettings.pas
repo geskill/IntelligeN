@@ -1360,8 +1360,8 @@ var
 
   procedure A;
   var
-    _ComboBoxIntf: IComboBox;
-    _CheckComboBoxIntf: ICheckComboBox;
+    _ComboBoxIntf: IControlComboBox;
+    _CheckComboBoxIntf: IControlCheckComboBox;
   begin
     with cxLBControlsItems do
     begin
@@ -1370,8 +1370,8 @@ var
         if (Items.IndexOf(NewItem) = -1) and not(NewItem = '') then
         begin
           ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID; AControlCollectionItem: TControlCollectionItem)begin TControlItemsCollectionItem(AControlCollectionItem.Items.Add).ItemName := NewItem;
-            UpdateAllOpenedTabs(ATypeID, TControlID(cxTCControls.TabIndex), procedure(const AControl: IControlBasic)begin if AControl.QueryInterface(IComboBox, _ComboBoxIntf) = 0 then _ComboBoxIntf.List := _ComboBoxIntf.List + NewItem;
-              if AControl.QueryInterface(ICheckComboBox, _CheckComboBoxIntf) = 0 then _CheckComboBoxIntf.List := _CheckComboBoxIntf.List + NewItem; end); end);
+            UpdateAllOpenedTabs(ATypeID, TControlID(cxTCControls.TabIndex), procedure(const AControl: IControlBasic)begin if AControl.QueryInterface(IControlComboBox, _ComboBoxIntf) = 0 then _ComboBoxIntf.List := _ComboBoxIntf.List + NewItem;
+              if AControl.QueryInterface(IControlCheckComboBox, _CheckComboBoxIntf) = 0 then _CheckComboBoxIntf.List := _CheckComboBoxIntf.List + NewItem; end); end);
           Items.Add(NewItem);
         end
         else
@@ -1401,10 +1401,10 @@ begin
   begin
     _SelectedItem := cxLBControlsItems.Items[cxLBControlsItems.ItemIndex];
 
-    ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID; AControlCollectionItem: TControlCollectionItem)var I: Integer; _ComboBoxIntf: IComboBox; _CheckComboBoxIntf: ICheckComboBox;
+    ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID; AControlCollectionItem: TControlCollectionItem)var I: Integer; _ComboBoxIntf: IControlComboBox; _CheckComboBoxIntf: IControlCheckComboBox;
       begin for I := AControlCollectionItem.Items.Count - 1 downto 0 do with TControlItemsCollectionItem(AControlCollectionItem.Items.Items[I]) do if (_SelectedItem = ItemName) then Free;
-      UpdateAllOpenedTabs(ATypeID, AComponentID, procedure(const AControl: IControlBasic)begin if AControl.QueryInterface(IComboBox, _ComboBoxIntf) = 0 then _ComboBoxIntf.List := AControlCollectionItem.GetItems;
-        if AControl.QueryInterface(ICheckComboBox, _CheckComboBoxIntf) = 0 then _CheckComboBoxIntf.List := AControlCollectionItem.GetItems; end); end);
+      UpdateAllOpenedTabs(ATypeID, AComponentID, procedure(const AControl: IControlBasic)begin if AControl.QueryInterface(IControlComboBox, _ComboBoxIntf) = 0 then _ComboBoxIntf.List := AControlCollectionItem.GetItems;
+        if AControl.QueryInterface(IControlCheckComboBox, _CheckComboBoxIntf) = 0 then _CheckComboBoxIntf.List := AControlCollectionItem.GetItems; end); end);
     with cxLBControlsItems do
       Items.Delete(ItemIndex);
   end;
@@ -1503,12 +1503,12 @@ end;
 
 procedure TSettings.cxSEDropDownRowsPropertiesChange(Sender: TObject);
 var
-  _ComboBoxIntf: IComboBox;
-  _CheckComboBoxIntf: ICheckComboBox;
+  _ComboBoxIntf: IControlComboBox;
+  _CheckComboBoxIntf: IControlCheckComboBox;
 begin
   SettingsManager.Settings.Controls.DropDownRows := cxSEDropDownRows.Value;
-  UpdateAllOpenedTabs( procedure(const AControl: IControlBasic)begin if AControl.QueryInterface(IComboBox, _ComboBoxIntf) = 0 then _ComboBoxIntf.DropDownRows := cxSEDropDownRows.Value;
-    if AControl.QueryInterface(ICheckComboBox, _CheckComboBoxIntf) = 0 then _CheckComboBoxIntf.DropDownRows := cxSEDropDownRows.Value; end);
+  UpdateAllOpenedTabs( procedure(const AControl: IControlBasic)begin if AControl.QueryInterface(IControlComboBox, _ComboBoxIntf) = 0 then _ComboBoxIntf.DropDownRows := cxSEDropDownRows.Value;
+    if AControl.QueryInterface(IControlCheckComboBox, _CheckComboBoxIntf) = 0 then _CheckComboBoxIntf.DropDownRows := cxSEDropDownRows.Value; end);
 end;
 
 procedure TSettings.cxBResetControlsClick(Sender: TObject);
@@ -2970,10 +2970,10 @@ begin
 
     if InputQuery(StrEditItem, StrNewItemValue, _NewName) then
     begin
-      ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID; AControlCollectionItem: TControlCollectionItem)var I: Integer; _ComboBoxIntf: IComboBox; _CheckComboBoxIntf: ICheckComboBox;
+      ControlsValues( procedure(const ATypeID: TTypeID; const AComponentID: TControlID; AControlCollectionItem: TControlCollectionItem)var I: Integer; _ComboBoxIntf: IControlComboBox; _CheckComboBoxIntf: IControlCheckComboBox;
         begin for I := 0 to AControlCollectionItem.Items.Count - 1 do with TControlItemsCollectionItem(AControlCollectionItem.Items.Items[I]) do if (_OldName = ItemName) then ItemName := _NewName;
-        UpdateAllOpenedTabs(ATypeID, AComponentID, procedure(const AControl: IControlBasic)begin if AControl.QueryInterface(IComboBox, _ComboBoxIntf) = 0 then _ComboBoxIntf.List := AControlCollectionItem.GetItems;
-          if AControl.QueryInterface(ICheckComboBox, _CheckComboBoxIntf) = 0 then _CheckComboBoxIntf.List := AControlCollectionItem.GetItems; end); end);
+        UpdateAllOpenedTabs(ATypeID, AComponentID, procedure(const AControl: IControlBasic)begin if AControl.QueryInterface(IControlComboBox, _ComboBoxIntf) = 0 then _ComboBoxIntf.List := AControlCollectionItem.GetItems;
+          if AControl.QueryInterface(IControlCheckComboBox, _CheckComboBoxIntf) = 0 then _CheckComboBoxIntf.List := AControlCollectionItem.GetItems; end); end);
       Items.Strings[ItemIndex] := _NewName;
     end;
   end;

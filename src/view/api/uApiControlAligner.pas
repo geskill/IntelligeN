@@ -13,6 +13,8 @@ uses
   uApiSettings;
 
 type
+  // TODO: Replace with DevExpress TdxLayoutControl in the future
+  // https://www.devexpress.com/Support/Center/Question/Details/Q258014
   TControlAligner = class
   private
     I: Integer;
@@ -30,7 +32,7 @@ type
   public
     procedure Start;
     property WorkPanelWidth: Integer read FWorkPanelWidth write FWorkPanelWidth;
-    function NextControlPosition: TPoint;
+    function NextControlPosition(ANewControlHeight, ANewControlWidth: Integer): TPoint;
     function NextMirrorPosition: TPoint;
     property ControlController: IControlController read FComponentController write FComponentController;
     property MirrorController: IMirrorController read FMirrorController write FMirrorController;
@@ -42,6 +44,7 @@ implementation
 
 procedure TControlAligner.SetProgressBarPosition(ANewPosition: Extended);
 begin
+  // FUTURE: Remove the progress bar. Not really necessary
   with FProgressBar do
   begin
     Position := ANewPosition;
@@ -77,45 +80,86 @@ begin
   CurrentControl.Top := PreviousControl.Top;
 end;
 
-function TControlAligner.NextControlPosition: TPoint;
+function TControlAligner.NextControlPosition(ANewControlHeight, ANewControlWidth: Integer): TPoint;
+var
+  LPreviousMirrorControl: IMirrorControl;
+  LPreviousControl: IControlBasic;
 begin
-  //
+  with SettingsManager.Settings.ControlAligner do
+    if (ControlController.ControlCount = 0) then
+    begin
+      result.X := PaddingLeft;
+
+      if (MirrorPosition = mpTop) then
+      begin
+        LPreviousMirrorControl := MirrorController.Mirror[MirrorController.MirrorCount - 1];
+
+        result.Y := CurrentMirrorControl.Top + MirrorHeight + PaddingHeight;
+
+        LPreviousMirrorControl := nil;
+      end
+      else
+      begin
+        result.Y := 0;
+      end;
+    end
+    else
+    begin
+      LPreviousControl := ControlController.Control[ControlController.ControlCount - 1];
+
+      if ( LPreviousControl.Left + LPreviousControl.Width + PaddingWidth + ANewControlWidth) > WorkPanelWidth then
+      begin
+        result.X := PaddingLeft;
+        result.Y := LPreviousControl.Top + LPreviousControl.Height + PaddingHeight;
+      end
+      else
+      begin
+        result.X := LPreviousControl.Left + LPreviousControl.Width + PaddingWidth;
+        result.Y := LPreviousControl.Top;
+      end;
+
+      LPreviousControl := nil;
+    end;
 end;
 
 function TControlAligner.NextMirrorPosition: TPoint;
 var
-  _LastControl: IControlBasic;
-  _PreviousMirrorControl: IMirrorControl;
+  LPreviousControl: IControlBasic;
+  LPreviousMirrorControl: IMirrorControl;
 begin
   with SettingsManager.Settings.ControlAligner do
-    if MirrorController.MirrorCount = 0 then
+    if (MirrorController.MirrorCount = 0) then
     begin
       result.X := PaddingLeft;
 
-      _LastControl := ControlController.Control[ControlController.ControlCount - 1];
-
       if (MirrorPosition = mpBottom) then
-        result.Y := _LastControl.Top + _LastControl.Height + PaddingHeight
-      else
-        result.Y := 0;
+      begin
+        LPreviousControl := ControlController.Control[ControlController.ControlCount - 1];
 
-      _LastControl := nil;
+        result.Y := LPreviousControl.Top + LPreviousControl.Height + PaddingHeight;
+
+        LPreviousControl := nil;
+      end
+      else // (MirrorPosition = mpTop)
+      begin
+        result.Y := 0;
+      end;
     end
     else
     begin
-      _PreviousMirrorControl := MirrorController.Mirror[MirrorController.MirrorCount - 1];
+      LPreviousMirrorControl := MirrorController.Mirror[MirrorController.MirrorCount - 1];
 
       if (Frac((MirrorController.MirrorCount - 1) / MirrorColumns) = 0.0) then
-        result.Y := (_PreviousMirrorControl.Top + MirrorHeight + PaddingHeight)
+        result.Y := (LPreviousMirrorControl.Top + MirrorHeight + PaddingHeight)
       else
-        result.Y := _PreviousMirrorControl.Top;
+        result.Y := LPreviousMirrorControl.Top;
 
-      if _PreviousMirrorControl.Top = result.Y then
-        result.X := _PreviousMirrorControl.Left + _PreviousMirrorControl.Width + PaddingLeft
+      if LPreviousMirrorControl.Top = result.Y then
+        result.X := LPreviousMirrorControl.Left + LPreviousMirrorControl.Width + PaddingLeft
       else
         result.X := PaddingLeft;
 
-      _PreviousMirrorControl := nil;
+      LPreviousMirrorControl := nil;
     end;
 end;
 
@@ -202,7 +246,7 @@ begin
         Left := PaddingLeft;
 
         if (MirrorPosition = mpTop) and (MirrorController.MirrorCount > 0) then
-          Top := CurrentMirrorControl.Top + MirrorHeight + PaddingWidth
+          Top := CurrentMirrorControl.Top + MirrorHeight + PaddingHeight
         else
           Top := 0;
       end;
@@ -231,8 +275,7 @@ begin
     end
     else if not(PreviousControl.Top = CurrentControl.Top) then
     begin
-      if not((PreviousControl.Left + PreviousControl.Width + SettingsManager.Settings.ControlAligner.PaddingWidth + CurrentControl.Width) > WorkPanelWidth)
-        then
+      if not((PreviousControl.Left + PreviousControl.Width + SettingsManager.Settings.ControlAligner.PaddingWidth + CurrentControl.Width) > WorkPanelWidth) then
       begin
         MoveUp;
         MoveLeft;
