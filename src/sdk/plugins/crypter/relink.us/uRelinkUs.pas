@@ -7,12 +7,12 @@ uses
   Windows, SysUtils, StrUtils, Classes, Variants, HTTPApp, Math,
   // Common
   uBaseConst, uBaseInterface,
-  // Utils
-  uPathUtils, uStringUtils,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPConst,
   // plugin system
-  uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst;
+  uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst,
+  // Utils
+  uPathUtils, uStringUtils;
 
 type
   TRelinkUs = class(TCrypterPlugIn)

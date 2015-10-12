@@ -162,6 +162,7 @@ end;
 constructor TIControlBase.Create(AControlID: TControlID; AValue: WideString);
 begin
   inherited Create(AControlID, AValue);
+  SetLength(FValueArray, 0);
 end;
 
 constructor TIControlBase.Clone(const AControlBase: IControlBase);

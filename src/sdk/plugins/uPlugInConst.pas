@@ -9,6 +9,10 @@ unit uPlugInConst;
 
 interface
 
+uses
+  // Common
+  uBaseConst;
+
 type
   TPlugInType = (ptNone, ptApp, ptCAPTCHA, ptCMS, ptCrawler, ptCrypter, ptFileFormats, ptFileHoster, ptImageHoster);
   TCAPTCHAInput = function(const ACAPTCHA: WideString; const AName: WideString; out AText: WideString; var ACookies: WideString): WordBool of object; safecall;
@@ -22,7 +26,6 @@ type
   TContainertypes = set of TContainertype;
   TAdvertismenttype = (atLayer, atLink, atBanner);
   TImageHostResize = (irNone, ir320x240, ir450x338, ir640x480, ir800x600);
-  TContentStatus = (csOffline, csOnline, csUnknown, csTemporaryOffline, csMixedOnOffline, csNotChecked);
   TLinkStatus = csOffline..csTemporaryOffline;
   TChecksumType = (ctMD5, ctSHA512);
 

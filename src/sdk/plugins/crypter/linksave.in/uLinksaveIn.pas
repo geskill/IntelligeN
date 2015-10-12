@@ -7,12 +7,12 @@ uses
   Windows, SysUtils, StrUtils, Classes, HTTPApp,
   // Common
   uBaseConst, uBaseInterface,
-  // Utils
-  uPathUtils,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // plugin system
-  uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst;
+  uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst,
+  // Utils
+  uPathUtils;
 
 type
   TLinksaveIn = class(TCrypterPlugIn)

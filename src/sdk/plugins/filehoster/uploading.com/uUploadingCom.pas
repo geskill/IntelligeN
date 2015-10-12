@@ -14,6 +14,8 @@ uses
   Windows, SysUtils, Classes, Math, HTTPApp, DateUtils,
   // Reg Ex
   RegExpr,
+  // Common
+  uBaseConst,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // plugin system

@@ -15,20 +15,23 @@ uses
 type
   TIMirrorData = class(TIValueItem, IMirrorData)
   private
+    FStatus: TContentStatus;
     FSize, FPartSize: Double;
     FHoster, FHosterShort: WideString;
     FParts: Integer;
   protected
+    function GetStatus: TContentStatus; virtual; safecall;
     function GetSize: Double; virtual; safecall;
     function GetPartSize: Double; virtual; safecall;
     function GetHoster: WideString; virtual; safecall;
     function GetHosterShort: WideString; virtual; safecall;
     function GetParts: Integer; virtual; safecall;
   public
-    constructor Create(ASize, APartSize: Double; AHoster, AHosterShort: WideString; AParts: Integer; AValue: WideString = ''); reintroduce;
+    constructor Create(AStatus: TContentStatus; ASize, APartSize: Double; AHoster, AHosterShort: WideString; AParts: Integer; AValue: WideString = ''); reintroduce;
     constructor Clone(const AMirrorData: IMirrorData);
     destructor Destroy; override;
 
+    property Status: TContentStatus read GetStatus;
     property Size: Double read GetSize;
     property PartSize: Double read GetPartSize;
     property Hoster: WideString read GetHoster;
@@ -42,7 +45,7 @@ type
   protected
     function GetFileName: WideString; virtual; safecall;
   public
-    constructor Create(AFileName: WideString; ASize, APartSize: Double; AHoster, AHosterShort: WideString; AParts: Integer; AValue: WideString = '');
+    constructor Create(AFileName: WideString; AStatus: TContentStatus; ASize, APartSize: Double; AHoster, AHosterShort: WideString; AParts: Integer; AValue: WideString = '');
     constructor Clone(const ADirectlink: IDirectlink);
     destructor Destroy; override;
 
@@ -57,7 +60,7 @@ type
     function GetStatusImage: WideString; safecall;
     function GetStatusImageText: WideString; safecall;
   public
-    constructor Create(AName, AStatusImage, AStatusImageText: WideString; ASize, APartSize: Double; AHoster, AHosterShort: WideString; AParts: Integer; AValue: WideString = '');
+    constructor Create(AName, AStatusImage, AStatusImageText: WideString; AStatus: TContentStatus; ASize, APartSize: Double; AHoster, AHosterShort: WideString; AParts: Integer; AValue: WideString = '');
     constructor Clone(const ACrypter: ICrypter);
     destructor Destroy; override;
 
@@ -70,6 +73,7 @@ type
   private
     FDirectlinkList: TList<IDirectlink>;
   protected
+    function GetStatus: TContentStatus; override; safecall;
     function GetValue: WideString; override; safecall;
     function GetSize: Double; override; safecall;
     function GetPartSize: Double; override; safecall;
@@ -118,6 +122,11 @@ implementation
 {$REGION 'TIMirrorData'}
 { TIMirrorData }
 
+function TIMirrorData.GetStatus: TContentStatus;
+begin
+  Result := FStatus;
+end;
+
 function TIMirrorData.GetSize: Double;
 begin
   Result := FSize;
@@ -147,6 +156,7 @@ constructor TIMirrorData.Create;
 begin
   inherited Create(AValue);
 
+  FStatus := AStatus;
   FSize := ASize;
   FPartSize := APartSize;
   FHoster := AHoster;
@@ -156,7 +166,7 @@ end;
 
 constructor TIMirrorData.Clone(const AMirrorData: IMirrorData);
 begin
-  Create(AMirrorData.Size, AMirrorData.PartSize, AMirrorData.Hoster, AMirrorData.HosterShort, AMirrorData.Parts, AMirrorData.Value);
+  Create(AMirrorData.Status, AMirrorData.Size, AMirrorData.PartSize, AMirrorData.Hoster, AMirrorData.HosterShort, AMirrorData.Parts, AMirrorData.Value);
 end;
 
 destructor TIMirrorData.Destroy;
@@ -173,16 +183,16 @@ begin
   Result := FFileName;
 end;
 
-constructor TIDirectlink.Create(AFileName: WideString; ASize, APartSize: Double; AHoster, AHosterShort: WideString; AParts: Integer; AValue: WideString = '');
+constructor TIDirectlink.Create;
 begin
-  inherited Create(ASize, APartSize, AHoster, AHosterShort, AParts, AValue);
+  inherited Create(AStatus, ASize, APartSize, AHoster, AHosterShort, AParts, AValue);
 
   FFileName := AFileName;
 end;
 
 constructor TIDirectlink.Clone(const ADirectlink: IDirectlink);
 begin
-  Create(ADirectlink.FileName, ADirectlink.Size, ADirectlink.PartSize, ADirectlink.Hoster, ADirectlink.HosterShort, ADirectlink.Parts, ADirectlink.Value);
+  Create(ADirectlink.FileName, ADirectlink.Status, ADirectlink.Size, ADirectlink.PartSize, ADirectlink.Hoster, ADirectlink.HosterShort, ADirectlink.Parts, ADirectlink.Value);
 end;
 
 destructor TIDirectlink.Destroy;
@@ -209,9 +219,9 @@ begin
   Result := FStatusImageText;
 end;
 
-constructor TICrypter.Create(AName, AStatusImage, AStatusImageText: WideString; ASize, APartSize: Double; AHoster, AHosterShort: WideString; AParts: Integer; AValue: WideString);
+constructor TICrypter.Create;
 begin
-  inherited Create(ASize, APartSize, AHoster, AHosterShort, AParts, AValue);
+  inherited Create(AStatus, ASize, APartSize, AHoster, AHosterShort, AParts, AValue);
 
   FName := AName;
   FStatusImage := AStatusImage;
@@ -220,7 +230,7 @@ end;
 
 constructor TICrypter.Clone(const ACrypter: ICrypter);
 begin
-  Create(ACrypter.Name, ACrypter.StatusImage, ACrypter.StatusImageText, ACrypter.Size, ACrypter.PartSize, ACrypter.Hoster, ACrypter.HosterShort, ACrypter.Parts, ACrypter.Value);
+  Create(ACrypter.Name, ACrypter.StatusImage, ACrypter.StatusImageText, ACrypter.Status, ACrypter.Size, ACrypter.PartSize, ACrypter.Hoster, ACrypter.HosterShort, ACrypter.Parts, ACrypter.Value);
 end;
 
 destructor TICrypter.Destroy;
@@ -231,6 +241,11 @@ end;
 { ... }
 
 { TISubMirrorContainer }
+
+function TIDirectlinkContainer.GetStatus: TContentStatus;
+begin
+  // TODO: Implement
+end;
 
 function TIDirectlinkContainer.GetValue: WideString;
 begin

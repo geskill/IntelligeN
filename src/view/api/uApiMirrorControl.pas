@@ -37,6 +37,27 @@ type
     property OnDropFiles: TWndMethod read FOnDropFiles write FOnDropFiles;
   end;
 
+  TStatusGrid = class
+  private
+    FcxGridInfo: TcxGrid;
+    FcxGridInfoLevel: TcxGridLevel;
+    FcxGridInfoTableView: TcxGridTableView;
+    FcxGridInfoTableViewColumn1: TcxGridColumn;
+    FcxGridInfoTableViewColumn2: TcxGridColumn;
+    procedure FcxGridInfoTableViewColumn2CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
+  protected
+    FMirrorData: IMirrorData;
+    function GetVisible: Boolean;
+    procedure SetVisible(AVisible: Boolean);
+  public
+    constructor Create(AOwner: TWinControl; AMirrorData: IMirrorData; ALeft, ATop, AHeight, AWidth: Integer; AMouseEnter: TNotifyEvent);
+    destructor Destroy; override;
+
+    procedure UpdateGUI;
+
+    property Visible: Boolean read GetVisible write SetVisible;
+  end;
+
   TMycxTabSheet = class(TcxTabSheet, IDirectlinksMirror)
     // TODO: Separate GUI and Logic
   private
@@ -53,11 +74,7 @@ type
     FmiRefreshSize: TdxBarButton;
     FMycxRichEdit: TMycxRichEdit;
     FTransparentPanel: TEZTexturePanel;
-    FcxGridLinksInfo: TcxGrid;
-    FcxGridLinksInfoLevel: TcxGridLevel;
-    FcxGridLinksInfoTableView: TcxGridTableView;
-    FcxGridLinksInfoTableViewColumn1: TcxGridColumn;
-    FcxGridLinksInfoTableViewColumn2: TcxGridColumn;
+    FStatusGrid: TStatusGrid;
     FStatusImage, FHosterImage: TImage;
     FPartsLabel, FSizeLabel: TLabel;
     FModyHintStyleController: TcxHintStyleController;
@@ -93,6 +110,7 @@ type
   protected
     // Base
     function GetValue: WideString; safecall;
+    function GetStatus: TContentStatus; safecall;
     function GetSize: Double; safecall;
     function GetPartSize: Double; safecall;
     function GetHoster: WideString; overload; safecall;
@@ -105,7 +123,6 @@ type
     procedure SetDirectlinksPanel(ADirectlinksPanel: IDirectlinksPanel);
     procedure SetSize(ASize: Double);
     procedure SetPartSize(APartSize: Double);
-    function GetStatus: TContentStatus;
     function GetHoster(AShortName: Boolean): WideString; overload;
     function GetLinksInfo: TLinksInfo;
     procedure SetLinksInfo(ALinksInfo: TLinksInfo);
@@ -125,6 +142,7 @@ type
 
     // Base
     property Value: WideString read GetValue { . } write SetValue;
+    property Status: TContentStatus read GetStatus;
     property Size: Double read GetSize { . } write SetSize;
     property PartSize: Double read GetPartSize { . } write SetPartSize;
     property Hoster: WideString read GetHoster;
@@ -135,7 +153,6 @@ type
     // Additional
     property DirectlinksPanel: IDirectlinksPanel read GetDirectlinksPanel write SetDirectlinksPanel;
 
-    property Status: TContentStatus read GetStatus;
     property LinksInfo: TLinksInfo read GetLinksInfo write SetLinksInfo;
 
     property Title: WideString read GetTitle write SetTitle;
@@ -170,6 +187,7 @@ type
   protected
     // Base
     function GetValue: WideString; safecall;
+    function GetStatus: TContentStatus; safecall;
     function GetSize: Double; safecall;
     function GetPartSize: Double; safecall;
     function GetHoster: WideString; overload; safecall;
@@ -201,6 +219,7 @@ type
 
     // Base
     property Value: WideString read GetValue;
+    property Status: TContentStatus read GetStatus;
     property Size: Double read GetSize;
     property PartSize: Double read GetPartSize;
     property Hoster: WideString read GetHoster;
@@ -233,14 +252,9 @@ type
     FPanel: TPanel;
     FcxTextEditLink: TcxTextEdit;
     FcxButtonLinkCheck: TcxButton;
-    FcxGridFolderInfo: TcxGrid;
-    FcxGridFolderInfoLevel: TcxGridLevel;
-    FcxGridFolderInfoTableView: TcxGridTableView;
-    FcxGridFolderInfoTableViewColumn1: TcxGridColumn;
-    FcxGridFolderInfoTableViewColumn2: TcxGridColumn;
+    FStatusGrid: TStatusGrid;
     // GUI
     procedure FPanelContextPopup(Sender: TObject; MousePos: TPoint; var Handled: Boolean);
-    procedure FcxGridFolderInfoTableViewColumn2CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
     procedure FcxTextEditLinkChange(Sender: TObject);
     procedure FcxButtonLinkCheckClick(Sender: TObject);
   private
@@ -251,15 +265,16 @@ type
     FCrypterFolderInfo: TCrypterFolderInfo;
   protected
     // Base
-    function GetValue: WideString; overload; safecall;
-    function GetSize: Double; overload; safecall;
-    function GetPartSize: Double; overload; safecall;
+    function GetValue: WideString; safecall;
+    function GetStatus: TContentStatus; safecall;
+    function GetSize: Double; safecall;
+    function GetPartSize: Double; safecall;
     function GetHoster: WideString; overload; safecall;
-    function GetHosterShort: WideString; overload; safecall;
-    function GetParts: Integer; overload; safecall;
-    function GetName: WideString; overload; safecall;
-    function GetStatusImage: WideString; overload; safecall;
-    function GetStatusImageText: WideString; overload; safecall;
+    function GetHosterShort: WideString; safecall;
+    function GetParts: Integer; safecall;
+    function GetName: WideString; safecall;
+    function GetStatusImage: WideString; safecall;
+    function GetStatusImageText: WideString; safecall;
 
     // Additional
     function GetMirrorControl: IMirrorControl;
@@ -269,8 +284,6 @@ type
 
     procedure SetSize(ASize: Double);
     procedure SetPartSize(APartSize: Double);
-
-    function GetStatus: TContentStatus;
 
     procedure SetCrypter(ACrypter: TCrypterCollectionItem); // TODO: Implement better?
 
@@ -291,6 +304,7 @@ type
 
     // Base
     property Value: WideString read GetValue { . } write SetValue;
+    property Status: TContentStatus read GetStatus;
     property Size: Double read GetSize { . } write SetSize;
     property PartSize: Double read GetPartSize { . } write SetPartSize;
     property Hoster: WideString read GetHoster;
@@ -302,8 +316,6 @@ type
 
     // Additional
     property MirrorControl: IMirrorControl read GetMirrorControl write SetMirrorControl;
-
-    property Status: TContentStatus read GetStatus;
 
     property Crypter: TCrypterCollectionItem read FCrypter write SetCrypter;
 
@@ -357,6 +369,7 @@ type
   protected
     // Base
     function GetValue: WideString; safecall;
+    function GetStatus: TContentStatus; safecall;
     function GetSize: Double; safecall;
     function GetPartSize: Double; safecall;
     function GetHoster: WideString; overload; safecall;
@@ -403,6 +416,13 @@ type
     destructor Destroy; override;
 
     // Base
+    property Status: TContentStatus read GetStatus;
+    property Size: Double read GetSize;
+    property PartSize: Double read GetPartSize;
+    property Hoster: WideString read GetHoster;
+    property HosterShort: WideString read GetHosterShort;
+    property Parts: Integer read GetParts;
+
     property Directlink[const Index: Integer]: IDirectlinksMirror read GetDirectlinkMirror;
     property DirectlinkCount: Integer read GetDirectlinkCount;
 
@@ -455,6 +475,179 @@ begin
     FOnDropFiles(Msg)
   else
     inherited;
+end;
+
+{ ****************************************************************************** }
+
+procedure TStatusGrid.FcxGridInfoTableViewColumn2CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
+const
+  ImageIndent = 3;
+var
+  LImageRect, LTextRect: TRect;
+  LImageIndex: Integer;
+begin
+  if FcxGridInfoTableView.DataController.Values[AViewInfo.GridRecord.index, 0] = 'Status' then
+  begin
+    ACanvas.Brush.Color := AViewInfo.Params.Color;
+    ACanvas.FillRect(AViewInfo.Bounds);
+    LImageRect := AViewInfo.ContentBounds;
+    LImageRect.Left := LImageRect.Left + ImageIndent;
+    LImageRect.Right := LImageRect.Left + Main.ILContainerStatusImages.Width + 2;
+    LTextRect := AViewInfo.ContentBounds;
+    LTextRect.Left := LImageRect.Right + ImageIndent;
+    LImageIndex := Integer(FMirrorData.Status);
+
+    cxDrawImage(ACanvas.Handle, LImageRect, LImageRect, nil, Main.ILContainerStatusImages, LImageIndex, idmNormal, False, 0, Main.ImageList.BkColor, False);
+
+    // ACanvas.DrawImage(Main.ImageList, AImageRect.Left, AImageRect.Top, AImageIndex);
+    ACanvas.DrawTexT(AViewInfo.Text, LTextRect, DT_SINGLELINE or DT_LEFT);
+    ADone := True;
+  end;
+end;
+
+function TStatusGrid.GetVisible: Boolean;
+begin
+  Result := FcxGridInfo.Visible;
+end;
+
+procedure TStatusGrid.SetVisible(AVisible: Boolean);
+begin
+  FcxGridInfo.Visible := AVisible;
+end;
+
+constructor TStatusGrid.Create;
+begin
+  inherited Create();
+
+  FMirrorData := AMirrorData;
+
+  FcxGridInfo := TcxGrid.Create(AOwner);
+  with FcxGridInfo do
+  begin
+    Parent := AOwner;
+
+    Anchors := [akLeft, akTop, akRight, akBottom];
+
+    Left := ALeft;
+    Top := ATop;
+    Height := AHeight;
+    Width := AWidth;
+
+    OnMouseEnter := AMouseEnter;
+
+    FcxGridInfoLevel := Levels.Add;
+    FcxGridInfoTableView := CreateView(TcxGridTableView) as TcxGridTableView;
+    FcxGridInfoLevel.GridView := FcxGridInfoTableView;
+
+    with FcxGridInfoTableView.OptionsView do
+    begin
+      ColumnAutoWidth := True;
+
+      GroupByBox := False;
+      ScrollBars := ssVertical;
+    end;
+
+    FcxGridInfoTableViewColumn1 := FcxGridInfoTableView.CreateColumn;
+    FcxGridInfoTableViewColumn1.Caption := 'Name';
+    FcxGridInfoTableViewColumn2 := FcxGridInfoTableView.CreateColumn;
+    with FcxGridInfoTableViewColumn2 do
+    begin
+      Caption := 'Value';
+      PropertiesClass := TcxTextEditProperties;
+      Properties.readonly := True;
+      OnCustomDrawCell := FcxGridInfoTableViewColumn2CustomDrawCell;
+    end;
+
+    with FcxGridInfoTableView do
+    begin
+      Items[0].PropertiesClass := TcxLabelProperties;
+
+      with DataController do
+        try
+          BeginUpdate;
+          RecordCount := 4;
+          Values[0, 0] := 'Status';
+          Values[1, 0] := 'Hoster';
+          Values[2, 0] := StrSize;
+          Values[3, 0] := StrParts;
+        finally
+          EndUpdate;
+        end;
+    end;
+  end;
+end;
+
+destructor TStatusGrid.Destroy;
+begin
+  FcxGridInfoTableViewColumn2.Free;
+  FcxGridInfoTableViewColumn1.Free;
+  FcxGridInfoTableView.Free;
+  FcxGridInfoLevel.Free;
+  FcxGridInfo.Free;
+
+  FMirrorData := nil;
+
+  inherited Destroy;
+end;
+
+procedure TStatusGrid.UpdateGUI;
+
+  function FindRecordIndexByText(const AText: string): Integer;
+  var
+    LRecordIndex: Integer;
+  begin
+    Result := -1;
+
+    with FcxGridInfoTableView.DataController do
+    begin
+      for LRecordIndex := 0 to RecordCount - 1 do
+        if SameText(Values[LRecordIndex, 0], AText) then
+        begin
+          Result := LRecordIndex;
+          Break;
+        end;
+    end;
+  end;
+
+var
+  LRecordIndex: Integer;
+  LStatusString: string;
+begin
+  LRecordIndex := FindRecordIndexByText('Status');
+  if not(LRecordIndex = -1) then
+  begin
+    case FMirrorData.Status of
+      csOffline:
+        LStatusString := StrOffline;
+      csOnline:
+        LStatusString := StrOnline;
+      csUnknown:
+        LStatusString := StrUnknown;
+      csTemporaryOffline:
+        LStatusString := StrTemporaryOffline;
+      csMixedOnOffline:
+        LStatusString := StrMixed;
+      csNotChecked:
+        LStatusString := StrNotChecked;
+    end;
+
+    FcxGridInfoTableView.DataController.Values[LRecordIndex, 1] := LStatusString;
+  end;
+
+  LRecordIndex := FindRecordIndexByText('Hoster');
+  if not(LRecordIndex = -1) then
+    if SameStr('', FMirrorData.Hoster) then
+      FcxGridInfoTableView.DataController.Values[LRecordIndex, 1] := 'n/a'
+    else
+      FcxGridInfoTableView.DataController.Values[LRecordIndex, 1] := string(FMirrorData.Hoster) + ' (' + string(FMirrorData.HosterShort) + ')';
+
+  LRecordIndex := FindRecordIndexByText(StrSize);
+  if not(LRecordIndex = -1) then
+    FcxGridInfoTableView.DataController.Values[LRecordIndex, 1] := FloatToStr(FMirrorData.Size) + ' MB (' + FloatToStr(FMirrorData.PartSize) + ' MB)';
+
+  LRecordIndex := FindRecordIndexByText(StrParts);
+  if not(LRecordIndex = -1) then
+    FcxGridInfoTableView.DataController.Values[LRecordIndex, 1] := IntToStr(FMirrorData.Parts);
 end;
 
 { ****************************************************************************** }
@@ -658,6 +851,21 @@ begin
   Result := FMycxRichEdit.Lines.Text;
 end;
 
+function TMycxTabSheet.GetStatus;
+begin
+  if not(FLinksChecked or SameStr(Hoster, '')) then
+  begin
+    FLinksChecked := True;
+    CheckStatus;
+  end;
+  FLinksInfoLock.EnterReadLock;
+  try
+    Result := FLinksInfo.Status;
+  finally
+    FLinksInfoLock.ExitReadLock;
+  end;
+end;
+
 function TMycxTabSheet.GetSize;
 begin
   if not(FLinksChecked or SameStr(Hoster, '')) then
@@ -771,21 +979,6 @@ begin
     FLinksInfo.PartSize := APartSize;
   finally
     FLinksInfoLock.ExitWriteLock;
-  end;
-end;
-
-function TMycxTabSheet.GetStatus;
-begin
-  if not(FLinksChecked or SameStr(Hoster, '')) then
-  begin
-    FLinksChecked := True;
-    CheckStatus;
-  end;
-  FLinksInfoLock.EnterReadLock;
-  try
-    Result := FLinksInfo.Status;
-  finally
-    FLinksInfoLock.ExitReadLock;
   end;
 end;
 
@@ -1044,60 +1237,9 @@ begin
     OnMouseEnter := FTransparentPanelMouseEnter;
   end;
 
-  FcxGridLinksInfo := TcxGrid.Create(FTransparentPanel);
-  with FcxGridLinksInfo do
+  FStatusGrid := TStatusGrid.Create(FTransparentPanel, Self as IDirectlinksMirror, 6, 6, FTransparentPanel.Height - 12, FTransparentPanel.Width - 12, FTransparentPanelMouseEnter);
+  with FStatusGrid do
   begin
-    Parent := TWinControl(FTransparentPanel);
-
-    Anchors := [akLeft, akTop, akRight, akBottom];
-
-    Height := FTransparentPanel.Height - 12;
-    Left := 6;
-    Top := 6;
-    Width := FTransparentPanel.Width - 12;
-
-    OnMouseEnter := FTransparentPanelMouseEnter;
-
-    FcxGridLinksInfoLevel := Levels.Add;
-    FcxGridLinksInfoTableView := CreateView(TcxGridTableView) as TcxGridTableView;
-    FcxGridLinksInfoLevel.GridView := FcxGridLinksInfoTableView;
-
-    with FcxGridLinksInfoTableView.OptionsView do
-    begin
-      ColumnAutoWidth := True;
-
-      GroupByBox := False;
-      ScrollBars := ssVertical;
-    end;
-
-    FcxGridLinksInfoTableViewColumn1 := FcxGridLinksInfoTableView.CreateColumn;
-    FcxGridLinksInfoTableViewColumn1.Caption := 'Name';
-    FcxGridLinksInfoTableViewColumn2 := FcxGridLinksInfoTableView.CreateColumn;
-    with FcxGridLinksInfoTableViewColumn2 do
-    begin
-      Caption := 'Value';
-      PropertiesClass := TcxTextEditProperties;
-      Properties.readonly := True;
-      // OnCustomDrawCell := FcxGridFolderInfoTableViewColumn2CustomDrawCell;
-    end;
-
-    with FcxGridLinksInfoTableView do
-    begin
-      Items[0].PropertiesClass := TcxLabelProperties;
-
-      with DataController do
-        try
-          BeginUpdate;
-          RecordCount := 4;
-          Values[0, 0] := 'Status';
-          Values[1, 0] := 'Hoster';
-          Values[2, 0] := StrSize;
-          Values[3, 0] := StrParts;
-        finally
-          EndUpdate;
-        end;
-    end;
-
     Visible := (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvGrid);
   end;
 
@@ -1209,11 +1351,7 @@ begin
   FHosterImage.Free;
   FStatusImage.Free;
 
-  FcxGridLinksInfoTableViewColumn2.Free;
-  FcxGridLinksInfoTableViewColumn1.Free;
-  FcxGridLinksInfoTableView.Free;
-  FcxGridLinksInfoLevel.Free;
-  FcxGridLinksInfo.Free;
+  FStatusGrid.Free;
 
   FTransparentPanel.Free;
 
@@ -1241,76 +1379,23 @@ var
   _LinksInfo: TLinksInfo;
   _PlugInCollectionItem: TPlugInCollectionItem;
 
-  function FindRecordIndexByText(const aText: string): Integer;
-  var
-    RecordIndex: Integer;
-  begin
-    Result := -1;
-
-    with FcxGridLinksInfoTableView.DataController do
-    begin
-      for RecordIndex := 0 to RecordCount - 1 do
-        if (Values[RecordIndex, 0] = aText) then
-        begin
-          Result := RecordIndex;
-          Break;
-        end;
-    end;
-  end;
-
 begin
-  FcxGridLinksInfo.Visible := (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvGrid);
+  FStatusGrid.Visible := (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvGrid);
 
   FStatusImage.Visible := (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvIcon);
   FHosterImage.Visible := (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvIcon);
   FPartsLabel.Visible := (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvIcon);
   FSizeLabel.Visible := (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvIcon);
 
-  _Hoster := Hoster;
-  _LinksInfo := LinksInfo;
-
   if (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvGrid) then
   begin
-    _FieldIndex := FindRecordIndexByText('Status');
-    if (_FieldIndex > -1) then
-    begin
-      case _LinksInfo.Status of
-        csOffline:
-          _StringStatus := StrOffline;
-        csOnline:
-          _StringStatus := StrOnline;
-        csUnknown:
-          _StringStatus := StrUnknown;
-        csTemporaryOffline:
-          _StringStatus := StrTemporaryOffline;
-        csMixedOnOffline:
-          _StringStatus := StrMixed;
-        csNotChecked:
-          _StringStatus := StrNotChecked;
-      end;
-
-      FcxGridLinksInfoTableView.DataController.Values[_FieldIndex, 1] := _StringStatus;
-    end;
-
-    _FieldIndex := FindRecordIndexByText('Hoster');
-    if (_FieldIndex > -1) then
-    begin
-      if SameStr(_Hoster, '') then
-        FcxGridLinksInfoTableView.DataController.Values[_FieldIndex, 1] := 'n/a'
-      else
-        FcxGridLinksInfoTableView.DataController.Values[_FieldIndex, 1] := string(_Hoster) + ' (' + string(GetHoster(True)) + ')';
-    end;
-
-    _FieldIndex := FindRecordIndexByText(StrSize);
-    if (_FieldIndex > -1) then
-      FcxGridLinksInfoTableView.DataController.Values[_FieldIndex, 1] := FloatToStr(_LinksInfo.Size) + ' MB (' + FloatToStr(_LinksInfo.PartSize) + ' MB)';
-
-    _FieldIndex := FindRecordIndexByText(StrParts);
-    if (_FieldIndex > -1) then
-      FcxGridLinksInfoTableView.DataController.Values[_FieldIndex, 1] := IntToStr(Parts);
+    FStatusGrid.UpdateGUI;
   end
   else if (SettingsManager.Settings.ControlAligner.DirectlinksView = dlvIcon) then
   begin
+    _Hoster := Hoster;
+    _LinksInfo := LinksInfo;
+
     Main.ILContainerStatusImages.GetIcon(Integer(_LinksInfo.Status), FStatusImage.Picture.Icon);
 
     with SettingsManager.Settings.Plugins do
@@ -1427,6 +1512,11 @@ end;
 ///
 
 function TDirectlinksPanel.GetValue;
+begin
+  // TODO: Implement
+end;
+
+function TDirectlinksPanel.GetStatus;
 begin
   // TODO: Implement
 end;
@@ -1738,32 +1828,6 @@ begin
   Handled := True;
 end;
 
-procedure TCrypterPanel.FcxGridFolderInfoTableViewColumn2CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
-const
-  ImageIndent = 3;
-var
-  LImageRect, LTextRect: TRect;
-  LImageIndex: Integer;
-begin
-  if FcxGridFolderInfoTableView.DataController.Values[AViewInfo.GridRecord.index, 0] = 'Status' then
-  begin
-    ACanvas.Brush.Color := AViewInfo.Params.Color;
-    ACanvas.FillRect(AViewInfo.Bounds);
-    LImageRect := AViewInfo.ContentBounds;
-    LImageRect.Left := LImageRect.Left + ImageIndent;
-    LImageRect.Right := LImageRect.Left + Main.ILContainerStatusImages.Width + 2;
-    LTextRect := AViewInfo.ContentBounds;
-    LTextRect.Left := LImageRect.Right + ImageIndent;
-    LImageIndex := Integer(Status);
-
-    cxDrawImage(ACanvas.Handle, LImageRect, LImageRect, nil, Main.ILContainerStatusImages, LImageIndex, idmNormal, False, 0, Main.ImageList.BkColor, False);
-
-    // ACanvas.DrawImage(Main.ImageList, AImageRect.Left, AImageRect.Top, AImageIndex);
-    ACanvas.DrawTexT(AViewInfo.Text, LTextRect, DT_SINGLELINE or DT_LEFT);
-    ADone := True;
-  end;
-end;
-
 procedure TCrypterPanel.FcxTextEditLinkChange(Sender: TObject);
 begin
   with FcxTextEditLink do
@@ -1781,6 +1845,16 @@ end;
 function TCrypterPanel.GetValue: WideString;
 begin
   Result := FcxTextEditLink.Text;
+end;
+
+function TCrypterPanel.GetStatus: TContentStatus;
+begin
+  FCrypterFolderInfoLock.EnterReadLock;
+  try
+    Result := FCrypterFolderInfo.Status;
+  finally
+    FCrypterFolderInfoLock.ExitReadLock;
+  end;
 end;
 
 function TCrypterPanel.GetSize: Double;
@@ -1893,16 +1967,6 @@ begin
   end;
 end;
 
-function TCrypterPanel.GetStatus: TContentStatus;
-begin
-  FCrypterFolderInfoLock.EnterReadLock;
-  try
-    Result := FCrypterFolderInfo.Status;
-  finally
-    FCrypterFolderInfoLock.ExitReadLock;
-  end;
-end;
-
 procedure TCrypterPanel.SetCrypter(ACrypter: TCrypterCollectionItem);
 begin
   FCrypter := ACrypter;
@@ -2010,58 +2074,7 @@ begin
     OnClick := FcxButtonLinkCheckClick;
   end;
 
-  FcxGridFolderInfo := TcxGrid.Create(FPanel);
-  with FcxGridFolderInfo do
-  begin
-    Parent := TWinControl(FPanel);
-
-    Anchors := [akLeft, akTop, akRight, akBottom];
-
-    Height := FPanel.Height - 20 - 12;
-    Left := 6;
-    Top := 27;
-    Width := FPanel.Width - 12;
-
-    FcxGridFolderInfoLevel := Levels.Add;
-    FcxGridFolderInfoTableView := CreateView(TcxGridTableView) as TcxGridTableView;
-    FcxGridFolderInfoLevel.GridView := FcxGridFolderInfoTableView;
-
-    with FcxGridFolderInfoTableView.OptionsView do
-    begin
-      ColumnAutoWidth := True;
-
-      GroupByBox := False;
-      ScrollBars := ssVertical;
-    end;
-
-    FcxGridFolderInfoTableViewColumn1 := FcxGridFolderInfoTableView.CreateColumn;
-    FcxGridFolderInfoTableViewColumn1.Caption := 'Name';
-    FcxGridFolderInfoTableViewColumn2 := FcxGridFolderInfoTableView.CreateColumn;
-    with FcxGridFolderInfoTableViewColumn2 do
-    begin
-      Caption := 'Value';
-      PropertiesClass := TcxTextEditProperties;
-      Properties.readonly := True;
-      OnCustomDrawCell := FcxGridFolderInfoTableViewColumn2CustomDrawCell;
-    end;
-
-    with FcxGridFolderInfoTableView do
-    begin
-      Items[0].PropertiesClass := TcxLabelProperties;
-
-      with DataController do
-        try
-          BeginUpdate;
-          RecordCount := 4;
-          Values[0, 0] := 'Status';
-          Values[1, 0] := 'Hoster';
-          Values[2, 0] := StrSize;
-          Values[3, 0] := StrParts;
-        finally
-          EndUpdate;
-        end;
-    end;
-  end;
+  FStatusGrid := TStatusGrid.Create(FPanel, Self as ICrypterPanel, 6, 27, FPanel.Height - 20 - 12, FPanel.Width - 12, nil);
 
   Visible := False;
 end;
@@ -2070,11 +2083,7 @@ destructor TCrypterPanel.Destroy;
 begin
   FCrypter := nil;
 
-  FcxGridFolderInfoTableViewColumn2.Free;
-  FcxGridFolderInfoTableViewColumn1.Free;
-  FcxGridFolderInfoTableView.Free;
-  FcxGridFolderInfoLevel.Free;
-  FcxGridFolderInfo.Free;
+  FStatusGrid.Free;
 
   FcxButtonLinkCheck.Free;
   FcxTextEditLink.Free;
@@ -2085,65 +2094,8 @@ begin
 end;
 
 procedure TCrypterPanel.UpdateGUI;
-// TODO: Merge with TMycxTabSheet
-var
-  I: Integer;
-  StatusString, _Hoster: string;
-
-  function FindRecordIndexByText(const aText: string): Integer;
-  var
-    RecordIndex: Integer;
-  begin
-    Result := -1;
-
-    with FcxGridFolderInfoTableView.DataController do
-    begin
-      for RecordIndex := 0 to RecordCount - 1 do
-        if (Values[RecordIndex, 0] = aText) then
-        begin
-          Result := RecordIndex;
-          Break;
-        end;
-    end;
-  end;
-
 begin
-  I := FindRecordIndexByText('Status');
-  if (I > -1) then
-  begin
-    case Status of
-      csOffline:
-        StatusString := StrOffline;
-      csOnline:
-        StatusString := StrOnline;
-      csUnknown:
-        StatusString := StrUnknown;
-      csTemporaryOffline:
-        StatusString := StrTemporaryOffline;
-      csMixedOnOffline:
-        StatusString := StrMixed;
-      csNotChecked:
-        StatusString := StrNotChecked;
-    end;
-
-    FcxGridFolderInfoTableView.DataController.Values[I, 1] := StatusString;
-  end;
-
-  _Hoster := Hoster;
-  I := FindRecordIndexByText('Hoster');
-  if (I > -1) then
-    if SameStr(_Hoster, '') then
-      FcxGridFolderInfoTableView.DataController.Values[I, 1] := 'n/a'
-    else
-      FcxGridFolderInfoTableView.DataController.Values[I, 1] := string(_Hoster) + ' (' + string(HosterShort) + ')';
-
-  I := FindRecordIndexByText(StrSize);
-  if (I > -1) then
-    FcxGridFolderInfoTableView.DataController.Values[I, 1] := FloatToStr(Size) + ' MB';
-
-  I := FindRecordIndexByText(StrParts);
-  if (I > -1) then
-    FcxGridFolderInfoTableView.DataController.Values[I, 1] := IntToStr(Parts);
+  FStatusGrid.UpdateGUI;
 end;
 
 procedure TCrypterPanel.CreateFolder;
@@ -2289,6 +2241,11 @@ end;
 function TMirrorControl.GetValue;
 begin
   Result := ''; { never used }
+end;
+
+function TMirrorControl.GetStatus;
+begin
+  // TODO: Implement
 end;
 
 function TMirrorControl.GetSize;

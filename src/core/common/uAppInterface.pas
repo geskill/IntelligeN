@@ -90,41 +90,54 @@ type
 
   IControlBasic = interface(IControlBase)
     ['{DE8F253F-D695-41D4-A350-3CF191644466}']
+    // Internal
+    function GetControlName: WideString;
+    procedure SetControlName(AName: WideString);
+    function GetControlTitle: WideString;
+    procedure SetControlTitle(ATitle: WideString);
+    function GetControlLeft: Integer;
+    procedure SetControlLeft(ALeft: Integer);
+    function GetControlTop: Integer;
+    procedure SetControlTop(ATop: Integer);
+    function GetControlWidth: Integer;
+    procedure SetControlWidth(AWidth: Integer);
+    function GetControlHeight: Integer;
+    procedure SetControlHeight(AHeight: Integer);
+    function GetControlHint: WideString;
+    procedure SetControlHint(AHint: WideString);
+    function GetControlFocus: Boolean;
+    procedure SetControlFocus(AFocus: Boolean);
+
+    // Additional
     function GetControlController: IControlController;
     procedure SetControlController(const AControlController: IControlController);
-    function GetTypeID: TTypeID;
-    function GetControlID: TControlID;
-    function GetName: WideString;
-    procedure SetName(AName: WideString);
-    function GetTitle: WideString;
-    procedure SetTitle(ATitle: WideString);
-    function GetLeft: Integer;
-    procedure SetLeft(ALeft: Integer);
-    function GetTop: Integer;
-    procedure SetTop(ATop: Integer);
-    function GetWidth: Integer;
-    procedure SetWidth(AWidth: Integer);
-    function GetHeight: Integer;
-    procedure SetHeight(AHeight: Integer);
-    function GetHint: WideString;
-    procedure SetHint(AHint: WideString);
-    procedure SetValue(AValue: WideString);
-    function GetFocus: Boolean;
-    procedure SetFocus(AFocus: Boolean);
 
+    function GetTypeID: TTypeID;
+
+    procedure SetValue(const AValue: WideString); safecall;
+
+    // Internal
+    property Name: WideString read GetControlName write SetControlName;
+    property Title: WideString read GetControlTitle write SetControlTitle;
+    property Left: Integer read GetControlLeft write SetControlLeft;
+    property Top: Integer read GetControlTop write SetControlTop;
+    property Width: Integer read GetControlWidth write SetControlWidth;
+    property Height: Integer read GetControlHeight write SetControlHeight;
+    property Hint: WideString read GetControlHint write SetControlHint;
+    property Focus: Boolean read GetControlFocus write SetControlFocus;
+
+    // Base
+    property Value: WideString read GetValue { . } write SetValue;
+
+    // Additional
     property ControlController: IControlController read GetControlController write SetControlController;
 
     property TypeID: TTypeID read GetTypeID;
-    property ControlID: TControlID read GetControlID;
-    property Name: WideString read GetName write SetName;
-    property Title: WideString read GetTitle write SetTitle;
-    property Left: Integer read GetLeft write SetLeft;
-    property Top: Integer read GetTop write SetTop;
-    property Width: Integer read GetWidth write SetWidth;
-    property Height: Integer read GetHeight write SetHeight;
-    property Hint: WideString read GetHint write SetHint;
-    property Value: WideString read GetValue write SetValue;
-    property Focus: Boolean read GetFocus write SetFocus;
+
+    // Cloning
+    function CloneInstance(): IControlBase;
+
+    // Events
   end;
 
   IControlEdit = interface(IControlBasic)
@@ -157,30 +170,34 @@ type
     property DropDownRows: Integer read GetDropDownRows write SetDropDownRows;
   end;
 
-  IDateEdit = interface(IControlBasic)
+  IControlDateEdit = interface(IControlBasic)
     ['{7441FAFF-6C09-43D0-96C7-4E1FED109D83}']
   end;
 
-  IRichEdit = interface(IControlBasic)
+  IControlRichEdit = interface(IControlBasic)
     ['{C4878DD0-57BF-4A32-809A-9F7AC7B6CC5E}']
   end;
 
-  IPictureMirror = interface
+  IPictureMirrorData = interface(IValueItem)
+    ['{D41C0E92-6FEF-489B-91F7-F802A9408801}']
+    function GetName: WideString; safecall;
+    function GetOriginalValue: WideString; safecall;
+    procedure SetValue(AValue: WideString); safecall;
+    function GetErrorMsg: WideString; safecall;
+    procedure SetErrorMsg(AErrorMsg: WideString); safecall;
+
+    property Name: WideString read GetName;
+    property OriginalValue: WideString read GetOriginalValue;
+    property Value: WideString read GetValue { . } write SetValue;
+    property ErrorMsg: WideString read GetErrorMsg write SetErrorMsg;
+  end;
+
+  IPictureMirror = interface(IPictureMirrorData)
     ['{5FBF0A22-0BD2-4B9C-A094-F4AD990A2605}']
     function GetPicture: IPicture;
     procedure SetPicture(APicture: IPicture);
-    function GetName: WideString;
-    function GetOriginalValue: WideString;
-    function GetValue: WideString;
-    procedure SetValue(AValue: WideString);
-    function GetErrorMsg: WideString;
-    procedure SetErrorMsg(AErrorMsg: WideString);
 
     property Picture: IPicture read GetPicture write SetPicture;
-    property Name: WideString read GetName;
-    property OriginalValue: WideString read GetOriginalValue;
-    property Value: WideString read GetValue write SetValue;
-    property ErrorMsg: WideString read GetErrorMsg write SetErrorMsg;
 
     procedure LocalUpload(ALocalPath: WideString);
     procedure RemoteUpload;
@@ -188,22 +205,21 @@ type
 
   IPicture = interface(IControlComboBox)
     ['{F686511D-EC7D-4FB1-AD88-121511434F93}']
-    function GetMirror(AIndex: Integer): IPictureMirror;
-    procedure SetMirror(AIndex: Integer; APictureMirror: IPictureMirror);
-    function GetMirrorCount: Integer;
-    function AddMirror(AName: WideString): Integer;
-    function RemoveMirror(AIndex: Integer): Boolean;
+    function GetValuePicture(AIndex: Integer): TPictureInfo; safecall;
+    procedure SetValuePicture(AIndex: Integer; APictureInfo: TPictureInfo); safecall;
 
-    property Mirror[AIndex: Integer]: IPictureMirror read GetMirror write SetMirror;
+    function GetMirror(const IndexOrName: OleVariant): IPictureMirror; safecall;
+    function GetMirrorCount: Integer; safecall;
+
+    function AddMirror(AName: WideString): Integer; safecall;
+    function RemoveMirror(AIndex: Integer): WordBool; safecall;
+
+    procedure RemoteUpload(const AAfterCrawling: WordBool = False); safecall;
+
+    function FindMirror(const AHoster: WideString): IPictureMirror; safecall;
+
+    property Mirror[const IndexOrName: OleVariant]: IPictureMirror read GetMirror;
     property MirrorCount: Integer read GetMirrorCount;
-
-    procedure RemoteUpload(const AAfterCrawling: WordBool = False);
-  end;
-
-  IPictureEx = interface(IPicture)
-    ['{F686511D-EC7D-4FB1-AD88-121511434F93}']
-    function GetValuePicture(AIndex: Integer): TPictureInfo;
-    procedure SetValuePicture(AIndex: Integer; APictureInfo: TPictureInfo);
   end;
 
   ITrailer = interface(IControlComboBox)
@@ -286,8 +302,6 @@ type
     function GetDirectlinksPanel: IDirectlinksPanel;
     procedure SetDirectlinksPanel(ADirectlinksPanel: IDirectlinksPanel);
 
-    function GetStatus: TContentStatus;
-
     procedure SetSize(ASize: Double);
     procedure SetPartSize(APartSize: Double);
 
@@ -304,6 +318,11 @@ type
     function GetFocus: Boolean;
     procedure SetFocus(AFocus: Boolean);
 
+    // Base
+    property Value: WideString read GetValue { . } write SetValue;
+    property Size: Double read GetSize { . } write SetSize;
+    property PartSize: Double read GetPartSize { . } write SetPartSize;
+
     // Additional
     procedure UpdateGUI;
     procedure Mody;
@@ -313,14 +332,9 @@ type
 
     property DirectlinksPanel: IDirectlinksPanel read GetDirectlinksPanel write SetDirectlinksPanel;
 
-    property Size: Double read GetSize { . } write SetSize;
-    property PartSize: Double read GetPartSize { . } write SetPartSize;
-    property Status: TContentStatus read GetStatus;
-
     property LinksInfo: TLinksInfo read GetLinksInfo write SetLinksInfo;
 
     property Title: WideString read GetTitle write SetTitle;
-    property Value: WideString read GetValue write SetValue;
     property Focus: Boolean read GetFocus write SetFocus;
   end;
 
@@ -372,8 +386,6 @@ type
     procedure SetSize(ASize: Double);
     procedure SetPartSize(APartSize: Double);
 
-    function GetStatus: TContentStatus;
-
     function GetCrypterFolderInfo: TCrypterFolderInfo;
     procedure SetCrypterFolderInfo(ACrypterFolderInfo: TCrypterFolderInfo);
 
@@ -392,8 +404,6 @@ type
 
     // Additional
     property MirrorControl: IMirrorControl read GetMirrorControl write SetMirrorControl;
-
-    property Status: TContentStatus read GetStatus;
 
     property CrypterFolderInfo: TCrypterFolderInfo read GetCrypterFolderInfo write SetCrypterFolderInfo;
 

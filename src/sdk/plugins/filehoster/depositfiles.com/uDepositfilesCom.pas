@@ -16,6 +16,8 @@ uses
   RegExpr,
   // LkJSON
   uLkJSON,
+  // Common
+  uBaseConst,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // plugin system

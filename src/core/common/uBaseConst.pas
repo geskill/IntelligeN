@@ -14,6 +14,7 @@ const
   ProgrammName = Programm + ' 2009';
 
 type
+  TContentStatus = (csOffline, csOnline, csUnknown, csTemporaryOffline, csMixedOnOffline, csNotChecked);
 {$REGION 'Documentation'}
   /// <summary>
   /// Control type definition of all controls in IntelligeN. This is required

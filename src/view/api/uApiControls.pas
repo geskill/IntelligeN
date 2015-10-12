@@ -4,8 +4,10 @@ interface
 
 uses
   // Delphi
-  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus, StdCtrls, ExtCtrls, ShellAPI, Clipbrd, Dialogs, ActiveX, AxCtrls,
-  jpeg, Generics.Collections,
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus, StdCtrls, ExtCtrls, Variants,
+  ShellAPI, Clipbrd, Dialogs, ActiveX, AxCtrls, jpeg,
+  // Spring Framework
+  Spring.Collections.Lists,
   // PopupMenu Mod
   uMydxBarPopupMenu, // uMyPopupMenu,
   // Dev Express
@@ -25,40 +27,13 @@ uses
   // Utils
   uImageUtils, uStringUtils;
 
-const
-  WM_CONTROL_VALUE_CHANGE = WM_USER + 175;
-
 type
   TIControlBasic = class(TIControlBase, IControlBasic)
   private
-    FHandle: HWND;
-    FComponentController: IControlController;
-    FControlID: TControlID;
-    FBufferedValues: TQueue<string>; // Omni Queue implementieren
+    // GUI
     FTitleLabel, FHintLabel, FClearLabel: TcxLabel;
     FOleDrop: TOleDrop;
-    procedure WndProc(var Msg: TMessage);
-    // procedure WMControlValueChange(var Msg: TMessage); message WM_CONTROL_VALUE_CHANGE;
-    function GetControlController: IControlController;
-    procedure SetControlController(const AControlController: IControlController);
-    function GetTypeID: TTypeID;
-    function GetControlID: TControlID;
-    function GetName: WideString;
-    function GetTitle: WideString;
-    function GetLeft: Integer;
-    procedure SetLeft(ALeft: Integer);
-    function GetTop: Integer;
-    procedure SetTop(ATop: Integer);
-    function GetWidth: Integer;
-    procedure SetWidth(AWidth: Integer);
-    function GetHeight: Integer;
-    procedure SetHeight(AHeight: Integer);
-    function GetHint: WideString;
-    procedure SetHint(AHint: WideString);
-    function GetValue: WideString;
-    procedure SetValue(AValue: WideString); virtual;
-    function GetVisible: Boolean;
-    procedure SetVisible(AVisible: Boolean);
+    // GUI
     procedure FPanelMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure FPanelResize(Sender: TObject);
     procedure FmiUndoClick(Sender: TObject);
@@ -69,52 +44,87 @@ type
     procedure FmiSelectAllClick(Sender: TObject);
     procedure FClearLabelClick(Sender: TObject);
   protected
-    FValueBufferLock: TOmniCS;
-    FValueLock: TOmniMREW;
+    // GUI
     FPanel: TPanel;
     FPopupMenu: TMydxBarPopupMenu;
+    // GUI
     procedure FPopupMenuPopup(Sender: TObject); virtual;
+    // Internal
     function GetControl: TcxCustomTextEdit; virtual; abstract;
     function GetControlValue: WideString; virtual; abstract;
     procedure SetControlValue(AValue: WideString); virtual; abstract;
-    procedure SetName(AName: WideString); virtual;
-    procedure SetTitle(ATitle: WideString); virtual;
-    function GetFocus: Boolean; virtual;
-    procedure SetFocus(AFocus: Boolean); virtual;
+    function GetControlName: WideString;
+    procedure SetControlName(AName: WideString); virtual;
+    function GetControlTitle: WideString;
+    procedure SetControlTitle(ATitle: WideString); virtual;
+    function GetControlLeft: Integer;
+    procedure SetControlLeft(ALeft: Integer);
+    function GetControlTop: Integer;
+    procedure SetControlTop(ATop: Integer);
+    function GetControlWidth: Integer;
+    procedure SetControlWidth(AWidth: Integer);
+    function GetControlHeight: Integer;
+    procedure SetControlHeight(AHeight: Integer);
+    function GetControlHint: WideString;
+    procedure SetControlHint(AHint: WideString);
+    function GetControlFocus: Boolean; virtual;
+    procedure SetControlFocus(AFocus: Boolean); virtual;
     procedure ControlOnDrop(AText: PWideChar);
-    procedure ControlOnChange(Sender: TObject); virtual;
-    procedure ControlOnEnter(Sender: TObject); virtual;
-    procedure ControlOnExit(Sender: TObject); virtual;
-    procedure DefaultConfiguration; virtual;
+    procedure ControlOnChange(ASender: TObject); virtual;
+    procedure ControlOnEnter(ASender: TObject); virtual;
+    procedure ControlOnExit(ASender: TObject); virtual;
+  private
+    // Logic
+    FControlController: IControlController;
+  protected
+    // Base
+    function GetValue: WideString; override;
+
+    // Additional
+    function GetControlController: IControlController;
+    procedure SetControlController(const AControlController: IControlController);
+
+    function GetTypeID: TTypeID;
+
+    procedure SetValue(const AValue: WideString); reintroduce; safecall;
+
+    procedure LoadDefaultConfiguration; virtual;
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); virtual;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AControlID: TControlID); virtual;
     destructor Destroy; override;
 
+    // Internal
+    property Name: WideString read GetControlName write SetControlName;
+    property Title: WideString read GetControlTitle write SetControlTitle;
+    property Left: Integer read GetControlLeft write SetControlLeft;
+    property Top: Integer read GetControlTop write SetControlTop;
+    property Width: Integer read GetControlWidth write SetControlWidth;
+    property Height: Integer read GetControlHeight write SetControlHeight;
+    property Hint: WideString read GetControlHint write SetControlHint;
+    property Focus: Boolean read GetControlFocus write SetControlFocus;
+
+    // Base
+    property Value: WideString read GetValue { . } write SetValue;
+
+    // Additional
     property ControlController: IControlController read GetControlController write SetControlController;
 
     property TypeID: TTypeID read GetTypeID;
-    property ControlID: TControlID read GetControlID;
-    property Name: WideString read GetName write SetName;
-    property Title: WideString read GetTitle write SetTitle;
-    property Left: Integer read GetLeft write SetLeft;
-    property Top: Integer read GetTop write SetTop;
-    property Width: Integer read GetWidth write SetWidth;
-    property Height: Integer read GetHeight write SetHeight;
-    property Hint: WideString read GetHint write SetHint;
-    property Value: WideString read GetValue write SetValue;
-    property Focus: Boolean read GetFocus write SetFocus;
-    property Visible: Boolean read GetVisible write SetVisible;
 
+    // Cloning
+    function CloneInstance(): IControlBase;
   end;
 
   TIControlEdit = class(TIControlBasic, IControlEdit)
   protected
+    // GUI
     FEdit: TcxTextEdit;
+    // Internal
     function GetControl: TcxCustomTextEdit; override;
     function GetControlValue: WideString; override;
     procedure SetControlValue(AValue: WideString); override;
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
     destructor Destroy; override;
   end;
 
@@ -122,16 +132,18 @@ type
   private
     function GetList: WideString;
   protected
+    // GUI
     FComboBox: TcxComboBox;
+    // Internal
     function GetDropDownRows: Integer;
     procedure SetDropDownRows(ADropDownRows: Integer);
     procedure SetList(AList: WideString); virtual;
     function GetControl: TcxCustomTextEdit; override;
     function GetControlValue: WideString; override;
     procedure SetControlValue(AValue: WideString); override;
-    procedure DefaultConfiguration; override;
+    procedure LoadDefaultConfiguration; override;
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
     property List: WideString read GetList write SetList;
     property DropDownRows: Integer read GetDropDownRows write SetDropDownRows;
     destructor Destroy; override;
@@ -139,16 +151,19 @@ type
 
   TIControlComboBoxList = class(TIControlComboBox, IControlComboBoxList)
   protected
+    // Internal
     procedure SetControlValue(AValue: WideString); override;
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIControlCheckComboBox = class(TIControlBasic, IControlCheckComboBox)
   private
     function InternalIndexOf(AStr: string): Integer;
   protected
+    // GUI
     FCheckComboBox: TcxCheckComboBox;
+    // Internal
     function GetDropDownRows: Integer;
     procedure SetDropDownRows(ADropDownRows: Integer);
     function GetList: WideString;
@@ -156,45 +171,51 @@ type
     function GetControl: TcxCustomTextEdit; override;
     function GetControlValue: WideString; override;
     procedure SetControlValue(AValue: WideString); override;
-    procedure DefaultConfiguration; override;
+    procedure LoadDefaultConfiguration; override;
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
     property List: WideString read GetList write SetList;
     property DropDownRows: Integer read GetDropDownRows write SetDropDownRows;
     destructor Destroy; override;
   end;
 
-  TIDateEdit = class(TIControlBasic, IDateEdit)
+  TIControlDateEdit = class(TIControlBasic, IControlDateEdit)
   protected
+    // GUI
     FDateEdit: TcxDateEdit;
+    // Internal
     function GetControl: TcxCustomTextEdit; override;
     function GetControlValue: WideString; override;
     procedure SetControlValue(AValue: WideString); override;
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
     destructor Destroy; override;
   end;
 
-  TIRichEdit = class(TIControlBasic, IRichEdit)
+  TIControlRichEdit = class(TIControlBasic, IControlRichEdit)
   protected
+    // GUI
     FMycxRichEdit: TMycxRichEdit;
+    // Internal
     function GetControl: TcxCustomTextEdit; override;
     function GetControlValue: WideString; override;
     procedure SetControlValue(AValue: WideString); override;
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
     destructor Destroy; override;
   end;
 
   TIReleaseName = class(TIControlEdit)
   protected
+    // Internal
     procedure ControlOnChange(Sender: TObject); override;
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
-  TIReleaseDate = class(TIDateEdit)
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+  TIReleaseDate = class(TIControlDateEdit)
+  public
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TITags = class(TIControlEdit)
@@ -213,31 +234,49 @@ type
   private
     procedure FCheckComboBoxPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIPassword = class(TIControlComboBox)
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
-  TPictureMirror = class(TInterfacedObject, IPictureMirror)
+  TPictureMirrorData = class(TIValueItem, IPictureMirrorData)
+  private
+    FName: WideString;
+    FOriginalValue: WideString;
+    FErrorMsg: WideString;
+  protected
+    function GetName: WideString; virtual; safecall;
+    function GetOriginalValue: WideString; virtual; safecall;
+    function GetErrorMsg: WideString; virtual; safecall;
+    procedure SetErrorMsg(AErrorMsg: WideString); virtual; safecall;
+  public
+    constructor Create(AName, AOriginalValue: WideString; AValue: WideString = ''); reintroduce;
+    constructor Clone(const APictureMirrorData: IPictureMirrorData);
+    destructor Destroy; override;
+
+    property Name: WideString read GetName;
+    property OriginalValue: WideString read GetOriginalValue;
+    property Value: WideString read GetValue write SetValue;
+    property ErrorMsg: WideString read GetErrorMsg write SetErrorMsg;
+  end;
+
+  TPictureMirror = class(TPictureMirrorData, IPictureMirror)
   private
     FPicture: IPicture;
     FImage: TImage;
-    FName, FValue, FErrorMsg: string;
   protected
     function GetPicture: IPicture;
     procedure SetPicture(APicture: IPicture);
-    function GetName: WideString;
-    function GetOriginalValue: WideString;
-    function GetValue: WideString;
-    procedure SetValue(AValue: WideString);
-    function GetErrorMsg: WideString;
-    procedure SetErrorMsg(AErrorMsg: WideString);
+    procedure SetValue(AValue: WideString); override; safecall;
+    procedure SetErrorMsg(AErrorMsg: WideString); override; safecall;
     procedure SetHint;
   public
-    constructor Create(AOwner: TWinControl; APicture: IPicture; AImageHoster: WideString);
+    constructor Create(AOwner: TWinControl; APicture: IPicture; AImageHosterName: WideString); reintroduce;
+    destructor Destroy; override;
+
     property Picture: IPicture read GetPicture write SetPicture;
     property Name: WideString read GetName;
     property OriginalValue: WideString read GetOriginalValue;
@@ -247,62 +286,77 @@ type
     procedure LocalUpload(ALocalPath: WideString);
     procedure RemoteUpload;
 
-    destructor Destroy; override;
+
   end;
 
-  TIPicture = class(TIControlComboBox, IPictureEx)
+  TIPicture = class(TIControlComboBox, IPicture)
   private
-    FPictureArrayLock: TOmniMREW;
-    FPictureArray: array of TPictureInfo;
-    FPictureMirrorList: TInterfaceList;
+    // GUI
     FPictureMirrorPanel: TFlowPanel;
     FmiSe1: TdxBarSeparator;
     FmiRemoteUploadImageMenu, FmiLocalUploadImageMenu: TdxBarSubItem;
     FmiRemoteUploadAll: TdxBarButton;
     FmiSaveAs: TdxBarButton;
     FmiVisitImage: TdxBarButton;
-    procedure DownloadImage(AImageLink: string; out AMemoryStream: TMemoryStream);
-
-    procedure SaveImage(AMemoryStream: TMemoryStream);
-    function GraphicAsVariant(AGraphic: TGraphic): Variant;
-    procedure SetValuePicture(AIndex: Integer; AMemoryStream: TMemoryStream); overload;
+    // GUI
     procedure FmiRemoteUploadImageClick(Sender: TObject);
     procedure FmiRemoteUploadAllImagesClick(Sender: TObject);
     procedure FmiLocalUploadImageClick(Sender: TObject);
     procedure FmiSaveAsClick(Sender: TObject);
     procedure FmiVisitImageClick(Sender: TObject);
   protected
+    // GUI
     procedure FPopupMenuPopup(Sender: TObject); override;
-    procedure SetTitle(ATitle: WideString); override;
-    function GetMirror(AIndex: Integer): IPictureMirror;
-    procedure SetMirror(AIndex: Integer; APictureMirror: IPictureMirror);
-    function GetMirrorCount: Integer;
-    function AddMirror(AName: WideString): Integer;
-    function RemoveMirror(AIndex: Integer): Boolean;
-    function GetValuePicture(AIndex: Integer): TPictureInfo;
-    procedure SetValuePicture(AIndex: Integer; APictureInfo: TPictureInfo); overload;
-  public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    // Internal
+    procedure SetControlTitle(ATitle: WideString); override;
+  private
+    // Logic
+    FPictureArrayLock: TOmniMREW;
+    FPictureArray: array of TPictureInfo;
+    FMirrorList: TInterfaceList<IPictureMirror>;
+    // Logic
+    function GraphicAsVariant(AGraphic: TGraphic): Variant;
+    procedure SaveImage(AMemoryStream: TMemoryStream);
 
+    procedure SetValuePictureFromDownload(AIndex: Integer; AMemoryStream: TMemoryStream); overload;
+    procedure DownloadImage(AImageLink: string; out AMemoryStream: TMemoryStream);
+  protected
+    function GetValuePicture(AIndex: Integer): TPictureInfo; safecall;
+    procedure SetValuePicture(AIndex: Integer; APictureInfo: TPictureInfo); safecall;
+
+    function GetMirror(const IndexOrName: OleVariant): IPictureMirror; safecall;
+    function GetMirrorCount: Integer; safecall;
+
+    function AddMirror(AName: WideString): Integer; safecall;
+    function RemoveMirror(AIndex: Integer): WordBool; safecall;
+  public
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    destructor Destroy; override;
+
+    // Base
     procedure AddProposedValue(const ASender: WideString; AValue: WideString; ATitle: WideString); override; safecall;
 
-    procedure RemoteUpload(const AAfterCrawling: WordBool = False);
+    // Additional
+    procedure RemoteUpload(const AAfterCrawling: WordBool = False); safecall;
 
-    property Mirror[AIndex: Integer]: IPictureMirror read GetMirror write SetMirror;
+    function FindMirrorIndex(const AHoster: WideString): Integer;
+    function FindMirror(const AHoster: WideString): IPictureMirror; safecall;
+
+    property Mirror[const IndexOrName: OleVariant]: IPictureMirror read GetMirror;
     property MirrorCount: Integer read GetMirrorCount;
-
-    destructor Destroy; override;
   end;
 
   TITrailer = class(TIControlComboBox, ITrailer)
   private
+    // GUI
     FmiSe1: TdxBarSeparator;
     FmiVisitImage: TdxBarButton;
     procedure FmiVisitImageClick(Sender: TObject);
   protected
+    // Internal
     procedure FPopupMenuPopup(Sender: TObject); override;
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
     destructor Destroy; override;
   end;
 
@@ -312,7 +366,7 @@ type
 
   TIAudioBitrate = class(TIControlComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIAudioBitrateType = class(TIControlComboBoxList)
@@ -321,27 +375,27 @@ type
 
   TIAudioEncoder = class(TIControlComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIAudioSamplingRate = class(TIControlComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIAudioStream = class(TIControlComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIGenre = class(TIControlComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TILanguage = class(TIControlCheckComboBox)
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIRuntime = class(TIControlEdit)
@@ -350,37 +404,40 @@ type
 
   TIVideoCodec = class(TIControlComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIVideoStream = class(TIControlComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIVideoSystem = class(TIControlComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
-  TINFO = class(TIRichEdit)
+  TINFO = class(TIControlRichEdit)
   private
+    // GUI
     procedure FMycxRichEditMouseEnter(Sender: TObject);
     procedure FMycxRichEditMouseLeave(Sender: TObject);
     procedure FMycxRichEditDropFiles(var message: TMessage);
   protected
+    // Internal
     procedure ControlOnChange(Sender: TObject); override;
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
 
     destructor Destroy; override;
   end;
 
-  TIDescription = class(TIRichEdit)
+  TIDescription = class(TIControlRichEdit)
   protected
+    // Internal
     procedure ControlOnChange(Sender: TObject); override;
   public
-    constructor Create(AOwner: TWinControl; AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
 implementation
@@ -388,147 +445,9 @@ implementation
 uses
   uSettings,
   // Api
-  uApiSettings, uApiPlugins;
+  uApiSettings;
 { . }
 {$REGION 'TIControlBasic'}
-
-procedure TIControlBasic.WndProc(var Msg: TMessage);
-begin
-  if Msg.Msg = WM_CONTROL_VALUE_CHANGE then
-  begin
-    FValueBufferLock.Acquire;
-    try
-      SetControlValue(FBufferedValues.Dequeue);
-    finally
-      FValueBufferLock.Release;
-    end;
-  end
-  else
-    Msg.Result := DefWindowProc(FHandle, Msg.Msg, Msg.WParam, Msg.LParam);
-end;
-
-{
-  procedure TIBasic.WMControlValueChange(var Msg: TMessage);
-  var
-  Value: string;
-  begin
-  Value := string(Msg.WParam);
-
-  SetControlValue(Value);
-  end;
-}
-
-function TIControlBasic.GetControlController;
-begin
-  Result := FComponentController;
-end;
-
-procedure TIControlBasic.SetControlController(const AControlController: IControlController);
-begin
-  FComponentController := AControlController;
-end;
-
-function TIControlBasic.GetTypeID;
-begin
-  Result := ControlController.TypeID;
-end;
-
-function TIControlBasic.GetControlID;
-begin
-  Result := FControlID;
-end;
-
-function TIControlBasic.GetName;
-begin
-  Result := copy(FPanel.name, 2);
-end;
-
-function TIControlBasic.GetTitle;
-begin
-  Result := copy(FTitleLabel.Caption, 1, length(FTitleLabel.Caption) - 1);
-end;
-
-function TIControlBasic.GetLeft;
-begin
-  Result := FPanel.Left;
-end;
-
-procedure TIControlBasic.SetLeft(ALeft: Integer);
-begin
-  FPanel.Left := ALeft;
-end;
-
-function TIControlBasic.GetTop;
-begin
-  Result := FPanel.Top;
-end;
-
-procedure TIControlBasic.SetTop(ATop: Integer);
-begin
-  FPanel.Top := ATop;
-end;
-
-function TIControlBasic.GetWidth;
-begin
-  Result := FPanel.Width;
-end;
-
-procedure TIControlBasic.SetWidth(AWidth: Integer);
-begin
-  FPanel.Width := AWidth;
-end;
-
-function TIControlBasic.GetHeight;
-begin
-  Result := FPanel.Height;
-end;
-
-procedure TIControlBasic.SetHeight(AHeight: Integer);
-begin
-  FPanel.Height := AHeight;
-end;
-
-function TIControlBasic.GetHint;
-begin
-  Result := FHintLabel.Hint;
-end;
-
-procedure TIControlBasic.SetHint(AHint: WideString);
-begin
-  FHintLabel.Hint := AHint;
-end;
-
-function TIControlBasic.GetValue;
-begin
-  FValueLock.EnterReadLock;
-  try
-    // TODO: Fix this
-    // Result := FValue;
-  finally
-    FValueLock.ExitReadLock;
-  end;
-end;
-
-procedure TIControlBasic.SetValue(AValue: WideString);
-begin
-  FValueBufferLock.Acquire;
-  try
-    FBufferedValues.Enqueue(AValue);
-  finally
-    FValueBufferLock.Release;
-  end;
-  PostMessage(FHandle, WM_CONTROL_VALUE_CHANGE, 0, 0);
-end;
-
-function TIControlBasic.GetVisible;
-begin
-  Result := FPanel.Visible;
-end;
-
-procedure TIControlBasic.SetVisible(AVisible: Boolean);
-begin
-  FPanel.Visible := AVisible;
-end;
 
 procedure TIControlBasic.FPanelMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X: Integer; Y: Integer);
 begin
@@ -593,17 +512,27 @@ begin
   end;
 end;
 
-procedure TIControlBasic.SetName(AName: WideString);
+function TIControlBasic.GetControlName;
+begin
+  Result := copy(FPanel.Name, 2);
+end;
+
+procedure TIControlBasic.SetControlName(AName: WideString);
 begin
   with FPanel do
   begin
-    name := 'p' + AName;
+    Name := 'p' + AName;
     Caption := '';
   end;
   GetControl.Name := AName;
 end;
 
-procedure TIControlBasic.SetTitle(ATitle: WideString);
+function TIControlBasic.GetControlTitle;
+begin
+  Result := copy(FTitleLabel.Caption, 1, length(FTitleLabel.Caption) - 1);
+end;
+
+procedure TIControlBasic.SetControlTitle(ATitle: WideString);
 begin
   with FTitleLabel do
   begin
@@ -615,12 +544,62 @@ begin
   end;
 end;
 
-function TIControlBasic.GetFocus;
+function TIControlBasic.GetControlLeft;
+begin
+  Result := FPanel.Left;
+end;
+
+procedure TIControlBasic.SetControlLeft(ALeft: Integer);
+begin
+  FPanel.Left := ALeft;
+end;
+
+function TIControlBasic.GetControlTop;
+begin
+  Result := FPanel.Top;
+end;
+
+procedure TIControlBasic.SetControlTop(ATop: Integer);
+begin
+  FPanel.Top := ATop;
+end;
+
+function TIControlBasic.GetControlWidth;
+begin
+  Result := FPanel.Width;
+end;
+
+procedure TIControlBasic.SetControlWidth(AWidth: Integer);
+begin
+  FPanel.Width := AWidth;
+end;
+
+function TIControlBasic.GetControlHeight;
+begin
+  Result := FPanel.Height;
+end;
+
+procedure TIControlBasic.SetControlHeight(AHeight: Integer);
+begin
+  FPanel.Height := AHeight;
+end;
+
+function TIControlBasic.GetControlHint;
+begin
+  Result := FHintLabel.Hint;
+end;
+
+procedure TIControlBasic.SetControlHint(AHint: WideString);
+begin
+  FHintLabel.Hint := AHint;
+end;
+
+function TIControlBasic.GetControlFocus;
 begin
   Result := GetControl.Focused;
 end;
 
-procedure TIControlBasic.SetFocus(AFocus: Boolean);
+procedure TIControlBasic.SetControlFocus(AFocus: Boolean);
 begin
   if AFocus and GetControl.CanFocusEx then
     GetControl.SetFocus;
@@ -628,24 +607,18 @@ end;
 
 procedure TIControlBasic.ControlOnDrop(AText: PWideChar);
 begin
-  Value := AText;
+  SetControlValue(AText);
 end;
 
-procedure TIControlBasic.ControlOnChange(Sender: TObject);
+procedure TIControlBasic.ControlOnChange(ASender: TObject);
 begin
-  FValueLock.EnterWriteLock;
-  try
-    // TODO: Fix thi
-    // FValue := GetControlValue;
-  finally
-    FValueLock.ExitWriteLock;
-  end;
+  SetControlValue(GetControlValue);
 
   if Assigned(ControlController.OnControlChange) then
     ControlController.OnControlChange.Invoke(Self);
 end;
 
-procedure TIControlBasic.ControlOnEnter(Sender: TObject);
+procedure TIControlBasic.ControlOnEnter(ASender: TObject);
 begin
   if Assigned(ControlController.OnControlEnter) then
     ControlController.OnControlEnter.Invoke(Self);
@@ -653,7 +626,7 @@ begin
     ControlController.OnPopupMenuChange.Invoke(Integer(FPopupMenu.ItemLinks));
 end;
 
-procedure TIControlBasic.ControlOnExit(Sender: TObject);
+procedure TIControlBasic.ControlOnExit(ASender: TObject);
 begin
   if Assigned(ControlController.OnPopupMenuChange) then
     ControlController.OnPopupMenuChange.Invoke(Integer(nil));
@@ -661,26 +634,46 @@ begin
     ControlController.OnControlExit.Invoke(Self);
 end;
 
-procedure TIControlBasic.DefaultConfiguration;
+function TIControlBasic.GetControlController;
+begin
+  Result := FControlController;
+end;
+
+procedure TIControlBasic.SetControlController(const AControlController: IControlController);
+begin
+  FControlController := AControlController;
+end;
+
+function TIControlBasic.GetTypeID;
+begin
+  Result := ControlController.TypeID;
+end;
+
+function TIControlBasic.GetValue;
+begin
+  Result := GetControlValue;
+end;
+
+procedure TIControlBasic.SetValue(const AValue: WideString);
+begin
+  SetControlValue(AValue);
+end;
+
+procedure TIControlBasic.LoadDefaultConfiguration;
 begin
   with SettingsManager.Settings.Controls.Controls[TypeID, ControlID] do
   begin
-    SetTitle(Title);
-    SetHint(HelpText);
-    SetValue(Value);
+    SetControlTitle(Title);
+    SetControlHint(HelpText);
+    SetControlValue(Value);
   end;
 end;
 
 constructor TIControlBasic.Create;
 begin
-  FHandle := AllocateHWnd(WndProc);
+  inherited Create(AControlID);
 
-  FBufferedValues := TQueue<string>.Create;
-
-  FComponentController := AControlController;
-  FControlID := AComponentID;
-
-  SetLength(FValueArray, 0);
+  FControlController := AControlController;
 
   FPanel := TPanel.Create(AOwner);
   with FPanel do
@@ -764,19 +757,6 @@ begin
 end;
 
 destructor TIControlBasic.Destroy;
-
-  procedure DeallocateHWnd(Wnd: HWND);
-  var
-    Instance: Pointer;
-  begin
-    Instance := Pointer(GetWindowLong(Wnd, GWL_WNDPROC));
-    if Instance <> @DefWindowProc then
-      // make sure we restore the old, original windows procedure before leaving
-      SetWindowLong(Wnd, GWL_WNDPROC, Longint(@DefWindowProc));
-    FreeObjectInstance(Instance);
-    DestroyWindow(Wnd);
-  end;
-
 begin
   FOleDrop.Free;
 
@@ -788,14 +768,18 @@ begin
 
   FPanel.Free;
 
-  FComponentController := nil;
-
-  FBufferedValues.Free;
-
-  DeallocateHWnd(FHandle);
-  FHandle := 0;
+  FControlController := nil;
 
   inherited Destroy;
+end;
+
+function TIControlBasic.CloneInstance(): IControlBase;
+var
+  LControlBase: IControlBase;
+begin
+  LControlBase := TIControlBase.Clone(Self);
+
+  Result := LControlBase;
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -826,7 +810,7 @@ begin
     MinWidth := 50;
   end;
 
-  FEdit := TcxTextEdit.Create(AOwner);
+  FEdit := TcxTextEdit.Create(FPanel);
   with FEdit do
   begin
     Parent := FPanel;
@@ -835,6 +819,8 @@ begin
     Width := FPanel.Width;
 
     Anchors := [akLeft, akTop, akRight];
+
+    ControlStyle := ControlStyle - [csSetCaption];
 
     StyleFocused.BorderStyle := ebsThick;
 
@@ -845,7 +831,7 @@ begin
     OnExit := ControlOnExit;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 
 destructor TIControlEdit.Destroy;
@@ -893,9 +879,9 @@ begin
   FComboBox.Text := AValue;
 end;
 
-procedure TIControlComboBox.DefaultConfiguration;
+procedure TIControlComboBox.LoadDefaultConfiguration;
 begin
-  inherited DefaultConfiguration;
+  inherited LoadDefaultConfiguration;
   with SettingsManager.Settings.Controls.Controls[TypeID, ControlID] do
     SetList(GetItems);
 end;
@@ -910,7 +896,7 @@ begin
     MinWidth := 50;
   end;
 
-  FComboBox := TcxComboBox.Create(AOwner);
+  FComboBox := TcxComboBox.Create(FPanel);
   with FComboBox do
   begin
     Parent := FPanel;
@@ -919,6 +905,8 @@ begin
     Width := FPanel.Width;
 
     Anchors := [akLeft, akTop, akRight];
+
+    ControlStyle := ControlStyle - [csSetCaption];
 
     StyleFocused.BorderStyle := ebsThick;
 
@@ -934,7 +922,7 @@ begin
     OnExit := ControlOnExit;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 
 destructor TIControlComboBox.Destroy;
@@ -972,7 +960,7 @@ begin
       DropDownListStyle := lsFixedList;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -1072,9 +1060,9 @@ begin
     end;
 end;
 
-procedure TIControlCheckComboBox.DefaultConfiguration;
+procedure TIControlCheckComboBox.LoadDefaultConfiguration;
 begin
-  inherited DefaultConfiguration;
+  inherited LoadDefaultConfiguration;
   with SettingsManager.Settings.Controls.Controls[TypeID, ControlID] do
     SetList(GetItems);
 end;
@@ -1091,7 +1079,7 @@ begin
     MinWidth := 75;
   end;
 
-  FCheckComboBox := TcxCheckComboBox.Create(AOwner);
+  FCheckComboBox := TcxCheckComboBox.Create(FPanel);
   with FCheckComboBox do
   begin
     Parent := FPanel;
@@ -1100,6 +1088,8 @@ begin
     Width := FPanel.Width;
 
     Anchors := [akLeft, akTop, akRight];
+
+    ControlStyle := ControlStyle - [csSetCaption];
 
     StyleFocused.BorderStyle := ebsThick;
 
@@ -1116,7 +1106,7 @@ begin
     OnExit := ControlOnExit;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 
 destructor TIControlCheckComboBox.Destroy;
@@ -1127,19 +1117,19 @@ begin
 end;
 {$ENDREGION}
 { ****************************************************************************** }
-{$REGION 'TIDateEdit'}
+{$REGION 'TIControlDateEdit'}
 
-function TIDateEdit.GetControl;
+function TIControlDateEdit.GetControl;
 begin
   Result := FDateEdit;
 end;
 
-function TIDateEdit.GetControlValue;
+function TIControlDateEdit.GetControlValue;
 begin
   Result := FDateEdit.Text;
 end;
 
-procedure TIDateEdit.SetControlValue(AValue: WideString);
+procedure TIControlDateEdit.SetControlValue(AValue: WideString);
 var
   FormatSettings: TFormatSettings;
 begin
@@ -1148,7 +1138,7 @@ begin
   FDateEdit.Date := StrToDateDef(AValue, Date, FormatSettings);
 end;
 
-constructor TIDateEdit.Create;
+constructor TIControlDateEdit.Create;
 begin
   inherited Create(AOwner, AControlController, AComponentID);
 
@@ -1158,7 +1148,7 @@ begin
     MinWidth := 75;
   end;
 
-  FDateEdit := TcxDateEdit.Create(AOwner);
+  FDateEdit := TcxDateEdit.Create(FPanel);
   with FDateEdit do
   begin
     Parent := FPanel;
@@ -1167,6 +1157,8 @@ begin
     Width := FPanel.Width;
 
     Anchors := [akLeft, akTop, akRight];
+
+    ControlStyle := ControlStyle - [csSetCaption];
 
     StyleFocused.BorderStyle := ebsThick;
 
@@ -1177,10 +1169,10 @@ begin
     OnExit := ControlOnExit;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 
-destructor TIDateEdit.Destroy;
+destructor TIControlDateEdit.Destroy;
 begin
   FDateEdit.Free;
 
@@ -1188,14 +1180,14 @@ begin
 end;
 {$ENDREGION}
 { ****************************************************************************** }
-{$REGION 'TIRichEdit'}
+{$REGION 'TIControlRichEdit'}
 
-function TIRichEdit.GetControl;
+function TIControlRichEdit.GetControl;
 begin
   Result := FMycxRichEdit;
 end;
 
-function TIRichEdit.GetControlValue;
+function TIControlRichEdit.GetControlValue;
 begin
   if SettingsManager.Settings.Controls.IRichEditWrapText then
     Result := FMycxRichEdit.Lines.Text
@@ -1203,12 +1195,12 @@ begin
     Result := FMycxRichEdit.Text;
 end;
 
-procedure TIRichEdit.SetControlValue(AValue: WideString);
+procedure TIControlRichEdit.SetControlValue(AValue: WideString);
 begin
   FMycxRichEdit.Lines.Text := AValue;
 end;
 
-constructor TIRichEdit.Create;
+constructor TIControlRichEdit.Create;
 begin
   inherited Create(AOwner, AControlController, AComponentID);
 
@@ -1218,10 +1210,9 @@ begin
     MinWidth := 150;
   end;
 
-  FMycxRichEdit := TMycxRichEdit.Create(AOwner);
+  FMycxRichEdit := TMycxRichEdit.Create(FPanel);
   with FMycxRichEdit do
   begin
-    name := Self.name;
     Parent := FPanel;
     Top := 16;
     Left := 0;
@@ -1229,6 +1220,8 @@ begin
     Width := FPanel.Width;
 
     Anchors := [akLeft, akTop, akRight, akBottom];
+
+    ControlStyle := ControlStyle - [csSetCaption];
 
     StyleFocused.BorderStyle := ebsThick;
 
@@ -1242,10 +1235,10 @@ begin
     OnExit := ControlOnExit;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 
-destructor TIRichEdit.Destroy;
+destructor TIControlRichEdit.Destroy;
 begin
   FMycxRichEdit.Free;
 
@@ -1275,7 +1268,6 @@ begin
 
   with FEdit do
   begin
-    // Name := Settings.Name;
     Parent := FPanel;
     Top := 16;
     Left := 0;
@@ -1299,7 +1291,7 @@ begin
     // Text := Value;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -1311,7 +1303,7 @@ begin
 
   FDateEdit.Date := Date;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -1348,7 +1340,7 @@ begin
       Kind := bkEllipsis;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -1361,9 +1353,50 @@ begin
   with FPanel.Constraints do
     MinWidth := 75;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 {$ENDREGION}
+{ ****************************************************************************** }
+function TPictureMirrorData.GetName: WideString;
+begin
+  Result := FName;
+end;
+
+function TPictureMirrorData.GetOriginalValue: WideString;
+begin
+  Result := FOriginalValue;
+end;
+
+function TPictureMirrorData.GetErrorMsg: WideString;
+begin
+  Result := FErrorMsg;
+end;
+
+procedure TPictureMirrorData.SetErrorMsg(AErrorMsg: WideString);
+begin
+   FErrorMsg := AErrorMsg;
+end;
+
+constructor TPictureMirrorData.Create(AName, AOriginalValue: WideString; AValue: WideString = '');
+begin
+  inherited Create(AValue);
+  FName := AName;
+  FOriginalValue := AOriginalValue;
+  FErrorMsg := '';
+end;
+
+constructor TPictureMirrorData.Clone(const APictureMirrorData: IPictureMirrorData);
+begin
+  Create(APictureMirrorData.Name, APictureMirrorData.OriginalValue, APictureMirrorData.Value);
+  FErrorMsg := APictureMirrorData.ErrorMsg;
+end;
+
+destructor TPictureMirrorData.Destroy;
+begin
+  inherited Destroy;
+end;
+
+
 { ****************************************************************************** }
 {$REGION 'TPictureMirror'}
 
@@ -1377,35 +1410,15 @@ begin
   FPicture := APicture;
 end;
 
-function TPictureMirror.GetName: WideString;
-begin
-  Result := FName;
-end;
-
-function TPictureMirror.GetOriginalValue: WideString;
-begin
-  Result := FPicture.Value;
-end;
-
-function TPictureMirror.GetValue: WideString;
-begin
-  Result := FValue;
-end;
-
 procedure TPictureMirror.SetValue(AValue: WideString);
 begin
-  FValue := AValue;
+  inherited SetValue(AValue);
   SetHint;
-end;
-
-function TPictureMirror.GetErrorMsg: WideString;
-begin
-  Result := FErrorMsg;
 end;
 
 procedure TPictureMirror.SetErrorMsg(AErrorMsg: WideString);
 begin
-  FErrorMsg := AErrorMsg;
+  inherited SetErrorMsg(AErrorMsg);
   SetHint;
 end;
 
@@ -1419,8 +1432,10 @@ begin
     FImage.Hint := Name + ': ' + Value;
 end;
 
-constructor TPictureMirror.Create(AOwner: TWinControl; APicture: IPicture; AImageHoster: WideString);
+constructor TPictureMirror.Create(AOwner: TWinControl; APicture: IPicture; AImageHosterName: WideString);
 begin
+  inherited Create(AImageHosterName, APicture.Value);
+
   FImage := TImage.Create(AOwner);
   with FImage do
   begin
@@ -1435,11 +1450,16 @@ begin
     Width := 16;
 
     with SettingsManager.Settings.Plugins do
-      Picture.Icon.Assign(TImageHosterCollectionItem(FindPlugInCollectionItemFromCollection(AImageHoster, ImageHoster)).Icon);
+      Picture.Icon.Assign(TImageHosterCollectionItem(FindPlugInCollectionItemFromCollection(AImageHosterName, ImageHoster)).Icon);
   end;
   FPicture := APicture;
-  FName := AImageHoster;
-  FValue := '';
+end;
+
+destructor TPictureMirror.Destroy;
+begin
+  FPicture := nil;
+  FImage.Free;
+  inherited Destroy;
 end;
 
 procedure TPictureMirror.LocalUpload(ALocalPath: WideString);
@@ -1451,159 +1471,8 @@ procedure TPictureMirror.RemoteUpload;
 begin
   FPicture.ControlController.TabSheetController.PageController.ImageHosterManager.AddRemoteUploadJob(Self);
 end;
-
-destructor TPictureMirror.Destroy;
-begin
-  FPicture := nil;
-  FImage.Free;
-  inherited Destroy;
-end;
 {$ENDREGION}
 {$REGION 'TIPicture'}
-
-procedure TIPicture.DownloadImage(AImageLink: string; out AMemoryStream: TMemoryStream);
-var
-  HTTPManager: IHTTPManager;
-  HTTPOptions: IHTTPOptions;
-  RequestID: Double;
-  HTTPProcess: IHTTPProcess;
-  OleStream: TOleStream;
-  Dummy: Int64;
-begin
-  HTTPManager := THTTPManager.Instance();
-
-  AMemoryStream := TMemoryStream.Create;
-
-  HTTPOptions := THTTPOptions.Create(SettingsManager.Settings.HTTP.GetProxy(psaCrawler));
-
-  HTTPOptions.ConnectTimeout := SettingsManager.Settings.HTTP.ConnectTimeout;
-  HTTPOptions.ReadTimeout := SettingsManager.Settings.HTTP.ReadTimeout;
-
-  RequestID := HTTPManager.Get(THTTPRequest.Create(AImageLink), HTTPOptions);
-
-  repeat
-    sleep(75);
-  until HTTPManager.HasResult(RequestID);
-
-  HTTPProcess := HTTPManager.GetResult(RequestID);
-
-  OleStream := TOleStream.Create(HTTPProcess.HTTPResult.HTTPResponse.ContentStream);
-  try
-    HTTPProcess.HTTPResult.HTTPResponse.ContentStream.Seek(0, STREAM_SEEK_SET, Dummy);
-    OleStream.Seek(0, STREAM_SEEK_SET);
-    AMemoryStream.CopyFrom(OleStream, OleStream.Size);
-  finally
-    OleStream.Free;
-  end;
-
-  HTTPProcess := nil;
-  HTTPOptions := nil;
-  HTTPManager := nil;
-end;
-
-procedure TIPicture.SaveImage(AMemoryStream: TMemoryStream);
-
-  function GetFileName(AMemoryStream: TMemoryStream): string;
-  var
-    FileName, FileExt: string;
-  begin
-    FileName := '';
-    with ControlController do
-      if not SameStr('', FindControl(cReleaseName).Value) then
-        FileName := FindControl(cReleaseName).Value
-      else
-        FileName := FindControl(cTitle).Value;
-
-    FileExt := GetTGraphicFileExt(AMemoryStream);
-    if SameStr('', FileExt) then
-      FileExt := ExtractFileExt(Value);
-
-    Result := FileName + FileExt;
-  end;
-
-begin
-  with TSaveDialog.Create(nil) do
-    try
-      FileName := ExtractFilePath(ParamStr(0)) + GetFileName(AMemoryStream);
-      if Execute then
-        AMemoryStream.SaveToFile(FileName);
-    finally
-      Free;
-    end;
-end;
-
-function TIPicture.GraphicAsVariant(AGraphic: TGraphic): Variant;
-
-  function GetBitmap(const Graphic: TGraphic): TBitmap;
-  begin
-    Result := TBitmap.Create;
-    if Assigned(Graphic) and not Graphic.Empty then
-    begin
-      Result.SetSize(Graphic.Width, Graphic.Height);
-      with Result.Canvas do
-        try
-          Draw(0, 0, Graphic);
-        except
-
-        end;
-    end;
-  end;
-
-var
-  StringStream: TStringStream;
-begin
-  StringStream := TStringStream.Create('');
-  try
-    with GetBitmap(AGraphic) do
-      try
-        SaveToStream(StringStream);
-      finally
-        Free;
-      end;
-    Result := StringStream.DataString;
-  finally
-    StringStream.Free;
-  end;
-end;
-
-procedure TIPicture.SetValuePicture(AIndex: Integer; AMemoryStream: TMemoryStream);
-var
-  PictureInfo: TPictureInfo;
-  FGraphic: TGraphic;
-begin
-  with PictureInfo do
-  begin
-    Picture := '';
-    Downloaded := True;
-    Size := 0;
-    Width := 0;
-    Height := 0;
-  end;
-
-  PictureInfo.Size := AMemoryStream.Size;
-
-  FGraphic := GetTGraphicType(AMemoryStream).Create;
-  try
-    AMemoryStream.Position := 0;
-
-    FGraphic.LoadFromStream(AMemoryStream);
-
-    if FGraphic.InheritsFrom(TJPEGImage) then
-      with TJPEGImage(FGraphic) do
-        DIBNeeded;
-
-    with PictureInfo do
-    begin
-      Picture := GraphicAsVariant(FGraphic);
-      Width := FGraphic.Width;
-      Height := FGraphic.Height;
-    end;
-  finally
-    FGraphic.Free;
-  end;
-
-  SetValuePicture(AIndex, PictureInfo);
-end;
 
 procedure TIPicture.FmiRemoteUploadImageClick(Sender: TObject);
 begin
@@ -1668,80 +1537,156 @@ begin
   FmiVisitImage.Enabled := not IsEmpty;
 end;
 
-procedure TIPicture.SetTitle(ATitle: WideString);
+procedure TIPicture.SetControlTitle(ATitle: WideString);
 begin
-  inherited SetTitle(ATitle);
+  inherited SetControlTitle(ATitle);
 
   if Assigned(FPictureMirrorPanel) then
     FPictureMirrorPanel.Left := FHintLabel.Left + FHintLabel.Width + 6;
 end;
 
-function TIPicture.GetMirror(AIndex: Integer): IPictureMirror;
-begin
-  Result := (FPictureMirrorList[AIndex] as IPictureMirror);
-end;
+function TIPicture.GraphicAsVariant(AGraphic: TGraphic): Variant;
 
-procedure TIPicture.SetMirror(AIndex: Integer; APictureMirror: IPictureMirror);
-begin
-  FPictureMirrorList[AIndex] := APictureMirror;
-end;
-
-function TIPicture.GetMirrorCount: Integer;
-begin
-  Result := FPictureMirrorList.Count;
-end;
-
-function TIPicture.AddMirror(AName: WideString): Integer;
-var
-  I: Integer;
-  PictureMirror: IPictureMirror;
-  NewMenuItem: TdxBarButton;
-begin
-  Result := -1;
-
-  for I := 0 to MirrorCount - 1 do
-    if (AName = Mirror[I].Name) then
+  function GetBitmap(const Graphic: TGraphic): TBitmap;
+  begin
+    Result := TBitmap.Create;
+    if Assigned(Graphic) and not Graphic.Empty then
     begin
-      Result := I;
-      Exit;
+      Result.SetSize(Graphic.Width, Graphic.Height);
+      with Result.Canvas do
+        try
+          Draw(0, 0, Graphic);
+        except
+
+        end;
     end;
-
-  // licence check, only 1 imagehoster allowed
-
-  PictureMirror := TPictureMirror.Create(FPictureMirrorPanel, Self as IPicture, AName);
-
-  Result := FPictureMirrorList.Add(PictureMirror);
-
-  NewMenuItem := TdxBarButton.Create(FPopupMenu);
-  with NewMenuItem do
-  begin
-    Caption := AName;
-
-    OnClick := FmiRemoteUploadImageClick;
   end;
-  with FmiRemoteUploadImageMenu.ItemLinks.Add do
-    Item := NewMenuItem;
-  NewMenuItem := TdxBarButton.Create(FPopupMenu);
-  with NewMenuItem do
-  begin
-    Caption := AName;
 
-    OnClick := FmiLocalUploadImageClick;
+var
+  StringStream: TStringStream;
+begin
+  StringStream := TStringStream.Create('');
+  try
+    with GetBitmap(AGraphic) do
+      try
+        SaveToStream(StringStream);
+      finally
+        Free;
+      end;
+    Result := StringStream.DataString;
+  finally
+    StringStream.Free;
   end;
-  with FmiLocalUploadImageMenu.ItemLinks.Add do
-    Item := NewMenuItem;
 end;
 
-function TIPicture.RemoveMirror(AIndex: Integer): Boolean;
-begin
-  Result := True;
-  try
-    FPictureMirrorList.Delete(AIndex);
-    FmiLocalUploadImageMenu.ItemLinks[AIndex].Free;
-    FmiRemoteUploadImageMenu.ItemLinks[AIndex].Free;
-  except
-    Result := False;
+procedure TIPicture.SaveImage(AMemoryStream: TMemoryStream);
+
+  function GetFileName(AMemoryStream: TMemoryStream): string;
+  var
+    FileName, FileExt: string;
+  begin
+    FileName := '';
+    with ControlController do
+      if not SameStr('', FindControl(cReleaseName).Value) then
+        FileName := FindControl(cReleaseName).Value
+      else
+        FileName := FindControl(cTitle).Value;
+
+    FileExt := GetTGraphicFileExt(AMemoryStream);
+    if SameStr('', FileExt) then
+      FileExt := ExtractFileExt(Value);
+
+    Result := FileName + FileExt;
   end;
+
+begin
+  with TSaveDialog.Create(nil) do
+    try
+      FileName := ExtractFilePath(ParamStr(0)) + GetFileName(AMemoryStream);
+      if Execute then
+        AMemoryStream.SaveToFile(FileName);
+    finally
+      Free;
+    end;
+end;
+
+procedure TIPicture.DownloadImage(AImageLink: string; out AMemoryStream: TMemoryStream);
+var
+  HTTPManager: IHTTPManager;
+  HTTPOptions: IHTTPOptions;
+  RequestID: Double;
+  HTTPProcess: IHTTPProcess;
+  OleStream: TOleStream;
+  Dummy: Int64;
+begin
+  HTTPManager := THTTPManager.Instance();
+
+  AMemoryStream := TMemoryStream.Create;
+
+  HTTPOptions := THTTPOptions.Create(SettingsManager.Settings.HTTP.GetProxy(psaCrawler));
+
+  HTTPOptions.ConnectTimeout := SettingsManager.Settings.HTTP.ConnectTimeout;
+  HTTPOptions.ReadTimeout := SettingsManager.Settings.HTTP.ReadTimeout;
+
+  RequestID := HTTPManager.Get(THTTPRequest.Create(AImageLink), HTTPOptions);
+
+  repeat
+    sleep(75);
+  until HTTPManager.HasResult(RequestID);
+
+  HTTPProcess := HTTPManager.GetResult(RequestID);
+
+  OleStream := TOleStream.Create(HTTPProcess.HTTPResult.HTTPResponse.ContentStream);
+  try
+    HTTPProcess.HTTPResult.HTTPResponse.ContentStream.Seek(0, STREAM_SEEK_SET, Dummy);
+    OleStream.Seek(0, STREAM_SEEK_SET);
+    AMemoryStream.CopyFrom(OleStream, OleStream.Size);
+  finally
+    OleStream.Free;
+  end;
+
+  HTTPProcess := nil;
+  HTTPOptions := nil;
+  HTTPManager := nil;
+end;
+
+procedure TIPicture.SetValuePictureFromDownload(AIndex: Integer; AMemoryStream: TMemoryStream);
+var
+  PictureInfo: TPictureInfo;
+  FGraphic: TGraphic;
+begin
+  with PictureInfo do
+  begin
+    Picture := '';
+    Downloaded := True;
+    Size := 0;
+    Width := 0;
+    Height := 0;
+  end;
+
+  PictureInfo.Size := AMemoryStream.Size;
+
+  FGraphic := GetTGraphicType(AMemoryStream).Create;
+  try
+    AMemoryStream.Position := 0;
+
+    FGraphic.LoadFromStream(AMemoryStream);
+
+    if FGraphic.InheritsFrom(TJPEGImage) then
+      with TJPEGImage(FGraphic) do
+        DIBNeeded;
+
+    with PictureInfo do
+    begin
+      Picture := GraphicAsVariant(FGraphic);
+      Width := FGraphic.Width;
+      Height := FGraphic.Height;
+    end;
+  finally
+    FGraphic.Free;
+  end;
+
+  SetValuePicture(AIndex, PictureInfo);
 end;
 
 function TIPicture.GetValuePicture(AIndex: Integer): TPictureInfo;
@@ -1764,6 +1709,70 @@ begin
   end;
 end;
 
+function TIPicture.GetMirror(const IndexOrName: OleVariant): IPictureMirror;
+begin
+  Result := nil;
+
+  if not VarIsNull(IndexOrName) then
+  begin
+    if VarIsNumeric(IndexOrName) then
+      Result := FMirrorList[IndexOrName]
+    else
+      Result := FindMirror(IndexOrName);
+  end;
+end;
+
+function TIPicture.GetMirrorCount: Integer;
+begin
+  Result := FMirrorList.Count;
+end;
+
+function TIPicture.AddMirror(AName: WideString): Integer;
+var
+  LPictureMirror: IPictureMirror;
+  LNewMenuItem: TdxBarButton;
+begin
+  Result := FindMirrorIndex(AName);
+
+  if not(Result = -1) then
+    Exit;
+
+  LPictureMirror := TPictureMirror.Create(FPictureMirrorPanel, Self as IPicture, AName);
+
+  Result := FMirrorList.Add(LPictureMirror);
+
+  LNewMenuItem := TdxBarButton.Create(FPopupMenu);
+  with LNewMenuItem do
+  begin
+    Caption := AName;
+
+    OnClick := FmiRemoteUploadImageClick;
+  end;
+  with FmiRemoteUploadImageMenu.ItemLinks.Add do
+    Item := LNewMenuItem;
+  LNewMenuItem := TdxBarButton.Create(FPopupMenu);
+  with LNewMenuItem do
+  begin
+    Caption := AName;
+
+    OnClick := FmiLocalUploadImageClick;
+  end;
+  with FmiLocalUploadImageMenu.ItemLinks.Add do
+    Item := LNewMenuItem;
+end;
+
+function TIPicture.RemoveMirror(AIndex: Integer): WordBool;
+begin
+  Result := True;
+  try
+    FMirrorList.Delete(AIndex);
+    FmiLocalUploadImageMenu.ItemLinks[AIndex].Free;
+    FmiRemoteUploadImageMenu.ItemLinks[AIndex].Free;
+  except
+    Result := False;
+  end;
+end;
+
 constructor TIPicture.Create;
 var
   I: Integer;
@@ -1772,7 +1781,7 @@ begin
 
   SetLength(FPictureArray, 0);
 
-  FPictureMirrorList := TInterfaceList.Create;
+  FMirrorList := TInterfaceList<IPictureMirror>.Create;
 
   FPictureMirrorPanel := TFlowPanel.Create(FPanel);
   with FPictureMirrorPanel do
@@ -1867,63 +1876,7 @@ begin
         if TPlugInCollectionItem(Items[I]).Enabled then
           AddMirror(TPlugInCollectionItem(Items[I]).name);
 
-  DefaultConfiguration;
-end;
-
-procedure TIPicture.AddProposedValue(const ASender: WideString; AValue: WideString; ATitle: WideString);
-var
-  ValueCount: Integer;
-begin
-  inherited AddProposedValue(ASender, AValue, ATitle);
-
-  FPictureArrayLock.EnterWriteLock;
-  try
-    ValueCount := GetProposedValuesCount;
-    SetLength(FPictureArray, ValueCount);
-    with FPictureArray[ValueCount - 1] do
-    begin
-      Picture := GraphicAsVariant(nil);
-      Downloaded := False;
-    end;
-  finally
-    FPictureArrayLock.ExitWriteLock;
-  end;
-
-  CreateTask(
-    { } procedure(const task: IOmniTask)
-    { } begin
-
-    { . } task.Invoke(
-      { ... } procedure
-      { ... } var
-      { ..... } MemoryStream: TMemoryStream;
-      { ... } begin
-      { ..... } DownloadImage(AValue, MemoryStream);
-      { ..... } sleep(100);
-      { ..... } SetValuePicture(ValueCount - 1, MemoryStream);
-      { ..... } MemoryStream.Free;
-      { ... } end);
-
-    { } end, 'TIPicture Image Download: ' + AValue).Run;
-end;
-
-procedure TIPicture.RemoteUpload(const AAfterCrawling: WordBool = False);
-
-  function UploadAfterCrawling(AName: string): Boolean;
-  var
-    ImageHosterCollectionItem: TImageHosterCollectionItem;
-  begin
-    with SettingsManager.Settings.Plugins do
-      ImageHosterCollectionItem := TImageHosterCollectionItem(FindPlugInCollectionItemFromCollection(AName, ImageHoster));
-    Result := Assigned(ImageHosterCollectionItem) and ImageHosterCollectionItem.UploadAfterCrawling;
-  end;
-
-var
-  I: Integer;
-begin
-  for I := 0 to MirrorCount - 1 do
-    if not AAfterCrawling or (AAfterCrawling and UploadAfterCrawling(Mirror[I].Name)) then
-      ControlController.TabSheetController.PageController.ImageHosterManager.AddRemoteUploadJob(Mirror[I]);
+  LoadDefaultConfiguration;
 end;
 
 destructor TIPicture.Destroy;
@@ -1952,9 +1905,95 @@ begin
     FPictureArrayLock.ExitWriteLock;
   end;
 
-  FPictureMirrorList.Free;
+  FMirrorList.Free;
 
   inherited Destroy;
+end;
+
+procedure TIPicture.AddProposedValue(const ASender: WideString; AValue: WideString; ATitle: WideString);
+var
+  LValueCount: Integer;
+begin
+  inherited AddProposedValue(ASender, AValue, ATitle);
+
+  FPictureArrayLock.EnterWriteLock;
+  try
+    LValueCount := GetProposedValuesCount;
+    SetLength(FPictureArray, LValueCount);
+    with FPictureArray[LValueCount - 1] do
+    begin
+      Picture := GraphicAsVariant(nil);
+      Downloaded := False;
+    end;
+  finally
+    FPictureArrayLock.ExitWriteLock;
+  end;
+
+  CreateTask(
+    { } procedure(const task: IOmniTask)
+    { } begin
+
+    { . } task.Invoke(
+      { ... } procedure
+      { ... } var
+      { ..... } LMemoryStream: TMemoryStream;
+      { ... } begin
+      { ..... } DownloadImage(AValue, LMemoryStream);
+      { ..... } sleep(100);
+      { ..... } SetValuePictureFromDownload(LValueCount - 1, LMemoryStream);
+      { ..... } LMemoryStream.Free;
+      { ... } end);
+
+    { } end, 'TIPicture Image Download: ' + AValue).Run;
+end;
+
+procedure TIPicture.RemoteUpload(const AAfterCrawling: WordBool = False);
+
+  function UploadAfterCrawling(AName: string): Boolean;
+  var
+    ImageHosterCollectionItem: TImageHosterCollectionItem;
+  begin
+    with SettingsManager.Settings.Plugins do
+      ImageHosterCollectionItem := TImageHosterCollectionItem(FindPlugInCollectionItemFromCollection(AName, ImageHoster));
+    Result := Assigned(ImageHosterCollectionItem) and ImageHosterCollectionItem.UploadAfterCrawling;
+  end;
+
+var
+  I: Integer;
+begin
+  for I := 0 to MirrorCount - 1 do
+    if not AAfterCrawling or (AAfterCrawling and UploadAfterCrawling(Mirror[I].Name)) then
+      ControlController.TabSheetController.PageController.ImageHosterManager.AddRemoteUploadJob(Mirror[I]);
+end;
+
+function TIPicture.FindMirrorIndex(const AHoster: WideString): Integer;
+var
+  LIndex: Integer;
+  LMirror: IPictureMirror;
+begin
+  Result := -1;
+
+  for LIndex := 0 to FMirrorList.Count - 1 do
+  begin
+    LMirror := FMirrorList[LIndex];
+
+    if SameText(AHoster, LMirror.Name) then
+    begin
+      Result := LIndex;
+      break;
+    end;
+  end;
+end;
+
+function TIPicture.FindMirror(const AHoster: WideString): IPictureMirror;
+var
+  LFoundIndex: Integer;
+begin
+  Result := nil;
+
+  LFoundIndex := FindMirrorIndex(AHoster);
+  if not(LFoundIndex = -1) then
+    Result := FMirrorList[LFoundIndex]
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -2009,7 +2048,7 @@ begin
     end;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 
 destructor TITrailer.Destroy;
@@ -2033,7 +2072,7 @@ begin
     MinWidth := 125;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -2049,7 +2088,7 @@ begin
     MinWidth := 125;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -2065,7 +2104,7 @@ begin
     MinWidth := 125;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -2081,7 +2120,7 @@ begin
     MinWidth := 125;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -2097,7 +2136,7 @@ begin
     MinWidth := 125;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -2113,7 +2152,7 @@ begin
     MinWidth := 125;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -2129,7 +2168,7 @@ begin
     MinWidth := 125;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -2145,7 +2184,7 @@ begin
     MinWidth := 75;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -2161,7 +2200,7 @@ begin
     MinWidth := 75;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -2248,7 +2287,7 @@ begin
     OnDropFiles := FMycxRichEditDropFiles;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 
 destructor TINFO.Destroy;
@@ -2289,7 +2328,7 @@ begin
     end;
   end;
 
-  DefaultConfiguration;
+  LoadDefaultConfiguration;
 end;
 {$ENDREGION}
 

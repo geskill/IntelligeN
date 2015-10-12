@@ -41,12 +41,14 @@ type
 
   IMirrorData = interface(IValueItem)
     ['{BD6E30EB-EC6F-476C-8C57-51ADEBB75156}']
+    function GetStatus: TContentStatus; safecall;
     function GetSize: Double; safecall;
     function GetPartSize: Double; safecall;
     function GetHoster: WideString; safecall;
     function GetHosterShort: WideString; safecall;
     function GetParts: Integer; safecall;
 
+    property Status: TContentStatus read GetStatus;
     property Size: Double read GetSize;
     property PartSize: Double read GetPartSize;
     property Hoster: WideString read GetHoster;

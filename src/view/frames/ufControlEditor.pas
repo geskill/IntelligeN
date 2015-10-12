@@ -91,7 +91,7 @@ begin
       if not Supports(FControl, IPicture) or not(Item.index = cxGridTableViewColumn2.index) then
         AHint := cxGridTableView.DataController.DisplayTexts[GridRecord.RecordIndex, Item.index]
       else
-        AHint := GetGraphicHint((FControl as IPictureEx).GetValuePicture(GridRecord.RecordIndex))
+        AHint := GetGraphicHint((FControl as IPicture).GetValuePicture(GridRecord.RecordIndex))
         { + sLineBreak + ((FControl as IPicture).GetValuePicture(GridRecord.RecordIndex). '' } ;
       with cxGridTableView.Site.ClientToScreen(Point(X, Y)) do
       begin
@@ -148,7 +148,7 @@ begin
             DataRowHeight := 18
           else if Supports(FControl, IControlComboBox) then
             DataRowHeight := 18
-          else if Supports(FControl, IRichEdit) then
+          else if Supports(FControl, IControlRichEdit) then
             DataRowHeight := 50;
 
         with DataController do
@@ -160,7 +160,7 @@ begin
             Values[RecordIndex, 0] := FControl.GetProposedValue(RecordIndex);
 
             if Supports(FControl, IPicture) then
-              Values[RecordIndex, 1] := (FControl as IPictureEx).GetValuePicture(RecordIndex).Picture
+              Values[RecordIndex, 1] := (FControl as IPicture).GetValuePicture(RecordIndex).Picture
             else if Supports(FControl, ITrailer) then
               Values[RecordIndex, 1] := (FControl as ITrailer).GetProposedValueTitle(RecordIndex)
             else
