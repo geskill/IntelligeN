@@ -105,7 +105,7 @@
 			<DCCReference Include="api\uApiDirectoryMonitor.pas"/>
 			<DCCReference Include="api\uApiDLMF.pas"/>
 			<DCCReference Include="api\uApiFile.pas"/>
-			<DCCReference Include="api\uApiHoster.pas"/>
+			<DCCReference Include="api\uApiFileHoster.pas"/>
 			<DCCReference Include="api\uApiImageHoster.pas"/>
 			<DCCReference Include="api\uApiIScriptFormatter.pas"/>
 			<DCCReference Include="api\uApiIScriptParser.pas"/>

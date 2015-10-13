@@ -286,7 +286,6 @@ type
     procedure LocalUpload(ALocalPath: WideString);
     procedure RemoteUpload;
 
-
   end;
 
   TIPicture = class(TIControlComboBox, IPicture)
@@ -1356,6 +1355,7 @@ begin
   LoadDefaultConfiguration;
 end;
 {$ENDREGION}
+
 { ****************************************************************************** }
 function TPictureMirrorData.GetName: WideString;
 begin
@@ -1374,7 +1374,7 @@ end;
 
 procedure TPictureMirrorData.SetErrorMsg(AErrorMsg: WideString);
 begin
-   FErrorMsg := AErrorMsg;
+  FErrorMsg := AErrorMsg;
 end;
 
 constructor TPictureMirrorData.Create(AName, AOriginalValue: WideString; AValue: WideString = '');
@@ -1395,7 +1395,6 @@ destructor TPictureMirrorData.Destroy;
 begin
   inherited Destroy;
 end;
-
 
 { ****************************************************************************** }
 {$REGION 'TPictureMirror'}
@@ -1501,20 +1500,19 @@ end;
 
 procedure TIPicture.FmiSaveAsClick(Sender: TObject);
 var
-  MemoryStream: TMemoryStream;
+  LMemoryStream: TMemoryStream;
 begin
-  Parallel.Async(
+  Async(
     { } procedure
     { } begin
-    { . } DownloadImage(Value, MemoryStream);
-    { } end,
-    { } Parallel.TaskConfig.OnTerminated(
-      { } procedure(const task: IOmniTaskControl)
-      { } begin
-      { . } SaveImage(MemoryStream);
-      { . } MemoryStream.Free;
-      { } end
-      { } ));
+    { . } DownloadImage(Value, LMemoryStream);
+    { } end). { }
+  Await(
+    { } procedure
+    { } begin
+    { . } SaveImage(LMemoryStream);
+    { . } LMemoryStream.Free;
+    { } end);
 end;
 
 procedure TIPicture.FmiVisitImageClick(Sender: TObject);

@@ -336,6 +336,9 @@ type
 
     property Title: WideString read GetTitle write SetTitle;
     property Focus: Boolean read GetFocus write SetFocus;
+
+    // Cloning
+    function CloneInstance(): IDirectlink;
   end;
 
   IDirectlinksPanel = interface(IDirectlinkContainer)
@@ -373,6 +376,9 @@ type
 
     property Visible: Boolean read GetVisible write SetVisible;
     property Focus: Boolean read GetFocus write SetFocus;
+
+    // Cloning
+    function CloneInstance(): IDirectlinkContainer;
   end;
 
   ICrypterPanel = interface(ICrypter)
@@ -412,6 +418,9 @@ type
 
     property Visible: Boolean read GetVisible write SetVisible;
     property Focus: Boolean read GetFocus write SetFocus;
+
+    // Cloning
+    function CloneInstance(): ICrypter;
   end;
 
   IMirrorControl = interface(IMirrorContainer)
@@ -466,6 +475,9 @@ type
 
     function AddCrypter(AName: WideString): Integer;
     function RemoveCrypter(AIndex: Integer): Boolean;
+
+    // Cloning
+    function CloneInstance(): IMirrorContainer;
   end;
 
   IMirrorController = interface(IMirrorControllerBase)

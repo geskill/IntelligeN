@@ -1,4 +1,4 @@
-unit uApiHoster;
+unit uApiFileHoster;
 
 interface
 
@@ -24,6 +24,7 @@ type
   public
     constructor Create(const ADirectlink: IDirectlink);
     function Initialize: Boolean; override;
+    procedure Execute();
     procedure Cleanup; override;
   end;
 
@@ -82,6 +83,11 @@ begin
   end;
 
   Result := True;
+end;
+
+procedure THosterCheckThread.Execute;
+begin
+  // TODO
 end;
 
 procedure THosterCheckThread.Cleanup;

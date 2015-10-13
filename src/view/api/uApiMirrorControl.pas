@@ -22,7 +22,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiConst, uApiCrypter, uApiMody, uApiSettings, uApiXml,
+  uApiConst, uApiMirrorControlBase, uApiCrypter, uApiMody, uApiSettings, uApiXml,
   // Plugin system
   uPlugInConst,
   // Utils
@@ -164,7 +164,7 @@ type
     function GetPartName(AFileName: WideString): WideString;
 
     // Cloning
-    // TODO:
+    function CloneInstance(): IDirectlink;
   end;
 
   TDirectlinksPanel = class(TInterfacedObject, IDirectlinksPanel)
@@ -243,7 +243,7 @@ type
     procedure Remove(ATabIndex: Integer);
 
     // Cloning
-    // TODO:
+    function CloneInstance(): IDirectlinkContainer;
   end;
 
   TCrypterPanel = class(TInterfacedObject, ICrypterPanel)
@@ -328,7 +328,7 @@ type
     procedure CheckFolder(const AUseCheckDelay: Boolean = False);
 
     // Cloning
-    // TODO:
+    function CloneInstance(): ICrypter;
   end;
 
   TMirrorControl = class(TInterfacedObject, IMirrorControl)
@@ -447,7 +447,7 @@ type
     function RemoveCrypter(AIndex: Integer): Boolean;
 
     // Cloning
-    // TODO:
+    function CloneInstance(): IMirrorContainer;
   end;
 
 implementation
@@ -1476,6 +1476,11 @@ begin
     FLinksInfoLock.ExitReadLock;
   end;
 end;
+
+function TMycxTabSheet.CloneInstance;
+begin
+  Result := TIDirectlink.Clone(IDirectlinksMirror(Self));
+end;
 {$ENDREGION}
 { ****************************************************************************** }
 {$REGION 'TDirectlinksPanel'}
@@ -1819,6 +1824,11 @@ begin
   else
     FcxLFirstSubMirrorInfo.Visible := True;
 end;
+
+function TDirectlinksPanel.CloneInstance;
+begin
+  Result := TIDirectlinkContainer.Clone(IDirectlinksPanel(Self));
+end;
 {$ENDREGION}
 { ****************************************************************************** }
 {$REGION 'TCrypterPanel'}
@@ -2106,6 +2116,11 @@ end;
 procedure TCrypterPanel.CheckFolder(const AUseCheckDelay: Boolean = False);
 begin
   MirrorControl.MirrorController.TabSheetController.PageController.CrypterManager.AddCrypterCheckJob(Self, AUseCheckDelay);
+end;
+
+function TCrypterPanel.CloneInstance;
+begin
+  Result := TICrypter.Clone(ICrypterPanel(Self));
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -2811,6 +2826,11 @@ begin
   else
     with FcxButtonCrypt do
       Width := GetTabControlTabWidth - Left - 1;
+end;
+
+function TMirrorControl.CloneInstance;
+begin
+  Result := TIMirrorContainer.Clone(IMirrorControl(Self));
 end;
 {$ENDREGION}
 { ****************************************************************************** }

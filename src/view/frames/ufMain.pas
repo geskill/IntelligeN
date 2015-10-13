@@ -17,7 +17,7 @@ uses
   uExport,
   // Api
   uApiConst, uApiMain, uApiMultiCastEvent, uApiBackupManager, uApiControlAligner, uApiSettings, uApiXml, uApiPlugins, uApiPublishController, uApiPublish,
-  uApiCrawler, uApiCrypter, uApiHoster, uApiImageHoster, uApiTabSheetController,
+  uApiCrawler, uApiCrypter, uApiFileHoster, uApiImageHoster, uApiTabSheetController,
   // Utils
   uFileUtils;
 
