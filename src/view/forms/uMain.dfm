@@ -95,12 +95,6 @@ object Main: TMain
                 Panels = <
                   item
                     PanelStyleClassName = 'TdxStatusBarContainerPanelStyle'
-                    PanelStyle.Container = fMain.dxStatusBarContainer0
-                    Bevel = dxpbNone
-                    Width = 125
-                  end
-                  item
-                    PanelStyleClassName = 'TdxStatusBarContainerPanelStyle'
                     PanelStyle.Container = fMain.dxStatusBarContainer3
                     Bevel = dxpbNone
                     MinWidth = 20

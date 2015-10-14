@@ -24,7 +24,6 @@ type
     FProgressBar: TcxProgressBar;
     PreviousControl, CurrentControl: IControlBasic;
     PreviousMirrorControl, CurrentMirrorControl: IMirrorControl;
-    procedure SetProgressBarPosition(ANewPosition: Extended);
     procedure MoveLeft;
     procedure MoveDown;
     procedure MoveUp;
@@ -36,22 +35,10 @@ type
     function NextMirrorPosition: TPoint;
     property ControlController: IControlController read FComponentController write FComponentController;
     property MirrorController: IMirrorController read FMirrorController write FMirrorController;
-    property ProgressBar: TcxProgressBar read FProgressBar write FProgressBar;
     destructor Destroy; override;
   end;
 
 implementation
-
-procedure TControlAligner.SetProgressBarPosition(ANewPosition: Extended);
-begin
-  // FUTURE: Remove the progress bar. Not really necessary
-  with FProgressBar do
-  begin
-    Position := ANewPosition;
-    Repaint;
-    // Application.ProcessMessages;
-  end;
-end;
 
 procedure TControlAligner.MoveLeft;
 begin
@@ -165,8 +152,7 @@ end;
 
 procedure TControlAligner.MoveMirrors;
 var
-  _MirrorControlIndex, _MirrorControlsWidth: Integer;
-  _NewPBPosition: Extended;
+  LMirrorControlIndex, LMirrorControlsWidth: Integer;
 begin
   if MirrorController.MirrorCount <= 0 then
     Exit;
@@ -174,7 +160,7 @@ begin
   with SettingsManager.Settings.ControlAligner do
   begin
     // Alle MirrorControls sind gleich breit
-    _MirrorControlsWidth := Trunc((WorkPanelWidth - (MirrorColumns * PaddingWidth)) / MirrorColumns);
+    LMirrorControlsWidth := Trunc((WorkPanelWidth - (MirrorColumns * PaddingWidth)) / MirrorColumns);
 
     with MirrorController do
     begin
@@ -184,7 +170,7 @@ begin
       with CurrentMirrorControl do
       begin
         Left := PaddingLeft;
-        Width := _MirrorControlsWidth;
+        Width := LMirrorControlsWidth;
         if (MirrorPosition = mpBottom) then
           Top := CurrentControl.Top + CurrentControl.Height + PaddingHeight
         else
@@ -192,20 +178,15 @@ begin
       end;
 
       // Alle weiteren MirrorControls positionieren
-      for _MirrorControlIndex := 1 to MirrorCount - 1 do
-        with Mirror[_MirrorControlIndex] do
+      for LMirrorControlIndex := 1 to MirrorCount - 1 do
+        with Mirror[LMirrorControlIndex] do
         begin
-          PreviousMirrorControl := Mirror[_MirrorControlIndex - 1];
-          CurrentMirrorControl := Mirror[_MirrorControlIndex];
-
-          _NewPBPosition := (_MirrorControlIndex) * (50 / MirrorCount);
-          if (MirrorPosition = mpBottom) then
-            _NewPBPosition := _NewPBPosition + 50;
-          SetProgressBarPosition(_NewPBPosition);
+          PreviousMirrorControl := Mirror[LMirrorControlIndex - 1];
+          CurrentMirrorControl := Mirror[LMirrorControlIndex];
 
           with CurrentMirrorControl do
           begin
-            if (Frac(_MirrorControlIndex / MirrorColumns) = 0.0) then
+            if (Frac(LMirrorControlIndex / MirrorColumns) = 0.0) then
               Top := (PreviousMirrorControl.Top + MirrorHeight + PaddingHeight)
             else
               Top := PreviousMirrorControl.Top;
@@ -215,7 +196,7 @@ begin
             else
               Left := PaddingLeft;
 
-            Width := _MirrorControlsWidth;
+            Width := LMirrorControlsWidth;
           end;
         end;
     end;
@@ -224,17 +205,13 @@ end;
 
 procedure TControlAligner.Start;
 var
-  _ControlIndex: Integer;
-  NewPBPosition: Extended;
+  LControlIndex: Integer;
 begin
-  SetProgressBarPosition(0);
-
   with SettingsManager.Settings.ControlAligner do
   begin
     if (MirrorPosition = mpTop) then
     begin
       MoveMirrors;
-      SetProgressBarPosition(50);
     end;
 
     // Das erste Control positionieren
@@ -254,19 +231,14 @@ begin
   end;
 
   // Alle weiteren Controls positionieren
-  for _ControlIndex := 1 to ControlController.ControlCount - 1 do
+  for LControlIndex := 1 to ControlController.ControlCount - 1 do
   begin
-    I := _ControlIndex;
+    I := LControlIndex;
 
     PreviousControl := ControlController.Control[I - 1];
     CurrentControl := ControlController.Control[I];
 
     MoveLeft;
-
-    NewPBPosition := (_ControlIndex) * (50 / ControlController.ControlCount);
-    if SettingsManager.Settings.ControlAligner.MirrorPosition = mpTop then
-      NewPBPosition := NewPBPosition + 50;
-    SetProgressBarPosition(NewPBPosition);
 
     if ((CurrentControl.Left + CurrentControl.Width) > WorkPanelWidth) then
     begin
@@ -291,12 +263,8 @@ begin
   with SettingsManager.Settings.ControlAligner do
     if (MirrorPosition = mpBottom) then
     begin
-      SetProgressBarPosition(50);
-
       MoveMirrors;
     end;
-
-  SetProgressBarPosition(100);
 
   PreviousControl := nil;
   CurrentControl := nil;

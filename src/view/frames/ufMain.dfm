@@ -13,12 +13,6 @@ object fMain: TfMain
     Panels = <
       item
         PanelStyleClassName = 'TdxStatusBarContainerPanelStyle'
-        PanelStyle.Container = dxStatusBarContainer0
-        Bevel = dxpbNone
-        Width = 125
-      end
-      item
-        PanelStyleClassName = 'TdxStatusBarContainerPanelStyle'
         PanelStyle.Container = dxStatusBarContainer3
         Bevel = dxpbNone
         MinWidth = 20
@@ -58,33 +52,15 @@ object fMain: TfMain
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
-    object dxStatusBarContainer0: TdxStatusBarContainerControl
-      Left = 0
-      Top = 2
-      Width = 127
-      Height = 18
-      object cxPBControlAligner: TcxProgressBar
-        Left = 0
-        Top = 0
-        Hint = 'ControlAligner'
-        Align = alClient
-        ParentShowHint = False
-        Properties.BeginColor = clSkyBlue
-        Properties.SolidTextColor = True
-        ShowHint = True
-        Style.Edges = [bLeft, bTop, bRight, bBottom]
-        TabOrder = 0
-        Width = 127
-      end
-    end
     object dxStatusBarContainer3: TdxStatusBarContainerControl
-      Left = 129
+      Left = 0
       Top = 2
       Width = 127
       Height = 18
       object cxPBAutocompletion: TcxProgressBar
         Left = 0
         Top = 0
+        Cursor = crHelp
         Hint = 'Autocompletion'
         Align = alClient
         ParentShowHint = False
@@ -96,7 +72,7 @@ object fMain: TfMain
       end
     end
     object dxStatusBarContainer6: TdxStatusBarContainerControl
-      Left = 263
+      Left = 134
       Top = 2
       Width = 140
       Height = 18
@@ -141,6 +117,7 @@ object fMain: TfMain
     Properties.CloseButtonMode = cbmActiveAndHoverTabs
     Properties.CustomButtons.Buttons = <>
     Properties.HotTrack = True
+    Properties.Images = Main.ILTemplateTypeIDs
     Properties.MultiLine = True
     Properties.ShowTabHints = True
     OnCanCloseEx = pcMainCanCloseEx

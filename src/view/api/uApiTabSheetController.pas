@@ -96,7 +96,7 @@ type
     property DataChanged: Boolean read GetDataChanged write SetDataChanged;
 
     property TemplateFileName: string read FTemplateFileName write FTemplateFileName;
-    property ATypeID: TTypeID read GetTypeID write FTypeID;
+    property TypeID: TTypeID read GetTypeID write FTypeID;
 
     property ActiveWebsite: WideString read GetActiveWebsite write SetActiveWebsite;
 
@@ -261,7 +261,7 @@ begin
   FPageController := APageController;
 
   ImageIndex := Integer(ATypeID);
-  ATypeID := ATypeID;
+  FTypeID := ATypeID;
 end;
 
 procedure TTabSheetController.Install;

@@ -25,8 +25,6 @@ type
   TfMain = class(TFrame, IPageController)
     pcMain: TcxPageControl;
     dxStatusBar: TdxStatusBar;
-    dxStatusBarContainer0: TdxStatusBarContainerControl;
-    cxPBControlAligner: TcxProgressBar;
     dxStatusBarContainer3: TdxStatusBarContainerControl;
     cxPBAutocompletion: TcxProgressBar;
     dxStatusBarContainer6: TdxStatusBarContainerControl;
@@ -350,8 +348,6 @@ begin
   end;
   FPublishManager := PublishManager;
   FControlAligner := TControlAligner.Create;
-  with FControlAligner do
-    ProgressBar := cxPBControlAligner;
   CrawlerManager := TCrawlerManager.Create;
   CrawlerManager.OnGUIInteraction := CrawlerGUIInteraction;
   FCrawlerManager := CrawlerManager;
