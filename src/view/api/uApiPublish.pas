@@ -12,7 +12,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // API
-  uApiCAPTCHA, uApiPlugins, uApiSettings, uApiThreadPoolManager,
+  uApiPlugins, uApiSettings, uApiThreadPoolManager,
   // Utils
   uPathUtils, uStringUtils;
 
@@ -25,18 +25,8 @@ type
 
   TPublishItemThread = class(TMyOmniWorker)
   private
-    FWait: IOmniWaitableValue;
     FErrorMsg: string;
-    FCAPTCHAResult: Boolean;
-    FCAPTCHAImageUrl, FCAPTCHAName, FCAPTCHAText, FCAPTCHACookies: WideString;
-    FIntelligentPostingResult, FIntelligentPostingRedoSearch: WordBool;
-    FIntelligentPostingSearchValue, FIntelligentPostingSearchResults: WideString;
-    FIntelligentPostingSearchIndex: Integer;
     procedure InternalErrorHandler(AErrorMsg: string);
-    procedure CAPTCHAInputThreaded;
-    function CAPTCHAInputSynchronizer(const AImageUrl, AName: WideString; out AText: WideString; var ACookies: WideString): WordBool; safecall;
-    procedure IntelligentPostingHandlerThreaded;
-    function IntelligentPostingHandlerSynchronizer(var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool; safecall;
   protected
     FPublishItem: IPublishItem;
     FPublishRetry: Integer;
@@ -107,55 +97,11 @@ const
 
 implementation
 
-uses
-  uIntelligentPosting;
-
 { TPublishItemThread }
 
 procedure TPublishItemThread.InternalErrorHandler(AErrorMsg: string);
 begin
   FErrorMsg := AErrorMsg;
-end;
-
-procedure TPublishItemThread.CAPTCHAInputThreaded;
-begin
-  FCAPTCHAResult := TCAPTCHAClass.CAPTCHAInput(FCAPTCHAImageUrl, FCAPTCHAName, FCAPTCHAText, FCAPTCHACookies);
-  FWait.Signal;
-end;
-
-function TPublishItemThread.CAPTCHAInputSynchronizer(const AImageUrl, AName: WideString; out AText: WideString; var ACookies: WideString): WordBool;
-begin
-  FCAPTCHAImageUrl := AImageUrl;
-  FCAPTCHAName := AName;
-  FCAPTCHACookies := ACookies;
-  FWait := CreateWaitableValue;
-  task.Invoke(CAPTCHAInputThreaded);
-  FWait.WaitFor;
-  FWait := nil;
-  AText := FCAPTCHAText;
-  ACookies := FCAPTCHACookies;
-  Result := FCAPTCHAResult;
-end;
-
-procedure TPublishItemThread.IntelligentPostingHandlerThreaded;
-begin
-  FIntelligentPostingResult := TIntelligentPostingClass.IntelligentPostingHandler(FIntelligentPostingSearchValue, FIntelligentPostingSearchResults, FIntelligentPostingSearchIndex, FIntelligentPostingRedoSearch);
-  FWait.Signal;
-end;
-
-function TPublishItemThread.IntelligentPostingHandlerSynchronizer(var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool;
-begin
-  FIntelligentPostingSearchValue := ASearchValue;
-  FIntelligentPostingSearchResults := ASearchResults;
-  FIntelligentPostingSearchIndex := ASearchIndex;
-  FWait := CreateWaitableValue;
-  task.Invoke(IntelligentPostingHandlerThreaded);
-  FWait.WaitFor;
-  FWait := nil;
-  ASearchValue := FIntelligentPostingSearchValue;
-  ASearchIndex := FIntelligentPostingSearchIndex;
-  ARedoSearch := FIntelligentPostingRedoSearch;
-  Result := FIntelligentPostingResult;
 end;
 
 constructor TPublishItemThread.Create(const APublishItem: IPublishItem; APublishRetry: Integer);
@@ -190,7 +136,7 @@ begin
 
       repeat
         FErrorMsg := '';
-        Success := TApiPlugin.CMSExec(FPublishItem, InternalErrorHandler, CAPTCHAInputSynchronizer, IntelligentPostingHandlerSynchronizer);
+        // Success := TApiPlugin.CMSExec(FPublishItem, InternalErrorHandler);
 
         // improve this later, that ErrorHandler ll only called when error really exists string check is shabby
         if not SameStr('', FErrorMsg) then

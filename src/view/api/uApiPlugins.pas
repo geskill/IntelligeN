@@ -4,15 +4,17 @@ interface
 
 uses
   // Delphi
-  Windows, Forms, SysUtils, Classes, Math, Graphics,
+  Windows, Forms, SysUtils, Classes, Controls, Math, Graphics,
   // Spring Framework
   Spring.SystemUtils,
+  // OmniThreadLibrary
+  OtlCommon, OtlTask,
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // DLLs
   uExport,
   // Api
-  uApiConst, uApiPluginsBase, uApiCAPTCHA, uApiSettings, uApiWebsiteEditor, uApiXml,
+  uApiConst, uApiPluginsBase, uApiHTTP, uApiSettings, uApiWebsiteEditor, uApiXml,
   // HTTPManager
   uHTTPManager,
   // Plugin system
@@ -21,10 +23,24 @@ uses
   uPathUtils;
 
 type
-  TCrypterPluginProc = reference to procedure(var ACrypterPlugin: ICrypterPlugIn);
-  TFileFormatPluginProc = reference to procedure(var AFileFormatPlugin: IFileFormatPlugIn);
+  TApiCAPTCHA = class
+  protected
+    class function GetCAPTCHAType(const ACAPTCHA: WideString): TCAPTCHAType;
+  public
+    class function PluginsHandle(const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString; AErrorProc: TPluginErrorProc = nil): WordBool;
+    class function ManualHandle(const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; ACAPTCHAMemoryStream: TMemoryStream; AMaxWaitMs: Cardinal = INFINITE): WordBool;
+    class function DefaultHandler(const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString): WordBool; safecall;
+  end;
 
-  TApiPlugin = class(TPluginBase)
+  TCAPTCHAPluginProc = reference to procedure(var ACAPTCHAPlugin: ICAPTCHAPlugIn);
+  TCMSPluginProc = reference to procedure(var ACMSPlugin: ICMSPlugIn);
+  TCrawlerPluginProc = reference to procedure(var ACrawlerPlugin: ICrawlerPlugIn);
+  TCrypterPluginProc = reference to procedure(var ACrypterPlugin: ICrypterPlugIn);
+  TFileHosterPluginProc = reference to procedure(var AFileHosterPlugin: IFileHosterPlugIn);
+  TFileFormatPluginProc = reference to procedure(var AFileFormatPlugin: IFileFormatPlugIn);
+  TImageHosterPluginProc = reference to procedure(var AImageHosterPlugin: IImageHosterPlugIn);
+
+  TPluginBasic = class(TPluginBase)
   protected
     class procedure InitializePlugin(const APlugin: IPlugIn);
     class procedure UninitializePlugin(const APlugin: IPlugIn);
@@ -37,41 +53,177 @@ type
 
     class procedure LoadPlugin(const ARelativPluginPath: string; APluginProc: TPluginProc; AErrorProc: TPluginErrorProc = nil);
 
-    class procedure LoadCrypterPlugin(ACrypter: TCrypterCollectionItem; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TPluginErrorProc = nil);
+    class procedure LoadCAPTCHAPlugin(ARelativPluginPath: string; ACAPTCHAPluginProc: TCAPTCHAPluginProc; AErrorProc: TPluginErrorProc = nil);
+    class procedure LoadCMSPlugin(ARelativPluginPath: string; ACMSPluginProc: TCMSPluginProc; AErrorProc: TPluginErrorProc = nil);
+    class procedure LoadCrawlerPlugin(ARelativPluginPath: string; ACrawlerPluginProc: TCrawlerPluginProc; AErrorProc: TPluginErrorProc = nil);
+    class procedure LoadCrypterPlugin(ARelativPluginPath: string; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TPluginErrorProc = nil);
+    class procedure LoadFileHosterPlugin(ARelativPluginPath: string; AFileHosterPluginProc: TFileHosterPluginProc; AErrorProc: TPluginErrorProc = nil);
     class procedure LoadFileFormatsPlugin(ARelativPluginPath: string; AFileFormatPluginProc: TFileFormatPluginProc; AErrorProc: TPluginErrorProc = nil);
+    class procedure LoadImageHosterPlugin(ARelativPluginPath: string; AImageHosterPluginProc: TImageHosterPluginProc; AErrorProc: TPluginErrorProc = nil);
   public
-    class function AppLoad(App: TAppCollectionItem; const AppController: IAppController): Boolean;
+    class function AppLoad(App: TAppCollectionItem; const AAppController: IAppController): Boolean;
     class procedure AppUnLoad(App: TAppCollectionItem);
 
-    class function CAPTCHAExec(ACAPTCHAPluginPath: string; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA, CAPTCHAName: string; out AText: string; var ACookies: string): Boolean;
+    class function CAPTCHAExec(const ACAPTCHAPluginPath: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString;
+      AErrorProc: TPluginErrorProc = nil): WordBool;
 
-    class function CMSExec(const APublishItem: IPublishItem; AErrorProc: TPluginErrorProc = nil; ACAPTCHAInput: TCAPTCHAInput = nil; AIntelligentPostingHandler: TIntelligentPostingHelper = nil): Boolean;
-    class function CMSDefaultCharset(ACMSPluginPath: string): string;
-    class function CMSBelongsTo(ACMSPluginPath, AWebsiteSourceCode: string): Boolean;
-    class procedure CMSShowWebsiteSettingsEditor(ACMSPluginPath: string; CMSWebsites: TCMSWebsitesCollectionItem; AppController: IAppController);
-
-    class function CrawlerExec(ACrawler: TCrawlerCollectionItem; const AControlController: IControlController; out AErrorMsg: string): Boolean;
-
-    class function CrypterAddFolder(ACrypter: TCrypterCollectionItem; const AMirrorContainer: IDirectlinkContainer; const AControlController: IControlControllerBase; out AFolderInfo: TCrypterFolderInfo; out AErrorMsg: string): Boolean;
-    class function CrypterGetFolder(ACrypter: TCrypterCollectionItem; AFolderIdentifier: string; out AFolderInfo: TCrypterFolderInfo; out AErrorMsg: string): Boolean;
+    class function CMSDefaultCharset(ARelativPluginPath: string): string;
+    class function CMSBelongsTo(ARelativPluginPath, AWebsiteSourceCode: string): Boolean;
+    class procedure CMSShowWebsiteSettingsEditor(ARelativPluginPath: string; ACMSWebsites: TCMSWebsitesCollectionItem; const AAppController: IAppController);
 
     class function GetSaveFileFormats: TStrings;
     class function GetLoadFileFormats: TStrings;
-    class procedure SaveFile(AFileFormats: TPlugInCollectionItem; AFileName, ATemplateFileName: string; ATabSheetController: ITabSheetController);
-    class procedure LoadFile(AFileName: string; APageController: IPageController);
+    class procedure SaveFile(AFileFormats: TPlugInCollectionItem; AFileName, ATemplateFileName: string; const ATabSheetController: ITabSheetController);
+    class procedure LoadFile(AFileName: string; const APageController: IPageController);
+  end;
 
-    class function CheckFiles(FileHoster: TPlugInCollectionItem; ALinks: string): TLinksInfo;
+  TApiThreadedPlugin = class(TPluginBasic)
+  private
+    FTask: IOmniTask;
+    FErrorHandler: TPluginErrorProc;
+  protected
+    procedure DefaultInternalErrorHandler(AErrorMsg: string);
 
-    class function ImageHosterLocalUpload(ImageHoster: TImageHosterCollectionItem; LocalPath: string; AErrorProc: TPluginErrorProc = nil; ACAPTCHAInput: TCAPTCHAInput = nil): string;
-    class function ImageHosterRemoteUpload(ImageHoster: TImageHosterCollectionItem; ImageUrl: string; AErrorProc: TPluginErrorProc = nil; ACAPTCHAInput: TCAPTCHAInput = nil): string;
+    function DefaultCAPTCHAInputHandler(const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString): WordBool; safecall;
+    function DefaultIntelligentPostingHelperHandler(var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool; safecall;
+
+    procedure LoadCrypterPlugin(ACrypter: TCrypterCollectionItem; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TPluginErrorProc = nil);
+    procedure LoadImageHosterPlugin(AImageHoster: TImageHosterCollectionItem; AImageHosterPluginProc: TImageHosterPluginProc; AErrorProc: TPluginErrorProc = nil);
+  public
+    constructor Create(const ATask: IOmniTask; AErrorHandler: TPluginErrorProc = nil);
+    destructor Destroy();
+
+    function CMSExec(const APublishItem: IPublishItem; ACAPTCHAInput: TCAPTCHAInput = nil; AIntelligentPostingHandler: TIntelligentPostingHelper = nil): Boolean;
+
+    function CrawlerExec(ACrawler: TCrawlerCollectionItem; const AControlController: IControlController): Boolean;
+
+    function CrypterAddFolder(ACrypter: TCrypterCollectionItem; const AMirrorContainer: IDirectlinkContainer; const AControlController: IControlControllerBase; out AFolderInfo: TCrypterFolderInfo): Boolean;
+    function CrypterGetFolder(ACrypter: TCrypterCollectionItem; AFolderIdentifier: string; out AFolderInfo: TCrypterFolderInfo): Boolean;
+
+    function FileHosterCheckFiles(AFileHoster: TPlugInCollectionItem; ALinks: string; out ALinksInfo: TLinksInfo): Boolean;
+
+    function ImageHosterLocalUpload(AImageHoster: TImageHosterCollectionItem; LocalPath: string; ACAPTCHAInput: TCAPTCHAInput = nil): string;
+    function ImageHosterRemoteUpload(AImageHoster: TImageHosterCollectionItem; ImageUrl: string; ACAPTCHAInput: TCAPTCHAInput = nil): string;
   end;
 
 implementation
 
 uses
+  uCAPTCHA,
   uIntelligentPosting;
 
-class procedure TApiPlugin.InitializePlugin(const APlugin: IPlugIn);
+{ TApiCAPTCHAClass }
+
+class function TApiCAPTCHA.GetCAPTCHAType(const ACAPTCHA: WideString): TCAPTCHAType;
+begin
+  if BeginsWithHTTP(ACAPTCHA) then
+    Result := ctImage
+  else
+    Result := ctText;
+end;
+
+class function TApiCAPTCHA.PluginsHandle(const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString; AErrorProc: TPluginErrorProc = nil): WordBool;
+var
+  LHandled: WordBool;
+  LCAPTCHAPluginIndex: Integer;
+  LCookies, LCAPTCHASolution: WideString;
+begin
+  LHandled := False;
+  ACAPTCHASolution := '';
+
+  for LCAPTCHAPluginIndex := 0 to SettingsManager.Settings.Plugins.CAPTCHA.Count - 1 do
+    if TPlugInCollectionItem(SettingsManager.Settings.Plugins.CAPTCHA.Items[LCAPTCHAPluginIndex]).Enabled then
+    begin
+      LCookies := ACookies;
+      LHandled := TPluginBasic.CAPTCHAExec(TPlugInCollectionItem(SettingsManager.Settings.Plugins.CAPTCHA.Items[LCAPTCHAPluginIndex]).Path, ACAPTCHAType, ACAPTCHA, ACAPTCHAName, LCAPTCHASolution, LCookies, AErrorProc);
+      if LHandled then
+      begin
+        ACAPTCHASolution := LCAPTCHASolution;
+        ACookies := LCookies;
+        Result := True;
+        break;
+      end;
+    end;
+
+  Result := LHandled;
+end;
+
+class function TApiCAPTCHA.ManualHandle(const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; ACAPTCHAMemoryStream: TMemoryStream; AMaxWaitMs: Cardinal = INFINITE): WordBool;
+begin
+  Result := False;
+
+  with TCAPTCHA.Create(nil, AMaxWaitMs) do
+    try
+      if (ACAPTCHAType = ctImage) then
+        DisplayCAPTCHAImage(ACAPTCHAMemoryStream)
+      else
+        DisplayCAPTCHAText(ACAPTCHA);
+
+      if (ShowModal = mrOk) then
+      begin
+        ACAPTCHASolution := CAPTCHA;
+        Result := True;
+      end;
+    finally
+      Free;
+    end;
+end;
+
+class function TApiCAPTCHA.DefaultHandler(const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString): WordBool;
+var
+  LResult: WordBool;
+  LCAPTCHAType: TCAPTCHAType;
+  LCookies, LCAPTCHASolution: WideString;
+
+  LCAPTCHAMemoryStream: TMemoryStream;
+begin
+  LCAPTCHAType := TApiCAPTCHA.GetCAPTCHAType(ACAPTCHA);
+  ACAPTCHASolution := '';
+
+  LCookies := ACookies;
+
+  LResult := TApiCAPTCHA.PluginsHandle(LCAPTCHAType, ACAPTCHA, ACAPTCHAName, ACAPTCHASolution, LCookies);
+
+  if LResult then
+  begin
+    ACAPTCHASolution := LCAPTCHASolution;
+    ACookies := LCookies;
+  end
+  else if not LResult then
+  begin
+    ACAPTCHASolution := '';
+
+    try
+      if (LCAPTCHAType = ctImage) then
+      begin
+        LCookies := ACookies;
+
+        TApiHTTP.DownloadData(ACAPTCHA, LCAPTCHAMemoryStream, LCookies,
+          // TODO: Read settings at a thread-safe position
+          { . } SettingsManager.Settings.HTTP.GetProxy(psaMain), SettingsManager.Settings.HTTP.ConnectTimeout, SettingsManager.Settings.HTTP.ReadTimeout);
+      end;
+
+      LResult := TApiCAPTCHA.ManualHandle(LCAPTCHAType, ACAPTCHA, ACAPTCHAName, ACAPTCHASolution, LCAPTCHAMemoryStream, 1000 * 60 * 2);
+    finally
+      if (LCAPTCHAType = ctImage) then
+      begin
+        LCAPTCHAMemoryStream.Free;
+      end;
+    end;
+
+    if LResult then
+    begin
+      ACAPTCHASolution := LCAPTCHASolution;
+      ACookies := LCookies;
+    end;
+  end;
+
+  Result := LResult;
+end;
+
+{ TPluginBasic }
+
+class procedure TPluginBasic.InitializePlugin(const APlugin: IPlugIn);
 begin
   APlugin.SetHTTPManager(THTTPManager.Instance());
 
@@ -94,169 +246,271 @@ begin
   APlugin.ReadTimeout := SettingsManager.Settings.HTTP.ReadTimeout;
 end;
 
-class procedure TApiPlugin.UninitializePlugin(const APlugin: IPlugIn);
+class procedure TPluginBasic.UninitializePlugin(const APlugin: IPlugIn);
 begin
   APlugin.SetHTTPManager(nil);
 end;
 
-class function TApiPlugin.RelativToAbsolutePath(const ARelativPluginPath: string): string;
+class function TPluginBasic.RelativToAbsolutePath(const ARelativPluginPath: string): string;
 begin
   Result := PathCombineEx(GetPluginFolder, ARelativPluginPath);
 end;
 
-class function TApiPlugin.PluginTypeToString(const APluginType: TPlugInType): string;
+class function TPluginBasic.PluginTypeToString(const APluginType: TPlugInType): string;
 begin
   Result := copy(TEnum.GetName<TPlugInType>(APluginType), 3, MaxInt);
 end;
 
-class function TApiPlugin.IncorrectPluginTypeErrorMsg(const ARelativPluginPath: string; const APlugin: IPlugIn; AExpectedPlugin: TPlugInType): string;
+class function TPluginBasic.IncorrectPluginTypeErrorMsg(const ARelativPluginPath: string; const APlugin: IPlugIn; AExpectedPlugin: TPlugInType): string;
 var
   LPluginFileName: string;
   LExpectedPluginType: string;
   LFoundPluginType: string;
 begin
   LPluginFileName := ExtractFileName(ARelativPluginPath);
-  LExpectedPluginType := TApiPlugin.PluginTypeToString(AExpectedPlugin);
-  LFoundPluginType := TApiPlugin.PluginTypeToString(APlugin.GetType);
+  LExpectedPluginType := TPluginBasic.PluginTypeToString(AExpectedPlugin);
+  LFoundPluginType := TPluginBasic.PluginTypeToString(APlugin.GetType);
 
   Result := Format(StrPluginIncorrectType, [LExpectedPluginType, LFoundPluginType, LPluginFileName]);
 end;
 
-class procedure TApiPlugin.LoadPlugin(const ARelativPluginPath: string; APluginProc: TPluginProc; AErrorProc: TPluginErrorProc);
+class procedure TPluginBasic.LoadPlugin(const ARelativPluginPath: string; APluginProc: TPluginProc; AErrorProc: TPluginErrorProc);
 var
   LPluginHandle: Cardinal;
   LPluginFileName: string;
 begin
-  LPluginFileName := TApiPlugin.RelativToAbsolutePath(ARelativPluginPath);
-  TApiPlugin.LoadPluginBase(LPluginFileName, LPluginHandle,
+  LPluginFileName := TPluginBasic.RelativToAbsolutePath(ARelativPluginPath);
+  TPluginBasic.LoadPluginBase(LPluginFileName, LPluginHandle,
     { } procedure(var APlugin: IPlugIn)
     { } begin
-    { . } TApiPlugin.InitializePlugin(APlugin);
-    { . } APluginProc(APlugin);
-    { . } TApiPlugin.UninitializePlugin(APlugin);
+    { . } TPluginBasic.InitializePlugin(APlugin);
+    { . } try
+    { ... } APluginProc(APlugin);
+    { . } finally
+    { ... } TPluginBasic.UninitializePlugin(APlugin);
+    { . } end;
     { } end, True, AErrorProc);
 end;
 
-class procedure TApiPlugin.LoadCrypterPlugin(ACrypter: TCrypterCollectionItem; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TPluginErrorProc);
+class procedure TPluginBasic.LoadCAPTCHAPlugin(ARelativPluginPath: string; ACAPTCHAPluginProc: TCAPTCHAPluginProc; AErrorProc: TPluginErrorProc = nil);
 begin
-  LoadPlugin(ACrypter.Path,
+  TPluginBasic.LoadPlugin(ARelativPluginPath,
     { } procedure(var APlugin: IPlugIn)
     { } var
-    { . } LPlugin: ICrypterPlugIn;
+    { . } LCAPTCHAPlugin: ICAPTCHAPlugIn;
     { } begin
-    { . } if APlugin.QueryInterface(ICrypterPlugIn, LPlugin) = 0 then
+    { . } if APlugin.QueryInterface(ICAPTCHAPlugIn, LCAPTCHAPlugin) = 0 then
+    { . } begin
     { ... } try
-    { ..... } with LPlugin do
-    { ..... } begin
-    { ....... } UseAccount := ACrypter.UseAccount;
-    { ....... } if ACrypter.UseAccount then
-    { ....... } begin
-    { ......... } Accountname := ACrypter.Accountname;
-    { ......... } Accountpassword := ACrypter.Accountpassword;
-    { ....... } end
-    { ....... } else
-    { ....... } begin
-    { ......... } Accountname := '';
-    { ......... } Accountpassword := '';
-    { ....... } end;
-
-    { ....... } try
-    { ......... } ACrypterPluginProc(LPlugin);
-    { ....... } except
-
-    { ....... } end;
-    { ..... } end;
+    { ..... } ACAPTCHAPluginProc(LCAPTCHAPlugin);
     { ... } finally
-    { ..... } LPlugin := nil;
+    { ..... } LCAPTCHAPlugin := nil;
     { ... } end;
+    { . } end
+    { . } else
+    { . } begin
+    { ... } TPluginBasic.ReturnError(TPluginBasic.IncorrectPluginTypeErrorMsg(ARelativPluginPath, APlugin, ptCAPTCHA), AErrorProc);
+    { . } end;
     { } end, AErrorProc);
 end;
 
-class procedure TApiPlugin.LoadFileFormatsPlugin(ARelativPluginPath: string; AFileFormatPluginProc: TFileFormatPluginProc; AErrorProc: TPluginErrorProc = nil);
+class procedure TPluginBasic.LoadCMSPlugin(ARelativPluginPath: string; ACMSPluginProc: TCMSPluginProc; AErrorProc: TPluginErrorProc = nil);
 begin
-  LoadPlugin(ARelativPluginPath,
+  TPluginBasic.LoadPlugin(ARelativPluginPath,
     { } procedure(var APlugin: IPlugIn)
     { } var
-    { . } _Plugin: IFileFormatPlugIn;
+    { . } LCMSPlugin: ICMSPlugIn;
     { } begin
-    { . } if APlugin.QueryInterface(IFileFormatPlugIn, _Plugin) = 0 then
+    { . } if APlugin.QueryInterface(ICMSPlugIn, LCMSPlugin) = 0 then
+    { . } begin
     { ... } try
-    { ..... } with _Plugin do
-    { ..... } begin
-    { ....... } try
-    { ......... } AFileFormatPluginProc(_Plugin);
-    { ....... } except
-
-    { ....... } end;
-    { ..... } end;
+    { ..... } ACMSPluginProc(LCMSPlugin);
     { ... } finally
-    { ..... } _Plugin := nil;
+    { ..... } LCMSPlugin := nil;
     { ... } end;
+    { . } end
+    { . } else
+    { . } begin
+    { ... } TPluginBasic.ReturnError(TPluginBasic.IncorrectPluginTypeErrorMsg(ARelativPluginPath, APlugin, ptCMS), AErrorProc);
+    { . } end;
     { } end, AErrorProc);
 end;
 
-class function TApiPlugin.AppLoad(App: TAppCollectionItem; const AppController: IAppController): Boolean;
+class procedure TPluginBasic.LoadCrawlerPlugin(ARelativPluginPath: string; ACrawlerPluginProc: TCrawlerPluginProc; AErrorProc: TPluginErrorProc = nil);
+begin
+  TPluginBasic.LoadPlugin(ARelativPluginPath,
+    { } procedure(var APlugin: IPlugIn)
+    { } var
+    { . } LCrawlerPlugin: ICrawlerPlugIn;
+    { } begin
+    { . } if APlugin.QueryInterface(ICrawlerPlugIn, LCrawlerPlugin) = 0 then
+    { . } begin
+    { ... } try
+    { ..... } ACrawlerPluginProc(LCrawlerPlugin);
+    { ... } finally
+    { ..... } LCrawlerPlugin := nil;
+    { ... } end;
+    { . } end
+    { . } else
+    { . } begin
+    { ... } TPluginBasic.ReturnError(TPluginBasic.IncorrectPluginTypeErrorMsg(ARelativPluginPath, APlugin, ptCrawler), AErrorProc);
+    { . } end;
+    { } end, AErrorProc);
+end;
+
+class procedure TPluginBasic.LoadCrypterPlugin(ARelativPluginPath: string; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TPluginErrorProc = nil);
+begin
+  TPluginBasic.LoadPlugin(ARelativPluginPath,
+    { } procedure(var APlugin: IPlugIn)
+    { } var
+    { . } LCrypterPlugin: ICrypterPlugIn;
+    { } begin
+    { . } if APlugin.QueryInterface(ICrypterPlugIn, LCrypterPlugin) = 0 then
+    { . } begin
+    { ... } try
+    { ..... } ACrypterPluginProc(LCrypterPlugin);
+    { ... } finally
+    { ..... } LCrypterPlugin := nil;
+    { ... } end;
+    { . } end
+    { . } else
+    { . } begin
+    { ... } TPluginBasic.ReturnError(TPluginBasic.IncorrectPluginTypeErrorMsg(ARelativPluginPath, APlugin, ptCrypter), AErrorProc);
+    { . } end;
+    { } end, AErrorProc);
+end;
+
+class procedure TPluginBasic.LoadFileHosterPlugin(ARelativPluginPath: string; AFileHosterPluginProc: TFileHosterPluginProc; AErrorProc: TPluginErrorProc = nil);
+begin
+  TPluginBasic.LoadPlugin(ARelativPluginPath,
+    { } procedure(var APlugin: IPlugIn)
+    { } var
+    { . } LFileHosterPlugin: IFileHosterPlugIn;
+    { } begin
+    { . } if APlugin.QueryInterface(IFileHosterPlugIn, LFileHosterPlugin) = 0 then
+    { . } begin
+    { ... } try
+    { ..... } AFileHosterPluginProc(LFileHosterPlugin);
+    { ... } finally
+    { ..... } LFileHosterPlugin := nil;
+    { ... } end;
+    { . } end
+    { . } else
+    { . } begin
+    { ... } TPluginBasic.ReturnError(TPluginBasic.IncorrectPluginTypeErrorMsg(ARelativPluginPath, APlugin, ptFileHoster), AErrorProc);
+    { . } end;
+    { } end, AErrorProc);
+end;
+
+class procedure TPluginBasic.LoadFileFormatsPlugin(ARelativPluginPath: string; AFileFormatPluginProc: TFileFormatPluginProc; AErrorProc: TPluginErrorProc = nil);
+begin
+  TPluginBasic.LoadPlugin(ARelativPluginPath,
+    { } procedure(var APlugin: IPlugIn)
+    { } var
+    { . } LFileFormatPlugin: IFileFormatPlugIn;
+    { } begin
+    { . } if APlugin.QueryInterface(IFileFormatPlugIn, LFileFormatPlugin) = 0 then
+    { . } begin
+    { ... } try
+    { ..... } AFileFormatPluginProc(LFileFormatPlugin);
+    { ... } finally
+    { ..... } LFileFormatPlugin := nil;
+    { ... } end;
+    { . } end
+    { . } else
+    { . } begin
+    { ... } TPluginBasic.ReturnError(TPluginBasic.IncorrectPluginTypeErrorMsg(ARelativPluginPath, APlugin, ptFileFormats), AErrorProc);
+    { . } end;
+    { } end, AErrorProc);
+end;
+
+class procedure TPluginBasic.LoadImageHosterPlugin(ARelativPluginPath: string; AImageHosterPluginProc: TImageHosterPluginProc; AErrorProc: TPluginErrorProc = nil);
+begin
+  TPluginBasic.LoadPlugin(ARelativPluginPath,
+    { } procedure(var APlugin: IPlugIn)
+    { } var
+    { . } LImageHosterPlugin: IImageHosterPlugIn;
+    { } begin
+    { . } if APlugin.QueryInterface(IImageHosterPlugIn, LImageHosterPlugin) = 0 then
+    { . } begin
+    { ... } try
+    { ..... } AImageHosterPluginProc(LImageHosterPlugin);
+    { ... } finally
+    { ..... } LImageHosterPlugin := nil;
+    { ... } end;
+    { . } end
+    { . } else
+    { . } begin
+    { ... } TPluginBasic.ReturnError(TPluginBasic.IncorrectPluginTypeErrorMsg(ARelativPluginPath, APlugin, ptImageHoster), AErrorProc);
+    { . } end;
+    { } end, AErrorProc);
+end;
+
+class function TPluginBasic.AppLoad(App: TAppCollectionItem; const AAppController: IAppController): Boolean;
 var
   LLibraryHandle: Cardinal;
   LPluginFile: string;
-  LResult, LStatus: Boolean;
+  LResult, LHighException, LDoUnload: Boolean;
 begin
-  LPluginFile := TApiPlugin.RelativToAbsolutePath(App.Path);
-  try
-    TApiPlugin.LoadPluginBase(LPluginFile, LLibraryHandle,
-      { } procedure(var APlugin: IPlugIn)
-      { } var
-      { . } LAppPlugin: IAppPlugin;
-      { } begin
-      { . } App.LibraryID := LLibraryHandle;
-      { . } TApiPlugin.InitializePlugin(APlugin);
-      { . } if APlugin.QueryInterface(IAppPlugin, LAppPlugin) = 0 then
-      { . } begin
-      { ... } try
-      { ..... } try
-      { ....... } LResult := True;
-      { ....... } LStatus := LAppPlugin.Start(AppController);
-      { ..... } except
-      { ....... } LResult := False;
-      { ....... } LAppPlugin.Stop;
-      { ....... } TApiPlugin.UninitializePlugin(LAppPlugin);
-      { ..... } end;
-      { ... } except
-      { ..... } LAppPlugin.Stop;
-      { ..... } TApiPlugin.UninitializePlugin(LAppPlugin);
-      { ..... } TApiPlugin.UnLoadPluginBase(LLibraryHandle);
-      { ..... } LStatus := True;
-      { ... } end;
+  LResult := False;
+  LHighException := False;
+  LDoUnload := False;
+  LPluginFile := TPluginBasic.RelativToAbsolutePath(App.Path);
 
-      { ... } if not LStatus then
-      { ... } begin
-      { ..... } LResult := False;
-      { ..... } TApiPlugin.ReturnError(Format(StrPluginInternalError, [LAppPlugin.ErrorMsg, ExtractFileName(LPluginFile)]));
-      { ... } end
-      { ... } else
-      { ... } begin
-      { ..... } App.Plugin := LAppPlugin;
-      { ... } end;
+  TPluginBasic.LoadPluginBase(LPluginFile, LLibraryHandle,
+    { } procedure(var APlugin: IPlugIn)
+    { } var
+    { . } LAppPlugin: IAppPlugin;
+    { } begin
+    { . } App.LibraryID := LLibraryHandle;
+    { . } TPluginBasic.InitializePlugin(APlugin);
+    { . } if APlugin.QueryInterface(IAppPlugin, LAppPlugin) = 0 then
+    { . } begin
+    { ... } try
+    { ..... } try
+    { ....... } LResult := LAppPlugin.Start(AAppController);
+    { ..... } except
+    { ....... } LHighException := True;
+    { ....... } LAppPlugin.Stop;
+    { ....... } TPluginBasic.UninitializePlugin(LAppPlugin);
+    { ....... } TPluginBasic.UnLoadPluginBase(LLibraryHandle);
+    { ....... } LAppPlugin := nil;
+    { ....... } LDoUnload := True;
+    { ..... } end;
+    { ... } except
+    { ..... } if not LDoUnload then
+    { ....... } TPluginBasic.UnLoadPluginBase(LLibraryHandle);
+    { ..... } LAppPlugin := nil;
+    { ... } end;
 
-      { ... } LAppPlugin := nil;
-      { . } end
-      { . } else
-      { . } begin
-      { ... } TApiPlugin.ReturnError(IncorrectPluginTypeErrorMsg(App.Path, APlugin, ptApp));
-      { . } end;
-      { } end, False);
-
-  except
-    if not LStatus then
-    begin
-      TApiPlugin.UnLoadPluginBase(LLibraryHandle);
-    end;
-  end;
+    { ... } if LResult then
+    { ... } begin
+    { ..... } App.Plugin := LAppPlugin;
+    { ... } end
+    { ... } else
+    { ... } if not LResult and not LHighException then
+    { ... } begin
+    { ..... } LAppPlugin.Stop;
+    { ..... } TPluginBasic.UninitializePlugin(LAppPlugin);
+    { ..... } TPluginBasic.UnLoadPluginBase(LLibraryHandle);
+    { ..... } LAppPlugin := nil;
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [LAppPlugin.ErrorMsg, ExtractFileName(LPluginFile)]));
+    { ... } end
+    { ... } else
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(LPluginFile)]));
+    { ... } end;
+    { . } end
+    { . } else
+    { . } begin
+    { ... } TPluginBasic.ReturnError(IncorrectPluginTypeErrorMsg(App.Path, APlugin, ptApp));
+    { . } end;
+    { } end, False);
 
   Result := LResult;
 end;
 
-class procedure TApiPlugin.AppUnLoad(App: TAppCollectionItem);
+class procedure TPluginBasic.AppUnLoad(App: TAppCollectionItem);
 var
   LLibraryHandle: Cardinal;
 begin
@@ -264,247 +518,495 @@ begin
   if not(LLibraryHandle = 0) then
   begin
     try
-      TApiPlugin.UninitializePlugin(App.Plugin);
+      TPluginBasic.UninitializePlugin(App.Plugin);
       App.Plugin.Stop;
     finally
       App.Plugin := nil;
     end;
   end;
-  TApiPlugin.UnLoadPluginBase(LLibraryHandle);
+  TPluginBasic.UnLoadPluginBase(LLibraryHandle);
 end;
 
-class function TApiPlugin.CAPTCHAExec;
+class function TPluginBasic.CAPTCHAExec(const ACAPTCHAPluginPath: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString;
+  AErrorProc: TPluginErrorProc = nil): WordBool;
 var
-  _Result: Boolean;
-  _Cookies, _CAPTCHAResult: WideString;
-begin
-  _Result := False;
-
-  _CAPTCHAResult := '';
-  _Cookies := ACookies;
-
-  LoadPlugin(ACAPTCHAPluginPath,
-    { } procedure(var APlugin: IPlugIn)
-    { } var
-    { . } _Plugin: ICAPTCHAPlugIn;
-    { . }
-    { } begin
-    { . } if APlugin.QueryInterface(ICAPTCHAPlugIn, _Plugin) = 0 then
-    { ... } try
-    { ..... } _Plugin.CAPTCHA := ACAPTCHA;
-    { ..... } _Plugin.CAPTCHAType := ACAPTCHAType;
-    { ..... } _Plugin.CAPTCHAName := CAPTCHAName;
-    { ..... } _Plugin.Cookies := _Cookies;
-
-    { ..... } _Result := _Plugin.Exec;
-
-    { ..... } if _Result then
-    { ..... } begin
-    { ....... } _Cookies := _Plugin.Cookies;
-    { ....... } _CAPTCHAResult := _Plugin.CAPTCHAResult;
-    { ..... } end;
-
-    { ... } finally
-    { ..... } _Plugin := nil;
-    { ... } end;
-    { } end);
-
-  AText := _CAPTCHAResult;
-  ACookies := _Cookies;
-  Result := _Result;
-end;
-
-class function TApiPlugin.CMSExec;
-var
-  _Result: Boolean;
-begin
-  _Result := False;
-  LoadPlugin(APublishItem.CMSPluginPath,
-    { } procedure(var APlugin: IPlugIn)
-    { } var
-    { . } _Plugin: ICMSPlugIn;
-    { } begin
-    { . } if APlugin.QueryInterface(ICMSPlugIn, _Plugin) = 0 then
-    { ... } try
-    { ..... } with _Plugin do
-    { ..... } begin
-    { ....... } if Assigned(ACAPTCHAInput) then
-    { ......... } SetCAPTCHAInput(ACAPTCHAInput)
-    { ....... } else
-    { ....... } begin
-    { ......... } SetCAPTCHAInput(TCAPTCHAClass.CAPTCHAInput)
-    { ....... } end;
-
-    { ....... } if Assigned(AIntelligentPostingHandler) then
-    { ......... } SetIntelligentPostingHelper(AIntelligentPostingHandler)
-    { ....... } else
-    { ....... } begin
-    { ......... } SetIntelligentPostingHelper(TIntelligentPostingClass.IntelligentPostingHandler)
-    { ....... } end;
-
-    { ....... } Accountname := APublishItem.Accountname;
-    { ....... } Accountpassword := APublishItem.Accountpassword;
-
-    { ....... } SettingsFileName := APublishItem.SettingsFileName;
-
-    { ....... } // ArticleID
-
-    { ....... } Subject := APublishItem.Subject;
-    { ....... } Tags := APublishItem.Tags;
-    { ....... } Message := APublishItem.Message;
-    { ....... } Website := APublishItem.Website;
-    { ....... } Data := APublishItem.Data;
-
-    { ....... } try
-    { ......... } _Result := Exec;
-    { ......... } // TApiPlugin.ReturnError(ErrorMsg, AErrorProc);
-    { ....... } except
-    { ......... } on E: Exception do
-    { ......... } begin
-    { ........... } TPluginBase.ReturnError('Unhandled exception (' + E.message + ') occurred', AErrorProc);
-    { ......... } end;
-    { ....... } end;
-    { ..... } end;
-    { ... } finally
-    { ..... } _Plugin := nil;
-    { ... } end;
-    { } end, AErrorProc);
-
-  Result := _Result;
-end;
-
-class function TApiPlugin.CMSDefaultCharset(ACMSPluginPath: string): string;
-var
-  _Result: string;
-begin
-  _Result := '';
-  LoadPlugin(ACMSPluginPath,
-    { } procedure(var APlugin: IPlugIn)
-    { } var
-    { . } _Plugin: ICMSPlugIn;
-    { } begin
-    { . } if APlugin.QueryInterface(ICMSPlugIn, _Plugin) = 0 then
-    { ... } try
-    { ..... } _Result := _Plugin.DefaultCharset;
-    { ... } finally
-    { ..... } _Plugin := nil;
-    { ... } end;
-    { } end);
-  Result := _Result;
-end;
-
-class function TApiPlugin.CMSBelongsTo(ACMSPluginPath, AWebsiteSourceCode: string): Boolean;
-var
-  _BelongsTo: Boolean;
-begin
-  _BelongsTo := False;
-  LoadPlugin(ACMSPluginPath,
-    { } procedure(var APlugin: IPlugIn)
-    { } var
-    { . } _Plugin: ICMSPlugIn;
-    { } begin
-    { . } if APlugin.QueryInterface(ICMSPlugIn, _Plugin) = 0 then
-    { ... } try
-    { ..... } _BelongsTo := _Plugin.BelongsTo(AWebsiteSourceCode);
-    { ... } finally
-    { ..... } _Plugin := nil;
-    { ... } end;
-    { } end);
-
-  Result := _BelongsTo;
-end;
-
-class procedure TApiPlugin.CMSShowWebsiteSettingsEditor;
-begin
-  LoadPlugin(ACMSPluginPath,
-    { } procedure(var APlugin: IPlugIn)
-    { } var
-    { . } _Plugin: ICMSPlugIn;
-    { . } _WebsiteEditor: TBasisWebsiteEditor;
-    { } begin
-    { . } if APlugin.QueryInterface(ICMSPlugIn, _Plugin) = 0 then
-    { ... } try
-    { ..... } with _Plugin do
-    { ..... } begin
-
-    { ....... } SetCAPTCHAInput(TCAPTCHAClass.CAPTCHAInput);
-
-    { ....... } Accountname := CMSWebsites.Accountname;
-    { ....... } Accountpassword := CMSWebsites.Accountpassword;
-
-    { ....... } SettingsFileName := CMSWebsites.GetPath;
-
-    { ....... } Website := CMSWebsites.name;
-
-    { ....... } _WebsiteEditor := TWebsiteEditorFactory.GetClassType(_Plugin.CMSType).Create(_Plugin, AppController, CMSWebsites.GetPath);
-    { ....... } try
-    { ......... } if ShowWebsiteSettingsEditor(_WebsiteEditor) then
-    { ........... } ;
-    { ....... } finally
-    { ......... } _WebsiteEditor.Free;
-    { ....... } end;
-    { ..... } end;
-    { ... } finally
-    { ..... } _Plugin := nil;
-    { ... } end;
-    { } end);
-end;
-
-class function TApiPlugin.CrawlerExec;
-var
-  LResult: Boolean;
-  LFolderInfo: TCrypterFolderInfo;
-  LErrorMsg: string;
+  LResult, LHighException: WordBool;
+  LCookies, LCAPTCHASolution: WideString;
 begin
   LResult := False;
-  LoadPlugin(ACrawler.Path,
-    { } procedure(var APlugin: IPlugIn)
-    { } var
-    { . } LPlugin: ICrawlerPlugIn;
-    { . } LComponentIDs: TControlIDs;
-    { . } LCrawlerContingentIndex: Integer;
+  LHighException := False;
+
+  LCAPTCHASolution := '';
+  LCookies := ACookies;
+
+  TPluginBasic.LoadCAPTCHAPlugin(ACAPTCHAPluginPath,
+    { } procedure(var ACAPTCHAPlugin: ICAPTCHAPlugIn)
     { } begin
-    { . } if APlugin.QueryInterface(ICrawlerPlugIn, LPlugin) = 0 then
-    { ... } try
-    { ..... } with LPlugin do
-    { ..... } begin
-    { ....... } LComponentIDs := [];
-    { ....... } for LCrawlerContingentIndex := 0 to ACrawler.Contingent.Count - 1 do
-    { ......... } with TCrawlerContingentCollectionItem(ACrawler.Contingent.Items[LCrawlerContingentIndex]) do
-    { ........... } if Status and (TypeID = AControlController.TypeID) then
-    { ............. } LComponentIDs := LComponentIDs + [ControlID];
+    { . } ACAPTCHAPlugin.CAPTCHA := ACAPTCHA;
+    { . } ACAPTCHAPlugin.CAPTCHAType := ACAPTCHAType;
+    { . } ACAPTCHAPlugin.CAPTCHAName := ACAPTCHAName;
+    { . } ACAPTCHAPlugin.Cookies := LCookies;
 
-    { ....... } try
-    { ......... } LResult := Exec(Integer(AControlController.TypeID), Longword(LComponentIDs), ACrawler.Limit, AControlController);
-    { ......... } LErrorMsg := ErrorMsg;
-    { ....... } except
-    { ......... } on E: Exception do
-    { ......... } begin
-    { ........... } LErrorMsg := E.message;
-    { ......... } end;
-    { ....... } end;
+    { . } try
+    { ... } LResult := ACAPTCHAPlugin.Exec;
+    { . } except
+    { ... } LHighException := True;
+    { . } end;
 
-    { ..... } end;
-    { ... } finally
-    { ..... } LPlugin := nil;
-    { ... } end;
-    { } end,
-    { } procedure(AErrorMsg: string)
-    { } begin
-    { . } LErrorMsg := AErrorMsg;
-    { } end);
+    { . } if LResult then
+    { . } begin
+    { ... } LCookies := ACAPTCHAPlugin.Cookies;
+    { ... } LCAPTCHASolution := ACAPTCHAPlugin.CAPTCHAResult;
+    { . } end
+    { . } else
+    { . } if not SameStr('', ACAPTCHAPlugin.ErrorMsg) then
+    { . } begin
+    { ... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ACAPTCHAPlugin.ErrorMsg, ExtractFileName(ACAPTCHAPluginPath)]), AErrorProc);
+    { . } end
+    { . } else
+    { . } if LHighException then
+    { . } begin
+    { ... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(ACAPTCHAPluginPath)]), AErrorProc);
+    { . } end;
+    { } end, AErrorProc);
 
-  AErrorMsg := LErrorMsg;
+  ACAPTCHASolution := LCAPTCHASolution;
+  ACookies := LCookies;
   Result := LResult;
 end;
 
-class function TApiPlugin.CrypterAddFolder;
+class function TPluginBasic.CMSDefaultCharset(ARelativPluginPath: string): string;
+var
+  LResult: string;
+begin
+  LResult := '';
+  TPluginBasic.LoadCMSPlugin(ARelativPluginPath,
+    { } procedure(var ACMSPlugin: ICMSPlugIn)
+    { } begin
+    { . } LResult := ACMSPlugin.DefaultCharset;
+    { } end);
+  Result := LResult;
+end;
+
+class function TPluginBasic.CMSBelongsTo(ARelativPluginPath, AWebsiteSourceCode: string): Boolean;
 var
   LResult: Boolean;
-  LFolderInfo: TCrypterFolderInfo;
-  LErrorMsg: string;
 begin
   LResult := False;
+  TPluginBasic.LoadCMSPlugin(ARelativPluginPath,
+    { } procedure(var ACMSPlugin: ICMSPlugIn)
+    { } begin
+    { . } LResult := ACMSPlugin.BelongsTo(AWebsiteSourceCode);
+    { } end);
+  Result := LResult;
+end;
+
+class procedure TPluginBasic.CMSShowWebsiteSettingsEditor(ARelativPluginPath: string; ACMSWebsites: TCMSWebsitesCollectionItem; const AAppController: IAppController);
+begin
+  TPluginBasic.LoadCMSPlugin(ARelativPluginPath,
+    { } procedure(var ACMSPlugin: ICMSPlugIn)
+    { } var
+    { . } LWebsiteEditor: TBasisWebsiteEditor;
+    { } begin
+    { . } with ACMSPlugin do
+    { . } begin
+    { ... } SetCAPTCHAInput(TApiCAPTCHA.DefaultHandler);
+
+    { ... } Accountname := ACMSWebsites.Accountname;
+    { ... } Accountpassword := ACMSWebsites.Accountpassword;
+
+    { ... } SettingsFileName := ACMSWebsites.GetPath;
+
+    { ... } Website := ACMSWebsites.name;
+
+    { ... } LWebsiteEditor := TWebsiteEditorFactory.GetClassType(ACMSPlugin.CMSType).Create(ACMSPlugin, AAppController, ACMSWebsites.GetPath);
+    { ... } try
+    { ..... } if ShowWebsiteSettingsEditor(LWebsiteEditor) then
+    { ....... } ;
+    { ... } finally
+    { ..... } LWebsiteEditor.Free;
+    { ... } end;
+    { . } end;
+    { } end);
+end;
+
+class function TPluginBasic.GetSaveFileFormats: TStrings;
+var
+  LResult: TStringList;
+  LFileFormatCollectionIndex: Integer;
+begin
+  LResult := TStringList.Create;
+
+  with SettingsManager.Settings.Plugins.FileFormats do
+    for LFileFormatCollectionIndex := 0 to Count - 1 do
+      with TFileFormatsCollectionItem(Items[LFileFormatCollectionIndex]) do
+        if Enabled then
+        begin
+          TPluginBasic.LoadFileFormatsPlugin(Path,
+            { } procedure(var AFileFormatPlugin: IFileFormatPlugIn)
+            { } begin
+            { . } if AFileFormatPlugin.CanSaveControls then
+            { ... } LResult.Add(AFileFormatPlugin.GetName + LResult.NameValueSeparator + Format(AFileFormatPlugin.GetFileFormatName, [StrDocument]));
+            { } end);
+        end;
+
+  Result := LResult;
+end;
+
+class function TPluginBasic.GetLoadFileFormats: TStrings;
+var
+  LResult: TStringList;
+  LFileFormatCollectionIndex: Integer;
+begin
+  LResult := TStringList.Create;
+
+  with SettingsManager.Settings.Plugins.FileFormats do
+    for LFileFormatCollectionIndex := 0 to Count - 1 do
+      with TFileFormatsCollectionItem(Items[LFileFormatCollectionIndex]) do
+        if Enabled then
+        begin
+          TPluginBasic.LoadFileFormatsPlugin(Path,
+            { } procedure(var AFileFormatPlugin: IFileFormatPlugIn)
+            { } begin
+            { . } if AFileFormatPlugin.CanLoadControls then
+            { ... } LResult.Add(AFileFormatPlugin.GetName + LResult.NameValueSeparator + Format(AFileFormatPlugin.GetFileFormatName, [StrDocument]));
+            { } end);
+        end;
+
+  Result := LResult;
+end;
+
+class procedure TPluginBasic.SaveFile(AFileFormats: TPlugInCollectionItem; AFileName, ATemplateFileName: string; const ATabSheetController: ITabSheetController);
+begin
+  TPluginBasic.LoadFileFormatsPlugin(AFileFormats.Path,
+    { } procedure(var AFileFormatPlugin: IFileFormatPlugIn)
+    { } begin
+    { . } if AFileFormatPlugin.CanSaveControls then
+    { ... } AFileFormatPlugin.SaveControls(AFileName, ATemplateFileName, ATabSheetController)
+    { } end);
+end;
+
+class procedure TPluginBasic.LoadFile(AFileName: string; const APageController: IPageController);
+var
+  LFileFormatCollectionIndex, TabIndex: Integer;
+  Stop: Boolean;
+begin
+  Stop := False;
+
+  with SettingsManager.Settings.Plugins.FileFormats do
+    for LFileFormatCollectionIndex := 0 to Count - 1 do
+      if not Stop then
+        with TFileFormatsCollectionItem(Items[LFileFormatCollectionIndex]) do
+          if Enabled then
+            TPluginBasic.LoadFileFormatsPlugin(Path,
+              { } procedure(var AFileFormatPlugin: IFileFormatPlugIn)
+              { } begin
+              { . } if AFileFormatPlugin.CanLoadControls then
+              { . } begin
+              { ... } try
+              { ..... } AFileFormatPlugin.ForceAddCrypter := ForceAddCrypter;
+              { ..... } AFileFormatPlugin.ForceAddImageMirror := ForceAddImageMirror;
+              { ..... } TabIndex := AFileFormatPlugin.LoadControls(AFileName, GetTemplatesTypeFolder, APageController);
+              { ..... } Stop := (TabIndex = -1);
+              { ..... } if not Stop then
+              { ....... } with APageController.TabSheetController[TabIndex] do
+              { ....... } begin
+              { ......... } Application.ProcessMessages;
+              { ......... } ResetDataChanged(AFileName, AFileFormatPlugin.GetName);
+              { ......... } PublishController.Active := True;
+              { ....... } end;
+              { ... } except
+
+              { ... } end;
+              { . } end;
+              { } end);
+end;
+
+procedure TApiThreadedPlugin.DefaultInternalErrorHandler(AErrorMsg: string);
+begin
+  FTask.Invoke(
+    { } procedure
+    { } begin
+    { ... } raise EIntelligeNPluginException.Create(AErrorMsg);
+    { } end);
+end;
+
+function TApiThreadedPlugin.DefaultCAPTCHAInputHandler(const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString): WordBool;
+var
+  LResult: WordBool;
+  LCAPTCHAType: TCAPTCHAType;
+
+  LCAPTCHASolution, LCAPTCHACookies: WideString;
+  LCAPTCHAWaitable: IOmniWaitableValue;
+
+  LCAPTCHAMemoryStream: TMemoryStream;
+begin
+  LCAPTCHAType := TApiCAPTCHA.GetCAPTCHAType(ACAPTCHA);
+
+  LCAPTCHASolution := '';
+  LCAPTCHACookies := ACookies;
+
+  LResult := TApiCAPTCHA.PluginsHandle(LCAPTCHAType, ACAPTCHA, ACAPTCHAName, ACAPTCHASolution, LCAPTCHACookies, FErrorHandler);
+
+  if LResult then
+  begin
+    ACAPTCHASolution := LCAPTCHACookies;
+    ACookies := LCAPTCHACookies;
+  end
+  else if not LResult then
+  begin
+    LCAPTCHAWaitable := CreateWaitableValue;
+
+    LCAPTCHASolution := '';
+
+    try
+      if (LCAPTCHAType = ctImage) then
+      begin
+        LCAPTCHACookies := ACookies;
+        TApiHTTP.DownloadData(ACAPTCHA, LCAPTCHAMemoryStream, LCAPTCHACookies,
+          // TODO: Read settings at a thread-safe position
+          { . } SettingsManager.Settings.HTTP.GetProxy(psaMain), SettingsManager.Settings.HTTP.ConnectTimeout, SettingsManager.Settings.HTTP.ReadTimeout);
+      end;
+
+      FTask.Invoke(
+        { } procedure
+        { } begin
+        { . } LResult := TApiCAPTCHA.ManualHandle(LCAPTCHAType, ACAPTCHA, ACAPTCHAName, LCAPTCHASolution, LCAPTCHAMemoryStream, 1000 * 60 * 2); // wait max. 2 minutes
+        { . } LCAPTCHAWaitable.Signal;
+        { } end);
+
+      LCAPTCHAWaitable.WaitFor(1000 * 60 * 2 + 15); // wait max. 2 minutes + 15 seconds
+
+      if LResult then
+      begin
+        ACAPTCHASolution := LCAPTCHASolution;
+        ACookies := LCAPTCHACookies;
+      end;
+
+      LCAPTCHAWaitable := nil;
+    finally
+      if (LCAPTCHAType = ctImage) then
+      begin
+        LCAPTCHAMemoryStream.Free;
+      end;
+    end;
+  end;
+
+  Result := LResult;
+end;
+
+function TApiThreadedPlugin.DefaultIntelligentPostingHelperHandler(var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool;
+var
+  LResult: WordBool;
+
+  LIntelligentPostingSearchValue, LIntelligentPostingSearchResults: WideString;
+  LIntelligentPostingSearchIndex: Integer;
+  LIntelligentPostingRedoSearch: WordBool;
+
+  LIntelligentPostingHelperWaitable: IOmniWaitableValue;
+begin
+  LIntelligentPostingHelperWaitable := CreateWaitableValue;
+
+  LIntelligentPostingSearchValue := ASearchValue;
+  LIntelligentPostingSearchResults := ASearchResults;
+  LIntelligentPostingSearchIndex := ASearchIndex;
+
+  FTask.Invoke(
+    { } procedure
+    { } begin
+    { . } LResult := TIntelligentPostingClass.IntelligentPostingHandler(LIntelligentPostingSearchValue, LIntelligentPostingSearchResults, LIntelligentPostingSearchIndex, LIntelligentPostingRedoSearch);
+    { . } LIntelligentPostingHelperWaitable.Signal;
+    { } end);
+
+  LIntelligentPostingHelperWaitable.WaitFor();
+
+  if LResult then
+  begin
+    ASearchValue := LIntelligentPostingSearchValue;
+    ASearchIndex := LIntelligentPostingSearchIndex;
+    ARedoSearch := LIntelligentPostingRedoSearch;
+  end;
+
+  LIntelligentPostingHelperWaitable := nil;
+
+  Result := LResult;
+end;
+
+procedure TApiThreadedPlugin.LoadCrypterPlugin(ACrypter: TCrypterCollectionItem; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TPluginErrorProc = nil);
+begin
+  TPluginBasic.LoadCrypterPlugin(ACrypter.Path,
+    { } procedure(var ACrypterPlugin: ICrypterPlugIn)
+    { } begin
+    { . } with ACrypterPlugin do
+    { . } begin
+    { ... } UseAccount := ACrypter.UseAccount;
+    { ... } if ACrypter.UseAccount then
+    { ... } begin
+    { ..... } Accountname := ACrypter.Accountname;
+    { ..... } Accountpassword := ACrypter.Accountpassword;
+    { ... } end
+    { ... } else
+    { ... } begin
+    { ..... } Accountname := '';
+    { ..... } Accountpassword := '';
+    { ... } end;
+
+    { ... } ACrypterPluginProc(ACrypterPlugin);
+    { . } end;
+    { } end, AErrorProc);
+end;
+
+procedure TApiThreadedPlugin.LoadImageHosterPlugin(AImageHoster: TImageHosterCollectionItem; AImageHosterPluginProc: TImageHosterPluginProc; AErrorProc: TPluginErrorProc = nil);
+begin
+  TPluginBasic.LoadImageHosterPlugin(AImageHoster.Path,
+    { } procedure(var AImageHosterPlugin: IImageHosterPlugIn)
+    { } begin
+    { . } with AImageHosterPlugin do
+    { . } begin
+    { ... } UseAccount := AImageHoster.UseAccount;
+    { ... } if AImageHoster.UseAccount then
+    { ... } begin
+    { ..... } Accountname := AImageHoster.Accountname;
+    { ..... } Accountpassword := AImageHoster.Accountpassword;
+    { ... } end
+    { ... } else
+    { ... } begin
+    { ..... } Accountname := '';
+    { ..... } Accountpassword := '';
+    { ... } end;
+
+    { ... } AImageHosterPluginProc(AImageHosterPlugin);
+    { . } end;
+    { } end, AErrorProc);
+end;
+
+constructor TApiThreadedPlugin.Create(const ATask: IOmniTask; AErrorHandler: TPluginErrorProc = nil);
+begin
+  inherited Create;
+  FTask := ATask;
+  if not Assigned(AErrorHandler) then
+    FErrorHandler := DefaultInternalErrorHandler
+  else
+    FErrorHandler := AErrorHandler;
+end;
+
+destructor TApiThreadedPlugin.Destroy;
+begin
+  FTask := nil;
+  inherited Destroy;
+end;
+
+function TApiThreadedPlugin.CMSExec(const APublishItem: IPublishItem; ACAPTCHAInput: TCAPTCHAInput = nil; AIntelligentPostingHandler: TIntelligentPostingHelper = nil): Boolean;
+var
+  LResult, LHighException: WordBool;
+  LErrorHandler: TPluginErrorProc;
+begin
+  LResult := False;
+  LHighException := False;
+
+  TPluginBasic.LoadCMSPlugin(APublishItem.CMSPluginPath,
+    { } procedure(var ACMSPlugin: ICMSPlugIn)
+    { } begin
+    { . } with ACMSPlugin do
+    { . } begin
+    { ... } if Assigned(ACAPTCHAInput) then
+    { ..... } SetCAPTCHAInput(ACAPTCHAInput)
+    { ... } else
+    { ... } begin
+    { ..... } SetCAPTCHAInput(DefaultCAPTCHAInputHandler)
+    { ... } end;
+
+    { ... } if Assigned(AIntelligentPostingHandler) then
+    { ..... } SetIntelligentPostingHelper(AIntelligentPostingHandler)
+    { ... } else
+    { ... } begin
+    { ..... } SetIntelligentPostingHelper(DefaultIntelligentPostingHelperHandler)
+    { ... } end;
+
+    { ... } Accountname := APublishItem.Accountname;
+    { ... } Accountpassword := APublishItem.Accountpassword;
+
+    { ... } SettingsFileName := APublishItem.SettingsFileName;
+
+    { ... } // ArticleID
+
+    { ... } Subject := APublishItem.Subject;
+    { ... } Tags := APublishItem.Tags;
+    { ... } Message := APublishItem.Message;
+    { ... } Website := APublishItem.Website;
+    { ... } Data := APublishItem.Data;
+
+    { ... } try
+    { ..... } LResult := Exec;
+    { ... } except
+    { ..... } LHighException := True;
+    { ... } end;
+
+    { ... } if not SameStr('', ErrorMsg) then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(APublishItem.CMSPluginPath)]), FErrorHandler);
+    { ... } end
+    { ... } else
+    { ... } if LHighException then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(APublishItem.CMSPluginPath)]), FErrorHandler);
+    { ... } end;
+    { . } end;
+    { } end, FErrorHandler);
+
+  Result := LResult;
+end;
+
+function TApiThreadedPlugin.CrawlerExec(ACrawler: TCrawlerCollectionItem; const AControlController: IControlController): Boolean;
+var
+  LResult, LHighException: WordBool;
+begin
+  LResult := False;
+  LHighException := False;
+
+  TPluginBasic.LoadCrawlerPlugin(ACrawler.Path,
+    { } procedure(var ACrawlerPlugin: ICrawlerPlugIn)
+    { } var
+    { . } LComponentIDs: TControlIDs;
+    { . } LCrawlerContingentIndex: Integer;
+    { } begin
+    { . } with ACrawlerPlugin do
+    { . } begin
+    { ... } LComponentIDs := [];
+    { ... } for LCrawlerContingentIndex := 0 to ACrawler.Contingent.Count - 1 do
+    { ..... } with TCrawlerContingentCollectionItem(ACrawler.Contingent.Items[LCrawlerContingentIndex]) do
+    { ....... } if Status and (TypeID = AControlController.TypeID) then
+    { ......... } LComponentIDs := LComponentIDs + [ControlID];
+
+    { ... } try
+    { ..... } LResult := Exec(Integer(AControlController.TypeID), Longword(LComponentIDs), ACrawler.Limit, AControlController);
+    { ... } except
+    { ..... } LHighException := True;
+    { ... } end;
+
+    { ... } if not SameStr('', ErrorMsg) then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(ACrawler.Path)]), FErrorHandler);
+    { ... } end
+    { ... } else
+    { ... } if LHighException then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(ACrawler.Path)]), FErrorHandler);
+    { ... } end;
+    { . } end;
+    { } end, FErrorHandler);
+
+  Result := LResult;
+end;
+
+function TApiThreadedPlugin.CrypterAddFolder;
+var
+  LResult, LHighException: WordBool;
+  LFolderInfo: TCrypterFolderInfo;
+begin
+  LResult := False;
+  LHighException := False;
+
   LoadCrypterPlugin(ACrypter,
     { } procedure(var ACrypterPlugin: ICrypterPlugIn)
     { } begin
@@ -556,149 +1058,70 @@ begin
 
     { ... } try
     { ..... } LResult := AddFolder(AMirrorContainer, LFolderInfo);
-    { ..... } LErrorMsg := ErrorMsg;
     { ... } except
-    { ..... } on E: Exception do
-    { ..... } begin
-    { ...... } LErrorMsg := E.message;
-    { ..... } end;
+    { ..... } LHighException := True;
     { ... } end;
 
+    { ... } if not SameStr('', ErrorMsg) then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(ACrypter.Path)]), FErrorHandler);
+    { ... } end
+    { ... } else
+    { ... } if LHighException then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(ACrypter.Path)]), FErrorHandler);
+    { ... } end;
     { . } end;
-    { } end,
-    { } procedure(AErrorMsg: string)
-    { } begin
-    { . } LErrorMsg := AErrorMsg;
-    { } end);
-  AFolderInfo := LFolderInfo;
-  AErrorMsg := LErrorMsg;
+    { } end, FErrorHandler);
+
   Result := LResult;
 end;
 
-class function TApiPlugin.CrypterGetFolder;
+function TApiThreadedPlugin.CrypterGetFolder;
 var
-  LResult: Boolean;
+  LResult, LHighException: WordBool;
   LFolderInfo: TCrypterFolderInfo;
-  LErrorMsg: string;
 begin
   LResult := False;
+  LHighException := False;
+
   LoadCrypterPlugin(ACrypter,
     { } procedure(var ACrypterPlugin: ICrypterPlugIn)
     { } begin
     { . } with ACrypterPlugin do
     { . } begin
-    { ... } LResult := GetFolder(AFolderIdentifier, LFolderInfo);
+
+    { ... } try
+    { ..... } LResult := GetFolder(AFolderIdentifier, LFolderInfo);
+    { ... } except
+    { ..... } LHighException := True;
+    { ... } end;
+
     { ... } if LResult then
     { ... } begin
     { ..... } LFolderInfo.Hoster := THosterConfiguration.GetCustomisedHoster(LFolderInfo.Hoster);
     { ..... } LFolderInfo.HosterShort := THosterConfiguration.GetCustomisedHoster(LFolderInfo.Hoster, True);
+    { ... } end
+    { ... } else
+    { ... } if not SameStr('', ErrorMsg) then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(ACrypter.Path)]), FErrorHandler);
+    { ... } end
+    { ... } else
+    { ... } if LHighException then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(ACrypter.Path)]), FErrorHandler);
     { ... } end;
     { . } end;
-    { } end,
-    { } procedure(AErrorMsg: string)
-    { } begin
-    { . } LErrorMsg := AErrorMsg;
-    { } end);
-  AFolderInfo := LFolderInfo;
-  AErrorMsg := LErrorMsg;
+    { } end, FErrorHandler);
+
   Result := LResult;
 end;
 
-class function TApiPlugin.GetSaveFileFormats: TStrings;
+function TApiThreadedPlugin.FileHosterCheckFiles(AFileHoster: TPlugInCollectionItem; ALinks: string; out ALinksInfo: TLinksInfo): Boolean;
 var
-  _Result: TStringList;
-  _FileFormatCollectionIndex: Integer;
-begin
-  _Result := TStringList.Create;
-
-  with SettingsManager.Settings.Plugins.FileFormats do
-    for _FileFormatCollectionIndex := 0 to Count - 1 do
-      with TFileFormatsCollectionItem(Items[_FileFormatCollectionIndex]) do
-        if Enabled then
-        begin
-          LoadFileFormatsPlugin(Path,
-            { } procedure(var AFileFormatPlugin: IFileFormatPlugIn)
-            { } begin
-            { . } if AFileFormatPlugin.CanSaveControls then
-            { ... } _Result.Add(AFileFormatPlugin.GetName + _Result.NameValueSeparator + Format(AFileFormatPlugin.GetFileFormatName, [StrDocument]));
-            { } end);
-        end;
-
-  Result := _Result;
-end;
-
-class function TApiPlugin.GetLoadFileFormats: TStrings;
-var
-  _Result: TStringList;
-  _FileFormatCollectionIndex: Integer;
-begin
-  _Result := TStringList.Create;
-
-  with SettingsManager.Settings.Plugins.FileFormats do
-    for _FileFormatCollectionIndex := 0 to Count - 1 do
-      with TFileFormatsCollectionItem(Items[_FileFormatCollectionIndex]) do
-        if Enabled then
-        begin
-          LoadFileFormatsPlugin(Path,
-            { } procedure(var AFileFormatPlugin: IFileFormatPlugIn)
-            { } begin
-            { . } if AFileFormatPlugin.CanLoadControls then
-            { ... } _Result.Add(AFileFormatPlugin.GetName + _Result.NameValueSeparator + Format(AFileFormatPlugin.GetFileFormatName, [StrDocument]));
-            { } end);
-        end;
-
-  Result := _Result;
-end;
-
-class procedure TApiPlugin.SaveFile(AFileFormats: TPlugInCollectionItem; AFileName, ATemplateFileName: string; ATabSheetController: ITabSheetController);
-begin
-  LoadFileFormatsPlugin(AFileFormats.Path,
-    { } procedure(var AFileFormatPlugin: IFileFormatPlugIn)
-    { } begin
-    { . } if AFileFormatPlugin.CanSaveControls then
-    { ... } AFileFormatPlugin.SaveControls(AFileName, ATemplateFileName, ATabSheetController)
-    { } end);
-end;
-
-class procedure TApiPlugin.LoadFile(AFileName: string; APageController: IPageController);
-var
-  I, TabIndex: Integer;
-  Stop: Boolean;
-begin
-  Stop := False;
-
-  with SettingsManager.Settings.Plugins.FileFormats do
-    for I := 0 to Count - 1 do
-      if not Stop then
-        with TFileFormatsCollectionItem(Items[I]) do
-          if Enabled then
-            LoadFileFormatsPlugin(Path,
-              { } procedure(var AFileFormatPlugin: IFileFormatPlugIn)
-              { } begin
-              { . } if AFileFormatPlugin.CanLoadControls then
-              { . } begin
-              { ... } try
-              { ..... } AFileFormatPlugin.ForceAddCrypter := ForceAddCrypter;
-              { ..... } AFileFormatPlugin.ForceAddImageMirror := ForceAddImageMirror;
-              { ..... } TabIndex := AFileFormatPlugin.LoadControls(AFileName, GetTemplatesTypeFolder, APageController);
-              { ..... } Stop := (TabIndex = -1);
-              { ..... } if not Stop then
-              { ....... } with APageController.TabSheetController[TabIndex] do
-              { ....... } begin
-              { ......... } Application.ProcessMessages;
-              { ......... } ResetDataChanged(AFileName, AFileFormatPlugin.GetName);
-              { ......... } PublishController.Active := True;
-              { ....... } end;
-              { ... } except
-
-              { ... } end;
-              { . } end;
-              { } end);
-end;
-
-class function TApiPlugin.CheckFiles(FileHoster: TPlugInCollectionItem; ALinks: string): TLinksInfo;
-var
-  _Result: TLinksInfo;
+  LResult, LHighException: WordBool;
+  LLinksInfo: TLinksInfo;
   unknown, online, offline, temporaryoffline: Integer;
 begin
   unknown := 0;
@@ -706,172 +1129,162 @@ begin
   offline := 0;
   temporaryoffline := 0;
 
-  LoadPlugin(FileHoster.Path,
-    { } procedure(var APlugin: IPlugIn)
+  TPluginBasic.LoadFileHosterPlugin(AFileHoster.Path,
+    { } procedure(var AFileHosterPlugin: IFileHosterPlugIn)
     { } var
-    { . } _Plugin: IFileHosterPlugIn;
-    { . } _Links, _LinksIndex: Integer;
-    { . } _GlobalSize, _MaxPartSize: Int64;
-    { . } _LinkInfo: TLinkInfo;
+    { . } LLinkCount, LLinksIndex: Integer;
+    { . } LGlobalSize, LMaxPartSize: Int64;
+    { . } LLinkInfo: TLinkInfo;
     { } begin
-    { . } _GlobalSize := 0;
-    { . } _MaxPartSize := 0;
-    { . } if APlugin.QueryInterface(IFileHosterPlugIn, _Plugin) = 0 then
+    { . } LLinkCount := 0;
+    { . } LGlobalSize := 0;
+    { . } LMaxPartSize := 0;
+
+    { . } with AFileHosterPlugin do
+    { . } begin
     { ... } try
-    { ..... } with _Plugin do
+    { ..... } LLinkCount := CheckLinks(ALinks);
+    { ... } except
+    { ..... } LHighException := True;
+    { ... } end;
+
+    { ... } if (LLinkCount > 0) then
+    { ... } begin
+    { ..... } for LLinksIndex := 0 to LLinkCount - 1 do
     { ..... } begin
-    { ....... } try
-    { ......... } _Links := CheckLinks(ALinks);
-    { ......... } for _LinksIndex := 0 to _Links - 1 do
-    { ......... } begin
-    { ........... } SetLength(_Result.Links, _LinksIndex + 1);
-    { ........... } _LinkInfo := CheckedLink(_LinksIndex);
+    { ....... } SetLength(LLinksInfo.Links, LLinksIndex + 1);
+    { ....... } LLinkInfo := CheckedLink(LLinksIndex);
 
-    { ........... } case _LinkInfo.Status of
-    { ............. } csOffline: Inc(offline);
-    { ............. } csOnline: Inc(online);
-    { ............. } csUnknown: Inc(unknown);
-    { ............. } csTemporaryOffline: Inc(temporaryoffline);
-    { ........... } end;
-
-    { ........... } _GlobalSize := _GlobalSize + Round(_LinkInfo.Size);
-    { ........... } if (_MaxPartSize < _LinkInfo.Size) then
-    { ............. } _MaxPartSize := Round(_LinkInfo.Size);
-
-    { ........... } _Result.Links[_LinksIndex] := _LinkInfo;
-    { ......... } end;
-
-    { ......... } if (unknown = 0) and (online = 0) and (temporaryoffline = 0) then
-    { ........... } _Result.Status := csOffline
-    { ......... } else if (unknown = 0) and (offline = 0) then
-    { ........... } _Result.Status := csOnline
-    { ......... } else if (offline > 0) and (online > 0) then
-    { ........... } _Result.Status := csMixedOnOffline
-    { ......... } else
-    { ........... } _Result.Status := csUnknown;
-
-    { ......... } _Result.Size := RoundTo((_GlobalSize / 1048576), -2);
-    { ......... } _Result.PartSize := RoundTo((_MaxPartSize / 1048576), -2);
-
-    { ....... } except
-
+    { ....... } case LLinkInfo.Status of
+    { ......... } csOffline: Inc(offline);
+    { ......... } csOnline: Inc(online);
+    { ......... } csUnknown: Inc(unknown);
+    { ......... } csTemporaryOffline: Inc(temporaryoffline);
     { ....... } end;
 
-    { ..... } end;
-    { ... } finally
-    { ..... } _Plugin := nil;
-    { ... } end;
-    { } end);
+    { ....... } LGlobalSize := LGlobalSize + Round(LLinkInfo.Size);
+    { ....... } if (LMaxPartSize < LLinkInfo.Size) then
+    { ......... } LMaxPartSize := Round(LLinkInfo.Size);
 
-  Result := _Result;
+    { ....... } LLinksInfo.Links[LLinksIndex] := LLinkInfo;
+    { ..... } end;
+
+    { ..... } if (unknown = 0) and (online = 0) and (temporaryoffline = 0) then
+    { ....... } LLinksInfo.Status := csOffline
+    { ..... } else if (unknown = 0) and (offline = 0) then
+    { ....... } LLinksInfo.Status := csOnline
+    { ..... } else if (offline > 0) and (online > 0) then
+    { ....... } LLinksInfo.Status := csMixedOnOffline
+    { ..... } else
+    { ....... } LLinksInfo.Status := csUnknown;
+
+    { ..... } LLinksInfo.Size := RoundTo((LGlobalSize / 1048576), -2);
+    { ..... } LLinksInfo.PartSize := RoundTo((LMaxPartSize / 1048576), -2);
+
+    { ... } end
+    { ... } else
+    { ... } if not SameStr('', ErrorMsg) then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(AFileHoster.Path)]), FErrorHandler);
+    { ... } end
+    { ... } else
+    { ... } if LHighException then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(AFileHoster.Path)]), FErrorHandler);
+    { ... } end;
+
+    { . } end;
+    { } end, FErrorHandler);
+
+  Result := LResult;
 end;
 
-class function TApiPlugin.ImageHosterLocalUpload(ImageHoster: TImageHosterCollectionItem; LocalPath: string; AErrorProc: TPluginErrorProc; ACAPTCHAInput: TCAPTCHAInput): string;
+function TApiThreadedPlugin.ImageHosterLocalUpload;
 var
-  _Result: string;
+  LResult: WideString;
+  LHighException: WordBool;
 begin
-  _Result := '';
-  LoadPlugin(ImageHoster.Path,
-    { } procedure(var APlugin: IPlugIn)
-    { } var
-    { . } _Plugin: IImageHosterPlugIn;
+  LResult := '';
+  LHighException := False;
+
+  LoadImageHosterPlugin(AImageHoster,
+    { } procedure(var AImageHosterPlugin: IImageHosterPlugIn)
     { } begin
-    { . } if APlugin.QueryInterface(IImageHosterPlugIn, _Plugin) = 0 then
-    { ... } try
-    { ..... } with _Plugin do
-    { ..... } begin
-    { ....... } if Assigned(ACAPTCHAInput) then
-    { ......... } SetCAPTCHAInput(ACAPTCHAInput)
-    { ....... } else
-    { ....... } begin
-    { ......... } SetCAPTCHAInput(TCAPTCHAClass.CAPTCHAInput)
-    { ....... } end;
-
-    { ....... } UseAccount := ImageHoster.UseAccount;
-    { ....... } if ImageHoster.UseAccount then
-    { ....... } begin
-    { ......... } Accountname := ImageHoster.Accountname;
-    { ......... } Accountpassword := ImageHoster.Accountpassword;
-    { ....... } end
-    { ....... } else
-    { ....... } begin
-    { ......... } Accountname := '';
-    { ......... } Accountpassword := '';
-    { ....... } end;
-
-    { ....... } ImageHostResize := ImageHoster.ImageHostResize;
-
-    { ....... } try
-    { ......... } _Result := LocalUpload(LocalPath);
-    { ......... } // TApiPlugin.ReturnError(ErrorMsg, AErrorProc);
-    { ....... } except
-    { ......... } on E: Exception do
-    { ......... } begin
-    { ........... } TApiPlugin.ReturnError('Unhandled exception (' + E.message + ') occurred', AErrorProc);
-    { ......... } end;
-    { ....... } end;
-
-    { ..... } end;
-    { ... } finally
-    { ..... } _Plugin := nil;
+    { . } with AImageHosterPlugin do
+    { . } begin
+    { ... } if Assigned(ACAPTCHAInput) then
+    { ..... } SetCAPTCHAInput(ACAPTCHAInput)
+    { ... } else
+    { ... } begin
+    { ..... } SetCAPTCHAInput(DefaultCAPTCHAInputHandler)
     { ... } end;
-    { } end, AErrorProc);
 
-  Result := _Result;
+    { ... } ImageHostResize := AImageHoster.ImageHostResize;
+
+    { ... } try
+    { ..... } LResult := LocalUpload(LocalPath);
+    { ... } except
+    { ..... } LHighException := True;
+    { ... } end;
+
+    { ... } if not SameStr('', ErrorMsg) then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(AImageHoster.Path)]), FErrorHandler);
+    { ... } end
+    { ... } else
+    { ... } if LHighException then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(AImageHoster.Path)]), FErrorHandler);
+    { ... } end;
+
+    { . } end;
+    { } end, FErrorHandler);
+
+  Result := LResult;
 end;
 
-class function TApiPlugin.ImageHosterRemoteUpload;
+function TApiThreadedPlugin.ImageHosterRemoteUpload;
 var
-  _Result: string;
+  LResult: WideString;
+  LHighException: WordBool;
 begin
-  _Result := ImageUrl;
-  LoadPlugin(ImageHoster.Path,
-    { } procedure(var APlugin: IPlugIn)
-    { } var
-    { . } _Plugin: IImageHosterPlugIn;
+  LResult := '';
+  LHighException := False;
+
+  LoadImageHosterPlugin(AImageHoster,
+    { } procedure(var AImageHosterPlugin: IImageHosterPlugIn)
     { } begin
-    { . } if APlugin.QueryInterface(IImageHosterPlugIn, _Plugin) = 0 then
-    { ... } try
-    { ..... } with _Plugin do
-    { ..... } begin
-    { ....... } if Assigned(ACAPTCHAInput) then
-    { ......... } SetCAPTCHAInput(ACAPTCHAInput)
-    { ....... } else
-    { ....... } begin
-    { ......... } SetCAPTCHAInput(TCAPTCHAClass.CAPTCHAInput)
-    { ....... } end;
-
-    { ....... } UseAccount := ImageHoster.UseAccount;
-    { ....... } if ImageHoster.UseAccount then
-    { ....... } begin
-    { ......... } Accountname := ImageHoster.Accountname;
-    { ......... } Accountpassword := ImageHoster.Accountpassword;
-    { ....... } end
-    { ....... } else
-    { ....... } begin
-    { ......... } Accountname := '';
-    { ......... } Accountpassword := '';
-    { ....... } end;
-
-    { ....... } ImageHostResize := ImageHoster.ImageHostResize;
-
-    { ....... } try
-    { ......... } _Result := RemoteUpload(ImageUrl);
-    { ......... } // TApiPlugin.ReturnError(ErrorMsg, AErrorProc);
-    { ....... } except
-    { ......... } on E: Exception do
-    { ......... } begin
-    { ........... } TApiPlugin.ReturnError('Unhandled exception (' + E.message + ') occurred', AErrorProc);
-    { ......... } end;
-    { ....... } end;
-
-    { ..... } end;
-    { ... } finally
-    { ..... } _Plugin := nil;
+    { . } with AImageHosterPlugin do
+    { . } begin
+    { ... } if Assigned(ACAPTCHAInput) then
+    { ..... } SetCAPTCHAInput(ACAPTCHAInput)
+    { ... } else
+    { ... } begin
+    { ..... } SetCAPTCHAInput(DefaultCAPTCHAInputHandler)
     { ... } end;
-    { } end, AErrorProc);
 
-  Result := _Result;
+    { ... } ImageHostResize := AImageHoster.ImageHostResize;
+
+    { ... } try
+    { ..... } LResult := RemoteUpload(ImageUrl);
+    { ... } except
+    { ..... } LHighException := True;
+    { ... } end;
+
+    { ... } if not SameStr('', ErrorMsg) then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(AImageHoster.Path)]), FErrorHandler);
+    { ... } end
+    { ... } else
+    { ... } if LHighException then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(AImageHoster.Path)]), FErrorHandler);
+    { ... } end;
+
+    { . } end;
+    { } end, FErrorHandler);
+
+  Result := LResult;
 end;
 
 end.

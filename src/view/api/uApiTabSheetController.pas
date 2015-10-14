@@ -296,7 +296,7 @@ end;
 procedure TTabSheetController.Save(AFileName: WideString; AFileType: WideString);
 begin
   with SettingsManager.Settings.Plugins do
-    TApiPlugin.SaveFile(FindPlugInCollectionItemFromCollection(AFileType, FileFormats), AFileName, GetTemplatesTypeFolder + TemplateFileName + '.xml', Self);
+    TPluginBasic.SaveFile(FindPlugInCollectionItemFromCollection(AFileType, FileFormats), AFileName, GetTemplatesTypeFolder + TemplateFileName + '.xml', Self);
   FileName := AFileName;
   FileType := AFileType;
   DataChanged := False;

@@ -18,7 +18,6 @@ uses
   uBaseConst;
 
 const
-  http: string = 'http://';
 {$IFDEF DEBUG}
   Homepage = 'http://localhost/IntelligeN%202009/';
 {$ELSE}

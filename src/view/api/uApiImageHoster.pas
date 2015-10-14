@@ -10,7 +10,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiCAPTCHA, uApiPlugins, uApiSettings;
+  uApiPlugins, uApiSettings;
 
 const
   MSG_SLEEP = 3;
@@ -18,10 +18,7 @@ const
 type
   TImageHosterUploadThread = class(TOmniWorker)
   private
-    FCAPTCHAResult: Boolean;
-    FCAPTCHAImageUrl, FCAPTCHAName, FCAPTCHAText, FCAPTCHACookies: WideString;
-    procedure CAPTCHAInputThreaded;
-    function CAPTCHAInputSynchronizer(const AImageUrl, AName: WideString; out AText: WideString; var ACookies: WideString): WordBool; safecall;
+
   protected
     FPictureMirror: IPictureMirror;
     FErrorMsg: string;
@@ -55,22 +52,6 @@ type
 implementation
 
 { TImageHosterUploadThread }
-
-procedure TImageHosterUploadThread.CAPTCHAInputThreaded;
-begin
-  FCAPTCHAResult := TCAPTCHAClass.CAPTCHAInput(FCAPTCHAImageUrl, FCAPTCHAName, FCAPTCHAText, FCAPTCHACookies);
-end;
-
-function TImageHosterUploadThread.CAPTCHAInputSynchronizer(const AImageUrl, AName: WideString; out AText: WideString; var ACookies: WideString): WordBool;
-begin
-  FCAPTCHAImageUrl := AImageUrl;
-  FCAPTCHAName := AName;
-  FCAPTCHACookies := ACookies;
-  task.Invoke(CAPTCHAInputThreaded);
-  AText := FCAPTCHAText;
-  ACookies := FCAPTCHACookies;
-  Result := FCAPTCHAResult;
-end;
 
 procedure TImageHosterUploadThread.InternalErrorHandler(AErrorMsg: string);
 begin
@@ -113,7 +94,8 @@ function TImageHosterLocalUploadThread.Initialize: Boolean;
 var
   LUploadURL: string;
 begin
-  LUploadURL := TApiPlugin.ImageHosterLocalUpload(FImageHosterCollectionItem, FLocalPath, InternalErrorHandler, CAPTCHAInputSynchronizer);
+  // TODO: Re-Work
+  // LUploadURL := TApiPlugin.ImageHosterLocalUpload(FImageHosterCollectionItem, FLocalPath, InternalErrorHandler);
 
   with FPictureMirror do
   begin
@@ -137,7 +119,8 @@ function TImageHosterRemoteUploadThread.Initialize: Boolean;
 begin
   with FPictureMirror do
   begin
-    Value := TApiPlugin.ImageHosterRemoteUpload(FImageHosterCollectionItem, OriginalValue, InternalErrorHandler, CAPTCHAInputSynchronizer);
+    // TODO: Re-Work
+    // Value := TApiPlugin.ImageHosterRemoteUpload(FImageHosterCollectionItem, OriginalValue, InternalErrorHandler, CAPTCHAInputSynchronizer);
     ErrorMsg := FErrorMsg;
   end;
 

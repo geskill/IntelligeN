@@ -92,7 +92,6 @@
 				<Form>NewDesignWindow </Form>
 			</DCCReference>
 			<DCCReference Include="api\uApiBackupManager.pas"/>
-			<DCCReference Include="api\uApiCAPTCHA.pas"/>
 			<DCCReference Include="api\uApiCodeTag.pas"/>
 			<DCCReference Include="api\uApiConst.pas"/>
 			<DCCReference Include="api\uApiControlAligner.pas"/>
@@ -106,6 +105,7 @@
 			<DCCReference Include="api\uApiDLMF.pas"/>
 			<DCCReference Include="api\uApiFile.pas"/>
 			<DCCReference Include="api\uApiFileHoster.pas"/>
+			<DCCReference Include="api\uApiHTTP.pas"/>
 			<DCCReference Include="api\uApiImageHoster.pas"/>
 			<DCCReference Include="api\uApiIScriptFormatter.pas"/>
 			<DCCReference Include="api\uApiIScriptParser.pas"/>
@@ -260,6 +260,10 @@
 			<None Include="ModelSupport_IntelligeN\uApiMirrorControllerBase\default.txvpck"/>
 			<None Include="ModelSupport_IntelligeN\uApiMirrorControlBase\default.txvpck"/>
 			<None Include="ModelSupport_IntelligeN\uApiMirrorControlBase\default.txaPackage"/>
+			<None Include="ModelSupport_IntelligeN\uApiPlugins\default.txvpck"/>
+			<None Include="ModelSupport_IntelligeN\ufAddWebsiteWizard\default.txvpck"/>
+			<None Include="ModelSupport_IntelligeN\uPathUtils\default.txvpck"/>
+			<None Include="ModelSupport_IntelligeN\uApiHTTP\default.txaPackage"/>
 			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
 			</BuildConfiguration>

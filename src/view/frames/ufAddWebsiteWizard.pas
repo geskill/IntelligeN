@@ -283,8 +283,7 @@ begin
               WebsiteType := Values[I, cxGLoadTableView1Column2.index];
           end;
           TWebsiteTemplateHelper.Save(Values[I, cxGLoadTableView1Column3.index], WebsiteConfigurationFile);
-          Settings.AddCMSWebsite(Values[I, cxGLoadTableView1Column3.index], Values[I, cxGLoadTableView1Column1.index],
-            Values[I, cxGLoadTableView1Column2.index]);
+          Settings.AddCMSWebsite(Values[I, cxGLoadTableView1Column3.index], Values[I, cxGLoadTableView1Column1.index], Values[I, cxGLoadTableView1Column2.index]);
         end;
 
         RecordCount := 0;
@@ -307,8 +306,7 @@ begin
           TWebsiteTemplateHelper.Save(ChangeFileExt(Values[I, cxGImportTableView1Column3.index], '.xml'), WebsiteConfigurationFile, True);
           if cxRBImportReplace.Checked and FileExists(Values[I, cxGLoadTableView1Column3.index]) then
             DeleteFile(Values[I, cxGLoadTableView1Column3.index]);
-          Settings.AddCMSWebsite(ChangeFileExt(Values[I, cxGImportTableView1Column3.index], '.xml'), Values[I, cxGImportTableView1Column1.index],
-            Values[I, cxGImportTableView1Column2.index]);
+          Settings.AddCMSWebsite(ChangeFileExt(Values[I, cxGImportTableView1Column3.index], '.xml'), Values[I, cxGImportTableView1Column1.index], Values[I, cxGImportTableView1Column2.index]);
         end;
         RecordCount := 0;
 
@@ -336,7 +334,7 @@ begin
   cxCOBEncoding.Clear;
   _url := cxTEPageURL.Text;
 
-  if not(copy(_url, 1, length(http)) = http) then
+  if not BeginsWithHTTP(_url) then
     _url := http + _url;
 
   if not(copy(_url, length(_url), 1) = '/') then
@@ -422,7 +420,8 @@ begin
 
   if not SameStr('', NewURL) then
   begin
-    if not(copy(NewURL, 1, length(http)) = http) then
+    // Handle result: /content/index instead of http://example.org/content/index
+    if not BeginsWithHTTP(NewURL) then
     begin
       if not(copy(NewURL, 1, 1) = '/') then
         NewURL := IncludeTrailingUrlDelimiter(cxTEPageURL.Text) + NewURL
@@ -464,11 +463,11 @@ begin
   with SettingsManager.Settings.Plugins.CMS do
     for I := 0 to Count - 1 do
       try
-        if TApiPlugin.CMSBelongsTo(TCMSCollectionItem(Items[I]).Path, HTTPResult.SourceCode) then
+        if TPluginBasic.CMSBelongsTo(TCMSCollectionItem(Items[I]).Path, HTTPResult.SourceCode) then
         begin
           cxCOBURLCMS.Text := TCMSCollectionItem(Items[I]).name;
           if SameStr('', CharSet) then
-            cxCOBEncoding.Text := TApiPlugin.CMSDefaultCharset(TCMSCollectionItem(Items[I]).Path);
+            cxCOBEncoding.Text := TPluginBasic.CMSDefaultCharset(TCMSCollectionItem(Items[I]).Path);
           break;
         end;
       except

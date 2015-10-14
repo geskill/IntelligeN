@@ -5,7 +5,7 @@ interface
 uses
   // Delphi
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Menus, StdCtrls, ExtCtrls, Variants,
-  ShellAPI, Clipbrd, Dialogs, ActiveX, AxCtrls, jpeg,
+  ShellAPI, Clipbrd, Dialogs, jpeg,
   // Spring Framework
   Spring.Collections.Lists,
   // PopupMenu Mod
@@ -23,7 +23,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiConst, uApiControlsBase,
+  uApiConst, uApiControlsBase, uApiHTTP,
   // Utils
   uImageUtils, uStringUtils;
 
@@ -318,7 +318,6 @@ type
     procedure SaveImage(AMemoryStream: TMemoryStream);
 
     procedure SetValuePictureFromDownload(AIndex: Integer; AMemoryStream: TMemoryStream); overload;
-    procedure DownloadImage(AImageLink: string; out AMemoryStream: TMemoryStream);
   protected
     function GetValuePicture(AIndex: Integer): TPictureInfo; safecall;
     procedure SetValuePicture(AIndex: Integer; APictureInfo: TPictureInfo); safecall;
@@ -1355,8 +1354,9 @@ begin
   LoadDefaultConfiguration;
 end;
 {$ENDREGION}
-
 { ****************************************************************************** }
+{$REGION 'TPictureMirrorData'}
+
 function TPictureMirrorData.GetName: WideString;
 begin
   Result := FName;
@@ -1395,7 +1395,7 @@ destructor TPictureMirrorData.Destroy;
 begin
   inherited Destroy;
 end;
-
+{$ENDREGION}
 { ****************************************************************************** }
 {$REGION 'TPictureMirror'}
 
@@ -1471,6 +1471,7 @@ begin
   FPicture.ControlController.TabSheetController.PageController.ImageHosterManager.AddRemoteUploadJob(Self);
 end;
 {$ENDREGION}
+{ ****************************************************************************** }
 {$REGION 'TIPicture'}
 
 procedure TIPicture.FmiRemoteUploadImageClick(Sender: TObject);
@@ -1504,8 +1505,12 @@ var
 begin
   Async(
     { } procedure
+    { } var
+    { . } LCookies: WideString;
     { } begin
-    { . } DownloadImage(Value, LMemoryStream);
+    { . } TApiHTTP.DownloadData(Value, LMemoryStream, LCookies,
+      // TODO: Read settings at a thread-safe position
+      { . } SettingsManager.Settings.HTTP.GetProxy(psaCrawler), SettingsManager.Settings.HTTP.ConnectTimeout, SettingsManager.Settings.HTTP.ReadTimeout);
     { } end). { }
   Await(
     { } procedure
@@ -1606,46 +1611,6 @@ begin
     finally
       Free;
     end;
-end;
-
-procedure TIPicture.DownloadImage(AImageLink: string; out AMemoryStream: TMemoryStream);
-var
-  HTTPManager: IHTTPManager;
-  HTTPOptions: IHTTPOptions;
-  RequestID: Double;
-  HTTPProcess: IHTTPProcess;
-  OleStream: TOleStream;
-  Dummy: Int64;
-begin
-  HTTPManager := THTTPManager.Instance();
-
-  AMemoryStream := TMemoryStream.Create;
-
-  HTTPOptions := THTTPOptions.Create(SettingsManager.Settings.HTTP.GetProxy(psaCrawler));
-
-  HTTPOptions.ConnectTimeout := SettingsManager.Settings.HTTP.ConnectTimeout;
-  HTTPOptions.ReadTimeout := SettingsManager.Settings.HTTP.ReadTimeout;
-
-  RequestID := HTTPManager.Get(THTTPRequest.Create(AImageLink), HTTPOptions);
-
-  repeat
-    sleep(75);
-  until HTTPManager.HasResult(RequestID);
-
-  HTTPProcess := HTTPManager.GetResult(RequestID);
-
-  OleStream := TOleStream.Create(HTTPProcess.HTTPResult.HTTPResponse.ContentStream);
-  try
-    HTTPProcess.HTTPResult.HTTPResponse.ContentStream.Seek(0, STREAM_SEEK_SET, Dummy);
-    OleStream.Seek(0, STREAM_SEEK_SET);
-    AMemoryStream.CopyFrom(OleStream, OleStream.Size);
-  finally
-    OleStream.Free;
-  end;
-
-  HTTPProcess := nil;
-  HTTPOptions := nil;
-  HTTPManager := nil;
 end;
 
 procedure TIPicture.SetValuePictureFromDownload(AIndex: Integer; AMemoryStream: TMemoryStream);
@@ -1911,6 +1876,7 @@ end;
 procedure TIPicture.AddProposedValue(const ASender: WideString; AValue: WideString; ATitle: WideString);
 var
   LValueCount: Integer;
+  LMemoryStream: TMemoryStream;
 begin
   inherited AddProposedValue(ASender, AValue, ATitle);
 
@@ -1927,6 +1893,25 @@ begin
     FPictureArrayLock.ExitWriteLock;
   end;
 
+  Async(
+    { } procedure
+    { } var
+    { . } LCookies: WideString;
+    { } begin
+    { . } TApiHTTP.DownloadData(Value, LMemoryStream, LCookies,
+      // TODO: Read settings at a thread-safe position
+      { . } SettingsManager.Settings.HTTP.GetProxy(psaCrawler), SettingsManager.Settings.HTTP.ConnectTimeout, SettingsManager.Settings.HTTP.ReadTimeout);
+    { } end). { }
+  Await(
+    { } procedure
+    { } begin
+    { . } SetValuePictureFromDownload(LValueCount - 1, LMemoryStream);
+    { . } LMemoryStream.Free;
+    { } end);
+
+  // TODO: Analyse this (old version)
+  (*
+
   CreateTask(
     { } procedure(const task: IOmniTask)
     { } begin
@@ -1935,14 +1920,18 @@ begin
       { ... } procedure
       { ... } var
       { ..... } LMemoryStream: TMemoryStream;
+      { ..... } LCookies: WideString;
       { ... } begin
-      { ..... } DownloadImage(AValue, LMemoryStream);
+      { ..... } TApiHTTP.DownloadData(Value, LMemoryStream, LCookies,
+        // TODO: Read settings at a thread-safe position
+        { ..... } SettingsManager.Settings.HTTP.GetProxy(psaCrawler), SettingsManager.Settings.HTTP.ConnectTimeout, SettingsManager.Settings.HTTP.ReadTimeout);
       { ..... } sleep(100);
       { ..... } SetValuePictureFromDownload(LValueCount - 1, LMemoryStream);
       { ..... } LMemoryStream.Free;
       { ... } end);
 
     { } end, 'TIPicture Image Download: ' + AValue).Run;
+  *)
 end;
 
 procedure TIPicture.RemoteUpload(const AAfterCrawling: WordBool = False);

@@ -15,7 +15,7 @@ uses
 
 type
   TPlugInType = (ptNone, ptApp, ptCAPTCHA, ptCMS, ptCrawler, ptCrypter, ptFileFormats, ptFileHoster, ptImageHoster);
-  TCAPTCHAInput = function(const ACAPTCHA: WideString; const AName: WideString; out AText: WideString; var ACookies: WideString): WordBool of object; safecall;
+  TCAPTCHAInput = function(const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString): WordBool of object; safecall;
   TCAPTCHAType = (ctImage, ctText);
   TIntelligentPostingHelper = function(var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool of object; safecall;
   TCMSType = (cmsBoard, cmsBlog, cmsFormbased);

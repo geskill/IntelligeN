@@ -583,7 +583,7 @@ begin
     _CMSWebsitesCollectionItem := _CMSCollectionItemItem.FindCMSWebsite(Values[GetFocusedRecordIndex, cxGCMSTableView1Column2.index]);
 
   if FileExists(_CMSWebsitesCollectionItem.GetPath) then
-    TApiPlugin.CMSShowWebsiteSettingsEditor(_CMSCollectionItemItem.Path, _CMSWebsitesCollectionItem, Main)
+    TPluginBasic.CMSShowWebsiteSettingsEditor(_CMSCollectionItemItem.Path, _CMSWebsitesCollectionItem, Main)
   else
     raise Exception.Create('Websitefile not found! (' + _CMSWebsitesCollectionItem.Path + ')');
 end;
@@ -1822,7 +1822,7 @@ procedure TSettings.FormDestroy(Sender: TObject);
         begin
           with TAppCollectionItem(Items[I]) do
             if Enabled then
-              TApiPlugin.AppUnLoad(TAppCollectionItem(App.Items[I]))
+              TPluginBasic.AppUnLoad(TAppCollectionItem(App.Items[I]))
         end;
       end;
     end;
@@ -1906,9 +1906,9 @@ begin
   TPlugInCollectionItem(SettingsManager.Settings.Plugins.App.Items[AIndex]).Enabled := (ANewState = cbsChecked);
 
   if (ANewState = cbsChecked) then
-    TApiPlugin.AppLoad(TAppCollectionItem(SettingsManager.Settings.Plugins.App.Items[AIndex]), Main)
+    TPluginBasic.AppLoad(TAppCollectionItem(SettingsManager.Settings.Plugins.App.Items[AIndex]), Main)
   else
-    TApiPlugin.AppUnLoad(TAppCollectionItem(SettingsManager.Settings.Plugins.App.Items[AIndex]));
+    TPluginBasic.AppUnLoad(TAppCollectionItem(SettingsManager.Settings.Plugins.App.Items[AIndex]));
 end;
 
 procedure TSettings.AddAppClick(Sender: TObject);
@@ -1926,7 +1926,7 @@ begin
   with TAppCollectionItem(SettingsManager.Settings.Plugins.App.Items[FAppPluginsCheckListBox.InnerCheckListBox.ItemIndex]) do
   begin
     if Enabled then
-      TApiPlugin.AppUnLoad(TAppCollectionItem(SettingsManager.Settings.Plugins.App.Items[FAppPluginsCheckListBox.InnerCheckListBox.ItemIndex]));
+      TPluginBasic.AppUnLoad(TAppCollectionItem(SettingsManager.Settings.Plugins.App.Items[FAppPluginsCheckListBox.InnerCheckListBox.ItemIndex]));
     Free;
   end;
 end;
@@ -2580,7 +2580,7 @@ begin
             Enabled := False;
 
           if Enabled and Checked then
-            TApiPlugin.AppLoad(TAppCollectionItem(Items[I]), Main)
+            TPluginBasic.AppLoad(TAppCollectionItem(Items[I]), Main)
         end;
       end;
     end;

@@ -8,7 +8,9 @@ uses
   // Dev Express
   cxControls, cxListView, cxContainer, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxEdit,
   // Api
-  uAppConst;
+  uAppConst,
+  // Utils
+  uPathUtils;
 
 type
   TfLinklist = class(TFrame)
@@ -69,7 +71,7 @@ var
   newLink: string;
 begin
   newLink := '';
-  if InputQuery('<!>', '<!>', newLink) and (Pos(http, newLink) > 0) then
+  if InputQuery('<!>', '<!>', newLink) and BeginsWithHTTP(newLink) then
     with lfLinklist.Items.Add do
       Caption := newLink;
 end;
@@ -79,7 +81,7 @@ var
   Link: string;
 begin
   Link := lfLinklist.Selected.Caption;
-  if InputQuery('<!>', '<!>', Link) and (Pos(http, Link) > 0) then
+  if InputQuery('<!>', '<!>', Link) and BeginsWithHTTP(Link) then
     lfLinklist.Selected.Caption := Link;
 end;
 

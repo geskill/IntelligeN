@@ -23,7 +23,7 @@ uses
 type
   TPluginOnLoadedFunc = reference to function(const APluginType: TPlugInType; var ACollection: TCollection; var ACheckListBox: TcxCheckListBox): Boolean;
 
-  TAddPlugin = class(TApiPlugin)
+  TAddPlugin = class(TPluginBasic)
   private
     class function AddPlugin(const APluginFile: string; const APluginHandle: Cardinal; const APlugin: IPlugIn; const ACollection: TCollection; const ACheckListBox: TcxCheckListBox; AHandleOverride: Boolean = True): Boolean;
   protected

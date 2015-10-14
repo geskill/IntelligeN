@@ -619,7 +619,7 @@ begin
     ** *)
   ASaveDialog := ASaveDialog or not FileExists(TabSheetController[ATabIndex].FileName);
 
-  FileFormats := TApiPlugin.GetSaveFileFormats;
+  FileFormats := TPluginBasic.GetSaveFileFormats;
   try
     PluginsAvailable := FileFormats.Count > 0;
 
@@ -684,7 +684,7 @@ var
 begin
   FileFilter := '';
 
-  FileFormats := TApiPlugin.GetSaveFileFormats;
+  FileFormats := TPluginBasic.GetSaveFileFormats;
   try
     PluginAvailable := FileFormats.Count > 0;
 
@@ -728,7 +728,7 @@ begin
   try
     if not FileExists(AFileName) then
     begin
-      FileFormats := TApiPlugin.GetLoadFileFormats;
+      FileFormats := TPluginBasic.GetLoadFileFormats;
       try
         PluginAvailable := FileFormats.Count > 0;
 
@@ -744,13 +744,13 @@ begin
 
           if PluginAvailable and Execute then
             for I := 0 to Files.Count - 1 do
-              TApiPlugin.LoadFile(Files.Strings[I], Self);
+              TPluginBasic.LoadFile(Files.Strings[I], Self);
         finally
           Free;
         end;
     end
     else
-      TApiPlugin.LoadFile(AFileName, Self);
+      TPluginBasic.LoadFile(AFileName, Self);
 
     pcMain.OnChange(pcMain);
   except

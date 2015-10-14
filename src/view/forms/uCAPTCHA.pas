@@ -19,13 +19,19 @@ type
     bAccept: TButton;
     bCancel: TButton;
     mCAPTCHA: TMemo;
+    tTimer: TTimer;
+    procedure tTimerTimer(Sender: TObject);
   private
     function GetCAPTCHA: string;
   protected
     procedure Display;
   public
+    constructor Create(AOwner: TComponent; AMaxWaitMs: Cardinal = INFINITE);
+
     procedure DisplayCAPTCHAImage(ACAPTCHAMemoryStream: TMemoryStream);
     procedure DisplayCAPTCHAText(ACAPTCHAText: string);
+
+    function ShowModal: Integer; override;
 
     property CAPTCHA: string read GetCAPTCHA;
   end;
@@ -34,6 +40,12 @@ implementation
 
 {$R *.dfm}
 { TCAPTCHA }
+
+procedure TCAPTCHA.tTimerTimer(Sender: TObject);
+begin
+  tTimer.Enabled := False;
+  Close;
+end;
 
 function TCAPTCHA.GetCAPTCHA: string;
 begin
@@ -62,6 +74,14 @@ begin
   begin
     Position := poScreenCenter;
   end;
+end;
+
+constructor TCAPTCHA.Create(AOwner: TComponent; AMaxWaitMs: Cardinal);
+begin
+  inherited Create(AOwner);
+
+  tTimer.Enabled := False;
+  tTimer.Interval := AMaxWaitMs;
 end;
 
 procedure TCAPTCHA.DisplayCAPTCHAImage(ACAPTCHAMemoryStream: TMemoryStream);
@@ -128,6 +148,12 @@ begin
   mCAPTCHA.Visible := True;
 
   Display;
+end;
+
+function TCAPTCHA.ShowModal: Integer;
+begin
+  tTimer.Enabled := True;
+  Result := inherited ShowModal;
 end;
 
 end.

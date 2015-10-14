@@ -68,4 +68,9 @@ object CAPTCHA: TCAPTCHA
     TabOrder = 0
     Visible = False
   end
+  object tTimer: TTimer
+    Enabled = False
+    Left = 16
+    Top = 16
+  end
 end

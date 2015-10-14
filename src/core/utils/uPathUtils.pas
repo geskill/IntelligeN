@@ -3,7 +3,11 @@ unit uPathUtils;
 interface
 
 uses
+  // Delphi
   Windows, SysUtils, ShlObj, ActiveX;
+
+const
+  http: string = 'http://';
 
 function GetWindowsFolder: string;
 function GetWindowsSystemFolder: string;
@@ -16,6 +20,7 @@ function GetPersonalLocalTempPath: string;
 
 function PathCombineEx(BaseName, RelativePath: string): string;
 
+function BeginsWithHTTP(const AUrl: string): Boolean;
 function IsDirectory(const FileName: string): Boolean;
 function IsURL(const AUrl: string): Boolean;
 
@@ -111,6 +116,11 @@ begin
   SetLength(Result, length(PChar(@Result[1])));
 end;
 
+function BeginsWithHTTP(const AUrl: string): Boolean;
+begin
+  Result := (copy(LowerCase(AUrl), 1, length(http)) = http);
+end;
+
 function IsDirectory(const FileName: string): Boolean;
 var
   R: DWORD;
@@ -121,7 +131,7 @@ end;
 
 function IsURL(const AUrl: string): Boolean;
 begin
-  result := Pos('://', AUrl) > 0;
+  Result := Pos('://', AUrl) > 0;
 end;
 
 function ExtractUrlFileName(const AUrl: string): string;

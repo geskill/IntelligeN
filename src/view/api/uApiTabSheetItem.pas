@@ -5,7 +5,7 @@ interface
 uses
   // Delphi
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ImgList, ActnList, StdCtrls,
-  ShellAPI, Generics.Collections, Math, StrUtils, ExtCtrls, Clipbrd, ActiveX, AxCtrls,
+  ShellAPI, Generics.Collections, Math, StrUtils, ExtCtrls, Clipbrd,
   // Dev Express
   cxControls, dxBar, cxScrollBox, cxDropDownEdit, cxImageComboBox, cxButtons, cxSplitter,
   // OmniThreadLibrary
@@ -17,7 +17,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiConst, uApiCodeTag, uApiControlController, uApiIScriptFormatter, uApiMirrorController, uApiPublishController, uApiMultiCastEvent, uApiSettings,
+  uApiConst, uApiCodeTag, uApiControlController, uApiHTTP, uApiIScriptFormatter, uApiMirrorController, uApiPublishController, uApiMultiCastEvent, uApiSettings,
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPManager,
   // MultiEvent
@@ -419,47 +419,23 @@ end;
 
 procedure TDesignTabSheetItem.FHtmlViewImageRequest(Sender: TObject; const SRC: ThtString; var Stream: TStream);
 var
-  HTTPRequest: IHTTPRequest;
-  HTTPOptions: IHTTPOptions;
-  RequestID: Double;
+  LMemoryStream: TMemoryStream;
 begin
-  HTTPRequest := THTTPRequest.Create(SRC);
-  HTTPRequest.Referer := SRC;
-
-  HTTPOptions := THTTPOptions.Create(SettingsManager.Settings.http.GetProxy(psaMain));
-  HTTPOptions.ConnectTimeout := SettingsManager.Settings.http.ConnectTimeout;
-  HTTPOptions.ReadTimeout := SettingsManager.Settings.http.ReadTimeout;
-
-  RequestID := THTTPManager.Instance().Get(HTTPRequest, HTTPOptions);
-
-  Stream := WaitStream;
-
-  Parallel.Async(
+  Async(
+    { } procedure
+    { } var
+    { . } LCookies: WideString;
+    { } begin
+    { . } TApiHTTP.DownloadData(SRC, LMemoryStream, LCookies,
+      // TODO: Read settings at a thread-safe position
+      { . } SettingsManager.Settings.HTTP.GetProxy(psaMain), SettingsManager.Settings.HTTP.ConnectTimeout, SettingsManager.Settings.HTTP.ReadTimeout);
+    { } end). { }
+  Await(
     { } procedure
     { } begin
-    { . } THTTPManager.Wait(RequestID);
-    { } end,
-    { } Parallel.TaskConfig.OnTerminated(
-      { } procedure(const task: IOmniTaskControl)
-      { } var
-      { . } HTTPProcess: IHTTPProcess;
-      { . } OleStream: TOleStream;
-      { . } Dummy: Int64;
-      { } begin
-      { . } HTTPProcess := THTTPManager.Instance.GetResult(RequestID);
-      { . } if not HTTPProcess.HTTPResult.HasError then
-      { . } begin
-      { ... } OleStream := TOleStream.Create(HTTPProcess.HTTPResult.HTTPResponse.ContentStream);
-      { ... } try
-      { ..... } HTTPProcess.HTTPResult.HTTPResponse.ContentStream.Seek(0, STREAM_SEEK_SET, Dummy);
-      { ..... } OleStream.Seek(0, STREAM_SEEK_SET);
-      { ..... } while not FHtmlView.InsertImage(SRC, OleStream) do sleep(50);
-      { ... } finally
-      { ..... } OleStream.Free;
-      { ... } end;
-      { . } end;
-      { } end
-      { } ));
+    { . } while not FHtmlView.InsertImage(SRC, LMemoryStream) do sleep(50);
+    { . } LMemoryStream.Free;
+    { } end);
 end;
 
 procedure TDesignTabSheetItem.FCheckSubjectScriptButtonClick(Sender: TObject);

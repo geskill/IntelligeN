@@ -60,7 +60,14 @@ begin
 
   if Assigned(FHoster) then
   begin
-    LinksInfo := TApiPlugin.CheckFiles(FHoster, FDirectlinks);
+    // TODO: NOT IN Initialize function
+
+    with TApiThreadedPlugin.Create(Task) do
+      try
+        // LinksInfo := CheckFiles(FHoster, FDirectlinks);
+      finally
+        Free;
+      end;
 
     if not task.Terminated then
     begin
