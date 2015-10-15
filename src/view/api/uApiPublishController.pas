@@ -3,19 +3,19 @@ unit uApiPublishController;
 interface
 
 uses
-  // Delphi
+  // Delphi 
   Windows, SysUtils, Classes, StrUtils, Math, Dialogs, Variants, Generics.Collections,
-  // MultiEvent
+  // MultiEvent 
   Generics.MultiEvents.NotifyInterface, Generics.MultiEvents.NotifyHandler,
-  // Common
+  // Common 
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
-  // DLLs
+  // DLLs 
   uExport,
-  // Api
-  uApiConst, uApiFile, uApiIScriptParser, uApiMultiCastEvent, uApiPublishModel, uApiSettings,
-  // Plugin system
+  // Api 
+  uApiConst, uApiFile, uApiIScriptParser, uApiMultiCastEvent, uApiTabSheetData, uApiMirrorControlBase, uApiMirrorControllerBase, uApiSettings,
+  // Plugin system 
   uPlugInEvent,
-  // Utils
+  // Utils 
   uPathUtils, uStringUtils;
 
 type
@@ -144,6 +144,8 @@ type
     procedure ValidateFile(ARelativeFileName, AFileName, AFileType: string);
     function ValidateFiles: Boolean;
     function LoadFromFile(AFileName: string): string;
+
+    procedure HandleBlackWhitelist(ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; out AControlList: TControlDataList; out AMirrorList: TMirrorContainerList);
 
     procedure ControlChange(const Sender: IControlBasic);
     procedure MirrorChange(const Sender: IUnknown);
@@ -648,6 +650,124 @@ begin
     end;
 end;
 
+procedure TICMSWebsiteContainer.HandleBlackWhitelist(ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; out AControlList: TControlDataList; out AMirrorList: TMirrorContainerList);
+var
+  LHostersIntex, LWhitelistIndex, LControlIndex: Integer;
+  LHosterType: THosterType;
+  LBlackList, LWhitelist: TStringList;
+
+  LControlBasic: IControlBasic;
+  LPicture: IPicture;
+  LHasPicture: Boolean;
+begin
+  AControlList := TControlDataList.Create;
+  AMirrorList := TMirrorContainerList.Create;
+
+  LControlBasic := TabSheetController.ControlController.FindControl(cPicture);
+  if Assigned(LControlBasic) then
+  begin
+    LPicture := IPicture(LControlBasic);
+  end;
+  LHasPicture := False;
+
+  for LHostersIntex := 0 to ACMSWebsiteCollectionItem.Filter.Hosters.Count - 1 do
+  begin
+    LHosterType := GetHosterNameType(FCMSWebsiteCollectionItem.Filter.Hosters.Items[LHostersIntex].Name);
+
+    LBlackList := TStringList.Create;
+    LWhitelist := TStringList.Create;
+    try
+      // Load black- and whitelist 
+      LBlackList.Text := FCMSWebsiteCollectionItem.Filter.Hosters.Items[LHostersIntex].Blacklist.Text;
+      if FCMSWebsiteCollectionItem.Filter.Hosters.Items[LHostersIntex].Ranked then
+        LWhitelist.Text := FCMSWebsiteCollectionItem.Filter.Hosters.Items[LHostersIntex].Whitelist.Text;
+
+      for LWhitelistIndex := 0 to LWhitelist.Count - 1 do
+      begin
+        // If not in blacklist 
+        if (LBlackList.IndexOf(LWhitelist.Strings[LWhitelistIndex]) = -1) then
+        begin
+          LBlackList.Add(LWhitelist.Strings[LWhitelistIndex]); // Add to blacklist, to not let add again into mirror list
+
+          case LHosterType of
+            htFile:
+              begin
+
+                for LControlIndex := 0 to TabSheetController.MirrorController.MirrorCount - 1 do
+                  if SameText(LWhitelist.Strings[LWhitelistIndex], TabSheetController.MirrorController.Mirror[LControlIndex].Hoster) then
+                  begin
+                    AMirrorList.Add(TabSheetController.MirrorController.Mirror[LControlIndex].CloneInstance());
+                    Break;
+                  end;
+
+              end;
+            htImage:
+              begin
+
+                if Assigned(LPicture) then
+                  for LControlIndex := 0 to LPicture.MirrorCount - 1 do
+                    if SameText(LWhitelist.Strings[LWhitelistIndex], LPicture.Mirror[LControlIndex].Name) then
+                    begin
+                      AControlList.Add(LPicture.Mirror[LWhitelistIndex].CloneInstance());
+                      LHasPicture := True;
+                      Break;
+                    end
+                    else if SameText(LWhitelist.Strings[LWhitelistIndex], 'OriginalValue') then
+                    begin
+                      AControlList.Add(LPicture.CloneInstance());
+                      LHasPicture := True;
+                      Break;
+                    end;
+
+                Break; // only one picture needed, break whitelist loop 
+              end;
+          end;
+        end;
+      end;
+
+      case LHosterType of
+        htFile:
+          begin
+
+            for LControlIndex := 0 to TabSheetController.MirrorController.MirrorCount - 1 do
+              if (LBlackList.IndexOf(TabSheetController.MirrorController.Mirror[LControlIndex].Hoster) = -1) then
+              begin
+                AMirrorList.Add(TabSheetController.MirrorController.Mirror[LControlIndex].CloneInstance());
+              end;
+
+          end;
+        htImage:
+          begin
+
+            if Assigned(LPicture) and not LHasPicture then
+            begin
+              for LControlIndex := 0 to LPicture.MirrorCount - 1 do
+                if (LBlackList.IndexOf(LPicture.Mirror[LControlIndex].Name) = -1) then
+                begin
+                  AControlList.Add(LPicture.Mirror[LWhitelistIndex].CloneInstance());
+                  LHasPicture := True;
+                  Break;
+                end;
+
+              if not LHasPicture then
+              begin
+                raise Exception.Create(Format('No picture or picture mirror usable for %s website.', [FCMSWebsiteCollectionItem.Website]));
+              end;
+            end;
+
+          end;
+      end;
+
+    finally
+      LWhitelist.Free;
+      LBlackList.Free;
+    end;
+  end;
+
+  LPicture := nil;
+  LControlBasic := nil;
+end;
+
 procedure TICMSWebsiteContainer.ControlChange(const Sender: IControlBasic);
 begin
   with FICMSWebsiteContainerActiveController do
@@ -824,119 +944,16 @@ end;
 
 function TICMSWebsiteContainer.GenerateData: ITabSheetData;
 var
-  CMSWebsiteData: TICMSWebsiteData;
+  LControlList: TControlDataList;
+  LMirrorList: TMirrorContainerList;
 
-  I, J: Integer;
-
-  BL, WL: TStringList;
-
-  procedure HandlePicture(APicture: IPicture);
-  var
-    I, J: Integer;
-  begin
-    WL := nil;
-    BL := TStringList.Create;
-    try
-      for I := 0 to FCMSWebsiteCollectionItem.Filter.Hosters.Count - 1 do
-        if GetHosterNameType(FCMSWebsiteCollectionItem.Filter.Hosters.Items[I].Name) = htImage then
-        begin
-          BL.Text := FCMSWebsiteCollectionItem.Filter.Hosters.Items[I].Blacklist.Text;
-          if FCMSWebsiteCollectionItem.Filter.Hosters.Items[I].Ranked then
-          begin
-            WL := TStringList.Create;
-            WL.Text := FCMSWebsiteCollectionItem.Filter.Hosters.Items[I].Whitelist.Text;
-          end;
-        end;
-
-      if Assigned(WL) then
-        try
-          for I := 0 to WL.Count - 1 do
-          begin
-            if not(BL.IndexOf(WL.Strings[I]) = -1) then
-              Continue;
-            for J := 0 to APicture.MirrorCount - 1 do
-              if SameText(WL.Strings[I], APicture.Mirror[J].Name) then
-              begin
-                // TODO
-                // CMSWebsiteData.ControlList.Add(TIControlContainer.Create(cPicture, APicture.Mirror[J].Value));
-                Exit;
-              end
-              else if SameText(WL.Strings[I], 'OriginalValue') then
-              begin
-                // TODO
-                // CMSWebsiteData.ControlList.Add(TIControlContainer.Create(cPicture, APicture.Value));
-                Exit;
-              end;
-          end;
-        finally
-          WL.Free;
-        end;
-      for J := 0 to APicture.MirrorCount - 1 do
-        if (BL.IndexOf(APicture.Mirror[J].Name) = -1) then
-        begin
-          // TODO
-          // CMSWebsiteData.ControlList.Add(TIControlContainer.Create(cPicture, APicture.Mirror[J].Value));
-          Exit;
-        end;
-    finally
-      BL.Free;
-    end;
-    // TODO
-    // CMSWebsiteData.ControlList.Add(TIControlContainer.Create(cPicture, APicture.Value));
-  end;
-
+  LTabSheetData: ITabSheetData;
 begin
-  CMSWebsiteData := TICMSWebsiteData.Create(TabSheetController.TypeID);
+  HandleBlackWhitelist(FCMSWebsiteCollectionItem, LControlList, LMirrorList);
 
-  for I := 0 to TabSheetController.ControlController.ControlCount - 1 do
-  begin
-    // TODO
-    //if not(TabSheetController.ControlController.Control[I].ControlID = cPicture) then
-    //  CMSWebsiteData.ControlList.Add(TIControlContainer.Create(TabSheetController.ControlController.Control[I].ControlID, TabSheetController.ControlController.Control[I].Value))
-    //else
-    //  HandlePicture(TabSheetController.ControlController.Control[I] as IPicture);
-  end;
+  LTabSheetData := TITabSheetData.Create(TabSheetController.TypeID, LControlList, LMirrorList);
 
-  WL := nil;
-  BL := TStringList.Create;
-  try
-    for I := 0 to FCMSWebsiteCollectionItem.Filter.Hosters.Count - 1 do
-      if GetHosterNameType(FCMSWebsiteCollectionItem.Filter.Hosters.Items[I].Name) = htFile then
-      begin
-        BL.Text := FCMSWebsiteCollectionItem.Filter.Hosters.Items[I].Blacklist.Text;
-        if FCMSWebsiteCollectionItem.Filter.Hosters.Items[I].Ranked then
-        begin
-          WL := TStringList.Create;
-          WL.Text := FCMSWebsiteCollectionItem.Filter.Hosters.Items[I].Whitelist.Text;
-        end;
-      end;
-
-    if Assigned(WL) then
-      try
-        for I := 0 to WL.Count - 1 do
-        begin
-          if not(BL.IndexOf(WL.Strings[I]) = -1) then
-            Continue;
-          for J := 0 to TabSheetController.MirrorController.MirrorCount - 1 do
-            if SameText(WL.Strings[I], TabSheetController.MirrorController.Mirror[J].Hoster) then
-            begin
-              // TODO
-              // CMSWebsiteData.MirrorList.Add(TIMirrorContainer.Create(TabSheetController.MirrorController.Mirror[J]));
-              Break;
-            end;
-        end;
-      finally
-        WL.Free;
-      end;
-    for J := 0 to TabSheetController.MirrorController.MirrorCount - 1 do
-      // TODO
-      //if (BL.IndexOf(TabSheetController.MirrorController.Mirror[J].Hoster) = -1) and not Assigned(CMSWebsiteData.Mirror[TabSheetController.MirrorController.Mirror[J].Hoster]) then
-        // CMSWebsiteData.MirrorList.Add(TIMirrorContainer.Create(TabSheetController.MirrorController.Mirror[J]));
-  finally
-    BL.Free;
-  end;
-
-  Result := CMSWebsiteData;
+  Result := LTabSheetData;
 end;
 
 function TICMSWebsiteContainer.GeneratePublishItem: IPublishItem;
@@ -1079,7 +1096,7 @@ end;
 procedure TICMSContainer.UpdateCMSWebsiteList;
 begin
   FTabConnection.PublishController.OnUpdateCMSWebsiteList.Invoke(Self, Index);
-  // Main.fPublish.GenerateCMSWebsiteList(Index, Self);
+  // Main.fPublish.GenerateCMSWebsiteList(Index, Self); 
 end;
 
 function TICMSContainer.GetTabSheetController: ITabSheetController;
@@ -1200,7 +1217,7 @@ begin
 
   case ACMSChangeType of
     pctAdd:
-      ; // nothing
+      ; // nothing 
     pctMove:
       begin
         Index := FindCMSContainer(CMSName);
@@ -1408,7 +1425,7 @@ end;
 
 destructor TIPublishController.Destroy;
 begin
-  // TODO: test this
+  // TODO: test this 
   if TabSheetController.IsTabActive then
     OnUpdateCMSList.Invoke(nil);
 

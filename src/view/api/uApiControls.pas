@@ -242,7 +242,7 @@ type
     constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
-  TPictureMirrorData = class(TIValueItem, IPictureMirrorData)
+  TPictureMirrorData = class(TIControlData, IPictureMirrorData)
   private
     FName: WideString;
     FOriginalValue: WideString;
@@ -261,6 +261,9 @@ type
     property OriginalValue: WideString read GetOriginalValue;
     property Value: WideString read GetValue write SetValue;
     property ErrorMsg: WideString read GetErrorMsg write SetErrorMsg;
+
+    // Cloning
+    function CloneInstance(): IControlData;
   end;
 
   TPictureMirror = class(TPictureMirrorData, IPictureMirror)
@@ -1379,7 +1382,7 @@ end;
 
 constructor TPictureMirrorData.Create(AName, AOriginalValue: WideString; AValue: WideString = '');
 begin
-  inherited Create(AValue);
+  inherited Create(cPicture, AValue);
   FName := AName;
   FOriginalValue := AOriginalValue;
   FErrorMsg := '';
@@ -1394,6 +1397,11 @@ end;
 destructor TPictureMirrorData.Destroy;
 begin
   inherited Destroy;
+end;
+
+function TPictureMirrorData.CloneInstance;
+begin
+  Result := TPictureMirrorData.Clone(Self);
 end;
 {$ENDREGION}
 { ****************************************************************************** }

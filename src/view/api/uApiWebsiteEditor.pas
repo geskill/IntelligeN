@@ -1743,11 +1743,11 @@ end;
 procedure TBasisWebsiteEditor.FcxGridFilterControlsTableViewColumn3PropertiesInitPopup(Sender: TObject);
 var
   LTypeID: TTypeID;
-  AControlID: TControlID;
+  LControlID: TControlID;
   StringList: TStringList;
 begin
   with FcxGridFilterControlsTableView.DataController do
-    AControlID := StringToControlID(Values[GetFocusedRecordIndex, FcxGridFilterControlsTableViewColumn1.index]);
+    LControlID := StringToControlID(Values[GetFocusedRecordIndex, FcxGridFilterControlsTableViewColumn1.index]);
 
   with TStringList.Create do
     try
@@ -1758,7 +1758,7 @@ begin
       begin
         StringList := TStringList.Create;
         try
-          StringList.Text := FAppController.GetControlValues(LTypeID, AControlID);
+          StringList.Text := FAppController.GetControlValues(LTypeID, LControlID);
           AddStrings(StringList);
         finally
           StringList.Free;
@@ -1830,6 +1830,7 @@ end;
 
 constructor TBasisWebsiteEditor.Create(ACMSPlugIn: ICMSPlugIn; AAppController: IAppController; AWebsiteSettingsFileName: TFileName);
 var
+  LTypeID: TTypeID;
   LControlID: TControlID;
 begin
   CreateNew(nil);
@@ -1982,11 +1983,11 @@ begin
     with Properties do
     begin
       EmptySelectionText := '';
-      for LControlID := Low(TControlID) to High(TControlID) do
+      for LTypeID := Low(TTypeID) to High(TTypeID) do
         with Items.Add do
         begin
           Enabled := True;
-          Description := ControlIDToString(LControlID);
+          Description := TypeIDToString(LTypeID);
         end;
     end;
 

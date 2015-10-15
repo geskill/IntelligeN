@@ -178,7 +178,7 @@ type
     ['{C4878DD0-57BF-4A32-809A-9F7AC7B6CC5E}']
   end;
 
-  IPictureMirrorData = interface(IValueItem)
+  IPictureMirrorData = interface(IControlData)
     ['{D41C0E92-6FEF-489B-91F7-F802A9408801}']
     function GetName: WideString; safecall;
     function GetOriginalValue: WideString; safecall;
@@ -190,6 +190,9 @@ type
     property OriginalValue: WideString read GetOriginalValue;
     property Value: WideString read GetValue { . } write SetValue;
     property ErrorMsg: WideString read GetErrorMsg write SetErrorMsg;
+
+    // Cloning
+    function CloneInstance(): IControlData;
   end;
 
   IPictureMirror = interface(IPictureMirrorData)

@@ -1,4 +1,4 @@
-unit uApiPublishModel;
+unit uApiTabSheetData;
 
 interface
 
@@ -10,14 +10,16 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiControlsBase, uApiMirrorControlBase;
+  uApiControlsBase, uApiMirrorControlBase, uApiMirrorControllerBase;
 
 type
-  TICMSWebsiteData = class(TInterfacedObject, ITabSheetData)
+  TControlDataList = TInterfaceList<IControlData>;
+
+  TITabSheetData = class(TInterfacedObject, ITabSheetData)
   private
     FTypeID: TTypeID;
-    FControlList: TList<IControlData>;
-    FMirrorList: TList<IMirrorContainer>;
+    FControlList: TControlDataList;
+    FMirrorList: TMirrorContainerList;
   protected
     function GetTypeID: TTypeID; safecall;
 
@@ -26,13 +28,12 @@ type
     function GetMirror(const IndexOrName: OleVariant): IMirrorContainer; safecall;
     function GetMirrorCount: Integer; safecall;
   public
-    constructor Create(ATypeID: TTypeID);
+    constructor Create(ATypeID: TTypeID); overload;
+    constructor Create(ATypeID: TTypeID; AControlList: TControlDataList; AMirrorList: TMirrorContainerList); overload;
+    constructor Clone(const ATabSheetData: ITabSheetData);
     destructor Destroy; override;
 
     property TypeID: TTypeID read GetTypeID;
-
-    property ControlList: TList<IControlData>read FControlList;
-    property MirrorList: TList<IMirrorContainer>read FMirrorList;
 
     function FindControl(const AControlID: TControlID): IControlData; safecall;
     function FindMirror(const AHoster: WideString): IMirrorContainer; safecall;
@@ -41,19 +42,18 @@ type
     property ControlCount: Integer read GetControlCount;
     property Mirror[const IndexOrName: OleVariant]: IMirrorContainer read GetMirror;
     property MirrorCount: Integer read GetMirrorCount;
-
   end;
 
 implementation
 
 { TITabSheetData }
 
-function TICMSWebsiteData.GetTypeID: TTypeID;
+function TITabSheetData.GetTypeID: TTypeID;
 begin
   Result := FTypeID;
 end;
 
-function TICMSWebsiteData.GetControl(const IndexOrName: OleVariant): IControlData;
+function TITabSheetData.GetControl(const IndexOrName: OleVariant): IControlData;
 begin
   Result := nil;
 
@@ -66,12 +66,12 @@ begin
   end;
 end;
 
-function TICMSWebsiteData.GetControlCount: Integer;
+function TITabSheetData.GetControlCount: Integer;
 begin
   Result := FControlList.Count;
 end;
 
-function TICMSWebsiteData.GetMirror(const IndexOrName: OleVariant): IMirrorContainer;
+function TITabSheetData.GetMirror(const IndexOrName: OleVariant): IMirrorContainer;
 begin
   Result := nil;
 
@@ -84,19 +84,55 @@ begin
   end;
 end;
 
-function TICMSWebsiteData.GetMirrorCount: Integer;
+function TITabSheetData.GetMirrorCount: Integer;
 begin
   Result := FMirrorList.Count;
 end;
 
-constructor TICMSWebsiteData.Create(ATypeID: TTypeID);
+constructor TITabSheetData.Create(ATypeID: TTypeID);
 begin
-  FTypeID := ATypeID;
-  FControlList := TList<IControlData>.Create;
-  FMirrorList := TList<IMirrorContainer>.Create;
+  Create(ATypeID, nil, nil);
 end;
 
-function TICMSWebsiteData.FindControl(const AControlID: TControlID): IControlData;
+constructor TITabSheetData.Create(ATypeID: TTypeID; AControlList: TControlDataList; AMirrorList: TMirrorContainerList);
+begin
+  inherited Create;
+
+  FTypeID := ATypeID;
+
+  if not Assigned(AControlList) then
+    FControlList := TControlDataList.Create
+  else
+    FControlList := AControlList;
+
+  if not Assigned(AMirrorList) then
+    FMirrorList := TMirrorContainerList.Create
+  else
+    FMirrorList := AMirrorList;
+end;
+
+constructor TITabSheetData.Clone(const ATabSheetData: ITabSheetData);
+var
+  LIndex: Integer;
+  LControl: IControlData;
+  LMirror: IMirrorContainer;
+begin
+  Create;
+
+  for LIndex := 0 to ATabSheetData.ControlCount - 1 do
+  begin
+    LControl := TIControlData.Clone(ATabSheetData.Control[LIndex]);
+    FControlList.Add(LControl);
+  end;
+
+  for LIndex := 0 to ATabSheetData.MirrorCount - 1 do
+  begin
+    LMirror := TIMirrorContainer.Clone(ATabSheetData.Mirror[LIndex]);
+    FMirrorList.Add(LMirror);
+  end;
+end;
+
+function TITabSheetData.FindControl(const AControlID: TControlID): IControlData;
 var
   LIndex: Integer;
   LControl: IControlData;
@@ -115,7 +151,7 @@ begin
   end;
 end;
 
-function TICMSWebsiteData.FindMirror(const AHoster: WideString): IMirrorContainer;
+function TITabSheetData.FindMirror(const AHoster: WideString): IMirrorContainer;
 var
   LIndex: Integer;
   LMirror: IMirrorContainer;
@@ -134,7 +170,7 @@ begin
   end;
 end;
 
-destructor TICMSWebsiteData.Destroy;
+destructor TITabSheetData.Destroy;
 begin
   FMirrorList.Free;
   FControlList.Free;

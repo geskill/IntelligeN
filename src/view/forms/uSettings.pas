@@ -704,25 +704,25 @@ var
   I, X: Integer;
   CustomDataController: TcxCustomDataController;
 
-  ATypeID: TTypeID;
-  AControlID: TControlID;
-  Status: Boolean;
+  LTypeID: TTypeID;
+  LControlID: TControlID;
+  LStatus: Boolean;
 begin
   if (FCrawlerPluginsCheckListBox.InnerCheckListBox.ItemIndex <> -1) and not FOnCrawlerContingentChange then
     with cxGCrawlerTableView1.DataController do
     begin
       for I := 0 to RecordCount - 1 do
       begin
-        ATypeID := StringToTypeID(Values[I, cxGCrawlerTableView1Column1.index]);
+        LTypeID := StringToTypeID(Values[I, cxGCrawlerTableView1Column1.index]);
         CustomDataController := GetDetailDataController(I, 0);
 
         for X := 0 to CustomDataController.RecordCount - 1 do
         begin
-          AControlID := StringToControlID('I' + CustomDataController.Values[X, cxGCrawlerTableView2Column1.index]);
-          Status := CustomDataController.Values[X, cxGCrawlerTableView2Column2.index];
+          LControlID := StringToControlID('I' + CustomDataController.Values[X, cxGCrawlerTableView2Column1.index]);
+          LStatus := CustomDataController.Values[X, cxGCrawlerTableView2Column2.index];
 
-          if not(TCrawlerCollectionItem(SettingsManager.Settings.Plugins.Crawler.Items[FCrawlerPluginsCheckListBox.InnerCheckListBox.ItemIndex]).ContingentStatus[ATypeID, AControlID] = Status) then
-            TCrawlerCollectionItem(SettingsManager.Settings.Plugins.Crawler.Items[FCrawlerPluginsCheckListBox.InnerCheckListBox.ItemIndex]).ContingentStatus[ATypeID, AControlID] := Status;
+          if not(TCrawlerCollectionItem(SettingsManager.Settings.Plugins.Crawler.Items[FCrawlerPluginsCheckListBox.InnerCheckListBox.ItemIndex]).ContingentStatus[LTypeID, LControlID] = LStatus) then
+            TCrawlerCollectionItem(SettingsManager.Settings.Plugins.Crawler.Items[FCrawlerPluginsCheckListBox.InnerCheckListBox.ItemIndex]).ContingentStatus[LTypeID, LControlID] := LStatus;
         end;
       end;
     end;

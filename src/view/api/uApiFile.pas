@@ -11,6 +11,7 @@ uses
   uStringUtils;
 
 type
+  // TODO: Re-write
   TChangeableObject = class(TInterfacedObject, IChangeable)
   private
     FChanged: Boolean;
@@ -39,7 +40,7 @@ type
 
     function GetControlName: WideString;
     procedure SetGetControlName(AGetControlName: WideString); overload;
-    procedure SetGetControlName(AComponentID: TControlID); overload;
+    procedure SetGetControlName(AControlID: TControlID); overload;
 
     function GetControlValue: WideString;
     procedure SetGetControlValue(AGetControlValue: WideString);
@@ -48,7 +49,7 @@ type
     function GetSubTypes: TList<ISubType>;
   public
     constructor Create; overload; override;
-    constructor Create(AComponentID: TControlID; AControlValue: WideString = ''; AID: WideString = ''); reintroduce; overload;
+    constructor Create(AControlID: TControlID; AControlValue: WideString = ''; AID: WideString = ''); reintroduce; overload;
     property ControlName: WideString read GetControlName write SetGetControlName;
     property ControlValue: WideString read GetControlValue write SetGetControlValue;
     property ID: WideString read GetID write SetID;
@@ -298,9 +299,9 @@ begin
   Change;
 end;
 
-procedure TSubType.SetGetControlName(AComponentID: TControlID);
+procedure TSubType.SetGetControlName(AControlID: TControlID);
 begin
-  FControlValue := ControlIDToString(AComponentID);
+  FControlValue := ControlIDToString(AControlID);
   Change;
 end;
 
@@ -327,10 +328,10 @@ begin
   FSubTypes.OnNotify := SubTypesNotify;
 end;
 
-constructor TSubType.Create(AComponentID: TControlID; AControlValue: WideString = ''; AID: WideString = '');
+constructor TSubType.Create(AControlID: TControlID; AControlValue: WideString = ''; AID: WideString = '');
 begin
   Create;
-  SetGetControlName(AComponentID);
+  SetGetControlName(AControlID);
   ControlValue := AControlValue;
   ID := AID;
 end;

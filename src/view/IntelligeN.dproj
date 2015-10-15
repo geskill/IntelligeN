@@ -122,13 +122,13 @@
 			<DCCReference Include="api\uApiPluginsAdd.pas"/>
 			<DCCReference Include="api\uApiPrerequisite.pas"/>
 			<DCCReference Include="api\uApiPublishController.pas"/>
-			<DCCReference Include="api\uApiPublishModel.pas"/>
 			<DCCReference Include="api\uApiPublish.pas"/>
 			<DCCReference Include="api\uApiSettings.pas"/>
 			<DCCReference Include="api\uApiSettingsManager.pas"/>
 			<DCCReference Include="api\uApiSettingsExport.pas"/>
 			<DCCReference Include="api\uApiSettingsPluginsCheckListBox.pas"/>
 			<DCCReference Include="api\uApiTabSheetController.pas"/>
+			<DCCReference Include="api\uApiTabSheetData.pas"/>
 			<DCCReference Include="api\uApiTabSheetItem.pas"/>
 			<DCCReference Include="api\uApiThreadPoolManager.pas"/>
 			<DCCReference Include="api\uApiUpdate.pas"/>
@@ -264,6 +264,9 @@
 			<None Include="ModelSupport_IntelligeN\ufAddWebsiteWizard\default.txvpck"/>
 			<None Include="ModelSupport_IntelligeN\uPathUtils\default.txvpck"/>
 			<None Include="ModelSupport_IntelligeN\uApiHTTP\default.txaPackage"/>
+			<None Include="ModelSupport_IntelligeN\uApiFile\default.txvpck"/>
+			<None Include="ModelSupport_IntelligeN\uApiTabSheetControllerBase\default.txaPackage"/>
+			<None Include="ModelSupport_IntelligeN\uApiTabSheetData\default.txaPackage"/>
 			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
 			</BuildConfiguration>

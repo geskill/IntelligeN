@@ -13,9 +13,11 @@ uses
   uApiMirrorControlBase;
 
 type
+  TMirrorContainerList = TInterfaceList<IMirrorContainer>;
+
   TIMirrorControllerBase = class(TInterfacedObject, IMirrorControllerBase)
   private
-    FMirrorList: TInterfaceList<IMirrorContainer>;
+    FMirrorList: TMirrorContainerList;
   protected
     function GetMirror(const IndexOrName: OleVariant): IMirrorContainer; safecall;
     function GetMirrorCount: Integer; safecall;
@@ -53,7 +55,7 @@ end;
 constructor TIMirrorControllerBase.Create;
 begin
   inherited Create;
-  FMirrorList := TInterfaceList<IMirrorContainer>.Create();
+  FMirrorList := TMirrorContainerList.Create();
 end;
 
 constructor TIMirrorControllerBase.Clone(const AMirrorControllerBase: IMirrorControllerBase);
