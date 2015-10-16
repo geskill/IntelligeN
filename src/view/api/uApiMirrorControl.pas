@@ -206,8 +206,6 @@ type
     procedure SetSize(ASize: Double);
     procedure SetPartSize(APartSize: Double);
 
-    procedure SetCrypter(ACrypter: TCrypterCollectionItem); // TODO: Implement better?
-
     function GetCrypterFolderInfo: TCrypterFolderInfo;
     procedure SetCrypterFolderInfo(ACrypterFolderInfo: TCrypterFolderInfo);
 
@@ -217,7 +215,7 @@ type
     function GetFocus: Boolean;
     procedure SetFocus(AFocus: Boolean);
   public
-    constructor Create(AOwner: TComponent; AMirrorControl: IMirrorControl);
+    constructor Create(AOwner: TComponent; const AMirrorControl: IMirrorControl; ACrypter: TCrypterCollectionItem);
     destructor Destroy; override;
 
     // GUI
@@ -237,8 +235,6 @@ type
 
     // Additional
     property MirrorControl: IMirrorControl read GetMirrorControl write SetMirrorControl;
-
-    property Crypter: TCrypterCollectionItem read FCrypter write SetCrypter;
 
     property CrypterFolderInfo: TCrypterFolderInfo read GetCrypterFolderInfo write SetCrypterFolderInfo;
 
@@ -1572,7 +1568,7 @@ end;
 
 function TCrypterPanel.GetName: WideString;
 begin
-  Result := Crypter.Name;
+  Result := FCrypter.Name;
 end;
 
 function TCrypterPanel.GetStatusImage: WideString;
@@ -1630,11 +1626,6 @@ begin
   end;
 end;
 
-procedure TCrypterPanel.SetCrypter(ACrypter: TCrypterCollectionItem);
-begin
-  FCrypter := ACrypter;
-end;
-
 function TCrypterPanel.GetCrypterFolderInfo;
 begin
   FCrypterFolderInfoLock.EnterReadLock;
@@ -1676,11 +1667,12 @@ begin
     FcxTextEditLink.SetFocus;
 end;
 
-constructor TCrypterPanel.Create;
+constructor TCrypterPanel.Create(AOwner: TComponent; const AMirrorControl: IMirrorControl; ACrypter: TCrypterCollectionItem);
 begin
   inherited Create;
 
-  MirrorControl := AMirrorControl;
+  FMirrorControl := AMirrorControl;
+  FCrypter := ACrypter;
 
   FPanel := TPanel.Create(AOwner);
   with FPanel do
@@ -1739,7 +1731,7 @@ begin
     OnClick := FcxButtonLinkCheckClick;
   end;
 
-  FStatusGrid := TStatusGrid.Create(FPanel, Self as ICrypterPanel, 6, 27, FPanel.Height - 20 - 12, FPanel.Width - 12, nil);
+  FStatusGrid := TStatusGrid.Create(FPanel, ICrypterPanel(Self), 6, 27, FPanel.Height - 20 - 12, FPanel.Width - 12, nil);
 
   Visible := False;
 end;
@@ -2678,7 +2670,7 @@ begin
     with Plugins.Crypter do
       for I := 0 to Count - 1 do
         if TPlugInCollectionItem(Items[I]).Enabled then
-          AddCrypter(TPlugInCollectionItem(Items[I]).name);
+          AddCrypter(TPlugInCollectionItem(Items[I]).Name);
 
     with ControlAligner do
       if not(DefaultMirrorTabIndex = StrDirectlinks) then
@@ -2693,7 +2685,12 @@ begin
 end;
 
 destructor TMirrorControl.Destroy;
+var
+  LCrypterIndex: Integer;
 begin
+  for LCrypterIndex := CrypterCount - 1 downto 0 do
+    RemoveCrypter(LCrypterIndex);
+
   FcxButtonCrypt.Free;
 
   FCrypterList.Free;
@@ -2751,9 +2748,8 @@ end;
 function TMirrorControl.AddCrypter;
 var
   I: Integer;
-  _NewMenuItem: TMenuItem;
-  _CrypterPanel: TCrypterPanel;
-  _CrypterPanelIntf: ICrypterPanel;
+  LNewMenuItem: TMenuItem;
+  LCrypterPanel: ICrypterPanel;
 begin
   Result := -1;
 
@@ -2766,16 +2762,14 @@ begin
 
   FcxTabControl.Tabs.Add(AName);
 
-  _CrypterPanel := TCrypterPanel.Create(FcxTabControl, Self);
   with SettingsManager.Settings.Plugins do
-    _CrypterPanel.Crypter := TCrypterCollectionItem(FindPlugInCollectionItemFromCollection(AName, Crypter));
+    LCrypterPanel := TCrypterPanel.Create(FcxTabControl, Self, TCrypterCollectionItem(FindPlugInCollectionItemFromCollection(AName, Crypter)));
 
-  _CrypterPanelIntf := _CrypterPanel;
-  Result := FCrypterList.Add(_CrypterPanel);
+  Result := FCrypterList.Add(LCrypterPanel);
 
-  _NewMenuItem := TMenuItem.Create(FCrypterPopupMenu);
-  FCrypterPopupMenu.Items.Add(_NewMenuItem);
-  with _NewMenuItem do
+  LNewMenuItem := TMenuItem.Create(FCrypterPopupMenu);
+  FCrypterPopupMenu.Items.Add(LNewMenuItem);
+  with LNewMenuItem do
   begin
     Caption := AName;
     // ShortCut := Menus.ShortCut($5A,[ssCtrl]);
