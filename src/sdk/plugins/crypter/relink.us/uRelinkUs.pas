@@ -16,12 +16,12 @@ uses
 
 type
   TRelinkUs = class(TCrypterPlugIn)
-  private
-    const
-      VIEW_SNIPPET = 'view.php?id=';
-      website = 'http://api.relink.us/';
+  private const
+    VIEW_SNIPPET = 'view.php?id=';
+    website = 'http://api.relink.us/';
 
     function GetFolderID(AFolderName: string): string;
+    function GetStatusImageLink(AFolderIdentifier: WideString; Small: WordBool = True): WideString;
   public
     function GetName: WideString; override;
     function AddFolder(const AMirrorContainer: IDirectlinkContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
@@ -40,6 +40,24 @@ begin
     Result := ExtractUrlFileName(AFolderName);
 end;
 
+function TRelinkUs.GetStatusImageLink(AFolderIdentifier: WideString; Small: WordBool = True): WideString;
+const
+  OLD_VIEW_SNIPPET = 'view.php?id=';
+var
+  LViewSnippet: string;
+begin
+  LViewSnippet := 'f/';
+  if Pos(VIEW_SNIPPET, string(AFolderIdentifier)) > 0 then
+    LViewSnippet := OLD_VIEW_SNIPPET;
+
+  case Small of
+    True:
+      Result := StringReplace(AFolderIdentifier, LViewSnippet, 'st/', []) + '.png';
+    False:
+      Result := StringReplace(AFolderIdentifier, LViewSnippet, 'std/', []) + '.png';
+  end;
+end;
+
 function TRelinkUs.GetName;
 begin
   Result := 'Relink.us';
@@ -47,22 +65,35 @@ end;
 
 function TRelinkUs.AddFolder;
 var
-  _Foldertypes: TFoldertypes;
-  _Containertypes: TContainertypes;
+  LFoldertypes: TFoldertypes;
+  LContainertypes: TContainertypes;
 
-  HTTPParams: IHTTPParams;
+  LDirectlinkIndex: Integer;
 
-  Links: string;
-
-  RequestID: Double;
-
-  HTTPProcess: IHTTPProcess;
+  LHTTPParams: IHTTPParams;
+  LRequestID: Double;
+  LHTTPProcess: IHTTPProcess;
 begin
-  _Foldertypes := TFoldertypes(TFoldertype(Foldertypes));
-  _Containertypes := TContainertypes(TContainertype(ContainerTypes));
+  Result := False;
 
-  HTTPParams := THTTPParams.Create(ptMultipartFormData);
-  with HTTPParams do
+  with ACrypterFolderInfo do
+  begin
+    Link := '';
+    Status := csNotChecked;
+    Size := 0;
+    PartSize := 0;
+    Hoster := '';
+    HosterShort := '';
+    Parts := 0;
+    StatusImage := '';
+    StatusImageText := '';
+  end;
+
+  LFoldertypes := TFoldertypes(TFoldertype(Foldertypes));
+  LContainertypes := TContainertypes(TContainertype(ContainerTypes));
+
+  LHTTPParams := THTTPParams.Create(ptMultipartFormData);
+  with LHTTPParams do
   begin
     AddFormField('protect', 'protect');
 
@@ -75,35 +106,10 @@ begin
       else
         AddFormField('api', AccountName);
 
-    Links := StringReplace(AMirrorContainer.Directlink[0].Value, sLineBreak, ';', [rfReplaceAll]);
+    AddFormField('url', TrimRight(StringReplace(AMirrorContainer.Directlink[0].Value, sLineBreak, ';', [rfReplaceAll]), ';'));
 
-    if (length(Links) > 0) and (Links[length(Links)] = ';') then
-      System.Delete(Links, length(Links), 1);
-
-    AddFormField('url', Links);
-
-    if ftWeb in _Foldertypes then
-      AddFormField('web', 'yes')
-    else
-      AddFormField('web', 'no');
-
-    if ftContainer in _Foldertypes then
-    begin
-      if ctDLC in _Containertypes then
-        AddFormField('dlc', 'yes')
-      else
-        AddFormField('dlc', 'no')
-    end;
-
-    if UseCNL then
-      AddFormField('cnl', 'yes')
-    else
-      AddFormField('cnl', 'no');
-
-    if UseCaptcha then
-      AddFormField('captcha', 'yes')
-    else
-      AddFormField('captcha', 'no');
+    for LDirectlinkIndex := 1 to AMirrorContainer.DirectlinkCount - 1 do
+      AddFormField('url[]', TrimRight(StringReplace(AMirrorContainer.Directlink[0].Value, sLineBreak, ';', [rfReplaceAll]), ';'));
 
     if not(FolderName = '') then
       AddFormField('title', FolderName);
@@ -111,30 +117,50 @@ begin
     if UseDescription then
       AddFormField('comment', Description);
 
+    if UseVisitorPassword then
+      AddFormField('password', Visitorpassword);
+
+    AddFormField('web', IfThen(ftWeb in LFoldertypes, 'yes', 'no'));
+
+    if ftContainer in LFoldertypes then
+    begin
+      AddFormField('dlc', IfThen(ctDLC in LContainertypes, 'yes', 'no'));
+    end;
+
+    AddFormField('cnl', IfThen(UseCNL, 'yes', 'no'));
+
+    AddFormField('captcha', IfThen(UseCaptcha, 'yes', 'no'));
+
     if UseFilePassword then
     begin
       AddFormField('password_zip_public', 'yes');
       AddFormField('password_zip', FilePassword);
     end;
-
-    if UseVisitorPassword then
-      AddFormField('password', Visitorpassword);
   end;
 
-  RequestID := HTTPManager.Post(THTTPRequest.Create(website + 'api.php'), HTTPParams, TPlugInHTTPOptions.Create(Self));
+  LRequestID := HTTPManager.Post(THTTPRequest.Create(website + 'api.php'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  until HTTPManager.HasResult(LRequestID);
 
-  HTTPProcess := HTTPManager.GetResult(RequestID);
+  LHTTPProcess := HTTPManager.GetResult(LRequestID);
 
-  if HTTPProcess.HTTPResult.HasError then
-    ErrorMsg := HTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage
-  else if not(Pos('relink.us', string(HTTPProcess.HTTPResult.SourceCode)) = 0) then
-    ErrorMsg := copy(HTTPProcess.HTTPResult.SourceCode, 5)
+  if LHTTPProcess.HTTPResult.HasError then
+  begin
+    ErrorMsg := LHTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
+  end
+  else if not(Pos('relink.us', string(LHTTPProcess.HTTPResult.SourceCode)) = 0) then
+  begin
+    ACrypterFolderInfo.Link := copy(LHTTPProcess.HTTPResult.SourceCode, 5);
+    ACrypterFolderInfo.StatusImage := GetStatusImageLink(ACrypterFolderInfo.Link);
+    ACrypterFolderInfo.StatusImageText := GetStatusImageLink(ACrypterFolderInfo.Link, False);
+    Result := True;
+  end
   else
-    ErrorMsg := HTTPProcess.HTTPResult.SourceCode;
+  begin
+    ErrorMsg := LHTTPProcess.HTTPResult.SourceCode;
+  end;
 
   {
     Wie benutze ich die Crypt-API?
@@ -175,80 +201,105 @@ end;
 
 function TRelinkUs.GetFolder;
 var
-  CrypterFolderInfo: TCrypterFolderInfo;
+  LRequestID: Double;
+  LHTTPProcess: IHTTPProcess;
 
-  RequestID: Double;
-
-  HTTPProcess: IHTTPProcess;
-
-  CompleteList, SingleList: TStrings;
-  SizeInBytes: Int64;
+  LCompleteList, LSingleList: TStrings;
+  LSizeInBytes, LPartSizeInBytes: Int64;
   I, unknown, online, offline: Integer;
 begin
-  with CrypterFolderInfo do
+  Result := False;
+
+  with ACrypterFolderInfo do
   begin
     Status := csNotChecked;
     Size := 0;
+    PartSize := 0;
     Hoster := '';
+    HosterShort := '';
     Parts := 0;
+    StatusImage := '';
+    StatusImageText := '';
   end;
 
-  RequestID := HTTPManager.Get(THTTPRequest.Create(website + 'container_link_info.php?id=' + GetFolderID(AFolderIdentifier)), TPlugInHTTPOptions.Create(Self));
+  LSizeInBytes := 0;
+  LPartSizeInBytes := 0;
+  unknown := 0;
+  online := 0;
+  offline := 0;
+
+  LRequestID := HTTPManager.Get(THTTPRequest.Create(website + 'container_link_info.php?id=' + GetFolderID(AFolderIdentifier)), TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  until HTTPManager.HasResult(LRequestID);
 
-  HTTPProcess := HTTPManager.GetResult(RequestID);
+  LHTTPProcess := HTTPManager.GetResult(LRequestID);
 
-  CompleteList := SplittString('|', HTTPProcess.HTTPResult.SourceCode);
-  try
-    SizeInBytes := 0;
-    unknown := 0;
-    online := 0;
-    offline := 0;
-    CrypterFolderInfo.Parts := 0;
-    for I := 0 to CompleteList.Count - 1 do
-    begin
-      if not(CompleteList[I] = '') then
+  if LHTTPProcess.HTTPResult.HasError then
+  begin
+    ErrorMsg := LHTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
+  end
+  else if Pos(';', LHTTPProcess.HTTPResult.SourceCode) > 0 then
+  begin
+    LCompleteList := SplittString('|', LHTTPProcess.HTTPResult.SourceCode);
+    try
+      for I := 0 to LCompleteList.Count - 1 do
       begin
-        Inc(CrypterFolderInfo.Parts);
-        SingleList := SplittString(';', CompleteList[I]);
-        try
+        if not(LCompleteList[I] = '') then
+        begin
+          Inc(ACrypterFolderInfo.Parts);
+          LSingleList := SplittString(';', LCompleteList[I]);
           try
-            case IndexText(SingleList[1], ['unknown', 'online', 'offline']) of
-              0:
-                Inc(unknown);
-              1:
-                Inc(online);
-              2:
-                Inc(offline);
+            try
+              case IndexText(LSingleList[1], ['unknown', 'online', 'offline']) of
+                0:
+                  Inc(unknown);
+                1:
+                  Inc(online);
+                2:
+                  Inc(offline);
+              end;
+              if StrToIntDef(LSingleList[4], 0) > LPartSizeInBytes then
+              begin
+                LPartSizeInBytes := StrToIntDef(LSingleList[4], 0);
+              end;
+              LSizeInBytes := LSizeInBytes + StrToIntDef(LSingleList[4], 0);
+              ACrypterFolderInfo.Hoster := LSingleList[2];
+            except
+              on E: Exception do
+              begin
+                ErrorMsg := 'The result from ' + GetName + ' was invaild: ' + E.message;
+              end;
             end;
-            SizeInBytes := SizeInBytes + StrToIntDef(SingleList[4], 0);
-            CrypterFolderInfo.Hoster := SingleList[2];
-          except
-
+          finally
+            LSingleList.Free;
           end;
-        finally
-          SingleList.Free;
         end;
       end;
+    finally
+      LCompleteList.Free;
     end;
-  finally
-    CompleteList.Free;
-  end;
-  if (unknown = 0) and (online = 0) then
-    CrypterFolderInfo.Status := csOffline
-  else if (unknown = 0) and (offline = 0) then
-    CrypterFolderInfo.Status := csOnline
-  else if (offline > 0) and (online > 0) then
-    CrypterFolderInfo.Status := csMixedOnOffline
+    if (unknown = 0) and (online = 0) then
+      ACrypterFolderInfo.Status := csOffline
+    else if (unknown = 0) and (offline = 0) then
+      ACrypterFolderInfo.Status := csOnline
+    else if (offline > 0) and (online > 0) then
+      ACrypterFolderInfo.Status := csMixedOnOffline
+    else
+      ACrypterFolderInfo.Status := csUnknown;
+
+    ACrypterFolderInfo.Size := RoundTo((LSizeInBytes / 1048576), -2);
+    ACrypterFolderInfo.PartSize := RoundTo((LPartSizeInBytes / 1048576), -2);
+    ACrypterFolderInfo.StatusImage := GetStatusImageLink(ACrypterFolderInfo.Link);
+    ACrypterFolderInfo.StatusImageText := GetStatusImageLink(ACrypterFolderInfo.Link, False);
+
+    Result := True;
+  end
   else
-    CrypterFolderInfo.Status := csUnknown;
-
-  CrypterFolderInfo.Size := RoundTo((SizeInBytes / 1048576), -2);
-
-  Result := False; // TODO
+  begin
+    ErrorMsg := LHTTPProcess.HTTPResult.SourceCode;
+  end;
 
   {
     Wie benutze ich die Container Link-API?
@@ -263,31 +314,6 @@ begin
     Als Rückgabe bekommt man folgende Informationen getrennt mit ";", einzelne Links werden mit "|" getrennt:
     fortlaufende Nummer (1, 2, 3, ...);status (unknown, online, offline);hoster;filename;size in bytes|
     }
-
-
-  (*
-
-var
-  l_view_snippet: string;
-begin
-  l_view_snippet := 'f/';
-  if Pos(VIEW_SNIPPET, string(FolderURL)) > 0 then
-    l_view_snippet := VIEW_SNIPPET;
-
-  case Small of
-    True:
-      Result := StringReplace(FolderURL, l_view_snippet, 'st/', []) + '.png';
-    False:
-      Result := StringReplace(FolderURL, l_view_snippet, 'std/', []) + '.png';
-  end;
-
-    case Small of
-    True:
-    Result := StringReplace(FolderURL, 'view.php?id=', 'forumstatus.php?id=', []);
-    False:
-    Result := StringReplace(FolderURL, 'view.php?id=', 'forumstatus.php?id=', []) + '&detail=1';
-    end;
-    *)
 end;
 
 end.

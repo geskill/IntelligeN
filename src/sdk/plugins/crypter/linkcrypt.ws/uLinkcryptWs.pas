@@ -23,6 +23,7 @@ type
     website = 'http://linkcrypt.ws/';
 
     function GetFolderID(AFolderURL: string): string;
+    function GetStatusImageLink(AFolderIdentifier: WideString; Small: WordBool = True): WideString;
   public
     function GetName: WideString; override;
     function AddFolder(const AMirrorContainer: IDirectlinkContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
@@ -49,6 +50,16 @@ begin
     end;
 end;
 
+function TLinkcryptWs.GetStatusImageLink(AFolderIdentifier: WideString; Small: WordBool = True): WideString;
+begin
+  case Small of
+    True:
+      Result := StringReplace(AFolderIdentifier, '/dir/', '/png/', []);
+    False:
+      Result := StringReplace(AFolderIdentifier, '/dir/', '/textpng/', []);
+  end;
+end;
+
 function TLinkcryptWs.GetName;
 begin
   Result := 'Linkcrypt.ws';
@@ -56,49 +67,61 @@ end;
 
 function TLinkcryptWs.AddFolder;
 var
-  _Foldertypes: TFoldertypes;
-  _Containertypes: TContainertypes;
+  LFoldertypes: TFoldertypes;
+  LContainertypes: TContainertypes;
 
-  I: Integer;
+  LDirectlinkIndex: Integer;
 
-  HTTPParams: IHTTPParams;
+  LHTTPParams: IHTTPParams;
+  LRequestID: Double;
+  LHTTPProcess: IHTTPProcess;
 
-  RequestID: Double;
-
-  HTTPProcess: IHTTPProcess;
-
-  XMLDoc: IXMLDocument;
+  LXMLDoc: IXMLDocument;
 begin
-  _Foldertypes := TFoldertypes(TFoldertype(Foldertypes));
-  _Containertypes := TContainertypes(TContainertype(ContainerTypes));
+  Result := False;
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
+  with ACrypterFolderInfo do
   begin
+    Link := '';
+    Status := csNotChecked;
+    Size := 0;
+    PartSize := 0;
+    Hoster := '';
+    HosterShort := '';
+    Parts := 0;
+    StatusImage := '';
+    StatusImageText := '';
+  end;
+
+  LFoldertypes := TFoldertypes(TFoldertype(Foldertypes));
+  LContainertypes := TContainertypes(TContainertype(ContainerTypes));
+
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
+  begin
+    if UseAccount then
+      AddFormField('apiKey', AccountName);
+
     AddFormField('urls', StringReplace(AMirrorContainer.Directlink[0].Value, sLineBreak, ';', [rfReplaceAll]));
 
-    for I := 1 to AMirrorContainer.DirectlinkCount - 1 do
-      AddFormField('mirror_' + IntToStr(I), StringReplace(AMirrorContainer.Directlink[I].Value, sLineBreak, ';', [rfReplaceAll]));
+    if not SameStr('', FolderName) then
+      AddFormField('title', FolderName);
 
-    if ftWeb in _Foldertypes then
-      AddFormField('weburls', '0')
-    else
-      AddFormField('weburls', '1');
+    if UseVisitorPassword then
+      AddFormField('folder_password', Visitorpassword);
 
-    if ftContainer in _Foldertypes then
+    if UseFilePassword then
+      AddFormField('download_password', FilePassword);
+
+    AddFormField('captx', IfThen(UseCaptcha, '0', '1'));
+
+    AddFormField('weburls', IfThen(ftWeb in LFoldertypes, '0', '1'));
+
+    if ftContainer in LFoldertypes then
     begin
-      if ctDLC in _Containertypes then
-        AddFormField('dlc', '0')
-      else
-        AddFormField('dlc', '1');
-      if ctRSDF in _Containertypes then
-        AddFormField('rsdf', '0')
-      else
-        AddFormField('rsdf', '1');
-      if ctCCF in _Containertypes then
-        AddFormField('ccf', '0')
-      else
-        AddFormField('ccf', '1');
+      AddFormField('dlc', IfThen(ctDLC in LContainertypes, '0', '1'));
+      AddFormField('rsdf', IfThen(ctRSDF in LContainertypes, '0', '1'));
+      AddFormField('ccf', IfThen(ctCCF in LContainertypes, '0', '1'));
     end
     else
     begin
@@ -107,58 +130,48 @@ begin
       AddFormField('ccf', '1');
     end;
 
-    if UseCNL then
-      AddFormField('cnl', '0')
-    else
-      AddFormField('cnl', '1');
+    AddFormField('cnl', IfThen(UseCNL, '0', '1'));
 
-    if UseCaptcha then
-      AddFormField('captx', '0')
-    else
-      AddFormField('captx', '1');
-
-    if not(FolderName = '') then
-      AddFormField('title', FolderName);
-
-    if UseFilePassword then
-      AddFormField('download_password', FilePassword);
-
-    if UseVisitorPassword then
-      AddFormField('folder_password', Visitorpassword);
-
-    if UseAccount then
-      AddFormField('api_user_id', AccountName);
-
-    AddFormField('api', 'create_V1');
+    for LDirectlinkIndex := 1 to AMirrorContainer.DirectlinkCount - 1 do
+      AddFormField('mirror_' + IntToStr(LDirectlinkIndex), StringReplace(AMirrorContainer.Directlink[LDirectlinkIndex].Value, sLineBreak, ';', [rfReplaceAll]));
   end;
 
-  RequestID := HTTPManager.Post(THTTPRequest.Create(website + 'api.html'), HTTPParams, TPlugInHTTPOptions.Create(Self));
+  LRequestID := HTTPManager.Post(THTTPRequest.Create(website + 'api.html?api=create_V2'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  until HTTPManager.HasResult(LRequestID);
 
-  HTTPProcess := HTTPManager.GetResult(RequestID);
+  LHTTPProcess := HTTPManager.GetResult(LRequestID);
 
-  if HTTPProcess.HTTPResult.HasError then
-    ErrorMsg := HTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage
-  else if not SameStr('', HTTPProcess.HTTPResult.SourceCode) then
+  if LHTTPProcess.HTTPResult.HasError then
+  begin
+    ErrorMsg := LHTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
+  end
+  else if not SameStr('', LHTTPProcess.HTTPResult.SourceCode) then
   begin
     OleInitialize(nil);
     try
-      XMLDoc := NewXMLDocument;
+      LXMLDoc := NewXMLDocument;
       try
         try
-          with XMLDoc do
+          with LXMLDoc do
           begin
-            LoadFromXML(HTTPProcess.HTTPResult.SourceCode);
+            LoadFromXML(LHTTPProcess.HTTPResult.SourceCode);
             Active := True;
           end;
-          with XMLDoc.ChildNodes.Nodes['data'].ChildNodes do
+          with LXMLDoc.ChildNodes.Nodes['data'].ChildNodes do
             if (Nodes['status'].NodeValue = '1') then
-              Result := Nodes['folderUrl'].NodeValue
+            begin
+              ACrypterFolderInfo.Link := Nodes['folderUrl'].NodeValue;
+              ACrypterFolderInfo.StatusImage := GetStatusImageLink(ACrypterFolderInfo.Link);
+              ACrypterFolderInfo.StatusImageText := GetStatusImageLink(ACrypterFolderInfo.Link, False);
+              Result := True;
+            end
             else
+            begin
               ErrorMsg := Nodes['errorCode'].NodeValue + ': ' + Nodes['errorMsg'].NodeValue;
+            end;
         except
           on E: Exception do
           begin
@@ -166,14 +179,16 @@ begin
           end;
         end;
       finally
-        XMLDoc := nil;
+        LXMLDoc := nil;
       end;
     finally
       OleUninitialize;
     end;
   end
   else
+  begin
     ErrorMsg := 'The Server response was empty!';
+  end;
 end;
 
 function TLinkcryptWs.EditFolder;
@@ -188,94 +203,106 @@ end;
 
 function TLinkcryptWs.GetFolder;
 var
-  CrypterFolderInfo: TCrypterFolderInfo;
+  LHTTPParams: IHTTPParams;
+  LRequestID: Double;
+  LHTTPProcess: IHTTPProcess;
 
-  RequestID: Double;
-
-  HTTPProcess: IHTTPProcess;
-
-  FormatSettings: TFormatSettings;
-  XMLDoc: IXMLDocument;
+  LXMLDoc: IXMLDocument;
 begin
-  with CrypterFolderInfo do
+  Result := False;
+
+  with ACrypterFolderInfo do
   begin
     Status := csNotChecked;
     Size := 0;
+    PartSize := 0;
     Hoster := '';
+    HosterShort := '';
     Parts := 0;
+    StatusImage := '';
+    StatusImageText := '';
   end;
 
-  // thread-safe ???
-  GetLocaleFormatSettings(LOCALE_SYSTEM_DEFAULT, FormatSettings);
-  FormatSettings.DecimalSeparator := ',';
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
+  begin
+    if UseAccount then
+      AddFormField('apiKey', AccountName);
 
-  RequestID := HTTPManager.Get(THTTPRequest.Create(website + 'api.html?api=status_V1&detail=1&folderKey=' + GetFolderID(AFolderIdentifier)), TPlugInHTTPOptions.Create(Self));
+    AddFormField('folderKey', GetFolderID(AFolderIdentifier));
+  end;
+
+  LRequestID := HTTPManager.Post(THTTPRequest.Create(website + 'api.html?api=getFolder_V2'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  until HTTPManager.HasResult(LRequestID);
 
-  HTTPProcess := HTTPManager.GetResult(RequestID);
+  LHTTPProcess := HTTPManager.GetResult(LRequestID);
 
-  if HTTPProcess.HTTPResult.HasError then
-    ErrorMsg := HTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage
-  else if not SameStr('', HTTPProcess.HTTPResult.SourceCode) then
+  if LHTTPProcess.HTTPResult.HasError then
+  begin
+    ErrorMsg := LHTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
+  end
+  else if not SameStr('', LHTTPProcess.HTTPResult.SourceCode) then
   begin
     OleInitialize(nil);
     try
-      XMLDoc := NewXMLDocument;
+      LXMLDoc := NewXMLDocument;
       try
         try
-          with XMLDoc do
+          with LXMLDoc do
           begin
-            LoadFromXML(HTTPProcess.HTTPResult.SourceCode);
+            LoadFromXML(LHTTPProcess.HTTPResult.SourceCode);
             Active := True;
           end;
-          with XMLDoc.ChildNodes.Nodes['data'].ChildNodes do
+          with LXMLDoc.ChildNodes.Nodes['data'].ChildNodes do
           begin
-            case IndexText(VarToStr(Nodes['folderStatus'].NodeValue), ['1', '3', '2', '0']) of
-              0:
-                CrypterFolderInfo.Status := csOnline;
-              1:
-                CrypterFolderInfo.Status := csMixedOnOffline;
-              2:
-                CrypterFolderInfo.Status := csOffline;
-              3:
-                CrypterFolderInfo.Status := csNotChecked;
+            if not Assigned(FindNode('errorCode')) then
+            begin
+              case IndexText(VarToStr(Nodes['folderStatus'].NodeValue), ['1', '3', '2', '0']) of
+                0:
+                  ACrypterFolderInfo.Status := csOnline;
+                1:
+                  ACrypterFolderInfo.Status := csMixedOnOffline;
+                2:
+                  ACrypterFolderInfo.Status := csOffline;
+                3:
+                  ACrypterFolderInfo.Status := csUnknown;
+              else
+                ACrypterFolderInfo.Status := csNotChecked;
+              end;
+              ACrypterFolderInfo.Size := VarToFloatDefault(VarToStr(Nodes['folderSize'].NodeValue), 0, False);
+              if Nodes['files'].ChildNodes.Count > 0 then
+                ACrypterFolderInfo.PartSize := VarToFloatDefault(Nodes['files'].ChildNodes.Nodes[0].ChildNodes.Nodes['filesize'], 0, False);
+              ACrypterFolderInfo.Hoster := VarToStr(Nodes['folderHoster'].NodeValue);
+              ACrypterFolderInfo.Parts := Nodes['files'].ChildNodes.Count;
+              ACrypterFolderInfo.StatusImage := GetStatusImageLink(ACrypterFolderInfo.Link);
+              ACrypterFolderInfo.StatusImageText := GetStatusImageLink(ACrypterFolderInfo.Link, False);
+              Result := True;
+            end
             else
-              CrypterFolderInfo.Status := csNotChecked;
+            begin
+              ErrorMsg := Nodes['errorCode'].NodeValue + ': ' + Nodes['errorMsg'].NodeValue;
             end;
-            CrypterFolderInfo.Hoster := VarToStr(Nodes['folderHoster'].NodeValue);
-            CrypterFolderInfo.Size := StrToFloatDef(StringReplace(VarToStr(Nodes['folderSize'].NodeValue), '.', ',', [rfReplaceAll]), 0, FormatSettings);
-            CrypterFolderInfo.Parts := VarToIntDef(Nodes['fileCount'].NodeValue, 0);
           end;
         except
           on E: Exception do
           begin
             ErrorMsg := 'The XML from ' + GetName + ' was invaild: ' + E.message;
-            // Exit(CrypterFolderInfo);
           end;
         end;
       finally
-        XMLDoc := nil;
+        LXMLDoc := nil;
       end;
     finally
       OleUninitialize;
     end;
   end
   else
+  begin
     ErrorMsg := 'The Server response was empty!';
-
-  (*
-    case Small of
-    True:
-    Result := StringReplace(FolderURL, '/dir/', '/png/', []);
-    False:
-    Result := StringReplace(FolderURL, '/dir/', '/textpng/', []);
-    end;
-    *)
-
-  // Result := CrypterFolderInfo;
+  end;
 end;
 
 end.

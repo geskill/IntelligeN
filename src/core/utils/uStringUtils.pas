@@ -26,6 +26,12 @@ function ReduceWhitespace(S: string; A: Boolean = False): string;
 
 function RemoveW(AHost: string): string;
 
+function Trim(const S: string; const C: Char): string;
+
+function TrimLeft(const S: string; const C: Char): string;
+
+function TrimRight(const S: string; const C: Char): string;
+
 implementation
 
 function MatchTextMask(const Mask, S: WideString; CaseSensitive: Boolean = False): Boolean;
@@ -348,6 +354,39 @@ begin
     finally
       Free;
     end;
+end;
+
+function Trim(const S: string; const C: Char): string;
+var
+  I, L: Integer;
+begin
+  L := Length(S);
+  I := 1;
+  while (I <= L) and ((S[I] <= ' ') or (S[I] = C)) do Inc(I);
+  if I > L then Result := '' else
+  begin
+    while ((S[L] <= ' ') or (S[L] = C)) do Dec(L);
+    Result := Copy(S, I, L - I + 1);
+  end;
+end;
+
+function TrimLeft(const S: string; const C: Char): string;
+var
+  I, L: Integer;
+begin
+  L := Length(S);
+  I := 1;
+  while (I <= L) and ((S[I] <= ' ') or (S[I] = C)) do Inc(I);
+  Result := Copy(S, I, Maxint);
+end;
+
+function TrimRight(const S: string; const C: Char): string;
+var
+  I: Integer;
+begin
+  I := Length(S);
+  while (I > 0) and ((S[I] <= ' ') or ((S[I] = C))) do Dec(I);
+  Result := Copy(S, 1, I);
 end;
 
 end.
