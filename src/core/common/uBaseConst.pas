@@ -14,7 +14,44 @@ const
   ProgrammName = Programm + ' 2009';
 
 type
-  TContentStatus = (csOffline, csOnline, csUnknown, csTemporaryOffline, csMixedOnOffline, csNotChecked);
+  TContentStatus = (
+    {$REGION 'Documentation'}
+    /// <summary>
+    ///   (default) Not checked by IntelligeN
+    /// </summary>
+    {$ENDREGION}
+    csNotChecked,
+    {$REGION 'Documentation'}
+    /// <summary>
+    ///   Not checked by the service or unknown status
+    /// </summary>
+    {$ENDREGION}
+    csUnknown,
+    {$REGION 'Documentation'}
+    /// <summary>
+    ///   The service reported all files are offline
+    /// </summary>
+    {$ENDREGION}
+    csOffline,
+    {$REGION 'Documentation'}
+    /// <summary>
+    ///   The service reported all files are online
+    /// </summary>
+    {$ENDREGION}
+    csOnline,
+    {$REGION 'Documentation'}
+    /// <summary>
+    ///   The service reported all files are online, but currently offline due
+    ///   to maintenance
+    /// </summary>
+    {$ENDREGION}
+    csTemporaryOffline,
+    {$REGION 'Documentation'}
+    /// <summary>
+    ///   The service reported some files are online and some are offline
+    /// </summary>
+    {$ENDREGION}
+    csMixedOnOffline);
 {$REGION 'Documentation'}
   /// <summary>
   /// Control type definition of all controls in IntelligeN. This is required

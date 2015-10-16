@@ -10,9 +10,14 @@ uses
   // Common
   uBaseConst, uBaseInterface,
   // Api
-  uApiControlsBase;
+  uApiControlsBase,
+  // Utils
+  uVariantUtils;
 
 type
+  TAbstractFunc = reference to function(): Variant;
+  TAbstractIndexFunc = reference to function(AIndex: Integer): Variant;
+
   TIMirrorData = class(TIValueItem, IMirrorData)
   private
     FStatus: TContentStatus;
@@ -73,8 +78,8 @@ type
   private
     FDirectlinkList: TList<IDirectlink>;
   protected
-    function GetStatus: TContentStatus; override; safecall;
     function GetValue: WideString; override; safecall;
+    function GetStatus: TContentStatus; override; safecall;
     function GetSize: Double; override; safecall;
     function GetPartSize: Double; override; safecall;
     function GetHoster: WideString; override; safecall;
@@ -84,6 +89,8 @@ type
 
     function GetDirectlink(const Index: Integer): IDirectlink; safecall;
     function GetDirectlinkCount: Integer; safecall;
+  protected
+    function GetAbstractBestValue(AValueAtIndex: TAbstractIndexFunc): Variant; virtual;
   public
     constructor Create(); reintroduce;
     constructor Clone(const ADirectlinkContainer: IDirectlinkContainer);
@@ -98,14 +105,18 @@ type
     FCrypterList: TList<ICrypter>;
   protected
     function GetValue: WideString; override; safecall;
+    function GetStatus: TContentStatus; override; safecall;
     function GetSize: Double; override; safecall;
     function GetPartSize: Double; override; safecall;
     function GetHoster: WideString; override; safecall;
     function GetHosterShort: WideString; override; safecall;
     function GetParts: Integer; override; safecall;
+    function GetFileName: WideString; override; safecall;
 
     function GetCrypter(const IndexOrName: OleVariant): ICrypter; safecall;
     function GetCrypterCount: Integer; safecall;
+  protected
+    function GetAbstractBestValue(AValue: TAbstractFunc; AValueAtIndex: TAbstractIndexFunc): Variant; reintroduce;
   public
     constructor Create(); reintroduce;
     constructor Clone(const AMirrorContainer: IMirrorContainer);
@@ -240,46 +251,74 @@ end;
 {$ENDREGION}
 { ... }
 
-{ TISubMirrorContainer }
-
-function TIDirectlinkContainer.GetStatus: TContentStatus;
-begin
-  // TODO: Implement
-end;
+{ TIDirectlinkContainer }
 
 function TIDirectlinkContainer.GetValue: WideString;
 begin
-  // TODO: Implement
+  Result := ''; // never used // do nothing
+end;
+
+function TIDirectlinkContainer.GetStatus: TContentStatus;
+begin
+  Result := GetAbstractBestValue(
+    { } function(AIndex: Integer): Variant
+    { } begin
+    { . } Result := FDirectlinkList[AIndex].Status;
+    { } end);
 end;
 
 function TIDirectlinkContainer.GetSize: Double;
 begin
-  // TODO: Implement
+  Result := VarToFloatDef(GetAbstractBestValue(
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := FDirectlinkList[AIndex].Size;
+      { } end), 0);
 end;
 
 function TIDirectlinkContainer.GetPartSize: Double;
 begin
-  // TODO: Implement
+  Result := VarToFloatDef(GetAbstractBestValue(
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := FDirectlinkList[AIndex].PartSize;
+      { } end), 0);
 end;
 
 function TIDirectlinkContainer.GetHoster: WideString;
 begin
-  // TODO: Implement
+  Result := VarToStrDef(GetAbstractBestValue(
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := FDirectlinkList[AIndex].Hoster;
+      { } end), '');
 end;
 
 function TIDirectlinkContainer.GetHosterShort: WideString;
 begin
-  // TODO: Implement
+  Result := VarToStrDef(GetAbstractBestValue(
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := FDirectlinkList[AIndex].HosterShort;
+      { } end), '');
 end;
 
 function TIDirectlinkContainer.GetParts: Integer;
 begin
-  // TODO: Implement
+  Result := VarToIntDef(GetAbstractBestValue(
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := FDirectlinkList[AIndex].Parts;
+      { } end), 0);
 end;
 
 function TIDirectlinkContainer.GetFileName: WideString;
 begin
-  // TODO: Implement
+  Result := VarToStrDef(GetAbstractBestValue(
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := FDirectlinkList[AIndex].FileName;
+      { } end), '');
 end;
 
 function TIDirectlinkContainer.GetDirectlink(const Index: Integer): IDirectlink;
@@ -290,6 +329,33 @@ end;
 function TIDirectlinkContainer.GetDirectlinkCount: Integer;
 begin
   Result := FDirectlinkList.Count;
+end;
+
+function TIDirectlinkContainer.GetAbstractBestValue(AValueAtIndex: TAbstractIndexFunc): Variant;
+var
+  LIndex, LCount: Integer;
+  FFound: Boolean;
+begin
+  Result := Null;
+
+  LIndex := 0;
+  LCount := DirectlinkCount;
+  FFound := False;
+
+  while (LIndex < LCount) and not FFound do
+  begin
+    FFound := HasUsefulValue(AValueAtIndex(LIndex));
+
+    if not FFound then
+    begin
+      Inc(LIndex);
+    end;
+  end;
+
+  if FFound then
+  begin
+    Result := AValueAtIndex(LIndex);
+  end;
 end;
 
 constructor TIDirectlinkContainer.Create;
@@ -322,32 +388,90 @@ end;
 
 function TIMirrorContainer.GetValue: WideString;
 begin
-  // TODO: Implement
+  Result := inherited GetValue;
+end;
+
+function TIMirrorContainer.GetStatus: TContentStatus;
+begin
+  Result := GetAbstractBestValue(
+    { } function: Variant
+    { } begin
+    { . } Result := inherited GetStatus;
+    { } end,
+    { } function(AIndex: Integer): Variant
+    { } begin
+    { . } Result := FCrypterList[AIndex].Status;
+    { } end);
 end;
 
 function TIMirrorContainer.GetSize: Double;
 begin
-  // TODO: Implement
+  Result := VarToFloatDef(GetAbstractBestValue(
+      { } function: Variant
+      { } begin
+      { . } Result := inherited GetStatus;
+      { } end,
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := FCrypterList[AIndex].Size;
+      { } end), 0);
 end;
 
 function TIMirrorContainer.GetPartSize: Double;
 begin
-  // TODO: Implement
+  Result := VarToFloatDef(GetAbstractBestValue(
+      { } function: Variant
+      { } begin
+      { . } Result := inherited GetStatus;
+      { } end,
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := FCrypterList[AIndex].PartSize;
+      { } end), 0);
 end;
 
 function TIMirrorContainer.GetHoster: WideString;
 begin
-  // TODO: Implement
+  Result := VarToStrDef(GetAbstractBestValue(
+      { } function: Variant
+      { } begin
+      { . } Result := inherited GetStatus;
+      { } end,
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := FCrypterList[AIndex].Hoster;
+      { } end), '');
 end;
 
 function TIMirrorContainer.GetHosterShort: WideString;
 begin
-  // TODO: Implement
+  Result := VarToStrDef(GetAbstractBestValue(
+      { } function: Variant
+      { } begin
+      { . } Result := inherited GetStatus;
+      { } end,
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := FCrypterList[AIndex].HosterShort;
+      { } end), '');
 end;
 
 function TIMirrorContainer.GetParts: Integer;
 begin
-  // TODO: Implement
+  Result := VarToIntDef(GetAbstractBestValue(
+      { } function: Variant
+      { } begin
+      { . } Result := inherited GetStatus;
+      { } end,
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := FCrypterList[AIndex].Parts;
+      { } end), 0);
+end;
+
+function TIMirrorContainer.GetFileName: WideString;
+begin
+  Result := inherited GetFileName;
 end;
 
 function TIMirrorContainer.GetCrypter(const IndexOrName: OleVariant): ICrypter;
@@ -366,6 +490,36 @@ end;
 function TIMirrorContainer.GetCrypterCount: Integer;
 begin
   Result := FCrypterList.Count;
+end;
+
+function TIMirrorContainer.GetAbstractBestValue(AValue: TAbstractFunc; AValueAtIndex: TAbstractIndexFunc): Variant;
+var
+  LIndex, LCount: Integer;
+  FFound: Boolean;
+begin
+  Result := AValue; // Best value from directlinks
+
+  if not HasUsefulValue(Result) then
+  begin
+    LIndex := 0;
+    LCount := CrypterCount;
+    FFound := False;
+
+    while (LIndex < LCount) and not FFound do
+    begin
+      FFound := HasUsefulValue(AValueAtIndex(LIndex));
+
+      if not FFound then
+      begin
+        Inc(LIndex);
+      end;
+    end;
+
+    if FFound then
+    begin
+      Result := AValueAtIndex(LIndex);
+    end;
+  end;
 end;
 
 constructor TIMirrorContainer.Create;

@@ -12,7 +12,7 @@ uses
   // Api
   uApiServerInterface, uApiServerClasses, uApiUpdateModel, uApiUpdateInterface,
   // Utils
-  uStringUtils;
+  uStringUtils, uVariantUtils;
 
 type
   TServerXMLReader = class
@@ -105,17 +105,17 @@ begin
                         LUpdateVersion := TIUpdateManagerVersion.Create;
                         with ChildNodes.Nodes[XMLNodeIndex], LUpdateVersion do
                         begin
-                          ID := StrToIntDef(VarToStr(ChildNodes.Nodes['id'].NodeValue), 0);
+                          ID := VarToIntDef(ChildNodes.Nodes['id'].NodeValue, 0);
 
                           if (IsNumber(ChildNodes.Nodes['active'].NodeValue)) then
                             Active := not(ChildNodes.Nodes['active'].NodeValue = 0)
                           else
                             Active := StrToBoolDef(VarToStr(ChildNodes.Nodes['major_version'].NodeValue), False);
 
-                          MajorVersion := StrToIntDef(VarToStr(ChildNodes.Nodes['major_version'].NodeValue), 0);
-                          MinorVersion := StrToIntDef(VarToStr(ChildNodes.Nodes['minor_version'].NodeValue), 0);
-                          MajorBuild := StrToIntDef(VarToStr(ChildNodes.Nodes['major_build'].NodeValue), 0);
-                          MinorBuild := StrToIntDef(VarToStr(ChildNodes.Nodes['minor_build'].NodeValue), 0);
+                          MajorVersion := VarToIntDef(ChildNodes.Nodes['major_version'].NodeValue, 0);
+                          MinorVersion := VarToIntDef(ChildNodes.Nodes['minor_version'].NodeValue, 0);
+                          MajorBuild := VarToIntDef(ChildNodes.Nodes['major_build'].NodeValue, 0);
+                          MinorBuild := VarToIntDef(ChildNodes.Nodes['minor_build'].NodeValue, 0);
                         end;
                         Versions.Add(LUpdateVersion);
                       end;
@@ -130,12 +130,12 @@ begin
                         LUpdateSystemFileBase := TIUpdateManagerSystemFileBase.Create;
                         with ChildNodes.Nodes[XMLNodeIndex], LUpdateSystemFileBase do
                         begin
-                          ID := StrToIntDef(VarToStr(ChildNodes.Nodes['id'].NodeValue), 0);
+                          ID := VarToIntDef(ChildNodes.Nodes['id'].NodeValue, 0);
 
                           FileName := VarToStr(ChildNodes.Nodes['name'].NodeValue);
 
                           if (IsNumber(ChildNodes.Nodes['filesystem_id'].NodeValue)) then
-                            FileSystem := TFileSystem(StrToIntDef(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue), 0))
+                            FileSystem := TFileSystem(VarToIntDef(ChildNodes.Nodes['filesystem_id'].NodeValue, 0))
                           else
                             FileSystem := TEnum.Parse<TFileSystem>(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue));
 
@@ -163,7 +163,7 @@ begin
                   if Assigned(ChildNodes.FindNode('version')) then
                     with ChildNodes.Nodes['version'] do
                     begin
-                      VersionID := StrToIntDef(VarToStr(ChildNodes.Nodes['id'].NodeValue), 0);
+                      VersionID := VarToIntDef(ChildNodes.Nodes['id'].NodeValue, 0);
                     end;
                 end;
             end;

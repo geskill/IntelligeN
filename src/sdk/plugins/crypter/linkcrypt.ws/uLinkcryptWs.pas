@@ -12,7 +12,9 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // plugin system
-  uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst;
+  uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst,
+  // Utils
+  uVariantUtils;
 
 type
   // see: http://linkcrypt.ws/image/Linkcrypt.ws_API-Create_folder_DE.pdf
@@ -245,7 +247,7 @@ begin
             end;
             CrypterFolderInfo.Hoster := VarToStr(Nodes['folderHoster'].NodeValue);
             CrypterFolderInfo.Size := StrToFloatDef(StringReplace(VarToStr(Nodes['folderSize'].NodeValue), '.', ',', [rfReplaceAll]), 0, FormatSettings);
-            CrypterFolderInfo.Parts := StrToIntDef(VarToStr(Nodes['fileCount'].NodeValue), 0);
+            CrypterFolderInfo.Parts := VarToIntDef(Nodes['fileCount'].NodeValue, 0);
           end;
         except
           on E: Exception do

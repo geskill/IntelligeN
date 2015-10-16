@@ -216,9 +216,14 @@
 			<DCCReference Include="..\sdk\plugins\filehoster\uPlugInFileHosterClass.pas"/>
 			<DCCReference Include="..\sdk\plugins\imagehoster\uPlugInImageHosterClass.pas"/>
 			<DCCReference Include="..\core\utils\uFileUtils.pas"/>
-			<DCCReference Include="..\core\utils\uPathUtils.pas"/>
-			<DCCReference Include="..\core\utils\uStringUtils.pas"/>
+			<DCCReference Include="..\core\utils\uHTMLUtils.pas"/>
 			<DCCReference Include="..\core\utils\uImageUtils.pas"/>
+			<DCCReference Include="..\core\utils\uPathUtils.pas"/>
+			<DCCReference Include="..\core\utils\uReleasenameUtils.pas"/>
+			<DCCReference Include="..\core\utils\uSetUtils.pas"/>
+			<DCCReference Include="..\core\utils\uSizeUtils.pas"/>
+			<DCCReference Include="..\core\utils\uStringUtils.pas"/>
+			<DCCReference Include="..\core\utils\uVariantUtils.pas"/>
 			<DCCReference Include="ole\IntelligeN_TLB.pas"/>
 			<DCCReference Include="ole\uOLE.pas">
 				<CoClasses>IntelligeN2009</CoClasses>

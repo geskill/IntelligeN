@@ -22,11 +22,11 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiConst, uApiMirrorControlBase, uApiCrypter, uApiMody, uApiSettings, uApiXml,
+  uApiConst, uApiMirrorControlBase, uApiCrypter, uApiDLMF, uApiMody, uApiSettings, uApiXml,
   // Plugin system
   uPlugInConst,
   // Utils
-  uApiDLMF, uPathUtils, uStringUtils;
+  uPathUtils, uStringUtils, uVariantUtils;
 
 type
   TEZTexturePanel = class(EZTexturePanel.TEZTexturePanel)
@@ -167,85 +167,6 @@ type
     function CloneInstance(): IDirectlink;
   end;
 
-  TDirectlinksPanel = class(TInterfacedObject, IDirectlinksPanel)
-  private
-    // GUI
-    FPopupMenu: TPopupMenu;
-    FmiAddTab: TMenuItem;
-    FmiRemoveTab: TMenuItem;
-    FcxPageControl: TcxPageControl;
-    FcxLFirstSubMirrorInfo: TcxLabel;
-    // GUI
-    procedure FmiAddTabClick(Sender: TObject);
-    procedure FmiRemoveTabClick(Sender: TObject);
-    procedure FPopupMenuPopup(Sender: TObject);
-    procedure FcxPageControlDblClick(Sender: TObject);
-    procedure FcxPageControlPageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
-  private
-    // Logic
-    FMirrorControl: IMirrorControl;
-  protected
-    // Base
-    function GetValue: WideString; safecall;
-    function GetStatus: TContentStatus; safecall;
-    function GetSize: Double; safecall;
-    function GetPartSize: Double; safecall;
-    function GetHoster: WideString; overload; safecall;
-    function GetHosterShort: WideString; safecall;
-    function GetParts: Integer; safecall;
-    function GetFileName: WideString; safecall;
-
-    function GetDirectlink(const Index: Integer): IDirectlink; safecall;
-    function GetDirectlinkMirror(const Index: Integer): IDirectlinksMirror; safecall;
-    function IDirectlinksPanel.GetDirectlink = GetDirectlinkMirror;
-    function GetDirectlinkCount: Integer; safecall;
-
-    // Additional
-    function GetMirrorControl: IMirrorControl;
-    procedure SetMirrorControl(AMirrorControl: IMirrorControl);
-
-    function GetHoster(AShortName: Boolean): WideString; overload;
-
-    function GetActiveDirectlinkIndex: Integer;
-    function GetActiveDirectlink: IDirectlinksMirror;
-
-    function GetVisible: Boolean;
-    procedure SetVisible(AVisible: Boolean);
-    function GetFocus: Boolean;
-    procedure SetFocus(AFocus: Boolean);
-  public
-    constructor Create(AOwner: TComponent; AMirrorControl: IMirrorControl);
-    destructor Destroy; override;
-
-    // Base
-    property Value: WideString read GetValue;
-    property Status: TContentStatus read GetStatus;
-    property Size: Double read GetSize;
-    property PartSize: Double read GetPartSize;
-    property Hoster: WideString read GetHoster;
-    property HosterShort: WideString read GetHosterShort;
-    property Parts: Integer read GetParts;
-    property FileName: WideString read GetFileName;
-
-    property Directlink[const Index: Integer]: IDirectlinksMirror read GetDirectlinkMirror; default;
-    property DirectlinkCount: Integer read GetDirectlinkCount;
-
-    // Additional
-    property MirrorControl: IMirrorControl read GetMirrorControl write SetMirrorControl;
-
-    property ActiveMirrorIndex: Integer read GetActiveDirectlinkIndex;
-    property ActiveMirror: IDirectlinksMirror read GetActiveDirectlink;
-
-    property Visible: Boolean read GetVisible write SetVisible;
-    property Focus: Boolean read GetFocus write SetFocus;
-
-    function Add(ALinks: WideString = ''): Integer;
-    procedure Remove(ATabIndex: Integer);
-
-    // Cloning
-    function CloneInstance(): IDirectlinkContainer;
-  end;
-
   TCrypterPanel = class(TInterfacedObject, ICrypterPanel)
   private
     // GUI
@@ -331,6 +252,85 @@ type
     function CloneInstance(): ICrypter;
   end;
 
+  TDirectlinksPanel = class(TInterfacedObject, IDirectlinksPanel)
+  private
+    // GUI
+    FPopupMenu: TPopupMenu;
+    FmiAddTab: TMenuItem;
+    FmiRemoveTab: TMenuItem;
+    FcxPageControl: TcxPageControl;
+    FcxLFirstSubMirrorInfo: TcxLabel;
+    // GUI
+    procedure FmiAddTabClick(Sender: TObject);
+    procedure FmiRemoveTabClick(Sender: TObject);
+    procedure FPopupMenuPopup(Sender: TObject);
+    procedure FcxPageControlDblClick(Sender: TObject);
+    procedure FcxPageControlPageChanging(Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
+  private
+    // Logic
+    FMirrorControl: IMirrorControl;
+  protected
+    // Base
+    function GetValue: WideString; safecall;
+    function GetStatus: TContentStatus; safecall;
+    function GetSize: Double; safecall;
+    function GetPartSize: Double; safecall;
+    function GetHoster: WideString; safecall;
+    function GetHosterShort: WideString; safecall;
+    function GetParts: Integer; safecall;
+    function GetFileName: WideString; safecall;
+
+    function GetDirectlink(const Index: Integer): IDirectlink; safecall;
+    function GetDirectlinkMirror(const Index: Integer): IDirectlinksMirror; safecall;
+    function IDirectlinksPanel.GetDirectlink = GetDirectlinkMirror;
+    function GetDirectlinkCount: Integer; safecall;
+  protected
+    function GetAbstractBestValue(AValueAtIndex: TAbstractIndexFunc): Variant;
+  protected
+    // Additional
+    function GetMirrorControl: IMirrorControl;
+    procedure SetMirrorControl(AMirrorControl: IMirrorControl);
+
+    function GetActiveDirectlinkIndex: Integer;
+    function GetActiveDirectlink: IDirectlinksMirror;
+
+    function GetVisible: Boolean;
+    procedure SetVisible(AVisible: Boolean);
+    function GetFocus: Boolean;
+    procedure SetFocus(AFocus: Boolean);
+  public
+    constructor Create(AOwner: TComponent; AMirrorControl: IMirrorControl);
+    destructor Destroy; override;
+
+    // Base
+    property Value: WideString read GetValue;
+    property Status: TContentStatus read GetStatus;
+    property Size: Double read GetSize;
+    property PartSize: Double read GetPartSize;
+    property Hoster: WideString read GetHoster;
+    property HosterShort: WideString read GetHosterShort;
+    property Parts: Integer read GetParts;
+    property FileName: WideString read GetFileName;
+
+    property Directlink[const Index: Integer]: IDirectlinksMirror read GetDirectlinkMirror; default;
+    property DirectlinkCount: Integer read GetDirectlinkCount;
+
+    // Additional
+    property MirrorControl: IMirrorControl read GetMirrorControl write SetMirrorControl;
+
+    property ActiveMirrorIndex: Integer read GetActiveDirectlinkIndex;
+    property ActiveMirror: IDirectlinksMirror read GetActiveDirectlink;
+
+    property Visible: Boolean read GetVisible write SetVisible;
+    property Focus: Boolean read GetFocus write SetFocus;
+
+    function Add(ALinks: WideString = ''): Integer;
+    procedure Remove(ATabIndex: Integer);
+
+    // Cloning
+    function CloneInstance(): IDirectlinkContainer;
+  end;
+
   TMirrorControl = class(TInterfacedObject, IMirrorControl)
   private
     // GUI
@@ -365,14 +365,14 @@ type
     // Logic
     FMirrorController: IMirrorController;
     FDirectlinksPanel: IDirectlinksPanel;
-    FCrypterPanelList: TInterfaceList<ICrypterPanel>;
+    FCrypterList: TInterfaceList<ICrypterPanel>;
   protected
     // Base
     function GetValue: WideString; safecall;
     function GetStatus: TContentStatus; safecall;
     function GetSize: Double; safecall;
     function GetPartSize: Double; safecall;
-    function GetHoster: WideString; overload; safecall;
+    function GetHoster: WideString; safecall;
     function GetHosterShort: WideString; safecall;
     function GetParts: Integer; safecall;
     function GetFileName: WideString; safecall;
@@ -386,12 +386,12 @@ type
     function GetCrypterMirror(const IndexOrName: OleVariant): ICrypterPanel; safecall;
     function IMirrorControl.GetCrypter = GetCrypterMirror;
     function GetCrypterCount: Integer; safecall;
-
+  protected
+    function GetAbstractBestValue(AValue: TAbstractFunc; AValueAtIndex: TAbstractIndexFunc): Variant;
+  protected
     // Additional
     function GetMirrorController: IMirrorController;
     procedure SetMirrorController(const AMirrorController: IMirrorController);
-
-    function GetHoster(AShortName: Boolean): WideString; overload;
 
     function GetIndex: Integer;
     procedure SetIndex(AIndex: Integer);
@@ -416,12 +416,14 @@ type
     destructor Destroy; override;
 
     // Base
+    property Value: WideString read GetValue;
     property Status: TContentStatus read GetStatus;
     property Size: Double read GetSize;
     property PartSize: Double read GetPartSize;
     property Hoster: WideString read GetHoster;
     property HosterShort: WideString read GetHosterShort;
     property Parts: Integer read GetParts;
+    property FileName: WideString read GetFileName;
 
     property Directlink[const Index: Integer]: IDirectlinksMirror read GetDirectlinkMirror;
     property DirectlinkCount: Integer read GetDirectlinkCount;
@@ -1372,7 +1374,6 @@ begin
 end;
 
 procedure TMycxTabSheet.UpdateGUI;
-// TODO: Merge with TCrypterPanel
 var
   _FieldIndex: Integer;
   _StringStatus, _Hoster: string;
@@ -1480,354 +1481,6 @@ end;
 function TMycxTabSheet.CloneInstance;
 begin
   Result := TIDirectlink.Clone(IDirectlinksMirror(Self));
-end;
-{$ENDREGION}
-{ ****************************************************************************** }
-{$REGION 'TDirectlinksPanel'}
-
-procedure TDirectlinksPanel.FmiAddTabClick(Sender: TObject);
-begin
-  Add;
-end;
-
-procedure TDirectlinksPanel.FmiRemoveTabClick(Sender: TObject);
-begin
-  Remove(ActiveMirrorIndex);
-end;
-
-procedure TDirectlinksPanel.FPopupMenuPopup(Sender: TObject);
-begin
-  FmiRemoveTab.Enabled := (GetDirectlinkCount > 0);
-end;
-
-procedure TDirectlinksPanel.FcxPageControlDblClick(Sender: TObject);
-begin
-  if (GetDirectlinkCount = 0) then
-    Add;
-end;
-
-procedure TDirectlinksPanel.FcxPageControlPageChanging;
-begin
-  if NewPage <> nil then
-    Windows.SetFocus(NewPage.Handle)
-  else
-    Windows.SetFocus(FcxPageControl.Handle);
-end;
-
-///
-
-function TDirectlinksPanel.GetValue;
-begin
-  // TODO: Implement
-end;
-
-function TDirectlinksPanel.GetStatus;
-begin
-  // TODO: Implement
-end;
-
-function TDirectlinksPanel.GetSize;
-// TODO: Optimize
-var
-  _Index, _Count: Integer;
-  _Found: Boolean;
-begin
-  Result := 0;
-
-  _Index := 0;
-  _Count := DirectlinkCount;
-  _Found := False;
-
-  while (_Index < _Count) and not _Found do
-  begin
-    _Found := (Directlink[_Index].Size > 0);
-
-    if not _Found then
-      Inc(_Index);
-  end;
-
-  if _Found then
-    Result := Directlink[_Index].Size;
-end;
-
-function TDirectlinksPanel.GetPartSize;
-// TODO: Optimize
-var
-  _Index, _Count: Integer;
-begin
-  Result := 0;
-
-  _Index := 0;
-  _Count := DirectlinkCount;
-
-  while (_Index < _Count) do
-  begin
-    if (Result < Directlink[ActiveMirrorIndex].PartSize) then
-      Result := Directlink[ActiveMirrorIndex].PartSize;
-
-    Inc(_Index);
-  end;
-end;
-
-function TDirectlinksPanel.GetHoster: WideString;
-begin
-  Result := GetHoster(False);
-end;
-
-function TDirectlinksPanel.GetHosterShort;
-begin
-  Result := GetHoster(True);
-end;
-
-function TDirectlinksPanel.GetParts;
-// TODO: Optimize
-var
-  I: Integer;
-begin
-  Result := 0;
-
-  for I := 0 to DirectlinkCount - 1 do
-  begin
-    Result := Directlink[ActiveMirrorIndex].Parts;
-
-    if not(Result = -1) then
-      Break;
-  end;
-end;
-
-function TDirectlinksPanel.GetFileName;
-// TODO: Optimize
-var
-  _Index, _Count: Integer;
-  _Found: Boolean;
-begin
-  Result := '';
-
-  _Index := 0;
-  _Count := DirectlinkCount;
-  _Found := False;
-
-  while (_Index < _Count) and not _Found do
-  begin
-    _Found := not(Directlink[_Index].GetFileName = '');
-
-    if not _Found then
-      Inc(_Index);
-  end;
-
-  if _Found then
-    Result := Directlink[_Index].GetFileName;
-end;
-
-function TDirectlinksPanel.GetDirectlink(const Index: Integer): IDirectlink;
-begin
-  Result := GetDirectlinkMirror(Index);
-end;
-
-function TDirectlinksPanel.GetDirectlinkMirror(const Index: Integer): IDirectlinksMirror;
-begin
-  Result := TMycxTabSheet(FcxPageControl.Pages[Index]);
-end;
-
-function TDirectlinksPanel.GetDirectlinkCount: Integer;
-begin
-  Result := FcxPageControl.PageCount;
-end;
-
-///
-
-function TDirectlinksPanel.GetMirrorControl;
-begin
-  Result := FMirrorControl;
-end;
-
-procedure TDirectlinksPanel.SetMirrorControl(AMirrorControl: IMirrorControl);
-begin
-  FMirrorControl := AMirrorControl;
-end;
-
-function TDirectlinksPanel.GetHoster(AShortName: Boolean): WideString;
-// TODO: Optimize
-var
-  I: Integer;
-begin
-  Result := '';
-  for I := 0 to DirectlinkCount - 1 do
-  begin
-    Result := Directlink[ActiveMirrorIndex].GetHoster(AShortName);
-
-    if not(Result = '') then
-      Break;
-  end;
-end;
-
-function TDirectlinksPanel.GetActiveDirectlinkIndex;
-begin
-  Result := FcxPageControl.ActivePageIndex;
-end;
-
-function TDirectlinksPanel.GetActiveDirectlink;
-begin
-  Result := Directlink[ActiveMirrorIndex];
-end;
-
-function TDirectlinksPanel.GetVisible;
-begin
-  Result := FcxPageControl.Visible;
-end;
-
-procedure TDirectlinksPanel.SetVisible(AVisible: Boolean);
-begin
-  FcxPageControl.Visible := AVisible;
-end;
-
-function TDirectlinksPanel.GetFocus: Boolean;
-begin
-  Result := Directlink[ActiveMirrorIndex].Focus;
-end;
-
-procedure TDirectlinksPanel.SetFocus(AFocus: Boolean);
-begin
-  Directlink[ActiveMirrorIndex].Focus := AFocus;
-end;
-
-constructor TDirectlinksPanel.Create;
-begin
-  MirrorControl := AMirrorControl;
-
-  FPopupMenu := TPopupMenu.Create(AOwner);
-  with FPopupMenu do
-  begin
-    with Items do
-    begin
-      FmiAddTab := TMenuItem.Create(FPopupMenu);
-      with FmiAddTab do
-      begin
-        Caption := StrAdd;
-        ShortCut := Menus.ShortCut($54, [ssCtrl]);
-        OnClick := FmiAddTabClick;
-      end;
-      Add(FmiAddTab);
-
-      FmiRemoveTab := TMenuItem.Create(FPopupMenu);
-      with FmiRemoveTab do
-      begin
-        Caption := StrRemove;
-        ShortCut := Menus.ShortCut($57, [ssCtrl]);
-        OnClick := FmiRemoveTabClick;
-      end;
-      Add(FmiRemoveTab);
-    end;
-    OnPopup := FPopupMenuPopup;
-  end;
-
-  FcxPageControl := TcxPageControl.Create(AOwner);
-  with FcxPageControl do
-  begin
-    Parent := TWinControl(AOwner);
-
-    Align := alClient;
-
-    Focusable := False;
-    HotTrack := True;
-
-    PopupMenu := FPopupMenu;
-
-    OnDblClick := FcxPageControlDblClick;
-    OnPageChanging := FcxPageControlPageChanging;
-
-    Show;
-  end;
-
-  FcxLFirstSubMirrorInfo := TcxLabel.Create(FcxPageControl);
-  with FcxLFirstSubMirrorInfo do
-  begin
-    Parent := FcxPageControl;
-
-    Align := alClient;
-    AutoSize := False;
-
-    Caption := 'Double-click here to create the first sub-mirror';
-
-    with Properties do
-    begin
-      with Alignment do
-      begin
-        Horz := taCenter;
-        Vert := taVCenter;
-      end;
-      WordWrap := True;
-    end;
-
-    Transparent := True;
-
-    OnDblClick := FcxPageControlDblClick;
-
-    Show;
-  end;
-end;
-
-destructor TDirectlinksPanel.Destroy;
-var
-  I: Integer;
-begin
-  // for I := FcxPageControl.PageCount - 1 downto 0 do
-  // Remove(I);
-
-  FcxLFirstSubMirrorInfo.Free;
-
-  // problem with destroing this item... see: TMirrorController.Remove()
-  FcxPageControl.Free;
-
-  FmiRemoveTab.Free;
-  FmiAddTab.Free;
-  FPopupMenu.Free;
-
-  MirrorControl := nil;
-end;
-
-function TDirectlinksPanel.Add;
-var
-  FcxTabSheet: TMycxTabSheet;
-begin
-  FcxLFirstSubMirrorInfo.Visible := False;
-  FcxTabSheet := TMycxTabSheet.Create(FcxPageControl);
-  with FcxTabSheet do
-  begin
-    DirectlinksPanel := Self;
-    PageControl := FcxPageControl;
-    Caption := 'Mirror ' + IntToStr(TabIndex + 1);
-    PostCreate;
-
-    FMycxRichEdit.Lines.Text := ALinks;
-
-    Result := PageIndex;
-
-    Show;
-  end;
-end;
-
-procedure TDirectlinksPanel.Remove(ATabIndex: Integer);
-var
-  I: Integer;
-begin
-  with TMycxTabSheet(FcxPageControl.Pages[ATabIndex]) do
-  begin
-    PreDestroy;
-    Free;
-  end;
-  for I := ATabIndex to DirectlinkCount - 1 do
-    Directlink[I].Title := 'Mirror ' + IntToStr(I + 1);
-
-  if (DirectlinkCount > 0) then
-    FcxPageControl.SelectNextPage(True)
-  else
-    FcxLFirstSubMirrorInfo.Visible := True;
-end;
-
-function TDirectlinksPanel.CloneInstance;
-begin
-  Result := TIDirectlinkContainer.Clone(IDirectlinksPanel(Self));
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -2025,6 +1678,8 @@ end;
 
 constructor TCrypterPanel.Create;
 begin
+  inherited Create;
+
   MirrorControl := AMirrorControl;
 
   FPanel := TPanel.Create(AOwner);
@@ -2100,7 +1755,9 @@ begin
 
   FPanel.Free;
 
-  MirrorControl := nil;
+  FMirrorControl := nil;
+
+  inherited Destroy;
 end;
 
 procedure TCrypterPanel.UpdateGUI;
@@ -2121,6 +1778,333 @@ end;
 function TCrypterPanel.CloneInstance;
 begin
   Result := TICrypter.Clone(ICrypterPanel(Self));
+end;
+{$ENDREGION}
+{ ****************************************************************************** }
+{$REGION 'TDirectlinksPanel'}
+
+procedure TDirectlinksPanel.FmiAddTabClick(Sender: TObject);
+begin
+  Add;
+end;
+
+procedure TDirectlinksPanel.FmiRemoveTabClick(Sender: TObject);
+begin
+  Remove(ActiveMirrorIndex);
+end;
+
+procedure TDirectlinksPanel.FPopupMenuPopup(Sender: TObject);
+begin
+  FmiRemoveTab.Enabled := (GetDirectlinkCount > 0);
+end;
+
+procedure TDirectlinksPanel.FcxPageControlDblClick(Sender: TObject);
+begin
+  if (GetDirectlinkCount = 0) then
+    Add;
+end;
+
+procedure TDirectlinksPanel.FcxPageControlPageChanging;
+begin
+  if NewPage <> nil then
+    Windows.SetFocus(NewPage.Handle)
+  else
+    Windows.SetFocus(FcxPageControl.Handle);
+end;
+
+///
+
+function TDirectlinksPanel.GetValue;
+begin
+  Result := ''; // never used // do nothing
+end;
+
+function TDirectlinksPanel.GetStatus;
+begin
+  Result := GetAbstractBestValue(
+    { } function(AIndex: Integer): Variant
+    { } begin
+    { . } Result := Directlink[AIndex].Status;
+    { } end);
+end;
+
+function TDirectlinksPanel.GetSize;
+begin
+  Result := VarToFloatDef(GetAbstractBestValue(
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := Directlink[AIndex].Size;
+      { } end), 0);
+end;
+
+function TDirectlinksPanel.GetPartSize;
+begin
+  Result := VarToFloatDef(GetAbstractBestValue(
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := Directlink[AIndex].PartSize;
+      { } end), 0);
+end;
+
+function TDirectlinksPanel.GetHoster: WideString;
+begin
+  Result := VarToStrDef(GetAbstractBestValue(
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := Directlink[AIndex].Hoster;
+      { } end), '');
+end;
+
+function TDirectlinksPanel.GetHosterShort;
+begin
+  Result := VarToStrDef(GetAbstractBestValue(
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := Directlink[AIndex].HosterShort;
+      { } end), '');
+end;
+
+function TDirectlinksPanel.GetParts;
+begin
+  Result := VarToIntDef(GetAbstractBestValue(
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := Directlink[AIndex].Parts;
+      { } end), 0);
+end;
+
+function TDirectlinksPanel.GetFileName;
+begin
+  Result := VarToStrDef(GetAbstractBestValue(
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := Directlink[AIndex].FileName;
+      { } end), '');
+end;
+
+function TDirectlinksPanel.GetDirectlink(const Index: Integer): IDirectlink;
+begin
+  Result := GetDirectlinkMirror(Index);
+end;
+
+function TDirectlinksPanel.GetDirectlinkMirror(const Index: Integer): IDirectlinksMirror;
+begin
+  Result := TMycxTabSheet(FcxPageControl.Pages[Index]);
+end;
+
+function TDirectlinksPanel.GetDirectlinkCount: Integer;
+begin
+  Result := FcxPageControl.PageCount;
+end;
+
+///
+
+function TDirectlinksPanel.GetAbstractBestValue(AValueAtIndex: TAbstractIndexFunc): Variant;
+var
+  LIndex, LCount: Integer;
+  FFound: Boolean;
+begin
+  Result := Null;
+
+  LIndex := 0;
+  LCount := DirectlinkCount;
+  FFound := False;
+
+  while (LIndex < LCount) and not FFound do
+  begin
+    FFound := HasUsefulValue(AValueAtIndex(LIndex));
+
+    if not FFound then
+    begin
+      Inc(LIndex);
+    end;
+  end;
+
+  if FFound then
+  begin
+    Result := AValueAtIndex(LIndex);
+  end;
+end;
+
+///
+
+function TDirectlinksPanel.GetMirrorControl;
+begin
+  Result := FMirrorControl;
+end;
+
+procedure TDirectlinksPanel.SetMirrorControl(AMirrorControl: IMirrorControl);
+begin
+  FMirrorControl := AMirrorControl;
+end;
+
+function TDirectlinksPanel.GetActiveDirectlinkIndex;
+begin
+  Result := FcxPageControl.ActivePageIndex;
+end;
+
+function TDirectlinksPanel.GetActiveDirectlink;
+begin
+  Result := Directlink[ActiveMirrorIndex];
+end;
+
+function TDirectlinksPanel.GetVisible;
+begin
+  Result := FcxPageControl.Visible;
+end;
+
+procedure TDirectlinksPanel.SetVisible(AVisible: Boolean);
+begin
+  FcxPageControl.Visible := AVisible;
+end;
+
+function TDirectlinksPanel.GetFocus: Boolean;
+begin
+  Result := Directlink[ActiveMirrorIndex].Focus;
+end;
+
+procedure TDirectlinksPanel.SetFocus(AFocus: Boolean);
+begin
+  Directlink[ActiveMirrorIndex].Focus := AFocus;
+end;
+
+constructor TDirectlinksPanel.Create;
+begin
+  MirrorControl := AMirrorControl;
+
+  FPopupMenu := TPopupMenu.Create(AOwner);
+  with FPopupMenu do
+  begin
+    with Items do
+    begin
+      FmiAddTab := TMenuItem.Create(FPopupMenu);
+      with FmiAddTab do
+      begin
+        Caption := StrAdd;
+        ShortCut := Menus.ShortCut($54, [ssCtrl]);
+        OnClick := FmiAddTabClick;
+      end;
+      Add(FmiAddTab);
+
+      FmiRemoveTab := TMenuItem.Create(FPopupMenu);
+      with FmiRemoveTab do
+      begin
+        Caption := StrRemove;
+        ShortCut := Menus.ShortCut($57, [ssCtrl]);
+        OnClick := FmiRemoveTabClick;
+      end;
+      Add(FmiRemoveTab);
+    end;
+    OnPopup := FPopupMenuPopup;
+  end;
+
+  FcxPageControl := TcxPageControl.Create(AOwner);
+  with FcxPageControl do
+  begin
+    Parent := TWinControl(AOwner);
+
+    Align := alClient;
+
+    Focusable := False;
+    HotTrack := True;
+
+    PopupMenu := FPopupMenu;
+
+    OnDblClick := FcxPageControlDblClick;
+    OnPageChanging := FcxPageControlPageChanging;
+
+    Show;
+  end;
+
+  FcxLFirstSubMirrorInfo := TcxLabel.Create(FcxPageControl);
+  with FcxLFirstSubMirrorInfo do
+  begin
+    Parent := FcxPageControl;
+
+    Align := alClient;
+    AutoSize := False;
+
+    Caption := 'Double-click here to create the first sub-mirror';
+
+    with Properties do
+    begin
+      with Alignment do
+      begin
+        Horz := taCenter;
+        Vert := taVCenter;
+      end;
+      WordWrap := True;
+    end;
+
+    Transparent := True;
+
+    OnDblClick := FcxPageControlDblClick;
+
+    Show;
+  end;
+end;
+
+destructor TDirectlinksPanel.Destroy;
+var
+  I: Integer;
+begin
+  // for I := FcxPageControl.PageCount - 1 downto 0 do
+  // Remove(I);
+
+  FcxLFirstSubMirrorInfo.Free;
+
+  // problem with destroing this item... see: TMirrorController.Remove()
+  FcxPageControl.Free;
+
+  FmiRemoveTab.Free;
+  FmiAddTab.Free;
+  FPopupMenu.Free;
+
+  MirrorControl := nil;
+end;
+
+function TDirectlinksPanel.Add;
+var
+  FcxTabSheet: TMycxTabSheet;
+begin
+  FcxLFirstSubMirrorInfo.Visible := False;
+  FcxTabSheet := TMycxTabSheet.Create(FcxPageControl);
+  with FcxTabSheet do
+  begin
+    DirectlinksPanel := Self;
+    PageControl := FcxPageControl;
+    Caption := 'Mirror ' + IntToStr(TabIndex + 1);
+    PostCreate;
+
+    FMycxRichEdit.Lines.Text := ALinks;
+
+    Result := PageIndex;
+
+    Show;
+  end;
+end;
+
+procedure TDirectlinksPanel.Remove(ATabIndex: Integer);
+var
+  I: Integer;
+begin
+  with TMycxTabSheet(FcxPageControl.Pages[ATabIndex]) do
+  begin
+    PreDestroy;
+    Free;
+  end;
+  for I := ATabIndex to DirectlinkCount - 1 do
+    Directlink[I].Title := 'Mirror ' + IntToStr(I + 1);
+
+  if (DirectlinkCount > 0) then
+    FcxPageControl.SelectNextPage(True)
+  else
+    FcxLFirstSubMirrorInfo.Visible := True;
+end;
+
+function TDirectlinksPanel.CloneInstance;
+begin
+  Result := TIDirectlinkContainer.Clone(IDirectlinksPanel(Self));
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -2255,89 +2239,85 @@ end;
 
 function TMirrorControl.GetValue;
 begin
-  Result := ''; { never used }
+  Result := ''; // never used // do nothing
 end;
 
 function TMirrorControl.GetStatus;
 begin
-  // TODO: Implement
+  Result := GetAbstractBestValue(
+    { } function: Variant
+    { } begin
+    { . } Result := GetDirectlink.Status;
+    { } end,
+    { } function(AIndex: Integer): Variant
+    { } begin
+    { . } Result := FCrypterList[AIndex].Status;
+    { } end);
 end;
 
 function TMirrorControl.GetSize;
-// TODO: Optimize
-var
-  I: Integer;
 begin
-  with TList<Extended>.Create do
-    try
-      if GetDirectlink.Size > 0 then
-        Add(GetDirectlink.Size);
-
-      for I := 0 to CrypterCount - 1 do
-      begin
-        if GetCrypter(I).Size > 0 then
-          Add(GetCrypter(I).Size);
-      end;
-
-      if Count > 0 then
-      begin
-        Sort;
-
-        Result := Items[Count div 2];
-      end
-      else
-      begin
-        Result := 0;
-      end;
-    finally
-      Free;
-    end;
+  Result := VarToFloatDef(GetAbstractBestValue(
+      { } function: Variant
+      { } begin
+      { . } Result := GetDirectlink.Size;
+      { } end,
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := FCrypterList[AIndex].Size;
+      { } end), 0);
 end;
 
 function TMirrorControl.GetPartSize;
 begin
-  Result := GetDirectlink.PartSize;
+  Result := VarToFloatDef(GetAbstractBestValue(
+      { } function: Variant
+      { } begin
+      { . } Result := GetDirectlink.PartSize;
+      { } end,
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := FCrypterList[AIndex].PartSize;
+      { } end), 0);
 end;
 
 function TMirrorControl.GetHoster: WideString;
 begin
-  Result := GetHoster(False);
+  Result := VarToStrDef(GetAbstractBestValue(
+      { } function: Variant
+      { } begin
+      { . } Result := GetDirectlink.Hoster;
+      { } end,
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := FCrypterList[AIndex].Hoster;
+      { } end), '');
 end;
 
 function TMirrorControl.GetHosterShort;
 begin
-  Result := GetHoster(True);
+  Result := VarToStrDef(GetAbstractBestValue(
+      { } function: Variant
+      { } begin
+      { . } Result := GetDirectlink.HosterShort;
+      { } end,
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := FCrypterList[AIndex].HosterShort;
+      { } end), '');
 end;
 
 function TMirrorControl.GetParts;
-// TODO: Optimize
-var
-  I: Integer;
 begin
-  with TList<Integer>.Create do
-    try
-      if GetDirectlink.Parts > -1 then
-        Add(GetDirectlink.Parts);
-
-      for I := 0 to CrypterCount - 1 do
-      begin
-        if GetCrypter(I).Parts > -1 then
-          Add(GetCrypter(I).Parts);
-      end;
-
-      if Count > 0 then
-      begin
-        Sort;
-
-        Result := Items[Count div 2];
-      end
-      else
-      begin
-        Result := 0;
-      end;
-    finally
-      Free;
-    end;
+  Result := VarToIntDef(GetAbstractBestValue(
+      { } function: Variant
+      { } begin
+      { . } Result := GetDirectlink.Parts;
+      { } end,
+      { } function(AIndex: Integer): Variant
+      { } begin
+      { . } Result := FCrypterList[AIndex].Parts;
+      { } end), 0);
 end;
 
 function TMirrorControl.GetFileName;
@@ -2372,7 +2352,7 @@ begin
   if not VarIsNull(IndexOrName) then
   begin
     if VarIsNumeric(IndexOrName) then
-      Result := FCrypterPanelList[IndexOrName]
+      Result := FCrypterList[IndexOrName]
     else
       Result := FindCrypterMirror(IndexOrName);
   end;
@@ -2380,7 +2360,39 @@ end;
 
 function TMirrorControl.GetCrypterCount: Integer;
 begin
-  Result := FCrypterPanelList.Count;
+  Result := FCrypterList.Count;
+end;
+
+//
+
+function TMirrorControl.GetAbstractBestValue(AValue: TAbstractFunc; AValueAtIndex: TAbstractIndexFunc): Variant;
+var
+  LIndex, LCount: Integer;
+  FFound: Boolean;
+begin
+  Result := AValue; // Best value from directlinks
+
+  if not HasUsefulValue(Result) then
+  begin
+    LIndex := 0;
+    LCount := CrypterCount;
+    FFound := False;
+
+    while (LIndex < LCount) and not FFound do
+    begin
+      FFound := HasUsefulValue(AValueAtIndex(LIndex));
+
+      if not FFound then
+      begin
+        Inc(LIndex);
+      end;
+    end;
+
+    if FFound then
+    begin
+      Result := AValueAtIndex(LIndex);
+    end;
+  end;
 end;
 
 //
@@ -2393,26 +2405,6 @@ end;
 procedure TMirrorControl.SetMirrorController(const AMirrorController: IMirrorController);
 begin
   FMirrorController := AMirrorController;
-end;
-
-function TMirrorControl.GetHoster(AShortName: Boolean): WideString;
-// TODO: Optimize
-var
-  I: Integer;
-begin
-  Result := GetDirectlink.GetHoster(AShortName);
-
-  if (Result = '') then
-    for I := 0 to CrypterCount - 1 do
-    begin
-      if AShortName then
-        Result := GetCrypter(I).HosterShort
-      else
-        Result := GetCrypter(I).Hoster;
-
-      if not(Result = '') then
-        Break;
-    end;
 end;
 
 function TMirrorControl.GetIndex;
@@ -2534,6 +2526,8 @@ constructor TMirrorControl.Create;
 var
   I: Integer;
 begin
+  inherited Create();
+
   FPopupMenu := TPopupMenu.Create(AOwner);
   FPopupMenu.OnPopup := FPopupMenuPopup;
   with FPopupMenu.Items do
@@ -2677,7 +2671,7 @@ begin
 
   FDirectlinksPanel := TDirectlinksPanel.Create(FcxTabControl, Self);
 
-  FCrypterPanelList := TInterfaceList<ICrypterPanel>.Create;
+  FCrypterList := TInterfaceList<ICrypterPanel>.Create;
 
   with SettingsManager.Settings do
   begin
@@ -2702,7 +2696,7 @@ destructor TMirrorControl.Destroy;
 begin
   FcxButtonCrypt.Free;
 
-  FCrypterPanelList.Free;
+  FCrypterList.Free;
 
   FDirectlinksPanel := nil;
 
@@ -2726,6 +2720,8 @@ begin
   FmiAddMirror.Free;
 
   FPopupMenu.Free;
+
+  inherited Destroy();
 end;
 
 function TMirrorControl.FindCrypter(const AName: WideString): ICrypter;
@@ -2740,9 +2736,9 @@ var
 begin
   Result := nil;
 
-  for LIndex := 0 to FCrypterPanelList.Count - 1 do
+  for LIndex := 0 to FCrypterList.Count - 1 do
   begin
-    LCrypter := FCrypterPanelList[LIndex];
+    LCrypter := FCrypterList[LIndex];
 
     if SameText(AName, LCrypter.Name) then
     begin
@@ -2775,7 +2771,7 @@ begin
     _CrypterPanel.Crypter := TCrypterCollectionItem(FindPlugInCollectionItemFromCollection(AName, Crypter));
 
   _CrypterPanelIntf := _CrypterPanel;
-  Result := FCrypterPanelList.Add(_CrypterPanel);
+  Result := FCrypterList.Add(_CrypterPanel);
 
   _NewMenuItem := TMenuItem.Create(FCrypterPopupMenu);
   FCrypterPopupMenu.Items.Add(_NewMenuItem);
@@ -2818,8 +2814,8 @@ begin
   if FcxTabControl.TabIndex = AIndex + 1 then
     FcxTabControl.TabIndex := AIndex;
   FcxTabControl.Tabs.Delete(AIndex + 1);
-  FCrypterPanelList.Items[AIndex]._Release;
-  FCrypterPanelList.Delete(AIndex);
+  FCrypterList.Items[AIndex]._Release;
+  FCrypterList.Delete(AIndex);
   FCrypterPopupMenu.Items.Items[AIndex].Free;
   if (CrypterCount = 0) then
     FreeAndNil(FcxButtonCrypt)

@@ -353,8 +353,6 @@ type
     function GetMirrorControl: IMirrorControl;
     procedure SetMirrorControl(AMirrorControl: IMirrorControl);
 
-    function GetHoster(AShortName: Boolean): WideString; overload;
-
     function GetActiveDirectlinkIndex: Integer;
     function GetActiveDirectlink: IDirectlinksMirror;
 
@@ -436,8 +434,6 @@ type
     // Additional
     function GetMirrorController: IMirrorController;
     procedure SetMirrorController(const AMirrorController: IMirrorController);
-
-    function GetHoster(AShortName: Boolean): WideString; overload;
 
     function GetIndex: Integer;
     procedure SetIndex(AIndex: Integer);

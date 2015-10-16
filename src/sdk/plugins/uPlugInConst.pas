@@ -26,7 +26,7 @@ type
   TContainertypes = set of TContainertype;
   TAdvertismenttype = (atLayer, atLink, atBanner);
   TImageHostResize = (irNone, ir320x240, ir450x338, ir640x480, ir800x600);
-  TLinkStatus = csOffline..csTemporaryOffline;
+  TLinkStatus = csNotChecked..csTemporaryOffline;
   TChecksumType = (ctMD5, ctSHA512);
 
   TIDInfo = packed record

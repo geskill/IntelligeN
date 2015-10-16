@@ -14,7 +14,7 @@ uses
   // Api
   uApiCodeTag, uApiFile,
   // Utils
-  uFileUtils, uPathUtils, uStringUtils;
+  uFileUtils, uPathUtils, uStringUtils, uVariantUtils;
 
 type
   TTemplateInfo = record
@@ -692,8 +692,8 @@ begin
               if HasChildNodes then
               begin
                 AControlController.NewControl(StringToControlID(NodeName), VarToStr(ChildNodes.Nodes['title'].NodeValue), VarToStr(ChildNodes.Nodes['value'].NodeValue), VarToStr(ChildNodes.Nodes['title'].Attributes['hint']),
-                  VarToStr(ChildNodes.Nodes['value'].Attributes['list']), StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['left']), 0), StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['top']), 0),
-                  StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['width']), 0), StrToIntDef(VarToStr(ChildNodes.Nodes['position'].Attributes['height']), 0));
+                  VarToStr(ChildNodes.Nodes['value'].Attributes['list']), VarToIntDef(ChildNodes.Nodes['position'].Attributes['left'], 0), VarToIntDef(ChildNodes.Nodes['position'].Attributes['top'], 0),
+                  VarToIntDef(ChildNodes.Nodes['position'].Attributes['width'], 0), VarToIntDef(ChildNodes.Nodes['position'].Attributes['height'], 0));
                 APageController.CallControlAligner;
               end;
 end;

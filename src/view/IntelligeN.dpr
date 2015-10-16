@@ -121,9 +121,14 @@ uses
   uPlugInFileHosterClass in '..\sdk\plugins\filehoster\uPlugInFileHosterClass.pas',
   uPlugInImageHosterClass in '..\sdk\plugins\imagehoster\uPlugInImageHosterClass.pas',
   uFileUtils in '..\core\utils\uFileUtils.pas',
-  uPathUtils in '..\core\utils\uPathUtils.pas',
-  uStringUtils in '..\core\utils\uStringUtils.pas',
+  uHTMLUtils in '..\core\utils\uHTMLUtils.pas',
   uImageUtils in '..\core\utils\uImageUtils.pas',
+  uPathUtils in '..\core\utils\uPathUtils.pas',
+  uReleasenameUtils in '..\core\utils\uReleasenameUtils.pas',
+  uSetUtils in '..\core\utils\uSetUtils.pas',
+  uSizeUtils in '..\core\utils\uSizeUtils.pas',
+  uStringUtils in '..\core\utils\uStringUtils.pas',
+  uVariantUtils in '..\core\utils\uVariantUtils.pas',
   IntelligeN_TLB in 'ole\IntelligeN_TLB.pas',
   uOLE in 'ole\uOLE.pas' {IntelligeN2009: CoClass};
 

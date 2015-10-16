@@ -22,7 +22,7 @@ uses
   // DLLs
   uExport,
   // Utils
-  uFileUtils, uPathUtils, uStringUtils;
+  uFileUtils, uPathUtils, uStringUtils, uVariantUtils;
 
 type
   TUpdateVersion = class
@@ -277,10 +277,10 @@ begin
     begin
       AUpdateVersion.DownloadPath := VarToStr(ChildNodes.Nodes['files_dir'].NodeValue);
 
-      AUpdateVersion.UpdateVersion.MajorVersion := StrToIntDef(VarToStr(ChildNodes.Nodes['major_version'].NodeValue), 0);
-      AUpdateVersion.UpdateVersion.MinorVersion := StrToIntDef(VarToStr(ChildNodes.Nodes['minor_version'].NodeValue), 0);
-      AUpdateVersion.UpdateVersion.MajorBuild := StrToIntDef(VarToStr(ChildNodes.Nodes['major_build'].NodeValue), 0);
-      AUpdateVersion.UpdateVersion.MinorBuild := StrToIntDef(VarToStr(ChildNodes.Nodes['minor_build'].NodeValue), 0);
+      AUpdateVersion.UpdateVersion.MajorVersion := VarToIntDef(ChildNodes.Nodes['major_version'].NodeValue, 0);
+      AUpdateVersion.UpdateVersion.MinorVersion := VarToIntDef(ChildNodes.Nodes['minor_version'].NodeValue, 0);
+      AUpdateVersion.UpdateVersion.MajorBuild := VarToIntDef(ChildNodes.Nodes['major_build'].NodeValue, 0);
+      AUpdateVersion.UpdateVersion.MinorBuild := VarToIntDef(ChildNodes.Nodes['minor_build'].NodeValue, 0);
 
       AUpdateVersion.UpdateCreated := StrToDateTime(VarToStr(ChildNodes.Nodes['created'].NodeValue), FSQLFormatSettings);
       AUpdateVersion.UpdateModified := StrToDateTime(VarToStr(ChildNodes.Nodes['modified'].NodeValue), FSQLFormatSettings);
@@ -293,7 +293,7 @@ begin
         with ChildNodes.Nodes[LFileIndex] do
         begin
           if (IsNumber(ChildNodes.Nodes['filesystem_id'].NodeValue)) then
-            LFileSystem := TFileSystem(StrToIntDef(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue), 0))
+            LFileSystem := TFileSystem(VarToIntDef(ChildNodes.Nodes['filesystem_id'].NodeValue, 0))
           else
             LFileSystem := TEnum.Parse<TFileSystem>(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue));
 
@@ -311,12 +311,12 @@ begin
 
               FileBase.FilePathAppendix := VarToStr(ChildNodes.Nodes['path_appendix'].NodeValue);
 
-              FileVersion.MajorVersion := StrToIntDef(VarToStr(ChildNodes.Nodes['major_version'].NodeValue), 0);
-              FileVersion.MinorVersion := StrToIntDef(VarToStr(ChildNodes.Nodes['minor_version'].NodeValue), 0);
-              FileVersion.MajorBuild := StrToIntDef(VarToStr(ChildNodes.Nodes['major_build'].NodeValue), 0);
-              FileVersion.MinorBuild := StrToIntDef(VarToStr(ChildNodes.Nodes['minor_build'].NodeValue), 0);
+              FileVersion.MajorVersion := VarToIntDef(ChildNodes.Nodes['major_version'].NodeValue, 0);
+              FileVersion.MinorVersion := VarToIntDef(ChildNodes.Nodes['minor_version'].NodeValue, 0);
+              FileVersion.MajorBuild := VarToIntDef(ChildNodes.Nodes['major_build'].NodeValue, 0);
+              FileVersion.MinorBuild := VarToIntDef(ChildNodes.Nodes['minor_build'].NodeValue, 0);
 
-              FileSizeCompressed := StrToIntDef(VarToStr(ChildNodes.Nodes['size_compressed'].NodeValue), 0);
+              FileSizeCompressed := VarToIntDef(ChildNodes.Nodes['size_compressed'].NodeValue, 0);
               FileChecksum := VarToStr(ChildNodes.Nodes['checksum'].NodeValue);
 
               AUpdateVersion.UpdateSize := AUpdateVersion.UpdateSize + FileSizeCompressed;

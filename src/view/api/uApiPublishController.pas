@@ -3,19 +3,19 @@ unit uApiPublishController;
 interface
 
 uses
-  // Delphi 
+  // Delphi
   Windows, SysUtils, Classes, StrUtils, Math, Dialogs, Variants, Generics.Collections,
-  // MultiEvent 
+  // MultiEvent
   Generics.MultiEvents.NotifyInterface, Generics.MultiEvents.NotifyHandler,
-  // Common 
+  // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
-  // DLLs 
+  // DLLs
   uExport,
-  // Api 
+  // Api
   uApiConst, uApiFile, uApiIScriptParser, uApiMultiCastEvent, uApiTabSheetData, uApiMirrorControlBase, uApiMirrorControllerBase, uApiSettings,
-  // Plugin system 
+  // Plugin system
   uPlugInEvent,
-  // Utils 
+  // Utils
   uPathUtils, uStringUtils;
 
 type
@@ -666,7 +666,7 @@ begin
   LControlBasic := TabSheetController.ControlController.FindControl(cPicture);
   if Assigned(LControlBasic) then
   begin
-    LPicture := IPicture(LControlBasic);
+    LControlBasic.QueryInterface(IPicture, LPicture);
   end;
   LHasPicture := False;
 
@@ -677,14 +677,14 @@ begin
     LBlackList := TStringList.Create;
     LWhitelist := TStringList.Create;
     try
-      // Load black- and whitelist 
+      // Load black- and whitelist
       LBlackList.Text := FCMSWebsiteCollectionItem.Filter.Hosters.Items[LHostersIntex].Blacklist.Text;
       if FCMSWebsiteCollectionItem.Filter.Hosters.Items[LHostersIntex].Ranked then
         LWhitelist.Text := FCMSWebsiteCollectionItem.Filter.Hosters.Items[LHostersIntex].Whitelist.Text;
 
       for LWhitelistIndex := 0 to LWhitelist.Count - 1 do
       begin
-        // If not in blacklist 
+        // If not in blacklist
         if (LBlackList.IndexOf(LWhitelist.Strings[LWhitelistIndex]) = -1) then
         begin
           LBlackList.Add(LWhitelist.Strings[LWhitelistIndex]); // Add to blacklist, to not let add again into mirror list
@@ -719,7 +719,7 @@ begin
                       Break;
                     end;
 
-                Break; // only one picture needed, break whitelist loop 
+                Break; // only one picture needed, break whitelist loop
               end;
           end;
         end;
@@ -751,7 +751,7 @@ begin
 
               if not LHasPicture then
               begin
-                raise Exception.Create(Format('No picture or picture mirror usable for %s website.', [FCMSWebsiteCollectionItem.Website]));
+                AControlList.Add(LPicture.CloneInstance());
               end;
             end;
 
@@ -1096,7 +1096,7 @@ end;
 procedure TICMSContainer.UpdateCMSWebsiteList;
 begin
   FTabConnection.PublishController.OnUpdateCMSWebsiteList.Invoke(Self, Index);
-  // Main.fPublish.GenerateCMSWebsiteList(Index, Self); 
+  // Main.fPublish.GenerateCMSWebsiteList(Index, Self);
 end;
 
 function TICMSContainer.GetTabSheetController: ITabSheetController;
@@ -1217,7 +1217,7 @@ begin
 
   case ACMSChangeType of
     pctAdd:
-      ; // nothing 
+      ; // nothing
     pctMove:
       begin
         Index := FindCMSContainer(CMSName);
@@ -1325,7 +1325,7 @@ end;
 
 procedure TIPublishController.SetActive(AActive: WordBool);
 var
-  I, J: Integer;
+  LCMSIndex: Integer;
 begin
   if not(Active = AActive) then
   begin
@@ -1334,9 +1334,9 @@ begin
         begin
           with SettingsManager.Settings.Plugins do
           begin
-            for I := 0 to CMS.Count - 1 do
-              if TCMSCollectionItem(CMS.Items[I]).Enabled then
-                FCMSList.Add(CreateNewCMSContainer(I));
+            for LCMSIndex := 0 to CMS.Count - 1 do
+              if TCMSCollectionItem(CMS.Items[LCMSIndex]).Enabled then
+                FCMSList.Add(CreateNewCMSContainer(LCMSIndex));
             UpdateInternalListItemIndex;
 
             OnCMSChange.Add(FPluginChangeEventHandler);
@@ -1425,7 +1425,7 @@ end;
 
 destructor TIPublishController.Destroy;
 begin
-  // TODO: test this 
+  // TODO: test this
   if TabSheetController.IsTabActive then
     OnUpdateCMSList.Invoke(nil);
 

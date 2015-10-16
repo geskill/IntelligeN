@@ -288,7 +288,6 @@ type
 
     procedure LocalUpload(ALocalPath: WideString);
     procedure RemoteUpload;
-
   end;
 
   TIPicture = class(TIControlComboBox, IPicture)
