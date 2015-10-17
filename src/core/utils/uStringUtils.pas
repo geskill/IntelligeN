@@ -26,11 +26,11 @@ function ReduceWhitespace(S: string; A: Boolean = False): string;
 
 function RemoveW(AHost: string): string;
 
-function Trim(const S: string; const C: Char): string;
+function Trim(const S: string; const C: Char): string; overload;
 
-function TrimLeft(const S: string; const C: Char): string;
+function TrimLeft(const S: string; const C: Char): string; overload;
 
-function TrimRight(const S: string; const C: Char): string;
+function TrimRight(const S: string; const C: Char): string; overload;
 
 implementation
 

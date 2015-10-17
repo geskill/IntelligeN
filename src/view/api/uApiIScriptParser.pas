@@ -282,7 +282,7 @@ begin
       AddProperty('Parts', 'Integer', GetMirrorProperties, nil);
 
       AddIndexProperty('Crypter', 'Variant', 'TICrypter', CallMirrorMethod);
-      AddProperty('CrypterCount', 'Variant', GetMirrorProperties, nil);
+      AddProperty('CrypterCount', 'Integer', GetMirrorProperties, nil);
 
       AddIndexProperty('Directlink', 'Integer', 'TIDirectlink', CallMirrorMethod);
       AddProperty('DirectlinkCount', 'Integer', GetMirrorProperties, nil);

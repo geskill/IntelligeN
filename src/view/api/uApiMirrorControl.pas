@@ -7,7 +7,7 @@ uses
   Windows, SysUtils, Messages, Classes, Controls, Menus, StdCtrls, ExtCtrls, Graphics, Variants, Dialogs,
   Clipbrd, ShellAPI, Math,
   // Spring Framework
-  Spring.Collections.Lists,
+  Spring.Collections.Lists, Spring.SystemUtils,
   // Dev Express
   cxPC, cxEdit, cxTextEdit, cxGraphics, cxGrid, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxLabel,
   cxButtons, dxBar, cxHint,
@@ -1812,12 +1812,18 @@ begin
 end;
 
 function TDirectlinksPanel.GetStatus;
+var
+  LValue: Variant;
 begin
-  Result := GetAbstractBestValue(
+  LValue := GetAbstractBestValue(
     { } function(AIndex: Integer): Variant
     { } begin
     { . } Result := Directlink[AIndex].Status;
     { } end);
+  if VarIsNull(LValue) or not VarIsOrdinal(LValue) or not TEnum.IsValid<TContentStatus>(Integer(LValue)) then
+    Result := csNotChecked
+  else
+    Result := LValue;
 end;
 
 function TDirectlinksPanel.GetSize;
@@ -1847,7 +1853,7 @@ begin
       { } end), '');
 end;
 
-function TDirectlinksPanel.GetHosterShort;
+function TDirectlinksPanel.GetHosterShort: WideString;
 begin
   Result := VarToStrDef(GetAbstractBestValue(
       { } function(AIndex: Integer): Variant
@@ -1896,7 +1902,7 @@ var
   LIndex, LCount: Integer;
   FFound: Boolean;
 begin
-  Result := Null;
+  Result := Unassigned;
 
   LIndex := 0;
   LCount := DirectlinkCount;
@@ -2235,8 +2241,10 @@ begin
 end;
 
 function TMirrorControl.GetStatus;
+var
+  LValue: Variant;
 begin
-  Result := GetAbstractBestValue(
+  LValue := GetAbstractBestValue(
     { } function: Variant
     { } begin
     { . } Result := GetDirectlink.Status;
@@ -2245,6 +2253,10 @@ begin
     { } begin
     { . } Result := FCrypterList[AIndex].Status;
     { } end);
+  if VarIsNull(LValue) or not VarIsOrdinal(LValue) or not TEnum.IsValid<TContentStatus>(Integer(LValue)) then
+    Result := csNotChecked
+  else
+    Result := LValue;
 end;
 
 function TMirrorControl.GetSize;
@@ -2286,7 +2298,7 @@ begin
       { } end), '');
 end;
 
-function TMirrorControl.GetHosterShort;
+function TMirrorControl.GetHosterShort: WideString;
 begin
   Result := VarToStrDef(GetAbstractBestValue(
       { } function: Variant

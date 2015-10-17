@@ -6,7 +6,7 @@ uses
   // Delphi
   SysUtils, Variants,
   // Spring Framework
-  Spring.Collections.Lists,
+  Spring.Collections.Lists, Spring.SystemUtils,
   // Common
   uBaseConst, uBaseInterface,
   // Api
@@ -259,12 +259,18 @@ begin
 end;
 
 function TIDirectlinkContainer.GetStatus: TContentStatus;
+var
+  LValue: Variant;
 begin
-  Result := GetAbstractBestValue(
+  LValue := GetAbstractBestValue(
     { } function(AIndex: Integer): Variant
     { } begin
     { . } Result := FDirectlinkList[AIndex].Status;
     { } end);
+  if VarIsNull(LValue) or not VarIsOrdinal(LValue) or not TEnum.IsValid<TContentStatus>(Integer(LValue)) then
+    Result := csNotChecked
+  else
+    Result := LValue;
 end;
 
 function TIDirectlinkContainer.GetSize: Double;
@@ -336,7 +342,7 @@ var
   LIndex, LCount: Integer;
   FFound: Boolean;
 begin
-  Result := Null;
+  Result := '';
 
   LIndex := 0;
   LCount := DirectlinkCount;
@@ -392,8 +398,10 @@ begin
 end;
 
 function TIMirrorContainer.GetStatus: TContentStatus;
+var
+  LValue: Variant;
 begin
-  Result := GetAbstractBestValue(
+  LValue := GetAbstractBestValue(
     { } function: Variant
     { } begin
     { . } Result := inherited GetStatus;
@@ -402,6 +410,10 @@ begin
     { } begin
     { . } Result := FCrypterList[AIndex].Status;
     { } end);
+  if VarIsNull(LValue) or not VarIsOrdinal(LValue) or not TEnum.IsValid<TContentStatus>(Integer(LValue)) then
+    Result := csNotChecked
+  else
+    Result := LValue;
 end;
 
 function TIMirrorContainer.GetSize: Double;
@@ -409,7 +421,7 @@ begin
   Result := VarToFloatDef(GetAbstractBestValue(
       { } function: Variant
       { } begin
-      { . } Result := inherited GetStatus;
+      { . } Result := inherited GetSize;
       { } end,
       { } function(AIndex: Integer): Variant
       { } begin
@@ -422,7 +434,7 @@ begin
   Result := VarToFloatDef(GetAbstractBestValue(
       { } function: Variant
       { } begin
-      { . } Result := inherited GetStatus;
+      { . } Result := inherited GetPartSize;
       { } end,
       { } function(AIndex: Integer): Variant
       { } begin
@@ -435,7 +447,7 @@ begin
   Result := VarToStrDef(GetAbstractBestValue(
       { } function: Variant
       { } begin
-      { . } Result := inherited GetStatus;
+      { . } Result := inherited GetHoster;
       { } end,
       { } function(AIndex: Integer): Variant
       { } begin
@@ -448,7 +460,7 @@ begin
   Result := VarToStrDef(GetAbstractBestValue(
       { } function: Variant
       { } begin
-      { . } Result := inherited GetStatus;
+      { . } Result := inherited GetHosterShort;
       { } end,
       { } function(AIndex: Integer): Variant
       { } begin
@@ -461,7 +473,7 @@ begin
   Result := VarToIntDef(GetAbstractBestValue(
       { } function: Variant
       { } begin
-      { . } Result := inherited GetStatus;
+      { . } Result := inherited GetParts;
       { } end,
       { } function(AIndex: Integer): Variant
       { } begin
