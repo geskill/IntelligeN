@@ -95,7 +95,7 @@ type
 
     function CMSExec(const APublishItem: IPublishItem; ACAPTCHAInput: TCAPTCHAInput = nil; AIntelligentPostingHandler: TIntelligentPostingHelper = nil): Boolean;
 
-    function CrawlerExec(ACrawler: TCrawlerCollectionItem; const AControlController: IControlController): Boolean;
+    function CrawlerExec(ACrawler: TCrawlerCollectionItem; ATypeID: TTypeID; const AControlController: IControlController): Boolean;
 
     function CrypterAddFolder(ACrypter: TCrypterCollectionItem; const AMirrorContainer: IDirectlinkContainer; const AControlController: IControlControllerBase; out AFolderInfo: TCrypterFolderInfo): Boolean;
     function CrypterGetFolder(ACrypter: TCrypterCollectionItem; AFolderIdentifier: string; out AFolderInfo: TCrypterFolderInfo): Boolean;
@@ -957,7 +957,7 @@ begin
   Result := LResult;
 end;
 
-function TApiThreadedPlugin.CrawlerExec(ACrawler: TCrawlerCollectionItem; const AControlController: IControlController): Boolean;
+function TApiThreadedPlugin.CrawlerExec(ACrawler: TCrawlerCollectionItem; ATypeID: TTypeID; const AControlController: IControlController): Boolean;
 var
   LResult, LHighException: WordBool;
 begin
@@ -979,7 +979,7 @@ begin
     { ......... } LComponentIDs := LComponentIDs + [ControlID];
 
     { ... } try
-    { ..... } LResult := Exec(Integer(AControlController.TypeID), Longword(LComponentIDs), ACrawler.Limit, AControlController);
+    { ..... } LResult := Exec(Integer(ATypeID), Longword(LComponentIDs), ACrawler.Limit, AControlController);
     { ... } except
     { ..... } LHighException := True;
     { ... } end;
@@ -1074,6 +1074,7 @@ begin
     { . } end;
     { } end, FErrorHandler);
 
+  AFolderInfo := LFolderInfo;
   Result := LResult;
 end;
 
@@ -1115,6 +1116,7 @@ begin
     { . } end;
     { } end, FErrorHandler);
 
+  AFolderInfo := LFolderInfo;
   Result := LResult;
 end;
 
@@ -1196,6 +1198,7 @@ begin
     { . } end;
     { } end, FErrorHandler);
 
+  ALinksInfo := LLinksInfo;
   Result := LResult;
 end;
 

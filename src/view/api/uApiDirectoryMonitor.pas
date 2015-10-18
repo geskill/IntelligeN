@@ -9,19 +9,18 @@ uses
   OtlParallel, OtlTaskControl, OtlSync, OtlTask,
   // DirectoryWatch
   DirectoryWatch,
-  // GenericThreadList
-  uGenerics.ThreadList,
-  // ThreadStringList
-  uThreadStringList,
+  // Generic TThreadList
+  hThreadList,
   // Api
   uApiMultiCastEvent, uApiSettings,
   // Utils
   uPathUtils;
 
 type
+  // TODO Re-work in BUILD >= 130
   TCMSInformation = class
   private
-    FWebsiteXMLs, FSubjectTXTs, FMessageTXTs: TThreadStringList;
+    FWebsiteXMLs, FSubjectTXTs, FMessageTXTs: TThreadList<string>;
     FName, FPath: string;
     FCMSCollectionItem: TCMSCollectionItem;
     FWebsiteChangeEventHandler, FSubjectChangeEventHandler, FMessageChangeEventHandler: ICMSItemChangeEventHandler;
@@ -29,8 +28,8 @@ type
     procedure SubjectUpdate(ACMSItemChangeType: TCMSItemChangeType; AIndex: Integer; AParam: Integer);
     procedure MessageUpdate(ACMSItemChangeType: TCMSItemChangeType; AIndex: Integer; AParam: Integer);
   protected
-    function Find(AName: string; AThreadStringList: TThreadStringList): Integer;
-    function FindPath(APath: string; AThreadStringList: TThreadStringList; AStartIndex: Integer = 0): Integer;
+    function Find(AName: string; AThreadStringList: TThreadList<string>): Integer;
+    function FindPath(APath: string; AThreadStringList: TThreadList<string>; AStartIndex: Integer = 0): Integer;
 
     function FindWebsite(AName: string): Integer;
     function FindWebsitePath(APath: string): Integer;

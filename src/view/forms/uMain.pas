@@ -17,7 +17,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiCodeTag, uApiConst, uApiDirectoryMonitor, uApiMainMenu, uApiMain, uApiSettings, uApiTabSheetController, uApiXml,
+  uApiCodeTag, uApiConst, uApiMainMenu, uApiMain, uApiSettings, uApiTabSheetController, uApiXml,
   // DLLs
   uExport,
   // Forms
@@ -294,7 +294,7 @@ type
     FOnStartup: INotifyEvent;
     FMainMenu: IMainMenu;
     FCodeDefinition: TCodeDefinition;
-    FMonitorManager: TMonitorManager;
+    // FMonitorManager: TMonitorManager;
     // FOneInstance: TOneInstance;
     // FdwJumpLists: TdwJumpLists;
     procedure WMSysCommand(var Msg: TWMSysCommand); message WM_SYSCOMMAND;
@@ -388,7 +388,7 @@ begin
 
   FMainMenu := TIMainMenu.Create(dxBarManagerBarMainMenu);
 
-  FMonitorManager := TMonitorManager.Create;
+  // FMonitorManager := TMonitorManager.Create;
 
   fMain.PostCreate;
 
@@ -407,7 +407,7 @@ begin
     FCodeDefinition.CodeTags[I].ParamValues.Free;
   end;
 
-  FMonitorManager.Free;
+  // FMonitorManager.Free;
 
   FOnStartup := nil;
   FMainMenu := nil;

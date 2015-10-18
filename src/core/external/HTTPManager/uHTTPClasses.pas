@@ -587,6 +587,7 @@ end;
 constructor THTTPParams.Create;
 begin
   FHTTPParamList := TList<THTTPParam>.Create;
+  FRawData := '';
   FHasFile := False;
 end;
 

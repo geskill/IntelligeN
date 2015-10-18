@@ -104,7 +104,7 @@ end;
 
 function TIntelligeN2009.hostermanageractive: SYSINT;
 begin
-  if Main.fMain.HosterManager.IsIdle then
+  if Main.fMain.FileHosterManager.IsIdle then
     Result := 0
   else
     Result := 1;

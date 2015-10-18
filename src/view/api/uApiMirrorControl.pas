@@ -22,7 +22,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiConst, uApiMirrorControlBase, uApiCrypter, uApiDLMF, uApiMody, uApiSettings, uApiXml,
+  uApiConst, uApiMirrorControlBase, uApiCrypterManager, uApiFileHosterManager, uApiDLMF, uApiMody, uApiSettings, uApiXml,
   // Plugin system
   uPlugInConst,
   // Utils
@@ -479,7 +479,7 @@ end;
 
 procedure TStatusGrid.FcxGridInfoTableViewColumn2CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
 const
-  ImageIndent = 3;
+  IMAGE_INDENT = 2;
 var
   LImageRect, LTextRect: TRect;
   LImageIndex: Integer;
@@ -489,10 +489,10 @@ begin
     ACanvas.Brush.Color := AViewInfo.Params.Color;
     ACanvas.FillRect(AViewInfo.Bounds);
     LImageRect := AViewInfo.ContentBounds;
-    LImageRect.Left := LImageRect.Left + ImageIndent;
-    LImageRect.Right := LImageRect.Left + Main.ILContainerStatusImages.Width + 2;
+    LImageRect.Left := LImageRect.Left;
+    LImageRect.Right := LImageRect.Left + Main.ILContainerStatusImages.Width + IMAGE_INDENT;
     LTextRect := AViewInfo.ContentBounds;
-    LTextRect.Left := LImageRect.Right + ImageIndent;
+    LTextRect.Left := LImageRect.Right + IMAGE_INDENT;
     LImageIndex := Integer(FMirrorData.Status);
 
     cxDrawImage(ACanvas.Handle, LImageRect, LImageRect, nil, Main.ILContainerStatusImages, LImageIndex, idmNormal, False, 0, Main.ImageList.BkColor, False);
@@ -1371,8 +1371,7 @@ end;
 
 procedure TMycxTabSheet.UpdateGUI;
 var
-  _FieldIndex: Integer;
-  _StringStatus, _Hoster: string;
+  _Hoster: string;
   _LinksInfo: TLinksInfo;
   _PlugInCollectionItem: TPlugInCollectionItem;
 
@@ -1442,9 +1441,8 @@ end;
 
 procedure TMycxTabSheet.CheckStatus;
 begin
-  // TODO: Fix this
-  // if not SameStr(Hoster, '') then
-  // FDirectlinksPanel.MirrorControl.MirrorController.TabSheetController.PageController.HosterManager.AddHosterCheckJob(Self);
+  if not SameStr(Hoster, '') then
+    FDirectlinksPanel.MirrorControl.MirrorController.TabSheetController.PageController.FileHosterManager.AddHosterCheckJob(Self);
 end;
 
 function TMycxTabSheet.GetPartName(AFileName: WideString): WideString;
@@ -1731,7 +1729,7 @@ begin
     OnClick := FcxButtonLinkCheckClick;
   end;
 
-  FStatusGrid := TStatusGrid.Create(FPanel, ICrypterPanel(Self), 6, 27, FPanel.Height - 20 - 12, FPanel.Width - 12, nil);
+  FStatusGrid := TStatusGrid.Create(FPanel, Self as ICrypterPanel, 6, 27, FPanel.Height - 20 - 12, FPanel.Width - 12, nil);
 
   Visible := False;
 end;
@@ -1902,7 +1900,7 @@ var
   LIndex, LCount: Integer;
   FFound: Boolean;
 begin
-  Result := Unassigned;
+  Result := Null;
 
   LIndex := 0;
   LCount := DirectlinkCount;

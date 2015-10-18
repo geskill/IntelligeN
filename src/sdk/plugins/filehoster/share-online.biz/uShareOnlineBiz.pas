@@ -17,7 +17,7 @@ uses
   // Common
   uBaseConst,
   // HTTPManager
-  uHTTPInterface, uHTTPClasses,
+  uHTTPInterface, uHTTPClasses, uHTTPConst,
   // plugin system
   uPlugInFileHosterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
@@ -59,28 +59,27 @@ function TShareOnlineBiz.CheckLinks(AFiles: WideString): Integer;
 
   function GetDownloadlinkID(ALink: string): string;
   begin
+    Result := '';
+
     with TRegExpr.Create do
       try
         InputString := ALink;
         Expression := '\/dl\/([a-zA-Z0-9]+)';
 
         if Exec(InputString) then
+        begin
           Result := Match[1];
-      finally
-        Free;
-      end;
-
-    if (Result = '') then
-      with TRegExpr.Create do
-        try
-          InputString := ALink;
+        end
+        else
+        begin
           Expression := 'id=([a-zA-Z0-9]+)';
 
           if Exec(InputString) then
             Result := Match[1];
-        finally
-          Free;
         end;
+      finally
+        Free;
+      end;
   end;
 
   function APIResultToStatus(AValue: string): TLinkStatus;
@@ -90,72 +89,71 @@ function TShareOnlineBiz.CheckLinks(AFiles: WideString): Integer;
       Result := csOnline;
   end;
 
-  function GetRequestString(AIDs: string): string;
-  begin
-    Result := 'links=' + AIDs;
-  end;
-
 var
-  I: Integer;
-  _OverAllPostReply, _IDs: string;
+  LFileIndex: Integer;
+  LOverAllPostReply, LIDsString: string;
 
-  HTTPParams: IHTTPParams;
+  LHTTPParams: IHTTPParams;
 
-  RequestID: Double;
+  LRequestID: Double;
 
   ResponeStr: string;
+
+  LResultList: TStringList;
 begin
   with TStringList.Create do
     try
       Text := AFiles;
 
-      _OverAllPostReply := '';
-      _IDs := '';
-      for I := 0 to Count - 1 do
+      LOverAllPostReply := '';
+      LIDsString := '';
+      for LFileIndex := 0 to Count - 1 do
       begin
-        _IDs := _IDs + GetDownloadlinkID(Strings[I]);
-        if not(I = Count - 1) then
-          _IDs := _IDs + sLineBreak;
+        LIDsString := LIDsString + GetDownloadlinkID(Strings[LFileIndex]);
+        if not(LFileIndex = Count - 1) then
+          LIDsString := LIDsString + sLineBreak;
 
-        if (length(GetRequestString(_IDs)) > 200) or (I = Count - 1) then
+        if (length(LIDsString) > 200) or (LFileIndex = Count - 1) then
         begin
-          HTTPParams := THTTPParams.Create;
-          with HTTPParams do
-            AddFormField('links', GetRequestString(_IDs));
+          LHTTPParams := THTTPParams.Create('links=' + LIDsString);
 
-          RequestID := HTTPManager.Post(THTTPRequest.Create('http://api.share-online.biz/linkcheck.php?md5=1'), HTTPParams, TPlugInHTTPOptions.Create(Self));
+          LRequestID := HTTPManager.Post(THTTPRequest.Create('http://api.share-online.biz/cgi-bin?q=checklinks&md5=1'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
           repeat
             sleep(50);
-          until HTTPManager.HasResult(RequestID);
+          until HTTPManager.HasResult(LRequestID);
 
-          ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
+          ResponeStr := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
 
-          _OverAllPostReply := _OverAllPostReply + ResponeStr;
-          _IDs := '';
+          LOverAllPostReply := LOverAllPostReply + ResponeStr;
+          LIDsString := '';
         end;
       end;
 
       with TRegExpr.Create do
         try
-          InputString := _OverAllPostReply;
+          ModifierS := False;
+
+          InputString := LOverAllPostReply;
           Expression := '(\w+);(\w+);(.*?);(\d+);(\w+)|(\w+);(\w+);';
 
-          // 3JHHUEPL157;OK;Bad.Teacher.2011.R5.Line.Dubbed.German.XviD-POE.part1.rar;471859200;ec53507a1efc8a1ceb3d1ce19751f2f4
-          // XCUMPQJLIEK;NOTFOUND;
+          // 07LZU12G89;NOTFOUND;
+          // L65EJ6WX8K9P;OK;Autos.part1.rar;524288000;1d0c8fecbf25b0a0690ec9db644b9a99
 
           if Exec(InputString) then
           begin
             repeat
-              for I := 0 to Count - 1 do
-                if SameText(GetDownloadlinkID(Strings[I]), Match[1]) or SameText(GetDownloadlinkID(Strings[I]), Match[6]) then
+              for LFileIndex := 0 to Count - 1 do
+              begin
+                if SameText(GetDownloadlinkID(Strings[LFileIndex]), Match[1]) or SameText(GetDownloadlinkID(Strings[LFileIndex]), Match[6]) then
                 begin
                   if SameText(Match[6], '') then
-                    AddLink(Strings[I], Match[3], APIResultToStatus(Match[2]), StrToInt64Def(Match[4], 0), Match[5])
+                    AddLink(Strings[LFileIndex], Match[3], APIResultToStatus(Match[2]), StrToInt64Def(Match[4], 0), Match[5])
                   else
-                    AddLink(Strings[I], '', csOffline, 0);
+                    AddLink(Strings[LFileIndex], '', APIResultToStatus(Match[6]), 0);
                   break;
                 end;
+              end;
             until not ExecNext;
           end;
         finally

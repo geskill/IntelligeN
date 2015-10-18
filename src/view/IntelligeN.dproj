@@ -99,14 +99,13 @@
 			<DCCReference Include="api\uApiControlControllerBase.pas"/>
 			<DCCReference Include="api\uApiControls.pas"/>
 			<DCCReference Include="api\uApiControlsBase.pas"/>
-			<DCCReference Include="api\uApiCrawler.pas"/>
-			<DCCReference Include="api\uApiCrypter.pas"/>
-			<DCCReference Include="api\uApiDirectoryMonitor.pas"/>
+			<DCCReference Include="api\uApiCrawlerManager.pas"/>
+			<DCCReference Include="api\uApiCrypterManager.pas"/>
 			<DCCReference Include="api\uApiDLMF.pas"/>
 			<DCCReference Include="api\uApiFile.pas"/>
-			<DCCReference Include="api\uApiFileHoster.pas"/>
+			<DCCReference Include="api\uApiFileHosterManager.pas"/>
 			<DCCReference Include="api\uApiHTTP.pas"/>
-			<DCCReference Include="api\uApiImageHoster.pas"/>
+			<DCCReference Include="api\uApiImageHosterManager.pas"/>
 			<DCCReference Include="api\uApiIScriptFormatter.pas"/>
 			<DCCReference Include="api\uApiIScriptParser.pas"/>
 			<DCCReference Include="api\uApiMain.pas"/>
@@ -122,7 +121,7 @@
 			<DCCReference Include="api\uApiPluginsAdd.pas"/>
 			<DCCReference Include="api\uApiPrerequisite.pas"/>
 			<DCCReference Include="api\uApiPublishController.pas"/>
-			<DCCReference Include="api\uApiPublish.pas"/>
+			<DCCReference Include="api\uApiPublishManager.pas"/>
 			<DCCReference Include="api\uApiSettings.pas"/>
 			<DCCReference Include="api\uApiSettingsManager.pas"/>
 			<DCCReference Include="api\uApiSettingsExport.pas"/>
@@ -130,7 +129,7 @@
 			<DCCReference Include="api\uApiTabSheetController.pas"/>
 			<DCCReference Include="api\uApiTabSheetData.pas"/>
 			<DCCReference Include="api\uApiTabSheetItem.pas"/>
-			<DCCReference Include="api\uApiThreadPoolManager.pas"/>
+			<DCCReference Include="api\uApiThreadManager.pas"/>
 			<DCCReference Include="api\uApiUpdate.pas"/>
 			<DCCReference Include="api\uApiUpdateInterfaceBase.pas"/>
 			<DCCReference Include="api\uApiUpdateModelBase.pas"/>

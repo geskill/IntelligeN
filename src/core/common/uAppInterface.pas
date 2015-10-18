@@ -724,7 +724,13 @@ type
 
   // // // Multithreading Manager // // //
 
-  ICrawlerManager = interface
+  IThreadManager = interface
+    ['{3861EE60-B97E-4F27-AB4D-657F702B7D62}']
+    function InUse(const ATabSheetController: ITabSheetController): WordBool;
+    function IsIdle: WordBool;
+  end;
+
+  ICrawlerManager = interface(IThreadManager)
     ['{EC5351B9-7BF9-4317-88AB-DDAD6D9B8D8C}']
     function IsIdle: WordBool;
 
@@ -732,15 +738,15 @@ type
     procedure RemoveCrawlerJob(const AControlController: IControlController);
   end;
 
-  IHosterManager = interface
+  IFileHosterManager = interface(IThreadManager)
     ['{03675561-B598-4929-B5C9-FBEF9FB52656}']
     function IsIdle: WordBool;
 
-    procedure AddHosterCheckJob(const ADirectlink: IDirectlink);
-    procedure RemoveHosterCheckJob(const ADirectlink: IDirectlink);
+    procedure AddHosterCheckJob(const ADirectlink: IDirectlinksMirror);
+    procedure RemoveHosterCheckJob(const ADirectlink: IDirectlinksMirror);
   end;
 
-  ICrypterManager = interface
+  ICrypterManager = interface(IThreadManager)
     ['{3ABA9E7F-6D3D-4F35-94E8-45ED37228710}']
     procedure AddCrypterJob(const ACrypterPanel: ICrypterPanel);
     procedure AddCrypterCheckJob(const ACrypterPanel: ICrypterPanel; const AUseCheckDelay: WordBool = False);
@@ -802,7 +808,7 @@ type
   IPageController = interface
     ['{735F0449-3C70-4701-BBC3-9FE3F229DD96}']
     function GetCrawlerManager: ICrawlerManager;
-    function GetHosterManager: IHosterManager;
+    function GetFileHosterManager: IFileHosterManager;
     function GetCrypterManager: ICrypterManager;
     function GetPublishManager: IPublishManager;
     function GetImageHosterManager: IImageHosterManager;
@@ -827,7 +833,7 @@ type
 
     function Add(AFileName: WideString; ATypeID: TTypeID; AEmpty: WordBool = False): Integer;
     property CrawlerManager: ICrawlerManager read GetCrawlerManager;
-    property HosterManager: IHosterManager read GetHosterManager;
+    property FileHosterManager: IFileHosterManager read GetFileHosterManager;
     property CrypterManager: ICrypterManager read GetCrypterManager;
     property PublishManager: IPublishManager read GetPublishManager;
     property ImageHosterManager: IImageHosterManager read GetImageHosterManager;

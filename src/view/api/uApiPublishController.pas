@@ -947,9 +947,17 @@ var
   LControlList: TControlDataList;
   LMirrorList: TMirrorContainerList;
 
+  LControlIndex: Integer;
+
   LTabSheetData: ITabSheetData;
 begin
   HandleBlackWhitelist(FCMSWebsiteCollectionItem, LControlList, LMirrorList);
+
+  for LControlIndex := 0 to TabSheetController.ControlController.ControlCount - 1 do
+  begin
+    if not(TabSheetController.ControlController.Control[LControlIndex].ControlID = cPicture) then
+      LControlList.Add(TabSheetController.ControlController.Control[LControlIndex]);
+  end;
 
   LTabSheetData := TITabSheetData.Create(TabSheetController.TypeID, LControlList, LMirrorList);
 

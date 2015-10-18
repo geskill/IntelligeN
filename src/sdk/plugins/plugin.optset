@@ -8,7 +8,11 @@
 			<Borland.Personality>Delphi.Personality.12</Borland.Personality>
 			<Borland.ProjectType>OptionSet</Borland.ProjectType>
 			<BorlandProject>
-				<Delphi.Personality/>
+				<Delphi.Personality>
+					<Parameters>
+						<Parameters Name="HostApplication">../../../../../bin_portable\IntelligeN.exe</Parameters>
+					</Parameters>
+				</Delphi.Personality>
 			</BorlandProject>
 			<ProjectFileVersion>12</ProjectFileVersion>
 		</ProjectExtensions>

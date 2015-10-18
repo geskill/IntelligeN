@@ -312,7 +312,8 @@ end;
 procedure TTabSheetController.RemoveEvents;
 begin
   /// removing tabs with active crawler is forbidden, nevertheless additionally blacklist entry
-  PageController.CrawlerManager.RemoveCrawlerJob(ControlController);
+  // TODO: Re-Implement this
+  //PageController.CrawlerManager.RemoveCrawlerJob(ControlController);
 
   ControlController.OnReleaseNameChange := nil;
 

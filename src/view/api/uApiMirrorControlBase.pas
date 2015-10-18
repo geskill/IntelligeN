@@ -342,7 +342,7 @@ var
   LIndex, LCount: Integer;
   FFound: Boolean;
 begin
-  Result := '';
+  Result := Null;
 
   LIndex := 0;
   LCount := DirectlinkCount;

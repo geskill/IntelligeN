@@ -14,7 +14,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiPublish,
+  uApiPublishManager,
   // Utils
   uStringUtils;
 

@@ -16,8 +16,9 @@ uses
   // DLLs
   uExport,
   // Api
-  uApiConst, uApiMain, uApiMultiCastEvent, uApiBackupManager, uApiControlAligner, uApiSettings, uApiXml, uApiPlugins, uApiPublishController, uApiPublish,
-  uApiCrawler, uApiCrypter, uApiFileHoster, uApiImageHoster, uApiTabSheetController,
+  uApiConst, uApiMain, uApiMultiCastEvent, uApiBackupManager, uApiControlAligner, uApiSettings, uApiXml, uApiPlugins,
+  uApiPublishController, uApiPublishManager, uApiCrawlerManager, uApiCrypterManager, uApiFileHosterManager,
+  uApiImageHosterManager, uApiTabSheetController,
   // Utils
   uFileUtils;
 
@@ -41,7 +42,7 @@ type
     FBackupManager: TBackupManager;
     FControlAligner: TControlAligner;
     FCrawlerManager: ICrawlerManager;
-    FHosterManager: IHosterManager;
+    FFileHosterManager: IFileHosterManager;
     FCrypterManager: ICrypterManager;
     FPublishManager: IPublishManager;
     FImageHosterManager: IImageHosterManager;
@@ -54,7 +55,7 @@ type
     procedure SetActiveViewType(AViewType: TTabViewType);
     procedure CommonActiveViewTypeChange(AViewType: TTabViewType);
     function GetCrawlerManager: ICrawlerManager;
-    function GetHosterManager: IHosterManager;
+    function GetFileHosterManager: IFileHosterManager;
     function GetCrypterManager: ICrypterManager;
     function GetPublishManager: IPublishManager;
     function GetImageHosterManager: IImageHosterManager;
@@ -99,7 +100,7 @@ type
     function RemoveAllTabs: Boolean;
 
     property CrawlerManager: ICrawlerManager read GetCrawlerManager;
-    property HosterManager: IHosterManager read GetHosterManager;
+    property FileHosterManager: IFileHosterManager read GetFileHosterManager;
     property CrypterManager: ICrypterManager read GetCrypterManager;
     property PublishManager: IPublishManager read GetPublishManager;
     property ImageHosterManager: IImageHosterManager read GetImageHosterManager;
@@ -281,9 +282,9 @@ begin
   Result := FCrawlerManager;
 end;
 
-function TfMain.GetHosterManager;
+function TfMain.GetFileHosterManager;
 begin
-  Result := FHosterManager;
+  Result := FFileHosterManager;
 end;
 
 function TfMain.GetCrypterManager;
@@ -335,11 +336,19 @@ begin
 end;
 
 procedure TfMain.PostCreate;
-var
-  PublishManager: TPublishManager;
-  CrawlerManager: TCrawlerManager;
+//var
+  //PublishManager: TPublishManager;
+  //CrawlerManager: TCrawlerManager;
 begin
   FBackupManager := TBackupManager.Create;
+  FControlAligner := TControlAligner.Create;
+
+  FCrypterManager := TCrypterManager.Create;
+  FFileHosterManager := TFileHosterManager.Create;
+  FImageHosterManager := TImageHosterManager.Create;
+
+  // TODO
+  (*
   PublishManager := TPublishManager.Create;
   with PublishManager do
   begin
@@ -347,15 +356,15 @@ begin
     OnGUIInteractionItem := Main.fPublishQueue.GUIInteractionItemEvent;
   end;
   FPublishManager := PublishManager;
-  FControlAligner := TControlAligner.Create;
+
   CrawlerManager := TCrawlerManager.Create;
   CrawlerManager.OnGUIInteraction := CrawlerGUIInteraction;
   FCrawlerManager := CrawlerManager;
   FHosterManager := THosterManager.Create;
-  FCrypterManager := TCrypterManager.Create;
-  FPublishManager := PublishManager;
-  FImageHosterManager := TImageHosterManager.Create;
 
+  FPublishManager := PublishManager;
+
+  *)
   FChange := TINotifyEvent.Create;
   FViewChange := TIViewChangeEvent.Create;
 end;

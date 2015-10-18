@@ -113,24 +113,24 @@ begin
     if UseFilePassword then
       AddFormField('download_password', FilePassword);
 
-    AddFormField('captx', IfThen(UseCaptcha, '0', '1'));
+    AddFormField('captx', IfThen(UseCaptcha, '1', '0'));
 
-    AddFormField('weburls', IfThen(ftWeb in LFoldertypes, '0', '1'));
+    AddFormField('weburls', IfThen(ftWeb in LFoldertypes, '1', '0'));
 
     if ftContainer in LFoldertypes then
     begin
-      AddFormField('dlc', IfThen(ctDLC in LContainertypes, '0', '1'));
-      AddFormField('rsdf', IfThen(ctRSDF in LContainertypes, '0', '1'));
-      AddFormField('ccf', IfThen(ctCCF in LContainertypes, '0', '1'));
+      AddFormField('dlc', IfThen(ctDLC in LContainertypes, '1', '0'));
+      AddFormField('rsdf', IfThen(ctRSDF in LContainertypes, '1', '0'));
+      AddFormField('ccf', IfThen(ctCCF in LContainertypes, '1', '0'));
     end
     else
     begin
-      AddFormField('dlc', '1');
-      AddFormField('rsdf', '1');
-      AddFormField('ccf', '1');
+      AddFormField('dlc', '0');
+      AddFormField('rsdf', '0');
+      AddFormField('ccf', '0');
     end;
 
-    AddFormField('cnl', IfThen(UseCNL, '0', '1'));
+    AddFormField('cnl', IfThen(UseCNL, '1', '0'));
 
     for LDirectlinkIndex := 1 to AMirrorContainer.DirectlinkCount - 1 do
       AddFormField('mirror_' + IntToStr(LDirectlinkIndex), StringReplace(AMirrorContainer.Directlink[LDirectlinkIndex].Value, sLineBreak, ';', [rfReplaceAll]));
@@ -272,9 +272,10 @@ begin
               else
                 ACrypterFolderInfo.Status := csNotChecked;
               end;
-              ACrypterFolderInfo.Size := VarToFloatDefault(VarToStr(Nodes['folderSize'].NodeValue), 0, False);
+              ACrypterFolderInfo.Link := AFolderIdentifier;
+              ACrypterFolderInfo.Size := VarToFloatDefault(VarToStr(Nodes['folderSize'].NodeValue), 0, True);
               if Nodes['files'].ChildNodes.Count > 0 then
-                ACrypterFolderInfo.PartSize := VarToFloatDefault(Nodes['files'].ChildNodes.Nodes[0].ChildNodes.Nodes['filesize'], 0, False);
+                ACrypterFolderInfo.PartSize := VarToFloatDefault(Nodes['files'].ChildNodes.Nodes[0].ChildNodes.Nodes['filesize'].NodeValue, 0, False);
               ACrypterFolderInfo.Hoster := VarToStr(Nodes['folderHoster'].NodeValue);
               ACrypterFolderInfo.Parts := Nodes['files'].ChildNodes.Count;
               ACrypterFolderInfo.StatusImage := GetStatusImageLink(ACrypterFolderInfo.Link);

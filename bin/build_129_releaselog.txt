@@ -375,6 +375,18 @@
 
 + Tremendous interface changes
 
++ Improved Plugin Error handling
+
++ Removed DirectoryMonitor (need re-work, planned for next BUILD)
+
 	~~~~~~ minor enhancements ~~~~~~
 
++ Added new status images incl. new image for temporary offline
+
 + Improved FirstStart performance
+
++ Fixed a bug of adding a new tab while having MirrorPosition = mpTop
+
++ Fixed linkcrypt.ws crypter plugin
+
++ Fixed share-online.biz hoster plugin

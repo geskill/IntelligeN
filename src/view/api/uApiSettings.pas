@@ -32,6 +32,7 @@ type
     FIcon: TIcon;
     function GetIconHandle: Cardinal;
     function GetIcon: TIcon;
+    function GetEnabled: Boolean;
   public
     function GetPath: string; virtual;
     property IconHandle: Cardinal read GetIconHandle write FIconHandle;
@@ -39,7 +40,7 @@ type
     destructor Destroy; override;
   published
     property Name: string read FName write FName;
-    property Enabled: Boolean read FEnabled write FEnabled;
+    property Enabled: Boolean read GetEnabled write FEnabled;
     property Path: string read FPath write FPath;
   end;
 
@@ -621,6 +622,11 @@ begin
     FIcon.Handle := IconHandle;
   end;
   Result := FIcon;
+end;
+
+function TPlugInCollectionItem.GetEnabled: Boolean;
+begin
+  Result := FEnabled and FileExists(GetPath);
 end;
 
 destructor TPlugInCollectionItem.Destroy;

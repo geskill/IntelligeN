@@ -1,10 +1,10 @@
 object IntelligentPosting: TIntelligentPosting
   Left = 0
   Top = 0
-  BorderStyle = bsDialog
+  BorderStyle = bsSizeToolWin
   Caption = 'intelligent_posting-Helper'
-  ClientHeight = 226
-  ClientWidth = 400
+  ClientHeight = 220
+  ClientWidth = 390
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -14,8 +14,8 @@ object IntelligentPosting: TIntelligentPosting
   OldCreateOrder = False
   Position = poScreenCenter
   DesignSize = (
-    400
-    226)
+    390
+    220)
   PixelsPerInch = 96
   TextHeight = 13
   object cxLSearchValue: TcxLabel
@@ -28,10 +28,11 @@ object IntelligentPosting: TIntelligentPosting
     Top = 30
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 1
-    Width = 303
+    ExplicitWidth = 303
+    Width = 293
   end
   object cxBNewSearch: TcxButton
-    Left = 317
+    Left = 307
     Top = 28
     Width = 75
     Height = 25
@@ -39,6 +40,7 @@ object IntelligentPosting: TIntelligentPosting
     Caption = 'Search'
     ModalResult = 4
     TabOrder = 2
+    ExplicitLeft = 317
   end
   object cxLSearchResults: TcxLabel
     Left = 8
@@ -48,18 +50,20 @@ object IntelligentPosting: TIntelligentPosting
   object cxLBSearchResults: TcxListBox
     Left = 8
     Top = 80
-    Width = 384
-    Height = 107
+    Width = 374
+    Height = 101
     Anchors = [akLeft, akTop, akRight, akBottom]
     ItemHeight = 13
     ParentShowHint = False
     ShowHint = True
     TabOrder = 4
     OnMouseMove = cxLBSearchResultsMouseMove
+    ExplicitWidth = 384
+    ExplicitHeight = 107
   end
   object cxBAccept: TcxButton
-    Left = 236
-    Top = 193
+    Left = 226
+    Top = 187
     Width = 75
     Height = 25
     Anchors = [akRight, akBottom]
@@ -67,10 +71,12 @@ object IntelligentPosting: TIntelligentPosting
     Default = True
     ModalResult = 1
     TabOrder = 5
+    ExplicitLeft = 236
+    ExplicitTop = 193
   end
   object cxBCancel: TcxButton
-    Left = 317
-    Top = 193
+    Left = 307
+    Top = 187
     Width = 75
     Height = 25
     Anchors = [akRight, akBottom]
@@ -78,5 +84,7 @@ object IntelligentPosting: TIntelligentPosting
     Caption = 'Cancel'
     ModalResult = 2
     TabOrder = 6
+    ExplicitLeft = 317
+    ExplicitTop = 193
   end
 end
