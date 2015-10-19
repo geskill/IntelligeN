@@ -132,7 +132,7 @@ begin
   end
   else if (Pos('***', string(LHTTPProcess.HTTPResult.SourceCode)) = 0) then
   begin
-    ErrorMsg := copy(LHTTPProcess.HTTPResult.SourceCode, 6);
+    ACrypterFolderInfo.Link := copy(LHTTPProcess.HTTPResult.SourceCode, 6);
     Result := True;
   end
   else
