@@ -87,8 +87,8 @@ type
     function GetParts: Integer; override; safecall;
     function GetFileName: WideString; override; safecall;
 
-    function GetDirectlink(const Index: Integer): IDirectlink; safecall;
-    function GetDirectlinkCount: Integer; safecall;
+    function GetDirectlink(const Index: Integer): IDirectlink; virtual; safecall;
+    function GetDirectlinkCount: Integer; virtual; safecall;
   protected
     function GetAbstractBestValue(AValueAtIndex: TAbstractIndexFunc): Variant; virtual;
   public
@@ -113,8 +113,8 @@ type
     function GetParts: Integer; override; safecall;
     function GetFileName: WideString; override; safecall;
 
-    function GetCrypter(const IndexOrName: OleVariant): ICrypter; safecall;
-    function GetCrypterCount: Integer; safecall;
+    function GetCrypter(const IndexOrName: OleVariant): ICrypter; virtual; safecall;
+    function GetCrypterCount: Integer; virtual; safecall;
   protected
     function GetAbstractBestValue(AValue: TAbstractFunc; AValueAtIndex: TAbstractIndexFunc): Variant; reintroduce;
   public

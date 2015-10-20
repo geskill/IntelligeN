@@ -17,25 +17,25 @@ implementation
 
 class function TSizeFormatter.SizeToByte(ASizeString: string; ASizeType: string = ''; ADotAsDecimalSeparator: Boolean = True): Int64;
 var
-  FormatSettings: TFormatSettings;
-  Size: Extended;
+  LFormatSettings: TFormatSettings;
+  LSize: Extended;
 begin
-  GetLocaleFormatSettings(LOCALE_SYSTEM_DEFAULT, FormatSettings);
+  GetLocaleFormatSettings(LOCALE_USER_DEFAULT, LFormatSettings);
   if ADotAsDecimalSeparator then
-    FormatSettings.DecimalSeparator := '.'
+    LFormatSettings.DecimalSeparator := '.'
   else
-    FormatSettings.DecimalSeparator := ',';
+    LFormatSettings.DecimalSeparator := ',';
 
-  Size := StrToFloatDef(ASizeString, 0, FormatSettings);
+  LSize := StrToFloatDef(ASizeString, 0, LFormatSettings);
 
   if (Pos('KB', UpperCase(ASizeType)) > 0) then
-    Result := Round(Size * 1024)
+    Result := Round(LSize * 1024)
   else if (Pos('MB', UpperCase(ASizeType)) > 0) then
-    Result := Round(Size * 1048576)
+    Result := Round(LSize * 1048576)
   else if (Pos('GB', UpperCase(ASizeType)) > 0) then
-    Result := Round(Size * 1073741824)
+    Result := Round(LSize * 1073741824)
   else
-    Result := Round(Size);
+    Result := Round(LSize);
 end;
 
 end.

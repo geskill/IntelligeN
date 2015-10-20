@@ -17,8 +17,8 @@ type
   private
     FControlList: TInterfaceList<IControlBase>;
   protected
-    function GetControl(const IndexOrName: OleVariant): IControlBase; safecall;
-    function GetControlCount: Integer; safecall;
+    function GetControl(const IndexOrName: OleVariant): IControlBase; virtual; safecall;
+    function GetControlCount: Integer; virtual; safecall;
   public
     constructor Create;
     constructor Clone(const AControlControllerBase: IControlControllerBase);

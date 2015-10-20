@@ -27,10 +27,10 @@ type
     FPopupMenuChange: IPopupMenuChange;
   protected
     // Base
-    function GetMirror(const IndexOrName: OleVariant): IMirrorContainer; safecall;
+    function GetMirror(const IndexOrName: OleVariant): IMirrorContainer; override; safecall;
     function GetMirrorControl(const IndexOrName: OleVariant): IMirrorControl; safecall;
     function IMirrorController.GetMirror = GetMirrorControl;
-    function GetMirrorCount: Integer; safecall;
+    function GetMirrorCount: Integer; override; safecall;
 
     // Additional
     function GetTabSheetController: ITabSheetController;

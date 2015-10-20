@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  SysUtils,
+  Windows, SysUtils,
   // Common
   uBaseConst, uBaseInterface;
 
@@ -53,6 +53,7 @@ type
     function GetProposedValue(const AIndex: Integer): WideString; safecall;
     function GetProposedValueSender(const AIndex: Integer): WideString; safecall;
     function GetProposedValueTitle(const AIndex: Integer): WideString; safecall;
+    procedure UpdateValueFromProposedValue; safecall;
 
     property ProposedValuesCount: Integer read GetProposedValuesCount;
   end;
@@ -157,6 +158,24 @@ end;
 function TIControlBase.GetProposedValueTitle(const AIndex: Integer): WideString;
 begin
   Result := FValueArray[AIndex][2];
+end;
+
+procedure TIControlBase.UpdateValueFromProposedValue;
+var
+  LFormatSettings: TFormatSettings;
+  LProposedValueIndex: Integer;
+begin
+  GetLocaleFormatSettings(LOCALE_USER_DEFAULT, LFormatSettings);
+
+  if ProposedValuesCount > 0 then
+  begin
+    LProposedValueIndex := 0;
+    while (LProposedValueIndex < ProposedValuesCount) and (SameStr('', Value) or ((ControlID = cReleaseDate) and (Value = DateToStr(Date, LFormatSettings)))) do
+    begin
+      Value := GetProposedValue(LProposedValueIndex);
+      Inc(LProposedValueIndex);
+    end;
+  end;
 end;
 
 constructor TIControlBase.Create(AControlID: TControlID; AValue: WideString);

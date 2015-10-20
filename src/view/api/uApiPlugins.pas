@@ -95,7 +95,7 @@ type
 
     function CMSExec(const APublishItem: IPublishItem; ACAPTCHAInput: TCAPTCHAInput = nil; AIntelligentPostingHandler: TIntelligentPostingHelper = nil): Boolean;
 
-    function CrawlerExec(ACrawler: TCrawlerCollectionItem; ATypeID: TTypeID; const AControlController: IControlController): Boolean;
+    function CrawlerExec(ACrawler: TCrawlerCollectionItem; ATypeID: TTypeID; const AControlController: IControlControllerBase): Boolean;
 
     function CrypterAddFolder(ACrypter: TCrypterCollectionItem; const AMirrorContainer: IDirectlinkContainer; const AControlController: IControlControllerBase; out AFolderInfo: TCrypterFolderInfo): Boolean;
     function CrypterGetFolder(ACrypter: TCrypterCollectionItem; AFolderIdentifier: string; out AFolderInfo: TCrypterFolderInfo): Boolean;
@@ -957,7 +957,7 @@ begin
   Result := LResult;
 end;
 
-function TApiThreadedPlugin.CrawlerExec(ACrawler: TCrawlerCollectionItem; ATypeID: TTypeID; const AControlController: IControlController): Boolean;
+function TApiThreadedPlugin.CrawlerExec(ACrawler: TCrawlerCollectionItem; ATypeID: TTypeID; const AControlController: IControlControllerBase): Boolean;
 var
   LResult, LHighException: WordBool;
 begin
@@ -975,7 +975,7 @@ begin
     { ... } LComponentIDs := [];
     { ... } for LCrawlerContingentIndex := 0 to ACrawler.Contingent.Count - 1 do
     { ..... } with TCrawlerContingentCollectionItem(ACrawler.Contingent.Items[LCrawlerContingentIndex]) do
-    { ....... } if Status and (TypeID = AControlController.TypeID) then
+    { ....... } if Status and (TypeID = ATypeID) then
     { ......... } LComponentIDs := LComponentIDs + [ControlID];
 
     { ... } try

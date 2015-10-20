@@ -38,26 +38,26 @@ type
     procedure pcMainNewTabButtonClick(Sender: TObject; var AHandled: Boolean);
     procedure cxTCViewChange(Sender: TObject);
   private
-    FActiveCrawlerComponentController: IControlController;
+    FActiveCrawlerControlController: IControlController;
     FBackupManager: TBackupManager;
     FControlAligner: TControlAligner;
-    FCrawlerManager: ICrawlerManager;
-    FFileHosterManager: IFileHosterManager;
-    FCrypterManager: ICrypterManager;
     FPublishManager: IPublishManager;
+    FCrawlerManager: ICrawlerManager;
+    FCrypterManager: ICrypterManager;
+    FFileHosterManager: IFileHosterManager;
     FImageHosterManager: IImageHosterManager;
     FChange: INotifyEvent;
     FViewChange: IViewChangeEvent;
-    procedure CrawlerGUIInteraction(AControlController: IControlController; Status: TCrawlerTaskStatus; AProgressPosition: Extended; msg: string);
+    procedure CrawlerGUIInteraction(const AControlController: IControlController; AStatus: TCrawlerTaskStatus; AProgressPosition: Extended; AMessage: string);
     function GetPagesAvailable: Boolean;
     procedure SetPagesAvailable(APagesAvailable: Boolean);
     function GetActiveViewType: TTabViewType;
     procedure SetActiveViewType(AViewType: TTabViewType);
     procedure CommonActiveViewTypeChange(AViewType: TTabViewType);
-    function GetCrawlerManager: ICrawlerManager;
-    function GetFileHosterManager: IFileHosterManager;
-    function GetCrypterManager: ICrypterManager;
     function GetPublishManager: IPublishManager;
+    function GetCrawlerManager: ICrawlerManager;
+    function GetCrypterManager: ICrypterManager;
+    function GetFileHosterManager: IFileHosterManager;
     function GetImageHosterManager: IImageHosterManager;
     function GetActiveTabSheetIndex: Integer;
     function GetActiveTabSheetController: ITabSheetController;
@@ -68,6 +68,10 @@ type
     procedure PostCreate; // called after all frames are created
 
     procedure CallBackupManager;
+    procedure CallControlAligner;
+    procedure CallPublish(ATabIndex: Integer); overload;
+    procedure CallPublish; overload;
+    procedure CallSeriesPublish;
     procedure CallAutoCompletion;
     procedure CallSeriesAutoCompletion;
     procedure CallCrypterCrypt(ATabIndex: Integer); overload;
@@ -76,10 +80,6 @@ type
     procedure CallCrypterCheck(ATabIndex: Integer); overload;
     procedure CallCrypterCheck; overload;
     procedure CallSeriesCrypterCheck;
-    procedure CallPublish(ATabIndex: Integer); overload;
-    procedure CallPublish; overload;
-    procedure CallSeriesPublish;
-    procedure CallControlAligner;
 
     procedure SwitchDesignView(AEnabled: Boolean);
 
@@ -99,10 +99,10 @@ type
     function RemoveAllOtherTabs: Boolean;
     function RemoveAllTabs: Boolean;
 
-    property CrawlerManager: ICrawlerManager read GetCrawlerManager;
-    property FileHosterManager: IFileHosterManager read GetFileHosterManager;
-    property CrypterManager: ICrypterManager read GetCrypterManager;
     property PublishManager: IPublishManager read GetPublishManager;
+    property CrawlerManager: ICrawlerManager read GetCrawlerManager;
+    property CrypterManager: ICrypterManager read GetCrypterManager;
+    property FileHosterManager: IFileHosterManager read GetFileHosterManager;
     property ImageHosterManager: IImageHosterManager read GetImageHosterManager;
     property ActiveTabSheetIndex: Integer read GetActiveTabSheetIndex;
     property ActiveTabSheetController: ITabSheetController read GetActiveTabSheetController;
@@ -135,7 +135,7 @@ procedure TfMain.pcMainCanCloseEx(Sender: TObject; ATabIndex: Integer; var ACanC
 var
   CrawlingActive: Boolean;
 begin
-  CrawlingActive := (TabSheetController[ATabIndex].ControlController = FActiveCrawlerComponentController);
+  CrawlingActive := (TabSheetController[ATabIndex].ControlController = FActiveCrawlerControlController);
 
   ACanClose := not CrawlingActive;
 
@@ -194,24 +194,24 @@ begin
   CommonActiveViewTypeChange(ActiveViewType);
 end;
 
-procedure TfMain.CrawlerGUIInteraction(AControlController: IControlController; Status: TCrawlerTaskStatus; AProgressPosition: Extended; msg: string);
+procedure TfMain.CrawlerGUIInteraction(const AControlController: IControlController; AStatus: TCrawlerTaskStatus; AProgressPosition: Extended; AMessage: string);
 begin
-  case Status of
+  case AStatus of
     ctsCREATED:
-      FActiveCrawlerComponentController := AControlController;
+      FActiveCrawlerControlController := AControlController;
 
     ctsFINISHED:
-      FActiveCrawlerComponentController := nil;
+      FActiveCrawlerControlController := nil;
   end;
 
   with cxPBAutocompletion do
   begin
     Repaint;
-    case Status of
+    case AStatus of
       ctsCREATED:
         Hint := 'Autocompletion (starting)';
       ctsWORKING:
-        Hint := 'Active crawler: ' + msg;
+        Hint := 'Active crawler: ' + AMessage;
       ctsFINISHED:
         Hint := 'Autocompletion (idle)';
     end;
@@ -277,14 +277,14 @@ begin
   FViewChange.Invoke(AViewType);
 end;
 
+function TfMain.GetPublishManager: IPublishManager;
+begin
+  Result := FPublishManager;
+end;
+
 function TfMain.GetCrawlerManager: ICrawlerManager;
 begin
   Result := FCrawlerManager;
-end;
-
-function TfMain.GetFileHosterManager;
-begin
-  Result := FFileHosterManager;
 end;
 
 function TfMain.GetCrypterManager;
@@ -292,9 +292,9 @@ begin
   Result := FCrypterManager;
 end;
 
-function TfMain.GetPublishManager: IPublishManager;
+function TfMain.GetFileHosterManager;
 begin
-  Result := FPublishManager;
+  Result := FFileHosterManager;
 end;
 
 function TfMain.GetImageHosterManager;
@@ -336,35 +336,33 @@ begin
 end;
 
 procedure TfMain.PostCreate;
-//var
-  //PublishManager: TPublishManager;
-  //CrawlerManager: TCrawlerManager;
+var
+  // LPublishManager: TPublishManager;
+  LCrawlerManager: TCrawlerManager;
 begin
   FBackupManager := TBackupManager.Create;
   FControlAligner := TControlAligner.Create;
 
-  FCrypterManager := TCrypterManager.Create;
-  FFileHosterManager := TFileHosterManager.Create;
-  FImageHosterManager := TImageHosterManager.Create;
-
   // TODO
   (*
-  PublishManager := TPublishManager.Create;
-  with PublishManager do
+  LPublishManager := TPublishManager.Create;
+  with LPublishManager do
   begin
     OnGUIInteraction := Main.fPublishQueue.GUIInteractionEvent;
     OnGUIInteractionItem := Main.fPublishQueue.GUIInteractionItemEvent;
   end;
-  FPublishManager := PublishManager;
-
-  CrawlerManager := TCrawlerManager.Create;
-  CrawlerManager.OnGUIInteraction := CrawlerGUIInteraction;
-  FCrawlerManager := CrawlerManager;
-  FHosterManager := THosterManager.Create;
-
-  FPublishManager := PublishManager;
-
+  FPublishManager := LPublishManager;
   *)
+
+  LCrawlerManager := TCrawlerManager.Create;
+  LCrawlerManager.OnGUIInteraction := CrawlerGUIInteraction;
+  FCrawlerManager := LCrawlerManager;
+
+  FCrypterManager := TCrypterManager.Create;
+
+  FFileHosterManager := TFileHosterManager.Create;
+  FImageHosterManager := TImageHosterManager.Create;
+
   FChange := TINotifyEvent.Create;
   FViewChange := TIViewChangeEvent.Create;
 end;
@@ -373,6 +371,46 @@ procedure TfMain.CallBackupManager;
 begin
   if (TabSheetCount > 0) then
     FBackupManager.Backup(ActiveTabSheetController);
+end;
+
+procedure TfMain.CallControlAligner;
+begin
+  if (TabSheetCount > 0) and (SettingsManager.Settings.ControlAligner.Mode <> cpNone) then
+    with FControlAligner do
+    begin
+      TTabSheetController(pcMain.ActivePage).DataTabSheetItem.VertScrollBar.Position := 0;
+
+      WorkPanelWidth := pcMain.ActivePage.Width;
+
+      ControlController := ActiveTabSheetController.ControlController;
+      MirrorController := ActiveTabSheetController.MirrorController;
+      Start;
+    end;
+end;
+
+procedure TfMain.CallPublish(ATabIndex: Integer);
+begin
+  if (TabSheetCount > 0) then
+    PublishManager.AddPublishJob(TabSheetController[ATabIndex].PublishController.GeneratePublishJob);
+end;
+
+procedure TfMain.CallPublish;
+begin
+  CallPublish(ActiveTabSheetIndex);
+end;
+
+procedure TfMain.CallSeriesPublish;
+var
+  I: Integer;
+
+  PublishJob: TIPublishJob;
+begin
+  PublishJob := TIPublishJob.Create('Everything active');
+
+  for I := 0 to TabSheetCount - 1 do
+    PublishJob.Add(TabSheetController[I].PublishController.GeneratePublishTab);
+
+  PublishManager.AddPublishJob(PublishJob);
 end;
 
 procedure TfMain.CallAutoCompletion;
@@ -436,46 +474,6 @@ var
 begin
   for I := 0 to TabSheetCount - 1 do
     CallCrypterCheck(I);
-end;
-
-procedure TfMain.CallPublish(ATabIndex: Integer);
-begin
-  if (TabSheetCount > 0) then
-    PublishManager.AddPublishJob(TabSheetController[ATabIndex].PublishController.GeneratePublishJob);
-end;
-
-procedure TfMain.CallPublish;
-begin
-  CallPublish(ActiveTabSheetIndex);
-end;
-
-procedure TfMain.CallSeriesPublish;
-var
-  I: Integer;
-
-  PublishJob: TIPublishJob;
-begin
-  PublishJob := TIPublishJob.Create('Everything active');
-
-  for I := 0 to TabSheetCount - 1 do
-    PublishJob.Add(TabSheetController[I].PublishController.GeneratePublishTab);
-
-  PublishManager.AddPublishJob(PublishJob);
-end;
-
-procedure TfMain.CallControlAligner;
-begin
-  if (TabSheetCount > 0) and (SettingsManager.Settings.ControlAligner.Mode <> cpNone) then
-    with FControlAligner do
-    begin
-      TTabSheetController(pcMain.ActivePage).DataTabSheetItem.VertScrollBar.Position := 0;
-
-      WorkPanelWidth := pcMain.ActivePage.Width;
-
-      ControlController := ActiveTabSheetController.ControlController;
-      MirrorController := ActiveTabSheetController.MirrorController;
-      Start;
-    end;
 end;
 
 procedure TfMain.SwitchDesignView(AEnabled: Boolean);

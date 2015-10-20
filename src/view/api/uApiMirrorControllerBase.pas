@@ -19,8 +19,8 @@ type
   private
     FMirrorList: TMirrorContainerList;
   protected
-    function GetMirror(const IndexOrName: OleVariant): IMirrorContainer; safecall;
-    function GetMirrorCount: Integer; safecall;
+    function GetMirror(const IndexOrName: OleVariant): IMirrorContainer; virtual; safecall;
+    function GetMirrorCount: Integer; virtual; safecall;
   public
     constructor Create;
     constructor Clone(const AMirrorControllerBase: IMirrorControllerBase);

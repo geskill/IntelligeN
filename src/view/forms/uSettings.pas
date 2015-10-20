@@ -1864,7 +1864,7 @@ procedure TSettings.cxBExportSettingsClick(Sender: TObject);
 var
   FormatSettings: TFormatSettings;
 begin
-  GetLocaleFormatSettings(LOCALE_SYSTEM_DEFAULT, FormatSettings);
+  GetLocaleFormatSettings(LOCALE_USER_DEFAULT, FormatSettings);
   FormatSettings.ThousandSeparator := '-';
   FormatSettings.DecimalSeparator := '-';
   FormatSettings.DateSeparator := '-';

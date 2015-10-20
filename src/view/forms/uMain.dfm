@@ -141,6 +141,8 @@ object Main: TMain
                 Width = 516
                 Height = 573
                 Properties.Images = nil
+                ExplicitLeft = 56
+                ExplicitTop = -32
                 ExplicitWidth = 516
                 ExplicitHeight = 573
                 ClientRectBottom = 569

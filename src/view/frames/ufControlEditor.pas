@@ -148,6 +148,10 @@ begin
             DataRowHeight := 18
           else if Supports(FControl, IControlComboBox) then
             DataRowHeight := 18
+          else if Supports(FControl, IControlCheckComboBox) then
+            DataRowHeight := 18
+          else if Supports(FControl, IControlDateEdit) then
+            DataRowHeight := 18
           else if Supports(FControl, IControlRichEdit) then
             DataRowHeight := 50;
 

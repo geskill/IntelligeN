@@ -35,6 +35,7 @@ type
     function GetProposedValueSender(const AIndex: Integer): WideString; safecall;
     function GetProposedValueTitle(const AIndex: Integer): WideString; safecall;
     function GetProposedValuesCount: Integer; safecall;
+    procedure UpdateValueFromProposedValue; safecall;
 
     property ProposedValuesCount: Integer read GetProposedValuesCount;
   end;

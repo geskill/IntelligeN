@@ -730,28 +730,6 @@ type
     function IsIdle: WordBool;
   end;
 
-  ICrawlerManager = interface(IThreadManager)
-    ['{EC5351B9-7BF9-4317-88AB-DDAD6D9B8D8C}']
-    function IsIdle: WordBool;
-
-    procedure AddCrawlerJob(const AControlController: IControlController);
-    procedure RemoveCrawlerJob(const AControlController: IControlController);
-  end;
-
-  IFileHosterManager = interface(IThreadManager)
-    ['{03675561-B598-4929-B5C9-FBEF9FB52656}']
-    function IsIdle: WordBool;
-
-    procedure AddHosterCheckJob(const ADirectlink: IDirectlinksMirror);
-    procedure RemoveHosterCheckJob(const ADirectlink: IDirectlinksMirror);
-  end;
-
-  ICrypterManager = interface(IThreadManager)
-    ['{3ABA9E7F-6D3D-4F35-94E8-45ED37228710}']
-    procedure AddCrypterJob(const ACrypterPanel: ICrypterPanel);
-    procedure AddCrypterCheckJob(const ACrypterPanel: ICrypterPanel; const AUseCheckDelay: WordBool = False);
-  end;
-
   IPublishItem = interface(ICMSWebsite)
     ['{5AE2BAB5-6B50-40E7-85B7-C01D060C83DF}']
     function GetCMSPluginPath: WideString;
@@ -784,10 +762,8 @@ type
     function Count: Integer;
   end;
 
-  IPublishManager = interface
+  IPublishManager = interface(IThreadManager)
     ['{D49455B7-1B06-4884-9A40-EF2245FD3A7C}']
-    function IsIdle: WordBool;
-
     function AddPublishJob(const APublishJob: IPublishJob): Longword;
     procedure RemovePublishJob(const APublishJob: IPublishJob); overload;
     procedure RemovePublishJob(const AUniqueID: Longword); overload;
@@ -796,6 +772,25 @@ type
     procedure Resume;
     procedure Pause;
   end;
+
+  ICrawlerManager = interface(IThreadManager)
+    ['{EC5351B9-7BF9-4317-88AB-DDAD6D9B8D8C}']
+    procedure AddCrawlerJob(const AControlController: IControlController);
+    procedure RemoveCrawlerJob(const AControlController: IControlController);
+  end;
+
+  ICrypterManager = interface(IThreadManager)
+    ['{3ABA9E7F-6D3D-4F35-94E8-45ED37228710}']
+    procedure AddCrypterJob(const ACrypterPanel: ICrypterPanel);
+    procedure AddCrypterCheckJob(const ACrypterPanel: ICrypterPanel; const AUseCheckDelay: WordBool = False);
+  end;
+
+  IFileHosterManager = interface(IThreadManager)
+    ['{03675561-B598-4929-B5C9-FBEF9FB52656}']
+    procedure AddHosterCheckJob(const ADirectlink: IDirectlinksMirror);
+    procedure RemoveHosterCheckJob(const ADirectlink: IDirectlinksMirror);
+  end;
+
 
   IImageHosterManager = interface
     ['{CC554556-2480-49A7-90B8-A214E6619F25}']
@@ -807,10 +802,10 @@ type
 
   IPageController = interface
     ['{735F0449-3C70-4701-BBC3-9FE3F229DD96}']
-    function GetCrawlerManager: ICrawlerManager;
-    function GetFileHosterManager: IFileHosterManager;
-    function GetCrypterManager: ICrypterManager;
     function GetPublishManager: IPublishManager;
+    function GetCrawlerManager: ICrawlerManager;
+    function GetCrypterManager: ICrypterManager;
+    function GetFileHosterManager: IFileHosterManager;
     function GetImageHosterManager: IImageHosterManager;
     function GetActiveTabSheetIndex: Integer;
     function GetActiveTabSheetController: ITabSheetController;
@@ -818,24 +813,24 @@ type
     function GetChange: INotifyEvent;
     function GetViewChange: IViewChangeEvent;
 
+    procedure CallControlAligner;
+
+    procedure CallPublish;
+    procedure CallSeriesPublish;
     procedure CallAutoCompletion;
     procedure CallSeriesAutoCompletion;
     procedure CallCrypterCrypt;
     procedure CallSeriesCrypterCrypt;
     procedure CallCrypterCheck;
     procedure CallSeriesCrypterCheck;
-    procedure CallPublish;
-    procedure CallSeriesPublish;
-
-    procedure CallControlAligner;
 
     procedure OpenToNewTab(AFileName: WideString = '');
 
     function Add(AFileName: WideString; ATypeID: TTypeID; AEmpty: WordBool = False): Integer;
-    property CrawlerManager: ICrawlerManager read GetCrawlerManager;
-    property FileHosterManager: IFileHosterManager read GetFileHosterManager;
-    property CrypterManager: ICrypterManager read GetCrypterManager;
     property PublishManager: IPublishManager read GetPublishManager;
+    property CrawlerManager: ICrawlerManager read GetCrawlerManager;
+    property CrypterManager: ICrypterManager read GetCrypterManager;
+    property FileHosterManager: IFileHosterManager read GetFileHosterManager;
     property ImageHosterManager: IImageHosterManager read GetImageHosterManager;
     property ActiveTabSheetIndex: Integer read GetActiveTabSheetIndex;
     property ActiveTabSheetController: ITabSheetController read GetActiveTabSheetController;

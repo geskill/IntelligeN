@@ -1133,7 +1133,7 @@ procedure TIControlDateEdit.SetControlValue(AValue: WideString);
 var
   FormatSettings: TFormatSettings;
 begin
-  GetLocaleFormatSettings(LOCALE_SYSTEM_DEFAULT, FormatSettings);
+  GetLocaleFormatSettings(LOCALE_USER_DEFAULT, FormatSettings);
 
   FDateEdit.Date := StrToDateDef(AValue, Date, FormatSettings);
 end;

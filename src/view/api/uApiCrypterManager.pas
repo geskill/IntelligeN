@@ -9,7 +9,7 @@ uses
   OtlCommon, OtlTaskControl,
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
-  // API
+  // Api
   uApiThreadManager, uApiPlugins, uApiSettings,
   // Plugin system
   uPlugInConst;

@@ -34,10 +34,10 @@ type
     function GetClassType(AType: TControlID): TIControlBasicMeta;
   protected
     // Base (see: http://stackoverflow.com/questions/27929314/how-do-i-implement-two-interfaces-that-have-methods-with-the-same-name)
-    function GetControl(const IndexOrName: OleVariant): IControlBase; safecall;
+    function GetControl(const IndexOrName: OleVariant): IControlBase; override; safecall;
     function GetBasicControl(const IndexOrName: OleVariant): IControlBasic; safecall;
     function IControlController.GetControl = GetBasicControl;
-    function GetControlCount: Integer; safecall;
+    function GetControlCount: Integer; override; safecall;
 
     // Additional
     function GetTabSheetController: ITabSheetController;

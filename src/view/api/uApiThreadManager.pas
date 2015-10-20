@@ -201,6 +201,9 @@ procedure TThreadManager<T>.OmniEMTaskMessage(const task: IOmniTaskControl; cons
 var
   LJobWorkData: T;
 begin
+  (*
+    task.Comm.Send( <Message ID>, [<UniqueID>, <TThreadWorkData>, <Additional Parameter 1>, <Additional Parameter 2>, ...])
+    *)
   LJobWorkData := T(msg.MsgData[1].AsObject);
 
   case msg.MsgID of
