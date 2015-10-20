@@ -42,6 +42,8 @@ type
     FFileName: TFileName;
     FAdvJScriptMemoStyler: TAdvJScriptMemoStyler;
 
+    procedure ToogleEnabledStatus(AStatus: Boolean);
+
     procedure UpdateDisplayFileName;
 
     function GetDataChanged: WordBool;
@@ -68,9 +70,7 @@ implementation
 
 uses
   uMain;
-
 {$R *.dfm}
-
 { TIScriptDesigner }
 
 procedure TIScriptDesigner.FrameResize(Sender: TObject);
@@ -182,6 +182,16 @@ begin
   ShellExecute(Handle, nil, PChar(ExtractFilePath(FFileName)), nil, nil, SW_SHOW);
 end;
 
+procedure TIScriptDesigner.ToogleEnabledStatus(AStatus: Boolean);
+begin
+  AdvMemo.Enabled := AStatus;
+
+  cxBSave.Enabled := AStatus;
+  cxBResetChanges.Enabled := AStatus;
+  cxBCheckScript.Enabled := AStatus;
+  cxBFormatScript.Enabled := AStatus;
+end;
+
 procedure TIScriptDesigner.UpdateDisplayFileName;
 var
   FileName: TFileName;
@@ -232,6 +242,8 @@ begin
 
   FAdvJScriptMemoStyler := TAdvJScriptMemoStyler.Create(nil);
   AdvMemo.SyntaxStyles := FAdvJScriptMemoStyler;
+
+  ToogleEnabledStatus(False);
 end;
 
 procedure TIScriptDesigner.InsertText(AText: WideString);
@@ -296,12 +308,7 @@ procedure TIScriptDesigner.SetFileName(AFileName: TFileName);
 begin
   if not SameFileName(AFileName, FFileName) then
   begin
-    AdvMemo.Enabled := FileExists(AFileName);
-
-    cxBSave.Enabled := AdvMemo.Enabled;
-    cxBResetChanges.Enabled := AdvMemo.Enabled;
-    cxBCheckScript.Enabled := AdvMemo.Enabled;
-    cxBFormatScript.Enabled := AdvMemo.Enabled;
+    ToogleEnabledStatus(FileExists(AFileName));
 
     if AdvMemo.Enabled then
       AdvMemo.Lines.LoadFromFile(AFileName)
