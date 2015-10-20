@@ -551,7 +551,7 @@ end;
 
 function TDesignTabSheetItem.GetActiveWebsiteData: ICMSWebsiteContainer;
 begin
-  result := FActiveWebsiteData;
+  Result := FActiveWebsiteData;
 end;
 
 procedure TDesignTabSheetItem.SetActiveWebsiteData(AData: ICMSWebsiteContainer);
@@ -592,6 +592,13 @@ begin
     FMessageDesigner.SetFileName(ActiveWebsiteData.MessageFileName);
 
     RenderHTMLView;
+  end
+  else
+  begin
+    DeregisterWebsite;
+
+    FSubjectDesigner.SetFileName('');
+    FMessageDesigner.SetFileName('');
   end;
 end;
 
@@ -646,11 +653,11 @@ procedure TDesignTabSheetItem.UpdateHTMLView(ASubject, AMessage: RIScriptResult)
 
   begin
     BasicHTML := StringReplaceMultiple(ABBCode, { }
-      [sLineBreak, #10, OpenBB('b'), CloseBB('b'), OpenBB('i'), CloseBB('i'), OpenBB('u'), CloseBB('u'), OpenBB('s'), CloseBB('s'), OpenBB('left'), CloseBB('left'), OpenBB('center'),
-      CloseBB('center'), OpenBB('right'), CloseBB('right'), OpenBB('align=left'), OpenBB('align=center'), OpenBB('align=right'), CloseBB('align'), CloseBB('size'), CloseBB('color')], { }
-      [OpenHTML('br'), OpenHTML('br'), OpenHTML('strong'), CloseHTML('strong'), OpenHTML('em'), CloseHTML('em'), OpenHTML('ins'), CloseHTML('ins'), OpenHTML('del'), CloseHTML('del'),
-      OpenHTML('div align="left"'), CloseHTML('div'), OpenHTML('div align="center"'), CloseHTML('div'), OpenHTML('div align="right"'), CloseHTML('div'), OpenHTML('div align="left"'),
-      OpenHTML('div align="center"'), OpenHTML('div align="right"'), CloseHTML('div'), CloseHTML('font'), CloseHTML('font')], { }
+      [sLineBreak, #10, OpenBB('b'), CloseBB('b'), OpenBB('i'), CloseBB('i'), OpenBB('u'), CloseBB('u'), OpenBB('s'), CloseBB('s'), OpenBB('left'), CloseBB('left'), OpenBB('center'), CloseBB('center'), OpenBB('right'), CloseBB('right'),
+      OpenBB('align=left'), OpenBB('align=center'), OpenBB('align=right'), CloseBB('align'), CloseBB('size'), CloseBB('color')], { }
+      [OpenHTML('br'), OpenHTML('br'), OpenHTML('strong'), CloseHTML('strong'), OpenHTML('em'), CloseHTML('em'), OpenHTML('ins'), CloseHTML('ins'), OpenHTML('del'), CloseHTML('del'), OpenHTML('div align="left"'), CloseHTML('div'),
+      OpenHTML('div align="center"'), CloseHTML('div'), OpenHTML('div align="right"'), CloseHTML('div'), OpenHTML('div align="left"'), OpenHTML('div align="center"'), OpenHTML('div align="right"'), CloseHTML('div'), CloseHTML('font'),
+      CloseHTML('font')], { }
       False);
 
     with TRegExpr.Create do
@@ -671,7 +678,8 @@ procedure TDesignTabSheetItem.UpdateHTMLView(ASubject, AMessage: RIScriptResult)
 
         Expression := '\[youtube\](.*?)\[\/youtube\]';
         BasicHTML := Replace(BasicHTML,
-          '<object width="425" height="350"><param name="movie" value="$1"></param><param name="wmode" value="transparent"></param><embed src="$1" type="application/x-shockwave-flash" wmode="transparent" width="425" height="350"></embed></object>', True);
+          '<object width="425" height="350"><param name="movie" value="$1"></param><param name="wmode" value="transparent"></param><embed src="$1" type="application/x-shockwave-flash" wmode="transparent" width="425" height="350"></embed></object>',
+          True);
 
         Expression := '\[url\](.*?)\[\/url\]';
         BasicHTML := Replace(BasicHTML, '<a href="$1">$1</a>', True);
@@ -1150,8 +1158,15 @@ var
 begin
   if Assigned(Sender) then
   begin
-    for I := 0 to Sender.Count - 1 do
-      UpdateCMSWebsiteList(Sender.CMS[I], I);
+    if (Sender.Count > 0) then
+    begin
+      for I := 0 to Sender.Count - 1 do
+        UpdateCMSWebsiteList(Sender.CMS[I], I);
+    end
+    else
+    begin
+      UpdateCMSWebsiteList(nil, -1);
+    end;
 
     with FWebsite do
       if (ItemIndex = -1) and (Properties.Items.Count > 0) then
@@ -1173,23 +1188,34 @@ begin
   begin
     BeginUpdate;
     try
-      for I := Items.Count - 1 downto 0 do
-        if SameText(Sender.Name, GetImageComboBoxValue(VarToStr(Items[I].Value))) then
+      if Assigned(Sender) then
+      begin
+
+        for I := Items.Count - 1 downto 0 do
+          if SameText(Sender.Name, GetImageComboBoxValue(VarToStr(Items[I].Value))) then
+            Items[I].Free;
+
+        // Items.Clear;
+
+        for I := 0 to Sender.Count - 1 do
+          with Items.Add do
+          begin
+            Description := RemoveW(ExtractUrlHost(Sender.Website[I].Name));
+            Tag := Sender.Website[I].Index;
+            Value := Sender.Name + '=' + IntToStr(Sender.Website[I].Index);
+          end;
+      end
+      else
+      begin
+        for I := Items.Count - 1 downto 0 do
           Items[I].Free;
-
-      // Items.Clear;
-
-      for I := 0 to Sender.Count - 1 do
-        with Items.Add do
-        begin
-          Description := RemoveW(ExtractUrlHost(Sender.Website[I].Name));
-          Tag := Sender.Website[I].Index;
-          Value := Sender.Name + '=' + IntToStr(Sender.Website[I].Index);
-
-        end;
+      end;
     finally
       EndUpdate;
     end;
+
+    // TODO: Bugfix OnChange event
+    // see: https://www.devexpress.com/Support/Center/Question/Details/T302539
   end;
 end;
 
