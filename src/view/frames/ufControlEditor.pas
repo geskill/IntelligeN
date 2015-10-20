@@ -161,7 +161,7 @@ begin
 
           for RecordIndex := 0 to RecordCount - 1 do
           begin
-            Values[RecordIndex, 0] := FControl.GetProposedValue(RecordIndex);
+            Values[RecordIndex, 0] := FControl.GetProposedValueSender(RecordIndex);
 
             if Supports(FControl, IPicture) then
               Values[RecordIndex, 1] := (FControl as IPicture).GetValuePicture(RecordIndex).Picture
