@@ -1622,10 +1622,12 @@ end;
 
 procedure TIPicture.SetValuePictureFromDownload(AIndex: Integer; AMemoryStream: TMemoryStream);
 var
-  PictureInfo: TPictureInfo;
-  FGraphic: TGraphic;
+  LPictureInfo: TPictureInfo;
+  LGraphic: TGraphic;
 begin
-  with PictureInfo do
+  AMemoryStream.Position := 0;
+
+  with LPictureInfo do
   begin
     Picture := '';
     Downloaded := True;
@@ -1634,29 +1636,33 @@ begin
     Height := 0;
   end;
 
-  PictureInfo.Size := AMemoryStream.Size;
+  LPictureInfo.Size := AMemoryStream.Size;
 
-  FGraphic := GetTGraphicType(AMemoryStream).Create;
   try
-    AMemoryStream.Position := 0;
+    LGraphic := GetTGraphicType(AMemoryStream).Create;
+    try
+      LGraphic.LoadFromStream(AMemoryStream);
 
-    FGraphic.LoadFromStream(AMemoryStream);
+      if LGraphic.InheritsFrom(TJPEGImage) then
+        with TJPEGImage(LGraphic) do
+          DIBNeeded;
 
-    if FGraphic.InheritsFrom(TJPEGImage) then
-      with TJPEGImage(FGraphic) do
-        DIBNeeded;
-
-    with PictureInfo do
-    begin
-      Picture := GraphicAsVariant(FGraphic);
-      Width := FGraphic.Width;
-      Height := FGraphic.Height;
+      with LPictureInfo do
+      begin
+        Picture := GraphicAsVariant(LGraphic);
+        Width := LGraphic.Width;
+        Height := LGraphic.Height;
+      end;
+    finally
+      LGraphic.Free;
     end;
-  finally
-    FGraphic.Free;
+
+  except
+    AMemoryStream.SaveToFile(ExtractFilePath(ParamStr(0)) + 'Fehlerbild.jpg');
+    // TODO: This image file has problems
   end;
 
-  SetValuePicture(AIndex, PictureInfo);
+  SetValuePicture(AIndex, LPictureInfo);
 end;
 
 function TIPicture.GetValuePicture(AIndex: Integer): TPictureInfo;
@@ -1919,26 +1925,26 @@ begin
   // TODO: Analyse this (old version)
   (*
 
-  CreateTask(
+    CreateTask(
     { } procedure(const task: IOmniTask)
     { } begin
 
     { . } task.Invoke(
-      { ... } procedure
-      { ... } var
-      { ..... } LMemoryStream: TMemoryStream;
-      { ..... } LCookies: WideString;
-      { ... } begin
-      { ..... } TApiHTTP.DownloadData(Value, LMemoryStream, LCookies,
-        // TODO: Read settings at a thread-safe position
-        { ..... } SettingsManager.Settings.HTTP.GetProxy(psaCrawler), SettingsManager.Settings.HTTP.ConnectTimeout, SettingsManager.Settings.HTTP.ReadTimeout);
-      { ..... } sleep(100);
-      { ..... } SetValuePictureFromDownload(LValueCount - 1, LMemoryStream);
-      { ..... } LMemoryStream.Free;
-      { ... } end);
+    { ... } procedure
+    { ... } var
+    { ..... } LMemoryStream: TMemoryStream;
+    { ..... } LCookies: WideString;
+    { ... } begin
+    { ..... } TApiHTTP.DownloadData(Value, LMemoryStream, LCookies,
+    // TODO: Read settings at a thread-safe position
+    { ..... } SettingsManager.Settings.HTTP.GetProxy(psaCrawler), SettingsManager.Settings.HTTP.ConnectTimeout, SettingsManager.Settings.HTTP.ReadTimeout);
+    { ..... } sleep(100);
+    { ..... } SetValuePictureFromDownload(LValueCount - 1, LMemoryStream);
+    { ..... } LMemoryStream.Free;
+    { ... } end);
 
     { } end, 'TIPicture Image Download: ' + AValue).Run;
-  *)
+    *)
 end;
 
 procedure TIPicture.RemoteUpload(const AAfterCrawling: WordBool = False);
