@@ -89,6 +89,7 @@ var
   _img_jpeg: TJPEGImage;
   _img_png: TdxPNGImage;
   _img_gif: TGIFImage;
+  _img_tif: TWicImage;
 begin
   if IsJPEG(ACAPTCHAMemoryStream) then
   begin
@@ -119,6 +120,16 @@ begin
       iCAPTCHA.Picture.Graphic := _img_gif;
     finally
       _img_gif.Free;
+    end;
+  end
+  else if IsTIF(ACAPTCHAMemoryStream) then
+  begin
+    _img_tif := TWicImage.Create;
+    try
+      _img_tif.LoadFromStream(ACAPTCHAMemoryStream);
+      iCAPTCHA.Picture.Graphic := _img_tif;
+    finally
+      _img_tif.Free;
     end;
   end
   else if IsBMP(ACAPTCHAMemoryStream) then
