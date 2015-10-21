@@ -1,10 +1,34 @@
-#IntelligeN 2009 BUILD 129 todo log
+#IntelligeN 2009 TODO list
+
+This todo list contains all useful ideas for improvement, not necessarily for the next release.
 
 ###Core
 
 ###SDK
 
+######Content-Management-Systems
+
+- [ ] Add password protected subforums for vBulletin
+
+######Crawler
+
+- [ ] Update Amazon.com/.de plugin
+
+- [ ] Update MovieMaze.de plugin
+
+######Crypter
+
+- [ ] Add flag if a user account is required
+
+- [ ] Add distinction flag if username/password or API-Key is required
+
+######FileFormats
+
+- [ ] intelligen.xml.2 improve file saving (load existing XML file and assign new properties instead of create a complete new XML file)
+
 ###View
+
+- [ ] Implement a silent error logger
 
 - [ ] Improve WebsiteEditor control arrangement in general tab
 
