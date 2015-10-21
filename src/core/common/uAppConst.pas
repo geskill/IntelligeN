@@ -70,6 +70,18 @@ function StringToTypeID(AStringTypeID: string): TTypeID;
 function TypeIDToString(ATypeID: TTypeID): string;
 {$REGION 'Documentation'}
 /// <remarks>
+/// Expects AStringContentStatus in format "NotChecked" not "csNotChecked"
+/// </remarks>
+{$ENDREGION}
+function StringToContentStatus(AStringContentStatus: string): TContentStatus;
+{$REGION 'Documentation'}
+/// <remarks>
+///   Returns TContentStatus in format "NotChecked" not "csNotChecked" <br />
+/// </remarks>
+{$ENDREGION}
+function ContentStatusToString(AContentStatus: TContentStatus): string;
+{$REGION 'Documentation'}
+/// <remarks>
 /// Expects AStringControlID in format "IReleaseName" not "cReleaseName"
 /// </remarks>
 {$ENDREGION}
@@ -111,6 +123,19 @@ end;
 function TypeIDToString(ATypeID: TTypeID): string;
 begin
   Result := copy(TEnum.GetName<TTypeID>(ATypeID), 2, MaxInt);
+end;
+
+function StringToContentStatus(AStringContentStatus: string): TContentStatus;
+var
+  LContentStatus: TContentStatus;
+begin
+  if not TEnum.TryParse<TContentStatus>('cs' + AStringContentStatus, Result) then
+    raise Exception.Create('Unknown content status id');
+end;
+
+function ContentStatusToString(AContentStatus: TContentStatus): string;
+begin
+  Result := copy(TEnum.GetName<TContentStatus>(AContentStatus), 3, MaxInt);
 end;
 
 function StringInControlID(AStringControlID: string): Boolean;

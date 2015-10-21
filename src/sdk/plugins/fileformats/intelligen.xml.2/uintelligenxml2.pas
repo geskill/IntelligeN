@@ -9,13 +9,13 @@ uses
   uBaseConst, uAppConst, uAppInterface,
   // DLLs
   uExport,
-  // Utils
-  uFileUtils, uStringUtils,
   // Plugin system
-  uPlugInFileFormatClass;
+  uPlugInFileFormatClass,
+  // Utils
+  uFileUtils, uStringUtils, uVariantUtils;
 
 type
-  Tintelligenxml2 = class(TFileFormatPlugIn)
+  TIntelligeNXML2 = class(TFileFormatPlugIn)
   public
     function GetName: WideString; override; safecall;
     function GetFileFormatName: WideString; override; safecall;
@@ -30,22 +30,26 @@ implementation
 uses
   uSelectTemplateFileName;
 
-function Tintelligenxml2.GetName;
+resourcestring
+  StrTheXMLFileIsNotCompatible = 'The XML file is not compatible to the intelligen.xml.2 standard';
+  StrTheIntelligeNXML2StdReq = 'The intelligen.xml.2 standard requires a template file.';
+
+function TIntelligeNXML2.GetName;
 begin
   result := 'intelligen.xml.2';
 end;
 
-function Tintelligenxml2.GetFileFormatName;
+function TIntelligeNXML2.GetFileFormatName;
 begin
   result := 'IntelligeN 2009 %s (*.xml)|*.xml|';
 end;
 
-function Tintelligenxml2.CanSaveControls;
+function TIntelligeNXML2.CanSaveControls;
 begin
   result := True;
 end;
 
-procedure Tintelligenxml2.SaveControls;
+procedure TIntelligeNXML2.SaveControls;
 var
   XMLDoc: IXMLDocument;
   Picture: IPicture;
@@ -120,8 +124,9 @@ begin
               for X := 0 to Mirror[I].DirectlinkCount - 1 do
                 with AddChild('directlink') do
                 begin
+                  Attributes['status'] := ContentStatusToString(Mirror[I].Directlink[X].Status);
                   Attributes['size'] := Round(Mirror[I].Directlink[X].Size);
-                  Attributes['partsize'] := Mirror[I].Directlink[X].PartSize;
+                  Attributes['partsize'] := Round(Mirror[I].Directlink[X].PartSize);
                   Attributes['hoster'] := Mirror[I].Directlink[X].Hoster;
                   Attributes['parts'] := Mirror[I].Directlink[X].Parts;
                   NodeValue := Mirror[I].Directlink[X].Value;
@@ -130,9 +135,9 @@ begin
                 with AddChild('crypter') do
                 begin
                   Attributes['name'] := Mirror[I].Crypter[X].Name;
-                  Attributes['status'] := Mirror[I].Crypter[X].Status;
-                  Attributes['partsize'] := Mirror[I].Crypter[X].PartSize;
-                  Attributes['size'] := Mirror[I].Crypter[X].Size;
+                  Attributes['status'] := ContentStatusToString(Mirror[I].Crypter[X].Status);
+                  Attributes['size'] := Round(Mirror[I].Crypter[X].Size);
+                  Attributes['partsize'] := Round(Mirror[I].Crypter[X].PartSize);
                   Attributes['hoster'] := Mirror[I].Crypter[X].Hoster;
                   Attributes['parts'] := Mirror[I].Crypter[X].Parts;
                   Attributes['statusimage'] := Mirror[I].Crypter[X].StatusImage;
@@ -149,35 +154,37 @@ begin
   end;
 end;
 
-function Tintelligenxml2.CanLoadControls;
+function TIntelligeNXML2.CanLoadControls;
 begin
   result := True;
 end;
 
-function Tintelligenxml2.LoadControls;
+function TIntelligeNXML2.LoadControls;
 var
-  XMLDoc: IXMLDocument;
+  LXMLDoc: IXMLDocument;
   LBasicControl: IControlBasic;
   I, X, Y: Integer;
   Picture: IPicture;
-  TemplateType: TTypeID;
-  _TemplateFile, _TemplateFileName: TFileName;
-  _TemplateChecksum: string;
+  LType: TTypeID;
+  LTemplateFile, LTemplateFileName: TFileName;
+  LTemplateChecksum: string;
   _CrypterExists, _ImageMirrorExists: Boolean;
 begin
   OleInitialize(nil);
   try
     result := -1;
     try
-      XMLDoc := NewXMLDocument;
+      LXMLDoc := NewXMLDocument;
 
-      with XMLDoc do
+      with LXMLDoc do
       begin
         LoadFromFile(AFileName);
         Active := True;
       end;
 
-      with XMLDoc.DocumentElement do
+      // Read file header
+      with LXMLDoc.DocumentElement do
+      begin
         if HasChildNodes then
         begin
           with ChildNodes.Nodes['templatetype'] do
@@ -187,35 +194,44 @@ begin
                 try
                   if Execute then
                   begin
-                    TemplateType := GetFileInfo(ATemplateDirectory + TemplateFileName + '.xml').TemplateType;
-                    _TemplateFileName := TemplateFileName + '.xml';
-                    _TemplateChecksum := '#';
+                    LType := GetFileInfo(ATemplateDirectory + TemplateFileName + '.xml').TemplateType;
+                    LTemplateFileName := TemplateFileName + '.xml';
+                    LTemplateChecksum := '#';
                   end
                   else
-                    raise Exception.Create('');
+                  begin
+                    ErrorMsg := StrTheIntelligeNXML2StdReq;
+                    raise Exception.Create(ErrorMsg);
+                  end;
                 finally
                   Free;
                 end;
             end
             else
             begin
-              TemplateType := StringToTypeID(VarToStr(NodeValue));
-              _TemplateFileName := '';
+              LType := StringToTypeID(VarToStr(NodeValue));
+              LTemplateFileName := '';
               if HasAttribute('filename') then
-                _TemplateFileName := VarToStr(Attributes['filename']) + '.xml';
-              _TemplateChecksum := VarToStr(Attributes['checksum']);
+                LTemplateFileName := VarToStr(Attributes['filename']) + '.xml';
+              LTemplateChecksum := '#';
+              if HasAttribute('checksum') then
+                LTemplateChecksum := VarToStr(Attributes['checksum']);
             end;
         end
         else
-          raise Exception.Create('');
+        begin
+          ErrorMsg := StrTheXMLFileIsNotCompatible;
+          raise Exception.Create(ErrorMsg);
+        end;
+      end;
 
-      if (FileExists(ATemplateDirectory + _TemplateFileName)) and (SameText(_TemplateChecksum, GetMD5FromFile(ATemplateDirectory + _TemplateFileName)) or SameText('#', _TemplateChecksum)) then
-        _TemplateFile := ATemplateDirectory + _TemplateFileName
+      if (FileExists(ATemplateDirectory + LTemplateFileName)) and (SameText(LTemplateChecksum, GetMD5FromFile(ATemplateDirectory + LTemplateFileName)) or SameText('#', LTemplateChecksum)) then
+        LTemplateFile := ATemplateDirectory + LTemplateFileName
       else
-        _TemplateFile := AFileName;
+        LTemplateFile := AFileName;
 
-      with APageController.TabSheetController[APageController.Add(_TemplateFile, TemplateType, True)] do
-        with XMLDoc.DocumentElement do
+      with APageController.TabSheetController[APageController.Add(LTemplateFile, LType, True)] do
+        with LXMLDoc.DocumentElement do
         begin
           for I := 0 to ChildNodes.Nodes['mirrors'].ChildNodes.Count - 1 do
             with MirrorController.Mirror[MirrorController.Add] do
@@ -223,11 +239,11 @@ begin
               for X := 0 to ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Count - 1 do
                 if SameText('directlink', ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeName) then
                 begin
-                  Directlink[GetDirectlink.Add(VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeValue))].Size
-                  { . } := StrToFloatDef(VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['size']), 0);
-
-                  Directlink[GetDirectlink.Add(VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeValue))].PartSize
-                  { . } := StrToFloatDef(VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['partsize']), 0);
+                  with Directlink[GetDirectlink.Add(VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeValue))] do
+                  begin
+                    Size := VarToIntDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['size'], 0);
+                    PartSize := VarToIntDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['partsize'], 0);
+                  end;
 
                   // Workaround for: http://www.devexpress.com/issue=B202502
                   APageController.CallControlAligner;
@@ -250,6 +266,13 @@ begin
                     if SameText(Crypter[Y].name, VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['name'])) then
                     begin
                       Crypter[Y].Value := VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeValue);
+                      Crypter[Y].Size := VarToIntDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['size'], 0);
+                      Crypter[Y].PartSize := VarToIntDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['partsize'], 0);
+                      // Crypter[Y].Hoster := VarToStrDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['hoster'], '');
+                      // Crypter[Y].Parts := VarToIntDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['parts'], 0);
+                      // Crypter[Y].StatusImage := VarToStrDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['statusimage'], '');
+                      // Crypter[Y].StatusImageText := VarToStrDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['statusimagetext'], '');
+
                       Crypter[Y].CheckFolder;
                       break;
                     end;
@@ -298,7 +321,7 @@ begin
       result := -1;
     end;
   finally
-    XMLDoc := nil;
+    LXMLDoc := nil;
     OleUninitialize;
   end;
 end;

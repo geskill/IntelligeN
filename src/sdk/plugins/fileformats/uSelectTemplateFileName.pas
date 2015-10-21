@@ -13,12 +13,13 @@ uses
 
 type
   TSelectTemplateFileName = class(TForm)
+  private
     lTemplateFileName: TLabel;
     cobTemplateFileName: TComboBox;
     bAccept: TButton;
     procedure cobTemplateFileNameChange(Sender: TObject);
     procedure bAcceptClick(Sender: TObject);
-  private
+  protected
     FTemplateFileName: string;
   public
     function Execute: Boolean;

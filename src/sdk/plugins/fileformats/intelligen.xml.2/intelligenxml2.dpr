@@ -11,7 +11,7 @@ uses
 function LoadPlugin(var APlugIn: IFileFormatPlugIn): WordBool; safecall; export;
 begin
   try
-    APlugIn := Tintelligenxml2.Create;
+    APlugIn := TIntelligeNXML2.Create;
     Result := True;
   except
     Result := False;
