@@ -11,8 +11,6 @@ uses
   // Dev Express
   cxPC, cxEdit, cxTextEdit, cxGraphics, cxGrid, cxGridLevel, cxGridCustomTableView, cxGridTableView, cxLabel,
   cxButtons, dxBar, cxHint,
-  // OmniThreadLibrary
-  OtlSync,
   // EZTexturePanel
   EZTexturePanel,
   // RegExp
@@ -105,8 +103,8 @@ type
     // Logic
     FDirectlinksPanel: IDirectlinksPanel;
     FLinksChecked: Boolean;
-    FLinksInfoLock: TOmniMREW;
     FLinksInfo: TLinksInfo;
+    procedure VerifyCheckLinks;
   protected
     // Base
     function GetValue: WideString; safecall;
@@ -182,7 +180,6 @@ type
     // Logic
     FMirrorControl: IMirrorControl;
     FCrypter: TCrypterCollectionItem;
-    FCrypterFolderInfoLock: TOmniMREW;
     FCrypterFolderInfo: TCrypterFolderInfo;
   protected
     // Base
@@ -844,6 +841,15 @@ begin
   TTimer(Sender).Enabled := False;
 end;
 
+procedure TMycxTabSheet.VerifyCheckLinks;
+begin
+  if not(FLinksChecked or SameStr(Hoster, '')) then
+  begin
+    FLinksChecked := True;
+    CheckStatus;
+  end;
+end;
+
 function TMycxTabSheet.GetValue;
 begin
   Result := FMycxRichEdit.Lines.Text;
@@ -851,49 +857,20 @@ end;
 
 function TMycxTabSheet.GetStatus;
 begin
-  if not(FLinksChecked or SameStr(Hoster, '')) then
-  begin
-    FLinksChecked := True;
-    CheckStatus;
-  end;
-  FLinksInfoLock.EnterReadLock;
-  try
-    Result := FLinksInfo.Status;
-  finally
-    FLinksInfoLock.ExitReadLock;
-  end;
+  VerifyCheckLinks;
+  Result := FLinksInfo.Status;
 end;
 
 function TMycxTabSheet.GetSize;
 begin
-  if not(FLinksChecked or SameStr(Hoster, '')) then
-  begin
-    FLinksChecked := True;
-    CheckStatus;
-  end;
-  FLinksInfoLock.EnterReadLock;
-  try
-    Result := FLinksInfo.Size;
-  finally
-    FLinksInfoLock.ExitReadLock;
-  end;
+  VerifyCheckLinks;
+  Result := FLinksInfo.Size;
 end;
 
 function TMycxTabSheet.GetPartSize;
 begin
-  // FLinksChecked or SameStr(Hoster, '') need to be false
-  // then CheckStatus; can be processed
-  if not(FLinksChecked or SameStr(Hoster, '')) then
-  begin
-    FLinksChecked := True;
-    CheckStatus;
-  end;
-  FLinksInfoLock.EnterReadLock;
-  try
-    Result := FLinksInfo.PartSize;
-  finally
-    FLinksInfoLock.ExitReadLock;
-  end;
+  VerifyCheckLinks;
+  Result := FLinksInfo.PartSize;
 end;
 
 function TMycxTabSheet.GetHoster: WideString;
@@ -962,22 +939,12 @@ end;
 
 procedure TMycxTabSheet.SetSize(ASize: Double);
 begin
-  FLinksInfoLock.EnterWriteLock;
-  try
-    FLinksInfo.Size := ASize;
-  finally
-    FLinksInfoLock.ExitWriteLock;
-  end;
+  FLinksInfo.Size := ASize;
 end;
 
 procedure TMycxTabSheet.SetPartSize(APartSize: Double);
 begin
-  FLinksInfoLock.EnterWriteLock;
-  try
-    FLinksInfo.PartSize := APartSize;
-  finally
-    FLinksInfoLock.ExitWriteLock;
-  end;
+  FLinksInfo.PartSize := APartSize;
 end;
 
 function TMycxTabSheet.GetHoster(AShortName: Boolean): WideString;
@@ -996,29 +963,13 @@ end;
 
 function TMycxTabSheet.GetLinksInfo;
 begin
-  // FLinksChecked or SameStr(Hoster, '') need to be false
-  // then CheckStatus; can be processed
-  if not(FLinksChecked or SameStr(Hoster, '')) then
-  begin
-    FLinksChecked := True;
-    CheckStatus;
-  end;
-  FLinksInfoLock.EnterReadLock;
-  try
-    Result := FLinksInfo;
-  finally
-    FLinksInfoLock.ExitReadLock;
-  end;
+  VerifyCheckLinks;
+  Result := FLinksInfo;
 end;
 
 procedure TMycxTabSheet.SetLinksInfo(ALinksInfo: TLinksInfo);
 begin
-  FLinksInfoLock.EnterWriteLock;
-  try
-    FLinksInfo := ALinksInfo;
-  finally
-    FLinksInfoLock.ExitWriteLock;
-  end;
+  FLinksInfo := ALinksInfo;
 end;
 
 function TMycxTabSheet.GetTitle;
@@ -1448,28 +1399,24 @@ end;
 function TMycxTabSheet.GetPartName(AFileName: WideString): WideString;
 var
   _Index, _Count: Integer;
-  _Found: Boolean;
+  LFound: Boolean;
 begin
   Result := ExtractUrlFileName(AFileName);
   _Index := 0;
-  _Found := False;
-  FLinksInfoLock.EnterReadLock;
-  try
-    _Count := length(FLinksInfo.Links);
+  LFound := False;
 
-    while (_Index < _Count) and not _Found do
-    begin
-      _Found := (AFileName = FLinksInfo.Links[_Index].Link);
+  _Count := length(FLinksInfo.Links);
 
-      if not _Found then
-        Inc(_Index);
-    end;
+  while (_Index < _Count) and not LFound do
+  begin
+    LFound := (AFileName = FLinksInfo.Links[_Index].Link);
 
-    if _Found then
-      Result := FLinksInfo.Links[_Index].FileName;
-  finally
-    FLinksInfoLock.ExitReadLock;
+    if not LFound then
+      Inc(_Index);
   end;
+
+  if LFound then
+    Result := FLinksInfo.Links[_Index].FileName;
 end;
 
 function TMycxTabSheet.CloneInstance;
@@ -1506,62 +1453,32 @@ end;
 
 function TCrypterPanel.GetStatus: TContentStatus;
 begin
-  FCrypterFolderInfoLock.EnterReadLock;
-  try
-    Result := FCrypterFolderInfo.Status;
-  finally
-    FCrypterFolderInfoLock.ExitReadLock;
-  end;
+  Result := FCrypterFolderInfo.Status;
 end;
 
 function TCrypterPanel.GetSize: Double;
 begin
-  FCrypterFolderInfoLock.EnterReadLock;
-  try
-    Result := FCrypterFolderInfo.Size;
-  finally
-    FCrypterFolderInfoLock.ExitReadLock;
-  end;
+  Result := FCrypterFolderInfo.Size;
 end;
 
 function TCrypterPanel.GetPartSize: Double;
 begin
-  FCrypterFolderInfoLock.EnterReadLock;
-  try
-    Result := FCrypterFolderInfo.PartSize;
-  finally
-    FCrypterFolderInfoLock.ExitReadLock;
-  end;
+  Result := FCrypterFolderInfo.PartSize;
 end;
 
 function TCrypterPanel.GetHoster: WideString;
 begin
-  FCrypterFolderInfoLock.EnterReadLock;
-  try
-    Result := FCrypterFolderInfo.Hoster;
-  finally
-    FCrypterFolderInfoLock.ExitReadLock;
-  end;
+  Result := FCrypterFolderInfo.Hoster;
 end;
 
 function TCrypterPanel.GetHosterShort: WideString;
 begin
-  FCrypterFolderInfoLock.EnterReadLock;
-  try
-    Result := FCrypterFolderInfo.HosterShort;
-  finally
-    FCrypterFolderInfoLock.ExitReadLock;
-  end;
+  Result := FCrypterFolderInfo.HosterShort;
 end;
 
 function TCrypterPanel.GetParts: Integer;
 begin
-  FCrypterFolderInfoLock.EnterReadLock;
-  try
-    Result := FCrypterFolderInfo.Parts;
-  finally
-    FCrypterFolderInfoLock.ExitReadLock;
-  end;
+  Result := FCrypterFolderInfo.Parts;
 end;
 
 function TCrypterPanel.GetName: WideString;
@@ -1571,22 +1488,12 @@ end;
 
 function TCrypterPanel.GetStatusImage: WideString;
 begin
-  FCrypterFolderInfoLock.EnterReadLock;
-  try
-    Result := FCrypterFolderInfo.StatusImage;
-  finally
-    FCrypterFolderInfoLock.ExitReadLock;
-  end;
+  Result := FCrypterFolderInfo.StatusImage;
 end;
 
 function TCrypterPanel.GetStatusImageText: WideString;
 begin
-  FCrypterFolderInfoLock.EnterReadLock;
-  try
-    Result := FCrypterFolderInfo.StatusImageText;
-  finally
-    FCrypterFolderInfoLock.ExitReadLock;
-  end;
+  Result := FCrypterFolderInfo.StatusImageText;
 end;
 
 function TCrypterPanel.GetMirrorControl;
@@ -1606,42 +1513,22 @@ end;
 
 procedure TCrypterPanel.SetSize(ASize: Double);
 begin
-  FCrypterFolderInfoLock.EnterWriteLock;
-  try
-    FCrypterFolderInfo.Size := ASize;
-  finally
-    FCrypterFolderInfoLock.ExitWriteLock;
-  end;
+  FCrypterFolderInfo.Size := ASize;
 end;
 
 procedure TCrypterPanel.SetPartSize(APartSize: Double);
 begin
-  FCrypterFolderInfoLock.EnterWriteLock;
-  try
-    FCrypterFolderInfo.PartSize := APartSize;
-  finally
-    FCrypterFolderInfoLock.ExitWriteLock;
-  end;
+  FCrypterFolderInfo.PartSize := APartSize;
 end;
 
 function TCrypterPanel.GetCrypterFolderInfo;
 begin
-  FCrypterFolderInfoLock.EnterReadLock;
-  try
-    Result := FCrypterFolderInfo;
-  finally
-    FCrypterFolderInfoLock.ExitReadLock;
-  end;
+  Result := FCrypterFolderInfo;
 end;
 
 procedure TCrypterPanel.SetCrypterFolderInfo(ACrypterFolderInfo: TCrypterFolderInfo);
 begin
-  FCrypterFolderInfoLock.EnterWriteLock;
-  try
-    FCrypterFolderInfo := ACrypterFolderInfo;
-  finally
-    FCrypterFolderInfoLock.ExitWriteLock;
-  end;
+  FCrypterFolderInfo := ACrypterFolderInfo;
 end;
 
 function TCrypterPanel.GetVisible;
@@ -2836,4 +2723,3 @@ end;
 { ****************************************************************************** }
 
 end.
-
