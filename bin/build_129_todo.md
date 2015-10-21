@@ -10,6 +10,10 @@ This todo list contains all useful ideas for improvement, not necessarily for th
 
 - [ ] Add password protected subforums for vBulletin
 
+- [ ] Fix Woltlab Burning Bord to support version 4.1.
+
+- [ ] Fix XenForo to support version 1.5.
+
 ######Crawler
 
 - [ ] Update Amazon.com/.de plugin
