@@ -687,6 +687,50 @@ begin
       if ACMSWebsiteCollectionItem.Filter.Hosters.Items[LHostersIntex].Ranked then
         LWhitelist.Text := ACMSWebsiteCollectionItem.Filter.Hosters.Items[LHostersIntex].Whitelist.Text;
 
+      // Reduce black- and whitelist to used hosters
+      case LHosterType of
+        htFile:
+          begin
+
+            for LControlIndex := 0 to TabSheetController.MirrorController.MirrorCount - 1 do
+            begin
+              for LWhitelistIndex := LWhitelist.Count - 1 downto 0 do
+                if not SameText(LWhitelist.Strings[LWhitelistIndex], TabSheetController.MirrorController.Mirror[LControlIndex].Hoster) then
+                begin
+                  LWhitelist.Delete(LWhitelistIndex);
+                end;
+              for LWhitelistIndex := LBlackList.Count - 1 downto 0 do
+                if not SameText(LBlackList.Strings[LWhitelistIndex], TabSheetController.MirrorController.Mirror[LControlIndex].Hoster) then
+                begin
+                  LBlackList.Delete(LWhitelistIndex);
+                end;
+            end;
+
+          end;
+        htImage:
+          begin
+
+            if Assigned(LPicture) then
+            begin
+              for LControlIndex := 0 to LPicture.MirrorCount - 1 do
+              begin
+                for LWhitelistIndex := LWhitelist.Count - 1 downto 0 do
+                  if not SameText(LWhitelist.Strings[LWhitelistIndex], LPicture.Mirror[LControlIndex].Name) then
+                  begin
+                    LWhitelist.Delete(LWhitelistIndex);
+                  end;
+                for LWhitelistIndex := LBlackList.Count - 1 downto 0 do
+                  if not SameText(LBlackList.Strings[LWhitelistIndex], LPicture.Mirror[LControlIndex].Name) then
+                  begin
+                    LBlackList.Delete(LWhitelistIndex);
+                  end;
+              end;
+            end;
+
+          end;
+      end;
+
+      // Make the ordering and filter for blacklist
       for LWhitelistIndex := 0 to LWhitelist.Count - 1 do
       begin
         // If not in blacklist
@@ -710,6 +754,7 @@ begin
               begin
 
                 if Assigned(LPicture) then
+                begin
                   for LControlIndex := 0 to LPicture.MirrorCount - 1 do
                     if SameText(LWhitelist.Strings[LWhitelistIndex], LPicture.Mirror[LControlIndex].Name) then
                     begin
@@ -723,6 +768,7 @@ begin
                       LHasPicture := True;
                       Break;
                     end;
+                end;
 
                 Break; // only one picture needed, break whitelist loop
               end;
