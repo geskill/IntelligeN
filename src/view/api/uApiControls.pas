@@ -317,8 +317,10 @@ type
     FMirrorList: TInterfaceList<IPictureMirror>;
     // Logic
     function GraphicAsVariant(AGraphic: TGraphic): Variant;
-    procedure SaveImage(AMemoryStream: TMemoryStream);
+    procedure SaveImage; overload;
+    procedure SaveImage(AMemoryStream: TMemoryStream); overload;
 
+    procedure HandleProposedValue(AIndex: Integer; AValue: WideString);
     procedure SetValuePictureFromDownload(AIndex: Integer; AMemoryStream: TMemoryStream); overload;
   protected
     function GetValuePicture(AIndex: Integer): TPictureInfo; safecall;
@@ -1507,24 +1509,8 @@ begin
 end;
 
 procedure TIPicture.FmiSaveAsClick(Sender: TObject);
-var
-  LMemoryStream: TMemoryStream;
 begin
-  Async(
-    { } procedure
-    { } var
-    { . } LCookies: WideString;
-    { } begin
-    { . } TApiHTTP.DownloadData(Value, LMemoryStream, LCookies,
-      // TODO: Read settings at a thread-safe position
-      { . } SettingsManager.Settings.HTTP.GetProxy(psaCrawler), SettingsManager.Settings.HTTP.ConnectTimeout, SettingsManager.Settings.HTTP.ReadTimeout);
-    { } end). { }
-  Await(
-    { } procedure
-    { } begin
-    { . } SaveImage(LMemoryStream);
-    { . } LMemoryStream.Free;
-    { } end);
+  SaveImage;
 end;
 
 procedure TIPicture.FmiVisitImageClick(Sender: TObject);
@@ -1589,6 +1575,27 @@ begin
   end;
 end;
 
+procedure TIPicture.SaveImage;
+var
+  LMemoryStream: TMemoryStream;
+begin
+  Async(
+    { } procedure
+    { } var
+    { . } LCookies: WideString;
+    { } begin
+    { . } TApiHTTP.DownloadData(Value, LMemoryStream, LCookies,
+      // TODO: Read settings at a thread-safe position
+      { . } SettingsManager.Settings.HTTP.GetProxy(psaCrawler), SettingsManager.Settings.HTTP.ConnectTimeout, SettingsManager.Settings.HTTP.ReadTimeout);
+    { } end). { }
+  Await(
+    { } procedure
+    { } begin
+    { . } SaveImage(LMemoryStream);
+    { . } LMemoryStream.Free;
+    { } end);
+end;
+
 procedure TIPicture.SaveImage(AMemoryStream: TMemoryStream);
 
   function GetFileName(AMemoryStream: TMemoryStream): string;
@@ -1620,13 +1627,26 @@ begin
     end;
 end;
 
+procedure TIPicture.HandleProposedValue(AIndex: Integer; AValue: WideString);
+var
+  LMemoryStream: TMemoryStream;
+  LCookies: WideString;
+begin
+  TApiHTTP.DownloadData(AValue, LMemoryStream, LCookies,
+    // TODO: Read settings at a thread-safe position
+    { . } SettingsManager.Settings.HTTP.GetProxy(psaCrawler), SettingsManager.Settings.HTTP.ConnectTimeout, SettingsManager.Settings.HTTP.ReadTimeout);
+  try
+    SetValuePictureFromDownload(AIndex - 1, LMemoryStream);
+  finally
+    LMemoryStream.Free;
+  end;
+end;
+
 procedure TIPicture.SetValuePictureFromDownload(AIndex: Integer; AMemoryStream: TMemoryStream);
 var
   LPictureInfo: TPictureInfo;
   LGraphic: TGraphic;
 begin
-  AMemoryStream.Position := 0;
-
   with LPictureInfo do
   begin
     Picture := '';
@@ -1677,11 +1697,11 @@ end;
 
 procedure TIPicture.SetValuePicture(AIndex: Integer; APictureInfo: TPictureInfo);
 begin
-  FPictureArrayLock.EnterReadLock;
+  FPictureArrayLock.EnterWriteLock;
   try
     FPictureArray[AIndex] := APictureInfo;
   finally
-    FPictureArrayLock.ExitReadLock;
+    FPictureArrayLock.ExitWriteLock;
   end;
 end;
 
@@ -1888,16 +1908,20 @@ end;
 
 procedure TIPicture.AddProposedValue(const ASender: WideString; AValue: WideString; ATitle: WideString);
 var
-  LValueCount: Integer;
-  LMemoryStream: TMemoryStream;
+  LProposedValueCount: Integer;
 begin
   inherited AddProposedValue(ASender, AValue, ATitle);
 
+  LProposedValueCount := GetProposedValuesCount;
+
+  // Must be done in main thread, because user can access control editor
+  // with images that are not downloaded so far, but the count has already
+  // been set by inherited AddProposedValue(). Therefore do not do this
+  // in the background task!
   FPictureArrayLock.EnterWriteLock;
   try
-    LValueCount := GetProposedValuesCount;
-    SetLength(FPictureArray, LValueCount);
-    with FPictureArray[LValueCount - 1] do
+    SetLength(FPictureArray, LProposedValueCount);
+    with FPictureArray[LProposedValueCount - 1] do
     begin
       Picture := GraphicAsVariant(nil);
       Downloaded := False;
@@ -1906,45 +1930,13 @@ begin
     FPictureArrayLock.ExitWriteLock;
   end;
 
-  Async(
-    { } procedure
-    { } var
-    { . } LCookies: WideString;
-    { } begin
-    { . } TApiHTTP.DownloadData(Value, LMemoryStream, LCookies,
-      // TODO: Read settings at a thread-safe position
-      { . } SettingsManager.Settings.HTTP.GetProxy(psaCrawler), SettingsManager.Settings.HTTP.ConnectTimeout, SettingsManager.Settings.HTTP.ReadTimeout);
-    { } end). { }
-  Await(
+  // Do everything else in the background task. Access of TPictureInfo is
+  // secured by TOmniMREW.
+  Parallel.Async(
     { } procedure
     { } begin
-    { . } SetValuePictureFromDownload(LValueCount - 1, LMemoryStream);
-    { . } LMemoryStream.Free;
+    { . } HandleProposedValue(LProposedValueCount, AValue);
     { } end);
-
-  // TODO: Analyse this (old version)
-  (*
-
-    CreateTask(
-    { } procedure(const task: IOmniTask)
-    { } begin
-
-    { . } task.Invoke(
-    { ... } procedure
-    { ... } var
-    { ..... } LMemoryStream: TMemoryStream;
-    { ..... } LCookies: WideString;
-    { ... } begin
-    { ..... } TApiHTTP.DownloadData(Value, LMemoryStream, LCookies,
-    // TODO: Read settings at a thread-safe position
-    { ..... } SettingsManager.Settings.HTTP.GetProxy(psaCrawler), SettingsManager.Settings.HTTP.ConnectTimeout, SettingsManager.Settings.HTTP.ReadTimeout);
-    { ..... } sleep(100);
-    { ..... } SetValuePictureFromDownload(LValueCount - 1, LMemoryStream);
-    { ..... } LMemoryStream.Free;
-    { ... } end);
-
-    { } end, 'TIPicture Image Download: ' + AValue).Run;
-    *)
 end;
 
 procedure TIPicture.RemoteUpload(const AAfterCrawling: WordBool = False);
@@ -1959,11 +1951,11 @@ procedure TIPicture.RemoteUpload(const AAfterCrawling: WordBool = False);
   end;
 
 var
-  I: Integer;
+  LMirrorIndex: Integer;
 begin
-  for I := 0 to MirrorCount - 1 do
-    if not AAfterCrawling or (AAfterCrawling and UploadAfterCrawling(Mirror[I].Name)) then
-      ControlController.TabSheetController.PageController.ImageHosterManager.AddRemoteUploadJob(Mirror[I]);
+  for LMirrorIndex := 0 to MirrorCount - 1 do
+    if not AAfterCrawling or (AAfterCrawling and UploadAfterCrawling(Mirror[LMirrorIndex].Name)) then
+      Mirror[LMirrorIndex].RemoteUpload;
 end;
 
 function TIPicture.FindMirrorIndex(const AHoster: WideString): Integer;
