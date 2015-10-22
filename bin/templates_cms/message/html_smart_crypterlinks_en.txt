@@ -1,0 +1,157 @@
+import "iUtils.js"
+
+print("." + "<br />" + "<div align=\"center\">" + "<br />");
+
+if((IPICTURE != null) && (IPICTURE != ""))
+  print("<img src=\"" + IPICTURE + "\" />");
+else
+  print("- no image available -");
+
+print("<br />");
+
+if(ITITLE != null)
+{
+  print("<br />" + ITITLE);
+}
+
+if(IARTIST != null)
+{
+  print(" (form: " + IARTIST + ")");
+}
+
+print("<br />");
+
+if(IGENRE != null)
+{
+  print("<strong>Genre:</strong> ");
+  if(IGENRE != "")
+    print(IGENRE);
+}
+
+if(IRUNTIME != null)
+{
+  print(" | <strong>Runtime:</strong> ");
+  if(IRUNTIME != "")
+    print(IRUNTIME + " Min.");
+}
+
+if(ILANGUAGE != null)
+{
+  print(" | <strong>Language/s:</strong> ");
+  if(ILANGUAGE != "")
+    print( StringReplace(ILANGUAGE, ";", ", ") );
+}
+
+if((ITRAILER != null) && (ITRAILER != ""))
+  print("<br /><strong>Trailer:</strong> <a href=\"" + ITRAILER + "\">" + ITRAILER + "</a>");
+
+if(IDESCRIPTION != null)
+  print("<br /><br />" + IDESCRIPTION + "<br />");
+
+if(IVIDEOSTREAM != null)
+{
+  print("<br /><strong>Video Stream:</strong> ");
+  if(IVIDEOSTREAM != "")
+    print(IVIDEOSTREAM);
+}
+
+if(IVIDEOSYSTEM != null)
+{
+  print(" | <strong>Video System:</strong> ");
+  if(IVIDEOSYSTEM != "")
+    print(IVIDEOSYSTEM);
+}
+
+if(IAUDIOSTREAM != null)
+{
+  print(" | <strong>Audio Stream:</strong> ");
+  if(IAUDIOSTREAM != "")
+    print(IAUDIOSTREAM);
+}
+
+if(IVIDEOCODEC != null)
+{
+  print(" | <strong>Video Codec:</strong> ");
+  if(IVIDEOCODEC != "")
+    print(IVIDEOCODEC);
+}
+
+if(IAUDIOBITRATE != null)
+{
+  print(" | <strong>Audio Bitrate:</strong> ");
+  if(IAUDIOBITRATE != "")
+    print(IAUDIOBITRATE);
+}
+
+if(IAUDIOBITRATETYPE != null)
+{
+  print(" | <strong>Audio Bitrate Type:</strong> ");
+  if(IAUDIOBITRATETYPE != "")
+    print(IAUDIOBITRATETYPE);
+}
+
+if(IAUDIOENCODER != null)
+{
+  print(" | <strong>Audio Encoder:</strong> ");
+  if(IAUDIOENCODER != "")
+    print(IAUDIOENCODER);
+}
+
+if(IAUDIOSAMPLINGRATE != null)
+{
+  print(" | <strong>Audio Sampling Rate:</strong> ");
+  if(IAUDIOSAMPLINGRATE != "")
+    print(IAUDIOSAMPLINGRATE);
+}
+
+print("<br /><strong>Hoster:</strong> ");
+for(i = 0; i < IMirror.Count; i++) 
+{
+  print(IMirror[I].HosterShort);
+  if(i != IMirror.Count -1)
+    print(", ");
+}
+
+for(i = 0; i < IMirror.Count; i++)
+  if(IMirror[i].Size > 0)
+  {
+    print(" | <strong>Size:</strong> " + FloatToStr(IMirror[i].Size) + " MB");
+    break;
+  }
+
+for(i = 0; i < IMirror.Count; i++)
+  if(IMirror[i].Parts > 0)
+  {
+    print(" | <strong>Parts:</strong> " + IntToStr(IMirror[i].Parts));
+    break;
+  }
+
+if(IPASSWORD != null)
+{
+  print(" | <strong>Password:</strong> ");
+  if(IPASSWORD != "")
+    print(IPASSWORD);
+  else
+    print("- not required -");
+}
+
+if((INOTES != null) && (INOTES != ""))
+  print(" | <strong>Notes:</strong> " + INOTES);
+
+if((ISAMPLE != null) && (ISAMPLE != ""))
+  print("<br /><strong>Sample:</strong> <a href=\"" + ISAMPLE + "\">" + ISAMPLE + "</a>");
+
+print("<br />");
+
+for(i = 0; i < IMirror.Count; i++) 
+{
+  if(i != 0)
+    print("<br />");
+  print("<br /><strong>Mirror: " + IntToStr(I + 1) + "</strong><br />");
+  for(j = 0; j < IMirror[I].CrypterCount; j++) 
+  {
+    print("<br /><a href=\"" + IMirror[I].Crypter[J].Value + "\">" + IMirror[I].Hoster + " <img src=\"" + IMirror[I].Crypter[J].StatusImage + "\" /></a>");
+  }
+}
+
+print("<br />" + "</div>" + "<br />" + ".");

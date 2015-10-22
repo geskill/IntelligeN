@@ -1,0 +1,164 @@
+import "iUtils.js"
+
+if(MatchText("wBB?", ICMS))
+  print("." + "\r\n" + "[align=center]" + "\r\n");
+else
+  print("." + "\r\n" + "[center]" + "\r\n");
+
+if((IPICTURE != null) && (IPICTURE != ""))
+  print("[img]" + IPICTURE + "[/img]");
+else
+  print("- no image available -");
+
+print("\r\n");
+
+if(ITITLE != null)
+{
+  print("\r\n" + ITITLE);
+}
+
+if(IARTIST != null)
+{
+  print(" (form: " + IARTIST + ")");
+}
+
+print("\r\n");
+
+if(IGENRE != null)
+{
+  print("[b]Genre:[/b] ");
+  if(IGENRE != "")
+    print(IGENRE);
+}
+
+if(IRUNTIME != null)
+{
+  print(" | [b]Runtime:[/b] ");
+  if(IRUNTIME != "")
+    print(IRUNTIME + " Min.");
+}
+
+if(ILANGUAGE != null)
+{
+  print(" | [b]Language/s:[/b] ");
+  if(ILANGUAGE != "")
+    print( StringReplace(ILANGUAGE, ";", ", ") );
+}
+
+if((ITRAILER != null) && (ITRAILER != ""))
+  print("\r\n[b]Trailer:[/b] [url]" + ITRAILER + "[/url]");
+
+if(IDESCRIPTION != null)
+  print("\r\n\r\n" + IDESCRIPTION + "\r\n");
+
+if(IVIDEOSTREAM != null)
+{
+  print("\r\n[b]Video Stream:[/b] ");
+  if(IVIDEOSTREAM != "")
+    print(IVIDEOSTREAM);
+}
+
+if(IVIDEOSYSTEM != null)
+{
+  print(" | [b]Video System:[/b] ");
+  if(IVIDEOSYSTEM != "")
+    print(IVIDEOSYSTEM);
+}
+
+if(IAUDIOSTREAM != null)
+{
+  print(" | [b]Audio Stream:[/b] ");
+  if(IAUDIOSTREAM != "")
+    print(IAUDIOSTREAM);
+}
+
+if(IVIDEOCODEC != null)
+{
+  print(" | [b]Video Codec:[/b] ");
+  if(IVIDEOCODEC != "")
+    print(IVIDEOCODEC);
+}
+
+if(IAUDIOBITRATE != null)
+{
+  print(" | [b]Audio Bitrate:[/b] ");
+  if(IAUDIOBITRATE != "")
+    print(IAUDIOBITRATE);
+}
+
+if(IAUDIOBITRATETYPE != null)
+{
+  print(" | [b]Audio Bitrate Type:[/b] ");
+  if(IAUDIOBITRATETYPE != "")
+    print(IAUDIOBITRATETYPE);
+}
+
+if(IAUDIOENCODER != null)
+{
+  print(" | [b]Audio Encoder:[/b] ");
+  if(IAUDIOENCODER != "")
+    print(IAUDIOENCODER);
+}
+
+if(IAUDIOSAMPLINGRATE != null)
+{
+  print(" | [b]Audio Sampling Rate:[/b] ");
+  if(IAUDIOSAMPLINGRATE != "")
+    print(IAUDIOSAMPLINGRATE);
+}
+
+print("\r\n[b]Hoster:[/b] ");
+for(i = 0; i < IMirror.Count; i++) 
+{
+  print(IMirror[I].HosterShort);
+  if(i != IMirror.Count -1)
+    print(", ");
+}
+
+for(i = 0; i < IMirror.Count; i++)
+  if(IMirror[i].Size > 0)
+  {
+    print(" | [b]Size:[/b] " + FloatToStr(IMirror[i].Size) + " MB");
+    break;
+  }
+
+for(i = 0; i < IMirror.Count; i++)
+  if(IMirror[i].Parts > 0)
+  {
+    print(" | [b]Parts:[/b] " + IntToStr(IMirror[i].Parts));
+    break;
+  }
+
+if(IPASSWORD != null)
+{
+  print(" | [b]Password:[/b] ");
+  if(IPASSWORD != "")
+    print(IPASSWORD);
+  else
+    print("- not required -");
+}
+
+if((INOTES != null) && (INOTES != ""))
+  print(" | [b]Notes:[/b] " + INOTES);
+
+if((ISAMPLE != null) && (ISAMPLE != ""))
+  print("\r\n[b]Sample:[/b] [url]" + ISAMPLE + "[/url]");
+
+print("\r\n");
+
+for(i = 0; i < IMirror.Count; i++) 
+{
+  if(i != 0)
+    print("\r\n");
+  print("\r\n[b]Mirror: " + IntToStr(I + 1) + "[/b]\r\n");
+  for(j = 0; j < IMirror[I].DirectlinkCount; j++) 
+  {
+    print("\r\n[b]" + IMirror[I].Hoster + "[/b]");
+    print("\r\n[spoiler][code]" + IMirror[I].Directlink[J].Value + "[/code][/spoiler]");
+  }
+}
+
+if(MatchText("wBB?", ICMS))
+  print("\r\n" + "[/align]" + "\r\n" + ".");
+else
+  print("\r\n" + "[/center]" + "\r\n" + ".");

@@ -1,0 +1,15 @@
+print(ITitle);
+
+print(" ");
+
+print("[");
+
+for(i = 0; i < IMirror.Count; i++) 
+{
+  if(i != 0)
+    print("/");
+
+  print(IMirror[I].HosterShort);
+}
+
+print("]");

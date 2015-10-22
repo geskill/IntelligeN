@@ -384,9 +384,15 @@
 
 * Added new status images incl. new image for temporary offline
 
+* Added tiff image file support
+
 * Improved FirstStart performance
 
 * Fixed a bug of adding a new tab while having MirrorPosition = mpTop
+
+* Fixed IScirpt editor enabling/disabling a CMS
+
+* Fixed enabled status of IScript editor buttons at launch
 
 * Fixed linkcrypt.ws crypter plugin
 

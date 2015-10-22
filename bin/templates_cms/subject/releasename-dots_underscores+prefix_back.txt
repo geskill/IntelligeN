@@ -1,0 +1,24 @@
+import "iUtils.js"
+
+s = IReleaseName;
+
+if( CharCount("_", s) > CharCount(".", s) )
+  s = StringReplace(s, "_", " ");
+else
+  s = StringReplace(s, ".", " ");
+
+print(s);
+
+print(" ");
+
+print("[");
+
+for(i = 0; i < IMirror.Count; i++) 
+{
+  if(i != 0)
+    print("/");
+
+  print(IMirror[I].HosterShort);
+}
+
+print("]");

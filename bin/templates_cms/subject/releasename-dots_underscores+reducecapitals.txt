@@ -1,0 +1,10 @@
+import "iUtils.js"
+
+s = IReleaseName;
+
+if( CharCount("_", s) > CharCount(".", s) )
+  s = StringReplace(s, "_", " ");
+else
+  s = StringReplace(s, ".", " ");
+
+print(ReduceCapitals(s));
