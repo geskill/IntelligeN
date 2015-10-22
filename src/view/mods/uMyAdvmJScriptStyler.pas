@@ -244,6 +244,7 @@ begin
       Add('const ' + ControlIDToString(LControlID) + ': string');
 
     Add('property IMirror: [const IndexOrName: OleVariant]: IMirrorContainer');
+    Add('const IMirrorCount: Integer');
   end;
 
 end;

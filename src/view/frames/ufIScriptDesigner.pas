@@ -99,7 +99,7 @@ begin
           Add('property Hoster: string');
           Add('property HosterShort: string');
           Add('property Parts: Integer');
-          Add('property Value: Integer');
+          Add('property Value: string');
         end
         else
         begin
@@ -113,7 +113,7 @@ begin
             Add('property Hoster: string');
             Add('property HosterShort: string');
             Add('property Parts: Integer');
-            Add('property Value: Integer');
+            Add('property Value: string');
             Add('property StatusImage: string');
             Add('property StatusImageText: string');
           end
