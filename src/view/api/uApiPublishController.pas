@@ -658,6 +658,8 @@ var
 
   LControlBasic: IControlBasic;
   LPicture: IPicture;
+
+  LHasMirror: Boolean;
   LHasPicture: Boolean;
 begin
   AControlList := TControlDataList.Create;
@@ -668,19 +670,22 @@ begin
   begin
     LControlBasic.QueryInterface(IPicture, LPicture);
   end;
+
+  LHasMirror := False;
   LHasPicture := False;
 
+  // Handle if hoster ranking/whitelist or blacklist is defined
   for LHostersIntex := 0 to ACMSWebsiteCollectionItem.Filter.Hosters.Count - 1 do
   begin
-    LHosterType := GetHosterNameType(FCMSWebsiteCollectionItem.Filter.Hosters.Items[LHostersIntex].Name);
+    LHosterType := GetHosterNameType(ACMSWebsiteCollectionItem.Filter.Hosters.Items[LHostersIntex].Name);
 
     LBlackList := TStringList.Create;
     LWhitelist := TStringList.Create;
     try
       // Load black- and whitelist
-      LBlackList.Text := FCMSWebsiteCollectionItem.Filter.Hosters.Items[LHostersIntex].Blacklist.Text;
-      if FCMSWebsiteCollectionItem.Filter.Hosters.Items[LHostersIntex].Ranked then
-        LWhitelist.Text := FCMSWebsiteCollectionItem.Filter.Hosters.Items[LHostersIntex].Whitelist.Text;
+      LBlackList.Text := ACMSWebsiteCollectionItem.Filter.Hosters.Items[LHostersIntex].Blacklist.Text;
+      if ACMSWebsiteCollectionItem.Filter.Hosters.Items[LHostersIntex].Ranked then
+        LWhitelist.Text := ACMSWebsiteCollectionItem.Filter.Hosters.Items[LHostersIntex].Whitelist.Text;
 
       for LWhitelistIndex := 0 to LWhitelist.Count - 1 do
       begin
@@ -735,6 +740,8 @@ begin
                 AMirrorList.Add(TabSheetController.MirrorController.Mirror[LControlIndex].CloneInstance());
               end;
 
+            LHasMirror := True;
+
           end;
         htImage:
           begin
@@ -752,6 +759,7 @@ begin
               if not LHasPicture then
               begin
                 AControlList.Add(LPicture.CloneInstance());
+                LHasPicture := True;
               end;
             end;
 
@@ -762,6 +770,17 @@ begin
       LWhitelist.Free;
       LBlackList.Free;
     end;
+  end;
+
+  // Handle if nothing is defined
+  if not LHasMirror then
+  begin
+    for LControlIndex := 0 to TabSheetController.MirrorController.MirrorCount - 1 do
+      AMirrorList.Add(TabSheetController.MirrorController.Mirror[LControlIndex].CloneInstance());
+  end;
+  if Assigned(LPicture) and not LHasPicture then
+  begin
+    AControlList.Add(LPicture.CloneInstance());
   end;
 
   LPicture := nil;
@@ -805,7 +824,7 @@ end;
 
 function TICMSWebsiteContainer.GetName: WideString;
 begin
-  Result := FCMSWebsiteCollectionItem.name;
+  Result := FCMSWebsiteCollectionItem.Name;
 end;
 
 function TICMSWebsiteContainer.GetTopIndex: Integer;
