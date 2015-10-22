@@ -90,10 +90,11 @@ begin
     try
       if FileHosterCheckFiles(Data.FileHosterCollectionItem, FLinks, FLinksInfo) then
       begin
+        Data.Directlink.LinksInfo := FLinksInfo;
+
         task.Invoke(
           { } procedure
           { } begin
-          { . } Data.Directlink.LinksInfo := FLinksInfo;
           { . } Data.Directlink.UpdateGUI;
 
           { . } Finish;

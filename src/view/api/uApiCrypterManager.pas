@@ -122,13 +122,14 @@ begin
     try
       if CrypterAddFolder(Data.CrypterCollectionItem, FMirrorContainer, FControlController, FFolderInfo) then
       begin
+        Data.CrypterPanel.CrypterFolderInfo := FFolderInfo;
+
         task.Invoke(
           { } procedure
           { } var
           { . } LCrypterIndex: Integer;
           { } begin
           { . } Data.CrypterPanel.Value := FFolderInfo.Link;
-          { . } Data.CrypterPanel.CrypterFolderInfo := FFolderInfo;
 
           { . } Data.CrypterPanel.CheckFolder(True);
 
@@ -185,10 +186,11 @@ begin
     try
       if CrypterGetFolder(Data.CrypterCollectionItem, FFolderURL, FFolderInfo) then
       begin
+        Data.CrypterPanel.CrypterFolderInfo := FFolderInfo;
+
         task.Invoke(
           { } procedure
           { } begin
-          { . } Data.CrypterPanel.CrypterFolderInfo := FFolderInfo;
           { . } Data.CrypterPanel.UpdateGUI;
 
           { . } Finish;
