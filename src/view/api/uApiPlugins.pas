@@ -69,7 +69,7 @@ type
 
     class function CMSDefaultCharset(ARelativPluginPath: string): string;
     class function CMSBelongsTo(ARelativPluginPath, AWebsiteSourceCode: string): Boolean;
-    class procedure CMSShowWebsiteSettingsEditor(ARelativPluginPath: string; ACMSWebsites: TCMSWebsitesCollectionItem; const AAppController: IAppController);
+    class procedure CMSShowWebsiteSettingsEditor(ARelativPluginPath: string; ACMSWebsite: TCMSWebsitesCollectionItem; const AAppController: IAppController);
 
     class function GetSaveFileFormats: TStrings;
     class function GetLoadFileFormats: TStrings;
@@ -601,7 +601,7 @@ begin
   Result := LResult;
 end;
 
-class procedure TPluginBasic.CMSShowWebsiteSettingsEditor(ARelativPluginPath: string; ACMSWebsites: TCMSWebsitesCollectionItem; const AAppController: IAppController);
+class procedure TPluginBasic.CMSShowWebsiteSettingsEditor(ARelativPluginPath: string; ACMSWebsite: TCMSWebsitesCollectionItem; const AAppController: IAppController);
 begin
   TPluginBasic.LoadCMSPlugin(ARelativPluginPath,
     { } procedure(var ACMSPlugin: ICMSPlugIn)
@@ -612,17 +612,18 @@ begin
     { . } begin
     { ... } SetCAPTCHAInput(TApiCAPTCHA.DefaultHandler);
 
-    { ... } Accountname := ACMSWebsites.Accountname;
-    { ... } Accountpassword := ACMSWebsites.Accountpassword;
+    { ... } Accountname := ACMSWebsite.Accountname;
+    { ... } Accountpassword := ACMSWebsite.Accountpassword;
 
-    { ... } SettingsFileName := ACMSWebsites.GetPath;
+    { ... } SettingsFileName := ACMSWebsite.GetPath;
 
-    { ... } Website := ACMSWebsites.name;
+    { ... } Website := ACMSWebsite.Name;
 
-    { ... } LWebsiteEditor := TWebsiteEditorFactory.GetClassType(ACMSPlugin.CMSType).Create(ACMSPlugin, AAppController, ACMSWebsites.GetPath);
+    { ... } LWebsiteEditor := TWebsiteEditorFactory.GetClassType(ACMSPlugin.CMSType).Create(ACMSPlugin, AAppController, ACMSWebsite.GetPath);
     { ... } try
     { ..... } if ShowWebsiteSettingsEditor(LWebsiteEditor) then
     { ....... } ;
+    { ..... } ACMSWebsite.UpdateWebsiteInformation; // TODO: FUTURE: This should be handled by the DirectoryMonitor!
     { ... } finally
     { ..... } LWebsiteEditor.Free;
     { ... } end;
