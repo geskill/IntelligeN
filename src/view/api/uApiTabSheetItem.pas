@@ -421,6 +421,8 @@ procedure TDesignTabSheetItem.FHtmlViewImageRequest(Sender: TObject; const SRC: 
 var
   LMemoryStream: TMemoryStream;
 begin
+  Stream := WaitStream; // important!
+
   Async(
     { } procedure
     { } var
