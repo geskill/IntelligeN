@@ -22,7 +22,7 @@ begin
       Result := (AValue > 0);
     varBoolean:
       Result := not(AValue = 0);
-    varVariant, varString, varUString:
+    varOleStr, varVariant, varStrArg, varString, varUString:
       Result := not(SameStr('', AValue));
   else
     Result := False;
