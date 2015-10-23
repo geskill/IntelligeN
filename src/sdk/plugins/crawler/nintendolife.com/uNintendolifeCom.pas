@@ -38,7 +38,7 @@ var
   _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cGameCube, cNintendoDS, cWii, cOther];
-  result := Word(_TemplateTypeIDs);
+  result := LongWord(_TemplateTypeIDs);
 end;
 
 function TNintendolifeCom.GetAvailableControlIDs;

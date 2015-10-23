@@ -43,7 +43,7 @@ var
   _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cGameCube, cNintendoDS, cPlayStation2, cPlayStation3, cPlayStationPortable, cWii, cXbox, cXbox360];
-  Result := Word(_TemplateTypeIDs);
+  Result := LongWord(_TemplateTypeIDs);
 end;
 
 function TGamingUniverseDe.GetAvailableControlIDs;

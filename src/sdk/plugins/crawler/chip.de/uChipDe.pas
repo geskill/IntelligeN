@@ -41,7 +41,7 @@ var
   _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cSoftware];
-  Result := Word(_TemplateTypeIDs);
+  Result := LongWord(_TemplateTypeIDs);
 end;
 
 function TChipDe.GetAvailableControlIDs(const ATypeID: Integer): Integer;

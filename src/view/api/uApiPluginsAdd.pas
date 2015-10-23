@@ -100,7 +100,7 @@ begin
         Contingent.Clear;
 
         // Load content from crawler plugin
-        Word(LTypeIDs) := LCrawlerPlugin.GetAvailableTypeIDs;
+        Longword(LTypeIDs) := LCrawlerPlugin.GetAvailableTypeIDs;
         for LTypeID := Low(TTypeID) to High(TTypeID) do
         begin
           if LTypeID in LTypeIDs then

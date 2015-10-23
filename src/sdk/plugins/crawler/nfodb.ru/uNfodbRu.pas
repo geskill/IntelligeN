@@ -39,7 +39,7 @@ var
   _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cAudio];
-  result := Word(_TemplateTypeIDs);
+  result := LongWord(_TemplateTypeIDs);
 end;
 
 function TNfodbRu.GetAvailableControlIDs;

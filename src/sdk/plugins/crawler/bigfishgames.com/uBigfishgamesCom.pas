@@ -100,7 +100,7 @@ var
   _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cPCGames];
-  Result := Word(_TemplateTypeIDs);
+  Result := LongWord(_TemplateTypeIDs);
 end;
 
 function TBigfishgamesCom.GetAvailableControlIDs;

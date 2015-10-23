@@ -39,7 +39,7 @@ var
   _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cWii];
-  result := Word(_TemplateTypeIDs);
+  result := LongWord(_TemplateTypeIDs);
 end;
 
 function TWiiboxartCom.GetAvailableControlIDs;

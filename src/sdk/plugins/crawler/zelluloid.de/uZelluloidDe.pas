@@ -46,7 +46,7 @@ var
   _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cMovie];
-  Result := Word(_TemplateTypeIDs);
+  Result := LongWord(_TemplateTypeIDs);
 end;
 
 function TZelluloidDe.GetAvailableControlIDs;

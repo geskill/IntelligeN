@@ -39,7 +39,7 @@ var
   _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)];
-  result := Word(_TemplateTypeIDs);
+  result := LongWord(_TemplateTypeIDs);
 end;
 
 function TImagesGoogleDe.GetAvailableControlIDs;

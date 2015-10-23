@@ -41,7 +41,7 @@ var
   _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [cNintendoDS, cPCGames, cPlayStation2, cPlayStation3, cPlayStationPortable, cWii, cXbox, cXbox360];
-  result := Word(_TemplateTypeIDs);
+  result := LongWord(_TemplateTypeIDs);
 end;
 
 function TIgnCom.GetAvailableControlIDs;

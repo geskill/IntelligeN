@@ -43,7 +43,7 @@ var
   _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := cGames;
-  Result := Word(_TemplateTypeIDs);
+  Result := LongWord(_TemplateTypeIDs);
 end;
 
 function TGametrailersCom.GetAvailableControlIDs;

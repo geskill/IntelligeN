@@ -41,7 +41,7 @@ var
   _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)];
-  Result := Word(_TemplateTypeIDs);
+  Result := LongWord(_TemplateTypeIDs);
 end;
 
 function TCoverParadiesTo.GetAvailableControlIDs;

@@ -382,6 +382,8 @@
 
 ######minor enhancements
 
+* Added new base categories EBook, PlayStation4 und XboxOne
+
 * Added new status images incl. new image for temporary offline
 
 * Added tiff image file support

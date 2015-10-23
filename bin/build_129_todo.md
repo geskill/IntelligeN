@@ -4,6 +4,8 @@ This todo list contains all useful ideas for improvement, not necessarily for th
 
 ###Core
 
+- [ ] Add new TTypeID icons
+
 ###SDK
 
 ######Content-Management-Systems

@@ -141,7 +141,7 @@ var
   _TemplateTypeIDs: TTypeIDs;
 begin
   _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)] - [cXXX];
-  Result := Word(_TemplateTypeIDs);
+  Result := LongWord(_TemplateTypeIDs);
 end;
 
 function TAmazonCom.GetAvailableControlIDs;

@@ -79,7 +79,7 @@ type
   /// Type definition of the different release categories.
   /// </summary>
 {$ENDREGION}
-  TTypeID = (cAudio, cGameCube, cMovie, cNintendoDS, cPCGames, cPlayStation2, cPlayStation3, cPlayStation4, cPlayStationPortable, cSoftware, cWii, cXbox, cXbox360, cXboxOne, cXXX, cOther);
+  TTypeID = (cAudio, cEBook, cGameCube, cMovie, cNintendoDS, cPCGames, cPlayStation2, cPlayStation3, cPlayStation4, cPlayStationPortable, cSoftware, cWii, cXbox, cXbox360, cXboxOne, cXXX, cOther);
 
   TTypeIDs = set of TTypeID;
 
