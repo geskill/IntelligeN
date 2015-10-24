@@ -6,6 +6,8 @@ This todo list contains all useful ideas for improvement, not necessarily for th
 
 - [ ] Add new TTypeID icons
 
+- [ ] Handle DDos protection from Cloudflare
+
 ###SDK
 
 ######Content-Management-Systems
@@ -38,4 +40,4 @@ This todo list contains all useful ideas for improvement, not necessarily for th
 
 - [ ] Improve WebsiteEditor control arrangement in general tab
 
-- [ ] Add possibility to base general settings upon the TypeID (i.e. PCGames with intelligent_posting and Software not)
+- [ ] Add possibility in WebsiteEditor to base general settings upon the TypeID (i.e. PCGames with intelligent_posting and Software not)

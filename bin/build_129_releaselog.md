@@ -392,6 +392,8 @@
 
 * Fixed a bug of adding a new tab while having MirrorPosition = mpTop
 
+* Fixed a bug switching the view from code to data, while a hint is displayed in code view
+
 * Fixed IScirpt editor enabling/disabling a CMS
 
 * Fixed enabled status of IScript editor buttons at launch

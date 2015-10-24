@@ -144,16 +144,26 @@ end;
 function TTabSheetController.GetViewType;
 begin
   if DataTabSheetItem.Visible then
-    Exit(vtData)
+    Result := vtData
   else
     Result := DesignTabSheetItem.ViewType;
 end;
 
 procedure TTabSheetController.SetViewType(AViewType: TTabViewType);
 begin
-  DataTabSheetItem.Visible := (AViewType = vtData);
-  DesignTabSheetItem.Visible := (AViewType = vtCode) or (AViewType = vtPreview);
-  DesignTabSheetItem.ViewType := AViewType;
+  case AViewType of
+    vtData:
+      begin
+        DesignTabSheetItem.Visible := False;
+        DataTabSheetItem.Visible := True;
+      end;
+    vtCode, vtPreview:
+      begin
+        DataTabSheetItem.Visible := False;
+        DesignTabSheetItem.ViewType := AViewType;
+        DesignTabSheetItem.Visible := True;
+      end;
+  end;
 end;
 
 function TTabSheetController.GetFileName;
@@ -313,7 +323,7 @@ procedure TTabSheetController.RemoveEvents;
 begin
   /// removing tabs with active crawler is forbidden, nevertheless additionally blacklist entry
   // TODO: Re-Implement this
-  //PageController.CrawlerManager.RemoveCrawlerJob(ControlController);
+  // PageController.CrawlerManager.RemoveCrawlerJob(ControlController);
 
   ControlController.OnReleaseNameChange := nil;
 
