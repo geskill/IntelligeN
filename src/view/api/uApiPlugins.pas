@@ -102,8 +102,8 @@ type
 
     function FileHosterCheckFiles(AFileHoster: TPlugInCollectionItem; ALinks: string; out ALinksInfo: TLinksInfo): Boolean;
 
-    function ImageHosterLocalUpload(AImageHoster: TImageHosterCollectionItem; LocalPath: string; ACAPTCHAInput: TCAPTCHAInput = nil): string;
-    function ImageHosterRemoteUpload(AImageHoster: TImageHosterCollectionItem; ImageUrl: string; ACAPTCHAInput: TCAPTCHAInput = nil): string;
+    function ImageHosterLocalUpload(AImageHoster: TImageHosterCollectionItem; ALocalPath: string; out AUrl: WideString; ACAPTCHAInput: TCAPTCHAInput = nil): Boolean;
+    function ImageHosterRemoteUpload(AImageHoster: TImageHosterCollectionItem; AImageUrl: string; out AUrl: WideString; ACAPTCHAInput: TCAPTCHAInput = nil): Boolean;
   end;
 
 implementation
@@ -1205,11 +1205,12 @@ end;
 
 function TApiThreadedPlugin.ImageHosterLocalUpload;
 var
-  LResult: WideString;
-  LHighException: WordBool;
+  LResult, LHighException: WordBool;
+  LResultUrl: WideString;
 begin
-  LResult := '';
+  LResult := False;
   LHighException := False;
+  LResultUrl := '';
 
   LoadImageHosterPlugin(AImageHoster,
     { } procedure(var AImageHosterPlugin: IImageHosterPlugIn)
@@ -1226,7 +1227,7 @@ begin
     { ... } ImageHostResize := AImageHoster.ImageHostResize;
 
     { ... } try
-    { ..... } LResult := LocalUpload(LocalPath);
+    { ..... } LResult := LocalUpload(ALocalPath, LResultUrl);
     { ... } except
     { ..... } LHighException := True;
     { ... } end;
@@ -1244,16 +1245,18 @@ begin
     { . } end;
     { } end, FErrorHandler);
 
+  AUrl := LResultUrl;
   Result := LResult;
 end;
 
 function TApiThreadedPlugin.ImageHosterRemoteUpload;
 var
-  LResult: WideString;
-  LHighException: WordBool;
+  LResult, LHighException: WordBool;
+  LResultUrl: WideString;
 begin
-  LResult := '';
+  LResult := False;
   LHighException := False;
+  LResultUrl := '';
 
   LoadImageHosterPlugin(AImageHoster,
     { } procedure(var AImageHosterPlugin: IImageHosterPlugIn)
@@ -1270,7 +1273,7 @@ begin
     { ... } ImageHostResize := AImageHoster.ImageHostResize;
 
     { ... } try
-    { ..... } LResult := RemoteUpload(ImageUrl);
+    { ..... } LResult := RemoteUpload(AImageUrl, LResultUrl);
     { ... } except
     { ..... } LHighException := True;
     { ... } end;
@@ -1288,6 +1291,7 @@ begin
     { . } end;
     { } end, FErrorHandler);
 
+  AUrl := LResultUrl;
   Result := LResult;
 end;
 

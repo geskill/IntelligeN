@@ -30,7 +30,7 @@ type
   protected
     FData: T;
     procedure DoFinish(var msg: TMessage); message WM_MSG_FINISH;
-    procedure DefaultErrorHandler(AErrorMsg: string);
+    procedure DefaultErrorHandler(AErrorMsg: string); virtual;
     function InBlackList: Boolean;
     function Initialize: Boolean; override;
   public

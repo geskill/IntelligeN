@@ -262,8 +262,8 @@ type
     property AccountName: WideString read GetAccountName write SetAccountName;
     property AccountPassword: WideString read GetAccountPassword write SetAccountPassword;
 
-    function LocalUpload(ALocalPath: WideString): WideString; safecall;
-    function RemoteUpload(AImageUrl: WideString): WideString; safecall;
+    function LocalUpload(ALocalPath: WideString; out AUrl: WideString): WordBool; safecall;
+    function RemoteUpload(ARemoteUrl: WideString; out AUrl: WideString): WordBool; safecall;
 
     property ImageHostResize: TImageHostResize read GetImageHostResize write SetImageHostResize;
   end;

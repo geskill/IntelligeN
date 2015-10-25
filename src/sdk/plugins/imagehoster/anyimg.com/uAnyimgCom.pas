@@ -18,28 +18,32 @@ type
   TAnyimgCom = class(TImageHosterPlugIn)
   private const
     website: string = 'http://anyimg.com/';
-    function Upload(AHTTPParams: IHTTPParams; out AImageUrl: string): Boolean;
+    function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
     function GetName: WideString; override;
-    function LocalUpload(ALocalPath: WideString): WideString; override;
-    function RemoteUpload(AImageUrl: WideString): WideString; override;
+    function LocalUpload(ALocalPath: WideString; out AUrl: WideString): WordBool; override;
+    function RemoteUpload(ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
   end;
 
 implementation
 
 { TAnyimgCom }
 
-function TAnyimgCom.Upload(AHTTPParams: IHTTPParams; out AImageUrl: string): Boolean;
+function TAnyimgCom.Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
+const
+  UPLOADED_STRING: string = 'Uploaded/';
 var
-  HTTPRequest: IHTTPRequest;
-  HTTPOptions: IHTTPOptions;
+  LHTTPRequest: IHTTPRequest;
+  LHTTPOptions: IHTTPOptions;
 
-  RequestID: Double;
+  LRequestID: Double;
+  LHTTPProcess: IHTTPProcess;
 
   // LoginUserNameField,
-  ImageURLBase64: string;
+  LImageURLBase64: string;
 begin
   Result := False;
+  AImageUrl := '';
 
   /// Remote Upload for Accounts not working right now
 {$REGION 'Remote Upload for Accounts'}
@@ -93,8 +97,8 @@ begin
     end;
     *)
 {$ENDREGION}
-  HTTPRequest := THTTPRequest.Create('http://s1.anyimg.com/upload.php');
-  HTTPRequest.Referer := website;
+  LHTTPRequest := THTTPRequest.Create('http://s1.anyimg.com/upload.php');
+  LHTTPRequest.Referer := website;
 
   with AHTTPParams do
   begin
@@ -121,7 +125,7 @@ begin
 
     AddFormField('remoteUploadFileList', '');
 
-    AddFormField('a', '2');
+    AddFormField('a', '2'); // Adult Content
 
     if not(ImageHostResize = irNone) then
     begin
@@ -141,17 +145,19 @@ begin
       AddFormField('imageSize', '1');
   end;
 
-  HTTPOptions := TPlugInHTTPOptions.Create(Self);
-  HTTPOptions.HandleSketchyRedirects := False;
-  HTTPOptions.RedirectMaximum := 0;
+  LHTTPOptions := TPlugInHTTPOptions.Create(Self);
+  LHTTPOptions.HandleSketchyRedirects := False;
+  LHTTPOptions.RedirectMaximum := 0;
 
-  RequestID := HTTPManager.Post(HTTPRequest, AHTTPParams, HTTPOptions);
+  LRequestID := HTTPManager.Post(LHTTPRequest, AHTTPParams, LHTTPOptions);
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  until HTTPManager.HasResult(LRequestID);
 
-  ImageURLBase64 := HTTPManager.GetResult(RequestID).HTTPResult.HTTPResponse.Location;
+  LHTTPProcess := HTTPManager.GetResult(LRequestID);
+
+  LImageURLBase64 := LHTTPProcess.HTTPResult.HTTPResponse.Location;
 
   /// Server liefert nach POST Request URL in Base64 Encoding zurück
   /// Diese muss noch aufgerufen werden, damit das Bild auch verfügbar ist
@@ -159,21 +165,98 @@ begin
   /// Es muss aber nicht abgewartet werden bis der Request ausgeführt wurde,
   /// da das Bild nicht sofort für den User verfügbar sein muss.
 
-  HTTPManager.Get(ImageURLBase64, RequestID, HTTPOptions);
+  if Pos('successfullyUploaded', LImageURLBase64) > 0 then
+  begin
+    HTTPManager.Get(LImageURLBase64, LRequestID, LHTTPOptions);
 
-  with TRegExpr.Create do
-    try
-      InputString := TFormat_MIME64.Decode(copy(ImageURLBase64, Pos('Uploaded/', ImageURLBase64) + length('Uploaded/')));
-      Expression := '"ServerDomain";s:20:"(.*?)".*?"data";a:1:\{i:0;a:3:\{i:0;s:7:"(\w+)";i:1;s:\d+:"(.*?)"';
+  (*
+   a:4:{
+      s:12:"ServerDomain";
+      s:20:"http://s1.anyimg.com";
+      s:4:"data";
+      a:1:{i:0;
+           a:3:{i:0;
+                s:7:"ubg6h3t";
+                i:1;
+                s:36:"35b76d34ee3d3e6cf8f4a474d51ab63f.jpg";
+                i:2;
+                s:1:"2";
+         }
+      }
+      s:6:"images";
+      a:1:{i:0;
+           a:3:{i:0;
+                s:7:"ubg6h3t";
+                i:1;
+                a:2:{s:5:"thumb";
+                     a:3:{i:0;
+                          i:100;
+                          i:1;
+                          i:150;
+                          i:2;
+                          i:4531;
+               }
+               s:5:"image";
+               a:3:{i:0;
+                    i:267;
+                    i:1;
+                    i:400;
+                    i:2;
+                    i:18708;
+               }
+            }
+            i:2;
+            d:0.017841339111328125;
+         }
+      }
+      s:6:"common";
+      a:2:{i:0;
+           N;
+           i:1;
+           s:20:"http://s1.anyimg.com";
+      }
+   }
+  *)
 
-      if Exec(InputString) then
-      begin
-        AImageUrl := Match[1] + '/img/' + Match[2] + '/' + Match[3];
-        Result := True;
+    with TRegExpr.Create do
+      try
+        InputString := TFormat_MIME64.Decode(copy(LImageURLBase64, Pos(UPLOADED_STRING, LImageURLBase64) + length(UPLOADED_STRING)));
+        Expression := '"ServerDomain";s:20:"(.*?)".*?"data";a:1:\{i:0;a:3:\{i:0;s:7:"(\w+)";i:1;s:\d+:"(.*?)"';
+
+        if Exec(InputString) then
+        begin
+          // http://s1.anyimg.com/img/2wfeq97/35b76d34ee3d3e6cf8f4a474d51ab63f.jpg
+
+          AImageUrl := Match[1] + '/img/' + Match[2] + '/' + Match[3];
+          Result := True;
+        end;
+      finally
+        Free;
       end;
-    finally
-      Free;
-    end;
+  end
+  else if LHTTPProcess.HTTPResult.HasError then
+  begin
+    ErrorMsg := LHTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
+  end
+  else
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := LImageURLBase64;
+        Expression := 'com\/(.*?)\/(.*?)$';
+
+        if Exec(InputString) then
+        begin
+          Self.ErrorMsg := Match[1] + ': ' + Match[2];
+        end
+        else
+        begin
+          Self.ErrorMsg := LImageURLBase64;
+        end;
+      finally
+        Free;
+      end;
+  end;
 end;
 
 function TAnyimgCom.GetName: WideString;
@@ -181,42 +264,38 @@ begin
   Result := 'Anyimg.com';
 end;
 
-function TAnyimgCom.LocalUpload(ALocalPath: WideString): WideString;
+function TAnyimgCom.LocalUpload(ALocalPath: WideString; out AUrl: WideString): WordBool;
 var
-  HTTPParams: IHTTPParams;
-  LImageUrl: string;
+  LHTTPParams: IHTTPParams;
 begin
-  Result := '';
+  Result := False;
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
   begin
     AddFormField('uploadMode', 'multi');
 
     AddFile('uploadFiles[]', ALocalPath);
   end;
 
-  if Upload(HTTPParams, LImageUrl) then
-    Result := LImageUrl;
+  Result := Upload(LHTTPParams, AUrl);
 end;
 
-function TAnyimgCom.RemoteUpload(AImageUrl: WideString): WideString;
+function TAnyimgCom.RemoteUpload(ARemoteUrl: WideString; out AUrl: WideString): WordBool;
 var
-  HTTPParams: IHTTPParams;
-  LImageUrl: string;
+  LHTTPParams: IHTTPParams;
 begin
-  Result := AImageUrl;
+  Result := False;
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
   begin
     AddFormField('uploadMode', 'remote');
 
-    AddFormField('remoteFiles[]', AImageUrl);
+    AddFormField('remoteFiles[]', ARemoteUrl);
   end;
 
-  if Upload(HTTPParams, LImageUrl) then
-    Result := LImageUrl;
+  Result := Upload(LHTTPParams, AUrl);
 end;
 
 end.

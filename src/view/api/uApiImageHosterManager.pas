@@ -28,6 +28,7 @@ type
   TImageHosterUploadThread = class(TThreadWorker<TImageHosterData>)
   protected
     FPictureURL: string;
+    procedure DefaultErrorHandler(AErrorMsg: string); override;
   public
     constructor Create(const APictureMirror: IPictureMirror); reintroduce;
     destructor Destroy; override;
@@ -74,6 +75,15 @@ end;
 
 { TImageHosterUploadThread }
 
+procedure TImageHosterUploadThread.DefaultErrorHandler(AErrorMsg: string);
+begin
+  task.Invoke(
+    { } procedure
+    { } begin
+    { . } Data.PictureMirror.ErrorMsg := AErrorMsg;
+    { } end);
+end;
+
 constructor TImageHosterUploadThread.Create(const APictureMirror: IPictureMirror);
 begin
   inherited Create;
@@ -102,20 +112,19 @@ end;
 
 procedure TImageHosterLocalUploadThread.Execute;
 var
-  LUploadURL: string;
+  LUploadedURL: WideString;
 begin
   with TApiThreadedPlugin.Create(task, DefaultErrorHandler) do
     try
-      LUploadURL := ImageHosterLocalUpload(Data.ImageHosterCollectionItem, FLocalPath);
-      if not SameStr('', LUploadURL) then
+      if ImageHosterLocalUpload(Data.ImageHosterCollectionItem, FLocalPath, LUploadedURL) then
       begin
         task.Invoke(
           { } procedure
           { } begin
-          { . } Data.PictureMirror.Value := LUploadURL;
+          { . } Data.PictureMirror.Value := LUploadedURL;
           { . } if SameStr('', Data.PictureMirror.OriginalValue) then
           { . } begin
-          { ... } Data.PictureMirror.Picture.Value := LUploadURL;
+          { ... } Data.PictureMirror.Picture.Value := LUploadedURL;
           { . } end;
           { . } Finish;
           { } end);
@@ -140,17 +149,16 @@ end;
 
 procedure TImageHosterRemoteUploadThread.Execute;
 var
-  LUploadURL: string;
+  LUploadedURL: WideString;
 begin
   with TApiThreadedPlugin.Create(task, DefaultErrorHandler) do
     try
-      LUploadURL := ImageHosterRemoteUpload(Data.ImageHosterCollectionItem, FRemotePath);
-      if not SameStr('', LUploadURL) then
+      if ImageHosterRemoteUpload(Data.ImageHosterCollectionItem, FRemotePath, LUploadedURL) then
       begin
         task.Invoke(
           { } procedure
           { } begin
-          { . } Data.PictureMirror.Value := LUploadURL;
+          { . } Data.PictureMirror.Value := LUploadedURL;
 
           { . } Finish;
           { } end);
