@@ -758,7 +758,7 @@ begin
                   for LControlIndex := 0 to LPicture.MirrorCount - 1 do
                     if SameText(LWhitelist.Strings[LWhitelistIndex], LPicture.Mirror[LControlIndex].Name) then
                     begin
-                      AControlList.Add(LPicture.Mirror[LWhitelistIndex].CloneInstance());
+                      AControlList.Add(LPicture.Mirror[LControlIndex].CloneInstance());
                       LHasPicture := True;
                       Break;
                     end
@@ -797,7 +797,7 @@ begin
               for LControlIndex := 0 to LPicture.MirrorCount - 1 do
                 if (LBlackList.IndexOf(LPicture.Mirror[LControlIndex].Name) = -1) then
                 begin
-                  AControlList.Add(LPicture.Mirror[LWhitelistIndex].CloneInstance());
+                  AControlList.Add(LPicture.Mirror[LControlIndex].CloneInstance());
                   LHasPicture := True;
                   Break;
                 end;
