@@ -1,26 +1,26 @@
-library imageshackus;
+﻿library fastpicru;
 
 {$R *.dres}
 
 uses
   uPlugInInterface,
   uPlugInImageHosterClass,
-  uImageshackUs in 'uImageshackUs.pas';
+  uFastpicRu in 'uFastpicRu.pas';
 
 {$R *.res}
 
 function LoadPlugin(var APlugIn: IImageHosterPlugIn): WordBool; safecall; export;
 begin
   try
-    APlugIn := TImageshackUs.Create;
+    APlugIn := TFastpicRu.Create;
     Result := True;
   except
     Result := False;
   end;
 end;
 
-exports LoadPlugin name 'LoadPlugIn';
+exports
+  LoadPlugIn name 'LoadPlugIn';
 
 begin
-
 end.
