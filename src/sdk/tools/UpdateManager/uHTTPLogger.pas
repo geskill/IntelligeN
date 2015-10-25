@@ -193,7 +193,10 @@ begin
             for I := 0 to RecordCount - 1 do
             begin
               Values[I, tvHTTPParamsColumnName.Index] := AHTTPProcess.HTTPData.HTTPParams.FieldNames[I];
-              Values[I, tvHTTPParamsColumnValue.Index] := AHTTPProcess.HTTPData.HTTPParams.FieldValueFromIndex[I];
+              if AHTTPProcess.HTTPData.HTTPParams.IsFile[I] then
+                Values[I, tvHTTPParamsColumnValue.Index] := AHTTPProcess.HTTPData.HTTPParams.FieldFileNameFromIndex[I]
+              else
+                Values[I, tvHTTPParamsColumnValue.Index] := AHTTPProcess.HTTPData.HTTPParams.FieldValueFromIndex[I];
             end;
           end;
         ptData:
