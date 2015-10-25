@@ -795,7 +795,7 @@ type
   IImageHosterManager = interface
     ['{CC554556-2480-49A7-90B8-A214E6619F25}']
     procedure AddLocalUploadJob(const APictureMirror: IPictureMirror; const ALocalPath: WideString);
-    procedure AddRemoteUploadJob(const APictureMirror: IPictureMirror);
+    procedure AddRemoteUploadJob(const APictureMirror: IPictureMirror; const ARemoteUrl: WideString);
   end;
 
   // // // Page Controller // // //

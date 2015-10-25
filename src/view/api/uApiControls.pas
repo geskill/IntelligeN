@@ -271,12 +271,14 @@ type
     FPicture: IPicture;
     FImage: TImage;
   protected
+    procedure FOnClickIconClick(Sender: TObject);
     function GetPicture: IPicture;
     procedure SetPicture(APicture: IPicture);
     function GetOriginalValue: WideString; override; safecall;
     procedure SetValue(AValue: WideString); override; safecall;
     procedure SetErrorMsg(AErrorMsg: WideString); override; safecall;
     procedure SetHint;
+    procedure ResetErrorMsgAndValue();
   public
     constructor Create(AOwner: TWinControl; APicture: IPicture; AImageHosterName: WideString); reintroduce;
     destructor Destroy; override;
@@ -1409,6 +1411,12 @@ end;
 { ****************************************************************************** }
 {$REGION 'TPictureMirror'}
 
+procedure TPictureMirror.FOnClickIconClick(Sender: TObject);
+begin
+  if not SameStr('', Value) then
+    ShellExecute(0, 'open', PChar(Value), nil, nil, SW_SHOW);
+end;
+
 function TPictureMirror.GetPicture: IPicture;
 begin
   Result := FPicture;
@@ -1444,6 +1452,12 @@ begin
     FImage.Hint := Name + ': ' + Value;
 end;
 
+procedure TPictureMirror.ResetErrorMsgAndValue;
+begin
+  ErrorMsg := '';
+  Value := '';
+end;
+
 constructor TPictureMirror.Create(AOwner: TWinControl; APicture: IPicture; AImageHosterName: WideString);
 begin
   inherited Create(AImageHosterName, APicture.Value);
@@ -1463,6 +1477,8 @@ begin
 
     with SettingsManager.Settings.Plugins do
       Picture.Icon.Assign(TImageHosterCollectionItem(FindPlugInCollectionItemFromCollection(AImageHosterName, ImageHoster)).Icon);
+
+    OnDblClick := FOnClickIconClick; // Double click required
   end;
   FPicture := APicture;
 end;
@@ -1476,12 +1492,14 @@ end;
 
 procedure TPictureMirror.LocalUpload(ALocalPath: WideString);
 begin
+  ResetErrorMsgAndValue;
   FPicture.ControlController.TabSheetController.PageController.ImageHosterManager.AddLocalUploadJob(Self, ALocalPath);
 end;
 
 procedure TPictureMirror.RemoteUpload;
 begin
-  FPicture.ControlController.TabSheetController.PageController.ImageHosterManager.AddRemoteUploadJob(Self);
+  ResetErrorMsgAndValue;
+  FPicture.ControlController.TabSheetController.PageController.ImageHosterManager.AddRemoteUploadJob(Self, OriginalValue);
 end;
 {$ENDREGION}
 { ****************************************************************************** }

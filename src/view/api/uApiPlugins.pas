@@ -103,7 +103,7 @@ type
     function FileHosterCheckFiles(AFileHoster: TPlugInCollectionItem; ALinks: string; out ALinksInfo: TLinksInfo): Boolean;
 
     function ImageHosterLocalUpload(AImageHoster: TImageHosterCollectionItem; ALocalPath: string; out AUrl: WideString; ACAPTCHAInput: TCAPTCHAInput = nil): Boolean;
-    function ImageHosterRemoteUpload(AImageHoster: TImageHosterCollectionItem; AImageUrl: string; out AUrl: WideString; ACAPTCHAInput: TCAPTCHAInput = nil): Boolean;
+    function ImageHosterRemoteUpload(AImageHoster: TImageHosterCollectionItem; ARemoteUrl: string; out AUrl: WideString; ACAPTCHAInput: TCAPTCHAInput = nil): Boolean;
   end;
 
 implementation
@@ -1273,7 +1273,7 @@ begin
     { ... } ImageHostResize := AImageHoster.ImageHostResize;
 
     { ... } try
-    { ..... } LResult := RemoteUpload(AImageUrl, LResultUrl);
+    { ..... } LResult := RemoteUpload(ARemoteUrl, LResultUrl);
     { ... } except
     { ..... } LHighException := True;
     { ... } end;

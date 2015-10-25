@@ -47,14 +47,14 @@ type
   protected
     FRemotePath: string;
   public
-    constructor Create(const APictureMirror: IPictureMirror);
+    constructor Create(const APictureMirror: IPictureMirror; const ARemoteUrl: WideString);
     procedure Execute; override;
   end;
 
   TImageHosterManager = class(TThreadManager<TImageHosterData>, IImageHosterManager)
   public
     procedure AddLocalUploadJob(const APictureMirror: IPictureMirror; const ALocalPath: WideString);
-    procedure AddRemoteUploadJob(const APictureMirror: IPictureMirror);
+    procedure AddRemoteUploadJob(const APictureMirror: IPictureMirror; const ARemoteUrl: WideString);
   end;
 
 implementation
@@ -140,11 +140,11 @@ end;
 
 { TImageHosterRemoteUploadThread }
 
-constructor TImageHosterRemoteUploadThread.Create(const APictureMirror: IPictureMirror);
+constructor TImageHosterRemoteUploadThread.Create(const APictureMirror: IPictureMirror; const ARemoteUrl: WideString);
 begin
   inherited Create(APictureMirror);
 
-  FRemotePath := APictureMirror.OriginalValue;
+  FRemotePath := ARemoteUrl;
 end;
 
 procedure TImageHosterRemoteUploadThread.Execute;
@@ -183,11 +183,11 @@ begin
   CreateTask(LImageHosterUploadThread).MonitorWith(FOmniEM).Run(@TImageHosterLocalUploadThread.Execute);
 end;
 
-procedure TImageHosterManager.AddRemoteUploadJob(const APictureMirror: IPictureMirror);
+procedure TImageHosterManager.AddRemoteUploadJob(const APictureMirror: IPictureMirror; const ARemoteUrl: WideString);
 var
   LImageHosterUploadThread: TImageHosterUploadThread;
 begin
-  LImageHosterUploadThread := TImageHosterRemoteUploadThread.Create(APictureMirror);
+  LImageHosterUploadThread := TImageHosterRemoteUploadThread.Create(APictureMirror, ARemoteUrl);
   AddJob(LImageHosterUploadThread.Data);
   CreateTask(LImageHosterUploadThread).MonitorWith(FOmniEM).Run(@TImageHosterRemoteUploadThread.Execute);
 end;
