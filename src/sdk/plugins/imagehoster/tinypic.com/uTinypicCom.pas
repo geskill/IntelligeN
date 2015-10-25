@@ -4,61 +4,64 @@ interface
 
 uses
   // Delphi
-  SysUtils, Classes, Controls, HTTPApp,
+  SysUtils, StrUtils, Classes, Controls, HTTPApp,
   // RegEx
   RegExpr,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInImageHosterClass, uPlugInHTTPClasses;
+  uPlugInImageHosterClass, uPlugInHTTPClasses,
+  // Utils
+  uHTMLUtils;
 
 type
   TTinypicCom = class(TImageHosterPlugIn)
   private
-    function Upload(AHTTPParams: IHTTPParams; out AImageUrl: string): Boolean;
+    function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
     function GetName: WideString; override;
-    function LocalUpload(ALocalPath: WideString): WideString; override;
-    function RemoteUpload(AImageUrl: WideString): WideString; override;
+    function LocalUpload(ALocalPath: WideString; out AUrl: WideString): WordBool; override;
+    function RemoteUpload(ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
   end;
 
 implementation
 
 { TTinypicCom }
 
-function TTinypicCom.Upload(AHTTPParams: IHTTPParams; out AImageUrl: string): Boolean;
+function TTinypicCom.Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
 var
-  RequestID: Double;
+  LRequestID: Double;
+  LHTTPProcess: IHTTPProcess;
 
-  ResponseStrUploadPage, ResponseStr: string;
+  LResponsePluginPage: string;
 
-  _uploadserver, _uid, _upk: string;
+  LUploadServer, LUID, LUPK: string;
 begin
   Result := False;
 
-  RequestID := HTTPManager.Get(THTTPRequest.Create('http://plugin.tinypic.com/plugin/index.php'), TPlugInHTTPOptions.Create(Self));
+  LRequestID := HTTPManager.Get(THTTPRequest.Create('http://plugin.tinypic.com/plugin/index.php'), TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  until HTTPManager.HasResult(LRequestID);
 
-  ResponseStrUploadPage := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
+  LResponsePluginPage := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
 
   with TRegExpr.Create do
     try
-      InputString := ResponseStrUploadPage;
+      InputString := LResponsePluginPage;
 
       Expression := '<form action="(.*?)"';
       if Exec(InputString) then
-        _uploadserver := Match[1];
+        LUploadServer := Match[1];
 
       Expression := 'name="UPLOAD_IDENTIFIER".*?value="(.*?)"';
       if Exec(InputString) then
-        _uid := Match[1];
+        LUID := Match[1];
 
       Expression := 'name="upk".*?value="(.*?)"';
       if Exec(InputString) then
-        _upk := Match[1];
+        LUPK := Match[1];
     finally
       Free;
     end;
@@ -66,8 +69,8 @@ begin
   with AHTTPParams do
   begin
     AddFormField('upload_form', '');
-    AddFormField('UPLOAD_IDENTIFIER', _uid);
-    AddFormField('upk', _upk);
+    AddFormField('UPLOAD_IDENTIFIER', LUID);
+    AddFormField('upk', LUPK);
     AddFormField('domain_lang', 'en');
     AddFormField('action', 'upload');
     AddFormField('popts', 'l,narrow|t,both|c,html|i,en|s,true');
@@ -78,69 +81,92 @@ begin
     AddFormField('upload_form', '');
   end;
 
-  RequestID := HTTPManager.Post(_uploadserver, RequestID, AHTTPParams, TPlugInHTTPOptions.Create(Self));
+  LRequestID := HTTPManager.Post(LUploadServer, LRequestID, AHTTPParams, TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  until HTTPManager.HasResult(LRequestID);
 
-  ResponseStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
+  LHTTPProcess := HTTPManager.GetResult(LRequestID);
 
-  with TRegExpr.Create do
-    try
-      InputString := ResponseStr;
+  if (Pos('name="pic"', string(LHTTPProcess.HTTPResult.SourceCode)) > 0) then
+  begin
 
-      ModifierS := True;
-      Expression := 'name="pic" value="(.*?)".*?name="s" value="(\d+)".*?name="ival" value="(.*?)".*?name="ext" value="(.*?)"';
-      if Exec(InputString) then
-      begin
-        AImageUrl := 'http://i' + Match[3] + '.tinypic.com/' + Match[1] + Match[4];
-        Result := True;
+    with TRegExpr.Create do
+      try
+        InputString := LHTTPProcess.HTTPResult.SourceCode;
+
+        ModifierS := True;
+        Expression := 'name="pic" value="(.*?)".*?name="s" value="(\d+)".*?name="ival" value="(.*?)".*?name="ext" value="(.*?)"';
+        if Exec(InputString) then
+        begin
+          // http://oi61.tinypic.com/or851t.jpg
+
+          AImageUrl := 'http://oi' + Match[3] + '.tinypic.com/' + Match[1] + '.jpg';
+          Result := True;
+        end;
+      finally
+        Free;
       end;
-    finally
-      Free;
-    end;
+
+  end
+  else if LHTTPProcess.HTTPResult.HasError then
+  begin
+    ErrorMsg := LHTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
+  end
+  else
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := string(LHTTPProcess.HTTPResult.SourceCode);
+        Expression := 'name="message" value="(.*?)".*?<strong>(.*?)<\/';
+
+        if Exec(InputString) then
+        begin
+          Self.ErrorMsg := Trim(HTML2Text(Match[2])) + ': ' + Match[1];
+        end;
+      finally
+        Free;
+      end;
+  end;
+
 end;
 
 function TTinypicCom.GetName;
 begin
-  result := 'Tinypic.com';
+  Result := 'Tinypic.com';
 end;
 
-function TTinypicCom.LocalUpload(ALocalPath: WideString): WideString;
+function TTinypicCom.LocalUpload;
 var
-  HTTPParams: IHTTPParams;
-  LImageUrl: string;
+  LHTTPParams: IHTTPParams;
 begin
-  Result := '';
+  Result := False;
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
   begin
     AddFile('the_file', ALocalPath);
     AddFormField('file_type', 'image');
   end;
 
-  if Upload(HTTPParams, LImageUrl) then
-    Result := LImageUrl;
+  Result := Upload(LHTTPParams, AUrl);
 end;
 
 function TTinypicCom.RemoteUpload;
 var
-  HTTPParams: IHTTPParams;
-  LImageUrl: string;
+  LHTTPParams: IHTTPParams;
 begin
-  Result := AImageUrl;
+  Result := False;
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
   begin
-    AddFormField('url', AImageUrl);
+    AddFormField('url', ARemoteUrl);
     AddFormField('file_type', 'url');
   end;
 
-  if Upload(HTTPParams, LImageUrl) then
-    Result := LImageUrl;
+  Result := Upload(LHTTPParams, AUrl);
 end;
 
 end.

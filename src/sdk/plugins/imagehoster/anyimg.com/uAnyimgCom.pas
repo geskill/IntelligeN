@@ -165,7 +165,7 @@ begin
   /// Es muss aber nicht abgewartet werden bis der Request ausgeführt wurde,
   /// da das Bild nicht sofort für den User verfügbar sein muss.
 
-  if Pos('successfullyUploaded', LImageURLBase64) > 0 then
+  if (Pos('successfullyUploaded', LImageURLBase64) > 0) then
   begin
     HTTPManager.Get(LImageURLBase64, LRequestID, LHTTPOptions);
 
@@ -264,7 +264,7 @@ begin
   Result := 'Anyimg.com';
 end;
 
-function TAnyimgCom.LocalUpload(ALocalPath: WideString; out AUrl: WideString): WordBool;
+function TAnyimgCom.LocalUpload;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -281,7 +281,7 @@ begin
   Result := Upload(LHTTPParams, AUrl);
 end;
 
-function TAnyimgCom.RemoteUpload(ARemoteUrl: WideString; out AUrl: WideString): WordBool;
+function TAnyimgCom.RemoteUpload;
 var
   LHTTPParams: IHTTPParams;
 begin

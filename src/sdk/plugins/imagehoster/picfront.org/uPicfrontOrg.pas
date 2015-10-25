@@ -17,27 +17,27 @@ uses
 type
   TPicfrontOrg = class(TImageHosterPlugIn)
   private
-    function Upload(AHTTPParams: IHTTPParams; out AImageUrl: string): Boolean;
+    function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
     function GetName: WideString; override;
-    function LocalUpload(ALocalPath: WideString): WideString; override;
-    function RemoteUpload(AImageUrl: WideString): WideString; override;
+    function LocalUpload(ALocalPath: WideString; out AUrl: WideString): WordBool; override;
+    function RemoteUpload(ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
   end;
 
 implementation
 
 { TPicfrontOrg }
 
-function TPicfrontOrg.Upload(AHTTPParams: IHTTPParams; out AImageUrl: string): Boolean;
-const
-  SearchStringBegin: string = '[IMG]';
-  SearchStringEnd: string = '[/IMG]';
+function TPicfrontOrg.Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
 var
-  RequestID: Double;
+  LHTTPRequest: IHTTPRequest;
 
-  ResponeStr, Text: string;
+  LRequestID: Double;
+  LHTTPProcess: IHTTPProcess;
 begin
   result := False;
+
+  LHTTPRequest := THTTPRequest.Create('http://www12.picfront.org/index.php');
 
   with AHTTPParams do
   begin
@@ -73,21 +73,39 @@ begin
     end;
   end;
 
-  RequestID := HTTPManager.Post(THTTPRequest.Create('http://www12.picfront.org/index.php'), AHTTPParams, TPlugInHTTPOptions.Create(Self));
+  LRequestID := HTTPManager.Post(LHTTPRequest, AHTTPParams, TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  until HTTPManager.HasResult(LRequestID);
 
-  ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
+  LHTTPProcess := HTTPManager.GetResult(LRequestID);
 
-  Text := copy(ResponeStr, Pos(SearchStringBegin, ResponeStr) + length(SearchStringBegin));
-  Text := copy(Text, 0, Pos(SearchStringEnd, Text) - 1);
-
-  if not(Text = '') then
+  if (Pos('[IMG]', string(LHTTPProcess.HTTPResult.SourceCode)) > 0) then
   begin
-    AImageUrl := StringReplace(Text, '/thb/', '/img/', []);
-    Result := True;
+
+    with TRegExpr.Create do
+      try
+        InputString := string(LHTTPProcess.HTTPResult.SourceCode);
+        Expression := '\[IMG\](.*?)\[\/IMG\]';
+
+        if Exec(InputString) then
+        begin
+          AImageUrl := StringReplace(Match[1], '/thb/', '/img/', []);
+          Result := True;
+        end;
+      finally
+        Free;
+      end;
+
+  end
+  else if LHTTPProcess.HTTPResult.HasError then
+  begin
+    ErrorMsg := LHTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
+  end
+  else
+  begin
+    Self.ErrorMsg := 'Unknown error';
   end;
 end;
 
@@ -96,34 +114,30 @@ begin
   result := 'Picfront.org';
 end;
 
-function TPicfrontOrg.LocalUpload(ALocalPath: WideString): WideString;
+function TPicfrontOrg.LocalUpload;
 var
-  HTTPParams: IHTTPParams;
-  LImageUrl: string;
+  LHTTPParams: IHTTPParams;
 begin
-  Result := '';
+  Result := False;
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
     AddFile('file_0', ALocalPath);
 
-  if Upload(HTTPParams, LImageUrl) then
-    Result := LImageUrl;
+  Result := Upload(LHTTPParams, AUrl);
 end;
 
 function TPicfrontOrg.RemoteUpload;
 var
-  HTTPParams: IHTTPParams;
-  LImageUrl: string;
+  LHTTPParams: IHTTPParams;
 begin
-  Result := AImageUrl;
+  Result := False;
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
-    AddFormField('urluploadfile_0', AImageUrl);
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
+    AddFormField('urluploadfile_0', ARemoteUrl);
 
-  if Upload(HTTPParams, LImageUrl) then
-    Result := LImageUrl;
+  Result := Upload(LHTTPParams, AUrl);
 end;
 
 end.

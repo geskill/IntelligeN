@@ -16,47 +16,32 @@ type
   TImgurCom = class(TImageHosterPlugIn)
   private const
     website: string = 'http://imgur.com/';
-    function Upload(AHTTPParams: IHTTPParams; out AImageUrl: string; AFileExt: string): Boolean;
+    function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString; AFileExt: string): Boolean;
   public
     function GetName: WideString; override;
-    function LocalUpload(ALocalPath: WideString): WideString; override;
-    function RemoteUpload(AImageUrl: WideString): WideString; override;
+    function LocalUpload(ALocalPath: WideString; out AUrl: WideString): WordBool; override;
+    function RemoteUpload(ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
   end;
 
 implementation
 
 { TImgurCom }
 
-function TImgurCom.Upload(AHTTPParams: IHTTPParams; out AImageUrl: string; AFileExt: string): Boolean;
+function TImgurCom.Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString; AFileExt: string): Boolean;
 var
-  HTTPRequest: IHTTPRequest;
+  LHTTPRequest: IHTTPRequest;
 
-  RequestID: Double;
-
-  sid_hash: string;
+  LRequestID: Double;
+  LHTTPProcess: IHTTPProcess;
 begin
   Result := False;
 
-  HTTPRequest := THTTPRequest.Create(website);
-  HTTPRequest.CustomHeaders.Add('X-Requested-With: XMLHttpRequest');
-  HTTPRequest.Referer := website;
-
-  RequestID := HTTPManager.Get(HTTPRequest, TPlugInHTTPOptions.Create(Self));
-
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID);
-
-  with TRegExpr.Create do
-    try
-      InputString := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
-      Expression := 'sid_hash   = ''(.*?)''';
-
-      if Exec(InputString) then
-        sid_hash := Match[1];
-    finally
-      Free;
-    end;
+  LHTTPRequest := THTTPRequest.Create(website + 'upload');
+  with LHTTPRequest do
+  begin
+    CustomHeaders.Add('X-Requested-With: XMLHttpRequest');
+    Referer := website;
+  end;
 
   with AHTTPParams do
   begin
@@ -67,27 +52,53 @@ begin
     AddFormField('catify', '0');
   end;
 
-  RequestID := HTTPManager.Post(website + 'upload?sid_hash=' + sid_hash, RequestID, AHTTPParams, TPlugInHTTPOptions.Create(Self));
+  LRequestID := HTTPManager.Post(LHTTPRequest, AHTTPParams, TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  until HTTPManager.HasResult(LRequestID);
 
-  with TRegExpr.Create do
-    try
-      InputString := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
-      Expression := '"hash":"(.*?)"';
+  LHTTPProcess := HTTPManager.GetResult(LRequestID);
 
-      if Exec(InputString) then
-      begin
-        AImageUrl := 'http://i.imgur.com/' + Match[1] + AFileExt ;
-        Result := True;
+  if (Pos('hash', string(LHTTPProcess.HTTPResult.SourceCode)) > 0) then
+  begin
+
+    with TRegExpr.Create do
+      try
+        InputString := LHTTPProcess.HTTPResult.SourceCode;
+        Expression := '"hash":"(.*?)"';
+
+        if Exec(InputString) then
+        begin
+          AImageUrl := 'http://i.imgur.com/' + Match[1] + AFileExt;
+          Result := True;
+        end;
+
+        // http://i.imgur.com/voxuS.png
+      finally
+        Free;
       end;
 
-      // http://i.imgur.com/voxuS.png
-    finally
-      Free;
-    end;
+  end
+  else if LHTTPProcess.HTTPResult.HasError then
+  begin
+    ErrorMsg := LHTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
+  end
+  else
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := string(LHTTPProcess.HTTPResult.SourceCode);
+        Expression := '"message":"(.*?)"';
+
+        if Exec(InputString) then
+        begin
+          Self.ErrorMsg := Match[1];
+        end;
+      finally
+        Free;
+      end;
+  end;
 end;
 
 function TImgurCom.GetName: WideString;
@@ -95,34 +106,30 @@ begin
   Result := 'Imgur.com';
 end;
 
-function TImgurCom.LocalUpload(ALocalPath: WideString): WideString;
+function TImgurCom.LocalUpload;
 var
-  HTTPParams: IHTTPParams;
-  LImageUrl: string;
+  LHTTPParams: IHTTPParams;
 begin
-  Result := '';
+  Result := False;
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
     AddFile('Filedata', ALocalPath);
 
-  if Upload(HTTPParams, LImageUrl, ExtractFileExt(ALocalPath)) then
-    Result := LImageUrl;
+  Result := Upload(LHTTPParams, AUrl, ExtractFileExt(ALocalPath));
 end;
 
-function TImgurCom.RemoteUpload(AImageUrl: WideString): WideString;
+function TImgurCom.RemoteUpload;
 var
-  HTTPParams: IHTTPParams;
-  LImageUrl: string;
+  LHTTPParams: IHTTPParams;
 begin
-  Result := AImageUrl;
+  Result := False;
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
-    AddFormField('url', AImageUrl);
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
+    AddFormField('url', ARemoteUrl);
 
-  if Upload(HTTPParams, LImageUrl, ExtractFileExt(AImageUrl)) then
-    Result := LImageUrl;
+  Result := Upload(LHTTPParams, AUrl, ExtractFileExt(ARemoteUrl));
 end;
 
 end.

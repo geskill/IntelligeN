@@ -4,67 +4,73 @@ interface
 
 uses
   // Delphi
-  Windows,
+  Windows, SysUtils,
   // RegEx
   RegExpr,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInImageHosterClass, uPlugInHTTPClasses;
+  uPlugInImageHosterClass, uPlugInHTTPClasses,
+  // Utils
+  uHTMLUtils;
 
 type
   TPicloadOrg = class(TImageHosterPlugIn)
   private const
     website: string = 'http://picload.org/';
-    function Upload(AHTTPParams: IHTTPParams; out AImageUrl: string): Boolean;
+    function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
     function GetName: WideString; override;
-    function LocalUpload(ALocalPath: WideString): WideString; override;
-    function RemoteUpload(AImageUrl: WideString): WideString; override;
+    function LocalUpload(ALocalPath: WideString; out AUrl: WideString): WordBool; override;
+    function RemoteUpload(ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
   end;
 
 implementation
 
 { TPicloadOrg }
 
-function TPicloadOrg.Upload(AHTTPParams: IHTTPParams; out AImageUrl: string): Boolean;
+function TPicloadOrg.Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
 var
-  HTTPRequest: IHTTPRequest;
-  HTTPOptions: IHTTPOptions;
+  LHTTPRequest: IHTTPRequest;
+  LHTTPOptions: IHTTPOptions;
 
-  RequestID: Double;
+  LRequestID: Double;
+  LHTTPProcess: IHTTPProcess;
 begin
   Result := False;
 
-  if not(Pos('picload.org/', string(AImageUrl)) > 0) then
+  LHTTPRequest := THTTPRequest.Create('http://upload.picload.org/upload.html');
+  with LHTTPRequest do
   begin
-    HTTPRequest := THTTPRequest.Create('http://upload.picload.org/upload.html');
-    with HTTPRequest do
-    begin
-      AcceptEncoding := 'deflate, identity, *;q=0';
-      Referer := website;
-    end;
+    AcceptEncoding := 'deflate, identity, *;q=0';
+    Referer := website;
+  end;
 
-    with AHTTPParams do
-    begin
-      AddFormField('sid', '');
-      AddFormField('uid', '');
-      AddFormField('upsubmit', 'Upload');
-    end;
+  with AHTTPParams do
+  begin
+    AddFormField('sid', '');
+    AddFormField('uid', '');
+    AddFormField('upsubmit', 'Upload');
+  end;
 
-    HTTPOptions := TPlugInHTTPOptions.Create(Self);
-    HTTPOptions.UseCompressor := False;
+  LHTTPOptions := TPlugInHTTPOptions.Create(Self);
+  LHTTPOptions.UseCompressor := False;
 
-    RequestID := HTTPManager.Post(HTTPRequest, AHTTPParams, HTTPOptions);
+  LRequestID := HTTPManager.Post(LHTTPRequest, AHTTPParams, LHTTPOptions);
 
-    repeat
-      sleep(50);
-    until HTTPManager.HasResult(RequestID);
+  repeat
+    sleep(50);
+  until HTTPManager.HasResult(LRequestID);
+
+  LHTTPProcess := HTTPManager.GetResult(LRequestID);
+
+  if (Pos('Direktlink', string(LHTTPProcess.HTTPResult.SourceCode)) > 0) then
+  begin
 
     with TRegExpr.Create do
       try
-        InputString := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
-        Expression := '<b>Direktlink</b><br />.*?value="(.*?)"';
+        InputString := LHTTPProcess.HTTPResult.SourceCode;
+        Expression := 'Direktlink.*?value="(.*?)"';
 
         if Exec(InputString) then
         begin
@@ -74,9 +80,27 @@ begin
       finally
         Free;
       end;
+
+  end
+  else if LHTTPProcess.HTTPResult.HasError then
+  begin
+    ErrorMsg := LHTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
   end
   else
-    ErrorMsg := 're-upload to this hoster is forbidden!';
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := string(LHTTPProcess.HTTPResult.SourceCode);
+        Expression := 'class="message">(.*?)<\/';
+
+        if Exec(InputString) then
+        begin
+          Self.ErrorMsg := Trim(HTML2Text(Match[1]));
+        end;
+      finally
+        Free;
+      end;
+  end;
 end;
 
 function TPicloadOrg.GetName;
@@ -84,40 +108,36 @@ begin
   Result := 'Picload.org';
 end;
 
-function TPicloadOrg.LocalUpload(ALocalPath: WideString): WideString;
+function TPicloadOrg.LocalUpload;
 var
-  HTTPParams: IHTTPParams;
-  LImageUrl: string;
+  LHTTPParams: IHTTPParams;
 begin
-  Result := '';
+  Result := False;
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
   begin
     AddFormField('type', 'local');
     AddFile('images[]', ALocalPath);
   end;
 
-  if Upload(HTTPParams, LImageUrl) then
-    Result := LImageUrl;
+  Result := Upload(LHTTPParams, AUrl);
 end;
 
 function TPicloadOrg.RemoteUpload;
 var
-  HTTPParams: IHTTPParams;
-  LImageUrl: string;
+  LHTTPParams: IHTTPParams;
 begin
-  Result := AImageUrl;
+  Result := False;
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
   begin
     AddFormField('type', 'remote');
-    AddFormField('links', AImageUrl);
+    AddFormField('links', ARemoteUrl);
   end;
 
-  if Upload(HTTPParams, LImageUrl) then
-    Result := LImageUrl;
+  Result := Upload(LHTTPParams, AUrl);
 end;
 
 end.

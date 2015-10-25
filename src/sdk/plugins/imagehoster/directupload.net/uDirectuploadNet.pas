@@ -10,57 +10,84 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInImageHosterClass, uPlugInHTTPClasses;
+  uPlugInImageHosterClass, uPlugInHTTPClasses,
+  // Utils
+  uHTMLUtils;
 
 type
   TDirectuploadNet = class(TImageHosterPlugIn)
   private const
     website: string = 'http://www.directupload.net/';
-    function Upload(AHTTPParams: IHTTPParams; out AImageUrl: string): Boolean;
+    function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
     function GetName: WideString; override;
-    function LocalUpload(ALocalPath: WideString): WideString; override;
-    function RemoteUpload(AImageUrl: WideString): WideString; override;
+    function LocalUpload(ALocalPath: WideString; out AUrl: WideString): WordBool; override;
+    function RemoteUpload(ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
   end;
 
 implementation
 
 { TDirectuploadNet }
 
-function TDirectuploadNet.Upload(AHTTPParams: IHTTPParams; out AImageUrl: string): Boolean;
-const
-  SearchStringBegin: string = '[URL=http://www.directupload.net][IMG]';
-  SearchStringEnd: string = '[/IMG]';
+function TDirectuploadNet.Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
 var
-  HTTPRequest: IHTTPRequest;
+  LHTTPRequest: IHTTPRequest;
 
-  RequestID: Double;
-
-  ResponeStr, Text: string;
+  LRequestID: Double;
+  LHTTPProcess: IHTTPProcess;
 begin
   Result := False;
 
-  HTTPRequest := THTTPRequest.Create(website + 'index.php?mode=upload');
-  HTTPRequest.Referer := website;
+  LHTTPRequest := THTTPRequest.Create(website + 'index.php?mode=upload');
+  LHTTPRequest.Referer := website;
 
   with AHTTPParams do
     AddFormField('f_up_form', '');
 
-  RequestID := HTTPManager.Post(HTTPRequest, AHTTPParams, TPlugInHTTPOptions.Create(Self));
+  LRequestID := HTTPManager.Post(LHTTPRequest, AHTTPParams, TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  until HTTPManager.HasResult(LRequestID);
 
-  ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
+  LHTTPProcess := HTTPManager.GetResult(LRequestID);
 
-  Text := copy(ResponeStr, Pos(SearchStringBegin, ResponeStr) + length(SearchStringBegin));
-  Text := copy(Text, 0, Pos(SearchStringEnd, string(Text)) - 1);
-
-  if not SameStr('', Text) then
+  if (Pos('[IMG]', string(LHTTPProcess.HTTPResult.SourceCode)) > 0) then
   begin
-    AImageUrl := Text;
-    Result := True;
+
+    with TRegExpr.Create do
+      try
+        InputString := string(LHTTPProcess.HTTPResult.SourceCode);
+        Expression := 'directupload\.net\]\[IMG\](.*?)\[\/IMG\]';
+
+        if Exec(InputString) then
+        begin
+          AImageUrl := Match[1];
+          Result := True;
+        end;
+      finally
+        Free;
+      end;
+
+  end
+  else if LHTTPProcess.HTTPResult.HasError then
+  begin
+    ErrorMsg := LHTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
+  end
+  else
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := string(LHTTPProcess.HTTPResult.SourceCode);
+        Expression := '"message error">(.*?)<\/div>';
+
+        if Exec(InputString) then
+        begin
+          Self.ErrorMsg := Trim(HTML2Text(Match[1]));
+        end;
+      finally
+        Free;
+      end;
   end;
 end;
 
@@ -69,40 +96,36 @@ begin
   Result := 'Directupload.net';
 end;
 
-function TDirectuploadNet.LocalUpload(ALocalPath: WideString): WideString;
+function TDirectuploadNet.LocalUpload;
 var
-  HTTPParams: IHTTPParams;
-  LImageUrl: string;
+  LHTTPParams: IHTTPParams;
 begin
-  Result := '';
+  Result := False;
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
   begin
     AddFormField('input', 'file');
     AddFile('bilddatei', ALocalPath);
   end;
 
-  if Upload(HTTPParams, LImageUrl) then
-    Result := LImageUrl;
+  Result := Upload(LHTTPParams, AUrl);
 end;
 
-function TDirectuploadNet.RemoteUpload(AImageUrl: WideString): WideString;
+function TDirectuploadNet.RemoteUpload;
 var
-  HTTPParams: IHTTPParams;
-  LImageUrl: string;
+  LHTTPParams: IHTTPParams;
 begin
-  Result := AImageUrl;
+  Result := False;
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
   begin
     AddFormField('input', 'url');
-    AddFormField('image_link', AImageUrl);
+    AddFormField('image_link', ARemoteUrl);
   end;
 
-  if Upload(HTTPParams, LImageUrl) then
-    Result := LImageUrl;
+  Result := Upload(LHTTPParams, AUrl);
 end;
 
 end.

@@ -14,28 +14,30 @@ type
   TDdlwOrg = class(TImageHosterPlugIn)
   private const
     website: string = 'http://ddlw.org/';
-    function Upload(AHTTPParams: IHTTPParams; out AImageUrl: string): Boolean;
+    function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
     function GetName: WideString; override;
-    function LocalUpload(ALocalPath: WideString): WideString; override;
-    function RemoteUpload(AImageUrl: WideString): WideString; override;
+    function LocalUpload(ALocalPath: WideString; out AUrl: WideString): WordBool; override;
+    function RemoteUpload(ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
   end;
 
 implementation
 
 { TDdlwOrg }
 
-function TDdlwOrg.Upload(AHTTPParams: IHTTPParams; out AImageUrl: string): Boolean;
+function TDdlwOrg.Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
 var
-  HTTPRequest: IHTTPRequest;
-  HTTPOptions: IHTTPOptions;
+  LHTTPRequest: IHTTPRequest;
+  LHTTPOptions: IHTTPOptions;
 
-  RequestID: Double;
+  LRequestID: Double;
+  LHTTPProcess: IHTTPProcess;
 begin
   Result := False;
+  AImageUrl := '';
 
-  HTTPRequest := THTTPRequest.Create(website + 'upload.py');
-  HTTPRequest.Referer := website;
+  LHTTPRequest := THTTPRequest.Create(website + 'upload.py');
+  LHTTPRequest.Referer := website;
 
   with AHTTPParams do
   begin
@@ -57,20 +59,33 @@ begin
       AddFormField('imgsize', 'original');
   end;
 
-  HTTPOptions := TPlugInHTTPOptions.Create(Self);
-  HTTPOptions.HandleSketchyRedirects := False;
-  HTTPOptions.RedirectMaximum := 0;
+  LHTTPOptions := TPlugInHTTPOptions.Create(Self);
+  with LHTTPOptions do
+  begin
+    HandleSketchyRedirects := False;
+    RedirectMaximum := 0;
+  end;
 
-  RequestID := HTTPManager.Post(HTTPRequest, AHTTPParams, HTTPOptions);
+  LRequestID := HTTPManager.Post(LHTTPRequest, AHTTPParams, LHTTPOptions);
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  until HTTPManager.HasResult(LRequestID);
 
-  if not SameStr('', HTTPManager.GetResult(RequestID).HTTPResult.HTTPResponse.Location) then
+  LHTTPProcess := HTTPManager.GetResult(LRequestID);
+
+  if (Pos('/img/', string(LHTTPProcess.HTTPResult.HTTPResponse.Location)) > 0) then
   begin
-    AImageUrl := HTTPManager.GetResult(RequestID).HTTPResult.HTTPResponse.Location;
+    AImageUrl := LHTTPProcess.HTTPResult.HTTPResponse.Location;
     Result := True;
+  end
+  else if LHTTPProcess.HTTPResult.HasError then
+  begin
+    ErrorMsg := LHTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
+  end
+  else
+  begin
+    ErrorMsg := LHTTPProcess.HTTPResult.SourceCode;
   end;
 end;
 
@@ -79,34 +94,30 @@ begin
   Result := 'Ddlw.org';
 end;
 
-function TDdlwOrg.LocalUpload(ALocalPath: WideString): WideString;
+function TDdlwOrg.LocalUpload;
 var
-  HTTPParams: IHTTPParams;
-  LImageUrl: string;
+  LHTTPParams: IHTTPParams;
 begin
-  Result := '';
+  Result := False;
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
     AddFile('file', ALocalPath);
 
-  if Upload(HTTPParams, LImageUrl) then
-    Result := LImageUrl;
+  Result := Upload(LHTTPParams, AUrl);
 end;
 
-function TDdlwOrg.RemoteUpload(AImageUrl: WideString): WideString;
+function TDdlwOrg.RemoteUpload;
 var
-  HTTPParams: IHTTPParams;
-  LImageUrl: string;
+  LHTTPParams: IHTTPParams;
 begin
-  Result := AImageUrl;
+  Result := False;
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
-    AddFormField('url', AImageUrl);
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
+    AddFormField('url', ARemoteUrl);
 
-  if Upload(HTTPParams, LImageUrl) then
-    Result := LImageUrl;
+  Result := Upload(LHTTPParams, AUrl);
 end;
 
 end.
