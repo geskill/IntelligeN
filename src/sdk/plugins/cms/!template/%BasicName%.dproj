@@ -24,7 +24,7 @@
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<UsePackages>true</UsePackages>
 			<DCC_UsePackage>framework</DCC_UsePackage>
-			<DCC_DependencyCheckOutputName>..\..\..\..\bin_portable\plugins\%BasicName%.dll</DCC_DependencyCheckOutputName>
+			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\%BasicName%.dll</DCC_DependencyCheckOutputName>
 			<GenDll>true</GenDll>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DCC_Platform>x86</DCC_Platform>
@@ -96,11 +96,11 @@
 						<VersionInfoKeys Name="FileDescription"/>
 						<VersionInfoKeys Name="FileVersion">%MajorVer%.%MinorVer%.%Release%.%Build%</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
-						<VersionInfoKeys Name="LegalCopyright"/>
+						<VersionInfoKeys Name="LegalCopyright">%Copyright%</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks"/>
 						<VersionInfoKeys Name="OriginalFilename"/>
 						<VersionInfoKeys Name="ProductName"/>
-						<VersionInfoKeys Name="ProductVersion">%MajorVer%.%MinorVer%.%Release%.%Build%</VersionInfoKeys>
+						<VersionInfoKeys Name="ProductVersion">2.5</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 					<Excluded_Packages/>
