@@ -273,6 +273,7 @@ type
   protected
     function GetPicture: IPicture;
     procedure SetPicture(APicture: IPicture);
+    function GetOriginalValue: WideString; override; safecall;
     procedure SetValue(AValue: WideString); override; safecall;
     procedure SetErrorMsg(AErrorMsg: WideString); override; safecall;
     procedure SetHint;
@@ -1418,6 +1419,11 @@ begin
   FPicture := APicture;
 end;
 
+function TPictureMirror.GetOriginalValue: WideString;
+begin
+  Result := FPicture.Value;
+end;
+
 procedure TPictureMirror.SetValue(AValue: WideString);
 begin
   inherited SetValue(AValue);
@@ -1434,8 +1440,6 @@ procedure TPictureMirror.SetHint;
 begin
   if not SameStr('', ErrorMsg) then
     FImage.Hint := Name + ' Error:' + sLineBreak + ErrorMsg
-  else if SameStr('', Value) then
-    FImage.Hint := Name + ': (no value)'
   else
     FImage.Hint := Name + ': ' + Value;
 end;
