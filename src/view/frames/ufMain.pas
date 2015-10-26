@@ -139,6 +139,8 @@ begin
 
   ACanClose := not CrawlingActive;
 
+  // TODO: If app is closed, this message will appear in a loop. Another problem exists for two tabs crawling
+  // at the same time FActiveCrawlerControlController only stores active tab.
   if CrawlingActive then
     MessageDlg('You cannot close this tab because the crawler for this tab is still active! ', mtWarning, [mbOK], 0);
 end;

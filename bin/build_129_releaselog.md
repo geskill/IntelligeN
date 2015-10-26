@@ -388,7 +388,13 @@
 
 * Added tiff image file support
 
+* Added fastpic.ru image hoster
+
+* Added possibility to visit uploaded image on picture mirror via double click on the image hoster icon
+
 * Improved FirstStart performance
+
+* Fixed a bug in the HTTP logger not showing the path of file parameters
 
 * Fixed a bug of adding a new tab while having MirrorPosition = mpTop
 

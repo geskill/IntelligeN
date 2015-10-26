@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Menus, StdCtrls, Dialogs, DateUtils, ShellApi,
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, ShellAPI,
   // Dev Express
   cxCustomData, cxGraphics, cxFilter, cxData, cxButtons, cxDataStorage, cxEdit, cxControls, cxGridCustomView, cxGridCustomTableView, cxGridCardView, cxClasses,
   cxGridLevel, cxGrid, cxGridTableView, cxCheckBox, cxLabel, cxButtonEdit, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, cxContainer, cxSplitter,
@@ -18,9 +18,7 @@ uses
   uExport,
   // Api
   uApiConst, uApiMultiCastEvent, uApiPlugins, uApiSettings,
-  // Utils
-  uPathUtils, uStringUtils,
-  // Plugin
+  // Plugin system
   uPlugInEvent;
 
 type
@@ -33,8 +31,6 @@ type
     tvValues: TcxGridTableView;
     tvValuesColumn1: TcxGridColumn;
     tvValuesColumn2: TcxGridColumn;
-    procedure tvValuesColumn3PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
-    procedure tvValuesColumn4PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure tvValuesMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure tvValuesColumn2PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
   private
@@ -64,10 +60,8 @@ type
 implementation
 
 uses
-  uMain, uSettings, uSelectDialog;
+  uMain, uSettings;
 
-resourcestring
-  StrAlreadyOnPublishP = 'Already on publish progress, continue anyway?';
 {$R *.dfm}
 
 procedure TfPublish.tvValuesColumn2PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
@@ -81,92 +75,6 @@ begin
     APoint := Parent.ClientToScreen(APoint);
 
     Main.dxBpmPublishDropDownClick.Popup(APoint.X, APoint.Y);
-  end;
-end;
-
-procedure TfPublish.tvValuesColumn3PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
-var
-  CMSType, CMSPluginName, TemplateFileName: string;
-begin
-  if Main.fMain.TabSheetCount > 0 then
-  begin
-    with FtvDataController do
-    begin
-      CMSType := GetMasterDataController.Values[GetMasterDataController.FocusedRecordIndex, tvSectionsColumn.index];
-      CMSPluginName := Values[FocusedRecordIndex, tvValuesColumn2.index];
-    end;
-
-    with SettingsManager.Settings.Plugins do
-    begin
-      TemplateFileName := TCMSCollectionItem(FindPlugInCollectionItemFromCollection(CMSType, CMS)).FindCMSWebsite(CMSPluginName).GetMessageFileName;
-
-      if not FileExists(TemplateFileName) then
-        if not PromptForFileName(TemplateFileName) then
-          Exit;
-
-      TCMSCollectionItem(FindPlugInCollectionItemFromCollection(CMSType, CMS)).FindCMSWebsite(CMSPluginName).MessageFileName := ExtractRelativePath
-        (GetTemplatesCMSFolder, TemplateFileName);
-
-      { TODO : IScript Editor hier öffnen }
-      {
-        if not Assigned(TemplateEditor) then
-        Application.CreateForm(TTemplateEditor, TemplateEditor);
-        TemplateEditor.Execute(TemplateFileName, Main.fMain.ActiveTabSheetController);
-        }
-    end;
-  end;
-end;
-
-procedure TfPublish.tvValuesColumn4PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
-var
-  CMSType, CMSPluginName, WebsiteFileName, SubjectFileName, MessageFileName, _ErrorMsg: string;
-begin
-  _ErrorMsg := '';
-
-  if Main.fMain.TabSheetCount > 0 then
-  begin
-    with FtvDataController do
-    begin
-      CMSType := GetMasterDataController.Values[GetMasterDataController.FocusedRecordIndex, tvSectionsColumn.index];
-      CMSPluginName := Values[FocusedRecordIndex, tvValuesColumn2.index];
-    end;
-
-    with SettingsManager.Settings.Plugins do
-    begin
-      WebsiteFileName := TCMSCollectionItem(FindPlugInCollectionItemFromCollection(CMSType, CMS)).FindCMSWebsite(CMSPluginName).GetPath;
-      SubjectFileName := TCMSCollectionItem(FindPlugInCollectionItemFromCollection(CMSType, CMS)).FindCMSWebsite(CMSPluginName).GetSubjectFileName;
-      MessageFileName := TCMSCollectionItem(FindPlugInCollectionItemFromCollection(CMSType, CMS)).FindCMSWebsite(CMSPluginName).GetMessageFileName;
-
-      if not FileExists(WebsiteFileName) then
-      begin
-        MessageDlg('Websitefile not found!', mtError, [mbOK], 0);
-        Exit;
-      end;
-
-      if (SubjectFileName = '') then
-      begin
-        MessageDlg('Select a subjectfile first!', mtError, [mbOK], 0);
-        Exit;
-      end;
-
-      if (MessageFileName = '') then
-      begin
-        MessageDlg('Select a messagefile first!', mtError, [mbOK], 0);
-        Exit;
-      end;
-
-      if not FileExists(SubjectFileName) then
-      begin
-        MessageDlg('Subjectfile not found!', mtError, [mbOK], 0);
-        Exit;
-      end;
-
-      if not FileExists(MessageFileName) then
-      begin
-        MessageDlg('Messagefile not found!', mtError, [mbOK], 0);
-        Exit;
-      end;
-    end;
   end;
 end;
 
@@ -188,102 +96,6 @@ begin
     FtvDataController := Item.GridView.DataController;
   end;
 end;
-
-{
-  procedure TfPublish.GenerateColumns;
-  var
-  I, Y, X: Integer;
-  CustomDataController: TcxCustomDataController;
-  begin
-  // START CRACK DETECTION
-  if not(Main.V = 0) and Assigned(Main.fLogin) and (Main.fLogin.pLogin.Visible) then
-  Halt;
-  // END CRACK DETECTION
-
-  with tvSections do
-  begin
-  BeginUpdate;
-  try
-  with SettingsManager.Settings.Plugins.CMS do
-  begin
-  X := 0;
-  for I := 0 to Count - 1 do
-  with TPlugInCollectionItem(Items[I]) do
-  if Enabled and FileExists(GetPath) then
-  Inc(X);
-
-  // START CRACK DETECTION
-  if Assigned(Main.fLogin) and not Assigned(Main.fLogin.FmiChangePassword) and (X >= 3) then
-  Halt;
-  if Assigned(Main.fLogin) and not Assigned(Main.fLogin.FmiLicenseHistory) and (X >= 3) and (Random(15) = 7) then
-  Halt;
-  // END CRACK DETECTION
-
-  with DataController do
-  begin
-  // START CRACK DETECTION
-  if Assigned(Main.fLogin) and (Main.fLogin.pLogin.Visible) and (X > 4) and (DayOfTheWeek(Now) = 5) then
-  Exit;
-  // END CRACK DETECTION
-  RecordCount := X;
-  // START CRACK DETECTION
-  if (Main.V = 0) and (X > 3) then
-  Halt;
-  // END CRACK DETECTION
-  X := 0;
-  for I := 0 to Count - 1 do
-  with TCMSCollectionItem(Items[I]) do
-  if Enabled and FileExists(GetPath) then
-  begin
-  Values[X, 0] := name;
-  Inc(X);
-  end;
-  end;
-  end;
-  finally
-  EndUpdate;
-  end;
-
-  // START CRACK DETECTION
-  if (Main.V = 0) and Assigned(Main.fLogin) and (Main.fLogin.pLogout.Visible) then
-  Halt;
-  if (Main.V = 0) and (Main.fMain.TabSheetCount > 2) and (Random(25) = 9) then
-  Halt;
-  // END CRACK DETECTION
-
-  X := 0;
-  for I := 0 to SettingsManager.Settings.Plugins.CMS.Count - 1 do
-  with TCMSCollectionItem(SettingsManager.Settings.Plugins.CMS.Items[I]) do
-  if Enabled and FileExists(GetPath) then
-  begin
-  with tvSections.DataController do
-  CustomDataController := GetDetailDataController(X, 0);
-  with CustomDataController do
-  begin
-  BeginUpdate;
-  try
-  RecordCount := Websites.Count;
-  for Y := 0 to Websites.Count - 1 do
-  with TPlugInCollectionItem(Websites.Items[Y]) do
-  begin
-  Values[Y, tvValuesColumn1.index] := True;//Check(TCMSCollectionItem(SettingsManager.Settings.Plugins.CMS.Items[I]).name, name);
-  Values[Y, tvValuesColumn2.index] := name;
-  end;
-
-  finally
-  EndUpdate;
-  Inc(X);
-  end;
-  end;
-  end;
-  end;
-
-  // START CRACK DETECTION
-  if (Main.V = 0) and (Main.fMain.TabSheetCount > 2) and (DayOfTheWeek(Now) = 1) then
-  Halt;
-  // END CRACK DETECTION
-  end;
-}
 
 function TfPublish.GetSelectedCMSCollectionItem: TCMSWebsitesCollectionItem;
 var
