@@ -1,0 +1,80 @@
+<xml>
+	<templatetype>Wii</templatetype>
+	<controls>
+		<IReleaseName>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</IReleaseName>
+		<IReleaseDate>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IReleaseDate>
+		<ITitle>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</ITitle>
+		<ICreator>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</ICreator>
+		<IPublisher>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IPublisher>
+		<IPicture>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</IPicture>
+		<ISample>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</ISample>
+		<ITrailer>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</ITrailer>
+		<IGenre>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IGenre>
+		<ILanguage>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</ILanguage>
+		<IVideoSystem>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IVideoSystem>
+		<IPassword>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IPassword>
+		<INotes>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</INotes>
+		<INFO>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</INFO>
+		<IDescription>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</IDescription>
+	</controls>
+</xml>

@@ -1,0 +1,105 @@
+<xml>
+	<templatetype>Movie</templatetype>
+	<controls>
+		<IReleaseName>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</IReleaseName>
+		<IReleaseDate>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IReleaseDate>
+		<ITags>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</ITags>
+		<ITitle>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</ITitle>
+		<ICreator>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</ICreator>
+		<IDirector>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IDirector>
+		<IPublisher>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IPublisher>
+		<IPicture>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</IPicture>
+		<ISample>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</ISample>
+		<ITrailer>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</ITrailer>
+		<IRuntime>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IRuntime>
+		<IGenre>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IGenre>
+		<ILanguage>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</ILanguage>
+		<IAudioStream>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IAudioStream>
+		<IVideoCodec>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IVideoCodec>
+		<IVideoStream>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IVideoStream>
+		<IPassword>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</IPassword>
+		<INotes>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="147"></position>
+		</INotes>
+		<INFO>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</INFO>
+		<IDescription>
+			<title hint="#">#</title>
+			<value list="#">#</value>
+			<position top="" left="" height="" width="300"></position>
+		</IDescription>
+	</controls>
+</xml>
