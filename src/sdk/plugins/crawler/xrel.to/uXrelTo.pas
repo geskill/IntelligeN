@@ -9,24 +9,26 @@ uses
   RegExpr,
   // Common
   uBaseConst, uBaseInterface,
-  // Utils
-  uHTMLUtils,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrawlerClass, uPlugInHTTPClasses;
+  uPlugInCrawlerClass, uPlugInHTTPClasses,
+  // Utils
+  uHTMLUtils;
 
 type
   TXrelTo = class(TCrawlerPlugIn)
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
@@ -43,72 +45,52 @@ begin
   Result := 'Xrel.to';
 end;
 
-function TXrelTo.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TXrelTo.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [cGameCube, cMovie, cNintendoDS, cPCGames, cPlayStation2, cPlayStation3, cPlayStationPortable, cSoftware, cWii, cXbox, cXbox360, cXXX];
-  Result := LongWord(_TemplateTypeIDs);
+  Result := [ low(TTypeID) .. high(TTypeID)] - [cAudio, cEBook];
 end;
 
-function TXrelTo.GetAvailableControlIDs;
-var
-  _TemplateTypeID: TTypeID;
-  _ComponentIDs: TControlIDs;
+function TXrelTo.InternalGetAvailableControlIDs;
 begin
-  _TemplateTypeID := TTypeID(ATypeID);
+  Result := [cReleaseDate, cTitle, cNFO];
 
-  _ComponentIDs := [cReleaseDate, cTitle, cNFO];
+  if not(ATypeID = cXXX) then
+    Result := Result + [cDescription];
 
-  if not(_TemplateTypeID = cXXX) then
-    _ComponentIDs := _ComponentIDs + [cDescription];
+  if (ATypeID = cMovie) or (ATypeID = cXbox360) then
+    Result := Result + [cPicture];
 
-  if (_TemplateTypeID = cMovie) or (_TemplateTypeID = cXbox360) then
-    _ComponentIDs := _ComponentIDs + [cPicture];
+  if (ATypeID = cMovie) or (ATypeID = cPCGames) then
+    Result := Result + [cGenre];
 
-  if (_TemplateTypeID = cMovie) or (_TemplateTypeID = cPCGames) then
-    _ComponentIDs := _ComponentIDs + [cGenre];
-
-  if (_TemplateTypeID = cMovie) then
-    _ComponentIDs := _ComponentIDs + [cAudioStream, cRuntime, cVideoStream];
-
-  Result := LongWord(_ComponentIDs);
+  if (ATypeID = cMovie) then
+    Result := Result + [cAudioStream, cRuntime, cVideoStream];
 end;
 
-function TXrelTo.GetControlIDDefaultValue;
-var
-  _ComponentID: TControlID;
+function TXrelTo.InternalGetControlIDDefaultValue;
 begin
-  _ComponentID := TControlID(AControlID);
-
   Result := True;
 
-  if (cPicture = _ComponentID) or (cNFO = _ComponentID) then
+  if (cPicture = AControlID) or (cNFO = AControlID) then
     Result := False;
 end;
 
-function TXrelTo.GetResultsLimitDefaultValue;
+function TXrelTo.InternalGetDependentControlIDs;
 begin
-  Result := 0;
+  Result := [];
 end;
 
-function TXrelTo.Exec;
+function TXrelTo.InternalExecute;
 const
   xrelmonth: array [0 .. 11] of string = ('Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez');
   xrelurl = 'http://www.xrel.to/';
 var
-  _TemplateTypeID: TTypeID;
-  _ComponentIDs: TControlIDs;
-
   HTTPRequest: IHTTPRequest;
 
   RequestID1, RequestID2: Double;
 
   ReleaseName, ProductInformationPageLink, ResponseStrReleaseInformation, ResponseStrProductInformation, s: string;
 begin
-  _TemplateTypeID := TTypeID(ATypeID);
-  LongWord(_ComponentIDs) := AControlIDs;
-
   ReleaseName := AControlController.FindControl(cReleaseName).Value;
 
   HTTPRequest := THTTPRequest.Create(xrelurl + 'search.html?xrel_search_query=' + ReleaseName);
@@ -124,7 +106,7 @@ begin
 
   if Pos('nfo_title', ResponseStrReleaseInformation) > 0 then
   begin
-    if (cReleaseDate in _ComponentIDs) and Assigned(AControlController.FindControl(cReleaseDate)) then
+    if ACanUse(cReleaseDate) then
     begin
       with TRegExpr.Create do
       begin
@@ -135,8 +117,7 @@ begin
           if Exec(InputString) then
           begin
             repeat
-              AControlController.FindControl(cReleaseDate).AddProposedValue(GetName, FormatInt(StrToInt(Match[1]), 2) + '.' + FormatInt(IndexText(Match[2], xrelmonth) + 1,
-                  2) + '.' + Match[3]);
+              AControlController.FindControl(cReleaseDate).AddProposedValue(GetName, FormatInt(StrToInt(Match[1]), 2) + '.' + FormatInt(IndexText(Match[2], xrelmonth) + 1, 2) + '.' + Match[3]);
             until not ExecNext;
           end;
         finally
@@ -145,7 +126,7 @@ begin
       end;
     end;
 
-    if (cNFO in _ComponentIDs) then
+    if ACanUse(cNFO) then
     begin
       with TRegExpr.Create do
       begin
@@ -182,9 +163,9 @@ begin
       end;
     end;
 
-    if (_TemplateTypeID = cMovie) then
+    if (ATypeID = cMovie) then
     begin
-      if (AControlController.FindControl(cAudioStream) <> nil) and (cAudioStream in _ComponentIDs) then
+      if ACanUse(cAudioStream) then
         with TRegExpr.Create do
           try
             InputString := ResponseStrReleaseInformation;
@@ -195,7 +176,7 @@ begin
             Free;
           end;
 
-      if (AControlController.FindControl(cVideoStream) <> nil) and (cVideoStream in _ComponentIDs) then
+      if ACanUse(cVideoStream) then
         with TRegExpr.Create do
           try
             InputString := ResponseStrReleaseInformation;
@@ -208,7 +189,7 @@ begin
           end;
     end;
 
-    if (cTitle in _ComponentIDs) or (cDescription in _ComponentIDs) or (cGenre in _ComponentIDs) then
+    if (cTitle in AControlIDs) or (cDescription in AControlIDs) or (cGenre in AControlIDs) then
     begin
       RequestID2 := HTTPManager.Get(xrelurl + ProductInformationPageLink, RequestID1, TPlugInHTTPOptions.Create(Self));
 
@@ -218,7 +199,7 @@ begin
 
       ResponseStrProductInformation := HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode;
 
-      if (AControlController.FindControl(cTitle) <> nil) and (cTitle in _ComponentIDs) then
+      if ACanUse(cTitle) then
       begin
         with TRegExpr.Create do
         begin
@@ -238,7 +219,7 @@ begin
         end;
       end;
 
-      if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+      if ACanUse(cPicture) then
         with TRegExpr.Create do
           try
             InputString := ResponseStrProductInformation;
@@ -259,7 +240,7 @@ begin
             Free;
           end;
 
-      if (AControlController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
+      if ACanUse(cRuntime) then
         with TRegExpr.Create do
           try
             InputString := ResponseStrProductInformation;
@@ -271,7 +252,7 @@ begin
             Free;
           end;
 
-      if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+      if ACanUse(cDescription) then
       begin
         with TRegExpr.Create do
         begin
@@ -291,7 +272,7 @@ begin
         end;
       end;
 
-      if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+      if ACanUse(cGenre) then
       begin
         with TRegExpr.Create do
         begin
@@ -333,6 +314,11 @@ begin
       end;
     end;
   end;
+end;
+
+function TXrelTo.GetResultsLimitDefaultValue;
+begin
+  Result := 0;
 end;
 
 end.

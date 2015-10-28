@@ -11,11 +11,13 @@ interface
 
 uses
   // Common
-  uBaseInterface,
+  uBaseConst, uBaseInterface,
   // Plugin
   uPlugInConst, uPlugInInterface, uPlugInClass;
 
 type
+  TCrawlerCanUseFunc = reference to function(AControlID: TControlID): WordBool;
+
   TCrawlerPlugIn = class(TPlugIn, ICrawlerPlugIn)
   private
     FUseAccount: WordBool;
@@ -27,19 +29,27 @@ type
     procedure SetAccountName(AAccountName: WideString); safecall;
     function GetAccountPassword: WideString; safecall;
     procedure SetAccountPassword(AAccountPassword: WideString); safecall;
+
+    function InternalGetAvailableTypeIDs: TTypeIDs; virtual; safecall; abstract;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; virtual; safecall; abstract;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; virtual; safecall; abstract;
+    function InternalGetDependentControlIDs: TControlIDs; virtual; safecall; abstract;
+
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; virtual; safecall; abstract;
   public
     function GetType: TPlugInType; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; virtual; safecall; abstract;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; virtual; safecall; abstract;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; virtual; safecall; abstract;
-    function GetResultsLimitDefaultValue: Integer; virtual; safecall; abstract;
+    function GetAvailableTypeIDs: Integer; safecall;
+    function GetAvailableControlIDs(const ATypeID: Integer): Integer; safecall;
+    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; safecall;
+    function GetDependentControlIDs: Integer; safecall;
+    function GetResultsLimitDefaultValue: Integer; virtual; safecall;
 
     property UseAccount: WordBool read GetUseAccount write SetUseAccount;
     property AccountName: WideString read GetAccountName write SetAccountName;
     property AccountPassword: WideString read GetAccountPassword write SetAccountPassword;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; virtual; safecall; abstract;
+    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; safecall;
   end;
 
 implementation
@@ -77,6 +87,52 @@ end;
 function TCrawlerPlugIn.GetType: TPlugInType;
 begin
   Result := ptCrawler;
+end;
+
+function TCrawlerPlugIn.GetAvailableTypeIDs: Integer;
+var
+  LTypeIDs: TTypeIDs;
+begin
+  LTypeIDs := InternalGetAvailableTypeIDs();
+  Result := Word(LTypeIDs);
+end;
+
+function TCrawlerPlugIn.GetAvailableControlIDs(const ATypeID: Integer): Integer;
+var
+  LControlIDs: TControlIDs;
+begin
+  LControlIDs := InternalGetAvailableControlIDs(TTypeID(ATypeID));
+  Result := LongWord(LControlIDs);
+end;
+
+function TCrawlerPlugIn.GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool;
+begin
+  Result := InternalGetControlIDDefaultValue(TTypeID(ATypeID), TControlID(AControlID));
+end;
+
+function TCrawlerPlugIn.GetDependentControlIDs: Integer;
+var
+  LControlIDs: TControlIDs;
+begin
+  LControlIDs := InternalGetDependentControlIDs();
+  Result := LongWord(LControlIDs);
+end;
+
+function TCrawlerPlugIn.GetResultsLimitDefaultValue: Integer;
+begin
+  Result := 5;
+end;
+
+function TCrawlerPlugIn.Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool;
+var
+  LControlIDs: TControlIDs;
+begin
+  LongWord(LControlIDs) := AControlIDs;
+  Result := InternalExecute(TTypeID(ATypeID), LControlIDs, ALimit, AControlController, { }
+    { } function(AControlID: TControlID): WordBool
+    { } begin
+    { . } Result := Assigned(AControlController.FindControl(AControlID)) and (AControlID in LControlIDs);
+    { } end);
 end;
 
 end.

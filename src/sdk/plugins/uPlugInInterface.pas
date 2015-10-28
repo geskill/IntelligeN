@@ -125,6 +125,7 @@ type
 
     function GetAvailableTypeIDs: Integer; safecall;
     function GetAvailableControlIDs(const ATypeID: Integer): Integer; safecall;
+    function GetDependentControlIDs: Integer; safecall;
     function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; safecall;
     function GetResultsLimitDefaultValue: Integer; safecall;
 
