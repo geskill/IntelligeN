@@ -258,7 +258,7 @@ begin
               ID.Types.Add(TType.Create(cPCGames, CleanUP(ChildNodes.Nodes['PcGames'].NodeValue)));
 
             if Assigned(ChildNodes.FindNode('Ps2Games')) then
-              ID.Types.Add(TType.Create(cPlayStation2, CleanUP(ChildNodes.Nodes['Ps2Games'].NodeValue)));
+              ID.Types.Add(TType.Create(cPlayStation3, CleanUP(ChildNodes.Nodes['Ps2Games'].NodeValue)));
 
             if Assigned(ChildNodes.FindNode('Ps3Games')) then
               ID.Types.Add(TType.Create(cPlayStation3, CleanUP(ChildNodes.Nodes['Ps3Games'].NodeValue)));
@@ -273,7 +273,7 @@ begin
               ID.Types.Add(TType.Create(cWii, CleanUP(ChildNodes.Nodes['NintendoWiiGames'].NodeValue)));
 
             if Assigned(ChildNodes.FindNode('XboxGames')) then
-              ID.Types.Add(TType.Create(cXbox, CleanUP(ChildNodes.Nodes['XboxGames'].NodeValue)));
+              ID.Types.Add(TType.Create(cXbox360, CleanUP(ChildNodes.Nodes['XboxGames'].NodeValue)));
 
             if Assigned(ChildNodes.FindNode('Xbox360Games')) then
               ID.Types.Add(TType.Create(cXbox360, CleanUP(ChildNodes.Nodes['Xbox360Games'].NodeValue)));

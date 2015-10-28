@@ -103,8 +103,12 @@ begin
       Result := TITags;
     cTitle:
       Result := TITitle;
-    cArtist:
-      Result := TIArtist;
+    cCreator:
+      Result := TICreator;
+    cDirector:
+      Result := TIDirector;
+    cPublisher:
+      Result := TIPublisher;
     cPicture:
       Result := TIPicture;
     cTrailer:

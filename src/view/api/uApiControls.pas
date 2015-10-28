@@ -226,7 +226,15 @@ type
 
   end;
 
-  TIArtist = class(TIControlEdit)
+  TICreator = class(TIControlComboBox)
+
+  end;
+
+  TIDirector = class(TIControlComboBox)
+
+  end;
+
+  TIPublisher = class(TIControlComboBox)
 
   end;
 
