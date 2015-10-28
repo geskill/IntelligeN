@@ -18,6 +18,9 @@ uses
 
 type
   T%FullName% = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = '%Website%';
   public
     function GetName: WideString; override; safecall;
 

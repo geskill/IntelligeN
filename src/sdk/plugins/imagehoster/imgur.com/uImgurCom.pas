@@ -14,8 +14,9 @@ uses
 
 type
   TImgurCom = class(TImageHosterPlugIn)
-  private const
-    website: string = 'http://imgur.com/';
+  protected { . }
+  const
+    WEBSITE: string = 'http://imgur.com/';
     function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString; AFileExt: string): Boolean;
   public
     function GetName: WideString; override;
@@ -36,11 +37,11 @@ var
 begin
   Result := False;
 
-  LHTTPRequest := THTTPRequest.Create(website + 'upload');
+  LHTTPRequest := THTTPRequest.Create(WEBSITE + 'upload');
   with LHTTPRequest do
   begin
     CustomHeaders.Add('X-Requested-With: XMLHttpRequest');
-    Referer := website;
+    Referer := WEBSITE;
   end;
 
   with AHTTPParams do

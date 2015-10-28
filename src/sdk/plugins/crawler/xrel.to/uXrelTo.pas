@@ -14,10 +14,13 @@ uses
   // Plugin system
   uPlugInCrawlerClass, uPlugInHTTPClasses,
   // Utils
-  uHTMLUtils;
+  uHTMLUtils, uStringUtils;
 
 type
   TXrelTo = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'http://www.xrel.to/';
   public
     function GetName: WideString; override; safecall;
 
@@ -32,13 +35,6 @@ type
   end;
 
 implementation
-
-function FormatInt(I, Count: Integer): string;
-begin
-  Result := IntToStr(I);
-  while Length(Result) < Count do
-    Result := '0' + Result;
-end;
 
 function TXrelTo.GetName;
 begin
@@ -55,16 +51,16 @@ begin
   Result := [cReleaseDate, cTitle, cNFO];
 
   if not(ATypeID = cXXX) then
-    Result := Result + [cDescription];
+    Result := Result + [cPicture, cDescription];
 
-  if (ATypeID = cMovie) or (ATypeID = cXbox360) then
-    Result := Result + [cPicture];
-
-  if (ATypeID = cMovie) or (ATypeID = cPCGames) then
+  if not(ATypeID in [cSoftware, cXXX]) then
     Result := Result + [cGenre];
 
+  if (ATypeID in cGames) then
+    Result := Result + [cCreator, cPublisher];
+
   if (ATypeID = cMovie) then
-    Result := Result + [cAudioStream, cRuntime, cVideoStream];
+    Result := Result + [cDirector, cRuntime, cAudioStream, cVideoStream];
 end;
 
 function TXrelTo.InternalGetControlIDDefaultValue;
@@ -77,24 +73,28 @@ end;
 
 function TXrelTo.InternalGetDependentControlIDs;
 begin
-  Result := [];
+  Result := [cReleaseName];
 end;
 
 function TXrelTo.InternalExecute;
 const
-  xrelmonth: array [0 .. 11] of string = ('Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez');
-  xrelurl = 'http://www.xrel.to/';
+  XREL_MONTH: array [0 .. 11] of string = ('Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez');
 var
+  LReleasename: string;
+
   HTTPRequest: IHTTPRequest;
 
   RequestID1, RequestID2: Double;
 
-  ReleaseName, ProductInformationPageLink, ResponseStrReleaseInformation, ResponseStrProductInformation, s: string;
-begin
-  ReleaseName := AControlController.FindControl(cReleaseName).Value;
+  ProductInformationPageLink, ResponseStrReleaseInformation, ResponseStrProductInformation, s: string;
 
-  HTTPRequest := THTTPRequest.Create(xrelurl + 'search.html?xrel_search_query=' + ReleaseName);
-  HTTPRequest.Referer := xrelurl + 'home.html';
+  LStringDate: string;
+  LStringList: TStringList;
+begin
+  LReleasename := AControlController.FindControl(cReleaseName).Value;
+
+  HTTPRequest := THTTPRequest.Create(WEBSITE + 'search.html?xrel_search_query=' + LReleasename);
+  HTTPRequest.Referer := WEBSITE + 'home.html';
 
   RequestID1 := HTTPManager.Get(HTTPRequest, TPlugInHTTPOptions.Create(Self));
 
@@ -117,7 +117,9 @@ begin
           if Exec(InputString) then
           begin
             repeat
-              AControlController.FindControl(cReleaseDate).AddProposedValue(GetName, FormatInt(StrToInt(Match[1]), 2) + '.' + FormatInt(IndexText(Match[2], xrelmonth) + 1, 2) + '.' + Match[3]);
+              LStringDate := PadLeft(Match[1], '0', 2) + '.' + PadLeft(IntToStr(IndexText(Match[2], XREL_MONTH) + 1), '0', 2) + '.' + Match[3];
+              // TODO: Improve localized date
+              AControlController.FindControl(cReleaseDate).AddProposedValue(GetName, LStringDate);
             until not ExecNext;
           end;
         finally
@@ -191,7 +193,7 @@ begin
 
     if (cTitle in AControlIDs) or (cDescription in AControlIDs) or (cGenre in AControlIDs) then
     begin
-      RequestID2 := HTTPManager.Get(xrelurl + ProductInformationPageLink, RequestID1, TPlugInHTTPOptions.Create(Self));
+      RequestID2 := HTTPManager.Get(WEBSITE + ProductInformationPageLink, RequestID1, TPlugInHTTPOptions.Create(Self));
 
       repeat
         sleep(50);
@@ -230,7 +232,7 @@ begin
               repeat
                 if not(Match[1] = '') then
                 begin
-                  s := xrelurl + Match[1];
+                  s := WEBSITE + Match[1];
 
                   AControlController.FindControl(cPicture).AddProposedValue(GetName, s);
                 end;
@@ -304,7 +306,9 @@ begin
                   end;
                 end
                 else
+                begin
                   AControlController.FindControl(cGenre).AddProposedValue(GetName, s);
+                end;
               until not ExecNext;
             end;
           finally
@@ -312,6 +316,79 @@ begin
           end;
         end;
       end;
+
+      if (ATypeID = cMovie) and ACanUse(cDirector) then
+      begin
+        with TRegExpr.Create do
+          try
+            InputString := ResponseStrProductInformation;
+            Expression := 'Regisseur: <\/div>(.*?)<div class="clear">';
+
+            if Exec(InputString) then
+            begin
+              s := Match[1];
+
+              LStringList := TStringList.Create;
+              try
+                with TRegExpr.Create do
+                begin
+                  try
+                    InputString := s;
+                    Expression := '<a href=".*?">(.*?)<\/a>';
+
+                    if Exec(InputString) then
+                    begin
+                      repeat
+                        LStringList.Add(Match[1]);
+                      until not ExecNext;
+
+                      AControlController.FindControl(cDirector).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
+                    end;
+                  finally
+                    Free;
+                  end;
+                end;
+              finally
+                LStringList.Free;
+              end;
+            end;
+          finally
+            Free;
+          end;
+      end;
+
+      if (ATypeID in cGames) and ACanUse(cCreator) then
+      begin
+        with TRegExpr.Create do
+          try
+            InputString := ResponseStrProductInformation;
+            Expression := 'Entwickler:</div> <div class="l_right">(.*?)<\/div>';
+
+            if Exec(InputString) then
+            begin
+              AControlController.FindControl(cCreator).AddProposedValue(GetName, Match[1]);
+            end;
+          finally
+            Free;
+          end;
+      end;
+
+      if (ATypeID in cGames) and ACanUse(cPublisher) then
+      begin
+        with TRegExpr.Create do
+          try
+            InputString := ResponseStrProductInformation;
+            Expression := 'Herausgeber:</div> <div class="l_right">(.*?)<\/div>';
+
+            if Exec(InputString) then
+            begin
+              AControlController.FindControl(cPublisher).AddProposedValue(GetName, Match[1]);
+            end;
+          finally
+            Free;
+          end;
+      end;
+
     end;
   end;
 end;

@@ -12,8 +12,9 @@ uses
 
 type
   TDdlwOrg = class(TImageHosterPlugIn)
-  private const
-    website: string = 'http://ddlw.org/';
+  protected { . }
+  const
+    WEBSITE: string = 'http://ddlw.org/';
     function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
     function GetName: WideString; override;
@@ -36,8 +37,11 @@ begin
   Result := False;
   AImageUrl := '';
 
-  LHTTPRequest := THTTPRequest.Create(website + 'upload.py');
-  LHTTPRequest.Referer := website;
+  LHTTPRequest := THTTPRequest.Create(WEBSITE + 'upload.py');
+  with LHTTPRequest do
+  begin
+    Referer := WEBSITE;
+  end;
 
   with AHTTPParams do
   begin

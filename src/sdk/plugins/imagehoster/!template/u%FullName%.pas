@@ -18,8 +18,10 @@ uses
 
 type
   T%FullName% = class(TImageHosterPlugIn)
-  private const
-    website: string = '%Website%';
+  protected { . }
+  const
+    WEBSITE = '%Website%';
+	
     function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
     function GetName: WideString; override;
@@ -42,10 +44,10 @@ begin
   Result := False;
   AImageUrl := '';
 
-  LHTTPRequest := THTTPRequest.Create(website);
+  LHTTPRequest := THTTPRequest.Create(WEBSITE);
   with LHTTPRequest do
   begin
-    LHTTPRequest.Referer := website;
+    LHTTPRequest.Referer := WEBSITE;
   end;
 
   with AHTTPParams do

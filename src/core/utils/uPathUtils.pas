@@ -4,10 +4,12 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, ShlObj, ActiveX;
+  Windows, SysUtils, ShlObj, ActiveX,
+  // Utils
+  uStringUtils;
 
 const
-  http: string = 'http://';
+  HTTP: string = 'http://';
 
 function GetWindowsFolder: string;
 function GetWindowsSystemFolder: string;
@@ -27,6 +29,7 @@ function IsURL(const AUrl: string): Boolean;
 function ExtractUrlFileName(const AUrl: string): string;
 function ExtractUrlProtocol(const AUrl: string): string;
 function ExtractUrlHost(const AUrl: string): string;
+function ExtractUrlWebsite(const AUrl: string): string;
 function IncludeTrailingUrlDelimiter(const AUrl: string): string;
 function ExcludeTrailingUrlDelimiter(const AUrl: string): string;
 
@@ -118,7 +121,7 @@ end;
 
 function BeginsWithHTTP(const AUrl: string): Boolean;
 begin
-  Result := (copy(LowerCase(AUrl), 1, length(http)) = http);
+  Result := (copy(LowerCase(AUrl), 1, length(HTTP)) = HTTP);
 end;
 
 function IsDirectory(const FileName: string): Boolean;
@@ -144,13 +147,13 @@ end;
 
 function ExtractUrlProtocol(const AUrl: string): string;
 var
-  I: Integer;
+  LPosition: Integer;
 begin
-  I := Pos('://', AUrl);
-  if (I = 0) then
+  LPosition := Pos('://', AUrl);
+  if (LPosition = 0) then
     Result := ''
   else
-    Result := copy(AUrl, 1, I - 1);
+    Result := copy(AUrl, 1, LPosition - 1);
 end;
 
 function ExtractUrlHost(const AUrl: string): string;
@@ -178,6 +181,24 @@ begin
     if (_pos2 = 0) then
       _pos2 := length(s) + 1;
     Result := copy(s, 1, _pos2 - 1);
+  end;
+end;
+
+function ExtractUrlWebsite(const AUrl: string): string;
+var
+  LUrl: string;
+begin
+  if not BeginsWithHTTP(AUrl) then
+    LUrl := HTTP + AUrl
+  else
+    LUrl := AUrl;
+
+  if not(LUrl[length(LUrl)] = '/') then
+  begin
+    if (CharCount('/', LUrl) < 3) then
+      LUrl := IncludeTrailingUrlDelimiter(LUrl)
+    else
+      LUrl := copy(LUrl, 1, LastDelimiter('/', LUrl))
   end;
 end;
 

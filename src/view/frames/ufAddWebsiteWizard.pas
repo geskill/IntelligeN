@@ -328,23 +328,15 @@ end;
 
 procedure TfAddWebsiteWizard.cxTEPageURLPropertiesChange(Sender: TObject);
 var
-  _url: string;
+  LUrl: string;
 begin
   cxCOBURLCMS.Clear;
   cxCOBEncoding.Clear;
-  _url := cxTEPageURL.Text;
 
-  if not BeginsWithHTTP(_url) then
-    _url := http + _url;
-
-  if not(copy(_url, length(_url), 1) = '/') then
-    if CharCount('/', _url) < 3 then
-      _url := _url + '/'
-    else
-      _url := copy(_url, 1, LastDelimiter('/', _url));
+  LUrl := ExtractUrlWebsite(cxTEPageURL.Text);
 
   if not cxCBEditFormattedURL.Checked then
-    cxTEFormattedURL.Text := _url;
+    cxTEFormattedURL.Text := LUrl;
   VerifyNewWebsiteInputs;
 end;
 

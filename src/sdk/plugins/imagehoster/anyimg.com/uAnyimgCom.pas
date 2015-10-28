@@ -16,8 +16,9 @@ uses
 
 type
   TAnyimgCom = class(TImageHosterPlugIn)
-  private const
-    website: string = 'http://anyimg.com/';
+  protected { . }
+  const
+    WEBSITE: string = 'http://anyimg.com/';
     function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
     function GetName: WideString; override;
@@ -98,7 +99,10 @@ begin
     *)
 {$ENDREGION}
   LHTTPRequest := THTTPRequest.Create('http://s1.anyimg.com/upload.php');
-  LHTTPRequest.Referer := website;
+  with LHTTPRequest do
+  begin
+    Referer := WEBSITE;
+  end;
 
   with AHTTPParams do
   begin

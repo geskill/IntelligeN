@@ -18,8 +18,9 @@ uses
 
 type
   TFastpicRu = class(TImageHosterPlugIn)
-  private const
-    website: string = 'http://fastpic.ru/';
+  protected { . }
+  const
+    WEBSITE: string = 'http://fastpic.ru/';
     function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString; AUploadURI: string): Boolean;
   public
     function GetName: WideString; override;
@@ -42,10 +43,10 @@ begin
   Result := False;
   AImageUrl := '';
 
-  LHTTPRequest := THTTPRequest.Create(website + AUploadURI + '?api=1');
+  LHTTPRequest := THTTPRequest.Create(WEBSITE + AUploadURI + '?api=1');
   with LHTTPRequest do
   begin
-    LHTTPRequest.Referer := website;
+    LHTTPRequest.Referer := WEBSITE;
   end;
 
   with AHTTPParams do

@@ -10,6 +10,8 @@ uses
 
 function MatchTextMask(const Mask, S: WideString; CaseSensitive: Boolean = False): Boolean;
 
+function StringListSplit(const AStrings: TStrings; ADelimiter: string): string;
+
 function SplittString(splitt: Char; S: string; AExact: Boolean = False): TStrings;
 
 function StringReplaceMultiple(const Source: string; const OldPatterns, NewPatterns: array of string; CaseSensitive: Boolean = True): string;
@@ -31,6 +33,10 @@ function Trim(const S: string; const C: Char): string; overload;
 function TrimLeft(const S: string; const C: Char): string; overload;
 
 function TrimRight(const S: string; const C: Char): string; overload;
+
+function PadLeft(S: string; Ch: Char; Len: Integer): string;
+
+function PadRight(S: string; Ch: Char; Len: Integer): string;
 
 implementation
 
@@ -107,6 +113,16 @@ begin
     Inc(Sp);
   end;
   Result := True;
+end;
+
+function StringListSplit(const AStrings: TStrings; ADelimiter: string): string;
+var
+  LEndPos: Integer;
+begin
+  Result := StringReplace(AStrings.Text, sLineBreak, ADelimiter, [rfReplaceAll]);
+  LEndPos := length(Result) + 1 - length(ADelimiter);
+  if copy(Result, LEndPos, length(ADelimiter)) = ADelimiter then
+    Delete(Result, LEndPos, length(ADelimiter));
 end;
 
 function SplittString(splitt: Char; S: string; AExact: Boolean = False): TStrings;
@@ -387,6 +403,26 @@ begin
   I := Length(S);
   while (I > 0) and ((S[I] <= ' ') or ((S[I] = C))) do Dec(I);
   Result := Copy(S, 1, I);
+end;
+
+function PadLeft(S: string; Ch: Char; Len: Integer): string;
+var
+  RestLen: Integer;
+begin
+  Result  := S;
+  RestLen := Len - Length(s);
+  if RestLen < 1 then Exit;
+  Result := S + StringOfChar(Ch, RestLen);
+end;
+
+function PadRight(S: string; Ch: Char; Len: Integer): string;
+var
+  RestLen: Integer;
+begin
+  Result  := S;
+  RestLen := Len - Length(s);
+  if RestLen < 1 then Exit;
+  Result := StringOfChar(Ch, RestLen) + S;
 end;
 
 end.

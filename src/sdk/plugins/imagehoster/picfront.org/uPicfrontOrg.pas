@@ -16,7 +16,9 @@ uses
 
 type
   TPicfrontOrg = class(TImageHosterPlugIn)
-  private
+  protected { . }
+  const
+    WEBSITE: string = 'http://picfront.org/';
     function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
     function GetName: WideString; override;
@@ -38,6 +40,10 @@ begin
   result := False;
 
   LHTTPRequest := THTTPRequest.Create('http://www12.picfront.org/index.php');
+  with LHTTPRequest do
+  begin
+    Referer := WEBSITE;
+  end;
 
   with AHTTPParams do
   begin

@@ -9,89 +9,76 @@ uses
   RegExpr,
   // Common
   uBaseConst, uBaseInterface,
-  // Utils
-  uHTMLUtils,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrawlerClass, uPlugInHTTPClasses;
+  uPlugInCrawlerClass, uPlugInHTTPClasses,
+  // Utils
+  uHTMLUtils, uStringUtils;
 
 type
   TZelluloidDe = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'http://www.zelluloid.de/';
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
-
-procedure ALUTF8ExtractHTMLText(HtmlContent: string; LstExtractedResourceText: Tstrings);
-begin
-  LstExtractedResourceText.Text := Trim(HTML2Text(HtmlContent));
-end;
 
 function TZelluloidDe.GetName;
 begin
   Result := 'Zelluloid.de';
 end;
 
-function TZelluloidDe.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TZelluloidDe.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [cMovie];
-  Result := LongWord(_TemplateTypeIDs);
+  Result := [cMovie];
 end;
 
-function TZelluloidDe.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
+function TZelluloidDe.InternalGetAvailableControlIDs;
 begin
-  _ComponentIDs := [cPicture, cGenre, cDescription];
-  Result := LongWord(_ComponentIDs);
+  Result := [cPicture, cDirector, cGenre, cDescription];
 end;
 
-function TZelluloidDe.GetControlIDDefaultValue;
+function TZelluloidDe.InternalGetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TZelluloidDe.GetResultsLimitDefaultValue;
+function TZelluloidDe.InternalGetDependentControlIDs;
 begin
-  Result := 5;
+  Result := [cTitle];
 end;
 
-function TZelluloidDe.Exec;
-const
-  zurl = 'http://www.zelluloid.de';
-  zsurl = zurl + '/suche';
-var
-  _ComponentIDs: TControlIDs;
-  _Title: WideString;
-  _Count: Integer;
+function TZelluloidDe.InternalExecute;
 
   procedure deep_search(AWebsiteSourceCode: string);
   var
     s: string;
-    des: TStringList;
+    LStringList: TStringList;
   begin
-    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if ACanUse(cPicture) then
     begin
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := '<a href="#" pic="(.*?)"';
+          Expression := '<a href="#" pic="\/(.*?)"';
 
           if Exec(InputString) then
           begin
             repeat
-              AControlController.FindControl(cPicture).AddProposedValue(GetName, zurl + Match[1]);
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, WEBSITE + Match[1]);
             until not ExecNext;
           end;
         finally
@@ -99,7 +86,47 @@ var
         end;
     end;
 
-    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if ACanUse(cDirector) then
+    begin
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'Regie:(.*?)<BR>';
+
+          if Exec(InputString) then
+          begin
+            s := Match[1];
+
+            LStringList := TStringList.Create;
+            try
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := 'NOBR>(.*?)<\/NOBR>';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      LStringList.Add(Match[1]);
+                    until not ExecNext;
+
+                    AControlController.FindControl(cDirector).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            finally
+              LStringList.Free;
+            end;
+          end;
+        finally
+          Free;
+        end;
+    end;
+
+    if ACanUse(cGenre) then
     begin
       with TRegExpr.Create do
         try
@@ -120,7 +147,7 @@ var
         end;
     end;
 
-    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if ACanUse(cDescription) then
     begin
       with TRegExpr.Create do
         try
@@ -130,13 +157,7 @@ var
           if Exec(InputString) then
           begin
             repeat
-              des := TStringList.Create;
-              try
-                ALUTF8ExtractHTMLText(Match[1], des);
-                AControlController.FindControl(cDescription).AddProposedValue(GetName, des.Text);
-              finally
-                des.Free;
-              end;
+              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
             until not ExecNext;
           end;
         finally
@@ -145,57 +166,72 @@ var
     end;
   end;
 
+const
+  SEARCH_URL = WEBSITE + 'suche/';
 var
-  HTTPRequest: IHTTPRequest;
+  LTitle: string;
+  LCount: Integer;
 
-  RequestID1, RequestID2: Double;
+  LHTTPRequest: IHTTPRequest;
+  LRequestID1, LRequestID2: Double;
 
-  ResponeStr: string;
+  LResponeStr: string;
 begin
-  LongWord(_ComponentIDs) := AControlIDs;
-  _Title := AControlController.FindControl(cTitle).Value;
-  _Count := 0;
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
 
-  HTTPRequest := THTTPRequest.Create(zsurl + '/index.php3?qstring=' + HTTPEncode(_Title));
-  HTTPRequest.Referer := zurl;
+  // http://www.zelluloid.de/suche/index.php3?qstring=Spectre&x=38&y=4
 
-  RequestID1 := HTTPManager.Get(HTTPRequest, TPlugInHTTPOptions.Create(Self));
+  LHTTPRequest := THTTPRequest.Create(SEARCH_URL + 'index.php3?qstring=' + HTTPEncode(LTitle));
+  with LHTTPRequest do
+  begin
+    Referer := WEBSITE;
+  end;
+
+  LRequestID1 := HTTPManager.Get(LHTTPRequest, TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID1);
+  until HTTPManager.HasResult(LRequestID1);
 
-  ResponeStr := HTTPManager.GetResult(RequestID1).HTTPResult.SourceCode;
+  LResponeStr := HTTPManager.GetResult(LRequestID1).HTTPResult.SourceCode;
 
-  if not(Pos('Suchbegriff', ResponeStr) = 0) then
+  if not(Pos('Treffer', LResponeStr) = 0) then
   begin
     with TRegExpr.Create do
       try
-        ModifierG := False;
-        InputString := ResponeStr;
-        Expression := '<B><A HREF="(.*?)"';
+        InputString := LResponeStr;
+        Expression := '<B><a href="(.*?)"';
 
         if Exec(InputString) then
         begin
           repeat
-            RequestID2 := HTTPManager.Get(zsurl + '/' + Match[1], RequestID1, TPlugInHTTPOptions.Create(Self));
+            LRequestID2 := HTTPManager.Get(SEARCH_URL + Match[1], LRequestID1, TPlugInHTTPOptions.Create(Self));
 
             repeat
               sleep(50);
-            until HTTPManager.HasResult(RequestID2);
+            until HTTPManager.HasResult(LRequestID2);
 
-            ResponeStr := HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode;
+            LResponeStr := HTTPManager.GetResult(LRequestID2).HTTPResult.SourceCode;
 
-            deep_search(ResponeStr);
-            Inc(_Count);
-          until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
+            deep_search(LResponeStr);
+
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
         end;
       finally
         Free;
       end;
   end
-  else
-    deep_search(ResponeStr);
+  else if not(Pos('headlineleft', LResponeStr) = 0) then
+  begin
+    deep_search(LResponeStr);
+  end;
+end;
+
+function TZelluloidDe.GetResultsLimitDefaultValue;
+begin
+  Result := 5;
 end;
 
 end.

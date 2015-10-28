@@ -10,10 +10,16 @@ unit uPlugInCrawlerClass;
 interface
 
 uses
+  // Delphi
+  Windows,
   // Common
   uBaseConst, uBaseInterface,
-  // Plugin
-  uPlugInConst, uPlugInInterface, uPlugInClass;
+  // HTTPManager
+  uHTTPInterface, uHTTPClasses,
+  // Plugin system
+  uPlugInConst, uPlugInInterface, uPlugInClass, uPlugInHTTPClasses,
+  // Utils
+  uPathUtils;
 
 type
   TCrawlerCanUseFunc = reference to function(AControlID: TControlID): WordBool;
@@ -35,6 +41,7 @@ type
     function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; virtual; safecall; abstract;
     function InternalGetDependentControlIDs: TControlIDs; virtual; safecall; abstract;
 
+    function SimpleGETRequest(const AURL: string; AHTTPOptions: IHTTPOptions = nil): string;
     function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; virtual; safecall; abstract;
   public
     function GetType: TPlugInType; override; safecall;
@@ -82,6 +89,35 @@ end;
 procedure TCrawlerPlugIn.SetAccountPassword(AAccountPassword: WideString);
 begin
   FAccountpassword := AAccountPassword;
+end;
+
+function TCrawlerPlugIn.SimpleGETRequest(const AURL: string; AHTTPOptions: IHTTPOptions = nil): string;
+var
+  LHTTPRequest: IHTTPRequest;
+  LHTTPOptions: IHTTPOptions;
+  LRequestID: Double;
+  LHTTPProcess: IHTTPProcess;
+begin
+  Result := '';
+
+  LHTTPRequest := THTTPRequest.Create(AURL);
+  with LHTTPRequest do
+  begin
+    Referer := ExtractUrlWebsite(AURL);
+  end;
+
+  if not Assigned(AHTTPOptions) then
+    LHTTPOptions := TPlugInHTTPOptions.Create(Self)
+  else
+    LHTTPOptions := AHTTPOptions;
+
+  LRequestID := HTTPManager.Get(LHTTPRequest, LHTTPOptions);
+
+  repeat
+    sleep(50);
+  until HTTPManager.HasResult(LRequestID);
+
+  Result := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
 end;
 
 function TCrawlerPlugIn.GetType: TPlugInType;

@@ -16,8 +16,9 @@ uses
 
 type
   TPicloadOrg = class(TImageHosterPlugIn)
-  private const
-    website: string = 'http://picload.org/';
+  protected { . }
+  const
+    WEBSITE: string = 'http://picload.org/';
     function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
     function GetName: WideString; override;
@@ -43,7 +44,7 @@ begin
   with LHTTPRequest do
   begin
     AcceptEncoding := 'deflate, identity, *;q=0';
-    Referer := website;
+    Referer := WEBSITE;
   end;
 
   with AHTTPParams do

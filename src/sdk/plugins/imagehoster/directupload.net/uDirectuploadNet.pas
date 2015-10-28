@@ -16,8 +16,9 @@ uses
 
 type
   TDirectuploadNet = class(TImageHosterPlugIn)
-  private const
-    website: string = 'http://www.directupload.net/';
+  protected { . }
+  const
+    WEBSITE: string = 'http://www.directupload.net/';
     function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
     function GetName: WideString; override;
@@ -38,8 +39,11 @@ var
 begin
   Result := False;
 
-  LHTTPRequest := THTTPRequest.Create(website + 'index.php?mode=upload');
-  LHTTPRequest.Referer := website;
+  LHTTPRequest := THTTPRequest.Create(WEBSITE + 'index.php?mode=upload');
+  with LHTTPRequest do
+  begin
+    Referer := WEBSITE;
+  end;
 
   with AHTTPParams do
     AddFormField('f_up_form', '');
