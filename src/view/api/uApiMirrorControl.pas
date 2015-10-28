@@ -1,7 +1,6 @@
 unit uApiMirrorControl;
-
-interface
 
+interface
 uses
   // Delphi
   Windows, SysUtils, Messages, Classes, Controls, Menus, StdCtrls, ExtCtrls, Graphics, Variants, Dialogs,
@@ -1629,8 +1628,7 @@ procedure TCrypterPanel.SetCrypterFolderInfo(ACrypterFolderInfo: TCrypterFolderI
 begin
   FCrypterFolderInfoLock.EnterWriteLock;
   try
-    // TODO: Update values only. Sustain already obtained values.
-    FCrypterFolderInfo := ACrypterFolderInfo;
+    UpdateCrypterFolderInfo(FCrypterFolderInfo, ACrypterFolderInfo);
   finally
     FCrypterFolderInfoLock.ExitWriteLock;
   end;
@@ -2828,3 +2826,4 @@ end;
 { ****************************************************************************** }
 
 end.
+

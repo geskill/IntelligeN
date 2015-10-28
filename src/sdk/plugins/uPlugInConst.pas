@@ -10,6 +10,8 @@ unit uPlugInConst;
 interface
 
 uses
+  // Delphi
+  SysUtils,
   // Common
   uBaseConst;
 
@@ -26,7 +28,7 @@ type
   TContainertypes = set of TContainertype;
   TAdvertismenttype = (atLayer, atLink, atBanner);
   TImageHostResize = (irNone, ir320x240, ir450x338, ir640x480, ir800x600);
-  TLinkStatus = csNotChecked..csTemporaryOffline;
+  TLinkStatus = csNotChecked .. csTemporaryOffline;
   TChecksumType = (ctMD5, ctSHA512);
 
   TIDInfo = packed record
@@ -60,6 +62,30 @@ type
   end;
   // PCrypterFolderInfo = ^TCrypterFolderInfo;
 
+procedure UpdateCrypterFolderInfo(var ACrypterFolderInfo: TCrypterFolderInfo; const ANewCrypterFolderInfo: TCrypterFolderInfo);
+
 implementation
+
+procedure UpdateCrypterFolderInfo(var ACrypterFolderInfo: TCrypterFolderInfo; const ANewCrypterFolderInfo: TCrypterFolderInfo);
+begin
+  with ACrypterFolderInfo do
+  begin
+    if SameStr('', Link) and not SameStr('', ANewCrypterFolderInfo.Link) then
+      Link := ANewCrypterFolderInfo.Link;
+
+    Status := ANewCrypterFolderInfo.Status;
+    Size := ANewCrypterFolderInfo.Size;
+    PartSize := ANewCrypterFolderInfo.PartSize;
+    Hoster := ANewCrypterFolderInfo.Hoster;
+    HosterShort := ANewCrypterFolderInfo.HosterShort;
+    Parts := ANewCrypterFolderInfo.Parts;
+
+    if SameStr('', StatusImage) and not SameStr('', ANewCrypterFolderInfo.StatusImage) then
+      StatusImage := ANewCrypterFolderInfo.StatusImage;
+
+    if SameStr('', StatusImageText) and not SameStr('', ANewCrypterFolderInfo.StatusImageText) then
+      StatusImageText := ANewCrypterFolderInfo.StatusImageText;
+  end;
+end;
 
 end.
