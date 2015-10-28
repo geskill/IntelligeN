@@ -117,7 +117,7 @@ object fMain: TfMain
     Properties.CloseButtonMode = cbmActiveAndHoverTabs
     Properties.CustomButtons.Buttons = <>
     Properties.HotTrack = True
-    Properties.Images = Main.ILTemplateTypeIDs
+    Properties.Images = Main.ILTypeIDs
     Properties.MultiLine = True
     Properties.ShowTabHints = True
     OnCanCloseEx = pcMainCanCloseEx

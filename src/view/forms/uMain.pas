@@ -202,7 +202,7 @@ type
     ILContainerStatusImages: TImageList;
 
     cxLookAndFeelController: TcxLookAndFeelController;
-    ILTemplateTypeIDs: TImageList;
+    ILTypeIDs: TImageList;
 
     dxBpmPageControlRightClick: TdxBarPopupMenu;
     dxBBmiClose: TdxBarButton;
@@ -215,6 +215,7 @@ type
     dxBBPublishItemSettings: TdxBarButton;
 
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -335,6 +336,11 @@ resourcestring
 procedure TMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   fMain.RemoveAllTabs;
+end;
+
+procedure TMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  CanClose := fMain.CanCloseAllTabs;
 end;
 
 procedure TMain.FormCreate(Sender: TObject);

@@ -38,7 +38,6 @@ type
     procedure pcMainNewTabButtonClick(Sender: TObject; var AHandled: Boolean);
     procedure cxTCViewChange(Sender: TObject);
   private
-    FActiveCrawlerControlController: IControlController;
     FBackupManager: TBackupManager;
     FControlAligner: TControlAligner;
     FPublishManager: IPublishManager;
@@ -94,6 +93,9 @@ type
     procedure SaveAllTabs;
     procedure SaveAllToFolder;
     procedure OpenToNewTab(AFileName: WideString = '');
+    function CanClose(ATabIndex: Integer): Boolean;
+    function CanCloseCurrentTab: Boolean;
+    function CanCloseAllTabs: Boolean;
     function RemoveTab(ATabIndex: Integer): Boolean;
     function RemoveCurrentTab: Boolean;
     function RemoveAllOtherTabs: Boolean;
@@ -132,17 +134,14 @@ begin
 end;
 
 procedure TfMain.pcMainCanCloseEx(Sender: TObject; ATabIndex: Integer; var ACanClose: Boolean);
-var
-  CrawlingActive: Boolean;
 begin
-  CrawlingActive := (TabSheetController[ATabIndex].ControlController = FActiveCrawlerControlController);
-
-  ACanClose := not CrawlingActive;
+  ACanClose := CanClose(ATabIndex);
 
   // TODO: If app is closed, this message will appear in a loop. Another problem exists for two tabs crawling
   // at the same time FActiveCrawlerControlController only stores active tab.
-  if CrawlingActive then
-    MessageDlg('You cannot close this tab because the crawler for this tab is still active! ', mtWarning, [mbOK], 0);
+
+  // if CrawlingActive then
+  // MessageDlg('You cannot close this tab because the crawler for this tab is still active! ', mtWarning, [mbOK], 0);
 end;
 
 procedure TfMain.pcMainChange(Sender: TObject);
@@ -198,14 +197,6 @@ end;
 
 procedure TfMain.CrawlerGUIInteraction(const AControlController: IControlController; AStatus: TCrawlerTaskStatus; AProgressPosition: Extended; AMessage: string);
 begin
-  case AStatus of
-    ctsCREATED:
-      FActiveCrawlerControlController := AControlController;
-
-    ctsFINISHED:
-      FActiveCrawlerControlController := nil;
-  end;
-
   with cxPBAutocompletion do
   begin
     Repaint;
@@ -347,14 +338,14 @@ begin
 
   // TODO
   (*
-  LPublishManager := TPublishManager.Create;
-  with LPublishManager do
-  begin
+    LPublishManager := TPublishManager.Create;
+    with LPublishManager do
+    begin
     OnGUIInteraction := Main.fPublishQueue.GUIInteractionEvent;
     OnGUIInteractionItem := Main.fPublishQueue.GUIInteractionItemEvent;
-  end;
-  FPublishManager := LPublishManager;
-  *)
+    end;
+    FPublishManager := LPublishManager;
+    *)
 
   LCrawlerManager := TCrawlerManager.Create;
   LCrawlerManager.OnGUIInteraction := CrawlerGUIInteraction;
@@ -528,7 +519,7 @@ begin
       Install;
     end;
   finally
-    pcMain.Properties.CancelUpdate;
+    pcMain.Properties.CancelUpdate; // prevent to call OnChanged
   end;
 
   pcMain.ActivePage := NewTabSheetController;
@@ -543,13 +534,6 @@ begin
         CallControlAligner;
       end;
     GetControls(AFileName, NewTabSheetController.ControlController, Self);
-    with NewTabSheetController do
-      if (MirrorController.MirrorCount > 0) then
-        MirrorController.Mirror[0].Focus := True
-      else
-        with ControlController do
-          if ControlCount > 0 then
-            Control[0].Focus := True;
   end
   else
   begin
@@ -560,9 +544,6 @@ begin
         NewTabSheetController.MirrorController.Mirror[NewTabSheetController.MirrorController.Add].GetDirectlink.Add('');
         // CallControlAligner;
       end;
-    with NewTabSheetController.ControlController do
-      if ControlCount > 0 then
-        Control[0].Focus := True;
   end;
 
   with NewTabSheetController do
@@ -570,6 +551,7 @@ begin
     Application.ProcessMessages;
 
     DataChanged := False;
+    ResetControlFocused();
 
     with PublishController do
     begin
@@ -761,6 +743,42 @@ begin
   except
 
   end;
+end;
+
+function TfMain.CanClose(ATabIndex: Integer): Boolean;
+var
+  LTabSheetController: ITabSheetController;
+begin
+  LTabSheetController := TabSheetController[ATabIndex];
+
+  Result := not CrawlerManager.InUse(LTabSheetController) and { }
+  { } not CrypterManager.InUse(LTabSheetController) and { }
+  { } not FileHosterManager.InUse(LTabSheetController) and { }
+  { } not ImageHosterManager.InUse(LTabSheetController);
+
+  LTabSheetController := nil;
+end;
+
+function TfMain.CanCloseCurrentTab: Boolean;
+begin
+  Result := CanClose(ActiveTabSheetIndex);
+end;
+
+function TfMain.CanCloseAllTabs: Boolean;
+var
+  LTabSheetIndex: Integer;
+  LResult: Boolean;
+begin
+  LResult := True;
+
+  for LTabSheetIndex := 0 to TabSheetCount - 1 do
+  begin
+    LResult := CanClose(LTabSheetIndex);
+    if not LResult then
+      break;
+  end;
+
+  Result := LResult;
 end;
 
 function TfMain.RemoveTab(ATabIndex: Integer): Boolean;
