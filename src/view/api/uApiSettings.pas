@@ -1489,15 +1489,18 @@ var
 begin
   with SettingsManager.Settings.Plugins do
   begin
-    TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptCrawler, GetPluginFolder + 'xrelto.dll', False, { make the error message silent } procedure(AErrorMsg: string)begin end);
+    if FileExists(GetPluginFolder + 'xrelto.dll') then
+      TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptCrawler, GetPluginFolder + 'xrelto.dll', False, { make the error message silent } procedure(AErrorMsg: string)begin end);
 
-    TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptCrawler, GetPluginFolder + 'releasename.dll', False, { make the error message silent } procedure(AErrorMsg: string)begin end);
+    if FileExists(GetPluginFolder + 'releasename.dll') then
+      TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptCrawler, GetPluginFolder + 'releasename.dll', False, { make the error message silent } procedure(AErrorMsg: string)begin end);
 
     LPlugInCollectionItem := FindPlugInCollectionItemFromCollection('Releasename', Crawler);
     if Assigned(LPlugInCollectionItem) then
       LPlugInCollectionItem.Enabled := True;
 
-    TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptFileFormats, GetPluginFolder + 'intelligenxml2.dll', False, { make the error message silent } procedure(AErrorMsg: string)begin end);
+    if FileExists(GetPluginFolder + 'intelligenxml2.dll') then
+      TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptFileFormats, GetPluginFolder + 'intelligenxml2.dll', False, { make the error message silent } procedure(AErrorMsg: string)begin end);
 
     LPlugInCollectionItem := FindPlugInCollectionItemFromCollection('intelligen.xml.2', FileFormats);
     if Assigned(LPlugInCollectionItem) then
