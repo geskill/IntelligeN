@@ -92,6 +92,7 @@ type
 
     procedure Save(AFileName, AFileType: WideString);
     procedure ResetDataChanged(AFileName, AFileType: WideString);
+    procedure ResetControlFocused();
 
     property DataChanged: Boolean read GetDataChanged write SetDataChanged;
 
@@ -317,6 +318,24 @@ begin
   FileName := AFileName;
   FileType := AFileType;
   DataChanged := False;
+end;
+
+procedure TTabSheetController.ResetControlFocused;
+begin
+  if SettingsManager.Settings.ControlAligner.MirrorPosition = mpTop then
+  begin
+    if (MirrorController.MirrorCount > 0) then
+      MirrorController.Mirror[0].Focus := True
+    else if (ControlController.ControlCount > 0) then
+      ControlController.Control[0].Focus := True;
+  end
+  else
+  begin
+    if (ControlController.ControlCount > 0) then
+      ControlController.Control[0].Focus := True
+    else if (MirrorController.MirrorCount > 0) then
+      MirrorController.Mirror[0].Focus := True;
+  end;
 end;
 
 procedure TTabSheetController.RemoveEvents;

@@ -315,6 +315,7 @@ begin
               LBasicControl := nil;
             end;
           ResetDataChanged(AFileName, GetName);
+          ResetControlFocused();
           result := TabSheetIndex;
         end;
     except

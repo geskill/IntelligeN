@@ -712,6 +712,7 @@ type
 
     procedure Save(AFileName, AFileType: WideString);
     procedure ResetDataChanged(AFileName, AFileType: WideString);
+    procedure ResetControlFocused();
 
     property TypeID: TTypeID read GetTypeID;
 
@@ -791,8 +792,7 @@ type
     procedure RemoveHosterCheckJob(const ADirectlink: IDirectlinksMirror);
   end;
 
-
-  IImageHosterManager = interface
+  IImageHosterManager = interface(IThreadManager)
     ['{CC554556-2480-49A7-90B8-A214E6619F25}']
     procedure AddLocalUploadJob(const APictureMirror: IPictureMirror; const ALocalPath: WideString);
     procedure AddRemoteUploadJob(const APictureMirror: IPictureMirror; const ARemoteUrl: WideString);
