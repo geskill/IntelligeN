@@ -48,7 +48,7 @@ end;
 
 function TWiiboxartCom.InternalGetAvailableControlIDs;
 begin
-  Result := [cCreator, cPublisher, cPicture, cGenre];
+  Result := [cCreator, cPublisher, cPicture, cGenre, cVideoSystem, cDescription];
 end;
 
 function TWiiboxartCom.InternalGetControlIDDefaultValue;
@@ -70,17 +70,15 @@ function TWiiboxartCom.InternalExecute;
   begin
     if ACanUse(cPicture) then
     begin
-      // TODO
-
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := 'artwork\/(.*?)''';
+          Expression := 'Window\(''(.*?)''';
 
           if Exec(InputString) then
           begin
             repeat
-              AControlController.FindControl(cPicture).AddProposedValue(GetName, WEBSITE + 'artwork/' + Match[1]);
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
             until not ExecNext;
           end;
         finally
@@ -88,18 +86,55 @@ function TWiiboxartCom.InternalExecute;
         end;
     end;
 
-    // TODO: Add others
+    if ACanUse(cCreator) then
+    begin
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'Developer:.*?210>(.*?)</TD>';
+
+          if Exec(InputString) then
+          begin
+            s := Trim(Match[1]);
+
+            if not SameStr('N/A', s) then
+            begin
+              AControlController.FindControl(cCreator).AddProposedValue(GetName, s);
+            end;
+          end;
+        finally
+          Free;
+        end;
+    end;
+
+    if ACanUse(cPublisher) then
+    begin
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'Publisher:.*?210>(.*?)</TD>';
+
+          if Exec(InputString) then
+          begin
+            s := Trim(Match[1]);
+
+            if not SameStr('N/A', s) then
+            begin
+              AControlController.FindControl(cPublisher).AddProposedValue(GetName, s);
+            end;
+          end;
+        finally
+          Free;
+        end;
+    end;
 
     if ACanUse(cGenre) then
     begin
-      // TODO
-
       with TRegExpr.Create do
         try
           ModifierM := True; // Causes ^ and $ to match the begin/end of each line
-          ModifierS := True; // Dot matches newline characters
           InputString := AWebsiteSourceCode;
-          Expression := 'Genre:.*210>(.*?)$';
+          Expression := 'Genre:.*?210>(.*?)$';
 
           if Exec(InputString) then
           begin
@@ -133,12 +168,27 @@ function TWiiboxartCom.InternalExecute;
         end;
     end;
 
+    if ACanUse(cVideoSystem) then
+    begin
+      with TRegExpr.Create do
+        try
+          ModifierM := True; // Causes ^ and $ to match the begin/end of each line
+          InputString := AWebsiteSourceCode;
+          Expression := 'Region.*?>(.*?)$';
+
+          if Exec(InputString) then
+          begin
+            AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, Trim(Match[1]));
+          end;
+        finally
+          Free;
+        end;
+    end;
+
     if ACanUse(cDescription) then
     begin
       with TRegExpr.Create do
         try
-          // TODO
-
           ModifierM := True; // Causes ^ and $ to match the begin/end of each line
           InputString := AWebsiteSourceCode;
           Expression := 'class=stdcopy width=600>(.*?)$';
