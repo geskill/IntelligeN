@@ -7,227 +7,42 @@ uses
   SysUtils, Classes, StrUtils, HTTPApp,
   // RegEx
   RegExpr,
-  // Utils
-  uHTMLUtils,
   // Common
   uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrawlerClass, uPlugInHTTPClasses;
+  uPlugInCrawlerClass, uPlugInHTTPClasses,
+  // Utils
+  uHTMLUtils, uStringUtils;
 
 type
   TThaliaDe = class(TCrawlerPlugIn)
-  protected
-    function ThaliaDetailedPageRequest(AFollowUpRequest: Double; AWebsite: string): string;
+  protected { . }
+  const
+    WEBSITE = 'http://www.thalia.de/';
+
+    function GetBaseSearchType(const ATypeID: TTypeID): string;
+    function GetGameSearchType(const ATypeID: TTypeID): string;
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
 
 { TThaliaDe }
 
-function TThaliaDe.ThaliaDetailedPageRequest;
-var
-  RequestID: Double;
+function TThaliaDe.GetBaseSearchType(const ATypeID: TTypeID): string;
 begin
-  RequestID := HTTPManager.Get(AWebsite, AFollowUpRequest, TPlugInHTTPOptions.Create(Self));
-
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID);
-
-  Result := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
-end;
-
-function TThaliaDe.GetName;
-begin
-  Result := 'Thalia.de';
-end;
-
-function TThaliaDe.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
-begin
-  _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)] - [cXXX];
-  Result := LongWord(_TemplateTypeIDs);
-end;
-
-function TThaliaDe.GetAvailableControlIDs;
-var
-  _TemplateTypeID: TTypeID;
-  _ComponentIDs: TControlIDs;
-begin
-  _TemplateTypeID := TTypeID(ATypeID);
-
-  _ComponentIDs := [cPicture, cLanguage, cDescription];
-
-  if not(_TemplateTypeID = cOther) then
-    _ComponentIDs := _ComponentIDs + [cGenre];
-
-  if (_TemplateTypeID = cMovie) then
-    _ComponentIDs := _ComponentIDs + [cRuntime];
-
-  Result := LongWord(_ComponentIDs);
-end;
-
-function TThaliaDe.GetControlIDDefaultValue;
-begin
-  Result := True;
-end;
-
-function TThaliaDe.GetResultsLimitDefaultValue;
-begin
-  Result := 5;
-end;
-
-function TThaliaDe.Exec;
-const
-  website = 'http://www.thalia.de/';
-var
-  _TemplateTypeID: TTypeID;
-  _ComponentIDs: TControlIDs;
-  _Title, _SearchType, _Language, _Genre: string;
-  _Count: Integer;
-
-  procedure deep_search(aWebsitecode: string);
-  begin
-    if (AControlController.FindControl(cLanguage) <> nil) and (cLanguage in _ComponentIDs) then
-      with TRegExpr.Create do
-        try
-          InputString := aWebsitecode;
-          Expression := 'Sprache\(n\):<\/strong> (.*?)<\/li>';
-
-          if Exec(InputString) then
-          begin
-            repeat
-              _Language := Match[1];
-              if (Pos('/', _Language) > 0) or (Pos(',', _Language) > 0) or (Pos('|', _Language) > 0) then
-              begin
-                with TRegExpr.Create do
-                begin
-                  try
-                    InputString := _Language;
-                    Expression := '([^\/,|]+)';
-
-                    if Exec(InputString) then
-                    begin
-                      repeat
-                        AControlController.FindControl(cLanguage).AddProposedValue(GetName, Trim(Match[1]));
-                      until not ExecNext;
-                    end;
-                  finally
-                    Free;
-                  end;
-                end;
-              end
-              else
-                AControlController.FindControl(cLanguage).AddProposedValue(GetName, _Language);
-            until not ExecNext;
-          end;
-        finally
-          Free;
-        end;
-    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
-      with TRegExpr.Create do
-        try
-          InputString := aWebsitecode;
-          Expression := 'Stilrichtung:<\/strong> (.*?)<\/li>';
-
-          if Exec(InputString) then
-          begin
-            repeat
-              _Genre := Match[1];
-              if (Pos('/', _Genre) > 0) or (Pos(',', _Genre) > 0) or (Pos('|', _Genre) > 0) then
-              begin
-                with TRegExpr.Create do
-                begin
-                  try
-                    InputString := _Genre;
-                    Expression := '([^\/,|]+)';
-
-                    if Exec(InputString) then
-                    begin
-                      repeat
-                        AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(Match[1]));
-                      until not ExecNext;
-                    end;
-                  finally
-                    Free;
-                  end;
-                end;
-              end
-              else
-                AControlController.FindControl(cGenre).AddProposedValue(GetName, _Genre);
-            until not ExecNext;
-          end;
-        finally
-          Free;
-        end;
-    if (AControlController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
-      with TRegExpr.Create do
-        try
-          InputString := aWebsitecode;
-          Expression := 'Spieldauer:<\/strong> (\d+) Minuten<\/li>';
-
-          if Exec(InputString) then
-            AControlController.FindControl(cRuntime).AddProposedValue(GetName, Match[1], GetName)
-          else
-          begin
-            Expression := 'Spieldauer:<\/strong> (\d+):(\d+):(\d+)<\/li>';
-
-            if Exec(InputString) then
-              AControlController.FindControl(cRuntime).AddProposedValue(GetName, IntToStr(StrToInt(Match[1])) + Match[2]);
-          end;
-        finally
-          Free;
-        end;
-    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
-      with TRegExpr.Create do
-        try
-          InputString := aWebsitecode;
-          Expression := '<div id="tab-content_content" class="detailLayer">.*?<p>(.*?)<\/p>';
-
-          if Exec(InputString) then
-            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
-        finally
-          Free;
-        end;
-    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
-      with TRegExpr.Create do
-        try
-          InputString := aWebsitecode;
-          Expression := '<div class="detailImageContainer" style="width:200px; height:300px;">\s+<a href="(.*?)"';
-
-          if Exec(InputString) then
-          begin
-            AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
-          end;
-        finally
-          Free;
-        end;
-  end;
-
-var
-  HTTPRequest: IHTTPRequest;
-
-  RequestID: Double;
-
-  ResponseStrSearchResult: string;
-begin
-  _TemplateTypeID := TTypeID(ATypeID);
-  LongWord(_ComponentIDs) := AControlIDs;
-  _Title := AControlController.FindControl(cTitle).Value;
-  _Count := 0;
-
   (*
     <option value="ANY" >in allen Kategorien</option>
     <option value="BUCH" >in B&#252;chern</option>
@@ -240,59 +55,265 @@ begin
     <option value="GESELLSCHAFTSSPIEL" >in Spielwaren</option>
     *)
 
-  case _TemplateTypeID of
-    cAudio:
-      _SearchType := 'MUSIK';
-    cGameCube, cNintendoDS, cPCGames, cPlayStation2, cPlayStation3, cPlayStationPortable, cWii, cXbox, cXbox360:
-      _SearchType := 'SPIEL';
-    cMovie:
-      _SearchType := 'FILM';
-    cSoftware:
-      _SearchType := 'SOFTWARE';
-    cOther:
-      _SearchType := 'ANY';
+  if ATypeID in cGames then
+    Result := 'SPIEL'
+  else
+  begin
+    case ATypeID of
+      cAudio:
+        Result := 'MUSIK';
+      cEBook:
+        Result := 'EBOOK';
+      cMovie:
+        Result := 'FILM';
+      cSoftware:
+        Result := 'SOFTWARE';
+      cOther:
+        Result := 'ANY';
+    end;
+  end;
+end;
+
+function TThaliaDe.GetGameSearchType(const ATypeID: TTypeID): string;
+begin
+  case ATypeID of
+    cNintendoDS:
+      // http://www.thalia.de/shop/home/suche/ANY/?fltKATEGORIEN_2=5350&sswg=ANY&asnlinkname=Kategorien_Nintendo+3DS+%26+2DS&fltKATEGORIEN_1=5067&asn=true&sq=Final+Fantasy&timestamp=1446157389683
+      Result := '5350';
+    cPCGames:
+      // http://www.thalia.de/shop/home/suche/ANY/?fltKATEGORIEN_2=5442&sswg=ANY&asnlinkname=Kategorien_PC-Games&fltKATEGORIEN_1=5067&asn=true&sq=Final+Fantasy&timestamp=1446157389683
+      Result := '5442';
+    cPlayStation3:
+      // http://www.thalia.de/shop/home/suche/ANY/?fltKATEGORIEN_2=5399&sswg=ANY&asnlinkname=Kategorien_Playstation+3&fltKATEGORIEN_1=5067&asn=true&sq=Final+Fantasy&timestamp=1446157389683
+      Result := '5399';
+    cPlayStation4:
+      // http://www.thalia.de/shop/home/suche/ANY/?fltKATEGORIEN_2=14958&sswg=ANY&asnlinkname=Kategorien_Playstation+4&fltKATEGORIEN_1=5067&asn=true&sq=Final+Fantasy&timestamp=1446157389683
+      Result := '14958';
+    cPlayStationVita:
+      // http://www.thalia.de/shop/home/suche/ANY/?fltKATEGORIEN_2=5427&sswg=ANY&asnlinkname=Kategorien_Playstation+Vita&fltKATEGORIEN_1=5067&asn=true&sq=Final+Fantasy&timestamp=1446157389683
+      Result := '5427';
+    cWii:
+      // http://www.thalia.de/shop/home/suche/ANY/?fltKATEGORIEN_2=5369&sswg=ANY&asnlinkname=Kategorien_Nintendo+Wii&fltKATEGORIEN_1=5067&asn=true&sq=Mario&timestamp=1446157777931
+      Result := '5369';
+    cWiiU:
+      // http://www.thalia.de/shop/home/suche/ANY/?fltKATEGORIEN_2=11096&sswg=ANY&asnlinkname=Kategorien_Nintendo+Wii+U&fltKATEGORIEN_1=5067&asn=true&sq=Mario&timestamp=1446157777931
+      Result := '11096';
+    cXbox360:
+      // http://www.thalia.de/shop/home/suche/ANY/?fltKATEGORIEN_2=5228&sswg=ANY&asnlinkname=Kategorien_Xbox+360&fltKATEGORIEN_1=5067&asn=true&sq=Final+Fantasy&timestamp=1446157389683
+      Result := '5228';
+    cXboxOne:
+      // http://www.thalia.de/shop/home/suche/ANY/?fltKATEGORIEN_2=14975&sswg=ANY&asnlinkname=Kategorien_Xbox+One&fltKATEGORIEN_1=5067&asn=true&sq=Final+Fantasy&timestamp=1446157389683
+      Result := '14975';
+  end;
+end;
+
+function TThaliaDe.GetName;
+begin
+  Result := 'Thalia.de';
+end;
+
+function TThaliaDe.InternalGetAvailableTypeIDs;
+begin
+  Result := [ low(TTypeID) .. high(TTypeID)] - [cXXX];
+end;
+
+function TThaliaDe.InternalGetAvailableControlIDs;
+begin
+  Result := [cPicture, cLanguage, cDescription];
+
+  if not(ATypeID = cOther) then
+    Result := Result + [cGenre];
+
+  if (ATypeID = cMovie) then
+    Result := Result + [cRuntime];
+end;
+
+function TThaliaDe.InternalGetControlIDDefaultValue;
+begin
+  Result := True;
+end;
+
+function TThaliaDe.InternalGetDependentControlIDs;
+begin
+  Result := [cTitle];
+end;
+
+function TThaliaDe.InternalExecute;
+
+  procedure deep_search(aWebsitecode: string);
+  var
+    s: string;
+  begin
+    if ACanUse(cPicture) then
+      with TRegExpr.Create do
+        try
+          InputString := aWebsitecode;
+          Expression := 'data-image="(.*?)"';
+
+          if Exec(InputString) then
+          begin
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cLanguage) then
+      with TRegExpr.Create do
+        try
+          InputString := aWebsitecode;
+          Expression := '<dt>\s+Sprache.*?d>(.*?)<\/';
+
+          if Exec(InputString) then
+          begin
+            s := Match[1];
+
+            // Remove (Untertitel
+            if (Pos('(', s) > 0) then
+              s := copy(s, 1, Pos('(', s));
+
+            if (Pos('/', s) > 0) or (Pos(',', s) > 0) or (Pos('|', s) > 0) then
+            begin
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := '([^\/,|]+)';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      AControlController.FindControl(cLanguage).AddProposedValue(GetName, Trim(Match[1]));
+                    until not ExecNext;
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            end
+            else
+            begin
+              AControlController.FindControl(cLanguage).AddProposedValue(GetName, s);
+            end;
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cGenre) then
+      with TRegExpr.Create do
+        try
+          InputString := aWebsitecode;
+          Expression := '<dt>\s+Genre.*?d>(.*?)<\/';
+
+          if Exec(InputString) then
+          begin
+            s := Match[1];
+
+            if (Pos('/', s) > 0) or (Pos(',', s) > 0) or (Pos('|', s) > 0) then
+            begin
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := '([^\/,|]+)';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(Match[1]));
+                    until not ExecNext;
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            end
+            else
+            begin
+              AControlController.FindControl(cGenre).AddProposedValue(GetName, s);
+            end;
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cRuntime) then
+      with TRegExpr.Create do
+        try
+          InputString := aWebsitecode;
+          Expression := '<dt>\s+Spieldauer.*?d>(.*?) Minuten';
+
+          if Exec(InputString) then
+            AControlController.FindControl(cRuntime).AddProposedValue(GetName, Trim(Match[1]));
+        finally
+          Free;
+        end;
+
+    if ACanUse(cDescription) then
+      with TRegExpr.Create do
+        try
+          InputString := aWebsitecode;
+          Expression := 'Beschreibung.*?">(.*?)<\/dd>';
+
+          if Exec(InputString) then
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
+        finally
+          Free;
+        end;
+
   end;
 
-  HTTPRequest := THTTPRequest.Create(website + 'shop/tha_homestartseite/suche/?sswg=' + HTTPEncode(_SearchType) + '&sq=' + HTTPEncode(_Title));
-  HTTPRequest.Referer := website;
+var
+  LTitle: string;
+  LCount: Integer;
 
-  RequestID := HTTPManager.Get(HTTPRequest, TPlugInHTTPOptions.Create(Self));
+  LSearchString: string;
+  LRequestID1, LRequestID2: Double;
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  LResponeStr: string;
+begin
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
 
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
+  LSearchString := 'shop/home/suche/' + GetBaseSearchType(ATypeID) + '/?sswg=' + GetBaseSearchType(ATypeID) + '&sq=' + HTTPEncode(LTitle);
+  if ATypeID in cGames then
+    LSearchString := LSearchString + '&fltKATEGORIEN_2=' + GetGameSearchType(ATypeID);
 
-  with TRegExpr.Create do
-    try
-      InputString := ResponseStrSearchResult;
-      if _TemplateTypeID in cGames then
-        Expression := '<h2><a href="(.*?)".*?Medium: ([\w ]+)'
-      else
-        Expression := '<h2><a href="(.*?)"';
-      if Exec(InputString) then
-      begin
-        repeat
-          if _TemplateTypeID in cGames then
-          begin
-            if ((_TemplateTypeID = cNintendoDS) and (Match[2] = 'Nintendo DS')) or { }
-            ((_TemplateTypeID in [cGameCube, cWii]) and ((Match[2] = 'GameCube') or (Match[2] = 'Nintendo Wii'))) or { }
-            ((_TemplateTypeID = cPCGames) and ((Match[2] = 'DVD') or (Match[2] = 'CD-ROM') or (Match[2] = 'PC Games'))) or { }
-            ((_TemplateTypeID in [cPlayStation2, cPlayStation3]) and ((Match[2] = 'PS2') or (Match[2] = 'PlayStation 2') or (Match[2] = 'PlayStation 3'))) or
-            { }
-            ((_TemplateTypeID = cPlayStationPortable) and ((Match[2] = 'PSP (Playstation Portable)') or (Match[2] = 'UMD'))) or { }
-            ((_TemplateTypeID in [cXbox, cXbox360]) and ((Match[2] = 'Xbox') or (Match[2] = 'XBOX 360'))) then
-              deep_search(ThaliaDetailedPageRequest(RequestID, Match[1]))
-          end
-          else
-            deep_search(ThaliaDetailedPageRequest(RequestID, Match[1]));
-          Inc(_Count);
-        until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
+  // http://www.thalia.de/shop/home/suche/ANY/?fltKATEGORIEN_2=5350&sswg=ANY&asnlinkname=Kategorien_Nintendo+3DS+%26+2DS&fltKATEGORIEN_1=5067&asn=true&sq=Final+Fantasy
+
+  LResponeStr := GETRequest(WEBSITE + LSearchString, LRequestID1);
+
+  if not(Pos('Treffer', LResponeStr) = 0) then
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := ExtractTextBetween(LResponeStr, 'ProductList', 'ProductList');
+        Expression := '<\/div>\s+<\/div>\s+<a href="(.*?)" data-test=';
+
+        if Exec(InputString) then
+        begin
+          repeat
+            LResponeStr := GETFollowUpRequest(Match[1], LRequestID1, LRequestID2);
+
+            deep_search(LResponeStr);
+
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
+        end;
+      finally
+        Free;
       end;
-    finally
-      Free;
-    end;
+  end
+  else if not(Pos('pvTopDetails', LResponeStr) = 0) then
+  begin
+    deep_search(LResponeStr);
+  end;
+end;
+
+function TThaliaDe.GetResultsLimitDefaultValue;
+begin
+  Result := 5;
 end;
 
 end.

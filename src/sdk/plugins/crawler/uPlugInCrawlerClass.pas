@@ -41,7 +41,10 @@ type
     function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; virtual; safecall; abstract;
     function InternalGetDependentControlIDs: TControlIDs; virtual; safecall; abstract;
 
+    function GETRequest(const AURL: string; out ARequestID: Double; AHTTPOptions: IHTTPOptions = nil): string;
+    function GETFollowUpRequest(const AURL: string; AFollowUp: Double; out ARequestID: Double; AHTTPOptions: IHTTPOptions = nil): string;
     function SimpleGETRequest(const AURL: string; AHTTPOptions: IHTTPOptions = nil): string;
+
     function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; virtual; safecall; abstract;
   public
     function GetType: TPlugInType; override; safecall;
@@ -91,7 +94,7 @@ begin
   FAccountpassword := AAccountPassword;
 end;
 
-function TCrawlerPlugIn.SimpleGETRequest(const AURL: string; AHTTPOptions: IHTTPOptions = nil): string;
+function TCrawlerPlugIn.GETRequest(const AURL: string; out ARequestID: Double; AHTTPOptions: IHTTPOptions = nil): string;
 var
   LHTTPRequest: IHTTPRequest;
   LHTTPOptions: IHTTPOptions;
@@ -117,7 +120,38 @@ begin
     sleep(50);
   until HTTPManager.HasResult(LRequestID);
 
+  ARequestID := LRequestID;
   Result := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
+end;
+
+function TCrawlerPlugIn.GETFollowUpRequest(const AURL: string; AFollowUp: Double; out ARequestID: Double; AHTTPOptions: IHTTPOptions = nil): string;
+var
+  LHTTPOptions: IHTTPOptions;
+  LRequestID: Double;
+  LHTTPProcess: IHTTPProcess;
+begin
+  Result := '';
+
+  if not Assigned(AHTTPOptions) then
+    LHTTPOptions := TPlugInHTTPOptions.Create(Self)
+  else
+    LHTTPOptions := AHTTPOptions;
+
+  LRequestID := HTTPManager.Get(AURL, AFollowUp, LHTTPOptions);
+
+  repeat
+    sleep(50);
+  until HTTPManager.HasResult(LRequestID);
+
+  ARequestID := LRequestID;
+  Result := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
+end;
+
+function TCrawlerPlugIn.SimpleGETRequest(const AURL: string; AHTTPOptions: IHTTPOptions = nil): string;
+var
+  LRequestID: Double;
+begin
+  Result := GETRequest(AURL, LRequestID, AHTTPOptions);
 end;
 
 function TCrawlerPlugIn.GetType: TPlugInType;

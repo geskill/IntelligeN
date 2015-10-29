@@ -172,7 +172,6 @@ var
   LTitle: string;
   LCount: Integer;
 
-  LHTTPRequest: IHTTPRequest;
   LRequestID1, LRequestID2: Double;
 
   LResponeStr: string;
@@ -182,19 +181,7 @@ begin
 
   // http://www.zelluloid.de/suche/index.php3?qstring=Spectre&x=38&y=4
 
-  LHTTPRequest := THTTPRequest.Create(SEARCH_URL + 'index.php3?qstring=' + HTTPEncode(LTitle));
-  with LHTTPRequest do
-  begin
-    Referer := WEBSITE;
-  end;
-
-  LRequestID1 := HTTPManager.Get(LHTTPRequest, TPlugInHTTPOptions.Create(Self));
-
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID1);
-
-  LResponeStr := HTTPManager.GetResult(LRequestID1).HTTPResult.SourceCode;
+  LResponeStr := GETRequest(SEARCH_URL + 'index.php3?qstring=' + HTTPEncode(LTitle), LRequestID1);
 
   if not(Pos('Treffer', LResponeStr) = 0) then
   begin
@@ -206,13 +193,7 @@ begin
         if Exec(InputString) then
         begin
           repeat
-            LRequestID2 := HTTPManager.Get(SEARCH_URL + Match[1], LRequestID1, TPlugInHTTPOptions.Create(Self));
-
-            repeat
-              sleep(50);
-            until HTTPManager.HasResult(LRequestID2);
-
-            LResponeStr := HTTPManager.GetResult(LRequestID2).HTTPResult.SourceCode;
+            LResponeStr := GETFollowUpRequest(SEARCH_URL + Match[1], LRequestID1, LRequestID2);
 
             deep_search(LResponeStr);
 

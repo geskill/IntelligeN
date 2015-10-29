@@ -248,9 +248,6 @@ begin
 
             ID.Types.Add(_Type);
 
-            if Assigned(ChildNodes.FindNode('RomsGames')) then
-              ID.Types.Add(TType.Create(cGameCube, CleanUP(ChildNodes.Nodes['RomsGames'].NodeValue)));
-
             if Assigned(ChildNodes.FindNode('NintendoDsGames')) then
               ID.Types.Add(TType.Create(cNintendoDS, CleanUP(ChildNodes.Nodes['NintendoDsGames'].NodeValue)));
 
@@ -264,7 +261,7 @@ begin
               ID.Types.Add(TType.Create(cPlayStation3, CleanUP(ChildNodes.Nodes['Ps3Games'].NodeValue)));
 
             if Assigned(ChildNodes.FindNode('PspGames')) then
-              ID.Types.Add(TType.Create(cPlayStationPortable, CleanUP(ChildNodes.Nodes['PspGames'].NodeValue)));
+              ID.Types.Add(TType.Create(cPlayStationVita, CleanUP(ChildNodes.Nodes['PspGames'].NodeValue)));
 
             if Assigned(ChildNodes.FindNode('Applications')) then
               ID.Types.Add(TType.Create(cSoftware, CleanUP(ChildNodes.Nodes['Applications'].NodeValue)));

@@ -247,13 +247,7 @@ begin
       if Exec(InputString) then
       begin
         repeat
-          LRequestID2 := HTTPManager.Get(WEBSITE + Match[1], LRequestID1, TPlugInHTTPOptions.Create(Self));
-
-          repeat
-            sleep(50);
-          until HTTPManager.HasResult(LRequestID2);
-
-          LResponeStr := HTTPManager.GetResult(LRequestID2).HTTPResult.SourceCode;
+          LResponeStr := GETFollowUpRequest(WEBSITE + Match[1], LRequestID1, LRequestID2);
 
           deep_search(LResponeStr);
 

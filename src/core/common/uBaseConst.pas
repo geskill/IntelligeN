@@ -79,13 +79,13 @@ type
   /// Type definition of the different release categories.
   /// </summary>
 {$ENDREGION}
-  TTypeID = (cAudio, cEBook, cGameCube, cMovie, cNintendoDS, cPCGames, cPlayStation3, cPlayStation4, cPlayStationPortable, cSoftware, cWii, cWiiU, cXbox360, cXboxOne, cXXX, cOther);
+  TTypeID = (cAudio, cEBook, cMovie, cNintendoDS, cPCGames, cPlayStation3, cPlayStation4, cPlayStationVita, cSoftware, cWii, cWiiU, cXbox360, cXboxOne, cXXX, cOther);
 
   TTypeIDs = set of TTypeID;
 
 const
-  cConsole: set of TTypeID = [cGameCube, cNintendoDS, cPlayStation3, cPlayStation4, cPlayStationPortable, cWii, cWiiU, cXbox360, cXboxOne];
-  cGames: set of TTypeID = [cGameCube, cNintendoDS, cPCGames, cPlayStation3, cPlayStation4, cPlayStationPortable, cWii, cWiiU, cXbox360, cXboxOne];
+  cConsole: set of TTypeID = [cNintendoDS, cPlayStation3, cPlayStation4, cPlayStationVita, cWii, cWiiU, cXbox360, cXboxOne];
+  cGames: set of TTypeID = [cNintendoDS, cPCGames, cPlayStation3, cPlayStation4, cPlayStationVita, cWii, cWiiU, cXbox360, cXboxOne];
 
 implementation
 
