@@ -376,13 +376,13 @@
 
 * Tremendous interface changes
 
+* Added new base categories EBook, PlayStation4, PlayStationVita, WiiU and XboxOne
+
 * Improved Plugin Error handling
 
 * Removed DirectoryMonitor (need re-work, planned for next BUILD)
 
 ######minor enhancements
-
-* Added new base categories EBook, PlayStation4 und XboxOne
 
 * Added new status images incl. new image for temporary offline
 
@@ -392,13 +392,27 @@
 
 * Added possibility to visit uploaded image on picture mirror via double click on the image hoster icon
 
+* Improved logo
+
+* Improved TypeID icons
+
+* Improved templates_type files
+
 * Improved FirstStart performance
+
+* Improved crawler interface by adding function that ensures the requirement of certain controls
+
+* Improved wiiboxart.com crawler
+
+* Updated to TLS 1.2 SSL in HTTPManager
 
 * Fixed a bug in the HTTP logger not showing the path of file parameters
 
 * Fixed a bug of adding a new tab while having MirrorPosition = mpTop
 
 * Fixed a bug switching the view from code to data, while a hint is displayed in code view
+
+* Fixed IScript Editor website OnChange
 
 * Fixed IScirpt editor enabling/disabling a CMS
 
@@ -407,3 +421,5 @@
 * Fixed linkcrypt.ws crypter plugin
 
 * Fixed share-online.biz hoster plugin
+
+* Removed base categories GameCube, PlayStation2, PlayStationPortable and Xbox
