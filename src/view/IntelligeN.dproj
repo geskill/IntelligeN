@@ -191,6 +191,7 @@
 			</DCCReference>
 			<DCCReference Include="mods\uMyAdvmJScriptStyler.pas"/>
 			<DCCReference Include="mods\uMycxCheckComboBox.pas"/>
+			<DCCReference Include="mods\uMycxImageComboBox.pas"/>
 			<DCCReference Include="mods\uMycxRichEdit.pas"/>
 			<DCCReference Include="mods\uMyPopupMenu.pas"/>
 			<DCCReference Include="mods\uMydxBarPopupMenu.pas"/>

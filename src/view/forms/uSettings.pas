@@ -1612,6 +1612,11 @@ procedure TSettings.FormCreate(Sender: TObject);
       Width := 129;
       Height := 262;
 
+      with InnerCheckListBox do
+      begin
+        Images := SettingsManager.Settings.Plugins.AppImageList;
+      end;
+
       OnClickCheck := AppClickCheck;
       OnAddPluginClick := AddAppClick;
       OnAddAllPluginClick := AppAddAllClick;
@@ -1629,6 +1634,11 @@ procedure TSettings.FormCreate(Sender: TObject);
       Height := 262;
 
       DragDrop := True;
+
+      with InnerCheckListBox do
+      begin
+        Images := SettingsManager.Settings.Plugins.CAPTCHAImageList;
+      end;
 
       OnClickCheck := CAPTCHAClickCheck;
       OnEndDrag := CAPTCHAEndDrag;
@@ -1648,6 +1658,11 @@ procedure TSettings.FormCreate(Sender: TObject);
       Height := 262;
 
       DragDrop := True;
+
+      with InnerCheckListBox do
+      begin
+        Images := SettingsManager.Settings.Plugins.CMSImageList;
+      end;
 
       OnClick := CMSClick;
       OnClickCheck := CMSClickCheck;
@@ -1670,6 +1685,11 @@ procedure TSettings.FormCreate(Sender: TObject);
 
       DragDrop := True;
 
+      with InnerCheckListBox do
+      begin
+        Images := SettingsManager.Settings.Plugins.CrawlerImageList;
+      end;
+
       OnClick := CrawlerClick;
       OnClickCheck := CrawlerClickCheck;
       OnEndDrag := CrawlerEndDrag;
@@ -1690,6 +1710,11 @@ procedure TSettings.FormCreate(Sender: TObject);
       Height := 262;
 
       DragDrop := True;
+
+      with InnerCheckListBox do
+      begin
+        Images := SettingsManager.Settings.Plugins.CrypterImageList;
+      end;
 
       OnClick := CrypterClick;
       OnClickCheck := CrypterClickCheck;
@@ -1712,6 +1737,11 @@ procedure TSettings.FormCreate(Sender: TObject);
 
       DragDrop := True;
 
+      with InnerCheckListBox do
+      begin
+        Images := SettingsManager.Settings.Plugins.FileFormatsImageList;
+      end;
+
       OnClick := FileFormatsClick;
       OnClickCheck := FileFormatsClickCheck;
       OnEndDrag := FileFormatsEndDrag;
@@ -1731,6 +1761,11 @@ procedure TSettings.FormCreate(Sender: TObject);
       Width := 129;
       Height := 262;
 
+      with InnerCheckListBox do
+      begin
+        Images := SettingsManager.Settings.Plugins.FileHosterImageList;
+      end;
+
       OnClickCheck := FileHosterClickCheck;
       OnAddPluginClick := FileHosterAddClick;
       OnAddAllPluginClick := FileHosterAddAllClick;
@@ -1746,6 +1781,11 @@ procedure TSettings.FormCreate(Sender: TObject);
       Top := 16;
       Width := 129;
       Height := 262;
+
+      with InnerCheckListBox do
+      begin
+        Images := SettingsManager.Settings.Plugins.ImageHosterImageList;
+      end;
 
       OnClick := ImageHosterClick;
       OnClickCheck := ImageHosterClickCheck;

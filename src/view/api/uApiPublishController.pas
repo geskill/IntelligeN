@@ -4,7 +4,9 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, Classes, StrUtils, Math, Dialogs, Variants, Generics.Collections,
+  Windows, SysUtils, Classes, StrUtils, Math, Dialogs, Variants,
+  // Spring Framework
+  Spring.Collections.Lists,
   // MultiEvent
   Generics.MultiEvents.NotifyInterface, Generics.MultiEvents.NotifyHandler,
   // Common
@@ -21,22 +23,24 @@ uses
 type
   TICMSWebsite = class(TInterfacedObject, ICMSWebsite)
   private
-    FAccountName, FAccountPassword, FSettingsFileName, FWebsite, FSubject, FTags, FMessage: WideString;
+    FAccountName, FAccountPassword, FSettingsFileName, FHost, FWebsite, FSubject, FTags, FMessage: WideString;
   protected
     function GetAccountName: WideString;
     function GetAccountPassword: WideString;
     function GetSettingsFileName: WideString;
+    function GetHost: WideString;
     function GetWebsite: WideString;
     function GetSubject: WideString;
     function GetTags: WideString;
     function GetMessage: WideString;
   public
-    constructor Create(AAccountName, AAccountPassword, ASettingsFileName, AWebsite, ASubject, ATags, AMessage: WideString);
+    constructor Create(AAccountName, AAccountPassword, ASettingsFileName, AHost, AWebsite, ASubject, ATags, AMessage: WideString);
     property AccountName: WideString read GetAccountName;
     property AccountPassword: WideString read GetAccountPassword;
 
     property SettingsFileName: WideString read GetSettingsFileName;
 
+    property Host: WideString read GetHost;
     property Website: WideString read GetWebsite;
     property Subject: WideString read GetSubject;
     property Tags: WideString read GetTags;
@@ -127,7 +131,7 @@ type
       function GetCMSPluginPath: WideString;
       function GetData: ITabSheetData;
     public
-      constructor Create(AAccountName, AAccountPassword, ASettingsFileName, AWebsite, ASubject, ATags, AMessage, ACMSPluginPath: WideString; ACMSWebsiteData: ITabSheetData);
+      constructor Create(AAccountName, AAccountPassword, ASettingsFileName, AHost, AWebsite, ASubject, ATags, AMessage, ACMSPluginPath: WideString; ACMSWebsiteData: ITabSheetData);
       property CMSPluginPath: WideString read GetCMSPluginPath;
       property WebsiteData: ITabSheetData read GetData;
       destructor Destroy; override;
@@ -153,6 +157,7 @@ type
     function GetTabSheetController: ITabSheetController;
     procedure SetTabSheetController(const ATabSheetController: ITabSheetController);
     function GetCMS: WideString;
+    function GetCMSInnerIndex: Integer;
     function GetCMSPluginPath: WideString;
     function GetName: WideString;
     function GetTopIndex: Integer;
@@ -168,6 +173,7 @@ type
 
     function GetSettingsFileName: WideString;
 
+    function GetHost: WideString;
     function GetWebsite: WideString;
 
     function GetSubject: WideString;
@@ -181,6 +187,7 @@ type
     constructor Create(const ATabConnection: ITabSheetController; ACMSCollectionItem: TCMSCollectionItem; ACMSWebsitesCollectionItem: TCMSWebsitesCollectionItem);
     property TabSheetController: ITabSheetController read GetTabSheetController write SetTabSheetController;
     property CMS: WideString read GetCMS;
+    property CMSInnerIndex: Integer read GetCMSInnerIndex;
     property Name: WideString read GetName;
     property TopIndex: Integer read GetTopIndex write SetTopIndex;
     property Index: Integer read GetIndex write SetIndex;
@@ -199,6 +206,7 @@ type
 
     property SettingsFileName: WideString read GetSettingsFileName;
 
+    property Host: WideString read GetWebsite;
     property Website: WideString read GetWebsite;
 
     property Subject: WideString read GetSubject;
@@ -214,7 +222,7 @@ type
   private
     FIndex: Integer;
     FTabConnection: ITabSheetController;
-    FWebsiteList: TInterfaceList;
+    FWebsiteList: TInterfaceList<ICMSWebsiteContainer>;
     FCMSCollectionItem: TCMSCollectionItem;
     FWebsiteChangeEventHandler: ICMSItemChangeEventHandler;
     function CreateNewWebsiteContainer(AWebsiteIndex: Integer): ICMSWebsiteContainer;
@@ -241,7 +249,7 @@ type
   TIPublishController = class(TInterfacedObject, IPublishController)
   private
     FTabSheetController: ITabSheetController;
-    FCMSList: TInterfaceList;
+    FCMSList: TInterfaceList<ICMSContainer>;
     FActive: Boolean;
     FUpdateCMSList: IUpdateCMSListEvent;
     FUpdateCMSWebsiteList: IUpdateCMSWebsiteListEvent;
@@ -304,6 +312,11 @@ begin
   Result := FSettingsFileName;
 end;
 
+function TICMSWebsite.GetHost: WideString;
+begin
+  Result := FHost;
+end;
+
 function TICMSWebsite.GetWebsite: WideString;
 begin
   Result := FWebsite;
@@ -324,13 +337,14 @@ begin
   Result := FMessage;
 end;
 
-constructor TICMSWebsite.Create(AAccountName, AAccountPassword, ASettingsFileName, AWebsite, ASubject, ATags, AMessage: WideString);
+constructor TICMSWebsite.Create;
 begin
   inherited Create;
 
   FAccountName := AAccountName;
   FAccountPassword := AAccountPassword;
   FSettingsFileName := ASettingsFileName;
+  FHost := AHost;
   FWebsite := AWebsite;
   FSubject := ASubject;
   FTags := ATags;
@@ -598,7 +612,7 @@ end;
 
 constructor TICMSWebsiteContainer.TIPublishItem.Create;
 begin
-  inherited Create(AAccountName, AAccountPassword, ASettingsFileName, AWebsite, ASubject, ATags, AMessage);
+  inherited Create(AAccountName, AAccountPassword, ASettingsFileName, AHost, AWebsite, ASubject, ATags, AMessage);
   FCMSPluginPath := ACMSPluginPath;
   FCMSWebsiteData := ACMSWebsiteData;
 end;
@@ -863,6 +877,11 @@ begin
   Result := FCMSCollectionItem.Name;
 end;
 
+function TICMSWebsiteContainer.GetCMSInnerIndex: Integer;
+begin
+  Result := FCMSCollectionItem.Index;
+end;
+
 function TICMSWebsiteContainer.GetCMSPluginPath: WideString;
 begin
   Result := FCMSCollectionItem.GetPath;
@@ -926,6 +945,11 @@ end;
 function TICMSWebsiteContainer.GetSettingsFileName: WideString;
 begin
   Result := FCMSWebsiteCollectionItem.GetPath;
+end;
+
+function TICMSWebsiteContainer.GetHost: WideString;
+begin
+  Result := FCMSWebsiteCollectionItem.Host;
 end;
 
 function TICMSWebsiteContainer.GetWebsite: WideString;
@@ -1033,7 +1057,7 @@ function TICMSWebsiteContainer.GeneratePublishItem: IPublishItem;
 begin
   Result := nil;
   if ValidateFiles then
-    Result := TIPublishItem.Create(AccountName, AccountPassword, SettingsFileName, Website, Subject, Tags, Message, GetCMSPluginPath, GenerateData);
+    Result := TIPublishItem.Create(AccountName, AccountPassword, SettingsFileName, Host, Website, Subject, Tags, Message, GetCMSPluginPath, GenerateData);
 end;
 
 function TICMSWebsiteContainer.GeneratePublishTab: IPublishTab;
@@ -1184,7 +1208,7 @@ end;
 
 function TICMSContainer.GetName: WideString;
 begin
-  Result := FCMSCollectionItem.name;
+  Result := FCMSCollectionItem.Name;
 end;
 
 function TICMSContainer.GetIndex: Integer;
@@ -1200,7 +1224,7 @@ end;
 
 function TICMSContainer.GetWebsite(AIndex: Integer): ICMSWebsiteContainer;
 begin
-  Result := (FWebsiteList[AIndex] as ICMSWebsiteContainer);
+  Result := FWebsiteList[AIndex];
 end;
 
 constructor TICMSContainer.Create(const ATabConnection: ITabSheetController; ACMSCollectionItem: TCMSCollectionItem);
@@ -1209,7 +1233,7 @@ var
 begin
   FIndex := -1;
   FTabConnection := ATabConnection;
-  FWebsiteList := TInterfaceList.Create;
+  FWebsiteList := TInterfaceList<ICMSWebsiteContainer>.Create;
   FCMSCollectionItem := ACMSCollectionItem;
 
   with FCMSCollectionItem do
@@ -1371,7 +1395,7 @@ constructor TIPublishController.Create;
 begin
   FTabSheetController := ATabConnection;
 
-  FCMSList := TInterfaceList.Create;
+  FCMSList := TInterfaceList<ICMSContainer>.Create;
 
   FUpdateCMSList := TIUpdateCMSListEvent.Create;
   FUpdateCMSWebsiteList := TIUpdateCMSWebsiteListEvent.Create;
@@ -1444,7 +1468,7 @@ begin
       Index := FindCMSContainer(IndexOrName);
 
     if not((Index < 0) or (Index > FCMSList.Count)) then
-      Result := (FCMSList[Index] as ICMSContainer);
+      Result := FCMSList[Index];
   end;
 end;
 

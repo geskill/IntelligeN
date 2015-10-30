@@ -5,9 +5,13 @@ interface
 uses
   // Delphi
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ImgList, ActnList, StdCtrls,
-  ShellAPI, Generics.Collections, Math, StrUtils, ExtCtrls, Clipbrd,
+  ShellAPI, Math, StrUtils, ExtCtrls, Clipbrd,
+  // Spring Framework
+  Spring.Collections.Lists,
   // Dev Express
   cxControls, dxBar, cxScrollBox, cxDropDownEdit, cxImageComboBox, cxButtons, cxSplitter,
+  // Dev Express mods
+  uMycxImageComboBox,
   // OmniThreadLibrary
   OtlParallel, OtlTaskControl,
   // HtmlViewer
@@ -84,8 +88,11 @@ type
     FMessageChange: TICMSItemChangeEventHandler;
 
     // code + preview
+    FWebsiteList: TInterfaceList<ICMSWebsiteContainer>;
     FWebsitePanel: TPanel;
-    FWebsite: TcxImageComboBox;
+    // TcxImageComboBox not suitable
+    // see: https://www.devexpress.com/Support/Center/Question/Details/T302539
+    FWebsite: TMycxImageComboBox;
 
     // code
     FCodePanel: TPanel;
@@ -139,6 +146,7 @@ type
     procedure RenderHTMLView;
   public
     constructor Create(AOwner: TComponent; ATabSheetController: ITabSheetController); override;
+    destructor Destroy; override;
 
     property ActiveWebsite: WideString read GetActiveWebsite write SetActiveWebsite;
     property ActiveWebsiteData: ICMSWebsiteContainer read GetActiveWebsiteData;
@@ -151,8 +159,7 @@ type
 
     procedure UpdateCMSList(const Sender: IPublishController);
     procedure UpdateCMSWebsiteList(const Sender: ICMSContainer; CMSIndex: Integer);
-
-    destructor Destroy; override;
+    procedure UpdateWebsiteGUIControl();
   end;
 
 implementation
@@ -332,26 +339,27 @@ end;
 { TDesignTabSheetItem }
 
 function TDesignTabSheetItem.GetCMSWebsiteContainer: ICMSWebsiteContainer;
-
-  function GetImageComboBoxValue(AValue: string): string;
-  begin
-    Result := copy(AValue, 1, LastDelimiter('=', AValue) - 1);
-  end;
-
 var
-  CMSName: string;
-  CMSWebsiteIndex: Integer;
+  LWebsiteItemIndex: Integer;
+
+  LCMSWebsiteContainer: ICMSWebsiteContainer;
 begin
-  if (FWebsite.ItemIndex = -1) then
-    Exit(nil);
+  LWebsiteItemIndex := FWebsite.ItemIndex;
 
-  with FWebsite.Properties.Items[FWebsite.ItemIndex] do
+  if (LWebsiteItemIndex = -1) then
+    Result := nil
+  else
   begin
-    CMSName := GetImageComboBoxValue(VarToStr(Value));
-    CMSWebsiteIndex := Tag;
-  end;
+    LCMSWebsiteContainer := FWebsiteList[LWebsiteItemIndex];
 
-  Result := PublishController.CMS[CMSName].Website[CMSWebsiteIndex];
+    OutputDebugString(PChar(LCMSWebsiteContainer.CMS + ' ' + LCMSWebsiteContainer.Website));
+
+    Result := LCMSWebsiteContainer;
+
+    LCMSWebsiteContainer := PublishController.CMS[LCMSWebsiteContainer.CMS].Website[LCMSWebsiteContainer.Index];
+
+    OutputDebugString(PChar(LCMSWebsiteContainer.CMS + ' ' + LCMSWebsiteContainer.Website));
+  end;
 end;
 
 procedure TDesignTabSheetItem.SubjectUpdate(ACMSItemChangeType: TCMSItemChangeType; AIndex, AParam: Integer);
@@ -530,24 +538,20 @@ end;
 
 function TDesignTabSheetItem.GetActiveWebsite: WideString;
 begin
-  Result := IfThen(Assigned(ActiveWebsiteData), ActiveWebsiteData.Name);
+  Result := IfThen(Assigned(ActiveWebsiteData), ActiveWebsiteData.Website);
 end;
 
 procedure TDesignTabSheetItem.SetActiveWebsite(AWebsite: WideString);
 var
-  WebsiteDescription: string;
-  NewWebsiteIndex, Index: Integer;
+  LWebsiteListIndex: Integer;
 begin
-  WebsiteDescription := RemoveW(ExtractUrlHost(AWebsite));
-
-  with FWebsite do
+  for LWebsiteListIndex := 0 to FWebsiteList.Count - 1 do
   begin
-    for Index := 0 to Properties.Items.Count - 1 do
-      if SameText(WebsiteDescription, Properties.Items[Index].Description) then
-      begin
-        ItemIndex := Index;
-        break;
-      end;
+    if SameText(AWebsite, FWebsiteList[LWebsiteListIndex].Website) then
+    begin
+      FWebsite.ItemIndex := LWebsiteListIndex;
+      break;
+    end;
   end;
 end;
 
@@ -769,6 +773,8 @@ begin
   FPublishController := TIPublishController.Create(ATabSheetController);
 
   // code + preview
+  FWebsiteList := TInterfaceList<ICMSWebsiteContainer>.Create();
+
   FWebsitePanel := TPanel.Create(Self);
   with FWebsitePanel do
   begin
@@ -787,7 +793,7 @@ begin
     Color := clWhite;
   end;
 
-  FWebsite := TcxImageComboBox.Create(FWebsitePanel);
+  FWebsite := TMycxImageComboBox.Create(FWebsitePanel);
   with FWebsite do
   begin
     Parent := TWinControl(FWebsitePanel);
@@ -797,6 +803,10 @@ begin
     Left := 8;
     Top := 8;
     Width := Parent.Width - 8 - 8;
+
+    Style.Font.Style := [fsBold];
+
+    ImageList := SettingsManager.Settings.Plugins.CMSImageList;
 
     with Properties do
     begin
@@ -944,6 +954,43 @@ begin
 
   FIViewChangeEvent := TIViewChangeEventHandler.Create(ViewChange);
   FTabSheetController.PageController.OnViewChange.Add(FIViewChangeEvent);
+end;
+
+destructor TDesignTabSheetItem.Destroy;
+begin
+  DeregisterWebsite;
+
+  FTabSheetController.PageController.OnViewChange.Remove(FIViewChangeEvent);
+  FIViewChangeEvent := nil;
+
+  FCopyMessageToClipboardButton.Free;
+  FCopySubjectToClipboardButton.Free;
+  FHtmlView.Free;
+  FPreviewPanel.Free;
+
+  FMessageDesigner.Free;
+  FcxSplitter.Free;
+  FSubjectDesigner.Free;
+  FCodePanel.Free;
+
+  FWebsite.Free;
+  FWebsitePanel.Free;
+  FWebsiteList.Free;
+
+  with FPublishController do
+  begin
+    Active := False;
+    // Disabled, because PublishController.Destroy() uses
+    // TabSheetController.IsTabActive to Invoke updating the
+    // CMS list only if the current tab was visible.
+    // TabSheetController := nil;
+  end;
+
+  FPublishController := nil;
+
+  FTabSheetController := nil;
+
+  inherited Destroy;
 end;
 
 procedure TDesignTabSheetItem.InsertTextBetweenSelected(ACodeTag: TCodeTag);
@@ -1160,6 +1207,10 @@ var
 begin
   if Assigned(Sender) then
   begin
+    // Cleanup WebsiteList
+    FWebsiteList.Clear;
+
+    // Add new Websites to WebsiteList for every CMS
     if (Sender.Count > 0) then
     begin
       for I := 0 to Sender.Count - 1 do
@@ -1167,94 +1218,68 @@ begin
     end
     else
     begin
-      UpdateCMSWebsiteList(nil, -1);
+      // Update Websites in GUI control
+      UpdateWebsiteGUIControl;
     end;
 
     with FWebsite do
+    begin
       if (ItemIndex = -1) and (Properties.Items.Count > 0) then
         ItemIndex := 0;
+    end;
   end;
 end;
 
 procedure TDesignTabSheetItem.UpdateCMSWebsiteList(const Sender: ICMSContainer; CMSIndex: Integer);
-
-  function GetImageComboBoxValue(AValue: string): string;
-  begin
-    Result := copy(AValue, 1, LastDelimiter('=', AValue) - 1);
-  end;
-
 var
-  I: Integer;
+  LWebsiteListIndex, LSenderIndex: Integer;
+begin
+  if Assigned(Sender) then
+  begin
+    // Cleanup WebsiteList
+    for LWebsiteListIndex := FWebsiteList.Count - 1 downto 0 do
+    begin
+      if SameText(Sender.Name, FWebsiteList[LWebsiteListIndex].CMS) then
+      begin
+        FWebsiteList.Delete(LWebsiteListIndex);
+      end;
+    end;
+
+    // Add new Websites to WebsiteList
+    for LSenderIndex := 0 to Sender.Count - 1 do
+    begin
+      FWebsiteList.Add(Sender.Website[LSenderIndex]);
+    end;
+
+    // Update Websites in GUI control
+    UpdateWebsiteGUIControl;
+
+    with FWebsite do
+    begin
+      if (ItemIndex = -1) and (Properties.Items.Count > 0) then
+        ItemIndex := 0;
+    end;
+  end;
+end;
+
+procedure TDesignTabSheetItem.UpdateWebsiteGUIControl;
+var
+  LWebsiteListIndex: Integer;
 begin
   with FWebsite.Properties do
   begin
     BeginUpdate;
     try
-      if Assigned(Sender) then
+      Items.Clear;
+
+      for LWebsiteListIndex := 0 to FWebsiteList.Count - 1 do
       begin
-
-        for I := Items.Count - 1 downto 0 do
-          if SameText(Sender.Name, GetImageComboBoxValue(VarToStr(Items[I].Value))) then
-            Items[I].Free;
-
-        // Items.Clear;
-
-        for I := 0 to Sender.Count - 1 do
-          with Items.Add do
-          begin
-            Description := RemoveW(ExtractUrlHost(Sender.Website[I].Name));
-            Tag := Sender.Website[I].Index;
-            Value := Sender.Name + '=' + IntToStr(Sender.Website[I].Index);
-          end;
-      end
-      else
-      begin
-        for I := Items.Count - 1 downto 0 do
-          Items[I].Free;
+        Items.AddObject(FWebsiteList[LWebsiteListIndex].Host, TObject(FWebsiteList[LWebsiteListIndex].CMSInnerIndex));
       end;
     finally
       EndUpdate;
     end;
-
-    // TODO: Bugfix OnChange event
-    // see: https://www.devexpress.com/Support/Center/Question/Details/T302539
   end;
-end;
-
-destructor TDesignTabSheetItem.Destroy;
-begin
-  DeregisterWebsite;
-
-  FTabSheetController.PageController.OnViewChange.Remove(FIViewChangeEvent);
-  FIViewChangeEvent := nil;
-
-  FCopyMessageToClipboardButton.Free;
-  FCopySubjectToClipboardButton.Free;
-  FHtmlView.Free;
-  FPreviewPanel.Free;
-
-  FMessageDesigner.Free;
-  FcxSplitter.Free;
-  FSubjectDesigner.Free;
-  FCodePanel.Free;
-
-  FWebsite.Free;
-  FWebsitePanel.Free;
-
-  with FPublishController do
-  begin
-    Active := False;
-    // Disabled, because PublishController.Destroy() uses
-    // TabSheetController.IsTabActive to Invoke updating the
-    // CMS list only if the current tab was visible.
-    // TabSheetController := nil;
-  end;
-
-  FPublishController := nil;
-
-  FTabSheetController := nil;
-
-  inherited Destroy;
 end;
 
 { ****************************************************************************** }

@@ -525,6 +525,7 @@ type
     function GetAccountName: WideString;
     function GetAccountPassword: WideString;
     function GetSettingsFileName: WideString;
+    function GetHost: WideString;
     function GetWebsite: WideString;
     function GetSubject: WideString;
     function GetTags: WideString;
@@ -535,6 +536,7 @@ type
 
     property SettingsFileName: WideString read GetSettingsFileName;
 
+    property Host: WideString read GetHost;
     property Website: WideString read GetWebsite;
     property Subject: WideString read GetSubject;
     property Tags: WideString read GetTags;
@@ -546,6 +548,7 @@ type
     function GetTabSheetController: ITabSheetController;
     // procedure SetTabSheetController(const ATabSheetController: ITabSheetController);
     function GetCMS: WideString;
+    function GetCMSInnerIndex: Integer;
     function GetName: WideString;
     function GetTopIndex: Integer;
     procedure SetTopIndex(ATopIndex: Integer);
@@ -561,6 +564,7 @@ type
 
     property TabSheetController: ITabSheetController read GetTabSheetController; // write SetTabSheetController;
     property CMS: WideString read GetCMS;
+    property CMSInnerIndex: Integer read GetCMSInnerIndex;
     property Name: WideString read GetName;
     property TopIndex: Integer read GetTopIndex write SetTopIndex;
     property Index: Integer read GetIndex write SetIndex;

@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, Classes, Controls, ExtCtrls, Menus, Types, ImgList,
+  Windows, Classes, Controls, ExtCtrls, Menus,
   // DevExpress
   cxButtons, cxCheckListBox, dxBar,
   // Api
@@ -17,7 +17,6 @@ type
   private
     FPanel: TPanel;
     FCheckListBox: TcxCheckListBox;
-    FImageList: TImageList;
     FPopupMenu, FAddPopupMenu: TdxBarPopupMenu; // TPopupMenu;
     FUpItem, FDownItem, FAddAllPluginsItem: TdxBarButton; // TMenuItem;
     FAddButton, FRemoveButton: TcxButton;
@@ -305,13 +304,6 @@ begin
     ParentColor := True;
   end;
 
-  FImageList := TImageList.Create(FPanel);
-  with FImageList do
-  begin
-    ColorDepth := cd32Bit;
-    DrawingStyle := dsTransparent;
-  end;
-
   FPopupMenu := TdxBarPopupMenu.Create(FPanel);
   with FPopupMenu do
   begin
@@ -346,8 +338,6 @@ begin
     Width := 100;
 
     PopupMenu := FPopupMenu;
-
-    Images := FImageList;
 
     OnClick := Click;
     // OnClickCheck := ;
@@ -432,7 +422,6 @@ begin
   FAddAllPluginsItem.Free;
   FAddPopupMenu.Free;
   FCheckListBox.Free;
-  FImageList.Free;
   FPanel.Free;
 
   inherited;

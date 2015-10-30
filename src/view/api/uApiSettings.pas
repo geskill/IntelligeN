@@ -4,13 +4,13 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, Classes, Forms, Graphics,
+  Windows, SysUtils, Classes, Controls, Forms, Graphics, ImgList,
   // Dev Express
   dxDockControl, cxCheckListBox,
   // AnyDAC
   // uADStanIntf,
   // Utils
-  uFileUtils, uPathUtils,
+  uFileUtils, uPathUtils, uStringUtils,
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface, uFileInterface,
   // DLLs
@@ -60,6 +60,7 @@ type
     FAccountName, FAccountPassword, FSubjectFileName, FMessageFileName: string;
     FWebsite: string;
     FFilter: IFilter;
+    function GetHost: string;
     procedure SetPath(APath: string);
   public
     function GetPath: string; override;
@@ -67,6 +68,7 @@ type
     function GetMessageFileName: string;
   public
     procedure UpdateWebsiteInformation;
+    property Host: string read GetHost;
     property Website: string read FWebsite write FWebsite;
     property Filter: IFilter read FFilter;
   published
@@ -209,10 +211,19 @@ type
   private
     FCMS: TCollection;
     FApp, FCAPTCHA, FCrawler, FCrypter, FFileFormats, FFileHoster, FImageHoster: TCollection;
+    FAppImageList, FCMSImageList, FCAPTCHAImageList, FCrawlerImageList, FCrypterImageList, FFileFormatsImageList, FFileHosterImageList, FImageHosterImageList: TImageList;
     FOnCMSChange: TIPluginChangeEvent;
   public
     constructor Create;
     function FindPlugInCollectionItemFromCollection(APlugInCollectionItemName: string; ACollection: TCollection): TPlugInCollectionItem;
+    property AppImageList: TImageList read FAppImageList;
+    property CMSImageList: TImageList read FCMSImageList;
+    property CAPTCHAImageList: TImageList read FCAPTCHAImageList;
+    property CrawlerImageList: TImageList read FCrawlerImageList;
+    property CrypterImageList: TImageList read FCrypterImageList;
+    property FileFormatsImageList: TImageList read FFileFormatsImageList;
+    property FileHosterImageList: TImageList read FFileHosterImageList;
+    property ImageHosterImageList: TImageList read FImageHosterImageList;
     property OnCMSChange: TIPluginChangeEvent read FOnCMSChange write FOnCMSChange;
     destructor Destroy; override;
   published
@@ -643,7 +654,12 @@ begin
   UpdateWebsiteInformation;
 end;
 
-function TCMSWebsitesCollectionItem.GetPath;
+function TCMSWebsitesCollectionItem.GetHost: string;
+begin
+  Result := RemoveW(ExtractUrlHost(Website));
+end;
+
+function TCMSWebsitesCollectionItem.GetPath: string;
 begin
   Result := PathCombineEx(GetTemplatesSiteFolder, Path);
 end;
@@ -665,7 +681,7 @@ begin
     Website := WebsiteURL;
     FFilter := Filter;
   end;
-  // change notification
+  // TODO: change notification
 end;
 
 constructor TCMSCollectionItem.Create(Collection: TCollection);
@@ -768,6 +784,55 @@ begin
   FFileHoster := TCollection.Create(TPlugInCollectionItem);
   ImageHoster := TCollection.Create(TImageHosterCollectionItem);
 
+  FAppImageList := TImageList.Create(nil);
+  with FAppImageList do
+  begin
+    ColorDepth := cd32Bit;
+    DrawingStyle := dsTransparent;
+  end;
+  FCMSImageList := TImageList.Create(nil);
+  with FCMSImageList do
+  begin
+    ColorDepth := cd32Bit;
+    DrawingStyle := dsTransparent;
+  end;
+  FCAPTCHAImageList := TImageList.Create(nil);
+  with FCAPTCHAImageList do
+  begin
+    ColorDepth := cd32Bit;
+    DrawingStyle := dsTransparent;
+  end;
+  FCrawlerImageList := TImageList.Create(nil);
+  with FCrawlerImageList do
+  begin
+    ColorDepth := cd32Bit;
+    DrawingStyle := dsTransparent;
+  end;
+  FCrypterImageList := TImageList.Create(nil);
+  with FCrypterImageList do
+  begin
+    ColorDepth := cd32Bit;
+    DrawingStyle := dsTransparent;
+  end;
+  FFileFormatsImageList := TImageList.Create(nil);
+  with FFileFormatsImageList do
+  begin
+    ColorDepth := cd32Bit;
+    DrawingStyle := dsTransparent;
+  end;
+  FFileHosterImageList := TImageList.Create(nil);
+  with FFileHosterImageList do
+  begin
+    ColorDepth := cd32Bit;
+    DrawingStyle := dsTransparent;
+  end;
+  FImageHosterImageList := TImageList.Create(nil);
+  with FImageHosterImageList do
+  begin
+    ColorDepth := cd32Bit;
+    DrawingStyle := dsTransparent;
+  end;
+
   FOnCMSChange := TIPluginChangeEvent.Create;
 end;
 
@@ -788,6 +853,15 @@ end;
 destructor TSettings_Plugins.Destroy;
 begin
   FOnCMSChange.Free;
+
+  FImageHosterImageList.Free;
+  FFileHosterImageList.Free;
+  FFileFormatsImageList.Free;
+  FCrypterImageList.Free;
+  FCrawlerImageList.Free;
+  FCAPTCHAImageList.Free;
+  FCMSImageList.Free;
+  FAppImageList.Free;
 
   FApp.Free;
   FCAPTCHA.Free;

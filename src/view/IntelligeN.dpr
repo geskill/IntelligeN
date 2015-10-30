@@ -96,6 +96,7 @@ uses
   ufHTTPLogger in 'frames\ufHTTPLogger.pas' {fHTTPLogger: TFrame},
   uMyAdvmJScriptStyler in 'mods\uMyAdvmJScriptStyler.pas',
   uMycxCheckComboBox in 'mods\uMycxCheckComboBox.pas',
+  uMycxImageComboBox in 'mods\uMycxImageComboBox.pas',
   uMycxRichEdit in 'mods\uMycxRichEdit.pas',
   uMyPopupMenu in 'mods\uMyPopupMenu.pas',
   uMydxBarPopupMenu in 'mods\uMydxBarPopupMenu.pas',

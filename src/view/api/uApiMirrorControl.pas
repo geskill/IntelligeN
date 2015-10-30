@@ -489,7 +489,6 @@ begin
     ACanvas.Brush.Color := AViewInfo.Params.Color;
     ACanvas.FillRect(AViewInfo.Bounds);
     LImageRect := AViewInfo.ContentBounds;
-    LImageRect.Left := LImageRect.Left;
     LImageRect.Right := LImageRect.Left + Main.ILContainerStatusImages.Width + IMAGE_INDENT;
     LTextRect := AViewInfo.ContentBounds;
     LTextRect.Left := LImageRect.Right + IMAGE_INDENT;
