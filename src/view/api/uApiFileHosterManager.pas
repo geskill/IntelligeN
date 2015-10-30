@@ -44,7 +44,7 @@ type
     destructor Destroy; override;
 
     procedure AddHosterCheckJob(const ADirectlink: IDirectlinksMirror);
-    procedure RemoveHosterCheckJob(const ADirectlink: IDirectlinksMirror);
+    procedure RemoveHosterJob(const ADirectlink: IDirectlinksMirror);
   end;
 
 implementation
@@ -130,10 +130,17 @@ begin
   CreateTask(LFileHosterCheckThread).MonitorWith(FOmniEM).Run(@TFileHosterCheckThread.Execute);
 end;
 
-procedure TFileHosterManager.RemoveHosterCheckJob;
+procedure TFileHosterManager.RemoveHosterJob;
+var
+  LListIndex: Integer;
 begin
-  //  TODO: Re-Implement this
-  // RemoveJob(ADirectlink);
+  for LListIndex := 0 to FInList.Count - 1 do
+  begin
+    if (ADirectlink = FInList[LListIndex].Directlink) then
+    begin
+      RemoveJob(FInList[LListIndex]);
+    end;
+  end;
 end;
 
 end.

@@ -330,22 +330,19 @@ end;
 
 procedure TfMain.PostCreate;
 var
-  // LPublishManager: TPublishManager;
+  LPublishManager: TPublishManager;
   LCrawlerManager: TCrawlerManager;
 begin
   FBackupManager := TBackupManager.Create;
   FControlAligner := TControlAligner.Create;
 
-  // TODO
-  (*
-    LPublishManager := TPublishManager.Create;
-    with LPublishManager do
-    begin
+  LPublishManager := TPublishManager.Create;
+  with LPublishManager do
+  begin
     OnGUIInteraction := Main.fPublishQueue.GUIInteractionEvent;
     OnGUIInteractionItem := Main.fPublishQueue.GUIInteractionItemEvent;
-    end;
-    FPublishManager := LPublishManager;
-    *)
+  end;
+  FPublishManager := LPublishManager;
 
   LCrawlerManager := TCrawlerManager.Create;
   LCrawlerManager.OnGUIInteraction := CrawlerGUIInteraction;

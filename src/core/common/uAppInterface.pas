@@ -788,18 +788,20 @@ type
     ['{3ABA9E7F-6D3D-4F35-94E8-45ED37228710}']
     procedure AddCrypterJob(const ACrypterPanel: ICrypterPanel);
     procedure AddCrypterCheckJob(const ACrypterPanel: ICrypterPanel; const AUseCheckDelay: WordBool = False);
+    procedure RemoveCrypterJob(const ACrypterPanel: ICrypterPanel);
   end;
 
   IFileHosterManager = interface(IThreadManager)
     ['{03675561-B598-4929-B5C9-FBEF9FB52656}']
     procedure AddHosterCheckJob(const ADirectlink: IDirectlinksMirror);
-    procedure RemoveHosterCheckJob(const ADirectlink: IDirectlinksMirror);
+    procedure RemoveHosterJob(const ADirectlink: IDirectlinksMirror);
   end;
 
   IImageHosterManager = interface(IThreadManager)
     ['{CC554556-2480-49A7-90B8-A214E6619F25}']
     procedure AddLocalUploadJob(const APictureMirror: IPictureMirror; const ALocalPath: WideString);
     procedure AddRemoteUploadJob(const APictureMirror: IPictureMirror; const ARemoteUrl: WideString);
+    procedure RemoveUploadJob(const APictureMirror: IPictureMirror);
   end;
 
   // // // Page Controller // // //

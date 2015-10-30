@@ -55,6 +55,7 @@ type
   public
     procedure AddLocalUploadJob(const APictureMirror: IPictureMirror; const ALocalPath: WideString);
     procedure AddRemoteUploadJob(const APictureMirror: IPictureMirror; const ARemoteUrl: WideString);
+    procedure RemoveUploadJob(const APictureMirror: IPictureMirror);
   end;
 
 implementation
@@ -190,6 +191,19 @@ begin
   LImageHosterUploadThread := TImageHosterRemoteUploadThread.Create(APictureMirror, ARemoteUrl);
   AddJob(LImageHosterUploadThread.Data);
   CreateTask(LImageHosterUploadThread).MonitorWith(FOmniEM).Run(@TImageHosterRemoteUploadThread.Execute);
+end;
+
+procedure TImageHosterManager.RemoveUploadJob(const APictureMirror: IPictureMirror);
+var
+  LListIndex: Integer;
+begin
+  for LListIndex := 0 to FInList.Count - 1 do
+  begin
+    if (APictureMirror = FInList[LListIndex].PictureMirror) then
+    begin
+      RemoveJob(FInList[LListIndex]);
+    end;
+  end;
 end;
 
 end.

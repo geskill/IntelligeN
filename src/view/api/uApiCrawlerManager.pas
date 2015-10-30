@@ -289,9 +289,16 @@ begin
 end;
 
 procedure TCrawlerManager.RemoveCrawlerJob;
+var
+  LListIndex: Integer;
 begin
-  // TODO: Re-Implement this
-  // RemoveJob();
+  for LListIndex := 0 to FInList.Count - 1 do
+  begin
+    if (AControlController = FInList[LListIndex].ControlController) then
+    begin
+      RemoveJob(FInList[LListIndex]);
+    end;
+  end;
 end;
 
 end.

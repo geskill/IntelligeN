@@ -63,6 +63,7 @@ type
 
     procedure AddCrypterJob(const ACrypterPanel: ICrypterPanel);
     procedure AddCrypterCheckJob(const ACrypterPanel: ICrypterPanel; const AUseCheckDelay: WordBool = False);
+    procedure RemoveCrypterJob(const ACrypterPanel: ICrypterPanel);
   end;
 
 implementation
@@ -233,6 +234,19 @@ begin
   LCrypterThread := TCrypterCheckThread.Create(ACrypterPanel, AUseCheckDelay);
   AddJob(LCrypterThread.Data);
   CreateTask(LCrypterThread).MonitorWith(FOmniEM).Run(@TCrypterCheckThread.Execute);
+end;
+
+procedure TCrypterManager.RemoveCrypterJob(const ACrypterPanel: ICrypterPanel);
+var
+  LListIndex: Integer;
+begin
+  for LListIndex := 0 to FInList.Count - 1 do
+  begin
+    if (ACrypterPanel = FInList[LListIndex].CrypterPanel) then
+    begin
+      RemoveJob(FInList[LListIndex]);
+    end;
+  end;
 end;
 
 end.

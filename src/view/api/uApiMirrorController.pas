@@ -235,12 +235,14 @@ begin
   try
     for I := 0 to Mirror[index].DirectlinkCount - 1 do
     begin
-      // TODO: Re-Implement this
-      // TabSheetController.PageController.HosterManager.RemoveHosterCheckJob(Mirror[index].Directlink[I]);
+      TabSheetController.PageController.FileHosterManager.RemoveHosterJob(Mirror[index].Directlink[I]);
       Mirror[index].Directlink[I].DirectlinksPanel := nil;
     end;
     for I := 0 to Mirror[index].CrypterCount - 1 do
+    begin
+      TabSheetController.PageController.CrypterManager.RemoveCrypterJob(Mirror[index].Crypter[I]);
       Mirror[index].Crypter[I].MirrorControl := nil;
+    end;
     Mirror[index].GetDirectlink.MirrorControl := nil;
     Mirror[index].MirrorController := nil;
 
