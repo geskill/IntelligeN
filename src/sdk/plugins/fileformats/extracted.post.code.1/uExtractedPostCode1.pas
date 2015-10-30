@@ -67,26 +67,20 @@ begin
         case ATabSheetController.ControlController.TypeID of
           cAudio:
             NodeValue := '24';
-          cGameCube:
-            NodeValue := '4';
           cMovie:
             NodeValue := '14';
           cNintendoDS:
             NodeValue := '10';
           cPCGames:
             NodeValue := '4';
-          cPlayStation2:
-            NodeValue := '6';
           cPlayStation3:
             NodeValue := '7';
-          cPlayStationPortable:
+          cPlayStationVita:
             NodeValue := '8';
           cSoftware:
             NodeValue := '0';
           cWii:
             NodeValue := '9';
-          cXbox:
-            NodeValue := '11';
           cXbox360:
             NodeValue := '12';
           cXXX:

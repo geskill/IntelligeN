@@ -7,26 +7,31 @@ uses
   SysUtils, StrUtils, HTTPApp,
   // RegEx
   RegExpr,
-  // Utils
-  uHTMLUtils,
   // Common
   uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrawlerClass, uPlugInHTTPClasses;
+  uPlugInCrawlerClass, uPlugInHTTPClasses,
+  // Utils
+  uHTMLUtils, uStringUtils;
 
 type
   TSexvideoallCom = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'http://www.sexvideoall.com/';
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
@@ -38,102 +43,132 @@ begin
   result := 'sexvideoall.com';
 end;
 
-function TSexvideoallCom.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TSexvideoallCom.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [cXXX];
-  result := LongWord(_TemplateTypeIDs);
+  result := [cXXX];
 end;
 
-function TSexvideoallCom.GetAvailableControlIDs;
-var
-  // _TemplateTypeID: TTypeID;
-  _ComponentIDs: TControlIDs;
+function TSexvideoallCom.InternalGetAvailableControlIDs;
 begin
-  // _TemplateTypeID := TTypeID(ATypeID);
-
-  _ComponentIDs := [cPicture, cGenre];
-
-  result := LongWord(_ComponentIDs);
+  result := [cPicture, cGenre, cRuntime, cDescription];
 end;
 
-function TSexvideoallCom.GetControlIDDefaultValue;
+function TSexvideoallCom.InternalGetControlIDDefaultValue;
 begin
   result := True;
+end;
+
+function TSexvideoallCom.InternalGetDependentControlIDs;
+begin
+  result := [cTitle];
+end;
+
+function TSexvideoallCom.InternalExecute;
+
+  procedure deep_search(AWebsiteSourceCode: string);
+  begin
+    if ACanUse(cPicture) then
+      with TRegExpr.Create do
+        try
+          InputString := ExtractTextBetween(AWebsiteSourceCode, '<div style="text-align: center; padding: 5px; margin-left: 300px;">', 'clear:');
+          Expression := 'src=''(.*?)''';
+
+          if Exec(InputString) then
+          begin
+            repeat
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
+            until not ExecNext;
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cRuntime) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'Length:.*?&nbsp;(\d+)';
+
+          if Exec(InputString) then
+            AControlController.FindControl(cRuntime).AddProposedValue(GetName, Trim(Match[1]));
+        finally
+          Free;
+        end;
+
+    if ACanUse(cGenre) then
+      with TRegExpr.Create do
+        try
+          InputString := ExtractTextBetween(AWebsiteSourceCode, 'Genre:', '<br />');
+          Expression := '> (.*?) <\/a>';
+
+          if Exec(InputString) then
+          begin
+            repeat
+              AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(Match[1]));
+            until not ExecNext;
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cDescription) then
+      with TRegExpr.Create do
+        try
+          InputString := ExtractTextBetween(AWebsiteSourceCode, '<div class=''bottomline''>', '<div class=''bottomline''>');
+          Expression := '<br \/><br \/>(.*?)$';
+
+          if Exec(InputString) then
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
+        finally
+          Free;
+        end;
+  end;
+
+var
+  LTitle: string;
+  LCount: Integer;
+
+  LRequestID1, LRequestID2: Double;
+
+  LResponeStr: string;
+begin
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
+
+  // http://www.sexvideoall.com/en/results.aspx?tkword=Amateur%20Japanese
+
+  LResponeStr := GETRequest(WEBSITE + 'en/results.aspx?tkword=' + HTTPEncode(LTitle), LRequestID1);
+
+  if not(Pos('found', LResponeStr) = 0) then
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := ExtractTextBetween(LResponeStr, '<div id="main">', '<div id');
+        Expression := ';''><a href=''(.*?)''';
+
+        if Exec(InputString) then
+        begin
+          repeat
+            LResponeStr := GETFollowUpRequest(WEBSITE + 'en/' + Match[1], LRequestID1, LRequestID2);
+
+            deep_search(LResponeStr);
+
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
+        end;
+      finally
+        Free;
+      end;
+  end
+  else if not(Pos('page_contentmaster', LResponeStr) = 0) then
+  begin
+    deep_search(LResponeStr);
+  end;
 end;
 
 function TSexvideoallCom.GetResultsLimitDefaultValue: Integer;
 begin
   result := 5;
-end;
-
-function TSexvideoallCom.Exec;
-const
-  website = 'http://sexvideoall.com/';
-var
-  _ComponentIDs: TControlIDs;
-  _Title, _FoundPictureFront: string;
-  _Count: Integer;
-
-  procedure ExtractGenres(AGenreCode: string);
-  begin
-    with TRegExpr.Create do
-      try
-        InputString := AGenreCode;
-        Expression := '">(.*?)<\/a>&nbsp;';
-
-        if Exec(InputString) then
-        begin
-          repeat
-            AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[1]);
-          until not ExecNext;
-        end;
-      finally
-        Free;
-      end;
-  end;
-
-var
-  RequestID: Double;
-
-  ResponseStrSearchResult: string;
-begin
-  LongWord(_ComponentIDs) := AControlIDs;
-  _Title := AControlController.FindControl(cTitle).Value;
-  _Count := 0;
-
-  RequestID := HTTPManager.Get(THTTPRequest.Create(website + 'DirectE/BrowseResults.asp?T88=0&T3=' + HTTPEncode(_Title) + '&act=viewCat&Submit=Go'),
-    TPlugInHTTPOptions.Create(Self));
-
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID);
-
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
-
-  with TRegExpr.Create do
-    try
-      InputString := ResponseStrSearchResult;
-      Expression := '<td align="center" width="70" height="100">.*?<img border="0" src="(.*?)".*?<b>Title:&nbsp;(.*?)<\/b>.*?Genre:<\/td>(.*?)<\/td>';
-
-      if Exec(InputString) then
-      begin
-        repeat
-          if (cPicture in _ComponentIDs) and Assigned(AControlController.FindControl(cPicture)) then
-          begin
-            _FoundPictureFront := StringReplace(Match[1], 'shop', 'SamplePhoto', [rfIgnoreCase]);
-            AControlController.FindControl(cPicture).AddProposedValue(GetName, _FoundPictureFront);
-            AControlController.FindControl(cPicture).AddProposedValue(GetName, StringReplace(_FoundPictureFront, '.jpg', 'f.jpg', [rfIgnoreCase]));
-          end;
-          if (cGenre in _ComponentIDs) and Assigned(AControlController.FindControl(cGenre)) then
-            ExtractGenres(Match[3]);
-          Inc(_Count);
-        until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
-      end;
-    finally
-      Free;
-    end;
 end;
 
 end.

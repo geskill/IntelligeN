@@ -314,8 +314,8 @@ begin
     if Assigned(AData.FindControl(cReleaseDate)) then
       AddFormField('release_year', FormatDateTime('yyyy', StrToDate(AData.FindControl(cReleaseDate).Value, FormatSettings), FormatSettings));
 
-    if Assigned(AData.FindControl(cArtist)) then
-      AddFormField('interpreter', AData.FindControl(cArtist).Value);
+    if Assigned(AData.FindControl(cCreator)) then
+      AddFormField('interpreter', AData.FindControl(cCreator).Value);
 
     for I := 0 to AData.MirrorCount - 1 do
       if AData.Mirror[I].Size > 0 then

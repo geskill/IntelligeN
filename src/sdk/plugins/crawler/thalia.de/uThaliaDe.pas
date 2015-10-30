@@ -140,14 +140,14 @@ end;
 
 function TThaliaDe.InternalExecute;
 
-  procedure deep_search(aWebsitecode: string);
+  procedure deep_search(AWebsiteSourceCode: string);
   var
     s: string;
   begin
     if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := 'data-image="(.*?)"';
 
           if Exec(InputString) then
@@ -161,7 +161,7 @@ function TThaliaDe.InternalExecute;
     if ACanUse(cLanguage) then
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '<dt>\s+Sprache.*?d>(.*?)<\/';
 
           if Exec(InputString) then
@@ -203,7 +203,7 @@ function TThaliaDe.InternalExecute;
     if ACanUse(cGenre) then
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '<dt>\s+Genre.*?d>(.*?)<\/';
 
           if Exec(InputString) then
@@ -241,7 +241,7 @@ function TThaliaDe.InternalExecute;
     if ACanUse(cRuntime) then
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '<dt>\s+Spieldauer.*?d>(.*?) Minuten';
 
           if Exec(InputString) then
@@ -253,7 +253,7 @@ function TThaliaDe.InternalExecute;
     if ACanUse(cDescription) then
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := 'Beschreibung.*?">(.*?)<\/dd>';
 
           if Exec(InputString) then

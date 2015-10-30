@@ -191,7 +191,7 @@ begin
 
           AddFormField('Genre', N3m0CMSSettings.categorys);
         end;
-      cNintendoDS, cPCGames, cPlayStation2, cPlayStation3, cPlayStationPortable, cWii, cXbox, cXbox360:
+      cNintendoDS, cPCGames, cPlayStation3, cPlayStation4, cWii, cXbox360, cXboxOne:
         begin
           AddFormField('Kategorie', 'Games');
           case AData.TypeID of
@@ -199,18 +199,16 @@ begin
               AddFormField('subgames', 'NDS');
             cPCGames:
               AddFormField('subgames', 'PC');
-            cPlayStation2:
-              AddFormField('subgames', 'PS2');
             cPlayStation3:
               AddFormField('subgames', 'PS3');
-            cPlayStationPortable:
-              AddFormField('subgames', 'PSP');
+            cPlayStation4:
+              AddFormField('subgames', 'PS4');
             cWii:
               AddFormField('subgames', 'Wii');
-            cXbox:
-              AddFormField('subgames', 'XBox');
             cXbox360:
               AddFormField('subgames', 'XBox360');
+            cXboxOne:
+              AddFormField('subgames', 'XBoxOne');
           end;
         end;
       cMovie:
@@ -244,8 +242,8 @@ begin
 
     AddFormField('Titel', Subject);
 
-    if Assigned(AData.FindControl(cArtist)) then
-      AddFormField('Interpret', AData.FindControl(cArtist).Value);
+    if Assigned(AData.FindControl(cCreator)) then
+      AddFormField('Interpret', AData.FindControl(cCreator).Value);
 
     if Assigned(AData.FindControl(cAudioBitrate)) then
       AddFormField('Bitrate', NumbersOnly(AData.FindControl(cAudioBitrate).Value));
