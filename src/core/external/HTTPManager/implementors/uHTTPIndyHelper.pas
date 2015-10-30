@@ -154,7 +154,7 @@ end;
 
 function THTTPIndyHelper.IsWrongProtocolException(ALowerCaseSourceCode: string): Boolean;
 begin
-  result := (not(Pos('<body', ALowerCaseSourceCode) = 0))
+  Result := (not(Pos('<body', ALowerCaseSourceCode) = 0))
 end;
 
 procedure THTTPIndyHelper.WriteErrorMsgToStream(AMsg: string; AStream: TStream);
@@ -215,6 +215,11 @@ begin
 
   FIdCompressorZLib := TIdCompressorZLib.Create(nil);
   FIdSSLIOHandlerSocketOpenSSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  with FIdSSLIOHandlerSocketOpenSSL.SSLOptions do
+  begin
+    Method := sslvTLSv1_2;
+    SSLVersions := [sslvTLSv1_2];
+  end;
   FIdSocksInfo := TIdSocksInfo.Create(nil);
 
   if Assigned(AProxy) then
