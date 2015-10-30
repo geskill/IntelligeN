@@ -421,6 +421,7 @@ begin
   FAddButton.Free;
   FAddAllPluginsItem.Free;
   FAddPopupMenu.Free;
+  FCheckListBox.Images := nil;
   FCheckListBox.Free;
   FPanel.Free;
 
