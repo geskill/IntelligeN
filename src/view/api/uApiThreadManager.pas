@@ -18,6 +18,7 @@ const
 type
   TThreadWorkData = class
   protected
+    // TODO: FUTURE: Replace ITabSheetController instance with UniqueID of every tab.
     FTabSheetController: ITabSheetController;
   public
     constructor Create; virtual;
@@ -46,7 +47,7 @@ type
   protected
     FOmniEM: TOmniEventMonitor;
     FInList, FBlackList: TList<T>;
-    function InAnyList(const ATabSheetController: ITabSheetController): Boolean;
+    function InAnyList(const ATabSheetController: ITabSheetController): Boolean; virtual;
     function InList(const AJobWorkData: T): Boolean;
     function InBlackList(const AJobWorkData: T): Boolean;
 
@@ -56,6 +57,7 @@ type
     function AddJob(const AJobWorkData: T): Boolean;
     function CanRemoveJob(const AJobWorkData: T): Boolean;
     function RemoveJob(const AJobWorkData: T): Boolean;
+    function RemoveAllJobs: Boolean;
   public
     constructor Create();
 
@@ -263,6 +265,17 @@ begin
   else
   begin
     Result := False;
+  end;
+end;
+
+function TThreadManager<T>.RemoveAllJobs: Boolean;
+var
+  LListIndex: Integer;
+begin
+  Result := True;
+  for LListIndex := 0 to FInList.Count - 1 do
+  begin
+    Result := Result and RemoveJob(FInList[LListIndex]);
   end;
 end;
 

@@ -769,10 +769,10 @@ type
 
   IPublishManager = interface(IThreadManager)
     ['{D49455B7-1B06-4884-9A40-EF2245FD3A7C}']
-    function AddPublishJob(const APublishJob: IPublishJob): Longword;
+    function AddPublishJob(const APublishJob: IPublishJob): LongWord;
     procedure RemovePublishJob(const APublishJob: IPublishJob); overload;
     procedure RemovePublishJob(const AUniqueID: Longword); overload;
-    procedure RemoveAllJobs;
+    procedure RemoveAllPublishJobs;
 
     procedure Resume;
     procedure Pause;

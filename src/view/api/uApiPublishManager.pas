@@ -6,7 +6,7 @@ uses
   // Delphi
   Windows, Forms, SysUtils, Classes, Messages,
   // OmniThreadLibrary
-  GpStuff, OtlCollections, OtlComm, OtlCommon, OtlParallel, OtlTask, OtlTaskControl, OtlThreadPool,
+  OtlCollections, OtlComm, OtlCommon, OtlParallel, OtlTask, OtlTaskControl, OtlThreadPool,
   // Generic TThreadList
   hThreadList,
   // Common
@@ -51,19 +51,17 @@ type
   private
     FThreadPool: IOmniThreadPool;
 
-    (*
-      FCompletedCount: TGp4AlignedInt;
-      FThreadStringList: TThreadList<string>;
-
-      FPublishJob: IPublishJob;
-      FTotalCount: Integer;
-      *)
+    FPublishJob: IPublishJob;
+    FTotalCount: Integer;
+    FCompletedCount: TOmniAlignedInt32;
+    FThreadStringList: TThreadList<string>;
 
     FOnGUIInteractionItem: TGUIInteractionItemEvent;
+    function GetProgressPosition: Extended;
   protected
     procedure OmniEMTaskMessage(const task: IOmniTaskControl; const msg: TOmniMessage); override;
   public
-    constructor Create(const APublishJob: IPublishJob; APublishRate, ATotalCount: Integer; AOnGUIInteractionItem: TGUIInteractionItemEvent); reintroduce;
+    constructor Create(const APublishJob: IPublishJob; APublishRate: Integer; AOnGUIInteractionItem: TGUIInteractionItemEvent); reintroduce;
     destructor Destroy; override;
 
     procedure AddPublishItem(const APublishItem: IPublishItem; APublishRetry: Integer);
@@ -88,9 +86,9 @@ type
 
   TPublishThread = class(TThreadWorker<TPublishData>)
   protected
-
+    FInnerPublishManager: TPublishInnerManager;
   public
-    constructor Create(const APublishJob: IPublishJob; APublishRate, APublishDelay, APublishRetry: Integer; AOnGUIInteractionItem: TGUIInteractionItemEvent);
+    constructor Create(const APublishJob: IPublishJob; APublishRate, APublishDelay, APublishRetry: Integer; AOnGUIInteractionItem: TGUIInteractionItemEvent); reintroduce;
     destructor Destroy; override;
 
     procedure Execute; override;
@@ -105,6 +103,7 @@ type
     FOnGUIInteractionItem: TGUIInteractionItemEvent;
     function GetNextUniqueID: LongWord;
   protected
+    function InAnyList(const ATabSheetController: ITabSheetController): Boolean; override;
     procedure OmniEMTaskMessage(const task: IOmniTaskControl; const msg: TOmniMessage); override;
   public
     constructor Create;
@@ -113,7 +112,7 @@ type
     function AddPublishJob(const APublishJob: IPublishJob): LongWord;
     procedure RemovePublishJob(const APublishJob: IPublishJob); overload;
     procedure RemovePublishJob(const AUniqueID: LongWord); overload;
-    procedure RemoveAllJobs; // i.e. STOP
+    procedure RemoveAllPublishJobs; // i.e. STOP
 
     procedure Resume; // play
     procedure Pause; // pause
@@ -203,9 +202,9 @@ begin
           task.Comm.Send(MSG_PUBLISH_ITEM_TASK_ERROR, [task.UniqueID, LOmniValue.AsObject, FErrorMsg]);
         end;
 
-        // RepeatIndex = 0, 1, 2
+        // LRepeatIndex = 0, 1, 2
         Inc(LRepeatIndex);
-        // RepeatIndex = 1, 2, 3
+        // LRepeatIndex = 1, 2, 3
 
       until (LSuccess or (LRepeatIndex >= Data.PublishRetry));
 
@@ -219,62 +218,63 @@ end;
 
 { TPublishInnerManager }
 
-procedure TPublishInnerManager.OmniEMTaskMessage(const task: IOmniTaskControl; const msg: TOmniMessage);
-
-(*
-  function GetProgressPosition: Extended;
-  var
-  CompletedCount: Integer;
-  begin
-  CompletedCount := FCompletedCount.value;
-  Result := CompletedCount / FTotalCount * 100;
-  end;
-
-  function GetHintLabeledText: string;
-  begin
-  with FThreadStringList do
-  begin
-  // TODO:
-  // Delimiter := ',';
-  Result := ToString;
-  end;
-  end;
-  *)
-
+function TPublishInnerManager.GetProgressPosition: Extended;
 begin
-  (*
-    case msg.MsgID of
-    MSG_PUBLISH_ITEM_TASK_STARTED:
-    begin
-    FThreadStringList.Add(msg.MsgData.AsString);
-
-    if Assigned(FOnGUIInteractionItem) then
-    FOnGUIInteractionItem(pmisWORKING, FPublishJob, GetProgressPosition, GetHintLabeledText);
-
-    end;
-    MSG_PUBLISH_ITEM_TASK_ERROR:
-    begin
-    if Assigned(FOnGUIInteractionItem) then
-    FOnGUIInteractionItem(pmisERROR, FPublishJob, GetProgressPosition, msg.MsgData.AsString);
-    end;
-    MSG_PUBLISH_ITEM_TASK_COMPLETED:
-    begin
-    FCompletedCount.Increment;
-
-    if Assigned(FOnGUIInteractionItem) then
-    FOnGUIInteractionItem(pmisWORKING, FPublishJob, GetProgressPosition, GetHintLabeledText);
-
-    // TODO:
-    // with FThreadStringList do
-    // Delete(IndexOf(msg.MsgData.AsString));
-    end;
-    else
-    inherited OmniTEDTaskMessage(task, msg);
-    end;
-    *)
+  Result := FCompletedCount.Value / FTotalCount * 100;
 end;
 
-constructor TPublishInnerManager.Create(const APublishJob: IPublishJob; APublishRate, ATotalCount: Integer; AOnGUIInteractionItem: TGUIInteractionItemEvent);
+procedure TPublishInnerManager.OmniEMTaskMessage(const task: IOmniTaskControl; const msg: TOmniMessage);
+
+  function GetHintLabeledText: string;
+  var
+    LHost: string;
+  begin
+    Result := '';
+    for LHost in FThreadStringList do
+    begin
+      if not SameStr('', Result) then
+        Result := Result + ', ';
+      Result := Result + LHost;
+    end;
+  end;
+
+var
+  LJobWorkData: TPublishInnerData;
+begin
+  LJobWorkData := TPublishInnerData(msg.MsgData[1].AsObject);
+
+  case msg.MsgID of
+    MSG_PUBLISH_ITEM_TASK_CREATED:
+      begin
+        FThreadStringList.Add(LJobWorkData.PublishItem.Host);
+
+        if Assigned(FOnGUIInteractionItem) then
+          FOnGUIInteractionItem(pmisWORKING, FPublishJob, GetProgressPosition, GetHintLabeledText);
+      end;
+    MSG_PUBLISH_ITEM_TASK_ERROR:
+      begin
+        if Assigned(FOnGUIInteractionItem) then
+          FOnGUIInteractionItem(pmisERROR, FPublishJob, GetProgressPosition, msg.MsgData[2].AsString);
+      end;
+    MSG_PUBLISH_ITEM_TASK_COMPLETED:
+      begin
+        FCompletedCount.Increment;
+
+        if Assigned(FOnGUIInteractionItem) then
+          FOnGUIInteractionItem(pmisWORKING, FPublishJob, GetProgressPosition, GetHintLabeledText);
+
+        FThreadStringList.Remove(LJobWorkData.PublishItem.Host);
+      end
+    else
+    begin
+      inherited OmniEMTaskMessage(task, msg);
+    end;
+  end;
+end;
+
+constructor TPublishInnerManager.Create(const APublishJob: IPublishJob; APublishRate: Integer; AOnGUIInteractionItem: TGUIInteractionItemEvent);
+var
+  FPublishJobIndex: Integer;
 begin
   inherited Create;
 
@@ -285,13 +285,13 @@ begin
     MaxQueued := 0;
   end;
 
-  (*
-    FPublishJob := APublishJob;
-    FTotalCount := ATotalCount;
+  FPublishJob := APublishJob;
 
-    FCompletedCount.value := 0;
-    FThreadStringList := TThreadList<string>.Create(False);
-    *)
+  FTotalCount := 0;
+  for FPublishJobIndex := 0 to FPublishJob.Count - 1 do
+    FTotalCount := FTotalCount + FPublishJob.Upload[FPublishJobIndex].Count;
+
+  FCompletedCount.Value := 0;
 
   FOnGUIInteractionItem := AOnGUIInteractionItem;
 end;
@@ -299,10 +299,9 @@ end;
 destructor TPublishInnerManager.Destroy;
 begin
   FOnGUIInteractionItem := nil;
-  (*
-    FPublishJob := nil;
-    FThreadStringList.Free;
-    *)
+
+  FPublishJob := nil;
+
   if Assigned(FThreadPool) then
   begin
     FThreadPool.CancelAll;
@@ -312,26 +311,25 @@ begin
 end;
 
 procedure TPublishInnerManager.AddPublishItem(const APublishItem: IPublishItem; APublishRetry: Integer);
+var
+  LPublishInnerThread: TPublishInnerThread;
 begin
-  (*
-    FInList.Add(APublishItem);
-    CreateTask(TPublishItemThread.Create(APublishItem, APublishRetry), 'TPublishItemThread (' + APublishItem.Website + ')').MonitorWith(FOmniTED).Schedule(FThreadPool);
-    *)
+  LPublishInnerThread := TPublishInnerThread.Create(APublishItem, APublishRetry);
+  AddJob(LPublishInnerThread.Data);
+  CreateTask(LPublishInnerThread).MonitorWith(FOmniEM).Schedule(FThreadPool).Invoke(@TPublishInnerThread.Execute);
 end;
 
 procedure TPublishInnerManager.RemovePublishItem(const APublishItem: IPublishItem);
 var
-  indxA, indxB: Integer;
+  LListIndex: Integer;
 begin
-  (*
-    indxA := FInList.IndexOf(APublishItem);
-    if indxA <> -1 then
+  for LListIndex := 0 to FInList.Count - 1 do
+  begin
+    if (APublishItem = FInList[LListIndex].PublishItem) then
     begin
-    indxB := FBlackList.IndexOf(APublishItem);
-    if indxB = -1 then
-    FBlackList.Add(APublishItem);
+      RemoveJob(FInList[LListIndex]);
     end;
-    *)
+  end;
 end;
 
 { ****************************************************************************** }
@@ -361,14 +359,7 @@ begin
   Data.PublishDelay := APublishDelay;
   Data.PublishRetry := APublishRetry;
 
-  // TODO:
-  (*
-    FTotalCount := 0;
-    for I := 0 to FPublishJob.Count - 1 do
-    FTotalCount := FTotalCount + FPublishJob.Upload[I].Count;
-
-    FPublishPool := TPublishPool.Create(FPublishJob, APublishRate, FTotalCount, AOnGUIInteractionItem);
-    *)
+  FInnerPublishManager := TPublishInnerManager.Create(APublishJob, APublishRate, AOnGUIInteractionItem);
 end;
 
 destructor TPublishThread.Destroy;
@@ -377,62 +368,67 @@ begin
 end;
 
 procedure TPublishThread.Execute;
+var
+  LOmniValue: TOmniValue;
+
+  FPublishJobIndex, FPublishJobItemIndex: Integer;
 begin
-  (*
-    if CheckforBlacklist(FPublishJob) then
+  LOmniValue := TOmniValue.CastFrom<TPublishData>(Data);
+
+  try
+    for FPublishJobIndex := 0 to Data.PublishJob.Count - 1 do
     begin
-    task.Comm.Send(MSG_PUBLISH_TASK_CANCELED, FPublishJob);
-    Exit(False);
+      if not task.Terminated then
+      begin
+        if (FPublishJobIndex > 0) and (Data.PublishDelay > 0) then
+        begin
+          sleep(Data.PublishDelay);
+
+          if InBlackList then
+          begin
+            task.Comm.Send(MSG_PUBLISH_TASK_CANCELED, [task.UniqueID, LOmniValue.AsObject]);
+            Exit;
+          end;
+        end;
+
+        for FPublishJobItemIndex := 0 to Data.PublishJob.Upload[FPublishJobIndex].Count - 1 do
+          FInnerPublishManager.AddPublishItem(Data.PublishJob.Upload[FPublishJobIndex].Item[FPublishJobItemIndex], Data.PublishRetry);
+
+        repeat
+          sleep(500);
+
+          if InBlackList then
+          begin
+            // send cancel info
+            task.Comm.Send(MSG_PUBLISH_TASK_CANCELED, [task.UniqueID, LOmniValue.AsObject]);
+
+            // insert all started publish jobs to inner thread pool blacklist
+            for FPublishJobItemIndex := 0 to Data.PublishJob.Upload[FPublishJobIndex].Count - 1 do
+              FInnerPublishManager.RemovePublishItem(Data.PublishJob.Upload[FPublishJobIndex].Item[FPublishJobItemIndex]);
+
+            // wait now until inner thread pool task are finished
+            repeat
+              sleep(500);
+            until (FInnerPublishManager.IsIdle);
+
+            // give tasks from inner thread pool some time for cleanup
+            sleep(1250);
+
+            // now exit, inner thread pool is idle
+            Exit;
+          end;
+
+          sleep(500);
+
+        until (FInnerPublishManager.IsIdle);
+      end;
     end;
+  finally
+    Finish;
+  end;
 
-    for I := 0 to FPublishJob.Count - 1 do
-    if not task.Terminated then
-    begin
-    if (I > 0) and (FPublishDelay > 0) then
-    begin
-    sleep(FPublishDelay);
-
-    if CheckforBlacklist(FPublishJob) then
-    begin
-    task.Comm.Send(MSG_PUBLISH_TASK_CANCELED, FPublishJob);
-    Exit(False);
-    end;
-    end;
-
-    for J := 0 to FPublishJob.Upload[I].Count - 1 do
-    FPublishPool.AddPublishItem(FPublishJob.Upload[I].Item[J], FPublishRetry);
-
-    repeat
-    sleep(250);
-    if CheckforBlacklist(FPublishJob) then
-    begin
-    // send cancel info
-    task.Comm.Send(MSG_PUBLISH_TASK_CANCELED, FPublishJob);
-    // insert all started publish jobs to inner thread pool blacklist
-    for J := 0 to FPublishJob.Upload[I].Count - 1 do
-    FPublishPool.RemovePublishItem(FPublishJob.Upload[I].Item[J]);
-    // wait now until inner thread pool task are finished
-    repeat
-    sleep(250);
-    until (FPublishPool.IsIdle);
-    // give tasks from inner thread pool some time for cleanup
-    sleep(1250);
-    // now exit, inner thread pool is idle
-    Exit(False);
-    end;
-    sleep(250);
-    until (FPublishPool.IsIdle);
-    end;
-
-    task.Invoke(
-    { } procedure
-    { } begin
-    { .. } task.SetTimer(1, 1, MSG_SLEEP);
-    { } end);
-
-    // this musst be done here (instead of in Cleanup) because when user calls cancel, this call is not allowed
-    task.Comm.Send(MSG_PUBLISH_TASK_FINISHED, FPublishJob);
-    *)
+  // this musst be done here (instead of in Cleanup) because when user calls cancel, this call is not allowed
+  task.Comm.Send(MSG_PUBLISH_TASK_FINISHED, [task.UniqueID, LOmniValue.AsObject]);
 end;
 
 { TPublishManager }
@@ -441,6 +437,31 @@ function TPublishManager.GetNextUniqueID: LongWord;
 begin
   Inc(FNextUniqueID);
   Result := FNextUniqueID;
+end;
+
+function TPublishManager.InAnyList(const ATabSheetController: ITabSheetController): Boolean;
+var
+  LListIndex: Integer;
+begin
+  Result := True;
+  for LListIndex := 0 to FInList.Count - 1 do
+  begin
+    // TODO: Add loop
+    // if ATabSheetController = FInList[LListIndex].PublishJob.Upload[] then
+    // begin
+    // Result := True;
+    // Break;
+    // end;
+  end;
+  for LListIndex := 0 to FBlackList.Count - 1 do
+  begin
+    // TODO: Add loop
+    // if ATabSheetController = FBlackList[LListIndex].TabSheetController then
+    // begin
+    // Result := True;
+    // Break;
+    // end;
+  end;
 end;
 
 procedure TPublishManager.OmniEMTaskMessage(const task: IOmniTaskControl; const msg: TOmniMessage);
@@ -452,13 +473,13 @@ begin
   case msg.MsgID of
     MSG_PUBLISH_TASK_CANCELED:
       begin
-        // if Assigned(FOnGUIInteractionItem) then
-        // FOnGUIInteractionItem(pmisCANCELED, IPublishJob(msg.MsgData.AsInterface), 0, '');
+        if Assigned(FOnGUIInteractionItem) then
+          FOnGUIInteractionItem(pmisCANCELED, LJobWorkData.PublishJob, 0, '');
       end;
     MSG_PUBLISH_TASK_FINISHED:
       begin
-        // if Assigned(FOnGUIInteractionItem) then
-        // FOnGUIInteractionItem(pmisFINISHED, IPublishJob(msg.MsgData.AsInterface), 100, '');
+        if Assigned(FOnGUIInteractionItem) then
+          FOnGUIInteractionItem(pmisFINISHED, LJobWorkData.PublishJob, 100, '');
       end
     else
     begin
@@ -493,80 +514,53 @@ end;
 
 function TPublishManager.AddPublishJob(const APublishJob: IPublishJob): LongWord;
 var
-  PublishRate, PublishDelay, PublishRetry: Integer;
+  LUniqueID: LongWord;
+  LPublishThread: TPublishThread;
 
-  UniqueID: LongWord;
+  LPublishRate, LPublishDelay, LPublishRetry: Integer;
 begin
   with SettingsManager.Settings.Publish do
   begin
-    PublishRate := PublishMaxCount;
-    PublishDelay := PublishDelaybetweenUploads;
-    PublishRetry := RetryCount;
+    LPublishRate := PublishMaxCount;
+    LPublishDelay := PublishDelaybetweenUploads;
+    LPublishRetry := RetryCount;
   end;
 
-  (*
-    FInList.Add(APublishJob);
-    UniqueID := GetNextUniqueID;
-    APublishJob.UniqueID := UniqueID;
-    CreateTask(TPublishThread.Create(APublishJob, PublishRate, PublishDelay, PublishRetry, FOnGUIInteractionItem), 'TPublishThread (' + APublishJob.Description + ')').MonitorWith(FOmniTED).Schedule(FThreadPool);
-    if Assigned(FOnGUIInteractionItem) then
+  LUniqueID := GetNextUniqueID;
+  APublishJob.UniqueID := LUniqueID;
+
+  LPublishThread := TPublishThread.Create(APublishJob, LPublishRate, LPublishDelay, LPublishRetry, FOnGUIInteractionItem);
+  AddJob(LPublishThread.Data);
+  CreateTask(LPublishThread).MonitorWith(FOmniEM).Schedule(FThreadPool).Invoke(@TPublishThread.Execute);
+
+  if Assigned(FOnGUIInteractionItem) then
     FOnGUIInteractionItem(pmisCREATED, APublishJob, 0, '');
-    Result := UniqueID;
-    *)
+
+  Result := LUniqueID;
 end;
 
 procedure TPublishManager.RemovePublishJob(const APublishJob: IPublishJob);
-var
-  indxA, indxB: Integer;
 begin
-  (*
-    indxA := FInList.IndexOf(APublishJob);
-    if indxA <> -1 then
-    begin
-    indxB := FBlackList.IndexOf(APublishJob);
-    if indxB = -1 then
-    FBlackList.Add(APublishJob);
-    end;
-    *)
+  RemovePublishJob(APublishJob.UniqueID);
 end;
 
 procedure TPublishManager.RemovePublishJob(const AUniqueID: LongWord);
-
-  function Find(AUniqueID: LongWord; AList: TInterfaceList): Integer;
-  var
-    I: Integer;
-  begin
-    Result := -1;
-    with AList do
-      for I := 0 to Count - 1 do
-        if AUniqueID = IPublishJob(Items[I]).UniqueID then
-          Exit(I);
-  end;
-
 var
-  indxA, indxB: Integer;
+  LListIndex: Integer;
 begin
-  (*
-    indxA := Find(AUniqueID, FInList);
-    if indxA <> -1 then
+  for LListIndex := 0 to FInList.Count - 1 do
+  begin
+    if (AUniqueID = FInList[LListIndex].PublishJob.UniqueID) then
     begin
-    indxB := Find(AUniqueID, FBlackList);
-    if indxB = -1 then
-    FBlackList.Add(FInList[indxA]);
+      RemoveJob(FInList[LListIndex]);
     end;
-    *)
+  end;
 end;
 
-procedure TPublishManager.RemoveAllJobs;
-var
-  I: Integer;
+procedure TPublishManager.RemoveAllPublishJobs;
 begin
-  (*
-    for I := 0 to FInList.Count - 1 do
-    RemovePublishJob(IPublishJob(FInList[I]));
-
-    Pause;
-    *)
+  RemoveAllJobs;
+  Pause;
 end;
 
 procedure TPublishManager.Resume;

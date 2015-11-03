@@ -76,7 +76,7 @@ end;
 
 procedure TfPublishQueue.cxBStopClick(Sender: TObject);
 begin
-  Main.fMain.PublishManager.RemoveAllJobs;
+  Main.fMain.PublishManager.RemoveAllPublishJobs;
 end;
 
 procedure TfPublishQueue.cxGPublishQueueTableViewColumnProgressGetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
