@@ -470,9 +470,11 @@ begin
       sleep(50);
     until HTTPManager.HasResult(RequestID);
 
+    HTTPProcess := HTTPManager.GetResult(RequestID);
+
     DoHandleSessionID(HTTPProcess);
 
-    ResponseStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
+    ResponseStr := HTTPProcess.HTTPResult.SourceCode;
   end;
 
   if DoBuildLoginRequest(HTTPRequest, HTTPParams, HTTPOptions, ResponseStr) then

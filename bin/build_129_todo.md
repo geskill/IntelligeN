@@ -4,8 +4,6 @@ This todo list contains all useful ideas for improvement, not necessarily for th
 
 ###Core
 
-- [ ] Add new TTypeID icons
-
 - [ ] Handle DDos protection from Cloudflare
 
 ###SDK
@@ -13,8 +11,6 @@ This todo list contains all useful ideas for improvement, not necessarily for th
 ######Content-Management-Systems
 
 - [ ] Add password protected subforums for vBulletin
-
-- [ ] Fix Woltlab Burning Bord to support version 4.1.
 
 - [ ] Fix XenForo to support version 1.5.
 

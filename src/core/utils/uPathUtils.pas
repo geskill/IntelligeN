@@ -200,6 +200,7 @@ begin
     else
       LUrl := copy(LUrl, 1, LastDelimiter('/', LUrl))
   end;
+  Result := LUrl;
 end;
 
 function IncludeTrailingUrlDelimiter(const AUrl: string): string;

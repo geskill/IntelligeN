@@ -62,7 +62,7 @@ type
   TwBB4 = class(TCMSBoardIPPlugIn)
   private
     wBB4Settings: TwBB4Settings;
-    FSessionID: string;
+    FSessionID, FSecurityToken: string;
   protected
     function SettingsClass: TCMSPlugInSettingsMeta; override;
     function GetSettings: TCMSPlugInSettings; override;
@@ -130,14 +130,14 @@ end;
 function TwBB4.NeedPreLogin;
 begin
   Result := True;
-  ARequestURL := Website + 'index.php/Login/';
+  ARequestURL := Website + 'index.php?login';
 end;
 
 function TwBB4.DoBuildLoginRequest;
 begin
   Result := True;
 
-  AHTTPRequest := THTTPRequest.Create(Website + 'index.php/Login/');
+  AHTTPRequest := THTTPRequest.Create(Website + 'index.php?login/&s=' + FSessionID);
   with AHTTPRequest do
   begin
     Referer := Website;
@@ -152,7 +152,7 @@ begin
     AddFormField('password', AccountPassword);
     AddFormField('useCookies', '1');
     AddFormField('url', '');
-    AddFormField('t', FSessionID);
+    AddFormField('t', FSecurityToken);
   end;
 
   AHTTPOptions := TPlugInHTTPOptions.Create(Self);
@@ -162,7 +162,7 @@ function TwBB4.DoAnalyzeLogin;
 begin
   ACAPTCHALogin := False;
 
-  Result := not(Pos('class="success"', AResponseStr) = 0);
+  Result := not(Pos('class="success"', AResponseStr) = 0) or not(Pos('logout/', AResponseStr) = 0);
   if not Result then
     with TRegExpr.Create do
       try
@@ -185,10 +185,14 @@ begin
   with TRegExpr.Create do
     try
       InputString := AHTTPProcess.HTTPResult.SourceCode;
-      Expression := 'SECURITY_TOKEN = ''(\w+)''';
 
+      Expression := '''&s=(\w+)''';
       if Exec(InputString) then
         FSessionID := Match[1];
+
+      Expression := 'SECURITY_TOKEN = ''(\w+)''';
+      if Exec(InputString) then
+        FSecurityToken := Match[1];
     finally
       Free;
     end;
@@ -244,7 +248,7 @@ begin
         else
           AddFormField('boardIDs[]', '*');
 
-        AddFormField('t', FSessionID);
+        AddFormField('t', FSecurityToken);
       end;
 
       ARequestID := HTTPManager.Post(GetSearchRequestURL, ARequestID, HTTPParams, TPlugInHTTPOptions.Create(Self));
@@ -317,9 +321,9 @@ function TwBB4.NeedPrePost;
 begin
   Result := True;
   if PostReply then
-    ARequestURL := Website + 'index.php/PostAdd/' + VarToStr(wBB4Settings.threads) + '/'
+    ARequestURL := Website + 'index.php?post-add/' + VarToStr(wBB4Settings.threads) + '/'
   else
-    ARequestURL := Website + 'index.php/ThreadAdd/' + VarToStr(wBB4Settings.forums) + '/'
+    ARequestURL := Website + 'index.php?thread-add/' + VarToStr(wBB4Settings.forums) + '/'
 end;
 
 function TwBB4.DoAnalyzePrePost;
@@ -352,9 +356,9 @@ begin
   Result := True;
 
   if PostReply then
-    RequestURL := Website + 'index.php/PostAdd/' + VarToStr(wBB4Settings.threads) + '/'
+    RequestURL := Website + 'index.php?post-add/' + VarToStr(wBB4Settings.threads) + '/&s=' + FSessionID
   else
-    RequestURL := Website + 'index.php/ThreadAdd/' + VarToStr(wBB4Settings.forums) + '/';
+    RequestURL := Website + 'index.php?thread-add/' + VarToStr(wBB4Settings.forums) + '/&s=' + FSessionID;
 
   AHTTPRequest := THTTPRequest.Create(RequestURL);
   with AHTTPRequest do
@@ -446,7 +450,7 @@ end;
 
 function TwBB4.GetIDsRequestURL;
 begin
-  Result := Website + 'index.php/Search/';
+  Result := Website + 'index.php?search';
 end;
 
 function TwBB4.DoAnalyzeIDsRequest;

@@ -418,6 +418,8 @@
 
 * Fixed enabled status of IScript editor buttons at launch
 
+* Fixed wbb4 cms plugin to support version 4.1.8
+
 * Fixed linkcrypt.ws crypter plugin
 
 * Fixed share-online.biz hoster plugin

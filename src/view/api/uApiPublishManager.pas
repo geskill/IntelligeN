@@ -292,14 +292,14 @@ begin
     FTotalCount := FTotalCount + FPublishJob.Upload[FPublishJobIndex].Count;
 
   FCompletedCount.Value := 0;
-
+  FThreadStringList := TThreadList<string>.Create(False);
   FOnGUIInteractionItem := AOnGUIInteractionItem;
 end;
 
 destructor TPublishInnerManager.Destroy;
 begin
   FOnGUIInteractionItem := nil;
-
+  FThreadStringList.Free;
   FPublishJob := nil;
 
   if Assigned(FThreadPool) then
