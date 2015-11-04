@@ -182,37 +182,40 @@ begin
 
   if not task.Terminated then
   begin
-
     try
-      LRepeatIndex := 0;
-      LSuccess := False; // FPublishRetry = 3
 
-      repeat
-        FErrorMsg := '';
+      try
+        LRepeatIndex := 0;
+        LSuccess := False; // FPublishRetry = 3
 
-        with TApiThreadedPlugin.Create(task, DefaultErrorHandler) do
-          try
-            LSuccess := CMSExec(Data.PublishItem);
-          finally
-            Free;
+        repeat
+          FErrorMsg := '';
+
+          with TApiThreadedPlugin.Create(task, DefaultErrorHandler) do
+            try
+              LSuccess := CMSExec(Data.PublishItem);
+            finally
+              Free;
+            end;
+
+          if FHasError then
+          begin
+            task.Comm.Send(MSG_PUBLISH_ITEM_TASK_ERROR, [task.UniqueID, LOmniValue.AsObject, FErrorMsg]);
           end;
 
-        if FHasError then
-        begin
-          task.Comm.Send(MSG_PUBLISH_ITEM_TASK_ERROR, [task.UniqueID, LOmniValue.AsObject, FErrorMsg]);
-        end;
+          // LRepeatIndex = 0, 1, 2
+          Inc(LRepeatIndex);
+          // LRepeatIndex = 1, 2, 3
 
-        // LRepeatIndex = 0, 1, 2
-        Inc(LRepeatIndex);
-        // LRepeatIndex = 1, 2, 3
+        until (LSuccess or (LRepeatIndex >= Data.PublishRetry));
 
-      until (LSuccess or (LRepeatIndex >= Data.PublishRetry));
+      finally
+        task.Comm.Send(MSG_PUBLISH_ITEM_TASK_COMPLETED, [task.UniqueID, LOmniValue.AsObject]);
+      end;
 
     finally
-      task.Comm.Send(MSG_PUBLISH_ITEM_TASK_COMPLETED, [task.UniqueID, LOmniValue.AsObject]);
+      Finish;
     end;
-
-    Finish;
   end;
 end;
 
@@ -364,6 +367,8 @@ end;
 
 destructor TPublishThread.Destroy;
 begin
+  FInnerPublishManager.Free;
+
   inherited Destroy;
 end;
 
@@ -423,12 +428,12 @@ begin
         until (FInnerPublishManager.IsIdle);
       end;
     end;
+
+    // this musst be done here (instead of in Cleanup) because when user calls cancel, this call is not allowed
+    task.Comm.Send(MSG_PUBLISH_TASK_FINISHED, [task.UniqueID, LOmniValue.AsObject]);
   finally
     Finish;
   end;
-
-  // this musst be done here (instead of in Cleanup) because when user calls cancel, this call is not allowed
-  task.Comm.Send(MSG_PUBLISH_TASK_FINISHED, [task.UniqueID, LOmniValue.AsObject]);
 end;
 
 { TPublishManager }
@@ -504,6 +509,9 @@ end;
 
 destructor TPublishManager.Destroy;
 begin
+  FOnGUIInteraction := nil;
+  FOnGUIInteractionItem := nil;
+
   if Assigned(FThreadPool) then
   begin
     FThreadPool.CancelAll;

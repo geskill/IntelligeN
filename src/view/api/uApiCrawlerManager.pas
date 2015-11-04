@@ -276,6 +276,7 @@ end;
 
 destructor TCrawlerManager.Destroy;
 begin
+  FOnGUIInteraction := nil;
   inherited Destroy;
 end;
 

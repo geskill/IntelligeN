@@ -341,8 +341,6 @@ end;
 function TDesignTabSheetItem.GetCMSWebsiteContainer: ICMSWebsiteContainer;
 var
   LWebsiteItemIndex: Integer;
-
-  LCMSWebsiteContainer: ICMSWebsiteContainer;
 begin
   LWebsiteItemIndex := FWebsite.ItemIndex;
 
@@ -350,15 +348,7 @@ begin
     Result := nil
   else
   begin
-    LCMSWebsiteContainer := FWebsiteList[LWebsiteItemIndex];
-
-    OutputDebugString(PChar(LCMSWebsiteContainer.CMS + ' ' + LCMSWebsiteContainer.Website));
-
-    Result := LCMSWebsiteContainer;
-
-    LCMSWebsiteContainer := PublishController.CMS[LCMSWebsiteContainer.CMS].Website[LCMSWebsiteContainer.Index];
-
-    OutputDebugString(PChar(LCMSWebsiteContainer.CMS + ' ' + LCMSWebsiteContainer.Website));
+    Result := FWebsiteList[LWebsiteItemIndex];
   end;
 end;
 
@@ -398,6 +388,7 @@ end;
 
 procedure TDesignTabSheetItem.FWebsiteChange(Sender: TObject);
 begin
+  // TODO: Fix host with same host i.e. localhost/wbb4/ localhost/xenforo/ => both localhost
   UpdateActiveWebsite;
 end;
 

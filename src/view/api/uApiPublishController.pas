@@ -50,13 +50,13 @@ type
   TIPublishTab = class(TInterfacedObject, IPublishTab)
   private
     FReleaseName: WideString;
-    FPublishItemList: TList<IPublishItem>;
+    FPublishItemList: TInterfaceList<IPublishItem>;
   protected
     function GetReleaseName: WideString;
     function GetItem(const IndexOrName: OleVariant): IPublishItem;
   public
     constructor Create(AReleaseName: WideString);
-    procedure Add(APublishItem: IPublishItem);
+    procedure Add(const APublishItem: IPublishItem);
     property ReleaseName: WideString read GetReleaseName;
     property Item[const IndexOrName: OleVariant]: IPublishItem read GetItem;
     function Count: Integer;
@@ -67,7 +67,7 @@ type
   private
     FUniqueID: Longword;
     FDescription: WideString;
-    FPublishTabList: TList<IPublishTab>;
+    FPublishTabList: TInterfaceList<IPublishTab>;
   protected
     function GetUniqueID: Longword;
     procedure SetUniqueID(AUniqueID: Longword);
@@ -75,7 +75,7 @@ type
     function GetUpload(const IndexOrName: OleVariant): IPublishTab;
   public
     constructor Create(ADescription: WideString);
-    procedure Add(APublishTab: IPublishTab);
+    procedure Add(const APublishTab: IPublishTab);
     property UniqueID: Longword read GetUniqueID write SetUniqueID;
     property Description: WideString read GetDescription;
     property Upload[const IndexOrName: OleVariant]: IPublishTab read GetUpload;
@@ -131,7 +131,7 @@ type
       function GetCMSPluginPath: WideString;
       function GetData: ITabSheetData;
     public
-      constructor Create(AAccountName, AAccountPassword, ASettingsFileName, AHost, AWebsite, ASubject, ATags, AMessage, ACMSPluginPath: WideString; ACMSWebsiteData: ITabSheetData);
+      constructor Create(AAccountName, AAccountPassword, ASettingsFileName, AHost, AWebsite, ASubject, ATags, AMessage, ACMSPluginPath: WideString; const ACMSWebsiteData: ITabSheetData);
       property CMSPluginPath: WideString read GetCMSPluginPath;
       property WebsiteData: ITabSheetData read GetData;
       destructor Destroy; override;
@@ -393,10 +393,10 @@ constructor TIPublishTab.Create(AReleaseName: WideString);
 begin
   inherited Create;
   FReleaseName := AReleaseName;
-  FPublishItemList := TList<IPublishItem>.Create;
+  FPublishItemList := TInterfaceList<IPublishItem>.Create;
 end;
 
-procedure TIPublishTab.Add(APublishItem: IPublishItem);
+procedure TIPublishTab.Add(const APublishItem: IPublishItem);
 begin
   if Assigned(APublishItem) then
     FPublishItemList.Add(APublishItem);
@@ -466,10 +466,10 @@ begin
   inherited Create;
   FUniqueID := 0;
   FDescription := ADescription;
-  FPublishTabList := TList<IPublishTab>.Create;
+  FPublishTabList := TInterfaceList<IPublishTab>.Create;
 end;
 
-procedure TIPublishJob.Add(APublishTab: IPublishTab);
+procedure TIPublishJob.Add(const APublishTab: IPublishTab);
 begin
   FPublishTabList.Add(APublishTab);
 end;
@@ -1023,6 +1023,10 @@ end;
 
 function TICMSWebsiteContainer.ParseIScript(AIScript: WideString): RIScriptResult;
 begin
+  (* TODO: Improve GenerateData to no generate this every time.
+   Used always twice for ISubject and IMessage.
+   i.e. implement changed file
+  *)
   with TIScirptParser.Create(CMS, Name, GenerateData) do
     try
       Result := Execute(AIScript);
