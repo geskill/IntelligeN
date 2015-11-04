@@ -17,7 +17,7 @@ uses
   uPlugInCMSClass, uPlugInCMSBoardClass, uPlugInHTTPClasses, uPlugInCMSSettingsHelper;
 
 type
-  TXenForoSettings = class(TCMSBoardPlugInSettings)
+  TXenForoSettings = class(TCMSBoardIPPlugInSettings)
   strict private
     fprefix_field: string;
     fintelligent_posting, fintelligent_posting_helper, fintelligent_posting_boundedsearch: Boolean;
@@ -107,7 +107,7 @@ function TXenForo.DoBuildLoginRequest;
 begin
   Result := True;
 
-  AHTTPRequest := THTTPRequest.Create(Website + 'login/login');
+  AHTTPRequest := THTTPRequest.Create(Website + 'index.php?login/login');
   with AHTTPRequest do
   begin
     Referer := Website;
@@ -132,7 +132,7 @@ end;
 function TXenForo.DoAnalyzeLogin;
 begin
   ACAPTCHALogin := False;
-  Result := not(Pos('logout/?_xfToken=', AResponseStr) = 0);
+  Result := not(Pos('logout/?_xfToken=', AResponseStr) = 0) or not(Pos('index.php?logout/&amp;_xfToken=', AResponseStr) = 0);
   if not Result then
     with TRegExpr.Create do
       try

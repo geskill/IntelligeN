@@ -10,9 +10,9 @@ This todo list contains all useful ideas for improvement, not necessarily for th
 
 ######Content-Management-Systems
 
-- [ ] Add password protected subforums for vBulletin
+- [ ] Add output link/id of created threads and/or posts
 
-- [ ] Fix XenForo to support version 1.5.
+- [ ] Add password protected subforums for vBulletin
 
 ######Crawler
 
