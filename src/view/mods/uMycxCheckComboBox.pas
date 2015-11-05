@@ -55,30 +55,31 @@ end;
 
 procedure TMycxCheckComboBox.CheckAll;
 var
-  I: Integer;
-  AStates: TcxCheckStates;
+  LItemIndex: Integer;
+  LStates: TcxCheckStates;
 begin
   with Properties do
   begin
-    SetLength(AStates, Items.Count);
-    for I := 0 to Items.Count - 1 do
-      AStates[I] := cbsChecked;
-    Value := CalculateCheckStatesValue(AStates, Items, EditValueFormat);
+    SetLength(LStates, Items.Count);
+    for LItemIndex := 0 to Items.Count - 1 do
+      LStates[LItemIndex] := cbsChecked;
+    Value := CalculateCheckStatesValue(LStates, Items, EditValueFormat);
   end;
 end;
 
 procedure TMycxCheckComboBox.SetTextValue(const TextValue: string);
 var
-  I, Index: Integer;
+  LCategoryIndex, LItemIndex: Integer;
 begin
   with SplittString(Properties.Delimiter[1], TextValue) do
     try
-      for I := 0 to Count - 1 do
+      Value := '';
+      for LCategoryIndex := 0 to Count - 1 do
       begin
-        Index := InternalIndexOf(Strings[I]);
+        LItemIndex := InternalIndexOf(Strings[LCategoryIndex]);
 
-        if Index <> -1 then
-          States[Index] := cbsChecked;
+        if (LItemIndex <> -1) then
+          States[LItemIndex] := cbsChecked;
       end;
     finally
       Free;
