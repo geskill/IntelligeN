@@ -706,19 +706,16 @@ begin
         htFile:
           begin
 
-            for LControlIndex := 0 to TabSheetController.MirrorController.MirrorCount - 1 do
-            begin
-              for LWhitelistIndex := LWhitelist.Count - 1 downto 0 do
-                if not SameText(LWhitelist.Strings[LWhitelistIndex], TabSheetController.MirrorController.Mirror[LControlIndex].Hoster) then
-                begin
-                  LWhitelist.Delete(LWhitelistIndex);
-                end;
-              for LWhitelistIndex := LBlackList.Count - 1 downto 0 do
-                if not SameText(LBlackList.Strings[LWhitelistIndex], TabSheetController.MirrorController.Mirror[LControlIndex].Hoster) then
-                begin
-                  LBlackList.Delete(LWhitelistIndex);
-                end;
-            end;
+            for LWhitelistIndex := LWhitelist.Count - 1 downto 0 do
+              if not Assigned(TabSheetController.MirrorController.Mirror[LWhitelist.Strings[LWhitelistIndex]]) then
+              begin
+                LWhitelist.Delete(LWhitelistIndex);
+              end;
+            for LWhitelistIndex := LBlackList.Count - 1 downto 0 do
+              if not Assigned(TabSheetController.MirrorController.Mirror[LBlackList.Strings[LWhitelistIndex]]) then
+              begin
+                LBlackList.Delete(LWhitelistIndex);
+              end;
 
           end;
         htImage:
@@ -726,19 +723,16 @@ begin
 
             if Assigned(LPicture) then
             begin
-              for LControlIndex := 0 to LPicture.MirrorCount - 1 do
-              begin
-                for LWhitelistIndex := LWhitelist.Count - 1 downto 0 do
-                  if not SameText(LWhitelist.Strings[LWhitelistIndex], LPicture.Mirror[LControlIndex].Name) then
-                  begin
-                    LWhitelist.Delete(LWhitelistIndex);
-                  end;
-                for LWhitelistIndex := LBlackList.Count - 1 downto 0 do
-                  if not SameText(LBlackList.Strings[LWhitelistIndex], LPicture.Mirror[LControlIndex].Name) then
-                  begin
-                    LBlackList.Delete(LWhitelistIndex);
-                  end;
-              end;
+              for LWhitelistIndex := LWhitelist.Count - 1 downto 0 do
+                if not Assigned(LPicture.Mirror[LWhitelist.Strings[LWhitelistIndex]]) then
+                begin
+                  LWhitelist.Delete(LWhitelistIndex);
+                end;
+              for LWhitelistIndex := LBlackList.Count - 1 downto 0 do
+                if not Assigned(LPicture.Mirror[LBlackList.Strings[LWhitelistIndex]]) then
+                begin
+                  LBlackList.Delete(LWhitelistIndex);
+                end;
             end;
 
           end;
@@ -1024,9 +1018,9 @@ end;
 function TICMSWebsiteContainer.ParseIScript(AIScript: WideString): RIScriptResult;
 begin
   (* TODO: Improve GenerateData to no generate this every time.
-   Used always twice for ISubject and IMessage.
-   i.e. implement changed file
-  *)
+    Used always twice for ISubject and IMessage.
+    i.e. implement changed file
+    *)
   with TIScirptParser.Create(CMS, Name, GenerateData) do
     try
       Result := Execute(AIScript);
