@@ -269,6 +269,8 @@ begin
   FIUpdateCMSWebsiteListEvent := nil;
   FIUpdateCMSListEvent := nil;
 
+  FtvDataController := nil;
+
   inherited Destroy;
 end;
 
