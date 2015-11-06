@@ -9,88 +9,85 @@ uses
   RegExpr,
   // Common
   uBaseConst, uBaseInterface,
-  // Utils
-  uHTMLUtils,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrawlerClass, uPlugInHTTPClasses;
+  uPlugInCrawlerClass, uPlugInHTTPClasses,
+  // Utils
+  uHTMLUtils, uStringUtils;
 
 type
   TPcgdbDe = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'http://www.pcgdb.de/';
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
 
 function TPcgdbDe.GetName;
 begin
-  result := 'pcgdb.de';
+  Result := 'pcgdb.de';
 end;
 
-function TPcgdbDe.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TPcgdbDe.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [cPCGames];
-  result := LongWord(_TemplateTypeIDs);
+  Result := [cPCGames];
 end;
 
-function TPcgdbDe.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
+function TPcgdbDe.InternalGetAvailableControlIDs;
 begin
-  _ComponentIDs := [cPicture, cGenre, cDescription];
-  result := LongWord(_ComponentIDs);
+  Result := [cPicture, cGenre, cCreator, cPublisher, cDescription];
 end;
 
-function TPcgdbDe.GetControlIDDefaultValue;
+function TPcgdbDe.InternalGetControlIDDefaultValue;
 begin
-  result := True;
+  Result := True;
 end;
 
-function TPcgdbDe.GetResultsLimitDefaultValue;
+function TPcgdbDe.InternalGetDependentControlIDs: TControlIDs;
 begin
-  result := 5;
+  Result := [cTitle];
 end;
 
-function TPcgdbDe.Exec;
-const
-  website = 'http://www.pcgdb.de/';
-var
-  _ComponentIDs: TControlIDs;
-  _Title: string;
-  _Count: Integer;
+function TPcgdbDe.InternalExecute;
 
-  procedure deep_search(aWebsitecode: string);
+  procedure deep_search(AWebsiteSourceCode: string);
+  var
+    s: string;
+    LStringList: TStringList;
   begin
-    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '<a href="titles(.*?)"';
 
           if Exec(InputString) then
           begin
             repeat
-              AControlController.FindControl(cPicture).AddProposedValue(GetName, website + 'titles' + Match[1]);
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, WEBSITE + 'titles' + Match[1]);
             until not ExecNext;
           end;
         finally
           Free;
         end;
-    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+
+    if ACanUse(cGenre) then
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '<td>Genre:<\/td>\W+<td width="233" bgcolor="#000000">(.*?)<\/td>';
 
           if Exec(InputString) then
@@ -102,11 +99,88 @@ var
         finally
           Free;
         end;
-    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+
+    if ACanUse(cCreator) then
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
-          Expression := '<tr><td bgcolor="#FFFFFF" class="content">(.*?)<br><br>';
+          InputString := AWebsiteSourceCode;
+          Expression := 'Entwickler:.*?">(.*?)<\/td>';
+
+          if Exec(InputString) then
+          begin
+            s := Match[1];
+
+            LStringList := TStringList.Create;
+            try
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := '">(.*?)<\/a>';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      LStringList.Add(Match[1]);
+                    until not ExecNext;
+
+                    AControlController.FindControl(cCreator).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            finally
+              LStringList.Free;
+            end;
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cPublisher) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'Publisher:.*?">(.*?)<\/td>';
+
+          if Exec(InputString) then
+          begin
+            s := Match[1];
+
+            LStringList := TStringList.Create;
+            try
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := '">(.*?)<\/a>';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      LStringList.Add(Match[1]);
+                    until not ExecNext;
+
+                    AControlController.FindControl(cPublisher).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            finally
+              LStringList.Free;
+            end;
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cDescription) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := '<tr><td bgcolor="#FFFFFF" class="content">.*?<br \/><br \/>(.*?)<br><br>';
 
           if Exec(InputString) then
           begin
@@ -120,54 +194,62 @@ var
   end;
 
 var
-  HTTPParams: IHTTPParams;
+  LTitle: string;
+  LCount: Integer;
 
-  RequestID1, RequestID2: Double;
+  LHTTPRequest: IHTTPRequest;
+  LHTTPParams: IHTTPParams;
+  LRequestID1, LRequestID2: Double;
 
-  ResponseStrSearchResult: string;
+  LResponeStr: string;
 begin
-  LongWord(_ComponentIDs) := AControlIDs;
-  _Title := AControlController.FindControl(cTitle).Value;
-  _Count := 0;
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
+  LHTTPRequest := THTTPRequest.Create(WEBSITE + 'games_search.php');
+  with LHTTPRequest do
   begin
-    AddFormField('titel', _Title);
+    Referer := WEBSITE;
+  end;
+
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
+  begin
+    AddFormField('titel', LTitle);
     AddFormField('search', 'submit');
   end;
 
-  RequestID1 := HTTPManager.Post(THTTPRequest.Create(website + 'games_search.php'), HTTPParams, TPlugInHTTPOptions.Create(Self));
+  LRequestID1 := HTTPManager.Post(LHTTPRequest, LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID1);
+  until HTTPManager.HasResult(LRequestID1);
 
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID1).HTTPResult.SourceCode;
+  LResponeStr := HTTPManager.GetResult(LRequestID1).HTTPResult.SourceCode;
 
   with TRegExpr.Create do
     try
-      InputString := ResponseStrSearchResult;
-
+      InputString := LResponeStr;
       Expression := '<td class="newstext"><a href="(.*?)"';
 
       if Exec(InputString) then
       begin
         repeat
-          RequestID2 := HTTPManager.Get(website + Match[1], RequestID1, TPlugInHTTPOptions.Create(Self));
+          LResponeStr := GETFollowUpRequest(WEBSITE + Match[1], LRequestID1, LRequestID2);
 
-          repeat
-            sleep(50);
-          until HTTPManager.HasResult(RequestID2);
+          deep_search(LResponeStr);
 
-          deep_search(HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode);
-
-          Inc(_Count);
-        until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
+          Inc(LCount);
+        until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
       end;
     finally
       Free;
     end;
+end;
+
+function TPcgdbDe.GetResultsLimitDefaultValue;
+begin
+  Result := 5;
 end;
 
 end.

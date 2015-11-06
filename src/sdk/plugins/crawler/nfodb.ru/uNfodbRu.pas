@@ -16,93 +16,93 @@ uses
 
 type
   TNfodbRu = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'http://nfodb.ru/';
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
 
 function TNfodbRu.GetName;
 begin
-  result := 'Nfodb.ru';
+  Result := 'Nfodb.ru';
 end;
 
-function TNfodbRu.GetAvailableTypeIDs;
+function TNfodbRu.InternalGetAvailableTypeIDs;
+begin
+  Result := [cAudio];
+end;
+
+function TNfodbRu.InternalGetAvailableControlIDs;
+begin
+  Result := [cGenre, cNFO];
+end;
+
+function TNfodbRu.InternalGetControlIDDefaultValue;
+begin
+  Result := True;
+end;
+
+function TNfodbRu.InternalGetDependentControlIDs: TControlIDs;
+begin
+  Result := [cReleaseName];
+end;
+
+function TNfodbRu.InternalExecute;
 var
-  _TemplateTypeIDs: TTypeIDs;
-begin
-  _TemplateTypeIDs := [cAudio];
-  result := LongWord(_TemplateTypeIDs);
-end;
+  LReleasename: string;
 
-function TNfodbRu.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
-begin
-  _ComponentIDs := [cNFO];
-  result := LongWord(_ComponentIDs);
-end;
+  LRequestID1, LRequestID2: Double;
 
-function TNfodbRu.GetControlIDDefaultValue;
+  LResponeStr: string;
 begin
-  result := True;
+  LReleasename := AControlController.FindControl(cReleaseName).Value;
+
+  // http://nfodb.ru/?do_search=Search&frelease=...&fyear=
+
+  LResponeStr := GETRequest(WEBSITE + '?do_search=Search&frelease=' + HTTPEncode(LReleasename), LRequestID1);
+
+  if not(Pos('releases</div>', LResponeStr) = 0) then
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := LResponeStr;
+        Expression := 'href=''nfo-(\d+)-.*?index\.php\?genreid=\d+''>(.*?)<\/';
+
+        if Exec(InputString) then
+        begin
+          repeat
+
+            if ACanUse(cGenre) then
+              AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[2]);
+
+            LResponeStr := GETFollowUpRequest(WEBSITE + 'get_nfo-' + Match[1] + '.php', LRequestID1, LRequestID2);
+
+            if ACanUse(cNFO) then
+              AControlController.FindControl(cNFO).AddProposedValue(GetName, LResponeStr);
+
+          until not ExecNext;
+        end;
+      finally
+        Free;
+      end;
+  end;
 end;
 
 function TNfodbRu.GetResultsLimitDefaultValue;
 begin
-  result := 0;
-end;
-
-function TNfodbRu.Exec;
-const
-  website = 'http://nfodb.ru/';
-var
-  _Releasename: string;
-
-  RequestID1, RequestID2: Double;
-
-  ResponseStrSearchResult: string;
-begin
-  _Releasename := AControlController.FindControl(cReleaseName).Value;
-
-  RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + '?do_search=Search&frelease=' + HTTPEncode(_Releasename)), TPlugInHTTPOptions.Create(Self));
-
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID1);
-
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID1).HTTPResult.SourceCode;
-
-  with TRegExpr.Create do
-  begin
-    try
-      ModifierS := False;
-      InputString := ResponseStrSearchResult;
-      Expression := 'href=''nfo-(\d+)-';
-
-      if Exec(InputString) then
-      begin
-        repeat
-          RequestID2 := HTTPManager.Get(website + 'get_nfo-' + Match[1] + '.php', RequestID1, TPlugInHTTPOptions.Create(Self));
-
-          repeat
-            sleep(50);
-          until HTTPManager.HasResult(RequestID2);
-
-          AControlController.FindControl(cNFO).AddProposedValue(GetName, HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode);
-        until not ExecNext;
-      end;
-    finally
-      Free;
-    end;
-  end;
+  Result := 1;
 end;
 
 end.
