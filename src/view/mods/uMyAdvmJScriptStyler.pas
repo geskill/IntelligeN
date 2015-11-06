@@ -105,7 +105,7 @@ begin
   LItem.Info := 'JScript Standard Functions';
   LItem.Font.Color := clPurple;
   LItem.Font.Style := [];
-  LItem.KeyWords.CommaText := '"PRINT"';
+  LItem.KeyWords.CommaText := '"PRINT","PRINTFILE"';
   // ----------Javascript functions --------------
   LItem := AllStyles.Add;
   LItem.Info := 'JScript Functions';
@@ -228,6 +228,7 @@ begin
     Add('function ReplaceRegExpr(const ARegExpr: string, AInputStr: string, AReplaceStr: string, AUseSubstitution: Boolean = False): string');
 
     Add('procedure print(Msg: string)');
+    Add('procedure printFile(const AFileName: string)');
 
     Add('function CharCount(const SubStr: string, S: string): Integer');
     Add('function PosEx(const SubStr: string, S: string, Offset: Integer = 1): Integer');

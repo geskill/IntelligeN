@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, StrUtils, Dialogs, Variants,
+  Windows, SysUtils, StrUtils, Classes, Dialogs, Variants,
   // RegEx
   RegExpr,
   // FastScript
@@ -102,10 +102,26 @@ end;
 { TIScirptParser }
 
 function TIScirptParser.CallMethod(Instance: TObject; ClassType: TClass; const MethodName: string; var Params: Variant): Variant;
+var
+  LFileName: string;
 begin
   Result := 0;
   if MethodName = 'PRINT' then
     FResult := FResult + Params[0]
+  else if MethodName = 'PRINTFILE' then
+  begin
+    LFileName := Params[0];
+    if not FileExists(LFileName) then
+      LFileName := PathCombineEx(GetTemplatesCMSFolder, LFileName);
+
+    with TStringList.Create do
+      try
+        LoadFromFile(LFileName);
+        FResult := FResult + UnicodeString(Text);
+      finally
+        Free;
+      end;
+  end
   else if MethodName = 'CHARCOUNT' then
     Result := CharCount(Params[0], Params[1])
   else if MethodName = 'POSEX' then
@@ -233,6 +249,7 @@ begin
     AddMethod('function ReplaceRegExpr(const ARegExpr, AInputStr, AReplaceStr : string; AUseSubstitution: Boolean = False): string', CallMethod);
 
     AddMethod('procedure print(Msg: string)', CallMethod);
+    AddMethod('procedure printFile(const AFileName: string)', CallMethod);
     AddMethod('function CharCount(const SubStr, S: string): Integer', CallMethod);
     AddMethod('function PosEx(const SubStr, S: string; Offset: Integer = 1): Integer', CallMethod);
 
