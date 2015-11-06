@@ -20,7 +20,7 @@ type
   TXenForoSettings = class(TCMSBoardIPPlugInSettings)
   strict private
     fprefix_field: string;
-    fintelligent_posting, fintelligent_posting_helper, fintelligent_posting_boundedsearch: Boolean;
+    fintelligent_posting_boundedsearch: Boolean;
     fprefix: Variant;
   public
     intelligent_posting_bounds: TIntegerArray;
@@ -28,9 +28,9 @@ type
     [AttrDefaultValue('prefix_id')]
     property prefix_field: string read fprefix_field write fprefix_field;
     [AttrDefaultValue(False)]
-    property intelligent_posting: Boolean read fintelligent_posting write fintelligent_posting;
+    property intelligent_posting;
     [AttrDefaultValue(False)]
-    property intelligent_posting_helper: Boolean read fintelligent_posting_helper write fintelligent_posting_helper;
+    property intelligent_posting_helper;
     [AttrDefaultValue(False)]
     property intelligent_posting_boundedsearch: Boolean read fintelligent_posting_boundedsearch write fintelligent_posting_boundedsearch;
 
@@ -300,14 +300,14 @@ function TXenForo.NeedPrePost;
 begin
   Result := True;
   if PostReply then
-    ARequestURL := Website + 'threads/' + VarToStr(XenForoSettings.threads) + '/'
+    ARequestURL := Website + 'threads/' + VarToStr(XenForoSettings.threads) + '/' // add-reply URI not allowed here
   else
     ARequestURL := Website + 'forums/' + VarToStr(XenForoSettings.forums) + '/create-thread';
 end;
 
 function TXenForo.DoAnalyzePrePost;
 begin
-  Result := not(Pos('name="message_html"', AResponseStr) = 0);
+  Result := not(Pos('name="message', AResponseStr) = 0);
   if not Result then
     with TRegExpr.Create do
       try
@@ -384,8 +384,26 @@ end;
 
 function TXenForo.DoAnalyzePost;
 begin
-  Result := not(Pos('name="message_html"', AResponseStr) = 0);
+  // <input type="checkbox" name="posts[]" value="5" class="InlineModCheck item" data-target="#post-5" title="Select this post by root" />
+
+  Result := not(Pos('type="checkbox" name="posts[]"', AResponseStr) = 0);
+
+  if Result then
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := AResponseStr;
+        Expression := 'type="checkbox" name="posts\[\]" value="(\d+)"';
+
+        if Exec(InputString) then
+          ArticleID := StrToInt(Match[1]);
+      finally
+        Free;
+      end;
+  end;
+
   if not Result then
+  begin
     with TRegExpr.Create do
       try
         InputString := AResponseStr;
@@ -403,6 +421,7 @@ begin
       finally
         Free;
       end;
+  end;
 end;
 
 function TXenForo.GetIDsRequestURL;
