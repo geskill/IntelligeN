@@ -149,6 +149,10 @@
 				<Form>fControlEditor</Form>
 				<DesignClass>TFrame</DesignClass>
 			</DCCReference>
+			<DCCReference Include="frames\ufDatabase.pas">
+				<Form>fDatabase</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
 			<DCCReference Include="frames\ufDesigner.pas">
 				<Form>fDesigner</Form>
 				<DesignClass>TFrame</DesignClass>
@@ -157,8 +161,12 @@
 				<Form>fDesignObjectInspector</Form>
 				<DesignClass>TFrame</DesignClass>
 			</DCCReference>
-			<DCCReference Include="frames\ufDatabase.pas">
-				<Form>fDatabase</Form>
+			<DCCReference Include="frames\ufErrorLogger.pas">
+				<Form>fErrorLogger</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
+			<DCCReference Include="frames\ufHTTPLogger.pas">
+				<Form>fHTTPLogger</Form>
 				<DesignClass>TFrame</DesignClass>
 			</DCCReference>
 			<DCCReference Include="frames\ufPublish.pas">
@@ -183,10 +191,6 @@
 			</DCCReference>
 			<DCCReference Include="frames\ufMain.pas">
 				<Form>fMain</Form>
-				<DesignClass>TFrame</DesignClass>
-			</DCCReference>
-			<DCCReference Include="frames\ufHTTPLogger.pas">
-				<Form>fHTTPLogger</Form>
 				<DesignClass>TFrame</DesignClass>
 			</DCCReference>
 			<DCCReference Include="mods\uMyAdvmJScriptStyler.pas"/>

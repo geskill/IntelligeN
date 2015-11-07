@@ -23,7 +23,7 @@ uses
   // Forms
   uSettings, uSelectDialog, uAbout, uUpdate,
   // Frames
-  ufLogin, ufLinklist, ufMain, ufDesigner, ufDesignObjectInspector, ufControlEditor, ufDatabase, ufPublish, ufHTTPLogger, ufPublishQueue;
+  ufLogin, ufLinklist, ufMain, ufDesigner, ufDesignObjectInspector, ufControlEditor, ufDatabase, ufPublish, ufHTTPLogger, ufPublishQueue, ufErrorLogger;
 
 type
   TMain = class(TForm, IAppController)
@@ -61,6 +61,7 @@ type
     aWindowDatabase: TAction;
     aWindowLogin: TAction;
     aWindowMain: TAction;
+    aWindowErrorLogger: TAction;
     aWindowHTTPLogger: TAction;
     aWindowPublish: TAction;
     aWindowPublishQueue: TAction;
@@ -110,6 +111,7 @@ type
     nWindowDatabase: TdxBarButton;
     nWindowLogin: TdxBarButton;
     nWindowMain: TdxBarButton;
+    nWindowErrorLogger: TdxBarButton;
     nWindowHTTPLogger: TdxBarButton;
     nWindowPublish: TdxBarButton;
     nWindowPublishQueue: TdxBarButton;
@@ -188,6 +190,7 @@ type
     dxTabContainerDockSite1: TdxTabContainerDockSite;
     dxDPMain: TdxDockPanel;
     fMain: TfMain;
+    dxDPErrorLogger: TdxDockPanel;
     dxDPHTTPLogger: TdxDockPanel;
     fHTTPLogger: TfHTTPLogger;
     dxVertContainerDockSite2: TdxVertContainerDockSite;
@@ -213,6 +216,9 @@ type
     dxBBPublishItemPreview: TdxBarButton;
     dxBBPublishItemPublish: TdxBarButton;
     dxBBPublishItemSettings: TdxBarButton;
+    fErrorLogger: TfErrorLogger;
+    dxBBPublish: TdxBarButton;
+
 
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -256,6 +262,7 @@ type
     procedure aWindowDatabaseExecute(Sender: TObject);
     procedure aWindowLoginExecute(Sender: TObject);
     procedure aWindowMainExecute(Sender: TObject);
+    procedure aWindowErrorLoggerExecute(Sender: TObject);
     procedure aWindowHTTPLoggerExecute(Sender: TObject);
     procedure aWindowPublishExecute(Sender: TObject);
     procedure aWindowPublishQueueExecute(Sender: TObject);
@@ -606,6 +613,11 @@ end;
 procedure TMain.aWindowMainExecute(Sender: TObject);
 begin
   dxDPMain.Show;
+end;
+
+procedure TMain.aWindowErrorLoggerExecute(Sender: TObject);
+begin
+  dxDPErrorLogger.Show;
 end;
 
 procedure TMain.aWindowHTTPLoggerExecute(Sender: TObject);

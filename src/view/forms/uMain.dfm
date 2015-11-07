@@ -132,11 +132,6 @@ object Main: TMain
                   end>
                 ExplicitTop = 573
                 ExplicitWidth = 516
-                inherited dxStatusBarContainer3: TdxStatusBarContainerControl
-                  inherited cxPBAutocompletion: TcxProgressBar
-                    ExplicitHeight = 18
-                  end
-                end
               end
               inherited pcMain: TcxPageControl
                 Width = 516
@@ -178,6 +173,33 @@ object Main: TMain
                 ExplicitWidth = 516
                 ExplicitHeight = 569
               end
+            end
+          end
+          object dxDPErrorLogger: TdxDockPanel
+            Left = 0
+            Top = 0
+            Width = 520
+            Height = 597
+            Visible = False
+            AllowFloating = True
+            AutoHide = False
+            Caption = 'Error Logger'
+            CustomCaptionButtons.Buttons = <>
+            TabsProperties.CustomButtons.Buttons = <>
+            ExplicitWidth = 185
+            ExplicitHeight = 140
+            DockingType = 0
+            OriginalWidth = 185
+            OriginalHeight = 140
+            inline fErrorLogger: TfErrorLogger
+              Left = 0
+              Top = 0
+              Width = 516
+              Height = 569
+              Align = alClient
+              TabOrder = 0
+              ExplicitLeft = -102
+              ExplicitTop = 58
             end
           end
         end
@@ -528,6 +550,12 @@ object Main: TMain
       Caption = 'Main'
       OnExecute = aWindowMainExecute
     end
+    object aWindowErrorLogger: TAction
+      Category = 'View'
+      Caption = 'Error Logger'
+      Hint = 'Error Logger'
+      OnExecute = aWindowErrorLoggerExecute
+    end
     object aWindowHTTPLogger: TAction
       Category = 'View'
       Caption = 'HTTP Logger'
@@ -537,6 +565,7 @@ object Main: TMain
     object aWindowPublish: TAction
       Category = 'View'
       Caption = 'Publish'
+      Hint = 'Publish'
       OnExecute = aWindowPublishExecute
     end
     object aOptions: TAction
@@ -616,6 +645,7 @@ object Main: TMain
       Category = 'Tools'
       Caption = 'Publish'
       Enabled = False
+      Hint = 'Publish'
       ImageIndex = 25
       ShortCut = 119
       OnExecute = aPublishExecute
@@ -970,7 +1000,7 @@ object Main: TMain
       CaptionButtons = <>
       DockControl = dxBarDockControl
       DockedDockControl = dxBarDockControl
-      DockedLeft = 94
+      DockedLeft = 118
       DockedTop = 25
       FloatLeft = 946
       FloatTop = 8
@@ -996,7 +1026,7 @@ object Main: TMain
       CaptionButtons = <>
       DockControl = dxBarDockControl
       DockedDockControl = dxBarDockControl
-      DockedLeft = 240
+      DockedLeft = 264
       DockedTop = 25
       FloatLeft = 452
       FloatTop = 8
@@ -1113,6 +1143,10 @@ object Main: TMain
         item
           Visible = True
           ItemName = 'dxBBAutoCompletion'
+        end
+        item
+          Visible = True
+          ItemName = 'dxBBPublish'
         end>
       OneOnRow = False
       Row = 1
@@ -1362,6 +1396,10 @@ object Main: TMain
         end
         item
           Visible = True
+          ItemName = 'nWindowErrorLogger'
+        end
+        item
+          Visible = True
           ItemName = 'nWindowHTTPLogger'
         end
         item
@@ -1430,6 +1468,10 @@ object Main: TMain
     end
     object nWindowHTTPLogger: TdxBarButton
       Action = aWindowHTTPLogger
+      Category = 3
+    end
+    object nWindowErrorLogger: TdxBarButton
+      Action = aWindowErrorLogger
       Category = 3
     end
     object nTools: TdxBarSubItem
@@ -1620,6 +1662,10 @@ object Main: TMain
     end
     object dxBBAutoCompletion: TdxBarButton
       Action = aAutoCompletion
+      Category = 7
+    end
+    object dxBBPublish: TdxBarButton
+      Action = aPublish
       Category = 7
     end
     object dxBCControlAligner: TdxBarCombo

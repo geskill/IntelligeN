@@ -107,10 +107,6 @@ object Settings: TSettings
     object cxTSPlugins: TcxTabSheet
       Caption = 'Plugins'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         598
         307)
@@ -122,7 +118,7 @@ object Settings: TSettings
         Anchors = [akLeft, akTop, akRight, akBottom]
         Focusable = False
         TabOrder = 0
-        Properties.ActivePage = cxTSCMS
+        Properties.ActivePage = cxTSCrawler
         Properties.CustomButtons.Buttons = <>
         Properties.HotTrack = True
         ClientRectBottom = 297
@@ -432,10 +428,6 @@ object Settings: TSettings
         object cxTSCrawler: TcxTabSheet
           Caption = 'Crawler'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           DesignSize = (
             584
             273)
@@ -498,7 +490,7 @@ object Settings: TSettings
                 OptionsView.ColumnAutoWidth = True
                 OptionsView.GroupByBox = False
                 object cxGCrawlerTableView2Column1: TcxGridColumn
-                  Caption = 'Component'
+                  Caption = 'Control'
                   PropertiesClassName = 'TcxLabelProperties'
                 end
                 object cxGCrawlerTableView2Column2: TcxGridColumn
@@ -519,10 +511,6 @@ object Settings: TSettings
         object cxTSCrypter: TcxTabSheet
           Caption = 'Crypter'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           DesignSize = (
             584
             273)
@@ -927,10 +915,6 @@ object Settings: TSettings
         object cxTSFileFormats: TcxTabSheet
           Caption = 'File Formats'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           DesignSize = (
             584
             273)
@@ -1297,10 +1281,6 @@ object Settings: TSettings
       Caption = 'Database'
       ImageIndex = 3
       TabVisible = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         598
         307)
@@ -1480,10 +1460,6 @@ object Settings: TSettings
     object cxTSControls: TcxTabSheet
       Caption = 'Controls'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         598
         307)
@@ -1505,10 +1481,6 @@ object Settings: TSettings
         object cxTSControls_: TcxTabSheet
           Caption = 'Controls'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           DesignSize = (
             584
             273)
