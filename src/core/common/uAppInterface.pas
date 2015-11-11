@@ -687,7 +687,9 @@ type
     ['{1973A687-DD39-472A-8B07-D541CFA08780}']
     function GetPageController: IPageController;
     function GetIsTabActive: WordBool;
+    procedure SetIsTabActive(ATabActive: WordBool);
     function GetTabSheetIndex: Integer;
+    procedure SetTabSheetIndex(ATabSheetIndex: Integer);
     function GetViewType: TTabViewType;
     procedure SetViewType(AViewType: TTabViewType);
     function GetFileName: WideString;
@@ -704,8 +706,8 @@ type
 
     property PageController: IPageController read GetPageController;
 
-    property IsTabActive: WordBool read GetIsTabActive;
-    property TabSheetIndex: Integer read GetTabSheetIndex;
+    property IsTabActive: WordBool read GetIsTabActive write SetIsTabActive;
+    property TabSheetIndex: Integer read GetTabSheetIndex write SetTabSheetIndex;
 
     property ViewType: TTabViewType read GetViewType write SetViewType;
 
