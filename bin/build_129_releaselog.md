@@ -425,3 +425,14 @@
 * Fixed share-online.biz hoster plugin
 
 * Removed base categories GameCube, PlayStation2, PlayStationPortable and Xbox
+
+
+###BETA 6
+
+######major enhancements
+
+* Error Logger 
+
+######minor enhancements
+
+* 
