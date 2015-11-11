@@ -7,14 +7,14 @@ uses
   Windows, SysUtils, Classes, Variants,
   // RegEx
   RegExpr,
-  // Utils,
-  uStringUtils,
   // Common
   uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCMSClass, uPlugInHTTPClasses;
+  uPlugInCMSClass, uPlugInHTTPClasses,
+  // Utils,
+  uStringUtils;
 
 type
   { TODO : use blog/forum/formbased settings class }

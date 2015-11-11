@@ -1,0 +1,83 @@
+unit u%FullName%;
+
+interface
+
+uses
+  // Delphi
+  Windows, SysUtils, Classes, Variants,
+  // RegEx
+  RegExpr,
+  // LkJSON
+  uLkJSON,
+  // MultiEvent
+  Generics.MultiEvents.NotifyHandler,
+  // HTTPManager
+  uHTTPInterface, uHTTPClasses,
+  // Common
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
+  // Plugin system
+  uPlugInAppClass, uPlugInHTTPClasses,
+  // Utils,
+  uPathUtils, uStringUtils;
+
+type
+  T%FullName% = class(TAppPlugIn)
+  private
+    FAppController: IAppController;
+    FNewMenuItem: IMenuItem;
+    FNotifyEventHandler: TINotifyEventHandler;
+    procedure OnClick(const Sender: IUnknown);
+  public
+    function GetName: WideString; override;
+    function Start(const AAppController: IAppController): WordBool; override;
+    procedure Stop; override;
+  end;
+
+implementation
+
+function GetModulePath: string;
+var
+  QueryRes: TMemoryBasicInformation;
+  LBuffer: string;
+begin
+  VirtualQuery(@GetModulePath, QueryRes, SizeOf(QueryRes));
+  SetLength(LBuffer, MAX_PATH);
+  SetLength(LBuffer, GetModuleFileName(Cardinal(QueryRes.AllocationBase), PChar(LBuffer), Length(LBuffer)));
+  Result := LBuffer;
+end;
+
+{ T%FullName% }
+
+procedure T%FullName%.OnClick(const Sender: IInterface);
+begin
+  with FAppController.PageController do
+  begin
+
+  end;
+end;
+
+function T%FullName%.GetName: WideString;
+begin
+  Result := '%FullName%';
+end;
+
+function T%FullName%.Start(const AAppController: IAppController): WordBool;
+begin
+  FAppController := AAppController;
+
+  Result := True;
+
+  { TODO : add menu items here }
+  FNotifyEventHandler := TINotifyEventHandler.Create(OnClick);
+  with FAppController.MainMenu.GetMenuItems.GetItem(3) do
+    FNewMenuItem := InsertMenuItem(GetMenuItems.GetCount, '%FullName%', '%FullName%', 0, -1, 0, FNotifyEventHandler);
+end;
+
+procedure T%FullName%.Stop;
+begin
+  { TODO : dont forget to remove the menu items here }
+  FAppController.MainMenu.GetMenuItems.GetItem(3).GetMenuItems.RemoveItem(FNewMenuItem);
+  FNotifyEventHandler := nil;
+end;
+
+end.
