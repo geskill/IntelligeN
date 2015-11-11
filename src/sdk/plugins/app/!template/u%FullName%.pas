@@ -52,7 +52,7 @@ procedure T%FullName%.OnClick(const Sender: IInterface);
 begin
   with FAppController.PageController do
   begin
-
+    { TODO : add your code for your menu item action here }
   end;
 end;
 
