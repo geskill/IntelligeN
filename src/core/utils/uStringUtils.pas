@@ -412,7 +412,7 @@ begin
   Result  := S;
   RestLen := Len - Length(s);
   if RestLen < 1 then Exit;
-  Result := S + StringOfChar(Ch, RestLen);
+  Result := StringOfChar(Ch, RestLen) + S;
 end;
 
 function PadRight(S: string; Ch: Char; Len: Integer): string;
@@ -422,7 +422,7 @@ begin
   Result  := S;
   RestLen := Len - Length(s);
   if RestLen < 1 then Exit;
-  Result := StringOfChar(Ch, RestLen) + S;
+  Result := S + StringOfChar(Ch, RestLen);
 end;
 
 end.

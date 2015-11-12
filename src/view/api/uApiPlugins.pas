@@ -714,6 +714,7 @@ begin
               { ....... } begin
               { ......... } Application.ProcessMessages;
               { ......... } ResetDataChanged(AFileName, AFileFormatPlugin.GetName);
+              { ......... } ResetControlFocused();
               { ......... } PublishController.Active := True;
               { ....... } end;
               { ... } except

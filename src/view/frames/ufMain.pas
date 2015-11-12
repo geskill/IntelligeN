@@ -498,55 +498,58 @@ end;
 
 function TfMain.Add(AFileName: WideString; ATypeID: TTypeID; AEmpty: WordBool = False): Integer;
 var
-  NewTabSheetController: TTabSheetController;
-  I: Integer;
+  LNewTabSheetController: TTabSheetController;
+  LMirrorIndex: Integer;
 begin
-  pcMain.Properties.BeginUpdate;
+  SendMessage(pcMain.Handle, WM_SETREDRAW, WPARAM(False), 0);
   try
-    NewTabSheetController := TTabSheetController.Create(pcMain, Self, ATypeID);
-    with NewTabSheetController do
+    pcMain.Properties.BeginUpdate;
+    try
+      LNewTabSheetController := TTabSheetController.Create(pcMain, Self, ATypeID);
+      with LNewTabSheetController do
+      begin
+        PageControl := pcMain;
+
+        // FileName := AFileName;
+        ImageIndex := Integer(ATypeID);
+
+        TemplateFileName := ExtractFileName(ChangeFileExt(AFileName, ''));
+
+        Install;
+      end;
+    finally
+      pcMain.Properties.CancelUpdate; // prevent to call OnChanged
+    end;
+
+    pcMain.ActivePage := LNewTabSheetController;
+
+    if SettingsManager.Settings.ControlAligner.MirrorPosition = mpTop then
     begin
-      PageControl := pcMain;
+      if not AEmpty then
+      begin
+        for LMirrorIndex := 0 to SettingsManager.Settings.ControlAligner.MirrorCount - 1 do
+          LNewTabSheetController.MirrorController.Mirror[LNewTabSheetController.MirrorController.Add].GetDirectlink.Add('');
+      end;
 
-      // FileName := AFileName;
-      ImageIndex := Integer(ATypeID);
+      GetControls(AFileName, LNewTabSheetController.ControlController, Self);
+    end
+    else
+    begin
+      GetControls(AFileName, LNewTabSheetController.ControlController, Self);
 
-      TemplateFileName := ExtractFileName(ChangeFileExt(AFileName, ''));
-
-      Install;
+      if not AEmpty then
+      begin
+        for LMirrorIndex := 0 to SettingsManager.Settings.ControlAligner.MirrorCount - 1 do
+          LNewTabSheetController.MirrorController.Mirror[LNewTabSheetController.MirrorController.Add].GetDirectlink.Add('');
+      end;
     end;
   finally
-    pcMain.Properties.CancelUpdate; // prevent to call OnChanged
+    SendMessage(pcMain.Handle, WM_SETREDRAW, 1, 0);
+    RedrawWindow(pcMain.Handle, nil, 0, RDW_ERASE or RDW_FRAME or RDW_INVALIDATE or RDW_ALLCHILDREN);
   end;
 
-  pcMain.ActivePage := NewTabSheetController;
-  Application.ProcessMessages;
-
-  if SettingsManager.Settings.ControlAligner.MirrorPosition = mpTop then
+  with LNewTabSheetController do
   begin
-    if not AEmpty then
-      for I := 0 to SettingsManager.Settings.ControlAligner.MirrorCount - 1 do
-      begin
-        NewTabSheetController.MirrorController.Mirror[NewTabSheetController.MirrorController.Add].GetDirectlink.Add('');
-        CallControlAligner;
-      end;
-    GetControls(AFileName, NewTabSheetController.ControlController, Self);
-  end
-  else
-  begin
-    GetControls(AFileName, NewTabSheetController.ControlController, Self);
-    if not AEmpty then
-      for I := 0 to SettingsManager.Settings.ControlAligner.MirrorCount - 1 do
-      begin
-        NewTabSheetController.MirrorController.Mirror[NewTabSheetController.MirrorController.Add].GetDirectlink.Add('');
-        // CallControlAligner;
-      end;
-  end;
-
-  with NewTabSheetController do
-  begin
-    Application.ProcessMessages;
-
     DataChanged := False;
     ResetControlFocused();
 
