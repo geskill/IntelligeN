@@ -31,7 +31,7 @@ type
   TIControlBasic = class(TIControlBase, IControlBasic)
   private
     // GUI
-    FTitleLabel, FHintLabel, FClearLabel: TcxLabel;
+    FTitleLabel, FClearLabel: TcxLabel;
     FOleDrop: TOleDrop;
     // GUI
     procedure FPanelMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -552,8 +552,6 @@ begin
     Caption := ATitle + ':';
 
     Width := Canvas.TextWidth(Caption);
-
-    FHintLabel.Left := FTitleLabel.Width + 6;
   end;
 end;
 
@@ -599,12 +597,12 @@ end;
 
 function TIControlBasic.GetControlHint;
 begin
-  Result := FHintLabel.Hint;
+  Result := FTitleLabel.Hint;
 end;
 
 procedure TIControlBasic.SetControlHint(AHint: WideString);
 begin
-  FHintLabel.Hint := AHint;
+  FTitleLabel.Hint := AHint;
 end;
 
 function TIControlBasic.GetControlFocus;
@@ -717,19 +715,7 @@ begin
 
     Top := 0;
     Left := 0;
-  end;
 
-  FHintLabel := TcxLabel.Create(FPanel);
-  with FHintLabel do
-  begin
-    Parent := FPanel;
-    Top := 0;
-    Width := Canvas.TextWidth('?');
-    Caption := '?';
-    { TODO 3 : In den Einstellungen Farbe wählbar }
-    // Font.Color := clBlue;
-    Style.Font.Style := [fsBold, fsUnderline];
-    Cursor := crHandPoint;
     ShowHint := True;
   end;
 
@@ -776,7 +762,6 @@ begin
   FPopupMenu.Free;
 
   FClearLabel.Free;
-  FHintLabel.Free;
   FTitleLabel.Free;
 
   FPanel.Free;
@@ -1568,7 +1553,7 @@ begin
   inherited SetControlTitle(ATitle);
 
   if Assigned(FPictureMirrorPanel) then
-    FPictureMirrorPanel.Left := FHintLabel.Left + FHintLabel.Width + 6;
+    FPictureMirrorPanel.Left := FTitleLabel.Left + FTitleLabel.Width + 6;
 end;
 
 function TIPicture.GraphicAsVariant(AGraphic: TGraphic): Variant;
@@ -1823,7 +1808,7 @@ begin
     Color := clWhite;
 
     Top := 0;
-    Left := FHintLabel.Left + FHintLabel.Width + 6;
+    Left := FTitleLabel.Left + FTitleLabel.Width + 6;
     Height := 16;
     Width := FClearLabel.Left - Left - 6;
   end;
