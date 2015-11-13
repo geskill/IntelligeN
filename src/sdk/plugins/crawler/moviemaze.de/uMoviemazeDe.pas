@@ -9,26 +9,31 @@ uses
   RegExpr,
   // Common
   uBaseConst, uBaseInterface,
-  // Utils
-  uHTMLUtils,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrawlerClass, uPlugInHTTPClasses;
+  uPlugInCrawlerClass, uPlugInHTTPClasses,
+  // Utils
+  uHTMLUtils, uStringUtils;
 
 type
   TMoviemazeDe = class(TCrawlerPlugIn)
-  protected
+  protected { . }
+  const
+    WEBSITE = 'http://www.moviemaze.de/';
+
     function MoviemazeHTMLDescription2Text(AHtmlContent: string): string;
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
@@ -39,7 +44,7 @@ function TMoviemazeDe.MoviemazeHTMLDescription2Text(AHtmlContent: string): strin
 var
   Text: string;
 begin
-  Text := HTML2Text(AHtmlContent, False, True);
+  Text := Trim(HTML2Text(AHtmlContent, False, True));
   try
     Result := HTMLDecode(Text);
   except
@@ -52,121 +57,142 @@ begin
   Result := 'Moviemaze.de';
 end;
 
-function TMoviemazeDe.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TMoviemazeDe.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [cMovie];
-  Result := LongWord(_TemplateTypeIDs);
+  Result := [cMovie];
 end;
 
-function TMoviemazeDe.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
+function TMoviemazeDe.InternalGetAvailableControlIDs;
 begin
-  _ComponentIDs := [cPicture, cGenre, cRuntime, cDescription];
-  Result := LongWord(_ComponentIDs);
+  Result := [cPicture, cDirector, cGenre, cRuntime, cDescription];
 end;
 
-function TMoviemazeDe.GetControlIDDefaultValue;
+function TMoviemazeDe.InternalGetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TMoviemazeDe.GetResultsLimitDefaultValue;
+function TMoviemazeDe.InternalGetDependentControlIDs;
 begin
-  Result := 5;
+  Result := [cTitle];
 end;
 
-function TMoviemazeDe.Exec;
-const
-  website: string = 'http://www.moviemaze.de/';
-var
-  _ComponentIDs: TControlIDs;
-  _Title: string;
-  _Count: Integer;
+function TMoviemazeDe.InternalExecute;
 
-  HTTPParams: IHTTPParams;
-
-  RequestID1, RequestID2, RequestID3: Double;
-
-  ResponseStrSearchResult: string;
-
-  procedure deep_picture_search(aWebsitecode: string);
+  procedure deep_search_picture(AWebsiteSourceCode: string);
   var
-    _incnumber, _picturenumber: string;
+    LMovieID, LPictureNumber: string;
   begin
     with TRegExpr.Create do
       try
-        InputString := aWebsitecode;
+        InputString := AWebsiteSourceCode;
         Expression := '<a href="\/media\/poster\/(\d+)\/(\d+)\/';
 
         if Exec(InputString) then
         begin
           repeat
-            _incnumber := Match[1];
-            if length(_incnumber) < 4 then
-              _incnumber := '0' + _incnumber;
+            LMovieID := PadLeft(Match[1], '0', 4);
+            LPictureNumber := PadLeft(Match[2], '0', 2);
 
-            _picturenumber := Match[2];
-            if length(_picturenumber) < 2 then
-              _picturenumber := '0' + _picturenumber;
-
-            AControlController.FindControl(cPicture).AddProposedValue(GetName, website + 'filme/' + _incnumber + '/poster_lg' + _picturenumber + '.jpg');
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, WEBSITE + 'filme/' + LMovieID + '/poster_lg' + LPictureNumber + '.jpg');
           until not ExecNext;
+        end
+        else
+        begin
+          Expression := 'img class="sidebar-img" itemprop="image" src="(.*?)"';
+
+          if Exec(InputString) then
+          begin
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, StringReplace(Match[1], '_thumb', '', []));
+          end;
         end;
       finally
         Free;
       end;
   end;
 
-  procedure deep_search(aWebsitecode: string);
+  procedure deep_search(AWebsiteSourceCode: string);
   var
     s: string;
+    LStringList: TStringList;
   begin
-    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if ACanUse(cDirector) then
       with TRegExpr.Create do
-      begin
         try
-          ModifierS := False;
-          InputString := aWebsitecode;
-          Expression := '<span class="fett">Genre:<\/span><\/td>\s+<td class="standard" valign="top">\s+(.*?)\s+<\/td>';
+          InputString := AWebsiteSourceCode;
+          Expression := 'itemprop="director".*?>(.*?)<\/div>\s+<\/div>';
 
           if Exec(InputString) then
           begin
-            s := MoviemazeHTMLDescription2Text(Match[1]);
-            if Pos(',', s) > 0 then
-            begin
+            s := Match[1];
+
+            LStringList := TStringList.Create;
+            try
               with TRegExpr.Create do
               begin
                 try
                   InputString := s;
-                  Expression := '([^, ]+)';
+                  Expression := 'name">(.*?)<\/';
 
                   if Exec(InputString) then
                   begin
                     repeat
-                      AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[1]);
+                      LStringList.Add(Match[1]);
                     until not ExecNext;
+
+                    AControlController.FindControl(cDirector).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
                   end;
                 finally
                   Free;
                 end;
               end;
-            end
-            else
-              AControlController.FindControl(cGenre).AddProposedValue(GetName, s);
+            finally
+              LStringList.Free;
+            end;
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cGenre) then
+      with TRegExpr.Create do
+      begin
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := '<dd itemprop="genre">(.*?)<\/dd>';
+
+          if Exec(InputString) then
+          begin
+            s := Match[1];
+
+            with TRegExpr.Create do
+            begin
+              try
+                InputString := s;
+                Expression := '([^\/,|]+)';
+
+                if Exec(InputString) then
+                begin
+                  repeat
+                    AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(Match[1]));
+                  until not ExecNext;
+                end;
+              finally
+                Free;
+              end;
+            end;
           end;
         finally
           Free;
         end;
       end;
-    if (AControlController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
+
+    if ACanUse(cRuntime) then
       with TRegExpr.Create do
       begin
         try
-          InputString := aWebsitecode;
-          Expression := 'nge:<\/span><\/td>\s+<td class="standard" valign="top"><nobr>\s+(\d+) ';
+          InputString := AWebsiteSourceCode;
+          Expression := '<dt>Länge:<\/dt>\s+<dd>(\d+)';
 
           if Exec(InputString) then
             AControlController.FindControl(cRuntime).AddProposedValue(GetName, Match[1]);
@@ -174,19 +200,20 @@ var
           Free;
         end;
       end;
-    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+
+    if ACanUse(cDescription) then
     begin
       with TRegExpr.Create do
         try
           // plot
-          InputString := aWebsitecode;
-          Expression := '"plot">\s+(.*?)<\/div>';
+          InputString := AWebsiteSourceCode;
+          Expression := '"description">(.*?)<\/';
 
           if Exec(InputString) then
             AControlController.FindControl(cDescription).AddProposedValue(GetName, HTMLDecode(Match[1]));
 
           // critics
-          Expression := '"summary">(.*?)<\/div><br\/>';
+          Expression := 'itemprop="articleBody">(.*?)<\/article>';
 
           if Exec(InputString) then
             AControlController.FindControl(cDescription).AddProposedValue(GetName, MoviemazeHTMLDescription2Text(Match[1]));
@@ -194,75 +221,93 @@ var
           Free;
         end;
     end;
-    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
-      with TRegExpr.Create do
-      begin
-        try
-          ModifierS := False;
-          InputString := aWebsitecode;
-          Expression := '<tr><td><a href="\/media\/poster\/(.*?)"';
 
-          if Exec(InputString) then
-          begin
-            RequestID3 := HTTPManager.Get(website + '/media/poster/' + Match[1], RequestID2, TPlugInHTTPOptions.Create(Self));
-
-            repeat
-              sleep(50);
-            until HTTPManager.HasResult(RequestID3);
-
-            deep_picture_search(HTTPManager.GetResult(RequestID3).HTTPResult.SourceCode);
-          end;
-        finally
-          Free;
-        end;
-      end;
   end;
 
+var
+  LTitle: string;
+  LCount: Integer;
+
+  LHTTPRequest: IHTTPRequest;
+  LHTTPParams: IHTTPParams;
+  LRequestID1, LRequestID2, LRequestID3: Double;
+
+  LResponeStr, s: string;
 begin
-  LongWord(_ComponentIDs) := AControlIDs;
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
 
-  _Title := AControlController.FindControl(cTitle).Value;
-  _Count := 0;
+  LHTTPRequest := THTTPRequest.Create(WEBSITE + 'suche/result.phtml');
+  with LHTTPRequest do
+  begin
+    Referer := WEBSITE;
+  end;
 
-  HTTPParams := THTTPParams.Create;
-  HTTPParams.AddFormField('searchword', _Title);
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
+  begin
+    AddFormField('searchword', LTitle);
+  end;
 
-  RequestID1 := HTTPManager.Post(THTTPRequest.Create(website + 'suche/result.phtml'), HTTPParams, TPlugInHTTPOptions.Create(Self));
+  LRequestID1 := HTTPManager.Post(LHTTPRequest, LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID1);
+  until HTTPManager.HasResult(LRequestID1);
 
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID1).HTTPResult.SourceCode;
+  LResponeStr := HTTPManager.GetResult(LRequestID1).HTTPResult.SourceCode;
 
-  if (Pos('download selection', ResponseStrSearchResult) = 0) then
+  if not(Pos('results-movie', LResponeStr) = 0) then
   begin
     with TRegExpr.Create do
       try
-        InputString := ResponseStrSearchResult;
-        Expression := '"><a href="\/filme(.*?)">';
+        InputString := ExtractTextBetween(LResponeStr, 'results-movie', '</ul>');
+        Expression := 'class="title" href="\/(.*?)"';
 
         if Exec(InputString) then
         begin
           repeat
 
-            RequestID2 := HTTPManager.Get(website + 'filme' + HTMLDecode(Match[1]), RequestID1, TPlugInHTTPOptions.Create(Self));
+            if Pos('filme', string(Match[1])) > 0 then
+            begin
+              LResponeStr := GETFollowUpRequest(WEBSITE + Match[1], LRequestID1, LRequestID2);
 
-            repeat
-              sleep(50);
-            until HTTPManager.HasResult(RequestID2);
+              deep_search(LResponeStr);
 
-            deep_search(HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode);
+              if ACanUse(cPicture) then
+              begin
+                s := Match[1];
+                with TRegExpr.Create do
+                begin
+                  try
+                    InputString := s;
+                    Expression := '\/(\d+)\/(.*?)$';
 
-            Inc(_Count);
-          until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
+                    if Exec(InputString) then
+                    begin
+                      LResponeStr := GETFollowUpRequest(WEBSITE + 'media/poster/' + Match[1] + '/' + Match[2], LRequestID2, LRequestID3);
+
+                      deep_search_picture(LResponeStr);
+                    end;
+                  finally
+                    Free;
+                  end;
+                end;
+              end;
+            end;
+
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
         end;
       finally
         Free;
       end;
-  end
-  else
-    deep_search(ResponseStrSearchResult);
+  end;
+end;
+
+function TMoviemazeDe.GetResultsLimitDefaultValue;
+begin
+  Result := 5;
 end;
 
 end.

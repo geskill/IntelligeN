@@ -10,63 +10,58 @@ uses
   // Common
   uBaseConst, uBaseInterface,
   // HTTPManager
-  uHTTPInterface, uHTTPClasses,
+  uHTTPConst, uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrawlerClass, uPlugInHTTPClasses;
+  uPlugInCrawlerClass, uPlugInHTTPClasses,
+  // Utils
+  uHTMLUtils, uStringUtils;
 
 type
   TJadedvideoCom = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'http://www.jadedvideo.com/';
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
 
 function TJadedvideoCom.GetName;
 begin
-  result := 'Jadedvideo.com';
+  Result := 'Jadedvideo.com';
 end;
 
-function TJadedvideoCom.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TJadedvideoCom.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [cXXX];
-  result := LongWord(_TemplateTypeIDs);
+  Result := [cXXX];
 end;
 
-function TJadedvideoCom.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
+function TJadedvideoCom.InternalGetAvailableControlIDs;
 begin
-  _ComponentIDs := [cPicture, cGenre];
-  result := LongWord(_ComponentIDs);
+  Result := [cPicture, cCreator, cPublisher, cGenre, cDescription];
 end;
 
-function TJadedvideoCom.GetControlIDDefaultValue;
+function TJadedvideoCom.InternalGetControlIDDefaultValue;
 begin
-  result := True;
+  Result := True;
 end;
 
-function TJadedvideoCom.GetResultsLimitDefaultValue;
+function TJadedvideoCom.InternalGetDependentControlIDs;
 begin
-  result := 5;
+  Result := [cTitle];
 end;
 
-function TJadedvideoCom.Exec;
-const
-  jvurl = 'http://www.jadedvideo.com/';
-var
-  _ComponentIDs: TControlIDs;
-  _Title: string;
-  _Count: Integer;
+function TJadedvideoCom.InternalExecute;
 
   procedure deep_search(AWebsiteSourceCode: string);
 
@@ -88,98 +83,219 @@ var
         end;
     end;
 
+  var
+    s: string;
+    LStringList: TStringList;
   begin
-    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := '<SPAN class="eight_pt">\s+<IMG src="(.*?)"';
+          Expression := '<SPAN class="eight_pt">.*?<IMG src="(.*?)"';
 
           if Exec(InputString) then
             AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
-    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+
+    if ACanUse(cCreator) then
+    begin
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := 'Categories:(.*?)<\/TD>';
+          Expression := 'Studio:(.*?)<\/TR>';
 
           if Exec(InputString) then
-            ExtractGenres(Match[1]);
+          begin
+            s := Match[1];
+
+            LStringList := TStringList.Create;
+            try
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := 'class="little normal">(.*?)<\/';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      LStringList.Add(Match[1]);
+                    until not ExecNext;
+
+                    AControlController.FindControl(cCreator).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            finally
+              LStringList.Free;
+            end;
+          end;
+        finally
+          Free;
+        end;
+    end;
+
+    if ACanUse(cDirector) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'Director:(.*?)<\/TR>';
+
+          if Exec(InputString) then
+          begin
+            s := Match[1];
+
+            LStringList := TStringList.Create;
+            try
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := 'class="little normal">(.*?)<\/';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      LStringList.Add(Match[1]);
+                    until not ExecNext;
+
+                    AControlController.FindControl(cDirector).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            finally
+              LStringList.Free;
+            end;
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cGenre) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'Categories:(.*?)<\/TR>';
+
+          if Exec(InputString) then
+          begin
+            s := Match[1];
+
+            with TRegExpr.Create do
+            begin
+              try
+                InputString := s;
+                Expression := 'class="little normal">(.*?)<\/';
+
+                if Exec(InputString) then
+                begin
+                  repeat
+                    AControlController.FindControl(cDirector).AddProposedValue(GetName, Match[1]);
+                  until not ExecNext;
+                end;
+              finally
+                Free;
+              end;
+            end;
+
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cDescription) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'Product Description.*?<BR\/>(.*?)<\/TR>';
+
+          if Exec(InputString) then
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
         finally
           Free;
         end;
   end;
 
 var
-  RequestID1, RequestID2, RequestID3: Double;
+  LTitle: string;
+  LCount: Integer;
 
-  HTTPParams: IHTTPParams;
+  LHTTPRequest: IHTTPRequest;
+  LHTTPParams: IHTTPParams;
+  LRequestID1, LRequestID2, LRequestID3: Double;
 
-  ResponseStrSearchResult: string;
+  LResponeStr: string;
 begin
-  LongWord(_ComponentIDs) := AControlIDs;
-  _Title := AControlController.FindControl(cTitle).Value;
-  _Count := 0;
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
 
-  RequestID1 := HTTPManager.Get(THTTPRequest.Create(jvurl + 'vap/Adult_Content_Accept.html'), TPlugInHTTPOptions.Create(Self));
+  LResponeStr := GETRequest(WEBSITE + 'vap/Adult_Content_Accept.html', LRequestID1);
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID1);
+  // TODO: Need search fix
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
+  LHTTPRequest := THTTPRequest.Create(WEBSITE + 'info/Advanced_Search.html');
+  with LHTTPRequest do
+  begin
+    Referer := WEBSITE;
+  end;
+
+  LHTTPParams := THTTPParams.Create(ptList);
+  with LHTTPParams do
   begin
     AddFormField('productNo', '');
     AddFormField('legacyProductId', '');
-    AddFormField('title', _Title);
+    AddFormField('title', LTitle);
     AddFormField('titleMatchTypeCd', '1');
     AddFormField('castNames', '');
     AddFormField('castMatchTypeCd', '1');
     AddFormField('directorName', '');
   end;
 
-  RequestID2 := HTTPManager.Post(jvurl + 'info/Advanced_Search.html', RequestID1, HTTPParams, TPlugInHTTPOptions.Create(Self));
+  LRequestID2 := HTTPManager.Post(LHTTPRequest.URL, LRequestID1, LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID2);
+  until HTTPManager.HasResult(LRequestID2);
 
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode;
+  LResponeStr := HTTPManager.GetResult(LRequestID2).HTTPResult.SourceCode;
 
-  if not(Pos('SEARCH RESULTS', ResponseStrSearchResult) = 0) then
+  if not(Pos('SEARCH RESULTS', LResponeStr) = 0) then
   begin
     with TRegExpr.Create do
       try
-        ModifierS := True;
-        ModifierG := False;
-        InputString := ResponseStrSearchResult;
-        Expression := '<TD width="124" align="left" valign="top">\s+<A href="(.*?)"';
+
+        InputString := LResponeStr;
+        Expression := 'align="center">\s+<A href="\/(.*?)"';
 
         if Exec(InputString) then
         begin
           repeat
+            LResponeStr := GETFollowUpRequest(WEBSITE + Match[1], LRequestID2, LRequestID3);
 
-            RequestID3 := HTTPManager.Get(jvurl + Match[1], RequestID2, TPlugInHTTPOptions.Create(Self));
+            deep_search(LResponeStr);
 
-            repeat
-              sleep(50);
-            until HTTPManager.HasResult(RequestID3);
-
-            deep_search(HTTPManager.GetResult(RequestID3).HTTPResult.SourceCode);
-
-            Inc(_Count);
-          until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
         end;
       finally
         Free;
       end;
   end
-  else
-    deep_search(ResponseStrSearchResult);
+  else if not(Pos('product_details', LResponeStr) = 0) then
+  begin
+    deep_search(LResponeStr);
+  end;
+end;
+
+function TJadedvideoCom.GetResultsLimitDefaultValue;
+begin
+  Result := 5;
 end;
 
 end.

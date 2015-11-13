@@ -16,15 +16,20 @@ uses
 
 type
   TImagesGoogleDe = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'https://www.google.de/';
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
@@ -34,76 +39,66 @@ begin
   result := 'images.google.de';
 end;
 
-function TImagesGoogleDe.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TImagesGoogleDe.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)];
-  result := LongWord(_TemplateTypeIDs);
+  result := [low(TTypeID) .. high(TTypeID)];
 end;
 
-function TImagesGoogleDe.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
+function TImagesGoogleDe.InternalGetAvailableControlIDs;
 begin
-  _ComponentIDs := [cPicture];
-  result := LongWord(_ComponentIDs);
+  result := [cPicture];
 end;
 
-function TImagesGoogleDe.GetControlIDDefaultValue;
+function TImagesGoogleDe.InternalGetControlIDDefaultValue;
 begin
   result := True;
 end;
 
-function TImagesGoogleDe.GetResultsLimitDefaultValue;
+function TImagesGoogleDe.InternalGetDependentControlIDs;
 begin
-  result := 5;
+  result := [cTitle];
 end;
 
-function TImagesGoogleDe.Exec;
-const
-  website = 'https://www.google.de/';
+function TImagesGoogleDe.InternalExecute;
 var
-  _ComponentIDs: TControlIDs;
-  _Title, _RequestURL: string;
-  _Count: Integer;
+  LTitle: string;
+  LCount: Integer;
 
-  RequestID: Double;
+  LRequestID1, LRequestID2: Double;
 
-  ResponseStrSearchResult: string;
+  LSearchString, LResponeStr: string;
 begin
-  LongWord(_ComponentIDs) := AControlIDs;
-  _Title := AControlController.FindControl(cTitle).Value;
-  _Count := 0;
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
 
-  if TTypeID(ATypeID) = cMovie then
-    _RequestURL := website + 'search?tbm=isch&q=' + HTTPEncode(_Title + ' cover')
+  if ATypeID = cMovie then
+    LSearchString := LTitle + ' cover'
   else
-    _RequestURL := website + 'search?tbm=isch&q=' + HTTPEncode(TypeIDToString(TTypeID(ATypeID)) + ' ' + _Title + ' cover');
+    LSearchString := TypeIDToString(ATypeID) + ' ' + LTitle + ' cover';
 
-  RequestID := HTTPManager.Get(THTTPRequest.Create(_RequestURL), TPlugInHTTPOptions.Create(Self));
-
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID);
-
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
+  LResponeStr := GETRequest(WEBSITE + 'search?tbm=isch&q=' + HTTPEncode(LSearchString), LRequestID1);
 
   with TRegExpr.Create do
     try
-      InputString := ResponseStrSearchResult;
+      InputString := LResponeStr;
       Expression := 'imgres\?imgurl=(.*?)&';
 
       if Exec(InputString) then
       begin
         repeat
           AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
-          Inc(_Count);
-        until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
+
+          Inc(LCount);
+        until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
       end;
     finally
       Free;
     end;
+end;
+
+function TImagesGoogleDe.GetResultsLimitDefaultValue;
+begin
+  result := 5;
 end;
 
 end.

@@ -91,7 +91,7 @@ function TWiiboxartCom.InternalExecute;
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := 'Developer:.*?210>(.*?)</TD>';
+          Expression := 'Developer:.*?210>(.*?)<\/TD>';
 
           if Exec(InputString) then
           begin
@@ -112,7 +112,7 @@ function TWiiboxartCom.InternalExecute;
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := 'Publisher:.*?210>(.*?)</TD>';
+          Expression := 'Publisher:.*?210>(.*?)<\/TD>';
 
           if Exec(InputString) then
           begin

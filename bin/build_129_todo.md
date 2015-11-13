@@ -18,8 +18,6 @@ This todo list contains all useful ideas for improvement, not necessarily for th
 
 - [ ] Update Amazon.com/.de plugin
 
-- [ ] Update MovieMaze.de plugin
-
 ######Crypter
 
 - [ ] Add flag if a user account is required

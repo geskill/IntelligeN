@@ -9,24 +9,29 @@ uses
   RegExpr,
   // Common
   uBaseConst, uBaseInterface,
-  // Utils
-  uHTMLUtils,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrawlerClass, uPlugInHTTPClasses;
+  uPlugInCrawlerClass, uPlugInHTTPClasses,
+  // Utils
+  uPathUtils, uHTMLUtils, uStringUtils;
 
 type
   TImdbCom = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'http://www.imdb.com/';
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
@@ -35,50 +40,105 @@ implementation
 
 function TImdbCom.GetName;
 begin
-  Result := 'Imdb.com';
+  Result := 'IMDb.com';
 end;
 
-function TImdbCom.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TImdbCom.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [cMovie];
-  Result := LongWord(_TemplateTypeIDs);
+  Result := [cMovie];
 end;
 
-function TImdbCom.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
+function TImdbCom.InternalGetAvailableControlIDs;
 begin
-  _ComponentIDs := [cPicture, cGenre, cDescription];
-  Result := LongWord(_ComponentIDs);
+  Result := [cPicture, cCreator, cDirector, cPublisher, cGenre, cRuntime, cDescription];
 end;
 
-function TImdbCom.GetControlIDDefaultValue;
+function TImdbCom.InternalGetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TImdbCom.GetResultsLimitDefaultValue: Integer;
+function TImdbCom.InternalGetDependentControlIDs;
 begin
-  Result := 0;
+  Result := [cTitle];
 end;
 
-function TImdbCom.Exec;
-const
-  website = 'http://www.imdb.com/';
-var
-  _ComponentIDs: TControlIDs;
-  _Title: string;
+function TImdbCom.InternalExecute;
 
-  procedure CrawlDetailedGenre(AGenreList: string);
+  procedure deep_search(AWebsiteSourceCode: string);
+  var
+    s: string;
+    LStringList: TStringList;
   begin
-    if (Pos('/', AGenreList) > 0) or (Pos(',', AGenreList) > 0) or (Pos('|', AGenreList) > 0) then
-    begin
+    if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
-          InputString := AGenreList;
-          Expression := '([^\/,|]+)';
+          InputString := AWebsiteSourceCode;
+          Expression := '<div class="image">.*?src="(.*?)"';
+
+          if Exec(InputString) then
+          begin
+            s := Match[1];
+
+            with TRegExpr.Create do
+            begin
+              try
+                InputString := s;
+                Expression := '(.*)_V1.*_(.*)$';
+
+                AControlController.FindControl(cPicture).AddProposedValue(GetName, Replace(InputString, '$1_V1_$2', True));
+              finally
+                Free;
+              end;
+            end;
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cDirector) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'itemprop="director".*?>(.*?)<\/div>';
+
+          if Exec(InputString) then
+          begin
+            s := Match[1];
+
+            LStringList := TStringList.Create;
+            try
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := 'name">(.*?)<\/';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      LStringList.Add(Match[1]);
+                    until not ExecNext;
+
+                    AControlController.FindControl(cDirector).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            finally
+              LStringList.Free;
+            end;
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cGenre) then
+      with TRegExpr.Create do
+        try
+          InputString := ExtractTextBetween(AWebsiteSourceCode, 'Genres:', '</div>');
+          Expression := '<a.*?>(.*?)<\/a>';
 
           if Exec(InputString) then
           begin
@@ -89,93 +149,173 @@ var
         finally
           Free;
         end;
-    end
-    else
-      AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(AGenreList));
-  end;
 
-  function GetIMDBLargePicture(ASmallPicture: string): string;
-  begin
-    Result := copy(ASmallPicture, 1, Pos('V1._', ASmallPicture)) + '1_.jpg';
-  end;
+    if ACanUse(cRuntime) then
+      with TRegExpr.Create do
+      begin
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'Runtime:.*?>(\d+) min';
 
-  procedure deep_search(AWebsiteSourceCode: string);
-  begin
+          if Exec(InputString) then
+            AControlController.FindControl(cRuntime).AddProposedValue(GetName, Match[1]);
+        finally
+          Free;
+        end;
+      end;
 
-    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if ACanUse(cDescription) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := '<span class="outline">(.*?)<\/span>';
+          Expression := 'itemprop="description">(.*?)<\/';
 
           if Exec(InputString) then
-            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
+          begin
+            repeat
+              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
+            until not ExecNext;
+          end;
+        finally
+          Free;
+        end;
+  end;
+
+  procedure deep_search_creator_publisher(AWebsiteSourceCode: string);
+  var
+    s: string;
+    LStringList: TStringList;
+  begin
+    if ACanUse(cCreator) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'name="production".*?>(.*?)<\/ul>';
+
+          if Exec(InputString) then
+          begin
+            s := Match[1];
+
+            LStringList := TStringList.Create;
+            try
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := '<a.*?>(.*?)<\/a>';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      if not(LStringList.IndexOf(Match[1]) > 0) then
+                        LStringList.Add(Match[1]);
+                    until not ExecNext;
+
+                    AControlController.FindControl(cCreator).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            finally
+              LStringList.Free;
+            end;
+          end;
         finally
           Free;
         end;
 
-    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if ACanUse(cPublisher) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := '<span class="genre">(.*?)<\/span>';
+          Expression := 'name="distributors".*?>(.*?)<\/ul>';
 
           if Exec(InputString) then
-            CrawlDetailedGenre(Trim(HTML2Text(Match[1], False)));
-        finally
-          Free;
-        end;
+          begin
+            s := Match[1];
 
-    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
-      with TRegExpr.Create do
-        try
-          InputString := AWebsiteSourceCode;
-          Expression := '<img src="([^"]*)"';
+            LStringList := TStringList.Create;
+            try
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := '<a.*?>(.*?)<\/a>';
 
-          if Exec(InputString) then
-            if Pos('@', string(Match[1])) > 0 then // some films have two @@ some single @
-              AControlController.FindControl(cPicture).AddProposedValue(GetName, GetIMDBLargePicture(Match[1]));
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      if not(LStringList.IndexOf(Match[1]) > 0) then
+                        LStringList.Add(Match[1]);
+                    until not ExecNext;
+
+                    AControlController.FindControl(cPublisher).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            finally
+              LStringList.Free;
+            end;
+          end;
         finally
           Free;
         end;
   end;
 
 var
-  RequestID: Double;
+  LTitle: string;
+  LCount: Integer;
 
-  ResponseStrSearchResult: string;
+  LRequestID1, LRequestID2, LRequestID3: Double;
+
+  LResponeStr: string;
 begin
-  LongWord(_ComponentIDs) := AControlIDs;
-  _Title := AControlController.FindControl(cTitle).Value;
-  // _Count := 0;
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
 
-  RequestID := HTTPManager.Get(THTTPRequest.Create(website + 'search/title?title=' + HTTPEncode(_Title)), TPlugInHTTPOptions.Create(Self));
+  // Works better then
+  // http://www.imdb.com/find?q=James%20Bond%20007%20-%20Spectre&s=tt
+  // specific title search ^-^
+  // http://www.imdb.com/search/title?title=James%20Bond%20007%20-%20Spectre
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  LResponeStr := GETRequest(WEBSITE + 'find?q=' + HTTPEncode(LTitle) + '&s=tt', LRequestID1);
 
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
+  if not(Pos('findSection', LResponeStr) = 0) then
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := LResponeStr;
+        Expression := '"result_text"> <a href="\/(.*?)"';
 
-  with TRegExpr.Create do
-    try
-      InputString := ResponseStrSearchResult;
-      Expression := '<td class="number">(.*?)<\/tr>';
+        if Exec(InputString) then
+        begin
+          repeat
+            LResponeStr := GETFollowUpRequest(WEBSITE + Match[1], LRequestID1, LRequestID2);
 
-      // <img src="([^"]*)".*?<span class="outline">(.*?)<\/span>.*?<span class="genre">(.*?)<\/span>
+            deep_search(LResponeStr);
 
-      if Exec(InputString) then
-      begin
-        repeat
+            if ACanUse(cCreator) or ACanUse(cPublisher) then
+            begin
+              LResponeStr := GETFollowUpRequest(ExtractUrlPath(WEBSITE + Match[1]) + 'companycredits', LRequestID2, LRequestID3);
 
-          deep_search(Match[1]);
+              deep_search_creator_publisher(LResponeStr);
+            end;
 
-          // Inc(_Count);
-        until not ExecNext; // not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
+        end;
+      finally
+        Free;
       end;
-    finally
-      Free;
-    end;
+  end;
+end;
+
+function TImdbCom.GetResultsLimitDefaultValue: Integer;
+begin
+  Result := 5;
 end;
 
 end.

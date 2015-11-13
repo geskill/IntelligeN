@@ -62,12 +62,14 @@ end;
 function TNfodbRu.InternalExecute;
 var
   LReleasename: string;
+  LCount: Integer;
 
   LRequestID1, LRequestID2: Double;
 
   LResponeStr: string;
 begin
   LReleasename := AControlController.FindControl(cReleaseName).Value;
+  LCount := 0;
 
   // http://nfodb.ru/?do_search=Search&frelease=...&fyear=
 
@@ -83,7 +85,6 @@ begin
         if Exec(InputString) then
         begin
           repeat
-
             if ACanUse(cGenre) then
               AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[2]);
 
@@ -92,7 +93,8 @@ begin
             if ACanUse(cNFO) then
               AControlController.FindControl(cNFO).AddProposedValue(GetName, LResponeStr);
 
-          until not ExecNext;
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
         end;
       finally
         Free;

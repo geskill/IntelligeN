@@ -16,15 +16,20 @@ uses
 
 type
   TLudibriaCom = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'http://www.ludibria.com/';
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
@@ -34,35 +39,27 @@ begin
   result := 'Ludibria.com';
 end;
 
-function TLudibriaCom.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TLudibriaCom.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [cGameCube, cNintendoDS, cPlayStation2, cPlayStation3, cPlayStationPortable, cWii, cXbox360];
-  result := LongWord(_TemplateTypeIDs);
+  result := [cGameCube, cNintendoDS, cPlayStation2, cPlayStation3, cPlayStationPortable, cWii, cXbox360];
 end;
 
-function TLudibriaCom.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
+function TLudibriaCom.InternalGetAvailableControlIDs;
 begin
-  _ComponentIDs := [cNFO];
-  result := LongWord(_ComponentIDs);
+  result := [cNFO];
 end;
 
-function TLudibriaCom.GetControlIDDefaultValue;
+function TLudibriaCom.InternalGetControlIDDefaultValue;
 begin
   result := True;
 end;
 
-function TLudibriaCom.GetResultsLimitDefaultValue;
+function TLudibriaCom.InternalGetDependentControlIDs;
 begin
-  result := 0;
+  result := [cReleaseName];
 end;
 
-function TLudibriaCom.Exec;
-const
-  website = 'http://www.ludibria.com/';
+function TLudibriaCom.InternalExecute;
 var
   _ComponentIDs: TControlIDs;
   _ReleaseName: WideString;
@@ -95,8 +92,7 @@ begin
   LongWord(_ComponentIDs) := AControlIDs;
   _ReleaseName := AControlController.FindControl(cReleaseName).Value;
 
-  RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + 'index.php?sys=' + TemplateTypeIDToSysId(TTypeID(ATypeID)) + '&srg=' + HTTPEncode
-        (_ReleaseName)), TPlugInHTTPOptions.Create(Self));
+  RequestID1 := HTTPManager.Get(THTTPRequest.Create(WEBSITE + 'index.php?sys=' + TemplateTypeIDToSysId(TTypeID(ATypeID)) + '&srg=' + HTTPEncode(_ReleaseName)), TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
@@ -113,13 +109,13 @@ begin
       begin
         repeat
 
-          RequestID2 := HTTPManager.Get(website + Match[1], RequestID1, TPlugInHTTPOptions.Create(Self));
+          RequestID2 := HTTPManager.Get(WEBSITE + Match[1], RequestID1, TPlugInHTTPOptions.Create(Self));
 
           repeat
             sleep(50);
           until HTTPManager.HasResult(RequestID2);
 
-          RequestID3 := HTTPManager.Get(website + StringReplace(Match[1], 'nfo', 'dwn', []), RequestID2, TPlugInHTTPOptions.Create(Self));
+          RequestID3 := HTTPManager.Get(WEBSITE + StringReplace(Match[1], 'nfo', 'dwn', []), RequestID2, TPlugInHTTPOptions.Create(Self));
 
           repeat
             sleep(50);
@@ -132,6 +128,11 @@ begin
     finally
       Free;
     end;
+end;
+
+function TLudibriaCom.GetResultsLimitDefaultValue;
+begin
+  result := 1;
 end;
 
 end.

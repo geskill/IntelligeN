@@ -211,7 +211,6 @@ function TNintendolifeCom.InternalExecute;
                 Free;
               end;
             end;
-
           end;
         finally
           Free;
