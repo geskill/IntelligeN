@@ -27,6 +27,7 @@ function IsDirectory(const FileName: string): Boolean;
 function IsURL(const AUrl: string): Boolean;
 
 function ExtractUrlFileName(const AUrl: string): string;
+function ExtractUrlPath(const AUrl: string): string;
 function ExtractUrlProtocol(const AUrl: string): string;
 function ExtractUrlHost(const AUrl: string): string;
 function ExtractUrlWebsite(const AUrl: string): string;
@@ -139,10 +140,18 @@ end;
 
 function ExtractUrlFileName(const AUrl: string): string;
 var
-  I: Integer;
+  LPosition: Integer;
 begin
-  I := LastDelimiter('/', AUrl);
-  Result := copy(AUrl, I + 1, length(AUrl) - (I));
+  LPosition := LastDelimiter('/', AUrl);
+  Result := copy(AUrl, LPosition + 1, length(AUrl) - (LPosition));
+end;
+
+function ExtractUrlPath(const AUrl: string): string;
+var
+  LPosition: Integer;
+begin
+  LPosition := LastDelimiter('/', AUrl);
+  Result := copy(AUrl, 1, LPosition);
 end;
 
 function ExtractUrlProtocol(const AUrl: string): string;
