@@ -7,8 +7,6 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls, jpeg, GIFImg,
   // Dev Express
   dxGDIPlusClasses,
-  // API
-  uApiSettings,
   // Utils
   uImageUtils;
 
@@ -37,6 +35,10 @@ type
   end;
 
 implementation
+
+uses
+  // Api
+  uApiSettings;
 
 {$R *.dfm}
 { TCAPTCHA }

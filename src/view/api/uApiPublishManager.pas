@@ -12,7 +12,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // API
-  uApiPlugins, uApiSettings, uApiThreadManager,
+  uApiPlugins, uApiThreadManager,
   // Utils
   uPathUtils, uStringUtils;
 
@@ -130,6 +130,10 @@ const
   MSG_PUBLISH_TASK_FINISHED = 14;
 
 implementation
+
+uses
+  // Api
+  uApiSettings;
 
 { TPublishInnerData }
 

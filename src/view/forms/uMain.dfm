@@ -132,6 +132,11 @@ object Main: TMain
                   end>
                 ExplicitTop = 573
                 ExplicitWidth = 516
+                inherited dxStatusBarContainer3: TdxStatusBarContainerControl
+                  inherited cxPBAutocompletion: TcxProgressBar
+                    ExplicitHeight = 18
+                  end
+                end
               end
               inherited pcMain: TcxPageControl
                 Width = 516
@@ -186,8 +191,6 @@ object Main: TMain
             Caption = 'Error Logger'
             CustomCaptionButtons.Buttons = <>
             TabsProperties.CustomButtons.Buttons = <>
-            ExplicitWidth = 185
-            ExplicitHeight = 140
             DockingType = 0
             OriginalWidth = 185
             OriginalHeight = 140
@@ -198,8 +201,8 @@ object Main: TMain
               Height = 569
               Align = alClient
               TabOrder = 0
-              ExplicitLeft = -102
-              ExplicitTop = 58
+              ExplicitWidth = 516
+              ExplicitHeight = 569
             end
           end
         end

@@ -16,7 +16,7 @@ uses
   // DLLs
   uExport,
   // Api
-  uApiConst, uApiMultiCastEvent, uApiSettingsManager, uApiXML, uApiXmlSettings,
+  uApiConst, uApiMain, uApiMultiCastEvent, uApiSettingsManager, uApiXML, uApiXmlSettings,
   // HTTPManager
   uHTTPConst, uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -61,20 +61,18 @@ type
     FWebsite: string;
     FFilter: IFilter;
     function GetHost: string;
-    procedure SetPath(APath: string);
   public
     function GetPath: string; override;
     function GetSubjectFileName: string;
     function GetMessageFileName: string;
   public
-    procedure UpdateWebsiteInformation;
     property Host: string read GetHost;
     property Website: string read FWebsite write FWebsite;
-    property Filter: IFilter read FFilter;
+    property Filter: IFilter read FFilter write FFilter;
   published
     property Name;
     property Enabled;
-    property Path: string read FPath write SetPath;
+    property Path;
     property AccountName: string read FAccountName write FAccountName;
     property AccountPassword: string read FAccountPassword write FAccountPassword;
     property SubjectFileName: string read FSubjectFileName write FSubjectFileName;
@@ -84,11 +82,14 @@ type
   TCMSCollectionItem = class(TPlugInCollectionItem)
   private
     FWebsites: TCollection;
-    FOnWebsitesChange, FOnSubjectsChange, FOnMessagesChange: TICMSItemChangeEvent;
+    FOnSettingsChange, FOnWebsitesChange, FOnSubjectsChange, FOnMessagesChange: TICMSItemChangeEvent;
   public
     constructor Create(Collection: TCollection); override;
     function GetWebsite(AIndex: Integer): TCMSWebsitesCollectionItem;
+    procedure UpdateWebsite(AIndex: Integer);
+    procedure UpdateWebsites;
     function FindCMSWebsite(ACMSWebsiteName: string): TCMSWebsitesCollectionItem;
+    property OnSettingsChange: TICMSItemChangeEvent read FOnSettingsChange write FOnSettingsChange;
     property OnWebsitesChange: TICMSItemChangeEvent read FOnWebsitesChange write FOnWebsitesChange;
     property OnSubjectsChange: TICMSItemChangeEvent read FOnSubjectsChange write FOnSubjectsChange;
     property OnMessagesChange: TICMSItemChangeEvent read FOnMessagesChange write FOnMessagesChange;
@@ -577,8 +578,8 @@ type
     property CAPTCHAPosition: TCAPTCHAPosition read FCAPTCHAPosition write FCAPTCHAPosition;
     property MoveWorkWhileHoldingLeftMouse: Boolean read FMoveWorkWhileHoldingLeftMouse write FMoveWorkWhileHoldingLeftMouse;
     property NativeStyle: Boolean read FNativeStyle write FNativeStyle;
-    // property UseSkins: Boolean read FUseSkins write FUseSkins;
-    // property DefaultSkin: string read FDefaultSkin write FDefaultSkin;
+    property UseSkins: Boolean read FUseSkins write FUseSkins;
+    property DefaultSkin: string read FDefaultSkin write FDefaultSkin;
     property SaveOnClose: Boolean read FSaveOnClose write FSaveOnClose;
   end;
 
@@ -586,8 +587,10 @@ type
   protected
     procedure LoadDefaultSettings; override;
   public
+    procedure LoadSettings; override;
     function GetDefaultPluginLoadedFunc(const APluginType: TPlugInType; var ACollection: TCollection; var ACheckListBox: TcxCheckListBox): Boolean;
-    procedure PreLoadPlugins;
+    procedure LoadDefaultPlugins;
+
   end;
 
 var
@@ -648,12 +651,6 @@ begin
   inherited Destroy;
 end;
 
-procedure TCMSWebsitesCollectionItem.SetPath(APath: string);
-begin
-  FPath := APath;
-  UpdateWebsiteInformation;
-end;
-
 function TCMSWebsitesCollectionItem.GetHost: string;
 begin
   Result := RemoveW(ExtractUrlHost(Website));
@@ -674,21 +671,12 @@ begin
   Result := PathCombineEx(GetTemplatesCMSFolder, MessageFileName);
 end;
 
-procedure TCMSWebsitesCollectionItem.UpdateWebsiteInformation;
-begin
-  with TWebsiteTemplateHelper.Load(GetPath) do
-  begin
-    Website := WebsiteURL;
-    FFilter := Filter;
-  end;
-  // TODO: change notification
-end;
-
 constructor TCMSCollectionItem.Create(Collection: TCollection);
 begin
   inherited Create(Collection);
 
   FWebsites := TCollection.Create(TCMSWebsitesCollectionItem);
+  FOnSettingsChange := TICMSItemChangeEvent.Create;
   FOnWebsitesChange := TICMSItemChangeEvent.Create;
   FOnSubjectsChange := TICMSItemChangeEvent.Create;
   FOnMessagesChange := TICMSItemChangeEvent.Create;
@@ -697,6 +685,28 @@ end;
 function TCMSCollectionItem.GetWebsite(AIndex: Integer): TCMSWebsitesCollectionItem;
 begin
   Result := TCMSWebsitesCollectionItem(Websites.Items[AIndex]);
+end;
+
+procedure TCMSCollectionItem.UpdateWebsite(AIndex: Integer);
+var
+  LCMSWebsitesCollectionItem: TCMSWebsitesCollectionItem;
+begin
+  LCMSWebsitesCollectionItem := GetWebsite(AIndex);
+  with LCMSWebsitesCollectionItem, TWebsiteTemplateHelper.Load(GetPath) do
+  begin
+    Website := WebsiteURL;
+    Filter := WebsiteFilter;
+  end;
+  if Assigned(OnWebsitesChange) then
+    OnWebsitesChange.Invoke(cctChange, LCMSWebsitesCollectionItem.Index, -1);
+end;
+
+procedure TCMSCollectionItem.UpdateWebsites;
+var
+  I: Integer;
+begin
+  for I := 0 to Websites.Count - 1 do
+    UpdateWebsite(I);
 end;
 
 function TCMSCollectionItem.FindCMSWebsite(ACMSWebsiteName: string): TCMSWebsitesCollectionItem;
@@ -718,6 +728,7 @@ begin
   FOnMessagesChange.Free;
   FOnSubjectsChange.Free;
   FOnWebsitesChange.Free;
+  FOnSettingsChange.Free;
 
   FWebsites.Free;
 
@@ -1529,6 +1540,22 @@ begin
   end;
 end;
 
+procedure TSettingsManager.LoadSettings;
+var
+  LCMSIndex: Integer;
+begin
+  inherited LoadSettings;
+  if not FirstStart then
+  begin
+    for LCMSIndex := 0 to Settings.Plugins.CMS.Count - 1 do
+    begin
+      TCMSCollectionItem(Settings.Plugins.CMS.Items[LCMSIndex]).UpdateWebsites;
+    end;
+
+    // TODO: Validate lower bounds (i.e. ControlAligner.MirrorColumns > 0 OR ControlAligner.PaddingLeft > 0)
+  end;
+end;
+
 function TSettingsManager.GetDefaultPluginLoadedFunc(const APluginType: TPlugInType; var ACollection: TCollection; var ACheckListBox: TcxCheckListBox): Boolean;
 begin
   ACheckListBox := nil;
@@ -1557,7 +1584,7 @@ begin
   Result := True;
 end;
 
-procedure TSettingsManager.PreLoadPlugins;
+procedure TSettingsManager.LoadDefaultPlugins;
 var
   LPlugInCollectionItem: TPlugInCollectionItem;
 begin

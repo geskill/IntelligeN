@@ -16,9 +16,9 @@ uses
   // DLLs
   uExport,
   // Api
-  uApiConst, uApiMain, uApiMultiCastEvent, uApiBackupManager, uApiControlAligner, uApiSettings, uApiXml, uApiPlugins,
-  uApiPublishController, uApiPublishManager, uApiCrawlerManager, uApiCrypterManager, uApiFileHosterManager,
-  uApiImageHosterManager, uApiTabSheetController,
+  uApiConst, uApiMain, uApiMultiCastEvent, uApiBackupManager, uApiControlAligner, uApiPlugins, uApiPublishController,
+  uApiPublishManager, uApiCrawlerManager, uApiCrypterManager, uApiFileHosterManager, uApiImageHosterManager,
+  uApiTabSheetController, uApiXml,
   // Utils
   uFileUtils;
 
@@ -120,7 +120,9 @@ type
 implementation
 
 uses
-  uMain, uSelectFolderDialog;
+  uMain, uSelectFolderDialog,
+  // Api
+  uApiSettings;
 
 type
   TcxPageControlAccess = class(TcxPageControl)

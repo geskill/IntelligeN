@@ -201,13 +201,13 @@ type
     function GetChanged: WordBool; override;
     procedure SetChanged(AChanged: WordBool); override;
 
-    function GetFilter: IFilter;
+    function GetWebsiteFilter: IFilter;
   public
     constructor Create; override;
     property WebsiteURL;
     property WebsiteType;
     property WebsiteCharset;
-    property Filter: IFilter read GetFilter;
+    property WebsiteFilter: IFilter read GetWebsiteFilter;
     destructor Destroy; override;
   end;
 
@@ -736,16 +736,16 @@ end;
 
 function TIntelligeNConfigurationFile.GetChanged: WordBool;
 begin
-  Result := ( inherited GetChanged) and Filter.Changed;
+  Result := ( inherited GetChanged) and WebsiteFilter.Changed;
 end;
 
 procedure TIntelligeNConfigurationFile.SetChanged(AChanged: WordBool);
 begin
   inherited SetChanged(AChanged);
-  Filter.Changed := AChanged;
+  WebsiteFilter.Changed := AChanged;
 end;
 
-function TIntelligeNConfigurationFile.GetFilter: IFilter;
+function TIntelligeNConfigurationFile.GetWebsiteFilter: IFilter;
 begin
   Result := FFilter;
 end;

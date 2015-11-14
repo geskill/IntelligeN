@@ -142,6 +142,10 @@ type
     FTabConnection: ITabSheetController;
     FCMSCollectionItem: TCMSCollectionItem;
     FCMSWebsiteCollectionItem: TCMSWebsitesCollectionItem;
+    FDataChanged: Boolean;
+    FDataBuffer: ITabSheetData;
+    FControlsBuffer, FMirrorBuffer: Boolean;
+    FIWebsiteChange: TICMSItemChangeEventHandler;
     FIControlChange: TIControlEventHandler;
     FIMirrorChange: TINotifyEventHandler;
 
@@ -151,6 +155,7 @@ type
 
     procedure HandleBlackWhitelist(ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; out AControlList: TControlDataList; out AMirrorList: TMirrorContainerList);
 
+    procedure WebsiteChange(ACMSItemChangeType: TCMSItemChangeType; AIndex, AParam: Integer);
     procedure ControlChange(const Sender: IControlBasic);
     procedure MirrorChange(const Sender: IUnknown);
   protected
@@ -224,9 +229,9 @@ type
     FTabConnection: ITabSheetController;
     FWebsiteList: TInterfaceList<ICMSWebsiteContainer>;
     FCMSCollectionItem: TCMSCollectionItem;
-    FWebsiteChangeEventHandler: ICMSItemChangeEventHandler;
+    FSettingsChangeEventHandler: ICMSItemChangeEventHandler;
     function CreateNewWebsiteContainer(AWebsiteIndex: Integer): ICMSWebsiteContainer;
-    procedure WebsiteUpdate(ACMSItemChangeType: TCMSItemChangeType; AIndex: Integer; AParam: Integer);
+    procedure SettingsUpdate(ACMSItemChangeType: TCMSItemChangeType; AIndex: Integer; AParam: Integer);
     procedure UpdateInternalListItemIndex;
     procedure UpdateCMSWebsiteList;
   protected
@@ -841,18 +846,45 @@ begin
   LControlBasic := nil;
 end;
 
-procedure TICMSWebsiteContainer.ControlChange(const Sender: IControlBasic);
+procedure TICMSWebsiteContainer.WebsiteChange(ACMSItemChangeType: TCMSItemChangeType; AIndex, AParam: Integer);
 begin
+  FDataChanged := True;
+end;
+
+procedure TICMSWebsiteContainer.ControlChange(const Sender: IControlBasic);
+var
+  LNeedUpdate: Boolean;
+begin
+  FDataChanged := True;
+
   with FICMSWebsiteContainerActiveController do
     if CanUpdatePartly then
-      FTabConnection.PublishController.OnUpdateCMSWebsite.Invoke(TopIndex, Index, FICMSWebsiteContainerActiveController.Active(ptControls));
+    begin
+      LNeedUpdate := FICMSWebsiteContainerActiveController.Active(ptControls);
+      if not(LNeedUpdate = FControlsBuffer) then
+      begin
+        FControlsBuffer := LNeedUpdate;
+        FTabConnection.PublishController.OnUpdateCMSWebsite.Invoke(TopIndex, Index, LNeedUpdate);
+      end;
+    end;
 end;
 
 procedure TICMSWebsiteContainer.MirrorChange(const Sender: IInterface);
+var
+  LNeedUpdate: Boolean;
 begin
+  FDataChanged := True;
+
   with FICMSWebsiteContainerActiveController do
     if CanUpdatePartly then
-      FTabConnection.PublishController.OnUpdateCMSWebsite.Invoke(TopIndex, Index, FICMSWebsiteContainerActiveController.Active(ptMirrors));
+    begin
+      LNeedUpdate := FICMSWebsiteContainerActiveController.Active(ptMirrors);
+      if not(LNeedUpdate = FMirrorBuffer) then
+      begin
+        FMirrorBuffer := LNeedUpdate;
+        FTabConnection.PublishController.OnUpdateCMSWebsite.Invoke(TopIndex, Index, LNeedUpdate);
+      end;
+    end;
 end;
 
 function TICMSWebsiteContainer.GetTabSheetController: ITabSheetController;
@@ -998,6 +1030,15 @@ begin
   FCMSCollectionItem := ACMSCollectionItem;
   FCMSWebsiteCollectionItem := ACMSWebsitesCollectionItem;
 
+  FDataChanged := True; // Need to be true to make first update.
+  FDataBuffer := nil;
+
+  FControlsBuffer := False;
+  FMirrorBuffer := False;
+
+  FIWebsiteChange := TICMSItemChangeEventHandler.Create(WebsiteChange);
+  FCMSCollectionItem.OnWebsitesChange.Add(FIWebsiteChange);
+
   FIControlChange := TIControlEventHandler.Create(ControlChange);
   FTabConnection.ControlController.OnControlChange.Add(FIControlChange);
 
@@ -1017,10 +1058,6 @@ end;
 
 function TICMSWebsiteContainer.ParseIScript(AIScript: WideString): RIScriptResult;
 begin
-  (* TODO: Improve GenerateData to no generate this every time.
-    Used always twice for ISubject and IMessage.
-    i.e. implement changed file
-    *)
   with TIScirptParser.Create(CMS, Name, GenerateData) do
     try
       Result := Execute(AIScript);
@@ -1035,20 +1072,22 @@ var
   LMirrorList: TMirrorContainerList;
 
   LControlIndex: Integer;
-
-  LTabSheetData: ITabSheetData;
 begin
-  HandleBlackWhitelist(FCMSWebsiteCollectionItem, LControlList, LMirrorList);
-
-  for LControlIndex := 0 to TabSheetController.ControlController.ControlCount - 1 do
+  if FDataChanged then
   begin
-    if not(TabSheetController.ControlController.Control[LControlIndex].ControlID = cPicture) then
-      LControlList.Add(TabSheetController.ControlController.Control[LControlIndex]);
+    HandleBlackWhitelist(FCMSWebsiteCollectionItem, LControlList, LMirrorList);
+
+    for LControlIndex := 0 to TabSheetController.ControlController.ControlCount - 1 do
+    begin
+      if not(TabSheetController.ControlController.Control[LControlIndex].ControlID = cPicture) then
+        LControlList.Add(TabSheetController.ControlController.Control[LControlIndex]);
+    end;
+
+    FDataBuffer := TITabSheetData.Create(TabSheetController.TypeID, LControlList, LMirrorList);
+    FDataChanged := False;
   end;
 
-  LTabSheetData := TITabSheetData.Create(TabSheetController.TypeID, LControlList, LMirrorList);
-
-  Result := LTabSheetData;
+  Result := FDataBuffer;
 end;
 
 function TICMSWebsiteContainer.GeneratePublishItem: IPublishItem;
@@ -1082,10 +1121,13 @@ end;
 
 destructor TICMSWebsiteContainer.Destroy;
 begin
+  FCMSCollectionItem.OnWebsitesChange.Remove(FIWebsiteChange);
   FTabConnection.MirrorController.OnChange.Remove(FIMirrorChange);
   FTabConnection.ControlController.OnControlChange.Remove(FIControlChange);
+  FDataBuffer := nil;
   FIMirrorChange := nil;
   FIControlChange := nil;
+  FIWebsiteChange := nil;
   FTabConnection := nil;
   FCMSCollectionItem := nil;
   FCMSWebsiteCollectionItem := nil;
@@ -1100,7 +1142,7 @@ begin
   Result := TICMSWebsiteContainer.Create(FTabConnection, FCMSCollectionItem, TCMSWebsitesCollectionItem(FCMSCollectionItem.Websites.Items[AWebsiteIndex]));
 end;
 
-procedure TICMSContainer.WebsiteUpdate(ACMSItemChangeType: TCMSItemChangeType; AIndex: Integer; AParam: Integer);
+procedure TICMSContainer.SettingsUpdate(ACMSItemChangeType: TCMSItemChangeType; AIndex: Integer; AParam: Integer);
 
   function FindCMSWebsiteItem(AName: string): Integer;
   var
@@ -1191,7 +1233,6 @@ end;
 procedure TICMSContainer.UpdateCMSWebsiteList;
 begin
   FTabConnection.PublishController.OnUpdateCMSWebsiteList.Invoke(Self, Index);
-  // Main.fPublish.GenerateCMSWebsiteList(Index, Self);
 end;
 
 function TICMSContainer.GetTabSheetController: ITabSheetController;
@@ -1240,8 +1281,8 @@ begin
       if TCMSWebsitesCollectionItem(Websites.Items[I]).Enabled then
         FWebsiteList.Add(CreateNewWebsiteContainer(I));
     UpdateInternalListItemIndex;
-    FWebsiteChangeEventHandler := TICMSItemChangeEventHandler.Create(WebsiteUpdate);
-    OnWebsitesChange.Add(FWebsiteChangeEventHandler);
+    FSettingsChangeEventHandler := TICMSItemChangeEventHandler.Create(SettingsUpdate);
+    OnSettingsChange.Add(FSettingsChangeEventHandler);
   end;
 end;
 
@@ -1252,7 +1293,7 @@ end;
 
 destructor TICMSContainer.Destroy;
 begin
-  FCMSCollectionItem.OnWebsitesChange.Remove(FWebsiteChangeEventHandler);
+  FCMSCollectionItem.OnSettingsChange.Remove(FSettingsChangeEventHandler);
   FCMSCollectionItem := nil;
   FWebsiteList.Free;
   FTabConnection := nil;

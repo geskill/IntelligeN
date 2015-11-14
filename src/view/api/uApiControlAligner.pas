@@ -8,9 +8,7 @@ uses
   // DevExpress
   cxProgressBar,
   // Common
-  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
-  // Api
-  uApiSettings;
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface;
 
 type
   // TODO: Replace with DevExpress TdxLayoutControl in the future
@@ -39,6 +37,10 @@ type
   end;
 
 implementation
+
+uses
+  // Api
+  uApiSettings;
 
 procedure TControlAligner.MoveLeft;
 begin

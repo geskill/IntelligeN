@@ -12,7 +12,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiConst, uApiMain, uApiSettings,
+  uApiConst, uApiMain,
   // Utils
   uFileUtils;
 
@@ -74,7 +74,10 @@ type
 implementation
 
 uses
-  uMain, uSettings, uRegister, uLicenceInfo;
+  uMain, uSettings, uRegister, uLicenceInfo,
+  // Api
+  uApiSettings;
+
 {$R *.dfm}
 
 procedure TfLogin.ActivateSaveData(Sender: TObject);

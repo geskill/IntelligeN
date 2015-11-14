@@ -69,7 +69,7 @@ type
 
     class function CMSDefaultCharset(ARelativPluginPath: string): string;
     class function CMSBelongsTo(ARelativPluginPath, AWebsiteSourceCode: string): Boolean;
-    class procedure CMSShowWebsiteSettingsEditor(ARelativPluginPath: string; ACMSWebsite: TCMSWebsitesCollectionItem; const AAppController: IAppController);
+    class function CMSShowWebsiteSettingsEditor(ARelativPluginPath: string; ACMSWebsite: TCMSWebsitesCollectionItem; const AAppController: IAppController): Boolean;
 
     class function GetSaveFileFormats: TStrings;
     class function GetLoadFileFormats: TStrings;
@@ -601,8 +601,11 @@ begin
   Result := LResult;
 end;
 
-class procedure TPluginBasic.CMSShowWebsiteSettingsEditor(ARelativPluginPath: string; ACMSWebsite: TCMSWebsitesCollectionItem; const AAppController: IAppController);
+class function TPluginBasic.CMSShowWebsiteSettingsEditor(ARelativPluginPath: string; ACMSWebsite: TCMSWebsitesCollectionItem; const AAppController: IAppController): Boolean;
+var
+  LResult: Boolean;
 begin
+  LResult := False;
   TPluginBasic.LoadCMSPlugin(ARelativPluginPath,
     { } procedure(var ACMSPlugin: ICMSPlugIn)
     { } var
@@ -621,14 +624,13 @@ begin
 
     { ... } LWebsiteEditor := TWebsiteEditorFactory.GetClassType(ACMSPlugin.CMSType).Create(ACMSPlugin, AAppController, ACMSWebsite.GetPath);
     { ... } try
-    { ..... } if ShowWebsiteSettingsEditor(LWebsiteEditor) then
-    { ....... } ;
-    { ..... } ACMSWebsite.UpdateWebsiteInformation; // TODO: FUTURE: This should be handled by the DirectoryMonitor!
+    { ..... } LResult := ShowWebsiteSettingsEditor(LWebsiteEditor);
     { ... } finally
     { ..... } LWebsiteEditor.Free;
     { ... } end;
     { . } end;
     { } end);
+  Result := LResult;
 end;
 
 class function TPluginBasic.GetSaveFileFormats: TStrings;

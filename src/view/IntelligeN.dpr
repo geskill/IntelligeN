@@ -67,6 +67,7 @@ uses
   uApiSettingsManager in 'api\uApiSettingsManager.pas',
   uApiSettingsExport in 'api\uApiSettingsExport.pas',
   uApiSettingsPluginsCheckListBox in 'api\uApiSettingsPluginsCheckListBox.pas',
+  uApiStartupParams in 'api\uApiStartupParams.pas',
   uApiTabSheetController in 'api\uApiTabSheetController.pas',
   uApiTabSheetData in 'api\uApiTabSheetData.pas',
   uApiTabSheetItem in 'api\uApiTabSheetItem.pas',

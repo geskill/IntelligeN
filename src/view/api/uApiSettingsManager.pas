@@ -38,7 +38,7 @@ type
 
     property Settings: T read FSettings write FSettings;
 
-    procedure LoadSettings;
+    procedure LoadSettings; virtual;
 
     procedure SaveSettings;
 

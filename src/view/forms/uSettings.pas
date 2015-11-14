@@ -25,7 +25,7 @@ uses
   // Utils
   uFileUtils, uPathUtils,
   // Api
-  uApiConst, uApiMultiCastEvent, uApiMain, uApiPlugins, uApiPluginsAdd, uApiSettings, uApiSettingsExport, uApiSettingsPluginsCheckListBox, uApiXml, uApiXmlSettings,
+  uApiConst, uApiMultiCastEvent, uApiMain, uApiPlugins, uApiPluginsAdd, uApiSettings, uApiSettingsExport, uApiSettingsPluginsCheckListBox, uApiXmlSettings, uApiXml,
   // Plugin
   uPlugInInterface, uPlugInInterfaceAdv, uPlugInClass, uPlugInConst;
 
@@ -431,6 +431,7 @@ type
     procedure RemoveImageHosterClick(Sender: TObject);
     procedure RemovedImageHosterClick(Sender: TObject);
 
+    procedure InitializePluginCheckListBoxes;
     function GetDefaultPluginLoadedFunc(const APluginType: TPlugInType; var ACollection: TCollection; var ACheckListBox: TcxCheckListBox): Boolean;
     function GetCMSCheckAllStatus: Byte;
     procedure SetCMSCheckAllStatus;
@@ -469,14 +470,14 @@ end;
 
 procedure TSettings.cxcbUseSkinsPropertiesChange(Sender: TObject);
 begin
-  // SettingsManager.Settings.UseSkins := cxcbUseSkins.Checked;
+  SettingsManager.Settings.UseSkins := cxcbUseSkins.Checked;
 
   // Main.dxSkinController.UseSkins := SettingsManager.Settings.UseSkins;
 end;
 
 procedure TSettings.cxCOBDefaultSkinPropertiesChange(Sender: TObject);
 begin
-  // SettingsManager.Settings.DefaultSkin := cxCOBDefaultSkin.EditValue;
+  SettingsManager.Settings.DefaultSkin := cxCOBDefaultSkin.EditValue;
 
   // Main.dxSkinController.SkinName := SettingsManager.Settings.DefaultSkin;
 end;
@@ -518,8 +519,8 @@ procedure TSettings.cxCBCMSAllPropertiesChange(Sender: TObject);
               // Do here everything EXCEPT "SetCMSCheckAllStatus" from "cxGCMSTableView1DataControllerDataChanged"
               LCMSWebsitesCollectionItem.Enabled := AStatus;
 
-              if Assigned(OnWebsitesChange) then
-                OnWebsitesChange.Invoke(cctEnabled, LCMSWebsitesCollectionItem.Index, IfThen(AStatus, 1));
+              if Assigned(OnSettingsChange) then
+                OnSettingsChange.Invoke(cctEnabled, LCMSWebsitesCollectionItem.Index, IfThen(AStatus, 1));
             end;
           end;
         end;
@@ -538,7 +539,6 @@ begin
     cbsChecked:
       SetStatus(True);
   end;
-  // Main.fPublish.GenerateColumns;
 end;
 
 procedure TSettings.cxGCMSTableView1Column3PropertiesInitPopup(Sender: TObject);
@@ -574,18 +574,24 @@ end;
 
 procedure TSettings.cxGCMSTableView1Column7PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
 var
-  _CMSCollectionItemItem: TCMSCollectionItem;
-  _CMSWebsitesCollectionItem: TCMSWebsitesCollectionItem;
+  LCMSCollectionItem: TCMSCollectionItem;
+  LCMSWebsitesCollectionItem: TCMSWebsitesCollectionItem;
 begin
-  _CMSCollectionItemItem := TCMSCollectionItem(SettingsManager.Settings.Plugins.CMS.Items[FCMSPluginsCheckListBox.InnerCheckListBox.ItemIndex]);
+  LCMSCollectionItem := TCMSCollectionItem(SettingsManager.Settings.Plugins.CMS.Items[FCMSPluginsCheckListBox.InnerCheckListBox.ItemIndex]);
 
   with cxGCMSTableView1.DataController do
-    _CMSWebsitesCollectionItem := _CMSCollectionItemItem.FindCMSWebsite(Values[GetFocusedRecordIndex, cxGCMSTableView1Column2.index]);
+    LCMSWebsitesCollectionItem := LCMSCollectionItem.FindCMSWebsite(Values[GetFocusedRecordIndex, cxGCMSTableView1Column2.index]);
 
-  if FileExists(_CMSWebsitesCollectionItem.GetPath) then
-    TPluginBasic.CMSShowWebsiteSettingsEditor(_CMSCollectionItemItem.Path, _CMSWebsitesCollectionItem, Main)
+  if FileExists(LCMSWebsitesCollectionItem.GetPath) then
+  begin
+    if TPluginBasic.CMSShowWebsiteSettingsEditor(LCMSCollectionItem.Path, LCMSWebsitesCollectionItem, Main) then
+    begin
+      // TODO: FUTURE: This should be handled by the DirectoryMonitor!
+      LCMSCollectionItem.UpdateWebsite(LCMSWebsitesCollectionItem.Index);
+    end;
+  end
   else
-    raise Exception.Create('Websitefile not found! (' + _CMSWebsitesCollectionItem.Path + ')');
+    raise Exception.Create('Websitefile not found! (' + LCMSWebsitesCollectionItem.Path + ')');
 end;
 
 procedure TSettings.cxGCMSTableView1DataControllerDataChanged(Sender: TObject);
@@ -603,8 +609,8 @@ begin
         CMSWebsitesCollectionItem := FindCMSWebsite(Values[FocusedRecordIndex, cxGCMSTableView1Column2.index]);
         CMSWebsitesCollectionItem.Enabled := Values[FocusedRecordIndex, cxGCMSTableView1Column1.index];
 
-        if Assigned(OnWebsitesChange) then
-          OnWebsitesChange.Invoke(cctEnabled, CMSWebsitesCollectionItem.Index, IfThen(CMSWebsitesCollectionItem.Enabled, 1));
+        if Assigned(OnSettingsChange) then
+          OnSettingsChange.Invoke(cctEnabled, CMSWebsitesCollectionItem.Index, IfThen(CMSWebsitesCollectionItem.Enabled, 1));
       end;
 
       SetCMSCheckAllStatus;
@@ -679,8 +685,8 @@ begin
     with TCMSCollectionItem(SettingsManager.Settings.Plugins.CMS.Items[FCMSPluginsCheckListBox.InnerCheckListBox.ItemIndex]) do
     begin
       CMSWebsitesCollectionItem := FindCMSWebsite(Values[FocusedRecordIndex, cxGCMSTableView1Column2.index]);
-      if Assigned(OnWebsitesChange) then
-        OnWebsitesChange.Invoke(cctDelete, CMSWebsitesCollectionItem.Index, -1);
+      if Assigned(OnSettingsChange) then
+        OnSettingsChange.Invoke(cctDelete, CMSWebsitesCollectionItem.Index, -1);
       CMSWebsitesCollectionItem.Free;
     end;
     DeleteRecord(FocusedRecordIndex);
@@ -1597,215 +1603,6 @@ end;
 
 procedure TSettings.FormCreate(Sender: TObject);
 
-  procedure A;
-  var
-    LTypeID: TTypeID;
-    LControlID: TControlID;
-  begin
-    FAppPluginsCheckListBox := TPluginsCheckListBox.Create(Self);
-    with FAppPluginsCheckListBox do
-    begin
-      Parent := cxTSApp;
-
-      Left := 16;
-      Top := 16;
-      Width := 129;
-      Height := 262;
-
-      with InnerCheckListBox do
-      begin
-        Images := SettingsManager.Settings.Plugins.AppImageList;
-      end;
-
-      OnClickCheck := AppClickCheck;
-      OnAddPluginClick := AddAppClick;
-      OnAddAllPluginClick := AppAddAllClick;
-      OnRemovePluginClick := RemoveAppClick;
-    end;
-
-    FCAPTCHAPluginsCheckListBox := TPluginsCheckListBox.Create(Self);
-    with FCAPTCHAPluginsCheckListBox do
-    begin
-      Parent := cxTSCAPTCHA;
-
-      Left := 16;
-      Top := 16;
-      Width := 129;
-      Height := 262;
-
-      DragDrop := True;
-
-      with InnerCheckListBox do
-      begin
-        Images := SettingsManager.Settings.Plugins.CAPTCHAImageList;
-      end;
-
-      OnClickCheck := CAPTCHAClickCheck;
-      OnEndDrag := CAPTCHAEndDrag;
-      OnAddPluginClick := CAPTCHAAddClick;
-      OnAddAllPluginClick := CAPTCHAAddAllClick;
-      OnRemovePluginClick := RemoveCAPTCHAClick;
-    end;
-
-    FCMSPluginsCheckListBox := TPluginsCheckListBox.Create(Self);
-    with FCMSPluginsCheckListBox do
-    begin
-      Parent := cxTSCMS;
-
-      Left := 16;
-      Top := 16;
-      Width := 129;
-      Height := 262;
-
-      DragDrop := True;
-
-      with InnerCheckListBox do
-      begin
-        Images := SettingsManager.Settings.Plugins.CMSImageList;
-      end;
-
-      OnClick := CMSClick;
-      OnClickCheck := CMSClickCheck;
-      OnEndDrag := CMSEndDrag;
-      OnAddPluginClick := AddCMSClick;
-      OnAddAllPluginClick := CMSAddAllClick;
-      OnRemovePluginClick := RemoveCMSClick;
-      OnRemovedPluginClick := RemovedCMSClick
-    end;
-
-    FCrawlerPluginsCheckListBox := TPluginsCheckListBox.Create(Self);
-    with FCrawlerPluginsCheckListBox do
-    begin
-      Parent := cxTSCrawler;
-
-      Left := 16;
-      Top := 16;
-      Width := 129;
-      Height := 262;
-
-      DragDrop := True;
-
-      with InnerCheckListBox do
-      begin
-        Images := SettingsManager.Settings.Plugins.CrawlerImageList;
-      end;
-
-      OnClick := CrawlerClick;
-      OnClickCheck := CrawlerClickCheck;
-      OnEndDrag := CrawlerEndDrag;
-      OnAddPluginClick := AddCrawlerClick;
-      OnAddAllPluginClick := CrawlerAddAllClick;
-      OnRemovePluginClick := RemoveCrawlerClick;
-      OnRemovedPluginClick := RemovedCrawlerClick;
-    end;
-
-    FCrypterPluginsCheckListBox := TPluginsCheckListBox.Create(Self);
-    with FCrypterPluginsCheckListBox do
-    begin
-      Parent := cxTSCrypter;
-
-      Left := 16;
-      Top := 16;
-      Width := 129;
-      Height := 262;
-
-      DragDrop := True;
-
-      with InnerCheckListBox do
-      begin
-        Images := SettingsManager.Settings.Plugins.CrypterImageList;
-      end;
-
-      OnClick := CrypterClick;
-      OnClickCheck := CrypterClickCheck;
-      OnEndDrag := CrypterEndDrag;
-      OnAddPluginClick := AddCrypterClick;
-      OnAddAllPluginClick := CrypterAddAllClick;
-      OnRemovePluginClick := RemoveCrypterClick;
-      OnRemovedPluginClick := RemovedCrypterClick;
-    end;
-
-    FFileFormatsPluginsCheckListBox := TPluginsCheckListBox.Create(Self);
-    with FFileFormatsPluginsCheckListBox do
-    begin
-      Parent := cxTSFileFormats;
-
-      Left := 16;
-      Top := 16;
-      Width := 129;
-      Height := 262;
-
-      DragDrop := True;
-
-      with InnerCheckListBox do
-      begin
-        Images := SettingsManager.Settings.Plugins.FileFormatsImageList;
-      end;
-
-      OnClick := FileFormatsClick;
-      OnClickCheck := FileFormatsClickCheck;
-      OnEndDrag := FileFormatsEndDrag;
-      OnAddPluginClick := FileFormatsAddClick;
-      OnAddAllPluginClick := FileFormatsAddAllClick;
-      OnRemovePluginClick := RemoveFileFormatsClick;
-      OnRemovedPluginClick := RemovedFileFormatsClick;
-    end;
-
-    FFileHosterPluginsCheckListBox := TPluginsCheckListBox.Create(Self);
-    with FFileHosterPluginsCheckListBox do
-    begin
-      Parent := cxTSFileHoster;
-
-      Left := 16;
-      Top := 16;
-      Width := 129;
-      Height := 262;
-
-      with InnerCheckListBox do
-      begin
-        Images := SettingsManager.Settings.Plugins.FileHosterImageList;
-      end;
-
-      OnClickCheck := FileHosterClickCheck;
-      OnAddPluginClick := FileHosterAddClick;
-      OnAddAllPluginClick := FileHosterAddAllClick;
-      OnRemovePluginClick := RemoveFileHosterClick;
-    end;
-
-    FImageHosterPluginsCheckListBox := TPluginsCheckListBox.Create(Self);
-    with FImageHosterPluginsCheckListBox do
-    begin
-      Parent := cxTSImageHoster;
-
-      Left := 16;
-      Top := 16;
-      Width := 129;
-      Height := 262;
-
-      with InnerCheckListBox do
-      begin
-        Images := SettingsManager.Settings.Plugins.ImageHosterImageList;
-      end;
-
-      OnClick := ImageHosterClick;
-      OnClickCheck := ImageHosterClickCheck;
-      OnAddPluginClick := ImageHosterAddClick;
-      OnAddAllPluginClick := ImageHosterAddAllClick;
-      OnRemovePluginClick := RemoveImageHosterClick;
-      OnRemovedPluginClick := RemovedImageHosterClick;
-    end;
-
-    // for I := 1 to Ord( High(TADRDBMSKind)) - 1 do
-    // cxCOBDatabaseType.Properties.Items.Add(C_AD_PhysRDBMSKinds[TADRDBMSKind(I)]);
-
-    for LTypeID := Low(TTypeID) to High(TTypeID) do
-      with cxLVControlsTemplateType.Items.Add do
-        Caption := TypeIDToString(LTypeID);
-
-    for LControlID := Low(TControlID) to High(TControlID) do
-      cxTCControls.Tabs.Add(ControlIDToString(LControlID));
-  end;
-
   function internalGetTabControlTabWidth: Integer;
   begin
     Result := 0;
@@ -1814,15 +1611,34 @@ procedure TSettings.FormCreate(Sender: TObject);
         Result := (Tabs[0].FullRect.Right - Tabs[0].FullRect.Left);
   end;
 
+var
+  LTypeID: TTypeID;
+  LControlID: TControlID;
 begin
   Caption := StrSettings;
 
   FOnCrawlerContingentChange := False;
 
+  // Need to be done here and not in SettingsManager initialization part,
+  // because some APP plugins might require VCL stuff that will be loaded.
+  // Later the main app is not capable to access the required packages
+  // which end up in "Cannot load a RichEdit library" error or similar.
   if SettingsManager.FirstStart then
-    SettingsManager.PreLoadPlugins;
+    SettingsManager.LoadDefaultPlugins;
 
-  A;
+  InitializePluginCheckListBoxes;
+
+  // dxSkinsUserSkinPopulateSkinNames(ExtractFilePath(ParamStr(0)) + 'AllSkins.skinres', cxCOBDefaultSkin.Properties.Items);
+
+  // for I := 1 to Ord( High(TADRDBMSKind)) - 1 do
+  // cxCOBDatabaseType.Properties.Items.Add(C_AD_PhysRDBMSKinds[TADRDBMSKind(I)]);
+
+  for LTypeID := Low(TTypeID) to High(TTypeID) do
+    with cxLVControlsTemplateType.Items.Add do
+      Caption := TypeIDToString(LTypeID);
+
+  for LControlID := Low(TControlID) to High(TControlID) do
+    cxTCControls.Tabs.Add(ControlIDToString(LControlID));
 
   with SettingsManager.Settings.Layout.Settings do
   begin
@@ -2511,6 +2327,202 @@ begin
 end;
 {$ENDREGION}
 
+procedure TSettings.InitializePluginCheckListBoxes;
+begin
+  FAppPluginsCheckListBox := TPluginsCheckListBox.Create(Self);
+  with FAppPluginsCheckListBox do
+  begin
+    Parent := cxTSApp;
+
+    Left := 16;
+    Top := 16;
+    Width := 129;
+    Height := 262;
+
+    with InnerCheckListBox do
+    begin
+      Images := SettingsManager.Settings.Plugins.AppImageList;
+    end;
+
+    OnClickCheck := AppClickCheck;
+    OnAddPluginClick := AddAppClick;
+    OnAddAllPluginClick := AppAddAllClick;
+    OnRemovePluginClick := RemoveAppClick;
+  end;
+
+  FCAPTCHAPluginsCheckListBox := TPluginsCheckListBox.Create(Self);
+  with FCAPTCHAPluginsCheckListBox do
+  begin
+    Parent := cxTSCAPTCHA;
+
+    Left := 16;
+    Top := 16;
+    Width := 129;
+    Height := 262;
+
+    DragDrop := True;
+
+    with InnerCheckListBox do
+    begin
+      Images := SettingsManager.Settings.Plugins.CAPTCHAImageList;
+    end;
+
+    OnClickCheck := CAPTCHAClickCheck;
+    OnEndDrag := CAPTCHAEndDrag;
+    OnAddPluginClick := CAPTCHAAddClick;
+    OnAddAllPluginClick := CAPTCHAAddAllClick;
+    OnRemovePluginClick := RemoveCAPTCHAClick;
+  end;
+
+  FCMSPluginsCheckListBox := TPluginsCheckListBox.Create(Self);
+  with FCMSPluginsCheckListBox do
+  begin
+    Parent := cxTSCMS;
+
+    Left := 16;
+    Top := 16;
+    Width := 129;
+    Height := 262;
+
+    DragDrop := True;
+
+    with InnerCheckListBox do
+    begin
+      Images := SettingsManager.Settings.Plugins.CMSImageList;
+    end;
+
+    OnClick := CMSClick;
+    OnClickCheck := CMSClickCheck;
+    OnEndDrag := CMSEndDrag;
+    OnAddPluginClick := AddCMSClick;
+    OnAddAllPluginClick := CMSAddAllClick;
+    OnRemovePluginClick := RemoveCMSClick;
+    OnRemovedPluginClick := RemovedCMSClick
+  end;
+
+  FCrawlerPluginsCheckListBox := TPluginsCheckListBox.Create(Self);
+  with FCrawlerPluginsCheckListBox do
+  begin
+    Parent := cxTSCrawler;
+
+    Left := 16;
+    Top := 16;
+    Width := 129;
+    Height := 262;
+
+    DragDrop := True;
+
+    with InnerCheckListBox do
+    begin
+      Images := SettingsManager.Settings.Plugins.CrawlerImageList;
+    end;
+
+    OnClick := CrawlerClick;
+    OnClickCheck := CrawlerClickCheck;
+    OnEndDrag := CrawlerEndDrag;
+    OnAddPluginClick := AddCrawlerClick;
+    OnAddAllPluginClick := CrawlerAddAllClick;
+    OnRemovePluginClick := RemoveCrawlerClick;
+    OnRemovedPluginClick := RemovedCrawlerClick;
+  end;
+
+  FCrypterPluginsCheckListBox := TPluginsCheckListBox.Create(Self);
+  with FCrypterPluginsCheckListBox do
+  begin
+    Parent := cxTSCrypter;
+
+    Left := 16;
+    Top := 16;
+    Width := 129;
+    Height := 262;
+
+    DragDrop := True;
+
+    with InnerCheckListBox do
+    begin
+      Images := SettingsManager.Settings.Plugins.CrypterImageList;
+    end;
+
+    OnClick := CrypterClick;
+    OnClickCheck := CrypterClickCheck;
+    OnEndDrag := CrypterEndDrag;
+    OnAddPluginClick := AddCrypterClick;
+    OnAddAllPluginClick := CrypterAddAllClick;
+    OnRemovePluginClick := RemoveCrypterClick;
+    OnRemovedPluginClick := RemovedCrypterClick;
+  end;
+
+  FFileFormatsPluginsCheckListBox := TPluginsCheckListBox.Create(Self);
+  with FFileFormatsPluginsCheckListBox do
+  begin
+    Parent := cxTSFileFormats;
+
+    Left := 16;
+    Top := 16;
+    Width := 129;
+    Height := 262;
+
+    DragDrop := True;
+
+    with InnerCheckListBox do
+    begin
+      Images := SettingsManager.Settings.Plugins.FileFormatsImageList;
+    end;
+
+    OnClick := FileFormatsClick;
+    OnClickCheck := FileFormatsClickCheck;
+    OnEndDrag := FileFormatsEndDrag;
+    OnAddPluginClick := FileFormatsAddClick;
+    OnAddAllPluginClick := FileFormatsAddAllClick;
+    OnRemovePluginClick := RemoveFileFormatsClick;
+    OnRemovedPluginClick := RemovedFileFormatsClick;
+  end;
+
+  FFileHosterPluginsCheckListBox := TPluginsCheckListBox.Create(Self);
+  with FFileHosterPluginsCheckListBox do
+  begin
+    Parent := cxTSFileHoster;
+
+    Left := 16;
+    Top := 16;
+    Width := 129;
+    Height := 262;
+
+    with InnerCheckListBox do
+    begin
+      Images := SettingsManager.Settings.Plugins.FileHosterImageList;
+    end;
+
+    OnClickCheck := FileHosterClickCheck;
+    OnAddPluginClick := FileHosterAddClick;
+    OnAddAllPluginClick := FileHosterAddAllClick;
+    OnRemovePluginClick := RemoveFileHosterClick;
+  end;
+
+  FImageHosterPluginsCheckListBox := TPluginsCheckListBox.Create(Self);
+  with FImageHosterPluginsCheckListBox do
+  begin
+    Parent := cxTSImageHoster;
+
+    Left := 16;
+    Top := 16;
+    Width := 129;
+    Height := 262;
+
+    with InnerCheckListBox do
+    begin
+      Images := SettingsManager.Settings.Plugins.ImageHosterImageList;
+    end;
+
+    OnClick := ImageHosterClick;
+    OnClickCheck := ImageHosterClickCheck;
+    OnAddPluginClick := ImageHosterAddClick;
+    OnAddAllPluginClick := ImageHosterAddAllClick;
+    OnRemovePluginClick := RemoveImageHosterClick;
+    OnRemovedPluginClick := RemovedImageHosterClick;
+  end;
+end;
+
 function TSettings.GetDefaultPluginLoadedFunc(const APluginType: TPlugInType; var ACollection: TCollection; var ACheckListBox: TcxCheckListBox): Boolean;
 begin
   SettingsManager.GetDefaultPluginLoadedFunc(APluginType, ACollection, ACheckListBox);
@@ -2599,8 +2611,8 @@ begin
 
   cxcbNativeStyle.Checked := SettingsManager.Settings.NativeStyle;
   cxcbUseSkins.Enabled := not cxcbNativeStyle.Checked;
-  // cxcbUseSkins.Checked := SettingsManager.Settings.UseSkins;
-  // cxCOBDefaultSkin.ItemIndex := cxCOBDefaultSkin.Properties.Items.IndexOf(SettingsManager.Settings.DefaultSkin);
+  cxcbUseSkins.Checked := SettingsManager.Settings.UseSkins;
+  cxCOBDefaultSkin.ItemIndex := cxCOBDefaultSkin.Properties.Items.IndexOf(SettingsManager.Settings.DefaultSkin);
   cxcbCheckForUpdates.Checked := SettingsManager.Settings.CheckForUpdates;
   cxCOBCAPTCHAPosition.ItemIndex := Integer(SettingsManager.Settings.CAPTCHAPosition);
 
@@ -2838,8 +2850,8 @@ begin
   end;
 
   with CMSCollectionItem do
-    if Assigned(OnWebsitesChange) and not OverrideWebsite then
-      OnWebsitesChange.Invoke(cctAdd, CMSWebsitesCollectionItem.Index, -1);
+    if Assigned(OnSettingsChange) and not OverrideWebsite then
+      OnSettingsChange.Invoke(cctAdd, CMSWebsitesCollectionItem.Index, -1);
 
   with FCMSPluginsCheckListBox.InnerCheckListBox do
     if (ItemIndex <> -1) and (Items[ItemIndex].Text = AWebsiteType) then
@@ -2874,8 +2886,6 @@ begin
 
       SetCMSCheckAllStatus;
     end;
-
-  // Main.fPublish.GenerateColumns;
 end;
 
 procedure TSettings.RefreshAccountlist;

@@ -12,7 +12,7 @@ uses
   // DLLs
   uExport,
   // Api
-  uApiSettings, uApiUpdate;
+  uApiUpdate;
 
 type
   TUpdate = class(TForm)
@@ -49,6 +49,10 @@ var
   Update: TUpdate;
 
 implementation
+
+uses
+  // Api
+  uApiSettings;
 
 {$R *.dfm}
 

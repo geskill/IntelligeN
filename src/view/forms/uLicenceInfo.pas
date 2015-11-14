@@ -10,7 +10,7 @@ uses
   cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit, cxTextEdit,
   cxGridCustomTableView, cxGridCardView, cxGridCustomView, cxClasses, cxGridLevel, cxGrid, cxLabel, cxButtons, cxGridCustomLayoutView, cxNavigator,
   // Api
-  uApiConst, uApiMain, uApiSettings,
+  uApiConst, uApiMain,
   // Utils
   uVariantUtils;
 
@@ -41,7 +41,10 @@ var
 implementation
 
 uses
-  uMain;
+  uMain,
+  // Api
+  uApiSettings;
+
 {$R *.dfm}
 
 procedure TLicenceInfo.FormKeyPress(Sender: TObject; var Key: Char);

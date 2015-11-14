@@ -4,13 +4,11 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, Forms, Controls, Classes, StdCtrls, ExtCtrls, Math, NB30,
+  Windows, SysUtils, Classes, Math, NB30,
   // Spring Framework
   Spring.Utils,
   // DLLs
   uExport,
-  // Api
-  uApiSettings,
   // Utils
   uFileUtils, uPathUtils;
 
@@ -22,16 +20,10 @@ function GetWindowsUserName: string;
 function GetWindowsComputerName: string;
 function GetVolumeID: string;
 
-procedure AnalyzeStartupParams; overload;
-procedure AnalyzeStartupParams(const StartupParams: array of string); overload;
-
 var
   MINOR_VERSION: Integer;
 
 implementation
-
-uses
-  uMain;
 
 function GetTemplateList: TStrings;
 begin
@@ -169,45 +161,6 @@ begin
   GetVolumeInformation(pRootPathName, pVolumeNameBuffer, SizeOf(pVolumeNameBuffer) - 1, @iVolumeSerialNumber, iMaximumComponentLength, iFileSystemFlags, nil,
     0);
   result := Format('%.8x', [iVolumeSerialNumber]);
-end;
-
-procedure AnalyzeStartupParams;
-var
-  I: integer;
-  Params: array of string;
-begin
-  for I := 1 to ParamCount do
-  begin
-    SetLength(Params, I);
-    Params[I - 1] := ParamStr(I);
-  end;
-
-  AnalyzeStartupParams(Params);
-end;
-
-procedure AnalyzeStartupParams(const StartupParams: array of string);
-const
-  Params: array [0 .. 2] of string = ('openfile', 'deletesettings', 'close');
-var
-  I, J: integer;
-begin
-
-  for I := 0 to Length(StartupParams) - 1 do
-    for J := 0 to Length(Params) - 1 do
-      if (StartupParams[I] = '/' + Params[J]) or (StartupParams[I] = '-' + Params[J]) or (StartupParams[I] = Params[J]) then
-        case J of
-          0:
-            begin
-              if ((I + 1) < Length(StartupParams)) then
-                Main.fMain.OpenToNewTab(StartupParams[I + 1])
-              else
-                Main.fMain.OpenToNewTab();
-            end;
-          1:
-            SettingsManager.DeleteSettings;
-          2:
-            Application.Terminate;
-        end;
 end;
 
 initialization

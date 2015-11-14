@@ -131,9 +131,9 @@ type
   IIntelligeNConfigurationFile = interface(IWebsiteConfigurationFile)
     ['{83C439E8-0FD3-4E56-8FF1-F54387180693}']
 
-    function GetFilter: IFilter;
+    function GetWebsiteFilter: IFilter;
 
-    property Filter: IFilter read GetFilter;
+    property WebsiteFilter: IFilter read GetWebsiteFilter;
   end;
 
 implementation

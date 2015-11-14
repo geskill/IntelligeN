@@ -330,7 +330,7 @@ begin
 
             if Assigned(ChildNodes.FindNode(XML_FILTERS)) then
               with ChildNodes.Nodes[XML_FILTERS] do
-                with Filter do
+                with WebsiteFilter do
                 begin
                   Active := Attributes['active'];
 
@@ -481,18 +481,18 @@ begin
             AddChild(XML_FILTERS);
           with ChildNodes.Nodes[XML_FILTERS] do
           begin
-            Attributes['active'] := IntelligeNConfigurationFile.Filter.Active;
+            Attributes['active'] := IntelligeNConfigurationFile.WebsiteFilter.Active;
 
             if ChildNodes.FindNode('categories') = nil then
               AddChild('categories');
-            ChildNodes.Nodes['categories'].NodeValue := IntelligeNConfigurationFile.Filter.Categories;
+            ChildNodes.Nodes['categories'].NodeValue := IntelligeNConfigurationFile.WebsiteFilter.Categories;
 
             if ChildNodes.FindNode('controls') = nil then
               AddChild('controls');
             with ChildNodes.Nodes['controls'] do
             begin
               ChildNodes.Clear;
-              for Control in IntelligeNConfigurationFile.Filter.Controls do
+              for Control in IntelligeNConfigurationFile.WebsiteFilter.Controls do
                 with AddChild('control') do
                 begin
                   Attributes[XML_NAME] := Control.Name;
@@ -501,7 +501,7 @@ begin
                 end;
             end;
 
-            for Hoster in IntelligeNConfigurationFile.Filter.Hosters do
+            for Hoster in IntelligeNConfigurationFile.WebsiteFilter.Hosters do
             begin
               if ChildNodes.FindNode(Hoster.Name) = nil then
                 AddChild(Hoster.Name);

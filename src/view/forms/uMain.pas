@@ -8,6 +8,7 @@ uses
   ImgList, ActnList, ShellAPI,
   // Dev Express
   dxBar, cxClasses, dxDockControl, dxDockPanel, cxEdit, cxDropDownEdit, cxLookAndFeels, cxPC, cxBarEditItem,
+  // dxSkinsCore, dxSkinsdxDockControlPainter, dxSkinsdxBarPainter, dxSkinsForm,
   // DEC
   DECFmt,
   // OneInstance
@@ -218,7 +219,6 @@ type
     dxBBPublishItemSettings: TdxBarButton;
     fErrorLogger: TfErrorLogger;
     dxBBPublish: TdxBarButton;
-
 
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);

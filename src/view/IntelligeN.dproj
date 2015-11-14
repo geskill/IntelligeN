@@ -126,6 +126,7 @@
 			<DCCReference Include="api\uApiSettingsManager.pas"/>
 			<DCCReference Include="api\uApiSettingsExport.pas"/>
 			<DCCReference Include="api\uApiSettingsPluginsCheckListBox.pas"/>
+			<DCCReference Include="api\uApiStartupParams.pas"/>
 			<DCCReference Include="api\uApiTabSheetController.pas"/>
 			<DCCReference Include="api\uApiTabSheetData.pas"/>
 			<DCCReference Include="api\uApiTabSheetItem.pas"/>

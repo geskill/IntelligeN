@@ -9,7 +9,7 @@ uses
   cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, Menus, StdCtrls, cxButtons, cxRadioGroup, ExtCtrls, cxControls,
   cxContainer, cxEdit, cxTextEdit, cxLabel,
   // Api
-  uApiConst, uApiSettings;
+  uApiConst;
 
 type
   TRegister = class(TForm)
@@ -52,6 +52,10 @@ var
   register: TRegister;
 
 implementation
+
+uses
+  // Api
+  uApiSettings;
 
 {$R *.dfm}
 

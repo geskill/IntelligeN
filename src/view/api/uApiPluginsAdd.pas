@@ -16,7 +16,7 @@ uses
   // DLLs
   uExport,
   // Api
-  uApiConst, uApiPluginsBase, uApiPlugins, uApiMultiCastEvent, uApiSettings,
+  uApiConst, uApiPluginsBase, uApiPlugins, uApiMultiCastEvent,
   // Plugin system
   uPlugInConst, uPlugInInterface;
 
@@ -34,6 +34,10 @@ type
   end;
 
 implementation
+
+uses
+  // Api
+  uApiSettings;
 
 class function TAddPlugin.AddPlugin(const APluginFile: string; const APluginHandle: Cardinal; const APlugin: IPlugIn; const ACollection: TCollection; const ACheckListBox: TcxCheckListBox; AHandleOverride: Boolean = True): Boolean;
 var

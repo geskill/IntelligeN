@@ -12,7 +12,7 @@ uses
   // DLLs
   uExport,
   // Api
-  uApiSettings, uApiPlugins, uApiTabSheetItem,
+  uApiPlugins, uApiTabSheetItem,
   // MultiEvent
   Generics.MultiEvents.Handler, Generics.MultiEvents.NotifyHandler,
   // Plugin
@@ -112,6 +112,10 @@ type
   end;
 
 implementation
+
+uses
+  // Api
+  uApiSettings;
 
 { TIReleaseNameChangeEventHandler }
 

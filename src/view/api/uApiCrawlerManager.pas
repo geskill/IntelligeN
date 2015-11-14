@@ -10,7 +10,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiThreadManager, uApiPlugins, uApiSettings;
+  uApiThreadManager, uApiPlugins;
 
 type
   TCrawlerTaskStatus = (ctsCREATED, ctsWORKING, ctsFINISHED);
@@ -66,6 +66,10 @@ const
   MSG_CRAWLER_TASK_FINISHED = 7;
 
 implementation
+
+uses
+  // Api
+  uApiSettings;
 
 { TCrawlerData }
 
