@@ -112,8 +112,9 @@ begin
   LItem.Font.Color := clGreen;
   LItem.Font.Style := [];
   LItem.KeyWords.CommaText := '"INTTOSTR","FLOATTOSTR","BOOLTOSTR","VARTOSTR","STRTOINT","STRTOINT64","STRTOFLOAT","STRTOBOOL","FORMAT","FORMATFLOAT",' +
-    '"LENGTH","COPY","POS","DELETE","DELETESTR","INSERT","UPPERCASE","LOWERCASE","TRIM","NAMECASE","COMPARETEXT","CHR","ORD","SETLENGTH",' + '"ROUND","TRUNC","INT","FRAC","SQRT","ABS","SIN","COS","ARCTAN","TAN","EXP","LN","PI","INC","DEC",' +
-    '"MATCHTEXT","REPLACEREGEXPR","CHARCOUNT","POSEX","EXTRACTURLFILENAME","EXTRACTURLPROTOCOL","EXTRACTURLHOST"';
+  { . } '"LENGTH","COPY","POS","DELETE","DELETESTR","INSERT","UPPERCASE","LOWERCASE","TRIM","NAMECASE","COMPARETEXT","CHR","ORD","SETLENGTH",' +
+  { . } '"ROUND","TRUNC","INT","FRAC","SQRT","ABS","SIN","COS","ARCTAN","TAN","EXP","LN","PI","INC","DEC",' +
+  { . } '"CHARCOUNT","POSEX","REDUCECAPITALS","STRINGREPLACE","EXTRACTURLFILENAME","EXTRACTURLPATH","EXTRACTURLPROTOCOL","EXTRACTURLHOST","EXTRACTURLWEBSITE","INCLUDETRAILINGURLDELIMITER","EXCLUDETRAILINGURLDELIMITER","MATCHTEXT","REPLACEREGEXPR"';
 
   with HintParameter.Parameters do
   begin
@@ -168,13 +169,21 @@ begin
     Add('ReplaceRegExpr(const ARegExpr: string, AInputStr: string, AReplaceStr: string, AUseSubstitution: Boolean = False): string');
 
     Add('print(Msg: string)');
+    Add('printFile(const AFileName: string)');
 
     Add('CharCount(const SubStr: string, S: string): Integer');
     Add('PosEx(const SubStr: string, S: string, Offset: Integer = 1): Integer');
+    Add('ReduceCapitals(const Str: string): string');
+    Add('StringReplace(const S, OldPattern, NewPattern: string): string');
 
     Add('ExtractUrlFileName(const AUrl: string): string');
+    Add('ExtractUrlPath(const AUrl: string): string');
     Add('ExtractUrlProtocol(const AUrl: string): string');
     Add('ExtractUrlHost(const AUrl: string): string');
+    Add('ExtractUrlWebsite(const AUrl: string): string');
+
+    Add('IncludeTrailingUrlDelimiter(const AUrl: string): string');
+    Add('ExcludeTrailingUrlDelimiter(const AUrl: string): string');
   end;
 
   with AutoCompletion do
@@ -232,10 +241,17 @@ begin
 
     Add('function CharCount(const SubStr: string, S: string): Integer');
     Add('function PosEx(const SubStr: string, S: string, Offset: Integer = 1): Integer');
+    Add('function ReduceCapitals(const Str: string): string');
+    Add('function StringReplace(const S, OldPattern, NewPattern: string): string');
 
     Add('function ExtractUrlFileName(const AUrl: string): string');
+    Add('function ExtractUrlPath(const AUrl: string): string');
     Add('function ExtractUrlProtocol(const AUrl: string): string');
     Add('function ExtractUrlHost(const AUrl: string): string');
+    Add('function ExtractUrlWebsite(const AUrl: string): string');
+
+    Add('function IncludeTrailingUrlDelimiter(const AUrl: string): string');
+    Add('function ExcludeTrailingUrlDelimiter(const AUrl: string): string');
 
     Add('const IType: string');
     Add('const ICMS: string');

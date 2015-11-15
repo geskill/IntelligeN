@@ -126,12 +126,24 @@ begin
     Result := CharCount(Params[0], Params[1])
   else if MethodName = 'POSEX' then
     Result := PosEx(Params[0], Params[1], Params[2])
+  else if MethodName = 'REDUCECAPITALS' then
+    Result := ReduceCapitals(Params[0])
+  else if MethodName = 'STRINGREPLACE' then
+    Result := StringReplace(Params[0], Params[1], Params[2], [rfReplaceAll])
   else if MethodName = 'EXTRACTURLFILENAME' then
     Result := ExtractUrlFileName(Params[0])
+  else if MethodName = 'EXTRACTURLPATH' then
+    Result := ExtractUrlPath(Params[0])
   else if MethodName = 'EXTRACTURLPROTOCOL' then
     Result := ExtractUrlProtocol(Params[0])
   else if MethodName = 'EXTRACTURLHOST' then
     Result := ExtractUrlHost(Params[0])
+  else if MethodName = 'EXTRACTURLWEBSITE' then
+    Result := ExtractUrlWebsite(Params[0])
+  else if MethodName = 'INCLUDETRAILINGURLDELIMITER' then
+    Result := IncludeTrailingUrlDelimiter(Params[0])
+  else if MethodName = 'EXCLUDETRAILINGURLDELIMITER' then
+    Result := ExcludeTrailingUrlDelimiter(Params[0])
   else if MethodName = 'MATCHTEXT' then
     Result := MatchTextMask(Params[0], Params[1], Params[2])
   else if MethodName = 'REPLACEREGEXPR' then
@@ -244,18 +256,25 @@ begin
     Parent := fsGlobalUnit;
     IncludePath.Add(GetTemplatesCMSFolder);
 
-    AddMethod('function MatchText(const Mask, S: string; CaseSensitive: Boolean = False): Boolean', CallMethod);
-
-    AddMethod('function ReplaceRegExpr(const ARegExpr, AInputStr, AReplaceStr : string; AUseSubstitution: Boolean = False): string', CallMethod);
-
     AddMethod('procedure print(Msg: string)', CallMethod);
     AddMethod('procedure printFile(const AFileName: string)', CallMethod);
+
     AddMethod('function CharCount(const SubStr, S: string): Integer', CallMethod);
     AddMethod('function PosEx(const SubStr, S: string; Offset: Integer = 1): Integer', CallMethod);
+    AddMethod('function ReduceCapitals(const Str: string): string', CallMethod);
+    AddMethod('function StringReplace(const S, OldPattern, NewPattern: string): string', CallMethod);
+
+    AddMethod('function MatchText(const Mask, S: string; CaseSensitive: Boolean = False): Boolean', CallMethod);
+    AddMethod('function ReplaceRegExpr(const ARegExpr, AInputStr, AReplaceStr : string; AUseSubstitution: Boolean = False): string', CallMethod);
 
     AddMethod('function ExtractUrlFileName(const AUrl: string): string', CallMethod);
+    AddMethod('function ExtractUrlPath(const AUrl: string): string', CallMethod);
     AddMethod('function ExtractUrlProtocol(const AUrl: string): string', CallMethod);
     AddMethod('function ExtractUrlHost(const AUrl: string): string', CallMethod);
+    AddMethod('function ExtractUrlWebsite(const AUrl: string): string', CallMethod);
+
+    AddMethod('function IncludeTrailingUrlDelimiter(const AUrl: string): string', CallMethod);
+    AddMethod('function ExcludeTrailingUrlDelimiter(const AUrl: string): string', CallMethod);
 
     AddConst('IType', 'string', TypeIDToString(FCMSWebsiteData.TypeID));
     AddConst('ICMS', 'string', FWebsiteCMS);

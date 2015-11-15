@@ -24,7 +24,9 @@ function ExtractTextBetween(const Str: string; const Delim1, Delim2: string): st
 
 function RemoveTextBetween(const Str: string; const Delim1, Delim2: string): string;
 
-function ReduceWhitespace(S: string; A: Boolean = False): string;
+function ReduceCapitals(const Str: string): string;
+
+function ReduceWhitespace(const Str: string; A: Boolean = False): string;
 
 function RemoveW(AHost: string): string;
 
@@ -120,9 +122,9 @@ var
   LEndPos: Integer;
 begin
   Result := StringReplace(AStrings.Text, sLineBreak, ADelimiter, [rfReplaceAll]);
-  LEndPos := length(Result) + 1 - length(ADelimiter);
-  if copy(Result, LEndPos, length(ADelimiter)) = ADelimiter then
-    Delete(Result, LEndPos, length(ADelimiter));
+  LEndPos := Length(Result) + 1 - Length(ADelimiter);
+  if copy(Result, LEndPos, Length(ADelimiter)) = ADelimiter then
+    Delete(Result, LEndPos, Length(ADelimiter));
 end;
 
 function SplittString(splitt: Char; S: string; AExact: Boolean = False): TStrings;
@@ -294,7 +296,7 @@ var
   LValue, LCode: Integer;
 begin
   val(VarToStrDef(AVariant, ''), LValue, LCode);
-  result := (LCode = 0);
+  Result := (LCode = 0);
 end;
 {$HINTS ON}
 
@@ -308,7 +310,7 @@ begin
   begin
     pos2 := PosEx(Delim2, Str, pos1 + 1);
     if pos2 > 0 then
-      Result := Copy(Str, pos1 + 1, pos2 - pos1 - 1);
+      Result := copy(Str, pos1 + 1, pos2 - pos1 - 1);
   end;
 end;
 
@@ -323,7 +325,7 @@ begin
     pos2 := PosEx(Delim2, Str, pos1 + 1);
     if pos2 > 0 then
     begin
-      Result := Copy(Str, 1, pos1 - 1) + copy(Str, pos2 + length(Delim2));
+      Result := copy(Str, 1, pos1 - 1) + copy(Str, pos2 + Length(Delim2));
     end;
   end;
 end;
@@ -341,15 +343,28 @@ begin
   end;
 end;
 
-function ReduceWhitespace(S: string; A: Boolean = False): string;
+function ReduceCapitals(const Str: string): string;
+var
+  LStringIndex: Integer;
+begin
+  Result := Str;
+
+  for LStringIndex := Length(Str) downto 2 do
+    if ((Str[LStringIndex] in ['A' .. 'Z']) and (Str[LStringIndex - 1] in ['A' .. 'Z'])) then
+    begin
+      Result[LStringIndex] := LowerCase(Str[LStringIndex])[1];
+    end;
+end;
+
+function ReduceWhitespace(const Str: string; A: Boolean = False): string;
 begin
   with TRegExpr.Create do
     try
       case A of
         True:
-          Result := ReplaceRegExpr('\s+', S, '', False);
+          Result := ReplaceRegExpr('\s+', Str, '', False);
       else
-        Result := ReplaceRegExpr('\s+', S, ' ', False);
+        Result := ReplaceRegExpr('\s+', Str, ' ', False);
       end;
     finally
       Free;
@@ -364,7 +379,7 @@ begin
       Expression := 'www\d{0,2}\.';
 
       if Exec(InputString) then
-        Result := Copy(AHost, Pos(string(Match[0]), AHost) + Length(Match[0]))
+        Result := copy(AHost, Pos(string(Match[0]), AHost) + Length(Match[0]))
       else
         Result := AHost;
     finally
@@ -378,11 +393,15 @@ var
 begin
   L := Length(S);
   I := 1;
-  while (I <= L) and ((S[I] <= ' ') or (S[I] = C)) do Inc(I);
-  if I > L then Result := '' else
+  while (I <= L) and ((S[I] <= ' ') or (S[I] = C)) do
+    Inc(I);
+  if I > L then
+    Result := ''
+  else
   begin
-    while ((S[L] <= ' ') or (S[L] = C)) do Dec(L);
-    Result := Copy(S, I, L - I + 1);
+    while ((S[L] <= ' ') or (S[L] = C)) do
+      Dec(L);
+    Result := copy(S, I, L - I + 1);
   end;
 end;
 
@@ -392,8 +411,9 @@ var
 begin
   L := Length(S);
   I := 1;
-  while (I <= L) and ((S[I] <= ' ') or (S[I] = C)) do Inc(I);
-  Result := Copy(S, I, Maxint);
+  while (I <= L) and ((S[I] <= ' ') or (S[I] = C)) do
+    Inc(I);
+  Result := copy(S, I, Maxint);
 end;
 
 function TrimRight(const S: string; const C: Char): string;
@@ -401,17 +421,19 @@ var
   I: Integer;
 begin
   I := Length(S);
-  while (I > 0) and ((S[I] <= ' ') or ((S[I] = C))) do Dec(I);
-  Result := Copy(S, 1, I);
+  while (I > 0) and ((S[I] <= ' ') or ((S[I] = C))) do
+    Dec(I);
+  Result := copy(S, 1, I);
 end;
 
 function PadLeft(S: string; Ch: Char; Len: Integer): string;
 var
   RestLen: Integer;
 begin
-  Result  := S;
-  RestLen := Len - Length(s);
-  if RestLen < 1 then Exit;
+  Result := S;
+  RestLen := Len - Length(S);
+  if RestLen < 1 then
+    Exit;
   Result := StringOfChar(Ch, RestLen) + S;
 end;
 
@@ -419,9 +441,10 @@ function PadRight(S: string; Ch: Char; Len: Integer): string;
 var
   RestLen: Integer;
 begin
-  Result  := S;
-  RestLen := Len - Length(s);
-  if RestLen < 1 then Exit;
+  Result := S;
+  RestLen := Len - Length(S);
+  if RestLen < 1 then
+    Exit;
   Result := S + StringOfChar(Ch, RestLen);
 end;
 
