@@ -4,8 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls,
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls,
   // DLLs
   uExport,
   // Utils
@@ -13,8 +12,7 @@ uses
 
 type
   TSelectTemplateFileName = class(TForm)
-  private
-    lTemplateFileName: TLabel;
+    lTemplateFile: TLabel;
     cobTemplateFileName: TComboBox;
     bAccept: TButton;
     procedure cobTemplateFileNameChange(Sender: TObject);

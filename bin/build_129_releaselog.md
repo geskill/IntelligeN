@@ -431,8 +431,12 @@
 
 ######major enhancements
 
-* Error Logger 
+* Error Logger
 
 ######minor enhancements
 
 * Improved performance
+
+* Improved IScript Website selection box using host including the path to distinguish among websites on the same host
+
+* Improved ExtractUrlHost using TIdURI. (therefore Indy package is now part of framework.bpl)

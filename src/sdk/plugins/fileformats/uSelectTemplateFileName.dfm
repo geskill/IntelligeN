@@ -15,7 +15,7 @@ object SelectTemplateFileName: TSelectTemplateFileName
   Position = poMainFormCenter
   PixelsPerInch = 96
   TextHeight = 13
-  object lTemplateFileName: TLabel
+  object lTemplateFile: TLabel
     Left = 8
     Top = 8
     Width = 48

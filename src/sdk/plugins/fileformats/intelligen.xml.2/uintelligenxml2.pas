@@ -74,17 +74,15 @@ begin
     end;
     with XMLDoc.DocumentElement do
     begin
-      if FileExists(ATemplateFileName) then
+      with AddChild('templatetype') do
       begin
-        with AddChild('templatetype') do
+        if FileExists(ATemplateFileName) then
         begin
           Attributes['filename'] := ExtractFileName(ChangeFileExt(ATemplateFileName, ''));
           Attributes['checksum'] := GetMD5FromFile(ATemplateFileName);
-          NodeValue := TypeIDToString(ATabSheetController.ControlController.TypeID);
         end;
-      end
-      else
-        AddChild('templatetype').NodeValue := '#';
+        NodeValue := TypeIDToString(ATabSheetController.ControlController.TypeID);
+      end;
 
       with AddChild('controls') do
         with ATabSheetController.ControlController do
