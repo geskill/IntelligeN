@@ -525,7 +525,7 @@ type
     function GetAccountName: WideString;
     function GetAccountPassword: WideString;
     function GetSettingsFileName: WideString;
-    function GetHost: WideString;
+    function GetHostWithPath: WideString;
     function GetWebsite: WideString;
     function GetSubject: WideString;
     function GetTags: WideString;
@@ -536,7 +536,7 @@ type
 
     property SettingsFileName: WideString read GetSettingsFileName;
 
-    property Host: WideString read GetHost;
+    property Host: WideString read GetHostWithPath;
     property Website: WideString read GetWebsite;
     property Subject: WideString read GetSubject;
     property Tags: WideString read GetTags;

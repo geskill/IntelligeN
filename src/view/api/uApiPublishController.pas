@@ -23,24 +23,24 @@ uses
 type
   TICMSWebsite = class(TInterfacedObject, ICMSWebsite)
   private
-    FAccountName, FAccountPassword, FSettingsFileName, FHost, FWebsite, FSubject, FTags, FMessage: WideString;
+    FAccountName, FAccountPassword, FSettingsFileName, FHostWithPath, FWebsite, FSubject, FTags, FMessage: WideString;
   protected
     function GetAccountName: WideString;
     function GetAccountPassword: WideString;
     function GetSettingsFileName: WideString;
-    function GetHost: WideString;
+    function GetHostWithPath: WideString;
     function GetWebsite: WideString;
     function GetSubject: WideString;
     function GetTags: WideString;
     function GetMessage: WideString;
   public
-    constructor Create(AAccountName, AAccountPassword, ASettingsFileName, AHost, AWebsite, ASubject, ATags, AMessage: WideString);
+    constructor Create(AAccountName, AAccountPassword, ASettingsFileName, AHostWithPath, AWebsite, ASubject, ATags, AMessage: WideString);
     property AccountName: WideString read GetAccountName;
     property AccountPassword: WideString read GetAccountPassword;
 
     property SettingsFileName: WideString read GetSettingsFileName;
 
-    property Host: WideString read GetHost;
+    property HostWithPath: WideString read GetHostWithPath;
     property Website: WideString read GetWebsite;
     property Subject: WideString read GetSubject;
     property Tags: WideString read GetTags;
@@ -178,7 +178,7 @@ type
 
     function GetSettingsFileName: WideString;
 
-    function GetHost: WideString;
+    function GetHostWithPath: WideString;
     function GetWebsite: WideString;
 
     function GetSubject: WideString;
@@ -211,7 +211,7 @@ type
 
     property SettingsFileName: WideString read GetSettingsFileName;
 
-    property Host: WideString read GetWebsite;
+    property HostWithPath: WideString read GetHostWithPath;
     property Website: WideString read GetWebsite;
 
     property Subject: WideString read GetSubject;
@@ -317,9 +317,9 @@ begin
   Result := FSettingsFileName;
 end;
 
-function TICMSWebsite.GetHost: WideString;
+function TICMSWebsite.GetHostWithPath: WideString;
 begin
-  Result := FHost;
+  Result := FHostWithPath;
 end;
 
 function TICMSWebsite.GetWebsite: WideString;
@@ -349,7 +349,7 @@ begin
   FAccountName := AAccountName;
   FAccountPassword := AAccountPassword;
   FSettingsFileName := ASettingsFileName;
-  FHost := AHost;
+  FHostWithPath := AHostWithPath;
   FWebsite := AWebsite;
   FSubject := ASubject;
   FTags := ATags;
@@ -973,9 +973,9 @@ begin
   Result := FCMSWebsiteCollectionItem.GetPath;
 end;
 
-function TICMSWebsiteContainer.GetHost: WideString;
+function TICMSWebsiteContainer.GetHostWithPath: WideString;
 begin
-  Result := FCMSWebsiteCollectionItem.Host;
+  Result := FCMSWebsiteCollectionItem.HostWithPath;
 end;
 
 function TICMSWebsiteContainer.GetWebsite: WideString;
@@ -1094,7 +1094,7 @@ function TICMSWebsiteContainer.GeneratePublishItem: IPublishItem;
 begin
   Result := nil;
   if ValidateFiles then
-    Result := TIPublishItem.Create(AccountName, AccountPassword, SettingsFileName, Host, Website, Subject, Tags, Message, GetCMSPluginPath, GenerateData);
+    Result := TIPublishItem.Create(AccountName, AccountPassword, SettingsFileName, HostWithPath, Website, Subject, Tags, Message, GetCMSPluginPath, GenerateData);
 end;
 
 function TICMSWebsiteContainer.GeneratePublishTab: IPublishTab;

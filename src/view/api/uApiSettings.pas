@@ -60,13 +60,13 @@ type
     FAccountName, FAccountPassword, FSubjectFileName, FMessageFileName: string;
     FWebsite: string;
     FFilter: IFilter;
-    function GetHost: string;
+    function GetHostWithPath: string;
   public
     function GetPath: string; override;
     function GetSubjectFileName: string;
     function GetMessageFileName: string;
   public
-    property Host: string read GetHost;
+    property HostWithPath: string read GetHostWithPath;
     property Website: string read FWebsite write FWebsite;
     property Filter: IFilter read FFilter write FFilter;
   published
@@ -651,9 +651,9 @@ begin
   inherited Destroy;
 end;
 
-function TCMSWebsitesCollectionItem.GetHost: string;
+function TCMSWebsitesCollectionItem.GetHostWithPath: string;
 begin
-  Result := RemoveW(ExtractUrlHost(Website));
+  Result := RemoveW(ExtractUrlHostWithPath(Website));
 end;
 
 function TCMSWebsitesCollectionItem.GetPath: string;

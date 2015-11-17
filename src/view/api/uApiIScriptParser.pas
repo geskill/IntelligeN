@@ -138,8 +138,10 @@ begin
     Result := ExtractUrlProtocol(Params[0])
   else if MethodName = 'EXTRACTURLHOST' then
     Result := ExtractUrlHost(Params[0])
-  else if MethodName = 'EXTRACTURLWEBSITE' then
-    Result := ExtractUrlWebsite(Params[0])
+  else if MethodName = 'EXTRACTURLHOSTWITHPATH' then
+    Result := ExtractUrlHostWithPath(Params[0])
+  else if MethodName = 'BUILDWEBSITEURL' then
+    Result := BuildWebsiteUrl(Params[0])
   else if MethodName = 'INCLUDETRAILINGURLDELIMITER' then
     Result := IncludeTrailingUrlDelimiter(Params[0])
   else if MethodName = 'EXCLUDETRAILINGURLDELIMITER' then
@@ -271,7 +273,8 @@ begin
     AddMethod('function ExtractUrlPath(const AUrl: string): string', CallMethod);
     AddMethod('function ExtractUrlProtocol(const AUrl: string): string', CallMethod);
     AddMethod('function ExtractUrlHost(const AUrl: string): string', CallMethod);
-    AddMethod('function ExtractUrlWebsite(const AUrl: string): string', CallMethod);
+    AddMethod('function ExtractUrlHostWithPath(const AUrl: string): string', CallMethod);
+    AddMethod('function BuildWebsiteUrl(const AUrl: string): string', CallMethod);
 
     AddMethod('function IncludeTrailingUrlDelimiter(const AUrl: string): string', CallMethod);
     AddMethod('function ExcludeTrailingUrlDelimiter(const AUrl: string): string', CallMethod);

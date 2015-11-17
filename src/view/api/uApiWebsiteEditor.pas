@@ -338,18 +338,33 @@ begin
 end;
 
 procedure TIDEditPanel.FcxPEIDInitPopup(Sender: TObject);
+
+  function FindRecordIndexByText(const AText: string): Integer;
+  var
+    LRecordIndex: Integer;
+  begin
+    Result := -1;
+
+    with FcxGIDTableView.DataController do
+    begin
+      for LRecordIndex := 0 to RecordCount - 1 do
+        if SameText(Values[LRecordIndex, 0], AText) then
+        begin
+          Result := LRecordIndex;
+          Break;
+        end;
+    end;
+  end;
+
 var
-  RecordIndex: Integer;
+  LRecordIndex: Integer;
 begin
   RefreshIDInfos;
 
+  LRecordIndex := FindRecordIndexByText(FcxPEID.Text);
+
   with FcxGIDTableView.DataController do
-    for RecordIndex := 0 to RecordCount - 1 do
-      if SameText(Values[RecordIndex, 0], FcxPEID.Text) then
-      begin
-        FocusedRecordIndex := RecordIndex;
-        Break;
-      end;
+    FocusedRecordIndex := LRecordIndex;
 end;
 
 procedure TIDEditPanel.FcxBCancelClick(Sender: TObject);

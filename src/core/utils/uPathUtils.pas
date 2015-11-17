@@ -5,6 +5,8 @@ interface
 uses
   // Delphi
   Windows, SysUtils, ShlObj, ActiveX,
+  // Indy
+  IdURI,
   // Utils
   uStringUtils;
 
@@ -30,7 +32,8 @@ function ExtractUrlFileName(const AUrl: string): string;
 function ExtractUrlPath(const AUrl: string): string;
 function ExtractUrlProtocol(const AUrl: string): string;
 function ExtractUrlHost(const AUrl: string): string;
-function ExtractUrlWebsite(const AUrl: string): string;
+function ExtractUrlHostWithPath(const AUrl: string): string;
+function BuildWebsiteUrl(const AUrl: string): string;
 function IncludeTrailingUrlDelimiter(const AUrl: string): string;
 function ExcludeTrailingUrlDelimiter(const AUrl: string): string;
 
@@ -166,34 +169,26 @@ begin
 end;
 
 function ExtractUrlHost(const AUrl: string): string;
-var
-  _pos, _pos2: Integer;
-  s: string;
 begin
-  if ExtractUrlProtocol(AUrl) = '' then
-  begin
-    _pos := Pos(':', AUrl);
-    if (_pos = 0) then
-      _pos := Pos('/', AUrl);
-    if (_pos = 0) then
-      _pos := length(AUrl) + 1;
-    Result := copy(AUrl, 1, _pos - 1);
-  end
-  else
-  begin
-    _pos := Pos('://', AUrl);
-    Inc(_pos, 3);
-    s := copy(AUrl, _pos, length(AUrl));
-    _pos2 := Pos(':', s);
-    if (_pos2 = 0) then
-      _pos2 := Pos('/', s);
-    if (_pos2 = 0) then
-      _pos2 := length(s) + 1;
-    Result := copy(s, 1, _pos2 - 1);
-  end;
+  with TIdURI.Create(AUrl) do
+    try
+      Result := Host;
+    finally
+      Free;
+    end;
 end;
 
-function ExtractUrlWebsite(const AUrl: string): string;
+function ExtractUrlHostWithPath(const AUrl: string): string;
+begin
+  with TIdURI.Create(AUrl) do
+    try
+      Result := Host + Path;
+    finally
+      Free;
+    end;
+end;
+
+function BuildWebsiteUrl(const AUrl: string): string;
 var
   LUrl: string;
 begin

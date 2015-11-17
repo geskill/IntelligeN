@@ -114,7 +114,8 @@ begin
   LItem.KeyWords.CommaText := '"INTTOSTR","FLOATTOSTR","BOOLTOSTR","VARTOSTR","STRTOINT","STRTOINT64","STRTOFLOAT","STRTOBOOL","FORMAT","FORMATFLOAT",' +
   { . } '"LENGTH","COPY","POS","DELETE","DELETESTR","INSERT","UPPERCASE","LOWERCASE","TRIM","NAMECASE","COMPARETEXT","CHR","ORD","SETLENGTH",' +
   { . } '"ROUND","TRUNC","INT","FRAC","SQRT","ABS","SIN","COS","ARCTAN","TAN","EXP","LN","PI","INC","DEC",' +
-  { . } '"CHARCOUNT","POSEX","REDUCECAPITALS","STRINGREPLACE","EXTRACTURLFILENAME","EXTRACTURLPATH","EXTRACTURLPROTOCOL","EXTRACTURLHOST","EXTRACTURLWEBSITE","INCLUDETRAILINGURLDELIMITER","EXCLUDETRAILINGURLDELIMITER","MATCHTEXT","REPLACEREGEXPR"';
+  { . } '"CHARCOUNT","POSEX","REDUCECAPITALS","STRINGREPLACE","EXTRACTURLFILENAME","EXTRACTURLPATH","EXTRACTURLPROTOCOL","EXTRACTURLHOST","EXTRACTURLHOSTWITHPATH","BUILDWEBSITEURL","INCLUDETRAILINGURLDELIMITER","EXCLUDETRAILINGURLDELIMITER",' +
+  { . } '"MATCHTEXT","REPLACEREGEXPR"';
 
   with HintParameter.Parameters do
   begin
@@ -180,7 +181,8 @@ begin
     Add('ExtractUrlPath(const AUrl: string): string');
     Add('ExtractUrlProtocol(const AUrl: string): string');
     Add('ExtractUrlHost(const AUrl: string): string');
-    Add('ExtractUrlWebsite(const AUrl: string): string');
+    Add('ExtractUrlHostWithPath(const AUrl: string): string');
+    Add('BuildWebsiteUrl(const AUrl: string): string');
 
     Add('IncludeTrailingUrlDelimiter(const AUrl: string): string');
     Add('ExcludeTrailingUrlDelimiter(const AUrl: string): string');
@@ -248,7 +250,8 @@ begin
     Add('function ExtractUrlPath(const AUrl: string): string');
     Add('function ExtractUrlProtocol(const AUrl: string): string');
     Add('function ExtractUrlHost(const AUrl: string): string');
-    Add('function ExtractUrlWebsite(const AUrl: string): string');
+    Add('function ExtractUrlHostWithPath(const AUrl: string): string');
+    Add('function BuildWebsiteUrl(const AUrl: string): string');
 
     Add('function IncludeTrailingUrlDelimiter(const AUrl: string): string');
     Add('function ExcludeTrailingUrlDelimiter(const AUrl: string): string');

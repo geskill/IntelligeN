@@ -333,7 +333,7 @@ begin
   cxCOBURLCMS.Clear;
   cxCOBEncoding.Clear;
 
-  LUrl := ExtractUrlWebsite(cxTEPageURL.Text);
+  LUrl := BuildWebsiteUrl(cxTEPageURL.Text);
 
   if not cxCBEditFormattedURL.Checked then
     cxTEFormattedURL.Text := LUrl;
