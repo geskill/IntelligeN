@@ -2815,25 +2815,43 @@ begin
 end;
 
 procedure TSettings.AddCMSWebsite(AFileName, AWebsiteName, AWebsiteType: string);
+
+  function FindRecordIndexByText(const AText: string): Integer;
+  var
+    LRecordIndex: Integer;
+  begin
+    Result := -1;
+
+    with cxGCMSTableView1.DataController do
+    begin
+      for LRecordIndex := 0 to RecordCount - 1 do
+        if SameText(Values[LRecordIndex, cxGCMSTableView1Column2.Index], AText) then
+        begin
+          Result := LRecordIndex;
+          break;
+        end;
+    end;
+  end;
+
 var
-  CMSCollectionItem: TCMSCollectionItem;
-  CMSWebsitesCollectionItem: TCMSWebsitesCollectionItem;
-  OverrideWebsite: Boolean;
-  I, _Record: Integer;
+  LCMSCollectionItem: TCMSCollectionItem;
+  LCMSWebsitesCollectionItem: TCMSWebsitesCollectionItem;
+  LOverrideWebsite: Boolean;
+  LRecordIndex: Integer;
 begin
-  OverrideWebsite := False;
+  LOverrideWebsite := False;
   try
     with SettingsManager.Settings.Plugins do
-      CMSCollectionItem := TCMSCollectionItem(FindPlugInCollectionItemFromCollection(AWebsiteType, CMS));
+      LCMSCollectionItem := TCMSCollectionItem(FindPlugInCollectionItemFromCollection(AWebsiteType, CMS));
 
-    with CMSCollectionItem do
+    with LCMSCollectionItem do
     begin
-      CMSWebsitesCollectionItem := FindCMSWebsite(AWebsiteName);
+      LCMSWebsitesCollectionItem := FindCMSWebsite(AWebsiteName);
 
-      if not Assigned(CMSWebsitesCollectionItem) then
-        CMSWebsitesCollectionItem := TCMSWebsitesCollectionItem(Websites.Add)
+      if not Assigned(LCMSWebsitesCollectionItem) then
+        LCMSWebsitesCollectionItem := TCMSWebsitesCollectionItem(Websites.Add)
       else if (MessageDlg(Format('Override "%s"?', [AWebsiteName]), mtConfirmation, [mbyes, mbno, mbcancel], 0) = ID_YES) then
-        OverrideWebsite := True
+        LOverrideWebsite := True
       else
         Exit;
     end;
@@ -2842,43 +2860,41 @@ begin
     Exit;
   end;
 
-  with CMSWebsitesCollectionItem do
+  with LCMSWebsitesCollectionItem do
   begin
     Enabled := False;
-    name := AWebsiteName;
+    Name := AWebsiteName;
     Path := ExtractRelativePath(GetTemplatesSiteFolder, AFileName);
   end;
 
-  with CMSCollectionItem do
-    if Assigned(OnSettingsChange) and not OverrideWebsite then
-      OnSettingsChange.Invoke(cctAdd, CMSWebsitesCollectionItem.Index, -1);
+  LCMSCollectionItem.UpdateWebsite(LCMSWebsitesCollectionItem.Index);
+
+  with LCMSCollectionItem do
+    if Assigned(OnSettingsChange) and not LOverrideWebsite then
+      OnSettingsChange.Invoke(cctAdd, LCMSWebsitesCollectionItem.Index, -1);
 
   with FCMSPluginsCheckListBox.InnerCheckListBox do
     if (ItemIndex <> -1) and (Items[ItemIndex].Text = AWebsiteType) then
     begin
+      if LOverrideWebsite then
+        LRecordIndex := FindRecordIndexByText(AWebsiteName);
+
       with cxGCMSTableView1.DataController do
       begin
         BeginUpdate;
         try
-          if not OverrideWebsite then
+          if not LOverrideWebsite then
           begin
             RecordCount := RecordCount + 1;
-            _Record := RecordCount - 1;
-          end
-          else
-            for I := 0 to RecordCount - 1 do
-              if (Values[I, cxGCMSTableView1Column2.index] = AWebsiteName) then
-              begin
-                _Record := I;
-                break;
-              end;
+            LRecordIndex := RecordCount - 1;
+          end;
 
-          Values[_Record, cxGCMSTableView1Column1.index] := CMSWebsitesCollectionItem.Enabled;
-          Values[_Record, cxGCMSTableView1Column2.index] := CMSWebsitesCollectionItem.name;
-          Values[_Record, cxGCMSTableView1Column3.index] := CMSWebsitesCollectionItem.AccountName;
-          Values[_Record, cxGCMSTableView1Column4.index] := CMSWebsitesCollectionItem.AccountPassword;
-          Values[_Record, cxGCMSTableView1Column5.index] := CMSWebsitesCollectionItem.SubjectFileName;
-          Values[_Record, cxGCMSTableView1Column6.index] := CMSWebsitesCollectionItem.MessageFileName;
+          Values[LRecordIndex, cxGCMSTableView1Column1.index] := LCMSWebsitesCollectionItem.Enabled;
+          Values[LRecordIndex, cxGCMSTableView1Column2.index] := LCMSWebsitesCollectionItem.Name;
+          Values[LRecordIndex, cxGCMSTableView1Column3.index] := LCMSWebsitesCollectionItem.AccountName;
+          Values[LRecordIndex, cxGCMSTableView1Column4.index] := LCMSWebsitesCollectionItem.AccountPassword;
+          Values[LRecordIndex, cxGCMSTableView1Column5.index] := LCMSWebsitesCollectionItem.SubjectFileName;
+          Values[LRecordIndex, cxGCMSTableView1Column6.index] := LCMSWebsitesCollectionItem.MessageFileName;
         finally
           EndUpdate;
         end;
