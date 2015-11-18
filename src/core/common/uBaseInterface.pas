@@ -135,6 +135,9 @@ type
     property ControlCount: Integer read GetControlCount;
     property Mirror[const IndexOrName: OleVariant]: IMirrorContainer read GetMirror;
     property MirrorCount: Integer read GetMirrorCount;
+
+    // TODO: Add custom fields that hold compiled IScript
+    // ~ Handle this like filters ~
   end;
 
   IWebsiteEditor = interface

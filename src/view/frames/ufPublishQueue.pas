@@ -7,7 +7,7 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Menus, StdCtrls, ExtCtrls, Dialogs,
   // DevExpress
   cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxControls, cxContainer, cxEdit, cxProgressBar, cxButtons, cxStyles, cxCustomData, cxFilter, cxData,
-  cxDataStorage, cxNavigator, cxLabel, cxButtonEdit, cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxClasses, cxGridLevel, cxGrid,
+  cxDataStorage, cxNavigator, cxLabel, cxButtonEdit, cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxClasses, cxGridLevel, cxGrid, cxExtEditRepositoryItems,
   // MultiEvent
   Generics.MultiEvents.NotifyEvent,
   Generics.MultiEvents.NotifyInterface,
@@ -34,6 +34,9 @@ type
     cxGPublishQueueTableViewColumnCanel: TcxGridColumn;
     cxGPublishQueueTableViewColumnHint: TcxGridColumn;
     cxGPublishQueueTableViewColumnErrorMsg: TcxGridColumn;
+    cxERProgressBar: TcxEditRepository;
+    cxERProgressBarOK: TcxEditRepositoryProgressBar;
+    cxERProgressBarError: TcxEditRepositoryProgressBar;
     procedure cxBStartClick(Sender: TObject);
     procedure cxBPauseClick(Sender: TObject);
     procedure cxBStopClick(Sender: TObject);
@@ -84,25 +87,26 @@ procedure TfPublishQueue.cxGPublishQueueTableViewColumnProgressGetCellHint(Sende
 var
   HasError: Boolean;
 begin
-  HasError := SameStr('', VarToStr(ARecord.Values[cxGPublishQueueTableViewColumnErrorMsg.Index]));
-  if not HasError then
+  HasError := not SameStr('', VarToStr(ARecord.Values[cxGPublishQueueTableViewColumnErrorMsg.Index]));
+  if HasError then
   begin
     AHintText := Trim(VarToStr(ARecord.Values[cxGPublishQueueTableViewColumnHint.Index]) + sLineBreak + VarToStr
         (ARecord.Values[cxGPublishQueueTableViewColumnErrorMsg.Index]));
   end
   else
+  begin
     AHintText := VarToStr(ARecord.Values[cxGPublishQueueTableViewColumnHint.Index]);
+  end;
   AIsHintMultiLine := HasError;
 end;
 
 procedure TfPublishQueue.cxGPublishQueueTableViewColumnProgressGetProperties(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
   var AProperties: TcxCustomEditProperties);
 begin
-  with AProperties as TcxCustomProgressBarProperties do
-  begin
-    if not SameStr('', VarToStr(ARecord.Values[cxGPublishQueueTableViewColumnErrorMsg.Index])) then
-      BeginColor := clRed;
-  end;
+  if Assigned(ARecord) and not SameStr('', VarToStr(ARecord.Values[cxGPublishQueueTableViewColumnErrorMsg.Index])) then
+    AProperties := cxERProgressBarError.Properties
+  else
+    AProperties := cxERProgressBarOK.Properties;
 end;
 
 procedure TfPublishQueue.cxGPublishQueueTableViewColumnCanelPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
@@ -212,7 +216,7 @@ end;
 
 procedure TfPublishQueue.GUIInteractionItemEvent;
 var
-  I, Index: Integer;
+  Index: Integer;
 begin
   case Status of
     pmisCREATED:

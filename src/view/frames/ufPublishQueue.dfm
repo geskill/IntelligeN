@@ -95,10 +95,7 @@ object fPublishQueue: TfPublishQueue
       end
       object cxGPublishQueueTableViewColumnProgress: TcxGridColumn
         Caption = 'Progress'
-        PropertiesClassName = 'TcxProgressBarProperties'
-        Properties.BarStyle = cxbsAnimation
-        Properties.BeginColor = 54056
-        Properties.SolidTextColor = True
+        RepositoryItem = cxERProgressBarOK
         OnGetCellHint = cxGPublishQueueTableViewColumnProgressGetCellHint
         OnGetProperties = cxGPublishQueueTableViewColumnProgressGetProperties
       end
@@ -131,6 +128,20 @@ object fPublishQueue: TfPublishQueue
     end
     object cxGPublishQueueLevel: TcxGridLevel
       GridView = cxGPublishQueueTableView
+    end
+  end
+  object cxERProgressBar: TcxEditRepository
+    Left = 88
+    Top = 64
+    object cxERProgressBarOK: TcxEditRepositoryProgressBar
+      Properties.BarStyle = cxbsAnimation
+      Properties.BeginColor = 54056
+      Properties.SolidTextColor = True
+    end
+    object cxERProgressBarError: TcxEditRepositoryProgressBar
+      Properties.BarStyle = cxbsAnimation
+      Properties.BeginColor = clRed
+      Properties.SolidTextColor = True
     end
   end
 end

@@ -559,7 +559,7 @@ begin
     { ... } LCAPTCHASolution := ACAPTCHAPlugin.CAPTCHAResult;
     { . } end
     { . } else
-    { . } if not SameStr('', ACAPTCHAPlugin.ErrorMsg) then
+    { . } if not LResult and not LHighException then
     { . } begin
     { ... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ACAPTCHAPlugin.ErrorMsg, ExtractFileName(ACAPTCHAPluginPath)]), AErrorProc);
     { . } end
@@ -903,7 +903,6 @@ end;
 function TApiThreadedPlugin.CMSExec(const APublishItem: IPublishItem; ACAPTCHAInput: TCAPTCHAInput = nil; AIntelligentPostingHandler: TIntelligentPostingHelper = nil): Boolean;
 var
   LResult, LHighException: WordBool;
-  LErrorHandler: TPluginErrorProc;
 begin
   LResult := False;
   LHighException := False;
@@ -946,7 +945,7 @@ begin
     { ..... } LHighException := True;
     { ... } end;
 
-    { ... } if not SameStr('', ErrorMsg) then
+    { ... } if not LResult and not LHighException then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(APublishItem.CMSPluginPath)]), FErrorHandler);
     { ... } end
@@ -988,7 +987,7 @@ begin
     { ..... } LHighException := True;
     { ... } end;
 
-    { ... } if not SameStr('', ErrorMsg) then
+    { ... } if not LResult and not LHighException then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(ACrawler.Path)]), FErrorHandler);
     { ... } end
@@ -1066,7 +1065,7 @@ begin
     { ..... } LHighException := True;
     { ... } end;
 
-    { ... } if not SameStr('', ErrorMsg) then
+    { ... } if not LResult and not LHighException then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(ACrypter.Path)]), FErrorHandler);
     { ... } end
@@ -1108,7 +1107,7 @@ begin
     { ..... } LFolderInfo.HosterShort := THosterConfiguration.GetCustomisedHoster(LFolderInfo.Hoster, True);
     { ... } end
     { ... } else
-    { ... } if not SameStr('', ErrorMsg) then
+    { ... } if not LResult and not LHighException then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(ACrypter.Path)]), FErrorHandler);
     { ... } end
@@ -1150,6 +1149,7 @@ begin
     { . } begin
     { ... } try
     { ..... } LLinkCount := CheckLinks(ALinks);
+    { ..... } LResult := True; // TODO: Improve interface with boolean result
     { ... } except
     { ..... } LHighException := True;
     { ... } end;
@@ -1235,7 +1235,7 @@ begin
     { ..... } LHighException := True;
     { ... } end;
 
-    { ... } if not SameStr('', ErrorMsg) then
+    { ... } if not LResult and not LHighException then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(AImageHoster.Path)]), FErrorHandler);
     { ... } end
@@ -1281,7 +1281,7 @@ begin
     { ..... } LHighException := True;
     { ... } end;
 
-    { ... } if not SameStr('', ErrorMsg) then
+    { ... } if not LResult and not LHighException then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(AImageHoster.Path)]), FErrorHandler);
     { ... } end
