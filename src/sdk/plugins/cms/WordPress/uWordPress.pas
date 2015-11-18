@@ -324,7 +324,12 @@ end;
 
 function TWordPress.DoAnalyzePost;
 begin
-  Result := Pos('=' + IntToStr(ArticleID), string(AHTTPProcess.HTTPResult.HTTPResponse.Location)) > 0;
+  Result := not(Pos('"hidden_post_status" value="publish"', AResponseStr) = 0) or not(Pos('=' + IntToStr(ArticleID), string(AHTTPProcess.HTTPResult.HTTPResponse.Location)) = 0);
+
+  if not Result then
+  begin
+    ErrorMsg := 'Something went wrong publishing the article. Maybe a draft is created (Id: ' + IntToStr(ArticleID) + ')';
+  end;
 end;
 
 function TWordPress.GetIDsRequestURL;
