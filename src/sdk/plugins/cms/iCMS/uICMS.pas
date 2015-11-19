@@ -158,7 +158,7 @@ var
 begin
   Result := False;
   try
-    OleInitialize(nil);
+    CoInitializeEx(nil, COINIT_MULTITHREADED);
     try
       XMLDoc := NewXMLDocument;
       try
@@ -179,7 +179,7 @@ begin
         XMLDoc := nil;
       end;
     finally
-      OleUninitialize;
+      CoUninitialize;
     end;
   except
     ErrorMsg := 'error parsing ICMS-RESULT-XML (' + SysErrorMessage(GetLastError()) + ')';

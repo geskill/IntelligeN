@@ -65,89 +65,91 @@ begin
   OleInitialize(nil);
   try
     XMLDoc := NewXMLDocument;
-
-    with XMLDoc do
-    begin
-      Options := Options + [doNodeAutoIndent];
-      DocumentElement := CreateElement('xml', '');
-      Active := True;
-    end;
-    with XMLDoc.DocumentElement do
-    begin
-      with AddChild('templatetype') do
+    try
+      with XMLDoc do
       begin
-        if FileExists(ATemplateFileName) then
+        Options := Options + [doNodeAutoIndent];
+        DocumentElement := CreateElement('xml', '');
+        Active := True;
+      end;
+      with XMLDoc.DocumentElement do
+      begin
+        with AddChild('templatetype') do
         begin
-          Attributes['filename'] := ExtractFileName(ChangeFileExt(ATemplateFileName, ''));
-          Attributes['checksum'] := GetMD5FromFile(ATemplateFileName);
+          if FileExists(ATemplateFileName) then
+          begin
+            Attributes['filename'] := ExtractFileName(ChangeFileExt(ATemplateFileName, ''));
+            Attributes['checksum'] := GetMD5FromFile(ATemplateFileName);
+          end;
+          NodeValue := TypeIDToString(ATabSheetController.ControlController.TypeID);
         end;
-        NodeValue := TypeIDToString(ATabSheetController.ControlController.TypeID);
+
+        with AddChild('controls') do
+          with ATabSheetController.ControlController do
+            for I := 0 to ControlCount - 1 do
+              with AddChild(ControlIDToString(Control[I].ControlID)) do
+              begin
+                AddChild('title').NodeValue := Control[I].Title;
+                with AddChild('value') do
+                begin
+                  Attributes['list'] := '#';
+                  NodeValue := RemoveSpecialChars(Control[I].Value);
+                end;
+                if Control[I].QueryInterface(IPicture, Picture) = 0 then
+                begin
+                  with AddChild('hosters') do
+                    for X := 0 to Picture.MirrorCount - 1 do
+                      with AddChild('hoster') do
+                      begin
+                        Attributes['name'] := Picture.Mirror[X].Name;
+                        NodeValue := Picture.Mirror[X].Value;
+                      end;
+                  Picture := nil;
+                end;
+                with AddChild('position') do
+                begin
+                  Attributes['left'] := Control[I].Left;
+                  Attributes['top'] := Control[I].Top;
+                  Attributes['width'] := Control[I].Width;
+                  Attributes['height'] := Control[I].Height;
+                end;
+              end;
+        with AddChild('mirrors') do
+          with ATabSheetController.MirrorController do
+            for I := 0 to MirrorCount - 1 do
+              with AddChild('mirror') do
+              begin
+                for X := 0 to Mirror[I].DirectlinkCount - 1 do
+                  with AddChild('directlink') do
+                  begin
+                    Attributes['status'] := ContentStatusToString(Mirror[I].Directlink[X].Status);
+                    Attributes['size'] := Round(Mirror[I].Directlink[X].Size);
+                    Attributes['partsize'] := Round(Mirror[I].Directlink[X].PartSize);
+                    Attributes['hoster'] := Mirror[I].Directlink[X].Hoster;
+                    Attributes['parts'] := Mirror[I].Directlink[X].Parts;
+                    NodeValue := Mirror[I].Directlink[X].Value;
+                  end;
+                for X := 0 to Mirror[I].CrypterCount - 1 do
+                  with AddChild('crypter') do
+                  begin
+                    Attributes['name'] := Mirror[I].Crypter[X].Name;
+                    Attributes['status'] := ContentStatusToString(Mirror[I].Crypter[X].Status);
+                    Attributes['size'] := Round(Mirror[I].Crypter[X].Size);
+                    Attributes['partsize'] := Round(Mirror[I].Crypter[X].PartSize);
+                    Attributes['hoster'] := Mirror[I].Crypter[X].Hoster;
+                    Attributes['parts'] := Mirror[I].Crypter[X].Parts;
+                    Attributes['statusimage'] := Mirror[I].Crypter[X].StatusImage;
+                    Attributes['statusimagetext'] := Mirror[I].Crypter[X].StatusImageText;
+                    NodeValue := Mirror[I].Crypter[X].Value;
+                  end;
+              end;
       end;
 
-      with AddChild('controls') do
-        with ATabSheetController.ControlController do
-          for I := 0 to ControlCount - 1 do
-            with AddChild(ControlIDToString(Control[I].ControlID)) do
-            begin
-              AddChild('title').NodeValue := Control[I].Title;
-              with AddChild('value') do
-              begin
-                Attributes['list'] := '#';
-                NodeValue := RemoveSpecialChars(Control[I].Value);
-              end;
-              if Control[I].QueryInterface(IPicture, Picture) = 0 then
-              begin
-                with AddChild('hosters') do
-                  for X := 0 to Picture.MirrorCount - 1 do
-                    with AddChild('hoster') do
-                    begin
-                      Attributes['name'] := Picture.Mirror[X].Name;
-                      NodeValue := Picture.Mirror[X].Value;
-                    end;
-                Picture := nil;
-              end;
-              with AddChild('position') do
-              begin
-                Attributes['left'] := Control[I].Left;
-                Attributes['top'] := Control[I].Top;
-                Attributes['width'] := Control[I].Width;
-                Attributes['height'] := Control[I].Height;
-              end;
-            end;
-      with AddChild('mirrors') do
-        with ATabSheetController.MirrorController do
-          for I := 0 to MirrorCount - 1 do
-            with AddChild('mirror') do
-            begin
-              for X := 0 to Mirror[I].DirectlinkCount - 1 do
-                with AddChild('directlink') do
-                begin
-                  Attributes['status'] := ContentStatusToString(Mirror[I].Directlink[X].Status);
-                  Attributes['size'] := Round(Mirror[I].Directlink[X].Size);
-                  Attributes['partsize'] := Round(Mirror[I].Directlink[X].PartSize);
-                  Attributes['hoster'] := Mirror[I].Directlink[X].Hoster;
-                  Attributes['parts'] := Mirror[I].Directlink[X].Parts;
-                  NodeValue := Mirror[I].Directlink[X].Value;
-                end;
-              for X := 0 to Mirror[I].CrypterCount - 1 do
-                with AddChild('crypter') do
-                begin
-                  Attributes['name'] := Mirror[I].Crypter[X].Name;
-                  Attributes['status'] := ContentStatusToString(Mirror[I].Crypter[X].Status);
-                  Attributes['size'] := Round(Mirror[I].Crypter[X].Size);
-                  Attributes['partsize'] := Round(Mirror[I].Crypter[X].PartSize);
-                  Attributes['hoster'] := Mirror[I].Crypter[X].Hoster;
-                  Attributes['parts'] := Mirror[I].Crypter[X].Parts;
-                  Attributes['statusimage'] := Mirror[I].Crypter[X].StatusImage;
-                  Attributes['statusimagetext'] := Mirror[I].Crypter[X].StatusImageText;
-                  NodeValue := Mirror[I].Crypter[X].Value;
-                end;
-            end;
+      XMLDoc.SaveToFile(AFileName);
+    finally
+      XMLDoc := nil;
     end;
-
-    XMLDoc.SaveToFile(AFileName);
   finally
-    XMLDoc := nil;
     OleUninitialize;
   end;
 end;
@@ -168,158 +170,160 @@ var
   LTemplateChecksum: string;
   _CrypterExists, _ImageMirrorExists: Boolean;
 begin
-  OleInitialize(nil);
+  result := -1;
   try
-    result := -1;
+    OleInitialize(nil);
     try
       LXMLDoc := NewXMLDocument;
-
-      with LXMLDoc do
-      begin
-        LoadFromFile(AFileName);
-        Active := True;
-      end;
-
-      // Read file header
-      with LXMLDoc.DocumentElement do
-      begin
-        if HasChildNodes then
+      try
+        with LXMLDoc do
         begin
-          with ChildNodes.Nodes['templatetype'] do
-            if SameText('#', NodeValue) then
-            begin
-              with TSelectTemplateFileName.Create(nil) do
-                try
-                  if Execute then
-                  begin
-                    LType := GetFileInfo(ATemplateDirectory + TemplateFileName + '.xml').TemplateType;
-                    LTemplateFileName := TemplateFileName + '.xml';
-                    LTemplateChecksum := '#';
-                  end
-                  else
-                  begin
-                    ErrorMsg := StrTheIntelligeNXML2StdReq;
-                    raise Exception.Create(ErrorMsg);
-                  end;
-                finally
-                  Free;
-                end;
-            end
-            else
-            begin
-              LType := StringToTypeID(VarToStr(NodeValue));
-              LTemplateFileName := '';
-              if HasAttribute('filename') then
-                LTemplateFileName := VarToStr(Attributes['filename']) + '.xml';
-              LTemplateChecksum := '#';
-              if HasAttribute('checksum') then
-                LTemplateChecksum := VarToStr(Attributes['checksum']);
-            end;
-        end
-        else
-        begin
-          ErrorMsg := StrTheXMLFileIsNotCompatible;
-          raise Exception.Create(ErrorMsg);
+          LoadFromFile(AFileName);
+          Active := True;
         end;
-      end;
 
-      if (FileExists(ATemplateDirectory + LTemplateFileName)) and (SameText(LTemplateChecksum, GetMD5FromFile(ATemplateDirectory + LTemplateFileName)) or SameText('#', LTemplateChecksum)) then
-        LTemplateFile := ATemplateDirectory + LTemplateFileName
-      else
-        LTemplateFile := AFileName;
-
-      with APageController.TabSheetController[APageController.Add(LTemplateFile, LType, True)] do
+        // Read file header
         with LXMLDoc.DocumentElement do
         begin
-          for I := 0 to ChildNodes.Nodes['mirrors'].ChildNodes.Count - 1 do
-            with MirrorController.Mirror[MirrorController.Add] do
-            begin
-              for X := 0 to ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Count - 1 do
-                if SameText('directlink', ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeName) then
-                begin
-                  with Directlink[GetDirectlink.Add(VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeValue))] do
-                  begin
-                    Size := VarToIntDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['size'], 0);
-                    PartSize := VarToIntDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['partsize'], 0);
+          if HasChildNodes then
+          begin
+            with ChildNodes.Nodes['templatetype'] do
+              if SameText('#', NodeValue) then
+              begin
+                with TSelectTemplateFileName.Create(nil) do
+                  try
+                    if Execute then
+                    begin
+                      LType := GetFileInfo(ATemplateDirectory + TemplateFileName + '.xml').TemplateType;
+                      LTemplateFileName := TemplateFileName + '.xml';
+                      LTemplateChecksum := '#';
+                    end
+                    else
+                    begin
+                      ErrorMsg := StrTheIntelligeNXML2StdReq;
+                      raise Exception.Create(ErrorMsg);
+                    end;
+                  finally
+                    Free;
                   end;
+              end
+              else
+              begin
+                LType := StringToTypeID(VarToStr(NodeValue));
+                LTemplateFileName := '';
+                if HasAttribute('filename') then
+                  LTemplateFileName := VarToStr(Attributes['filename']) + '.xml';
+                LTemplateChecksum := '#';
+                if HasAttribute('checksum') then
+                  LTemplateChecksum := VarToStr(Attributes['checksum']);
+              end;
+          end
+          else
+          begin
+            ErrorMsg := StrTheXMLFileIsNotCompatible;
+            raise Exception.Create(ErrorMsg);
+          end;
+        end;
 
-                  // Workaround for: http://www.devexpress.com/issue=B202502
-                  APageController.CallControlAligner;
-                end
-                else if ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeName = 'crypter' then
-                begin
-                  if ForceAddCrypter then
+        if (FileExists(ATemplateDirectory + LTemplateFileName)) and (SameText(LTemplateChecksum, GetMD5FromFile(ATemplateDirectory + LTemplateFileName)) or SameText('#', LTemplateChecksum)) then
+          LTemplateFile := ATemplateDirectory + LTemplateFileName
+        else
+          LTemplateFile := AFileName;
+
+        with APageController.TabSheetController[APageController.Add(LTemplateFile, LType, True)] do
+          with LXMLDoc.DocumentElement do
+          begin
+            for I := 0 to ChildNodes.Nodes['mirrors'].ChildNodes.Count - 1 do
+              with MirrorController.Mirror[MirrorController.Add] do
+              begin
+                for X := 0 to ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Count - 1 do
+                  if SameText('directlink', ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeName) then
                   begin
-                    _CrypterExists := False;
+                    with Directlink[GetDirectlink.Add(VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeValue))] do
+                    begin
+                      Size := VarToIntDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['size'], 0);
+                      PartSize := VarToIntDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['partsize'], 0);
+                    end;
+
+                    // Workaround for: http://www.devexpress.com/issue=B202502
+                    APageController.CallControlAligner;
+                  end
+                  else if ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeName = 'crypter' then
+                  begin
+                    if ForceAddCrypter then
+                    begin
+                      _CrypterExists := False;
+                      for Y := 0 to CrypterCount - 1 do
+                        if SameText(Crypter[Y].Name, VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['name'])) then
+                        begin
+                          _CrypterExists := True;
+                          break;
+                        end;
+                      if not _CrypterExists then
+                        AddCrypter(VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['name']));
+                    end;
                     for Y := 0 to CrypterCount - 1 do
-                      if SameText(Crypter[Y].Name, VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['name'])) then
+                      if SameText(Crypter[Y].name, VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['name'])) then
                       begin
-                        _CrypterExists := True;
+                        Crypter[Y].Value := VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeValue);
+                        Crypter[Y].Size := VarToIntDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['size'], 0);
+                        Crypter[Y].PartSize := VarToIntDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['partsize'], 0);
+                        // Crypter[Y].Hoster := VarToStrDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['hoster'], '');
+                        // Crypter[Y].Parts := VarToIntDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['parts'], 0);
+                        // Crypter[Y].StatusImage := VarToStrDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['statusimage'], '');
+                        // Crypter[Y].StatusImageText := VarToStrDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['statusimagetext'], '');
+
+                        Crypter[Y].CheckFolder;
                         break;
                       end;
-                    if not _CrypterExists then
-                      AddCrypter(VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['name']));
                   end;
-                  for Y := 0 to CrypterCount - 1 do
-                    if SameText(Crypter[Y].name, VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['name'])) then
-                    begin
-                      Crypter[Y].Value := VarToStr(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeValue);
-                      Crypter[Y].Size := VarToIntDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['size'], 0);
-                      Crypter[Y].PartSize := VarToIntDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['partsize'], 0);
-                      // Crypter[Y].Hoster := VarToStrDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['hoster'], '');
-                      // Crypter[Y].Parts := VarToIntDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['parts'], 0);
-                      // Crypter[Y].StatusImage := VarToStrDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['statusimage'], '');
-                      // Crypter[Y].StatusImageText := VarToStrDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['statusimagetext'], '');
-
-                      Crypter[Y].CheckFolder;
-                      break;
-                    end;
-                end;
-            end;
-          for I := 0 to ChildNodes.Nodes['controls'].ChildNodes.Count - 1 do
-            with ChildNodes.Nodes['controls'].ChildNodes.Nodes[I] do
-            begin
-              LBasicControl := ControlController.FindControl(StringToControlID(NodeName));
-              if Assigned(LBasicControl) then
+              end;
+            for I := 0 to ChildNodes.Nodes['controls'].ChildNodes.Count - 1 do
+              with ChildNodes.Nodes['controls'].ChildNodes.Nodes[I] do
               begin
-                LBasicControl.Value := VarToStr(ChildNodes.Nodes['value'].NodeValue);
-
-                if LBasicControl.QueryInterface(IPicture, Picture) = 0 then
+                LBasicControl := ControlController.FindControl(StringToControlID(NodeName));
+                if Assigned(LBasicControl) then
                 begin
-                  for X := 0 to ChildNodes.Nodes['hosters'].ChildNodes.Count - 1 do
+                  LBasicControl.Value := VarToStr(ChildNodes.Nodes['value'].NodeValue);
+
+                  if LBasicControl.QueryInterface(IPicture, Picture) = 0 then
                   begin
-                    if ForceAddImageMirror then
+                    for X := 0 to ChildNodes.Nodes['hosters'].ChildNodes.Count - 1 do
                     begin
-                      _ImageMirrorExists := False;
+                      if ForceAddImageMirror then
+                      begin
+                        _ImageMirrorExists := False;
+                        for Y := 0 to Picture.MirrorCount - 1 do
+                          if SameText(Picture.Mirror[Y].Name, VarToStr(ChildNodes.Nodes['hosters'].ChildNodes.Nodes[X].Attributes['name'])) then
+                          begin
+                            _ImageMirrorExists := True;
+                            break;
+                          end;
+                        if not _ImageMirrorExists then
+                          Picture.AddMirror(VarToStr(ChildNodes.Nodes['hosters'].ChildNodes.Nodes[X].Attributes['name']));
+                      end;
                       for Y := 0 to Picture.MirrorCount - 1 do
                         if SameText(Picture.Mirror[Y].Name, VarToStr(ChildNodes.Nodes['hosters'].ChildNodes.Nodes[X].Attributes['name'])) then
                         begin
-                          _ImageMirrorExists := True;
+                          Picture.Mirror[Y].Value := VarToStr(ChildNodes.Nodes['hosters'].ChildNodes.Nodes[X].NodeValue);
                           break;
                         end;
-                      if not _ImageMirrorExists then
-                        Picture.AddMirror(VarToStr(ChildNodes.Nodes['hosters'].ChildNodes.Nodes[X].Attributes['name']));
                     end;
-                    for Y := 0 to Picture.MirrorCount - 1 do
-                      if SameText(Picture.Mirror[Y].Name, VarToStr(ChildNodes.Nodes['hosters'].ChildNodes.Nodes[X].Attributes['name'])) then
-                      begin
-                        Picture.Mirror[Y].Value := VarToStr(ChildNodes.Nodes['hosters'].ChildNodes.Nodes[X].NodeValue);
-                        break;
-                      end;
                   end;
+                  Picture := nil;
                 end;
-                Picture := nil;
+                LBasicControl := nil;
               end;
-              LBasicControl := nil;
-            end;
-          result := TabSheetIndex;
-        end;
-    except
-      result := -1;
+            result := TabSheetIndex;
+          end;
+      finally
+        LXMLDoc := nil;
+      end;
+    finally
+      OleUninitialize;
     end;
-  finally
-    LXMLDoc := nil;
-    OleUninitialize;
+  except
+    result := -1;
   end;
 end;
 

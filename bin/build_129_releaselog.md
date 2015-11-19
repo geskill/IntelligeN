@@ -437,6 +437,12 @@
 
 * Improved performance
 
+* Improved TThreadManager thread-safety
+
 * Improved IScript Website selection box using host including the path to distinguish among websites on the same host
 
 * Improved ExtractUrlHost using TIdURI. (therefore Indy package is now part of framework.bpl)
+
+* Improved OleInitialize/CoInitializeEx usage
+
+* Fixed loading intelligen.xml.2 files with no templatetype

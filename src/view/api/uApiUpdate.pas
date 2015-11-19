@@ -239,26 +239,29 @@ begin
     Exit(False);
   end;
 
-  OleInitialize(nil);
-  LXMLDoc := NewXMLDocument;
+  CoInitializeEx(nil, COINIT_MULTITHREADED);
   try
-    with LXMLDoc do
-    begin
-      LoadFromXML(LHTTPProcess.HTTPResult.SourceCode);
-      Active := True;
-    end;
-
-    with LXMLDoc.DocumentElement do
-      if HasChildNodes then
+    LXMLDoc := NewXMLDocument;
+    try
+      with LXMLDoc do
       begin
-        if ChildNodes.Nodes['upgrade'].HasChildNodes then
-          ReadFiles(ChildNodes.Nodes['upgrade'], FUpdateVersions.Upgrade);
-        if ChildNodes.Nodes['update'].HasChildNodes then
-          ReadFiles(ChildNodes.Nodes['update'], FUpdateVersions.Update);
+        LoadFromXML(LHTTPProcess.HTTPResult.SourceCode);
+        Active := True;
       end;
+
+      with LXMLDoc.DocumentElement do
+        if HasChildNodes then
+        begin
+          if ChildNodes.Nodes['upgrade'].HasChildNodes then
+            ReadFiles(ChildNodes.Nodes['upgrade'], FUpdateVersions.Upgrade);
+          if ChildNodes.Nodes['update'].HasChildNodes then
+            ReadFiles(ChildNodes.Nodes['update'], FUpdateVersions.Update);
+        end;
+    finally
+      LXMLDoc := nil;
+    end;
   finally
-    LXMLDoc := nil;
-    OleUninitialize;
+    CoUninitialize;
   end;
 
   result := True;

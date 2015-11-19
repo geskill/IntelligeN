@@ -133,6 +133,8 @@ begin
         Delete(LTitle, 1, 3);
     end;
 
+    // TODO: Only for german stuff useful. Detect german language or ignore?
+
     LTitle := StringReplace(LTitle, 'ae', 'ä', [rfReplaceAll]);
     LTitle := StringReplace(LTitle, 'Ae', 'Ä', [rfReplaceAll]);
     LTitle := StringReplace(LTitle, 'oe', 'ö', [rfReplaceAll]);

@@ -393,29 +393,32 @@ var
   end;
 
 begin
-  OleInitialize(nil);
+  CoInitializeEx(nil, COINIT_MULTITHREADED);
   try
     XMLDoc := NewXMLDocument;
-    with XMLDoc do
-    begin
-      LoadFromXML(Trim(AResponseStr));
-      Active := True;
-    end;
-
-    with XMLDoc.ChildNodes.Nodes['methodResponse'] do
-      if Assigned(ChildNodes.FindNode('params')) then
+    try
+      with XMLDoc do
       begin
-        BoardLevel := TStringList.Create;
-        try
-          RecursiveIDGrabber(ChildNodes.Nodes['params'].ChildNodes.Nodes['param'].ChildNodes.Nodes['value'].ChildNodes.Nodes['array'].ChildNodes.Nodes['data'], '0', 0, BoardLevel);
-        finally
-          BoardLevel.Free;
-        end;
+        LoadFromXML(Trim(AResponseStr));
+        Active := True;
       end;
 
-    XMLDoc := nil;
+      with XMLDoc.ChildNodes.Nodes['methodResponse'] do
+        if Assigned(ChildNodes.FindNode('params')) then
+        begin
+          BoardLevel := TStringList.Create;
+          try
+            RecursiveIDGrabber(ChildNodes.Nodes['params'].ChildNodes.Nodes['param'].ChildNodes.Nodes['value'].ChildNodes.Nodes['array'].ChildNodes.Nodes['data'], '0', 0, BoardLevel);
+          finally
+            BoardLevel.Free;
+          end;
+        end;
+
+    finally
+      XMLDoc := nil;
+    end;
   finally
-    OleUninitialize;
+    CoUninitialize;
   end;
   Result := FCheckedIDsList.Count;
 end;
@@ -442,42 +445,44 @@ function TWordPress.GetIDs;
     XMLDoc: IXMLDocument;
     StringStream: TStringStream;
   begin
-    OleInitialize(nil);
+    CoInitializeEx(nil, COINIT_MULTITHREADED);
     try
       XMLDoc := NewXMLDocument;
-
-      with XMLDoc do
-      begin
-        Active := True;
-        Encoding := 'UTF-8';
-        StandAlone := 'yes';
-        Options := Options + [doNodeAutoIndent];
-      end;
-
-      with XMLDoc.AddChild('methodCall') do
-      begin
-        AddChild('methodName').NodeValue := 'metaWeblog.getCategories';
-        with AddChild('params') do
-        begin
-          AddChild('param').AddChild('value').AddChild('string').NodeValue := '1';
-          AddChild('param').AddChild('value').AddChild('string').NodeValue := AccountName;
-          AddChild('param').AddChild('value').AddChild('string').NodeValue := AccountPassword;
-        end;
-      end;
-
-      // Using SaveToXML didn't adds the encoding information in the xml header
-      StringStream := TStringStream.Create('', CP_UTF8);
       try
-        XMLDoc.SaveToStream(StringStream);
-        Result := StringStream.DataString;
+        with XMLDoc do
+        begin
+          Active := True;
+          Encoding := 'UTF-8';
+          StandAlone := 'yes';
+          Options := Options + [doNodeAutoIndent];
+        end;
+
+        with XMLDoc.AddChild('methodCall') do
+        begin
+          AddChild('methodName').NodeValue := 'metaWeblog.getCategories';
+          with AddChild('params') do
+          begin
+            AddChild('param').AddChild('value').AddChild('string').NodeValue := '1';
+            AddChild('param').AddChild('value').AddChild('string').NodeValue := AccountName;
+            AddChild('param').AddChild('value').AddChild('string').NodeValue := AccountPassword;
+          end;
+        end;
+
+        // Using SaveToXML didn't adds the encoding information in the xml header
+        StringStream := TStringStream.Create('', CP_UTF8);
+        try
+          XMLDoc.SaveToStream(StringStream);
+          Result := StringStream.DataString;
+        finally
+          StringStream.Free;
+        end;
+
       finally
-        StringStream.Free;
+        XMLDoc := nil;
       end;
 
-      // XMLDoc.SaveToXML(Result);
-      XMLDoc := nil;
     finally
-      OleUninitialize;
+      CoUninitialize;
     end;
   end;
 

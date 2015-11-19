@@ -150,7 +150,7 @@ begin
   end
   else if not SameStr('', LHTTPProcess.HTTPResult.SourceCode) then
   begin
-    OleInitialize(nil);
+    CoInitializeEx(nil, COINIT_MULTITHREADED);
     try
       LXMLDoc := NewXMLDocument;
       try
@@ -182,7 +182,7 @@ begin
         LXMLDoc := nil;
       end;
     finally
-      OleUninitialize;
+      CoUninitialize;
     end;
   end
   else
@@ -246,7 +246,7 @@ begin
   end
   else if not SameStr('', LHTTPProcess.HTTPResult.SourceCode) then
   begin
-    OleInitialize(nil);
+    CoInitializeEx(nil, COINIT_MULTITHREADED);
     try
       LXMLDoc := NewXMLDocument;
       try
@@ -297,7 +297,7 @@ begin
         LXMLDoc := nil;
       end;
     finally
-      OleUninitialize;
+      CoUninitialize;
     end;
   end
   else

@@ -5,42 +5,42 @@ uses
   Windows, SysUtils, Variants, XMLDoc, XMLIntf, ActiveX,
   // Common
   uAppConst;
-
 {$R *.res}
-
-  { ****************************************************************************** }
+{ ****************************************************************************** }
 
 function GetFileInfo(AFileName: WideString): RTemplateFileInfo; stdcall; export;
 var
   LXMLDoc: IXMLDocument;
   LTemplateInfo: RTemplateFileInfo;
 begin
-  OleInitialize(nil);
+  CoInitializeEx(nil, COINIT_MULTITHREADED);
   try
     LXMLDoc := NewXMLDocument;
+    try
+      with LXMLDoc do
+      begin
+        LoadFromFile(AFileName);
+        Active := True;
+      end;
 
-    with LXMLDoc do
-    begin
-      LoadFromFile(AFileName);
-      Active := True;
-    end;
-
-    with LXMLDoc.DocumentElement do
-      if HasChildNodes then
-        with ChildNodes.Nodes['templatetype'] do
-        begin
-          with LTemplateInfo do
+      with LXMLDoc.DocumentElement do
+        if HasChildNodes then
+          with ChildNodes.Nodes['templatetype'] do
           begin
-            TemplateType := StringToTypeID(VarToStr(NodeValue));
-            FileName := VarToStr(Attributes['filename']);
-            Checksum := VarToStr(Attributes['checksum']);
+            with LTemplateInfo do
+            begin
+              TemplateType := StringToTypeID(VarToStr(NodeValue));
+              FileName := VarToStr(Attributes['filename']);
+              Checksum := VarToStr(Attributes['checksum']);
+            end;
           end;
-        end;
 
-    Result := LTemplateInfo;
+      Result := LTemplateInfo;
+    finally
+      LXMLDoc := nil;
+    end;
   finally
-    LXMLDoc := nil;
-    OleUninitialize;
+    CoUninitialize;
   end;
 end;
 

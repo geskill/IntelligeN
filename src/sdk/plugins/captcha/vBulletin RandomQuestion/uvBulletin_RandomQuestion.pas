@@ -68,31 +68,32 @@ var
 begin
   Result := '';
 
-  OleInitialize(nil);
+  CoInitializeEx(nil, COINIT_MULTITHREADED);
   try
     XMLDoc := NewXMLDocument;
+    try
+      with XMLDoc do
+      begin
+        LoadFromFile(AFileName);
+        Active := True;
+      end;
 
-    with XMLDoc do
-    begin
-      LoadFromFile(AFileName);
-      Active := True;
-    end;
-
-    with XMLDoc.DocumentElement do
-      if HasChildNodes then
-        for CAPTCHACount := 0 to ChildNodes.Count - 1 do
-          with ChildNodes.Nodes[CAPTCHACount] do
-          begin
-            if SameText(ACAPTCHA, VarToStrDef(ChildNodes.Nodes['question'].NodeValue, '')) then
+      with XMLDoc.DocumentElement do
+        if HasChildNodes then
+          for CAPTCHACount := 0 to ChildNodes.Count - 1 do
+            with ChildNodes.Nodes[CAPTCHACount] do
             begin
-              Result := VarToStrDef(ChildNodes.Nodes['answer'].NodeValue, '');
-              break;
+              if SameText(ACAPTCHA, VarToStrDef(ChildNodes.Nodes['question'].NodeValue, '')) then
+              begin
+                Result := VarToStrDef(ChildNodes.Nodes['answer'].NodeValue, '');
+                break;
+              end;
             end;
-          end;
-
+    finally
+      XMLDoc := nil;
+    end;
   finally
-    XMLDoc := nil;
-    OleUninitialize;
+    CoUninitialize;
   end;
 end;
 

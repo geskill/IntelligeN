@@ -46,7 +46,7 @@ type
 
   THosterConfiguration = class
   class var
-    FCS: TCriticalSection;
+    // FCS: TCriticalSection;
   private const
     HosterXML: string = 'hoster.xml';
 
@@ -86,28 +86,30 @@ begin
   OleInitialize(nil);
   try
     XMLDoc := NewXMLDocument;
+    try
+      with XMLDoc do
+      begin
+        LoadFromFile(AFileName);
+        Active := True;
+      end;
 
-    with XMLDoc do
-    begin
-      LoadFromFile(AFileName);
-      Active := True;
-    end;
-
-    with XMLDoc.DocumentElement do
-      if HasChildNodes then
-        with ChildNodes.Nodes['templatetype'] do
-        begin
-          with _TemplateInfo do
+      with XMLDoc.DocumentElement do
+        if HasChildNodes then
+          with ChildNodes.Nodes['templatetype'] do
           begin
-            TemplateType := StringToTypeID(VarToStr(NodeValue));
-            TemplateFileName := VarToStr(Attributes['filename']);
-            TemplateChecksum := VarToStr(Attributes['checksum']);
+            with _TemplateInfo do
+            begin
+              TemplateType := StringToTypeID(VarToStr(NodeValue));
+              TemplateFileName := VarToStr(Attributes['filename']);
+              TemplateChecksum := VarToStr(Attributes['checksum']);
+            end;
           end;
-        end;
 
-    Result := _TemplateInfo;
+      Result := _TemplateInfo;
+    finally
+      XMLDoc := nil;
+    end;
   finally
-    XMLDoc := nil;
     OleUninitialize;
   end;
 end;
@@ -190,108 +192,115 @@ begin
 
   MultiPosterVersion := TMultiPosterVersion(IndexText(ExtractFileExt(AFileName), ['.mpu', '.ep4']));
   OleInitialize(nil);
-  XMLDoc := NewXMLDocument;
+  try
+    XMLDoc := NewXMLDocument;
+    try
+      with XMLDoc do
+      begin
+        Options := Options + [doNodeAutoIndent];
+        ParseOptions := ParseOptions + [poPreserveWhiteSpace];
+        NodeIndentStr := '  ';
 
-  with XMLDoc do
-  begin
-    Options := Options + [doNodeAutoIndent];
-    ParseOptions := ParseOptions + [poPreserveWhiteSpace];
-    NodeIndentStr := '  ';
+        LoadFromFile(AFileName);
+        Active := True;
 
-    LoadFromFile(AFileName);
-    Active := True;
-
-    with DocumentElement do
-      if HasChildNodes then
-        with Result do
-        begin
-          WebsiteURL := IncludeTrailingUrlDelimiter(VarToStr(ChildNodes.Nodes[GetWebsiteNameCaption(MultiPosterVersion)].NodeValue));
-          WebsiteType := GetForumType(VarToStr(ChildNodes.Nodes[GetWebsiteTypeCaption(MultiPosterVersion)].NodeValue));
-          WebsiteCharset := '';
-          if (MultiPosterVersion = vMPU) then
-          begin
-            ID := TID.Create;
-            ID.Name := 'forums';
-
-            if Assigned(ChildNodes.FindNode('MusicArea')) or Assigned(ChildNodes.FindNode('MusicAlbums')) then
+        with DocumentElement do
+          if HasChildNodes then
+            with Result do
             begin
-              _Type := TType.Create(cAudio);
-              if Assigned(ChildNodes.FindNode('MusicArea')) then
-                _Type.ID := CleanUP(ChildNodes.Nodes['MusicArea'].NodeValue)
-              else
-                _Type.ID := CleanUP(ChildNodes.Nodes['MusicAlbums'].NodeValue);
-              ID.Types.Add(_Type);
+              WebsiteURL := IncludeTrailingUrlDelimiter(VarToStr(ChildNodes.Nodes[GetWebsiteNameCaption(MultiPosterVersion)].NodeValue));
+              WebsiteType := GetForumType(VarToStr(ChildNodes.Nodes[GetWebsiteTypeCaption(MultiPosterVersion)].NodeValue));
+              WebsiteCharset := '';
+              if (MultiPosterVersion = vMPU) then
+              begin
+                ID := TID.Create;
+                ID.Name := 'forums';
+
+                if Assigned(ChildNodes.FindNode('MusicArea')) or Assigned(ChildNodes.FindNode('MusicAlbums')) then
+                begin
+                  _Type := TType.Create(cAudio);
+                  if Assigned(ChildNodes.FindNode('MusicArea')) then
+                    _Type.ID := CleanUP(ChildNodes.Nodes['MusicArea'].NodeValue)
+                  else
+                    _Type.ID := CleanUP(ChildNodes.Nodes['MusicAlbums'].NodeValue);
+                  ID.Types.Add(_Type);
+                end;
+
+                _Type := TType.Create(cMovie, CleanUP(ChildNodes.Nodes['MoviesArea'].NodeValue));
+
+                _SubType := TSubType.Create(cVideoCodec, 'MPEG-2', CleanUP(ChildNodes.Nodes['DvdMovies'].NodeValue));
+                _Type.SubTypes.Add(_SubType);
+
+                _SubType := TSubType.Create(cVideoCodec, 'VC-1', CleanUP(ChildNodes.Nodes['BluRayMovies'].NodeValue));
+                _Type.SubTypes.Add(_SubType);
+
+                _SubType := TSubType.Create(cVideoStream, 'BD', CleanUP(ChildNodes.Nodes['BluRayMovies'].NodeValue));
+                _Type.SubTypes.Add(_SubType);
+
+                _SubType := TSubType.Create(cVideoStream, 'CAM', CleanUP(ChildNodes.Nodes['CamMovies'].NodeValue));
+                _Type.SubTypes.Add(_SubType);
+
+                _SubType := TSubType.Create(cVideoStream, 'TS', CleanUP(ChildNodes.Nodes['TelesyncMovies'].NodeValue));
+                _Type.SubTypes.Add(_SubType);
+
+                _SubType := TSubType.Create(cVideoStream, 'SCR', CleanUP(ChildNodes.Nodes['ScreenerMovies'].NodeValue));
+                _Type.SubTypes.Add(_SubType);
+
+                _SubType := TSubType.Create(cVideoStream, 'R5', CleanUP(ChildNodes.Nodes['R5Movies'].NodeValue));
+                _Type.SubTypes.Add(_SubType);
+
+                ID.Types.Add(_Type);
+
+                if Assigned(ChildNodes.FindNode('NintendoDsGames')) then
+                  ID.Types.Add(TType.Create(cNintendoDS, CleanUP(ChildNodes.Nodes['NintendoDsGames'].NodeValue)));
+
+                if Assigned(ChildNodes.FindNode('PcGames')) then
+                  ID.Types.Add(TType.Create(cPCGames, CleanUP(ChildNodes.Nodes['PcGames'].NodeValue)));
+
+                if Assigned(ChildNodes.FindNode('Ps2Games')) then
+                  ID.Types.Add(TType.Create(cPlayStation3, CleanUP(ChildNodes.Nodes['Ps2Games'].NodeValue)));
+
+                if Assigned(ChildNodes.FindNode('Ps3Games')) then
+                  ID.Types.Add(TType.Create(cPlayStation3, CleanUP(ChildNodes.Nodes['Ps3Games'].NodeValue)));
+
+                if Assigned(ChildNodes.FindNode('PspGames')) then
+                  ID.Types.Add(TType.Create(cPlayStationVita, CleanUP(ChildNodes.Nodes['PspGames'].NodeValue)));
+
+                if Assigned(ChildNodes.FindNode('Applications')) then
+                  ID.Types.Add(TType.Create(cSoftware, CleanUP(ChildNodes.Nodes['Applications'].NodeValue)));
+
+                if Assigned(ChildNodes.FindNode('NintendoWiiGames')) then
+                  ID.Types.Add(TType.Create(cWii, CleanUP(ChildNodes.Nodes['NintendoWiiGames'].NodeValue)));
+
+                if Assigned(ChildNodes.FindNode('XboxGames')) then
+                  ID.Types.Add(TType.Create(cXbox360, CleanUP(ChildNodes.Nodes['XboxGames'].NodeValue)));
+
+                if Assigned(ChildNodes.FindNode('Xbox360Games')) then
+                  ID.Types.Add(TType.Create(cXbox360, CleanUP(ChildNodes.Nodes['Xbox360Games'].NodeValue)));
+
+                _Type := TType.Create(cXXX, CleanUP(ChildNodes.Nodes['AdultVideos'].NodeValue));
+
+                _SubType := TSubType.Create(cReleaseName, '%iMAGESET%', CleanUP(ChildNodes.Nodes['AdultPictureMegathreads'].NodeValue));
+                _SubType.SubTypes.Add(TSubType.Create(cGenre, 'Amateur', CleanUP(ChildNodes.Nodes['AdultAmateurPictures'].NodeValue)));
+                _SubType.SubTypes.Add(TSubType.Create(cGenre, 'Hentai', CleanUP(ChildNodes.Nodes['AdultHentaiPictures'].NodeValue)));
+                _Type.SubTypes.Add(_SubType);
+
+                _SubType := TSubType.Create(cReleaseName, '%XXX%', CleanUP(ChildNodes.Nodes['AdultMovies'].NodeValue));
+                _SubType.SubTypes.Add(TSubType.Create(cGenre, 'Amateur', CleanUP(ChildNodes.Nodes['AdultHentaiMovies'].NodeValue)));
+                _Type.SubTypes.Add(_SubType);
+
+                ID.Types.Add(_Type);
+
+                IDs.Add(ID);
+              end;
+              Changed := False;
             end;
-
-            _Type := TType.Create(cMovie, CleanUP(ChildNodes.Nodes['MoviesArea'].NodeValue));
-
-            _SubType := TSubType.Create(cVideoCodec, 'MPEG-2', CleanUP(ChildNodes.Nodes['DvdMovies'].NodeValue));
-            _Type.SubTypes.Add(_SubType);
-
-            _SubType := TSubType.Create(cVideoCodec, 'VC-1', CleanUP(ChildNodes.Nodes['BluRayMovies'].NodeValue));
-            _Type.SubTypes.Add(_SubType);
-
-            _SubType := TSubType.Create(cVideoStream, 'BD', CleanUP(ChildNodes.Nodes['BluRayMovies'].NodeValue));
-            _Type.SubTypes.Add(_SubType);
-
-            _SubType := TSubType.Create(cVideoStream, 'CAM', CleanUP(ChildNodes.Nodes['CamMovies'].NodeValue));
-            _Type.SubTypes.Add(_SubType);
-
-            _SubType := TSubType.Create(cVideoStream, 'TS', CleanUP(ChildNodes.Nodes['TelesyncMovies'].NodeValue));
-            _Type.SubTypes.Add(_SubType);
-
-            _SubType := TSubType.Create(cVideoStream, 'SCR', CleanUP(ChildNodes.Nodes['ScreenerMovies'].NodeValue));
-            _Type.SubTypes.Add(_SubType);
-
-            _SubType := TSubType.Create(cVideoStream, 'R5', CleanUP(ChildNodes.Nodes['R5Movies'].NodeValue));
-            _Type.SubTypes.Add(_SubType);
-
-            ID.Types.Add(_Type);
-
-            if Assigned(ChildNodes.FindNode('NintendoDsGames')) then
-              ID.Types.Add(TType.Create(cNintendoDS, CleanUP(ChildNodes.Nodes['NintendoDsGames'].NodeValue)));
-
-            if Assigned(ChildNodes.FindNode('PcGames')) then
-              ID.Types.Add(TType.Create(cPCGames, CleanUP(ChildNodes.Nodes['PcGames'].NodeValue)));
-
-            if Assigned(ChildNodes.FindNode('Ps2Games')) then
-              ID.Types.Add(TType.Create(cPlayStation3, CleanUP(ChildNodes.Nodes['Ps2Games'].NodeValue)));
-
-            if Assigned(ChildNodes.FindNode('Ps3Games')) then
-              ID.Types.Add(TType.Create(cPlayStation3, CleanUP(ChildNodes.Nodes['Ps3Games'].NodeValue)));
-
-            if Assigned(ChildNodes.FindNode('PspGames')) then
-              ID.Types.Add(TType.Create(cPlayStationVita, CleanUP(ChildNodes.Nodes['PspGames'].NodeValue)));
-
-            if Assigned(ChildNodes.FindNode('Applications')) then
-              ID.Types.Add(TType.Create(cSoftware, CleanUP(ChildNodes.Nodes['Applications'].NodeValue)));
-
-            if Assigned(ChildNodes.FindNode('NintendoWiiGames')) then
-              ID.Types.Add(TType.Create(cWii, CleanUP(ChildNodes.Nodes['NintendoWiiGames'].NodeValue)));
-
-            if Assigned(ChildNodes.FindNode('XboxGames')) then
-              ID.Types.Add(TType.Create(cXbox360, CleanUP(ChildNodes.Nodes['XboxGames'].NodeValue)));
-
-            if Assigned(ChildNodes.FindNode('Xbox360Games')) then
-              ID.Types.Add(TType.Create(cXbox360, CleanUP(ChildNodes.Nodes['Xbox360Games'].NodeValue)));
-
-            _Type := TType.Create(cXXX, CleanUP(ChildNodes.Nodes['AdultVideos'].NodeValue));
-
-            _SubType := TSubType.Create(cReleaseName, '%iMAGESET%', CleanUP(ChildNodes.Nodes['AdultPictureMegathreads'].NodeValue));
-            _SubType.SubTypes.Add(TSubType.Create(cGenre, 'Amateur', CleanUP(ChildNodes.Nodes['AdultAmateurPictures'].NodeValue)));
-            _SubType.SubTypes.Add(TSubType.Create(cGenre, 'Hentai', CleanUP(ChildNodes.Nodes['AdultHentaiPictures'].NodeValue)));
-            _Type.SubTypes.Add(_SubType);
-
-            _SubType := TSubType.Create(cReleaseName, '%XXX%', CleanUP(ChildNodes.Nodes['AdultMovies'].NodeValue));
-            _SubType.SubTypes.Add(TSubType.Create(cGenre, 'Amateur', CleanUP(ChildNodes.Nodes['AdultHentaiMovies'].NodeValue)));
-            _Type.SubTypes.Add(_SubType);
-
-            ID.Types.Add(_Type);
-
-            IDs.Add(ID);
-          end;
-          Changed := False;
-        end;
+      end;
+    finally
+      XMLDoc := nil;
+    end;
+  finally
+    OleUninitialize;
   end;
 end;
 
@@ -309,83 +318,87 @@ begin
   if FileExists(AFileName) then
   begin
     OleInitialize(nil);
-    XMLDoc := NewXMLDocument;
+    try
+      XMLDoc := NewXMLDocument;
+      try
+        with XMLDoc do
+        begin
+          Options := Options + [doNodeAutoIndent];
+          NodeIndentStr := #9;
+          LoadFromFile(AFileName);
+          Active := True;
 
-    with XMLDoc do
-    begin
-      Options := Options + [doNodeAutoIndent];
-      NodeIndentStr := #9;
-      LoadFromFile(AFileName);
-      Active := True;
+          with DocumentElement do
+            if HasChildNodes then
+              with Result do
+              begin
+                WebsiteURL := VarToStr(ChildNodes.Nodes[XML_NAME].NodeValue);
+                WebsiteType := VarToStr(ChildNodes.Nodes[XML_TYPE].NodeValue);
+                WebsiteCharset := VarToStr(ChildNodes.Nodes[XML_CHARSET].NodeValue);
 
-      with DocumentElement do
-        if HasChildNodes then
-          with Result do
-          begin
-            WebsiteURL := VarToStr(ChildNodes.Nodes[XML_NAME].NodeValue);
-            WebsiteType := VarToStr(ChildNodes.Nodes[XML_TYPE].NodeValue);
-            WebsiteCharset := VarToStr(ChildNodes.Nodes[XML_CHARSET].NodeValue);
+                // IDs
 
-            // IDs
+                if Assigned(ChildNodes.FindNode(XML_FILTERS)) then
+                  with ChildNodes.Nodes[XML_FILTERS] do
+                    with WebsiteFilter do
+                    begin
+                      Active := Attributes['active'];
 
-            if Assigned(ChildNodes.FindNode(XML_FILTERS)) then
-              with ChildNodes.Nodes[XML_FILTERS] do
-                with WebsiteFilter do
-                begin
-                  Active := Attributes['active'];
+                      Categories := VarToStr(ChildNodes.Nodes['categories'].NodeValue);
 
-                  Categories := VarToStr(ChildNodes.Nodes['categories'].NodeValue);
+                      if Assigned(ChildNodes.FindNode('controls')) then
+                        with ChildNodes.Nodes['controls'] do
+                          for I := 0 to ChildNodes.Count - 1 do
+                          begin
+                            Control := TControl.Create;
+                            with Control do
+                            begin
+                              Name := VarToStr(ChildNodes.Nodes[I].Attributes[XML_NAME]);
+                              Relation := VarToStr(ChildNodes.Nodes[I].Attributes['rel']);
+                              Value := VarToStr(ChildNodes.Nodes[I].NodeValue);
+                            end;
+                            Controls.Add(Control);
+                          end;
 
-                  if Assigned(ChildNodes.FindNode('controls')) then
-                    with ChildNodes.Nodes['controls'] do
-                      for I := 0 to ChildNodes.Count - 1 do
-                      begin
-                        Control := TControl.Create;
-                        with Control do
-                        begin
-                          Name := VarToStr(ChildNodes.Nodes[I].Attributes[XML_NAME]);
-                          Relation := VarToStr(ChildNodes.Nodes[I].Attributes['rel']);
-                          Value := VarToStr(ChildNodes.Nodes[I].NodeValue);
-                        end;
-                        Controls.Add(Control);
-                      end;
+                      for HosterType := low(THosterType) to high(THosterType) do
+                        if Assigned(ChildNodes.FindNode(GetHosterTypeName(HosterType))) then
+                          with ChildNodes.Nodes[GetHosterTypeName(HosterType)] do
+                          begin
+                            Hoster := THoster.Create;
+                            with Hoster do
+                            begin
+                              Name := GetHosterTypeName(HosterType);
+                              Ranked := StrToBoolDef(VarToStr(Attributes['ranked']), False);
 
-                  for HosterType := low(THosterType) to high(THosterType) do
-                    if Assigned(ChildNodes.FindNode(GetHosterTypeName(HosterType))) then
-                      with ChildNodes.Nodes[GetHosterTypeName(HosterType)] do
-                      begin
-                        Hoster := THoster.Create;
-                        with Hoster do
-                        begin
-                          Name := GetHosterTypeName(HosterType);
-                          Ranked := StrToBoolDef(VarToStr(Attributes['ranked']), False);
+                              if not SameStr('', VarToStr(ChildNodes.Nodes['blacklist'].NodeValue)) then
+                                with SplittString(';', VarToStr(ChildNodes.Nodes['blacklist'].NodeValue)) do
+                                  try
+                                    Blacklist.Text := Text;
+                                  finally
+                                    Free;
+                                  end;
 
-                          if not SameStr('', VarToStr(ChildNodes.Nodes['blacklist'].NodeValue)) then
-                            with SplittString(';', VarToStr(ChildNodes.Nodes['blacklist'].NodeValue)) do
-                              try
-                                Blacklist.Text := Text;
-                              finally
-                                Free;
-                              end;
+                              if not SameStr('', VarToStr(ChildNodes.Nodes['whitelist'].NodeValue)) then
+                                with SplittString(';', VarToStr(ChildNodes.Nodes['whitelist'].NodeValue)) do
+                                  try
+                                    Whitelist.Text := Text;
+                                  finally
+                                    Free;
+                                  end;
+                            end;
+                            Hosters.Add(Hoster);
+                          end;
+                    end;
 
-                          if not SameStr('', VarToStr(ChildNodes.Nodes['whitelist'].NodeValue)) then
-                            with SplittString(';', VarToStr(ChildNodes.Nodes['whitelist'].NodeValue)) do
-                              try
-                                Whitelist.Text := Text;
-                              finally
-                                Free;
-                              end;
-                        end;
-                        Hosters.Add(Hoster);
-                      end;
-                end;
-
-            Changed := False;
-          end;
+                Changed := False;
+              end;
+        end;
+      finally
+        XMLDoc := nil;
+      end;
+    finally
+      OleUninitialize;
     end;
-
-    XMLDoc := nil;
-    OleUninitialize;
   end;
 end;
 
@@ -423,127 +436,131 @@ var
   Hoster: IHoster;
 begin
   OleInitialize(nil);
-  XMLDoc := NewXMLDocument;
-
-  with XMLDoc do
-  begin
-    Options := Options + [doNodeAutoIndent];
-    NodeIndentStr := #9;
-
-    if not FileExists(AFileName) then
-      DocumentElement := CreateElement('xml', '')
-    else
-      LoadFromFile(AFileName);
-
-    Active := True;
-
-    with DocumentElement do
-    begin
-      if ChildNodes.FindNode(XML_NAME) = nil then
-        AddChild(XML_NAME);
-      ChildNodes.Nodes[XML_NAME].NodeValue := AWebsiteConfigurationFile.WebsiteURL;
-
-      if ChildNodes.FindNode(XML_TYPE) = nil then
-        AddChild(XML_TYPE);
-      ChildNodes.Nodes[XML_TYPE].NodeValue := AWebsiteConfigurationFile.WebsiteType;
-
-      if ChildNodes.FindNode(XML_CHARSET) = nil then
-        AddChild(XML_CHARSET);
-      ChildNodes.Nodes[XML_CHARSET].NodeValue := AWebsiteConfigurationFile.WebsiteCharset;
-
-      if ChildNodes.FindNode(XML_SETTINGS) = nil then
-        AddChild(XML_SETTINGS);
-
-      for ID in AWebsiteConfigurationFile.IDs do
+  try
+    XMLDoc := NewXMLDocument;
+    try
+      with XMLDoc do
       begin
-        if ChildNodes.FindNode(ID.Name) = nil then
-          AddChild(ID.Name);
-        with ChildNodes.Nodes[ID.Name] do
+        Options := Options + [doNodeAutoIndent];
+        NodeIndentStr := #9;
+
+        if not FileExists(AFileName) then
+          DocumentElement := CreateElement('xml', '')
+        else
+          LoadFromFile(AFileName);
+
+        Active := True;
+
+        with DocumentElement do
         begin
-          ChildNodes.Clear;
+          if ChildNodes.FindNode(XML_NAME) = nil then
+            AddChild(XML_NAME);
+          ChildNodes.Nodes[XML_NAME].NodeValue := AWebsiteConfigurationFile.WebsiteURL;
 
-          for _Type in ID.Types do
+          if ChildNodes.FindNode(XML_TYPE) = nil then
+            AddChild(XML_TYPE);
+          ChildNodes.Nodes[XML_TYPE].NodeValue := AWebsiteConfigurationFile.WebsiteType;
+
+          if ChildNodes.FindNode(XML_CHARSET) = nil then
+            AddChild(XML_CHARSET);
+          ChildNodes.Nodes[XML_CHARSET].NodeValue := AWebsiteConfigurationFile.WebsiteCharset;
+
+          if ChildNodes.FindNode(XML_SETTINGS) = nil then
+            AddChild(XML_SETTINGS);
+
+          for ID in AWebsiteConfigurationFile.IDs do
           begin
-            XMLNode := AddChild(XML_TYPE);
-            with XMLNode do
-            begin
-              Attributes[XML_NAME] := _Type.Name;
-              Attributes[XML_ID] := _Type.ID;
-            end;
-            RecursiveSubItemAdd(_Type.SubTypes, XMLNode);
-          end;
-        end;
-      end;
-
-      if AWebsiteConfigurationFile.QueryInterface(IIntelligeNConfigurationFile, IntelligeNConfigurationFile) = 0 then
-        try
-          if ChildNodes.FindNode(XML_FILTERS) = nil then
-            AddChild(XML_FILTERS);
-          with ChildNodes.Nodes[XML_FILTERS] do
-          begin
-            Attributes['active'] := IntelligeNConfigurationFile.WebsiteFilter.Active;
-
-            if ChildNodes.FindNode('categories') = nil then
-              AddChild('categories');
-            ChildNodes.Nodes['categories'].NodeValue := IntelligeNConfigurationFile.WebsiteFilter.Categories;
-
-            if ChildNodes.FindNode('controls') = nil then
-              AddChild('controls');
-            with ChildNodes.Nodes['controls'] do
+            if ChildNodes.FindNode(ID.Name) = nil then
+              AddChild(ID.Name);
+            with ChildNodes.Nodes[ID.Name] do
             begin
               ChildNodes.Clear;
-              for Control in IntelligeNConfigurationFile.WebsiteFilter.Controls do
-                with AddChild('control') do
-                begin
-                  Attributes[XML_NAME] := Control.Name;
-                  Attributes['rel'] := Control.Relation;
-                  NodeValue := Control.Value;
-                end;
-            end;
 
-            for Hoster in IntelligeNConfigurationFile.WebsiteFilter.Hosters do
-            begin
-              if ChildNodes.FindNode(Hoster.Name) = nil then
-                AddChild(Hoster.Name);
-              with ChildNodes.Nodes[Hoster.Name] do
+              for _Type in ID.Types do
               begin
-                Attributes['ranked'] := Hoster.Ranked;
-
-                if ChildNodes.FindNode('blacklist') = nil then
-                  AddChild('blacklist');
-
-                with TStringList.Create do
-                  try
-                    Text := Hoster.Blacklist.Text;
-                    Delimiter := ';';
-                    ChildNodes.Nodes['blacklist'].NodeValue := DelimitedText;
-                  finally
-                    Free;
-                  end;
-
-                if ChildNodes.FindNode('whitelist') = nil then
-                  AddChild('whitelist');
-                with TStringList.Create do
-                  try
-                    Text := Hoster.Whitelist.Text;
-                    Delimiter := ';';
-                    ChildNodes.Nodes['whitelist'].NodeValue := DelimitedText;
-                  finally
-                    Free;
-                  end;
+                XMLNode := AddChild(XML_TYPE);
+                with XMLNode do
+                begin
+                  Attributes[XML_NAME] := _Type.Name;
+                  Attributes[XML_ID] := _Type.ID;
+                end;
+                RecursiveSubItemAdd(_Type.SubTypes, XMLNode);
               end;
             end;
           end;
-        finally
-          IntelligeNConfigurationFile := nil;
+
+          if AWebsiteConfigurationFile.QueryInterface(IIntelligeNConfigurationFile, IntelligeNConfigurationFile) = 0 then
+            try
+              if ChildNodes.FindNode(XML_FILTERS) = nil then
+                AddChild(XML_FILTERS);
+              with ChildNodes.Nodes[XML_FILTERS] do
+              begin
+                Attributes['active'] := IntelligeNConfigurationFile.WebsiteFilter.Active;
+
+                if ChildNodes.FindNode('categories') = nil then
+                  AddChild('categories');
+                ChildNodes.Nodes['categories'].NodeValue := IntelligeNConfigurationFile.WebsiteFilter.Categories;
+
+                if ChildNodes.FindNode('controls') = nil then
+                  AddChild('controls');
+                with ChildNodes.Nodes['controls'] do
+                begin
+                  ChildNodes.Clear;
+                  for Control in IntelligeNConfigurationFile.WebsiteFilter.Controls do
+                    with AddChild('control') do
+                    begin
+                      Attributes[XML_NAME] := Control.Name;
+                      Attributes['rel'] := Control.Relation;
+                      NodeValue := Control.Value;
+                    end;
+                end;
+
+                for Hoster in IntelligeNConfigurationFile.WebsiteFilter.Hosters do
+                begin
+                  if ChildNodes.FindNode(Hoster.Name) = nil then
+                    AddChild(Hoster.Name);
+                  with ChildNodes.Nodes[Hoster.Name] do
+                  begin
+                    Attributes['ranked'] := Hoster.Ranked;
+
+                    if ChildNodes.FindNode('blacklist') = nil then
+                      AddChild('blacklist');
+
+                    with TStringList.Create do
+                      try
+                        Text := Hoster.Blacklist.Text;
+                        Delimiter := ';';
+                        ChildNodes.Nodes['blacklist'].NodeValue := DelimitedText;
+                      finally
+                        Free;
+                      end;
+
+                    if ChildNodes.FindNode('whitelist') = nil then
+                      AddChild('whitelist');
+                    with TStringList.Create do
+                      try
+                        Text := Hoster.Whitelist.Text;
+                        Delimiter := ';';
+                        ChildNodes.Nodes['whitelist'].NodeValue := DelimitedText;
+                      finally
+                        Free;
+                      end;
+                  end;
+                end;
+              end;
+            finally
+              IntelligeNConfigurationFile := nil;
+            end;
         end;
+
+        SaveToFile(AFileName);
+      end;
+    finally
+      XMLDoc := nil;
     end;
-
-    SaveToFile(AFileName);
+  finally
+    OleUninitialize;
   end;
-
-  XMLDoc := nil;
-  OleUninitialize;
 end;
 
 class procedure THosterConfiguration.LoadXML(AXMLProc: TXMLProc);
@@ -556,28 +573,29 @@ begin
     raise Exception.Create(HosterXML + ' not found located at configuration\' + HosterXML)
   else
   begin
-    FCS.Enter;
+    // FCS.Enter;
     try
-      OleInitialize(nil);
+      CoInitializeEx(nil, COINIT_MULTITHREADED);
       try
         XMLDoc := NewXMLDocument;
+        try
+          with XMLDoc do
+          begin
+            LoadFromFile(GetConfigurationFolder + HosterXML);
+            Active := True;
+          end;
 
-        with XMLDoc do
-        begin
-          LoadFromFile(GetConfigurationFolder + HosterXML);
-          Active := True;
+          Found := False;
+
+          AXMLProc(XMLDoc.DocumentElement);
+        finally
+          XMLDoc := nil;
         end;
-
-        Found := False;
-
-        AXMLProc(XMLDoc.DocumentElement);
       finally
-        XMLDoc := nil;
-        OleUninitialize;
+        CoUninitialize;
       end;
-
     finally
-      FCS.Leave;
+      // FCS.Leave;
     end;
   end;
 end;
@@ -657,12 +675,12 @@ end;
 
 class constructor THosterConfiguration.Create;
 begin
-  FCS := TCriticalSection.Create;
+  // FCS := TCriticalSection.Create;
 end;
 
 class destructor THosterConfiguration.Destroy;
 begin
-  FCS.Free;
+  // FCS.Free;
 end;
 
 procedure GetControls(AFileName: string; const AControlController: IControlController; const APageController: IPageController);
@@ -672,27 +690,35 @@ var
 begin
   // Wenn man hier den ComponentCreator erstellt braucht man wegen dem WorkPanel ein Verweis auf uMain
 
-  XMLDoc := NewXMLDocument;
+  OleInitialize(nil);
+  try
+    XMLDoc := NewXMLDocument;
+    try
+      with XMLDoc do
+      begin
+        LoadFromFile(AFileName);
+        Active := True;
+      end;
 
-  with XMLDoc do
-  begin
-    LoadFromFile(AFileName);
-    Active := True;
-  end;
-
-  with XMLDoc.DocumentElement do
-    if HasChildNodes then
-      with ChildNodes.Nodes['controls'] do
+      with XMLDoc.DocumentElement do
         if HasChildNodes then
-          for I := 0 to ChildNodes.Count - 1 do
-            with ChildNodes.Nodes[I] do
-              if HasChildNodes then
-              begin
-                AControlController.NewControl(StringToControlID(NodeName), VarToStr(ChildNodes.Nodes['title'].NodeValue), VarToStr(ChildNodes.Nodes['value'].NodeValue), VarToStr(ChildNodes.Nodes['title'].Attributes['hint']),
-                  VarToStr(ChildNodes.Nodes['value'].Attributes['list']), VarToIntDef(ChildNodes.Nodes['position'].Attributes['left'], 0), VarToIntDef(ChildNodes.Nodes['position'].Attributes['top'], 0),
-                  VarToIntDef(ChildNodes.Nodes['position'].Attributes['width'], 0), VarToIntDef(ChildNodes.Nodes['position'].Attributes['height'], 0));
-                APageController.CallControlAligner;
-              end;
+          with ChildNodes.Nodes['controls'] do
+            if HasChildNodes then
+              for I := 0 to ChildNodes.Count - 1 do
+                with ChildNodes.Nodes[I] do
+                  if HasChildNodes then
+                  begin
+                    AControlController.NewControl(StringToControlID(NodeName), VarToStr(ChildNodes.Nodes['title'].NodeValue), VarToStr(ChildNodes.Nodes['value'].NodeValue), VarToStr(ChildNodes.Nodes['title'].Attributes['hint']),
+                      VarToStr(ChildNodes.Nodes['value'].Attributes['list']), VarToIntDef(ChildNodes.Nodes['position'].Attributes['left'], 0), VarToIntDef(ChildNodes.Nodes['position'].Attributes['top'], 0),
+                      VarToIntDef(ChildNodes.Nodes['position'].Attributes['width'], 0), VarToIntDef(ChildNodes.Nodes['position'].Attributes['height'], 0));
+                    APageController.CallControlAligner;
+                  end;
+    finally
+      XMLDoc := nil;
+    end;
+  finally
+    OleUninitialize;
+  end;
 end;
 
 { TCodeDefinitions }
@@ -708,16 +734,18 @@ begin
     OleInitialize(nil);
     try
       XMLDoc := NewXMLDocument;
+      try
+        with XMLDoc do
+        begin
+          LoadFromFile(GetConfigurationFolder + CodeDefinitionsXML);
+          Active := True;
+        end;
 
-      with XMLDoc do
-      begin
-        LoadFromFile(GetConfigurationFolder + CodeDefinitionsXML);
-        Active := True;
+        AXMLProc(XMLDoc.DocumentElement);
+      finally
+        XMLDoc := nil;
       end;
-
-      AXMLProc(XMLDoc.DocumentElement);
     finally
-      XMLDoc := nil;
       OleUninitialize;
     end;
   end;

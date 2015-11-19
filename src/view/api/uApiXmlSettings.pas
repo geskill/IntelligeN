@@ -68,61 +68,63 @@ begin
     OleInitialize(nil);
     try
       LXMLDoc := NewXMLDocument;
-
-      with LXMLDoc do
-      begin
-        LoadFromFile(GetConfigurationFolder + 'controls.xml');
-        Active := True;
-      end;
-
-      for LTypeID := Low(TTypeID) to High(TTypeID) do
-        with TControlsCollectionItem(AControlsTT.Add) do
+      try
+        with LXMLDoc do
         begin
-          TypeID := LTypeID;
-          for LControlID := Low(TControlID) to High(TControlID) do
-            with TControlCollectionItem(Controls.Add) do
-            begin
-              ControlID := LControlID;
-
-              with LXMLDoc.DocumentElement.ChildNodes.Nodes[ControlIDToString(LControlID)].ChildNodes do
-              begin
-                Found := False;
-                for Y := 0 to Count - 1 do
-                begin
-                  sl := SplittString('|', Nodes[Y].Attributes['name']);
-                  try
-                    if sl.IndexOf(TypeIDToString(LTypeID)) <> -1 then
-                    begin
-                      internal(Nodes[Y], bTitle, bHelpText, bValue, Items);
-
-                      Title := bTitle;
-                      HelpText := bHelpText;
-                      Value := bValue;
-
-                      Found := True;
-                      // break;
-                    end;
-                  finally
-                    sl.Free;
-                  end;
-                end;
-                if not Found then
-                  for Y := 0 to Count - 1 do
-                    if Nodes[Y].Attributes['name'] = '' then
-                    begin
-                      internal(Nodes[Y], bTitle, bHelpText, bValue, Items);
-
-                      Title := bTitle;
-                      HelpText := bHelpText;
-                      Value := bValue;
-
-                      // break;
-                    end;
-              end;
-            end;
+          LoadFromFile(GetConfigurationFolder + 'controls.xml');
+          Active := True;
         end;
+
+        for LTypeID := Low(TTypeID) to High(TTypeID) do
+          with TControlsCollectionItem(AControlsTT.Add) do
+          begin
+            TypeID := LTypeID;
+            for LControlID := Low(TControlID) to High(TControlID) do
+              with TControlCollectionItem(Controls.Add) do
+              begin
+                ControlID := LControlID;
+
+                with LXMLDoc.DocumentElement.ChildNodes.Nodes[ControlIDToString(LControlID)].ChildNodes do
+                begin
+                  Found := False;
+                  for Y := 0 to Count - 1 do
+                  begin
+                    sl := SplittString('|', Nodes[Y].Attributes['name']);
+                    try
+                      if sl.IndexOf(TypeIDToString(LTypeID)) <> -1 then
+                      begin
+                        internal(Nodes[Y], bTitle, bHelpText, bValue, Items);
+
+                        Title := bTitle;
+                        HelpText := bHelpText;
+                        Value := bValue;
+
+                        Found := True;
+                        // break;
+                      end;
+                    finally
+                      sl.Free;
+                    end;
+                  end;
+                  if not Found then
+                    for Y := 0 to Count - 1 do
+                      if Nodes[Y].Attributes['name'] = '' then
+                      begin
+                        internal(Nodes[Y], bTitle, bHelpText, bValue, Items);
+
+                        Title := bTitle;
+                        HelpText := bHelpText;
+                        Value := bValue;
+
+                        // break;
+                      end;
+                end;
+              end;
+          end;
+      finally
+        LXMLDoc := nil;
+      end;
     finally
-      LXMLDoc := nil;
       OleUninitialize;
     end;
   end;

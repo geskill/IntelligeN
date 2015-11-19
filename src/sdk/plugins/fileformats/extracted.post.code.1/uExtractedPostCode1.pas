@@ -51,121 +51,123 @@ begin
   OleInitialize(nil);
   try
     XMLDoc := NewXMLDocument;
+    try
+      with XMLDoc do
+      begin
+        Encoding := 'iso-8859-1';
+        Options := Options + [doNodeAutoIndent];
+        DocumentElement := CreateElement('Settings', '');
+        Active := True;
+      end;
+      with XMLDoc.DocumentElement do
+      begin
+        with AddChild('Title') do
+          NodeValue := ATabSheetController.ControlController.FindControl(cTitle).Value;
+        with AddChild('SelectedArea') do
+          case ATabSheetController.ControlController.TypeID of
+            cAudio:
+              NodeValue := '24';
+            cMovie:
+              NodeValue := '14';
+            cNintendoDS:
+              NodeValue := '10';
+            cPCGames:
+              NodeValue := '4';
+            cPlayStation3:
+              NodeValue := '7';
+            cPlayStationVita:
+              NodeValue := '8';
+            cSoftware:
+              NodeValue := '0';
+            cWii:
+              NodeValue := '9';
+            cXbox360:
+              NodeValue := '12';
+            cXXX:
+              NodeValue := '31';
+            cOther:
+              NodeValue := '';
+          end;
+        with AddChild('Post') do
+          with ATabSheetController do
+            with TStringList.Create do
+              try
+                Add('.');
+                Add('[center]');
+                if Assigned(ControlController.FindControl(cPicture)) then
+                  Add('[img]' + ControlController.FindControl(cPicture).Value + '[/img]');
 
-    with XMLDoc do
-    begin
-      Encoding := 'iso-8859-1';
-      Options := Options + [doNodeAutoIndent];
-      DocumentElement := CreateElement('Settings', '');
-      Active := True;
-    end;
-    with XMLDoc.DocumentElement do
-    begin
-      with AddChild('Title') do
-        NodeValue := ATabSheetController.ControlController.FindControl(cTitle).Value;
-      with AddChild('SelectedArea') do
-        case ATabSheetController.ControlController.TypeID of
-          cAudio:
-            NodeValue := '24';
-          cMovie:
-            NodeValue := '14';
-          cNintendoDS:
-            NodeValue := '10';
-          cPCGames:
-            NodeValue := '4';
-          cPlayStation3:
-            NodeValue := '7';
-          cPlayStationVita:
-            NodeValue := '8';
-          cSoftware:
-            NodeValue := '0';
-          cWii:
-            NodeValue := '9';
-          cXbox360:
-            NodeValue := '12';
-          cXXX:
-            NodeValue := '31';
-          cOther:
-            NodeValue := '';
-        end;
-      with AddChild('Post') do
-        with ATabSheetController do
-          with TStringList.Create do
-            try
-              Add('.');
-              Add('[center]');
-              if Assigned(ControlController.FindControl(cPicture)) then
-                Add('[img]' + ControlController.FindControl(cPicture).Value + '[/img]');
+                Add('');
 
-              Add('');
+                if Assigned(ControlController.FindControl(cVideoSystem)) then
+                  Add('[b]Video System:[/b] ' + ControlController.FindControl(cVideoSystem).Value);
+                if Assigned(ControlController.FindControl(cVideoStream)) then
+                  Add('[b]Video Stream:[/b] ' + ControlController.FindControl(cVideoStream).Value);
+                if Assigned(ControlController.FindControl(cAudioStream)) then
+                  Add('[b]Audio Stream:[/b] ' + ControlController.FindControl(cAudioStream).Value);
+                if Assigned(ControlController.FindControl(cAudioBitrate)) then
+                  Add('[b]Audio Bitrate:[/b] ' + ControlController.FindControl(cAudioBitrate).Value);
+                if Assigned(ControlController.FindControl(cVideoCodec)) then
+                  Add('[b]Video Codec:[/b] ' + ControlController.FindControl(cVideoCodec).Value);
+                if Assigned(ControlController.FindControl(cAudioEncoder)) then
+                  Add('[b]Audio Encoder:[/b] ' + ControlController.FindControl(cAudioEncoder).Value);
+                if Assigned(ControlController.FindControl(cAudioSamplingRate)) then
+                  Add('[b]Audio Sampling Rate:[/b] ' + ControlController.FindControl(cAudioSamplingRate).Value);
 
-              if Assigned(ControlController.FindControl(cVideoSystem)) then
-                Add('[b]Video System:[/b] ' + ControlController.FindControl(cVideoSystem).Value);
-              if Assigned(ControlController.FindControl(cVideoStream)) then
-                Add('[b]Video Stream:[/b] ' + ControlController.FindControl(cVideoStream).Value);
-              if Assigned(ControlController.FindControl(cAudioStream)) then
-                Add('[b]Audio Stream:[/b] ' + ControlController.FindControl(cAudioStream).Value);
-              if Assigned(ControlController.FindControl(cAudioBitrate)) then
-                Add('[b]Audio Bitrate:[/b] ' + ControlController.FindControl(cAudioBitrate).Value);
-              if Assigned(ControlController.FindControl(cVideoCodec)) then
-                Add('[b]Video Codec:[/b] ' + ControlController.FindControl(cVideoCodec).Value);
-              if Assigned(ControlController.FindControl(cAudioEncoder)) then
-                Add('[b]Audio Encoder:[/b] ' + ControlController.FindControl(cAudioEncoder).Value);
-              if Assigned(ControlController.FindControl(cAudioSamplingRate)) then
-                Add('[b]Audio Sampling Rate:[/b] ' + ControlController.FindControl(cAudioSamplingRate).Value);
+                if Assigned(ControlController.FindControl(cGenre)) then
+                  Add('[b]Genre:[/b] ' + ControlController.FindControl(cGenre).Value);
+                if Assigned(ControlController.FindControl(cLanguage)) then
+                  Add('[b]Language/s:[/b] ' + ControlController.FindControl(cLanguage).Value);
+                Add('[b]Parts:[/b] ' + IntToStr(CharCount('http://', MirrorController.Mirror[0].Directlink[0].Value)));
+                if Assigned(ControlController.FindControl(cPassword)) and (ControlController.FindControl(cPassword).Value <> '') then
+                  Add('[b]Password:[/b] ' + ControlController.FindControl(cPassword).Value);
 
-              if Assigned(ControlController.FindControl(cGenre)) then
-                Add('[b]Genre:[/b] ' + ControlController.FindControl(cGenre).Value);
-              if Assigned(ControlController.FindControl(cLanguage)) then
-                Add('[b]Language/s:[/b] ' + ControlController.FindControl(cLanguage).Value);
-              Add('[b]Parts:[/b] ' + IntToStr(CharCount('http://', MirrorController.Mirror[0].Directlink[0].Value)));
-              if Assigned(ControlController.FindControl(cPassword)) and (ControlController.FindControl(cPassword).Value <> '') then
-                Add('[b]Password:[/b] ' + ControlController.FindControl(cPassword).Value);
+                for I := 0 to MirrorController.MirrorCount - 1 do
+                  if MirrorController.Mirror[I].Size > 0 then
+                  begin
+                    Add('[b]Size:[/b] ' + FloatToStr(MirrorController.Mirror[I].Size) + ' MB');
+                    break;
+                  end;
 
-              for I := 0 to MirrorController.MirrorCount - 1 do
-                if MirrorController.Mirror[I].Size > 0 then
+                _hoster := '[b]Hoster:[/b]';
+                for I := 0 to MirrorController.MirrorCount - 1 do
                 begin
-                  Add('[b]Size:[/b] ' + FloatToStr(MirrorController.Mirror[I].Size) + ' MB');
-                  break;
+                  _hoster := _hoster + ' ' + MirrorController.Mirror[I].Hoster;
+                  if not(I = MirrorController.MirrorCount - 1) then
+                    _hoster := _hoster + ',';
+                end;
+                Add(_hoster);
+
+                if Assigned(ControlController.FindControl(cDescription)) then
+                begin
+                  Add('');
+                  Add(ControlController.FindControl(cDescription).Value);
                 end;
 
-              _hoster := '[b]Hoster:[/b]';
-              for I := 0 to MirrorController.MirrorCount - 1 do
-              begin
-                _hoster := _hoster + ' ' + MirrorController.Mirror[I].Hoster;
-                if not(I = MirrorController.MirrorCount - 1) then
-                  _hoster := _hoster + ',';
-              end;
-              Add(_hoster);
-
-              if Assigned(ControlController.FindControl(cDescription)) then
-              begin
                 Add('');
-                Add(ControlController.FindControl(cDescription).Value);
-              end;
 
-              Add('');
-
-              for I := 0 to MirrorController.MirrorCount - 1 do
-              begin
-                Add('[b]Mirror: ' + IntToStr(I + 1) + '[/b]');
-                Add('');
-                Add('[b]' + MirrorController.Mirror[I].Hoster + '[/b]');
-                Add('[code]' + MirrorController.Mirror[I].Directlink[0].Value + '[/code]');
-                if not(I = MirrorController.MirrorCount - 1) then
+                for I := 0 to MirrorController.MirrorCount - 1 do
+                begin
+                  Add('[b]Mirror: ' + IntToStr(I + 1) + '[/b]');
                   Add('');
+                  Add('[b]' + MirrorController.Mirror[I].Hoster + '[/b]');
+                  Add('[code]' + MirrorController.Mirror[I].Directlink[0].Value + '[/code]');
+                  if not(I = MirrorController.MirrorCount - 1) then
+                    Add('');
+                end;
+
+                Add('[/center]');
+                NodeValue := Text;
+              finally
+                Free;
               end;
+      end;
 
-              Add('[/center]');
-              NodeValue := Text;
-            finally
-              Free;
-            end;
+      XMLDoc.SaveToFile(ChangeFileExt(AFileName, '.epc'));
+    finally
+      XMLDoc := nil;
     end;
-
-    XMLDoc.SaveToFile(ChangeFileExt(AFileName, '.epc'));
   finally
-    XMLDoc := nil;
     OleUninitialize;
   end;
 end;

@@ -42,42 +42,6 @@ end;
 
 { TPlugInCMSSettings }
 
-{
-  function TPlugInCMSSettingsHelper.GetSettingsBooleanValue(AName: string; ADefault: Boolean = False): Boolean;
-  begin
-  with FXMLDoc.DocumentElement do
-  if HasChildNodes then
-  with ChildNodes.Nodes['settings'] do
-  if ChildNodes.FindNode(AName) = nil then
-  Result := ADefault
-  else
-  Result := StrToBoolDef(VarToStrDef(ChildNodes.Nodes[AName].NodeValue, ''), ADefault);
-  end;
-
-  function TPlugInCMSSettingsHelper.GetSettingsIntegerValue(AName: string; ADefault: Integer = 0): Integer;
-  begin
-  with FXMLDoc.DocumentElement do
-  if HasChildNodes then
-  with ChildNodes.Nodes['settings'] do
-  if ChildNodes.FindNode(AName) = nil then
-  Result := ADefault
-  else
-  Result := StrToIntDef(VarToStrDef(ChildNodes.Nodes[AName].NodeValue, ''), ADefault);
-  end;
-
-  function TPlugInCMSSettingsHelper.GetSettingsStringValue(AName: string; ADefault: string = ''): string;
-  begin
-  with FXMLDoc.DocumentElement do
-  if HasChildNodes then
-  with ChildNodes.Nodes['settings'] do
-  if ChildNodes.FindNode(AName) = nil then
-  Result := ADefault
-  else
-  Result := VarToStrDef(ChildNodes.Nodes[AName].NodeValue, ADefault);
-  end;
-
-}
-
 class function TPlugInCMSSettingsHelper.GetID(ANode: IXMLNode): string;
 const
   IDNames: array [0 .. 4] of string = ('id', 'f', 't', 'p', 'i');
@@ -169,7 +133,7 @@ var
 
 begin
   SetLength(Result, 0);
-  OleInitialize(nil);
+  CoInitializeEx(nil, COINIT_MULTITHREADED);
   try
     XMLDoc := NewXMLDocument;
     try
@@ -305,7 +269,7 @@ begin
       XMLDoc := nil;
     end;
   finally
-    OleUninitialize;
+    CoUninitialize;
   end;
 end;
 

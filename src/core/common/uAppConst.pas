@@ -126,8 +126,6 @@ begin
 end;
 
 function StringToContentStatus(AStringContentStatus: string): TContentStatus;
-var
-  LContentStatus: TContentStatus;
 begin
   if not TEnum.TryParse<TContentStatus>('cs' + AStringContentStatus, Result) then
     raise Exception.Create('Unknown content status id');
