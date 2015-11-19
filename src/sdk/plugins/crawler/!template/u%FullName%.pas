@@ -51,7 +51,7 @@ end;
 
 function T%FullName%.InternalGetAvailableControlIDs;
 begin
-  { TODO : change elements }
+  { TODO : change controls for which this plugin retrieve information }
   Result := [cReleaseDate, cTitle, cNFO];
 
   if not(ATypeID = cXXX) then
@@ -71,25 +71,91 @@ function T%FullName%.InternalGetControlIDDefaultValue;
 begin
   Result := True;
 
-  { TODO : change default values }
+  { TODO : change values for default retrieval controls }
   if (cPicture = AControlID) or (cNFO = AControlID) then
     Result := False;
 end;
 
 function T%FullName%.InternalGetDependentControlIDs;
 begin
-  { TODO : change the dependent controls }
-  Result := [cReleaseName];
+  { TODO : change the dependent controls. These controls are necessarily, otherwise crawler is not used }
+  Result := [cTitle];
 end;
 
 function T%FullName%.InternalExecute;
+
+  procedure deep_search(AWebsiteSourceCode: string);
+  var
+    s: string;
+    LStringList: TStringList;
+  begin
+    if ACanUse(cPicture) then
+    begin
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'TODO_EXPRESSION-TO-GET-ALL-PRODUCT-PICTURES';
+
+          if Exec(InputString) then
+          begin
+            repeat
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, WEBSITE + Match[1]);
+            until not ExecNext;
+          end;
+        finally
+          Free;
+        end;
+    end;
+  end;
+  
+var
+  LTitle: string;
+  LCount: Integer;
+  
+  LRequestID1, LRequestID2: Double;
+
+  LResponeStr: string;
 begin
-  { TODO : your code here }
+  { TODO : change if you need for example the releasename. This value is related to InternalGetDependentControlIDs }
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
+  
+  { TODO : update the example code here }
+  // This is a very simple crawler example, see other crawlers for more information.
+  LResponeStr := GETRequest(WEBSITE + 'TODO_URL' + HTTPEncode(LTitle), LRequestID1);
+
+  if not(Pos('TODO_HAS-AT-LEAST-ONE-ITEM', LResponeStr) = 0) then
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := LResponeStr;
+        Expression := 'TODO_EXPRESSION-TO-GET-DETAILED-PAGE-URL';
+
+        if Exec(InputString) then
+        begin
+          repeat
+            LResponeStr := GETFollowUpRequest(WEBSITE + Match[1], LRequestID1, LRequestID2);
+
+            deep_search(LResponeStr); // Using a deep_search procedure to extract information
+
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
+        end;
+      finally
+        Free;
+      end;
+  end
+  else if not(Pos('TODO_MAYBE-DIRECT-REDIRECT-TO-DETAIL-PAGE-FOR-SPECIFIC-SEARCH-RESULT', LResponeStr) = 0) then
+  begin
+    deep_search(LResponeStr);
+  end;
+  
+  Result := True;
 end;
 
 function T%FullName%.GetResultsLimitDefaultValue;
 begin
-  { TODO : set default crawling site max }
+  { TODO : set default value for the maximal number of pages for information retrieval }
   Result := 5;
 end;
 

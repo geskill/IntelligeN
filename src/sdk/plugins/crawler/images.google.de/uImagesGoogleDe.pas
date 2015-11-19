@@ -94,6 +94,8 @@ begin
     finally
       Free;
     end;
+
+  Result := True;
 end;
 
 function TImagesGoogleDe.GetResultsLimitDefaultValue;

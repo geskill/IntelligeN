@@ -281,6 +281,8 @@ begin
         AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'JPN')
     end;
   end;
+
+  Result := True;
 end;
 
 function TReleasename.GetResultsLimitDefaultValue;

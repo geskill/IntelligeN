@@ -257,6 +257,8 @@ begin
     finally
       Free;
     end;
+
+  Result := True;
 end;
 
 function TWiiboxartCom.GetResultsLimitDefaultValue;

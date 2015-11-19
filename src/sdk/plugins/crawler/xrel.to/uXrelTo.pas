@@ -391,6 +391,8 @@ begin
 
     end;
   end;
+
+  Result := True;
 end;
 
 function TXrelTo.GetResultsLimitDefaultValue;

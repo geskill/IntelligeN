@@ -311,6 +311,8 @@ begin
         Free;
       end;
   end;
+
+  Result := True;
 end;
 
 function TImdbCom.GetResultsLimitDefaultValue: Integer;

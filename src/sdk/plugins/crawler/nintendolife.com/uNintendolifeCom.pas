@@ -306,6 +306,8 @@ begin
         Free;
       end;
   end;
+
+  Result := True;
 end;
 
 function TNintendolifeCom.GetResultsLimitDefaultValue;

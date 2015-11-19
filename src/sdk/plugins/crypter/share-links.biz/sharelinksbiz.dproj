@@ -25,7 +25,6 @@
 			<UsePackages>true</UsePackages>
 			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\sharelinksbiz.dll</DCC_DependencyCheckOutputName>
 			<GenDll>true</GenDll>
-			<DCC_DcuOutput>../../../../dcu</DCC_DcuOutput>
 			<DCC_UsePackage>framework</DCC_UsePackage>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DCC_Platform>x86</DCC_Platform>
@@ -75,7 +74,7 @@
 						<Parameters Name="UseLauncher">False</Parameters>
 						<Parameters Name="LoadAllSymbols">True</Parameters>
 						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
-						<Parameters Name="HostApplication">C:\Users\geskill\Documents\RAD Studio\Projekte\IntelligeN 2009\bin_portable\IntelligeN.exe</Parameters>
+						<Parameters Name="HostApplication">../../../../../bin_portable\IntelligeN.exe</Parameters>
 					</Parameters>
 					<VersionInfo>
 						<VersionInfo Name="IncludeVerInfo">True</VersionInfo>
@@ -104,10 +103,7 @@
 						<VersionInfoKeys Name="ProductVersion">2.5</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
-					<Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dcloffice2k140.bpl">Microsoft Office 2000 Beispiele für gekapselte Komponenten für Automation Server</Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dclofficexp140.bpl">Microsoft Office XP Beispiele für gekapselte Komponenten für Automation Server</Excluded_Packages>
-					</Excluded_Packages>
+					<Excluded_Packages/>
 				</Delphi.Personality>
 			</BorlandProject>
 			<ProjectFileVersion>12</ProjectFileVersion>

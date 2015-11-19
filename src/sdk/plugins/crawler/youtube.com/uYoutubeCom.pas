@@ -92,6 +92,8 @@ begin
       end;
     end;
   end;
+
+  Result := True;
 end;
 
 function TYoutubeCom.GetResultsLimitDefaultValue;

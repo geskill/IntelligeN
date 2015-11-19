@@ -309,6 +309,8 @@ begin
   begin
     deep_search(LResponeStr);
   end;
+
+  Result := True;
 end;
 
 function TThaliaDe.GetResultsLimitDefaultValue;
