@@ -536,7 +536,7 @@ type
 
     property SettingsFileName: WideString read GetSettingsFileName;
 
-    property Host: WideString read GetHostWithPath;
+    property HostWithPath: WideString read GetHostWithPath;
     property Website: WideString read GetWebsite;
     property Subject: WideString read GetSubject;
     property Tags: WideString read GetTags;

@@ -1048,7 +1048,7 @@ end;
 
 function TICMSWebsiteContainer.CheckIScript(AIScript: WideString): RIScriptResult;
 begin
-  with TIScirptParser.Create(CMS, Name, GenerateData) do
+  with TIScirptParser.Create(CMS, Website, GenerateData) do
     try
       Result := ErrorAnalysis(AIScript);
     finally
@@ -1058,7 +1058,7 @@ end;
 
 function TICMSWebsiteContainer.ParseIScript(AIScript: WideString): RIScriptResult;
 begin
-  with TIScirptParser.Create(CMS, Name, GenerateData) do
+  with TIScirptParser.Create(CMS, Website, GenerateData) do
     try
       Result := Execute(AIScript);
     finally

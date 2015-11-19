@@ -131,16 +131,12 @@ begin
 end;
 
 procedure TFileHosterManager.RemoveHosterJob;
-var
-  LListIndex: Integer;
 begin
-  for LListIndex := 0 to FInList.Count - 1 do
-  begin
-    if (ADirectlink = FInList[LListIndex].Directlink) then
-    begin
-      RemoveJob(FInList[LListIndex]);
-    end;
-  end;
+  RemoveIterator(
+    { } procedure(const AJobWorkData: TFileHosterData; var ARemove: Boolean)
+    { } begin
+    { . } ARemove := (ADirectlink = AJobWorkData.Directlink);
+    { } end);
 end;
 
 end.

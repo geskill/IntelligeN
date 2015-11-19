@@ -9,11 +9,10 @@ uses
   Spring.Collections.Lists,
   // OmniThreadLibrary
   OtlComm, OtlCommon, OtlEventMonitor, OtlTaskControl,
+  // Generic TThreadList
+  hThreadList,
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface;
-
-const
-  WM_MSG_FINISH = WM_USER + 2;
 
 type
   TThreadWorkData = class
@@ -30,7 +29,6 @@ type
   TThreadWorker<T: TThreadWorkData, constructor> = class(TOmniWorker)
   protected
     FData: T;
-    procedure DoFinish(var msg: TMessage); message WM_MSG_FINISH;
     procedure DefaultErrorHandler(AErrorMsg: string); virtual;
     function InBlackList: Boolean;
     function Initialize: Boolean; override;
@@ -43,10 +41,13 @@ type
     property Data: T read FData;
   end;
 
+  TThreadManagerRemoveProc<T> = reference to procedure(const AJobWorkData: T; var ARemove: Boolean);
+
   TThreadManager<T: TThreadWorkData, constructor> = class(TInterfacedObject, IThreadManager)
+  private
+    FInList, FBlackList: TThreadList<T>;
   protected
     FOmniEM: TOmniEventMonitor;
-    FInList, FBlackList: TList<T>;
     function InAnyList(const ATabSheetController: ITabSheetController): Boolean; virtual;
     function InList(const AJobWorkData: T): Boolean;
     function InBlackList(const AJobWorkData: T): Boolean;
@@ -58,6 +59,8 @@ type
     function CanRemoveJob(const AJobWorkData: T): Boolean;
     function RemoveJob(const AJobWorkData: T): Boolean;
     function RemoveAllJobs: Boolean;
+
+    function RemoveIterator(ARemoveProc: TThreadManagerRemoveProc<T>): Boolean;
   public
     constructor Create();
 
@@ -90,13 +93,6 @@ begin
 end;
 
 { TThreadWorker<T> }
-
-procedure TThreadWorker<T>.DoFinish(var msg: TMessage);
-begin
-  task.ClearTimer(1);
-  Sleep(1000);
-  task.Terminate;
-end;
 
 procedure TThreadWorker<T>.DefaultErrorHandler(AErrorMsg: string);
 begin
@@ -161,31 +157,46 @@ var
 begin
   LOmniValue := TOmniValue.CastFrom<T>(Data);
   task.Comm.Send(MSG_TASK_QUIT, [task.UniqueID, LOmniValue.AsObject]);
-  task.SetTimer(1, 1, WM_MSG_FINISH);
 end;
 
 { TThreadManager<T> }
 
 function TThreadManager<T>.InAnyList(const ATabSheetController: ITabSheetController): Boolean;
 var
+  LList: TThreadList<T>.TListObj;
   LListIndex: Integer;
+  LListItem: T;
 begin
   Result := False;
-  for LListIndex := 0 to FInList.Count - 1 do
-  begin
-    if ATabSheetController = FInList[LListIndex].TabSheetController then
+
+  LList := FInList.LockList;
+  try
+    for LListIndex := 0 to LList.Count - 1 do
     begin
-      Result := True;
-      Break;
+      LListItem := LList[LListIndex];
+
+      if ATabSheetController = LListItem.TabSheetController then
+      begin
+        Exit(True);
+      end;
     end;
+  finally
+    FInList.UnlockList;
   end;
-  for LListIndex := 0 to FBlackList.Count - 1 do
-  begin
-    if ATabSheetController = FBlackList[LListIndex].TabSheetController then
+
+  LList := FBlackList.LockList;
+  try
+    for LListIndex := 0 to LList.Count - 1 do
     begin
-      Result := True;
-      Break;
+      LListItem := LList[LListIndex];
+
+      if ATabSheetController = LListItem.TabSheetController then
+      begin
+        Exit(True);
+      end;
     end;
+  finally
+    FBlackList.UnlockList;
   end;
 end;
 
@@ -226,6 +237,8 @@ begin
         FInList.Remove(LJobWorkData);
         if FBlackList.Contains(LJobWorkData) then
           FBlackList.Remove(LJobWorkData);
+
+        task.Terminate;
       end;
   end;
 end;
@@ -269,27 +282,49 @@ begin
 end;
 
 function TThreadManager<T>.RemoveAllJobs: Boolean;
+begin
+  Result := RemoveIterator(
+    { } procedure(const AJobWorkData: T; var ARemove: Boolean)
+    { } begin
+    { . } ARemove := True;
+    { } end);
+end;
+
+function TThreadManager<T>.RemoveIterator(ARemoveProc: TThreadManagerRemoveProc<T>): Boolean;
 var
+  LList: TThreadList<T>.TListObj;
   LListIndex: Integer;
+  LListItem: T;
+  LRemove: Boolean;
 begin
   Result := True;
-  for LListIndex := 0 to FInList.Count - 1 do
-  begin
-    Result := Result and RemoveJob(FInList[LListIndex]);
+  LList := FInList.LockList;
+  try
+    for LListIndex := 0 to LList.Count - 1 do
+    begin
+      LListItem := LList[LListIndex];
+      LRemove := False;
+      ARemoveProc(LListItem, LRemove);
+      if LRemove then
+        Result := Result and RemoveJob(LList[LListIndex]);
+    end;
+  finally
+    FInList.UnlockList;
   end;
 end;
 
 constructor TThreadManager<T>.Create;
 begin
   inherited Create;
+
+  FInList := TThreadList<T>.Create(False);
+  FBlackList := TThreadList<T>.Create(False);
+
   FOmniEM := TOmniEventMonitor.Create(nil);
   with FOmniEM do
   begin
     OnTaskMessage := OmniEMTaskMessage;
   end;
-
-  FInList := TList<T>.Create;
-  FBlackList := TList<T>.Create;
 end;
 
 function TThreadManager<T>.InUse(const ATabSheetController: ITabSheetController): WordBool;

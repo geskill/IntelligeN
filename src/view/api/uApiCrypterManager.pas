@@ -237,16 +237,12 @@ begin
 end;
 
 procedure TCrypterManager.RemoveCrypterJob(const ACrypterPanel: ICrypterPanel);
-var
-  LListIndex: Integer;
 begin
-  for LListIndex := 0 to FInList.Count - 1 do
-  begin
-    if (ACrypterPanel = FInList[LListIndex].CrypterPanel) then
-    begin
-      RemoveJob(FInList[LListIndex]);
-    end;
-  end;
+  RemoveIterator(
+    { } procedure(const AJobWorkData: TCrypterData; var ARemove: Boolean)
+    { } begin
+    { . } ARemove := (ACrypterPanel = AJobWorkData.CrypterPanel);
+    { } end);
 end;
 
 end.

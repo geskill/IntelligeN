@@ -193,8 +193,6 @@ begin
         LSuccess := False; // FPublishRetry = 3
 
         repeat
-          FErrorMsg := '';
-
           with TApiThreadedPlugin.Create(task, DefaultErrorHandler) do
             try
               LSuccess := CMSExec(Data.PublishItem);
@@ -253,7 +251,7 @@ begin
   case msg.MsgID of
     MSG_PUBLISH_ITEM_TASK_CREATED:
       begin
-        FThreadStringList.Add(LJobWorkData.PublishItem.Host);
+        FThreadStringList.Add(LJobWorkData.PublishItem.HostWithPath);
 
         if Assigned(FOnGUIInteractionItem) then
           FOnGUIInteractionItem(pmisWORKING, FPublishJob, GetProgressPosition, GetHintLabeledText);
@@ -265,12 +263,11 @@ begin
       end;
     MSG_PUBLISH_ITEM_TASK_COMPLETED:
       begin
+        FThreadStringList.Remove(LJobWorkData.PublishItem.HostWithPath);
         FCompletedCount.Increment;
 
         if Assigned(FOnGUIInteractionItem) then
           FOnGUIInteractionItem(pmisWORKING, FPublishJob, GetProgressPosition, GetHintLabeledText);
-
-        FThreadStringList.Remove(LJobWorkData.PublishItem.Host);
       end
     else
     begin
@@ -327,16 +324,12 @@ begin
 end;
 
 procedure TPublishInnerManager.RemovePublishItem(const APublishItem: IPublishItem);
-var
-  LListIndex: Integer;
 begin
-  for LListIndex := 0 to FInList.Count - 1 do
-  begin
-    if (APublishItem = FInList[LListIndex].PublishItem) then
-    begin
-      RemoveJob(FInList[LListIndex]);
-    end;
-  end;
+  RemoveIterator(
+    { } procedure(const AJobWorkData: TPublishInnerData; var ARemove: Boolean)
+    { } begin
+    { . } ARemove := (APublishItem = AJobWorkData.PublishItem);
+    { } end);
 end;
 
 { ****************************************************************************** }
@@ -557,16 +550,12 @@ begin
 end;
 
 procedure TPublishManager.RemovePublishJob(const AUniqueID: LongWord);
-var
-  LListIndex: Integer;
 begin
-  for LListIndex := 0 to FInList.Count - 1 do
-  begin
-    if (AUniqueID = FInList[LListIndex].PublishJob.UniqueID) then
-    begin
-      RemoveJob(FInList[LListIndex]);
-    end;
-  end;
+  RemoveIterator(
+    { } procedure(const AJobWorkData: TPublishData; var ARemove: Boolean)
+    { } begin
+    { . } ARemove := (AUniqueID = AJobWorkData.PublishJob.UniqueID);
+    { } end);
 end;
 
 procedure TPublishManager.RemoveAllPublishJobs;

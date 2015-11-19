@@ -194,16 +194,12 @@ begin
 end;
 
 procedure TImageHosterManager.RemoveUploadJob(const APictureMirror: IPictureMirror);
-var
-  LListIndex: Integer;
 begin
-  for LListIndex := 0 to FInList.Count - 1 do
-  begin
-    if (APictureMirror = FInList[LListIndex].PictureMirror) then
-    begin
-      RemoveJob(FInList[LListIndex]);
-    end;
-  end;
+  RemoveIterator(
+    { } procedure(const AJobWorkData: TImageHosterData; var ARemove: Boolean)
+    { } begin
+    { . } ARemove := (APictureMirror = AJobWorkData.PictureMirror);
+    { } end);
 end;
 
 end.

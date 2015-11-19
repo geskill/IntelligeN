@@ -1265,7 +1265,7 @@ begin
 
       for LWebsiteListIndex := 0 to FWebsiteList.Count - 1 do
       begin
-        Items.AddObject(FWebsiteList[LWebsiteListIndex].Host, TObject(FWebsiteList[LWebsiteListIndex].CMSInnerIndex));
+        Items.AddObject(FWebsiteList[LWebsiteListIndex].HostWithPath, TObject(FWebsiteList[LWebsiteListIndex].CMSInnerIndex));
       end;
     finally
       EndUpdate;

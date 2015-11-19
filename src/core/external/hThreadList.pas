@@ -59,6 +59,7 @@ type
     procedure Add     (const Item: TListItem; Duplicates: TDuplicates = dupIgnore);
     procedure Remove  (const Item: TListItem);
     function  Contains(const Item: TListItem): Boolean;
+    function  Count: Integer;
     procedure Clear;
     function  LockList: TListObj;
     procedure UnlockList;
@@ -169,6 +170,16 @@ begin
   FLock.Enter;
   try
     Result := FList.Contains(Item);
+  finally
+    FLock.Leave;
+  end;
+end;
+
+function TThreadList<T>.Count: Integer;
+begin
+  FLock.Enter;
+  try
+    Result := FList.Count;
   finally
     FLock.Leave;
   end;

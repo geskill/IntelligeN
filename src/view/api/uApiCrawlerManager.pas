@@ -294,16 +294,12 @@ begin
 end;
 
 procedure TCrawlerManager.RemoveCrawlerJob;
-var
-  LListIndex: Integer;
 begin
-  for LListIndex := 0 to FInList.Count - 1 do
-  begin
-    if (AControlController = FInList[LListIndex].ControlController) then
-    begin
-      RemoveJob(FInList[LListIndex]);
-    end;
-  end;
+  RemoveIterator(
+    { } procedure(const AJobWorkData: TCrawlerData; var ARemove: Boolean)
+    { } begin
+    { . } ARemove := (AControlController = AJobWorkData.ControlController);
+    { } end);
 end;
 
 end.
