@@ -62,7 +62,7 @@ var
   end;
 
 begin
-  OleInitialize(nil);
+  CoInitialize(nil);
   try
     XMLDoc := NewXMLDocument;
     try
@@ -150,7 +150,7 @@ begin
       XMLDoc := nil;
     end;
   finally
-    OleUninitialize;
+    CoUninitialize;
   end;
 end;
 
@@ -172,7 +172,7 @@ var
 begin
   result := -1;
   try
-    OleInitialize(nil);
+    CoInitialize(nil);
     try
       LXMLDoc := NewXMLDocument;
       try
@@ -320,7 +320,7 @@ begin
         LXMLDoc := nil;
       end;
     finally
-      OleUninitialize;
+      CoUninitialize;
     end;
   except
     result := -1;

@@ -65,7 +65,7 @@ var
   XMLDoc: IXMLDocument;
   I, X: Integer;
 begin
-  OleInitialize(nil);
+  CoInitialize(nil);
   try
     XMLDoc := NewXMLDocument;
     try
@@ -151,7 +151,7 @@ begin
       XMLDoc := nil;
     end;
   finally
-    OleUninitialize;
+    CoUninitialize;
   end;
 end;
 
@@ -172,7 +172,7 @@ begin
 
   Result := -1;
   try
-    OleInitialize(nil);
+    CoInitialize(nil);
     try
       XMLDoc := NewXMLDocument;
       try
@@ -253,7 +253,7 @@ begin
         XMLDoc := nil;
       end;
     finally
-      OleUninitialize;
+      CoUninitialize;
     end;
   except
     Result := -1;

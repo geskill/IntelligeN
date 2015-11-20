@@ -80,24 +80,24 @@ implementation
 
 class function TApiXml.GetControlsTemplateInfo(AFileName: string): TTemplateInfo;
 var
-  XMLDoc: IXMLDocument;
-  _TemplateInfo: TTemplateInfo;
+  LXMLDoc: IXMLDocument;
+  LTemplateInfo: TTemplateInfo;
 begin
-  OleInitialize(nil);
+  CoInitialize(nil);
   try
-    XMLDoc := NewXMLDocument;
+    LXMLDoc := NewXMLDocument;
     try
-      with XMLDoc do
+      with LXMLDoc do
       begin
         LoadFromFile(AFileName);
         Active := True;
       end;
 
-      with XMLDoc.DocumentElement do
+      with LXMLDoc.DocumentElement do
         if HasChildNodes then
           with ChildNodes.Nodes['templatetype'] do
           begin
-            with _TemplateInfo do
+            with LTemplateInfo do
             begin
               TemplateType := StringToTypeID(VarToStr(NodeValue));
               TemplateFileName := VarToStr(Attributes['filename']);
@@ -105,12 +105,12 @@ begin
             end;
           end;
 
-      Result := _TemplateInfo;
+      Result := LTemplateInfo;
     finally
-      XMLDoc := nil;
+      LXMLDoc := nil;
     end;
   finally
-    OleUninitialize;
+    CoUninitialize;
   end;
 end;
 
@@ -191,7 +191,7 @@ begin
   Result := TWebsiteConfigurationFile.Create;
 
   MultiPosterVersion := TMultiPosterVersion(IndexText(ExtractFileExt(AFileName), ['.mpu', '.ep4']));
-  OleInitialize(nil);
+  CoInitialize(nil);
   try
     XMLDoc := NewXMLDocument;
     try
@@ -300,7 +300,7 @@ begin
       XMLDoc := nil;
     end;
   finally
-    OleUninitialize;
+    CoUninitialize;
   end;
 end;
 
@@ -317,7 +317,7 @@ begin
 
   if FileExists(AFileName) then
   begin
-    OleInitialize(nil);
+    CoInitialize(nil);
     try
       XMLDoc := NewXMLDocument;
       try
@@ -397,7 +397,7 @@ begin
         XMLDoc := nil;
       end;
     finally
-      OleUninitialize;
+      CoUninitialize;
     end;
   end;
 end;
@@ -435,7 +435,7 @@ var
   Control: IControl;
   Hoster: IHoster;
 begin
-  OleInitialize(nil);
+  CoInitialize(nil);
   try
     XMLDoc := NewXMLDocument;
     try
@@ -559,9 +559,11 @@ begin
       XMLDoc := nil;
     end;
   finally
-    OleUninitialize;
+    CoUninitialize;
   end;
 end;
+
+{ THosterConfiguration }
 
 class procedure THosterConfiguration.LoadXML(AXMLProc: TXMLProc);
 var
@@ -690,7 +692,7 @@ var
 begin
   // Wenn man hier den ComponentCreator erstellt braucht man wegen dem WorkPanel ein Verweis auf uMain
 
-  OleInitialize(nil);
+  CoInitialize(nil);
   try
     XMLDoc := NewXMLDocument;
     try
@@ -717,7 +719,7 @@ begin
       XMLDoc := nil;
     end;
   finally
-    OleUninitialize;
+    CoUninitialize;
   end;
 end;
 
@@ -731,7 +733,7 @@ begin
     raise Exception.Create(CodeDefinitionsXML + ' not found located at configuration\bbcodedefinitions.xml')
   else
   begin
-    OleInitialize(nil);
+    CoInitialize(nil);
     try
       XMLDoc := NewXMLDocument;
       try
@@ -746,7 +748,7 @@ begin
         XMLDoc := nil;
       end;
     finally
-      OleUninitialize;
+      CoUninitialize;
     end;
   end;
 end;

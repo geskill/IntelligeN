@@ -343,14 +343,14 @@ procedure TIDEditPanel.FcxPEIDInitPopup(Sender: TObject);
   var
     LRecordIndex: Integer;
   begin
-    Result := -1;
+    result := -1;
 
     with FcxGIDTableView.DataController do
     begin
       for LRecordIndex := 0 to RecordCount - 1 do
         if SameText(Values[LRecordIndex, 0], AText) then
         begin
-          Result := LRecordIndex;
+          result := LRecordIndex;
           Break;
         end;
     end;
@@ -1569,7 +1569,7 @@ var
 
   _tempnode: IXMLNode;
 begin
-  OleInitialize(nil);
+  CoInitialize(nil);
   try
     XMLDoc := NewXMLDocument;
     try
@@ -1737,7 +1737,7 @@ begin
       XMLDoc := nil;
     end;
   finally
-    OleUninitialize;
+    CoUninitialize;
   end;
 end;
 
@@ -2543,7 +2543,7 @@ var
 
   I, Y: Integer;
 begin
-  OleInitialize(nil);
+  CoInitialize(nil);
   try
     XMLDoc := NewXMLDocument;
     try
@@ -2705,7 +2705,7 @@ begin
       XMLDoc := nil;
     end;
   finally
-    OleUninitialize;
+    CoUninitialize;
   end;
 
   if FIDPanelList.Count > 0 then

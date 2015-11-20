@@ -65,7 +65,7 @@ begin
     raise Exception.Create('controls.xml not found located at configuration\controls.xml')
   else
   begin
-    OleInitialize(nil);
+    CoInitialize(nil);
     try
       LXMLDoc := NewXMLDocument;
       try
@@ -125,7 +125,7 @@ begin
         LXMLDoc := nil;
       end;
     finally
-      OleUninitialize;
+      CoUninitialize;
     end;
   end;
 end;

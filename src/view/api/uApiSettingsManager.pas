@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  SysUtils, Classes,
+  SysUtils, Classes, ActiveX,
   // DragonSoft XMLSerializer
   uXMLSerializer,
   // Utils
@@ -21,6 +21,9 @@ type
   type
     TXMLSerializer = class(uXMLSerializer.TXMLSerializer)
     public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+
       procedure LoadObject(const aInstance: TObject);
       procedure SaveObject(const aInstance: TObject);
     end;
@@ -52,6 +55,18 @@ type
 implementation
 
 { TSettingsManager }
+
+constructor TSettingsManager<T>.TXMLSerializer.Create(AOwner: TComponent);
+begin
+  CoInitialize(nil);
+  inherited Create(AOwner);
+end;
+
+destructor TSettingsManager<T>.TXMLSerializer.Destroy;
+begin
+  inherited Destroy;
+  CoUninitialize;
+end;
 
 procedure TSettingsManager<T>.TXMLSerializer.LoadObject(const aInstance: TObject);
 begin

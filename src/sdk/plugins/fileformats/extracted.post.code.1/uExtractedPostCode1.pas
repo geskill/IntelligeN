@@ -48,7 +48,7 @@ var
   I: Integer;
   _hoster: string;
 begin
-  OleInitialize(nil);
+  CoInitialize(nil);
   try
     XMLDoc := NewXMLDocument;
     try
@@ -168,7 +168,7 @@ begin
       XMLDoc := nil;
     end;
   finally
-    OleUninitialize;
+    CoUninitialize;
   end;
 end;
 
