@@ -20,8 +20,8 @@ function IsBMP(const AFileName: String): Boolean; overload;
 function IsGIF(const AFileStream: TStream): Boolean; overload;
 function IsGIF(const AFileName: String): Boolean; overload;
 
-function IsJPEG(const AFileStream: TStream): Boolean; overload;
-function IsJPEG(const AFileName: String): Boolean; overload;
+function IsJPG(const AFileStream: TStream): Boolean; overload;
+function IsJPG(const AFileName: String): Boolean; overload;
 
 function IsPNG(const AFileStream: TStream): Boolean; overload;
 function IsPNG(const AFileName: String): Boolean; overload;
@@ -33,7 +33,7 @@ implementation
 
 function GetTGraphicType(AStream: TStream): TGraphicMeta;
 begin
-  if IsJPEG(AStream) then
+  if IsJPG(AStream) then
     Result := TJPEGImage
   else if IsBMP(AStream) then
     Result := TBitmap
@@ -49,7 +49,7 @@ end;
 
 function GetTGraphicFileExt(AStream: TStream): string;
 begin
-  if IsJPEG(AStream) then
+  if IsJPG(AStream) then
     Result := '.jpg'
   else if IsBMP(AStream) then
     Result := '.bmp'
@@ -113,7 +113,7 @@ begin
   Result := Buffer = $4947;
 end;
 
-function IsJPEG(const AFileStream: TStream): Boolean;
+function IsJPG(const AFileStream: TStream): Boolean;
 var
   Buffer: Word;
 begin
@@ -126,7 +126,7 @@ begin
   end;
 end;
 
-function IsJPEG(const AFileName: String): Boolean;
+function IsJPG(const AFileName: String): Boolean;
 var
   FileHandle: Integer;
   Buffer: Word;

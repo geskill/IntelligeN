@@ -88,19 +88,19 @@ end;
 
 procedure TCAPTCHA.DisplayCAPTCHAImage(ACAPTCHAMemoryStream: TMemoryStream);
 var
-  _img_jpeg: TJPEGImage;
+  _img_jpg: TJPEGImage;
   _img_png: TdxPNGImage;
   _img_gif: TGIFImage;
   _img_tif: TWicImage;
 begin
-  if IsJPEG(ACAPTCHAMemoryStream) then
+  if IsJPG(ACAPTCHAMemoryStream) then
   begin
-    _img_jpeg := TJPEGImage.Create;
+    _img_jpg := TJPEGImage.Create;
     try
-      _img_jpeg.LoadFromStream(ACAPTCHAMemoryStream);
-      iCAPTCHA.Picture.Bitmap.Assign(_img_jpeg);
+      _img_jpg.LoadFromStream(ACAPTCHAMemoryStream);
+      iCAPTCHA.Picture.Bitmap.Assign(_img_jpg);
     finally
-      _img_jpeg.Free;
+      _img_jpg.Free;
     end;
   end
   else if IsPNG(ACAPTCHAMemoryStream) then
