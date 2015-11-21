@@ -201,194 +201,198 @@ begin
 
       ResponseStrProductInformation := HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode;
 
-      if ACanUse(cTitle) then
+      if Pos('extinfo_title', ResponseStrProductInformation) > 0 then
       begin
-        with TRegExpr.Create do
-        begin
-          try
-            InputString := ResponseStrProductInformation;
-            Expression := '<h3>(.*?)<\/h3>';
 
-            if Exec(InputString) then
-            begin
-              repeat
-                AControlController.FindControl(cTitle).AddProposedValue(GetName, HTML2Text(Match[1]));
-              until not ExecNext;
+        if ACanUse(cTitle) then
+        begin
+          with TRegExpr.Create do
+          begin
+            try
+              InputString := ResponseStrProductInformation;
+              Expression := '<h3>(.*?)<\/h3>';
+
+              if Exec(InputString) then
+              begin
+                repeat
+                  AControlController.FindControl(cTitle).AddProposedValue(GetName, HTML2Text(Match[1]));
+                until not ExecNext;
+              end;
+            finally
+              Free;
             end;
-          finally
-            Free;
           end;
         end;
-      end;
 
-      if ACanUse(cPicture) then
-        with TRegExpr.Create do
-          try
-            InputString := ResponseStrProductInformation;
-            Expression := '<div id="poster" style="line-height:0;"><div>  <img src="\/([^\"]+?)"';
+        if ACanUse(cPicture) then
+          with TRegExpr.Create do
+            try
+              InputString := ResponseStrProductInformation;
+              Expression := '<div id="poster" style="line-height:0;"><div>  <img src="\/([^\"]+?)"';
 
-            if Exec(InputString) then
-            begin
-              repeat
-                if not(Match[1] = '') then
-                begin
-                  s := WEBSITE + Match[1];
+              if Exec(InputString) then
+              begin
+                repeat
+                  if not(Match[1] = '') then
+                  begin
+                    s := WEBSITE + Match[1];
 
-                  AControlController.FindControl(cPicture).AddProposedValue(GetName, s);
-                end;
-              until not ExecNext;
+                    AControlController.FindControl(cPicture).AddProposedValue(GetName, s);
+                  end;
+                until not ExecNext;
+              end;
+            finally
+              Free;
             end;
-          finally
-            Free;
-          end;
 
-      if ACanUse(cRuntime) then
-        with TRegExpr.Create do
-          try
-            InputString := ResponseStrProductInformation;
-            Expression := 'Laufzeit:</div> <div class="l_right" title="(\d+) ';
+        if ACanUse(cRuntime) then
+          with TRegExpr.Create do
+            try
+              InputString := ResponseStrProductInformation;
+              Expression := 'Laufzeit:</div> <div class="l_right" title="(\d+) ';
 
-            if Exec(InputString) then
-              AControlController.FindControl(cRuntime).AddProposedValue(GetName, Match[1]);
-          finally
-            Free;
-          end;
+              if Exec(InputString) then
+                AControlController.FindControl(cRuntime).AddProposedValue(GetName, Match[1]);
+            finally
+              Free;
+            end;
 
-      if ACanUse(cDescription) then
-      begin
-        with TRegExpr.Create do
+        if ACanUse(cDescription) then
         begin
-          try
-            InputString := ResponseStrProductInformation;
-            Expression := '<div class="article_text" style="margin:0;"> (.*?)(<table| <\/div>)';
+          with TRegExpr.Create do
+          begin
+            try
+              InputString := ResponseStrProductInformation;
+              Expression := '<div class="article_text" style="margin:0;"> (.*?)(<table| <\/div>)';
 
-            if Exec(InputString) then
-            begin
-              repeat
-                AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
-              until not ExecNext;
+              if Exec(InputString) then
+              begin
+                repeat
+                  AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
+                until not ExecNext;
+              end;
+            finally
+              Free;
             end;
-          finally
-            Free;
           end;
         end;
-      end;
 
-      if ACanUse(cGenre) then
-      begin
-        with TRegExpr.Create do
+        if ACanUse(cGenre) then
         begin
-          try
-            InputString := ResponseStrProductInformation;
-            Expression := 'Genre:</div> <div class="l_right">(.*?)<\/div>';
+          with TRegExpr.Create do
+          begin
+            try
+              InputString := ResponseStrProductInformation;
+              Expression := 'Genre:</div> <div class="l_right">(.*?)<\/div>';
 
-            if Exec(InputString) then
-            begin
-              repeat
+              if Exec(InputString) then
+              begin
+                repeat
+                  s := Match[1];
+                  if (Pos('/', s) > 0) or (Pos(',', s) > 0) or (Pos('|', s) > 0) then
+                  begin
+                    with TRegExpr.Create do
+                    begin
+                      try
+                        InputString := s;
+                        Expression := '([^\/,|]+)';
+
+                        if Exec(InputString) then
+                        begin
+                          repeat
+                            AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(Match[1]));
+                          until not ExecNext;
+                        end;
+                      finally
+                        Free;
+                      end;
+                    end;
+                  end
+                  else
+                  begin
+                    AControlController.FindControl(cGenre).AddProposedValue(GetName, s);
+                  end;
+                until not ExecNext;
+              end;
+            finally
+              Free;
+            end;
+          end;
+        end;
+
+        if (ATypeID = cMovie) and ACanUse(cDirector) then
+        begin
+          with TRegExpr.Create do
+            try
+              InputString := ResponseStrProductInformation;
+              Expression := 'Regisseur: <\/div>(.*?)<div class="clear">';
+
+              if Exec(InputString) then
+              begin
                 s := Match[1];
-                if (Pos('/', s) > 0) or (Pos(',', s) > 0) or (Pos('|', s) > 0) then
-                begin
+
+                LStringList := TStringList.Create;
+                try
                   with TRegExpr.Create do
                   begin
                     try
                       InputString := s;
-                      Expression := '([^\/,|]+)';
+                      Expression := '<a href=".*?">(.*?)<\/a>';
 
                       if Exec(InputString) then
                       begin
                         repeat
-                          AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(Match[1]));
+                          LStringList.Add(Match[1]);
                         until not ExecNext;
+
+                        AControlController.FindControl(cDirector).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
                       end;
                     finally
                       Free;
                     end;
                   end;
-                end
-                else
-                begin
-                  AControlController.FindControl(cGenre).AddProposedValue(GetName, s);
+                finally
+                  LStringList.Free;
                 end;
-              until not ExecNext;
-            end;
-          finally
-            Free;
-          end;
-        end;
-      end;
-
-      if (ATypeID = cMovie) and ACanUse(cDirector) then
-      begin
-        with TRegExpr.Create do
-          try
-            InputString := ResponseStrProductInformation;
-            Expression := 'Regisseur: <\/div>(.*?)<div class="clear">';
-
-            if Exec(InputString) then
-            begin
-              s := Match[1];
-
-              LStringList := TStringList.Create;
-              try
-                with TRegExpr.Create do
-                begin
-                  try
-                    InputString := s;
-                    Expression := '<a href=".*?">(.*?)<\/a>';
-
-                    if Exec(InputString) then
-                    begin
-                      repeat
-                        LStringList.Add(Match[1]);
-                      until not ExecNext;
-
-                      AControlController.FindControl(cDirector).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
-                    end;
-                  finally
-                    Free;
-                  end;
-                end;
-              finally
-                LStringList.Free;
               end;
+            finally
+              Free;
             end;
-          finally
-            Free;
-          end;
-      end;
+        end;
 
-      if (ATypeID in cGames) and ACanUse(cCreator) then
-      begin
-        with TRegExpr.Create do
-          try
-            InputString := ResponseStrProductInformation;
-            Expression := 'Entwickler:</div> <div class="l_right">(.*?)<\/div>';
+        if (ATypeID in cGames) and ACanUse(cCreator) then
+        begin
+          with TRegExpr.Create do
+            try
+              InputString := ResponseStrProductInformation;
+              Expression := 'Entwickler:</div> <div class="l_right">(.*?)<\/div>';
 
-            if Exec(InputString) then
-            begin
-              AControlController.FindControl(cCreator).AddProposedValue(GetName, Match[1]);
+              if Exec(InputString) then
+              begin
+                AControlController.FindControl(cCreator).AddProposedValue(GetName, Match[1]);
+              end;
+            finally
+              Free;
             end;
-          finally
-            Free;
-          end;
-      end;
+        end;
 
-      if (ATypeID in cGames) and ACanUse(cPublisher) then
-      begin
-        with TRegExpr.Create do
-          try
-            InputString := ResponseStrProductInformation;
-            Expression := 'Herausgeber:</div> <div class="l_right">(.*?)<\/div>';
+        if (ATypeID in cGames) and ACanUse(cPublisher) then
+        begin
+          with TRegExpr.Create do
+            try
+              InputString := ResponseStrProductInformation;
+              Expression := 'Herausgeber:</div> <div class="l_right">(.*?)<\/div>';
 
-            if Exec(InputString) then
-            begin
-              AControlController.FindControl(cPublisher).AddProposedValue(GetName, Match[1]);
+              if Exec(InputString) then
+              begin
+                AControlController.FindControl(cPublisher).AddProposedValue(GetName, Match[1]);
+              end;
+            finally
+              Free;
             end;
-          finally
-            Free;
-          end;
-      end;
+        end;
 
+      end;
     end;
   end;
 

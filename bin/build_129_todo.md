@@ -12,6 +12,8 @@ This todo list contains all useful ideas for improvement, not necessarily for th
 
 - [ ] Add output link/id of created threads and/or posts
 
+- [ ] Add detection for post prohibition and wait this amount of time
+
 - [ ] Add password protected subforums for vBulletin
 
 ######Crawler
