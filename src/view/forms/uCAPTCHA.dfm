@@ -70,6 +70,7 @@ object CAPTCHA: TCAPTCHA
   end
   object tTimer: TTimer
     Enabled = False
+    OnTimer = tTimerTimer
     Left = 16
     Top = 16
   end

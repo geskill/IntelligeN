@@ -784,7 +784,7 @@ begin
         { . } LCAPTCHAWaitable.Signal;
         { } end);
 
-      LCAPTCHAWaitable.WaitFor(1000 * 60 * 2 + 15); // wait max. 2 minutes + 15 seconds
+      LCAPTCHAWaitable.WaitFor(1000 * 60 * 2 + 15000); // wait max. 2 minutes + 15 seconds
 
       if LResult then
       begin
