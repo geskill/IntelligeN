@@ -162,7 +162,7 @@ begin
         Free;
       end;
 
-    if not CAPTCHAInput(Website, Website + 'captcha.php?imagehash=' + _imagehash, GetName, _captcha, _cookies) then
+    if not CAPTCHAInput(Website, Subject, Website + 'captcha.php?imagehash=' + _imagehash, GetName, _captcha, _cookies) then
     begin
       ErrorMsg := StrAbortedThrougthCAP;
       Result := False;
@@ -343,7 +343,7 @@ begin
 
         if MyBBSettings.intelligent_posting_helper then
         begin
-          if not IntelligentPostingHelper(Website, SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
+          if not IntelligentPostingHelper(Website, Subject, SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
           begin
             ErrorMsg := StrAbortedThrougthInt;
             Result := False;

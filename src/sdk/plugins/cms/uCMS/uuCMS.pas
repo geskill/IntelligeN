@@ -149,7 +149,7 @@ begin
 
     sleep(2000);
 
-    if not CAPTCHAInput(Website, Website + 'gfx/secure/index.php?captcha=' + _captcha_id_c, GetName, _captcha, _cookies) then
+    if not CAPTCHAInput(Website, Subject, Website + 'gfx/secure/index.php?captcha=' + _captcha_id_c, GetName, _captcha, _cookies) then
     begin
       ErrorMsg := StrAbortedThrougthCAP;
       Result := False;
@@ -266,7 +266,7 @@ begin
         end;
       end;
 
-      if not CAPTCHAInput(Website, Website + 'gfx/secure/index.php?captcha=' + _captcha_id_c, GetName, _captcha, _cookies) then
+      if not CAPTCHAInput(Website, Subject, Website + 'gfx/secure/index.php?captcha=' + _captcha_id_c, GetName, _captcha, _cookies) then
       begin
         ErrorMsg := StrAbortedThrougthCAP;
         Result := False;

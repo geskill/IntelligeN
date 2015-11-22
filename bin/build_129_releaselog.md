@@ -437,7 +437,7 @@
 
 ######minor enhancements
 
-* Added host in CAPTCHA and intelligent_posting-Helper window
+* Added host and subject in CAPTCHA and intelligent_posting-Helper window
 
 * Improved performance
 

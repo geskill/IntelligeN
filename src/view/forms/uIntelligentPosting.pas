@@ -25,7 +25,7 @@ type
   end;
 
   TIntelligentPostingClass = class
-    class function IntelligentPostingHandler(const AHost: string; var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool;
+    class function IntelligentPostingHandler(const AHost: WideString; const ASubject: WideString; var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool;
   end;
 
 implementation
@@ -40,7 +40,7 @@ begin
 
   with TIntelligentPosting.Create(nil) do
     try
-      Caption := AHost + ' - ' + Caption;
+      Caption := AHost + ' - ' + Caption + ' - ' + ASubject;
 
       cxTESearchValue.Text := ASearchValue;
       cxLBSearchResults.Items.Text := ASearchResults;

@@ -212,7 +212,7 @@ begin
     if (Pos('name="sec_code"', APrevResponse) > 0) then
     begin
       _cookies := HTTPManager.GetResult(APrevRequest).HTTPResult.HTTPResponse.Cookies.Text;
-      if not CAPTCHAInput(Website, Website + 'engine/modules/antibot.php', GetName, _captcha, _cookies) then
+      if not CAPTCHAInput(Website, Subject, Website + 'engine/modules/antibot.php', GetName, _captcha, _cookies) then
       begin
         ErrorMsg := StrAbortedThrougthCAP;
         Result := False;

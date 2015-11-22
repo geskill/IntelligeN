@@ -194,7 +194,7 @@ begin
           Free;
         end;
 
-      if not CAPTCHAInput(Website, Website + 'vc.php?id=' + _captcha_confirm_hash, GetName + ' VisualConfirmation', _captcha, _cookies) then
+      if not CAPTCHAInput(Website, Subject, Website + 'vc.php?id=' + _captcha_confirm_hash, GetName + ' VisualConfirmation', _captcha, _cookies) then
       begin
         ErrorMsg := StrAbortedThrougthCAP;
         Result := False;
@@ -238,7 +238,7 @@ begin
           Free;
         end;
 
-      if not CAPTCHAInput(Website, 'http://www.google.com/recaptcha/api/image?c=' + _challenge, 'reCAPTCHA', _captcha, _cookies) then
+      if not CAPTCHAInput(Website, Subject, 'http://www.google.com/recaptcha/api/image?c=' + _challenge, 'reCAPTCHA', _captcha, _cookies) then
       begin
         ErrorMsg := StrAbortedThrougthCAP;
         Result := False;
@@ -260,7 +260,7 @@ begin
           Free;
         end;
 
-      if not CAPTCHAInput(Website, Website + 'profile.php?mode=confirm&id=' + _captcha_confirm_hash, GetName, _captcha, _cookies) then
+      if not CAPTCHAInput(Website, Subject, Website + 'profile.php?mode=confirm&id=' + _captcha_confirm_hash, GetName, _captcha, _cookies) then
       begin
         ErrorMsg := StrAbortedThrougthCAP;
         Result := False;

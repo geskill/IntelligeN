@@ -367,7 +367,7 @@ begin
 
         if vBulletinSettings.intelligent_posting_helper then
         begin
-          if not IntelligentPostingHelper(Website, SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
+          if not IntelligentPostingHelper(Website, Subject, SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
           begin
             ErrorMsg := StrAbortedThrougthInt;
             Result := False;
@@ -545,7 +545,7 @@ begin
           Free;
         end;
 
-      if not CAPTCHAInput(Website, _captcha_text, GetName + ' RandomQuestion', _captcha, _cookies) then
+      if not CAPTCHAInput(Website, Subject, _captcha_text, GetName + ' RandomQuestion', _captcha, _cookies) then
       begin
         ErrorMsg := StrAbortedThrougthCAP;
         Result := False;
@@ -586,7 +586,7 @@ begin
           Free;
         end;
 
-      if not CAPTCHAInput(Website, 'http://www.google.com/recaptcha/api/image?c=' + _challenge, 'reCAPTCHA', _captcha, _cookies) then
+      if not CAPTCHAInput(Website, Subject, 'http://www.google.com/recaptcha/api/image?c=' + _challenge, 'reCAPTCHA', _captcha, _cookies) then
       begin
         ErrorMsg := StrAbortedThrougthCAP;
         Result := False;
@@ -619,7 +619,7 @@ begin
           Free;
         end;
 
-      if not CAPTCHAInput(Website, _captcha_text, GetName + ' NoSpam!', _captcha, _cookies) then
+      if not CAPTCHAInput(Website, Subject, _captcha_text, GetName + ' NoSpam!', _captcha, _cookies) then
       begin
         ErrorMsg := StrAbortedThrougthCAP;
         Result := False;
