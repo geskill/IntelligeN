@@ -327,6 +327,7 @@ type
     FPictureArray: array of TPictureInfo;
     FMirrorList: TInterfaceList<IPictureMirror>;
     // Logic
+    function BitmapAsThumbnail(const Graphic: TGraphic): TBitmap;
     function GraphicAsVariant(AGraphic: TGraphic): Variant;
     procedure SaveImage; overload;
     procedure SaveImage(AMemoryStream: TMemoryStream); overload;
@@ -1556,37 +1557,53 @@ begin
     FPictureMirrorPanel.Left := FTitleLabel.Left + FTitleLabel.Width + 6;
 end;
 
-function TIPicture.GraphicAsVariant(AGraphic: TGraphic): Variant;
-
-  function GetBitmap(const Graphic: TGraphic): TBitmap;
-  begin
-    Result := TBitmap.Create;
-    if Assigned(Graphic) and not Graphic.Empty then
-    begin
-      Result.SetSize(Graphic.Width, Graphic.Height);
-      with Result.Canvas do
-        try
-          Draw(0, 0, Graphic);
-        except
-
-        end;
-    end;
-  end;
-
+function TIPicture.BitmapAsThumbnail(const Graphic: TGraphic): TBitmap;
+const
+  MAX_WIDTH = 300;
+  MAX_HEIGHT = 300;
 var
-  StringStream: TStringStream;
+  LThumbnail: TBitmap;
+  LThumbnailRect: TRect;
 begin
-  StringStream := TStringStream.Create('');
+  LThumbnail := TBitmap.Create;
+  if Assigned(Graphic) and not Graphic.Empty then
+  begin
+    LThumbnail.Assign(Graphic);
+
+    LThumbnailRect.Left := 0;
+    LThumbnailRect.Top := 0;
+    if Graphic.Width > Graphic.Height then
+    begin
+      LThumbnailRect.Right := MAX_WIDTH;
+      LThumbnailRect.Bottom := (MAX_WIDTH * Graphic.Height) div Graphic.Width;
+    end
+    else
+    begin
+      LThumbnailRect.Bottom := MAX_HEIGHT;
+      LThumbnailRect.Right := (MAX_HEIGHT * Graphic.Width) div Graphic.Height;
+    end;
+
+    LThumbnail.Canvas.StretchDraw(LThumbnailRect, LThumbnail);
+    LThumbnail.SetSize(LThumbnailRect.Right, LThumbnailRect.Bottom);
+  end;
+  Result := LThumbnail;
+end;
+
+function TIPicture.GraphicAsVariant(AGraphic: TGraphic): Variant;
+var
+  LStringStream: TStringStream;
+begin
+  LStringStream := TStringStream.Create('');
   try
-    with GetBitmap(AGraphic) do
+    with BitmapAsThumbnail(AGraphic) do
       try
-        SaveToStream(StringStream);
+        SaveToStream(LStringStream);
       finally
         Free;
       end;
-    Result := StringStream.DataString;
+    Result := LStringStream.DataString;
   finally
-    StringStream.Free;
+    LStringStream.Free;
   end;
 end;
 
@@ -1693,7 +1710,7 @@ begin
     end;
 
   except
-    AMemoryStream.SaveToFile(ExtractFilePath(ParamStr(0)) + 'Fehlerbild.jpg');
+    AMemoryStream.SaveToFile(ExtractFilePath(ParamStr(0)) + 'Fehlerbild' + '.jpg');
     // TODO: This image file has problems
   end;
 
