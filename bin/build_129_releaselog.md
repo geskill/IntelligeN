@@ -431,9 +431,13 @@
 
 ######major enhancements
 
-* Error Logger
+* Added Error Logger
+
+* Added signature creation
 
 ######minor enhancements
+
+* Added Host in CAPTCHA and intelligent_posting-Helper window
 
 * Improved performance
 
@@ -444,5 +448,9 @@
 * Improved ExtractUrlHost using TIdURI. (therefore Indy package is now part of framework.bpl)
 
 * Improved OleInitialize/CoInitializeEx usage
+
+* Improved phpbb3 forum id recognition if first forum is already sub-forum or portal mod is used
+
+* Improved xRel.to error detection
 
 * Fixed loading intelligen.xml.2 files with no templatetype

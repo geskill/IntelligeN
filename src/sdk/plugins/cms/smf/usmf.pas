@@ -213,7 +213,7 @@ begin
             _captcha_text := Match[1];
 
             _cookies := HTTPManager.GetResult(APrevRequest).HTTPResult.HTTPResponse.Cookies.Text;
-            if not CAPTCHAInput(_captcha_text, GetName, _captcha, _cookies) then
+            if not CAPTCHAInput(Website, _captcha_text, GetName, _captcha, _cookies) then
             begin
               Self.ErrorMsg := StrAbortedThrougthCAP;
               Result := False;

@@ -27,9 +27,11 @@ type
   protected
     class function GetCAPTCHAType(const ACAPTCHA: WideString): TCAPTCHAType;
   public
-    class function PluginsHandle(const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString; AErrorProc: TPluginErrorProc = nil): WordBool;
-    class function ManualHandle(const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; ACAPTCHAMemoryStream: TMemoryStream; AMaxWaitMs: Cardinal = INFINITE): WordBool;
-    class function DefaultHandler(const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString): WordBool; safecall;
+    class function PluginsHandle(const AWebsite: string; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString;
+      AErrorProc: TPluginErrorProc = nil): WordBool;
+    class function ManualHandle(const AWebsite: string; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; ACAPTCHAMemoryStream: TMemoryStream;
+      AMaxWaitMs: Cardinal = INFINITE): WordBool;
+    class function DefaultHandler(const AWebsite: string; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString): WordBool; safecall;
   end;
 
   TCAPTCHAPluginProc = reference to procedure(var ACAPTCHAPlugin: ICAPTCHAPlugIn);
@@ -84,8 +86,8 @@ type
   protected
     procedure DefaultInternalErrorHandler(AErrorMsg: string);
 
-    function DefaultCAPTCHAInputHandler(const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString): WordBool; safecall;
-    function DefaultIntelligentPostingHelperHandler(var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool; safecall;
+    function DefaultCAPTCHAInputHandler(const AWebsite: string; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString): WordBool; safecall;
+    function DefaultIntelligentPostingHelperHandler(const AWebsite: string; var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool; safecall;
 
     procedure LoadCrypterPlugin(ACrypter: TCrypterCollectionItem; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TPluginErrorProc = nil);
     procedure LoadImageHosterPlugin(AImageHoster: TImageHosterCollectionItem; AImageHosterPluginProc: TImageHosterPluginProc; AErrorProc: TPluginErrorProc = nil);
@@ -122,7 +124,8 @@ begin
     Result := ctText;
 end;
 
-class function TApiCAPTCHA.PluginsHandle(const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString; AErrorProc: TPluginErrorProc = nil): WordBool;
+class function TApiCAPTCHA.PluginsHandle(const AWebsite: string; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString;
+  AErrorProc: TPluginErrorProc = nil): WordBool;
 var
   LHandled: WordBool;
   LCAPTCHAPluginIndex: Integer;
@@ -148,12 +151,15 @@ begin
   Result := LHandled;
 end;
 
-class function TApiCAPTCHA.ManualHandle(const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; ACAPTCHAMemoryStream: TMemoryStream; AMaxWaitMs: Cardinal = INFINITE): WordBool;
+class function TApiCAPTCHA.ManualHandle(const AWebsite: string; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; ACAPTCHAMemoryStream: TMemoryStream;
+  AMaxWaitMs: Cardinal = INFINITE): WordBool;
 begin
   Result := False;
 
   with TCAPTCHA.Create(nil, AMaxWaitMs) do
     try
+      Caption := ExtractUrlHost(AWebsite) + ' - ' + Caption;
+
       if (ACAPTCHAType = ctImage) then
         DisplayCAPTCHAImage(ACAPTCHAMemoryStream)
       else
@@ -169,7 +175,7 @@ begin
     end;
 end;
 
-class function TApiCAPTCHA.DefaultHandler(const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString): WordBool;
+class function TApiCAPTCHA.DefaultHandler(const AWebsite: string; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString): WordBool;
 var
   LResult: WordBool;
   LCAPTCHAType: TCAPTCHAType;
@@ -182,7 +188,7 @@ begin
 
   LCookies := ACookies;
 
-  LResult := TApiCAPTCHA.PluginsHandle(LCAPTCHAType, ACAPTCHA, ACAPTCHAName, ACAPTCHASolution, LCookies);
+  LResult := TApiCAPTCHA.PluginsHandle(AWebsite, LCAPTCHAType, ACAPTCHA, ACAPTCHAName, ACAPTCHASolution, LCookies);
 
   if LResult then
   begin
@@ -203,7 +209,7 @@ begin
           { . } SettingsManager.Settings.HTTP.GetProxy(psaMain), SettingsManager.Settings.HTTP.ConnectTimeout, SettingsManager.Settings.HTTP.ReadTimeout);
       end;
 
-      LResult := TApiCAPTCHA.ManualHandle(LCAPTCHAType, ACAPTCHA, ACAPTCHAName, ACAPTCHASolution, LCAPTCHAMemoryStream, 1000 * 60 * 2);
+      LResult := TApiCAPTCHA.ManualHandle(AWebsite, LCAPTCHAType, ACAPTCHA, ACAPTCHAName, ACAPTCHASolution, LCAPTCHAMemoryStream, 1000 * 60 * 2);
     finally
       if (LCAPTCHAType = ctImage) then
       begin
@@ -735,7 +741,7 @@ begin
     { } end);
 end;
 
-function TApiThreadedPlugin.DefaultCAPTCHAInputHandler(const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString): WordBool;
+function TApiThreadedPlugin.DefaultCAPTCHAInputHandler(const AWebsite: string; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString): WordBool;
 var
   LResult: WordBool;
   LCAPTCHAType: TCAPTCHAType;
@@ -750,7 +756,7 @@ begin
   LCAPTCHASolution := '';
   LCAPTCHACookies := ACookies;
 
-  LResult := TApiCAPTCHA.PluginsHandle(LCAPTCHAType, ACAPTCHA, ACAPTCHAName, ACAPTCHASolution, LCAPTCHACookies, FErrorHandler);
+  LResult := TApiCAPTCHA.PluginsHandle(AWebsite, LCAPTCHAType, ACAPTCHA, ACAPTCHAName, ACAPTCHASolution, LCAPTCHACookies, FErrorHandler);
 
   if LResult then
   begin
@@ -775,7 +781,7 @@ begin
       FTask.Invoke(
         { } procedure
         { } begin
-        { . } LResult := TApiCAPTCHA.ManualHandle(LCAPTCHAType, ACAPTCHA, ACAPTCHAName, LCAPTCHASolution, LCAPTCHAMemoryStream, 1000 * 60 * 2); // wait max. 2 minutes
+        { . } LResult := TApiCAPTCHA.ManualHandle(AWebsite, LCAPTCHAType, ACAPTCHA, ACAPTCHAName, LCAPTCHASolution, LCAPTCHAMemoryStream, 1000 * 60 * 2); // wait max. 2 minutes
         { . } LCAPTCHAWaitable.Signal;
         { } end);
 
@@ -799,10 +805,11 @@ begin
   Result := LResult;
 end;
 
-function TApiThreadedPlugin.DefaultIntelligentPostingHelperHandler(var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool;
+function TApiThreadedPlugin.DefaultIntelligentPostingHelperHandler(const AWebsite: string; var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool;
 var
   LResult: WordBool;
 
+  LHost: string;
   LIntelligentPostingSearchValue, LIntelligentPostingSearchResults: WideString;
   LIntelligentPostingSearchIndex: Integer;
   LIntelligentPostingRedoSearch: WordBool;
@@ -811,6 +818,8 @@ var
 begin
   LIntelligentPostingHelperWaitable := CreateWaitableValue;
 
+  LHost := ExtractUrlHost(AWebsite);
+
   LIntelligentPostingSearchValue := ASearchValue;
   LIntelligentPostingSearchResults := ASearchResults;
   LIntelligentPostingSearchIndex := ASearchIndex;
@@ -818,7 +827,7 @@ begin
   FTask.Invoke(
     { } procedure
     { } begin
-    { . } LResult := TIntelligentPostingClass.IntelligentPostingHandler(LIntelligentPostingSearchValue, LIntelligentPostingSearchResults, LIntelligentPostingSearchIndex, LIntelligentPostingRedoSearch);
+    { . } LResult := TIntelligentPostingClass.IntelligentPostingHandler(LHost, LIntelligentPostingSearchValue, LIntelligentPostingSearchResults, LIntelligentPostingSearchIndex, LIntelligentPostingRedoSearch);
     { . } LIntelligentPostingHelperWaitable.Signal;
     { } end);
 

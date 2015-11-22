@@ -140,7 +140,7 @@ begin
         Free;
       end;
 
-    if not CAPTCHAInput(Website + 'index.php?page=Captcha&captchaID=' + _captchaID, GetName, _captcha, _cookies) then
+    if not CAPTCHAInput(Website, Website + 'index.php?page=Captcha&captchaID=' + _captchaID, GetName, _captcha, _cookies) then
     begin
       ErrorMsg := StrAbortedThrougthCAP;
       Result := False;
@@ -311,7 +311,7 @@ begin
 
         if wBB3Settings.intelligent_posting_helper then
         begin
-          if not IntelligentPostingHelper(SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
+          if not IntelligentPostingHelper(Website, SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
           begin
             ErrorMsg := StrAbortedThrougthInt;
             Result := False;

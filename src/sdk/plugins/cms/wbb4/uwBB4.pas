@@ -301,7 +301,7 @@ begin
 
         if wBB4Settings.intelligent_posting_helper then
         begin
-          if not IntelligentPostingHelper(SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
+          if not IntelligentPostingHelper(Website, SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
           begin
             ErrorMsg := StrAbortedThrougthInt;
             Result := False;

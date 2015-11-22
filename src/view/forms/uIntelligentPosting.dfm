@@ -28,7 +28,6 @@ object IntelligentPosting: TIntelligentPosting
     Top = 30
     Anchors = [akLeft, akTop, akRight]
     TabOrder = 1
-    ExplicitWidth = 303
     Width = 293
   end
   object cxBNewSearch: TcxButton
@@ -40,7 +39,6 @@ object IntelligentPosting: TIntelligentPosting
     Caption = 'Search'
     ModalResult = 4
     TabOrder = 2
-    ExplicitLeft = 317
   end
   object cxLSearchResults: TcxLabel
     Left = 8
@@ -58,8 +56,6 @@ object IntelligentPosting: TIntelligentPosting
     ShowHint = True
     TabOrder = 4
     OnMouseMove = cxLBSearchResultsMouseMove
-    ExplicitWidth = 384
-    ExplicitHeight = 107
   end
   object cxBAccept: TcxButton
     Left = 226
@@ -71,8 +67,6 @@ object IntelligentPosting: TIntelligentPosting
     Default = True
     ModalResult = 1
     TabOrder = 5
-    ExplicitLeft = 236
-    ExplicitTop = 193
   end
   object cxBCancel: TcxButton
     Left = 307
@@ -84,7 +78,5 @@ object IntelligentPosting: TIntelligentPosting
     Caption = 'Cancel'
     ModalResult = 2
     TabOrder = 6
-    ExplicitLeft = 317
-    ExplicitTop = 193
   end
 end
