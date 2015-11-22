@@ -25,7 +25,7 @@ uses
   // Implementor
   uHTTPIndyImplementor,
   // Delphi
-  Windows, SysUtils, Math,
+  Windows, SysUtils, Math, ActiveX,
   // OmniThreadLibrary
   OtlCommon, OtlSync, OtlParallel;
 
@@ -319,6 +319,8 @@ end;
 
 constructor THTTPManager.Create;
 begin
+  CoInitializeEx(nil, COINIT_MULTITHREADED);
+
   FBackgroundWorker := Parallel.BackgroundWorker;
 
   FImplementor := THTTPIndyImplementation.Create;
@@ -430,7 +432,7 @@ begin
 
   Index := Trunc(AUniqueID);
 
-  OutputDebugString(PChar('THTTPManager START GetResult'));
+  //OutputDebugString(PChar('THTTPManager START GetResult'));
   FRequestArrayLock.EnterReadLock;
   try
     if Index < length(FRequestArray) then
@@ -438,7 +440,7 @@ begin
   finally
     FRequestArrayLock.ExitReadLock;
   end;
-  OutputDebugString(PChar('THTTPManager END GetResult'));
+  //OutputDebugString(PChar('THTTPManager END GetResult'));
 end;
 
 destructor THTTPManager.Destroy;
@@ -450,6 +452,8 @@ begin
 
   FBackgroundWorker.Terminate(INFINITE);
   FBackgroundWorker := nil;
+
+  CoUninitialize;
 
   inherited Destroy;
 end;

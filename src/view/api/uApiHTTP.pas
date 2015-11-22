@@ -30,37 +30,42 @@ var
 begin
   AMemoryStream := TMemoryStream.Create;
 
-  LHTTPManager := THTTPManager.Instance();
-
-  LHTTPRequest := THTTPRequest.Create(AURL);
-  with LHTTPRequest do
-  begin
-    Referer := AURL;
-    Cookies.Text := ACookies;
-  end;
-
-  LHTTPOptions := THTTPOptions.Create(AProxy);
-  with LHTTPOptions do
-  begin
-    ConnectTimeout := AConnectTimeout;
-    ReadTimeout := AReadTimeout;
-  end;
-
-  LRequestID := LHTTPManager.Get(LHTTPRequest, LHTTPOptions);
-
-  THTTPManager.Wait(LRequestID, 75);
-
-  LHTTPProcess := LHTTPManager.GetResult(LRequestID);
-
-  ACookies := LHTTPProcess.HTTPResult.HTTPResponse.Cookies.Text;
-
-  LOleStream := TOleStream.Create(LHTTPProcess.HTTPResult.HTTPResponse.ContentStream);
+  CoInitializeEx(nil, COINIT_MULTITHREADED);
   try
-    LHTTPProcess.HTTPResult.HTTPResponse.ContentStream.Seek(0, STREAM_SEEK_SET, LDummy);
-    LOleStream.Seek(0, STREAM_SEEK_SET);
-    AMemoryStream.CopyFrom(LOleStream, LOleStream.Size);
+    LHTTPManager := THTTPManager.Instance();
+
+    LHTTPRequest := THTTPRequest.Create(AURL);
+    with LHTTPRequest do
+    begin
+      Referer := AURL;
+      Cookies.Text := ACookies;
+    end;
+
+    LHTTPOptions := THTTPOptions.Create(AProxy);
+    with LHTTPOptions do
+    begin
+      ConnectTimeout := AConnectTimeout;
+      ReadTimeout := AReadTimeout;
+    end;
+
+    LRequestID := LHTTPManager.Get(LHTTPRequest, LHTTPOptions);
+
+    THTTPManager.Wait(LRequestID, 75);
+
+    LHTTPProcess := LHTTPManager.GetResult(LRequestID);
+
+    ACookies := LHTTPProcess.HTTPResult.HTTPResponse.Cookies.Text;
+
+    LOleStream := TOleStream.Create(LHTTPProcess.HTTPResult.HTTPResponse.ContentStream);
+    try
+      LHTTPProcess.HTTPResult.HTTPResponse.ContentStream.Seek(0, STREAM_SEEK_SET, LDummy);
+      LOleStream.Seek(0, STREAM_SEEK_SET);
+      AMemoryStream.CopyFrom(LOleStream, LOleStream.Size);
+    finally
+      LOleStream.Free;
+    end;
   finally
-    LOleStream.Free;
+    CoUninitialize;
   end;
 
   AMemoryStream.Position := 0;
