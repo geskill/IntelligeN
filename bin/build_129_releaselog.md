@@ -449,6 +449,8 @@
 
 * Improved OleInitialize/CoInitializeEx usage
 
+* Improved phpbb3 login error message
+
 * Improved phpbb3 forum id recognition if first forum is already sub-forum or portal mod is used
 
 * Improved xRel.to error detection

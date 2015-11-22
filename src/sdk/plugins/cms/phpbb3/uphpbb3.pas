@@ -157,12 +157,12 @@ begin
     with TRegExpr.Create do
       try
         InputString := AResponseStr;
-        Expression := '<span class="error">(.*?)<\/span>';
+        Expression := 'class="error">(.*?)<\/(span|div)';
 
         if Exec(InputString) then
         begin
           repeat
-            Self.ErrorMsg := HTML2Text(Match[1]);
+            Self.ErrorMsg := HTML2Text(Match[1], False);
           until not ExecNext;
         end;
       finally
