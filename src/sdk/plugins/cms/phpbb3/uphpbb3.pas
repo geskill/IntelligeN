@@ -495,6 +495,8 @@ end;
 
 function Tphpbb3.DoAnalyzeIDsRequest;
 var
+  First: Boolean;
+
   BoardLevel: TStringList;
   BoardLevelIndex: Integer;
 
@@ -517,22 +519,27 @@ var
   end;
 
 begin
+  First := True;
+
   BoardLevel := TStringList.Create;
   try
     with TRegExpr.Create do
       try
         InputString := ExtractTextBetween(AResponseStr, 'name="fid[]"', '</select>');
-        Expression := 'option.*? value="(\d+)">([&nbsp; ]*)(.*?)<\/';
+        Expression := 'option.*? value="(\d+)">(&nbsp; &nbsp;)*(.*?)<\/';
 
         if Exec(InputString) then
         begin
           repeat
-            BoardLevelIndex := CharCount('&nbsp;', Match[2]);
+            BoardLevelIndex := CharCount('&nbsp;', Match[0]);
 
             if BoardLevelIndex > 0 then
               BoardLevelIndex := BoardLevelIndex div 2;
 
-            BoardLevelIndex := BoardLevelIndex - 1;
+            // Required if no category is defined
+            if First and not(BoardLevelIndex = 0) then
+              BoardLevel.Add('Index');
+            First := False;
 
             if (BoardLevelIndex = BoardLevel.Count) then
               BoardLevel.Add(CleanPathName(Match[3]))
