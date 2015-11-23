@@ -1,5 +1,5 @@
 #IntelligeN
-content publishing application for nearly every content management system
+A flexible content publishing application for nearly every content management system. [(read more ...)](https://github.com/geskill/IntelligeN/wiki)
 
 ##for users
 coming soon ...
