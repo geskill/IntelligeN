@@ -265,6 +265,7 @@ type
     procedure CMSUpdate(ACMSChangeType: TPluginChangeType; AIndex: Integer; AParam: Integer);
     procedure TabChange(const Sender: IUnknown);
     procedure UpdateInternalListItemIndex;
+    procedure UpdateCMSList;
     function FindCMSContainer(AName: WideString): Integer;
   protected
     function GetTabSheetController: ITabSheetController;
@@ -1232,7 +1233,8 @@ end;
 
 procedure TICMSContainer.UpdateCMSWebsiteList;
 begin
-  FTabConnection.PublishController.OnUpdateCMSWebsiteList.Invoke(Self, Index);
+  if TabSheetController.IsTabActive then
+    FTabConnection.PublishController.OnUpdateCMSWebsiteList.Invoke(Self, Index);
 end;
 
 function TICMSContainer.GetTabSheetController: ITabSheetController;
@@ -1403,13 +1405,12 @@ begin
   end;
 
   UpdateInternalListItemIndex;
-  OnUpdateCMSList.Invoke(Self);
+  UpdateCMSList;
 end;
 
 procedure TIPublishController.TabChange(const Sender: IInterface);
 begin
-  if TabSheetController.IsTabActive then
-    OnUpdateCMSList.Invoke(Self);
+  UpdateCMSList;
 end;
 
 procedure TIPublishController.UpdateInternalListItemIndex;
@@ -1418,6 +1419,12 @@ var
 begin
   for I := 0 to Count - 1 do
     CMS[I].Index := I;
+end;
+
+procedure TIPublishController.UpdateCMSList;
+begin
+  if TabSheetController.IsTabActive then
+    OnUpdateCMSList.Invoke(Self);
 end;
 
 function TIPublishController.FindCMSContainer(AName: WideString): Integer;
@@ -1562,8 +1569,7 @@ end;
 destructor TIPublishController.Destroy;
 begin
   // TODO: test this
-  if TabSheetController.IsTabActive then
-    OnUpdateCMSList.Invoke(nil);
+  UpdateCMSList;
 
   FPluginChangeEventHandler := nil;
   FIChange := nil;
