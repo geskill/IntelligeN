@@ -455,4 +455,6 @@
 
 * Improved xRel.to error detection
 
+* Fixed threaded draw process for images in Control Editor
+
 * Fixed loading intelligen.xml.2 files with no templatetype

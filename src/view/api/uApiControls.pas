@@ -1568,23 +1568,27 @@ begin
   LThumbnail := TBitmap.Create;
   if Assigned(Graphic) and not Graphic.Empty then
   begin
-    LThumbnail.Assign(Graphic);
+    LThumbnail.Canvas.Lock;
+    try
+      LThumbnail.Assign(Graphic);
+      LThumbnailRect.Left := 0;
+      LThumbnailRect.Top := 0;
+      if Graphic.Width > Graphic.Height then
+      begin
+        LThumbnailRect.Right := MAX_WIDTH;
+        LThumbnailRect.Bottom := (MAX_WIDTH * Graphic.Height) div Graphic.Width;
+      end
+      else
+      begin
+        LThumbnailRect.Bottom := MAX_HEIGHT;
+        LThumbnailRect.Right := (MAX_HEIGHT * Graphic.Width) div Graphic.Height;
+      end;
 
-    LThumbnailRect.Left := 0;
-    LThumbnailRect.Top := 0;
-    if Graphic.Width > Graphic.Height then
-    begin
-      LThumbnailRect.Right := MAX_WIDTH;
-      LThumbnailRect.Bottom := (MAX_WIDTH * Graphic.Height) div Graphic.Width;
-    end
-    else
-    begin
-      LThumbnailRect.Bottom := MAX_HEIGHT;
-      LThumbnailRect.Right := (MAX_HEIGHT * Graphic.Width) div Graphic.Height;
+      LThumbnail.Canvas.StretchDraw(LThumbnailRect, LThumbnail);
+      LThumbnail.SetSize(LThumbnailRect.Right, LThumbnailRect.Bottom);
+    finally
+      LThumbnail.Canvas.Unlock;
     end;
-
-    LThumbnail.Canvas.StretchDraw(LThumbnailRect, LThumbnail);
-    LThumbnail.SetSize(LThumbnailRect.Right, LThumbnailRect.Bottom);
   end;
   Result := LThumbnail;
 end;
@@ -1592,12 +1596,19 @@ end;
 function TIPicture.GraphicAsVariant(AGraphic: TGraphic): Variant;
 var
   LStringStream: TStringStream;
+  LThumbnail: TBitmap;
 begin
   LStringStream := TStringStream.Create('');
   try
-    with BitmapAsThumbnail(AGraphic) do
+    LThumbnail := BitmapAsThumbnail(AGraphic);
+    with LThumbnail do
       try
-        SaveToStream(LStringStream);
+        Canvas.Lock;
+        try
+          SaveToStream(LStringStream);
+        finally
+          Canvas.Unlock;
+        end;
       finally
         Free;
       end;
