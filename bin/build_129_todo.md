@@ -14,11 +14,15 @@ This todo list contains all useful ideas for improvement, not necessarily for th
 
 - [ ] Optimize HTTPManager log amount (i.e. ALL, SOME)
 
+- [ ] Improve handling of unknown file hosts (those not defined in hoster.xml)
+
 - [ ] Add custom fields in ITabSheetData that hold compiled IScript (required for WordPress custom files powered by IScript)
 
 - [ ] Add direct index based link access (i.e. IMirror[\<Index\>].Directlink[\<Index\>].Link[\<Index\>])
 
 - [ ] Add direct index based filename access (i.e. Mirror[\<Index\>].Directlink[\<Index\>].FileName[\<Index\>])
+
+- [ ] Implement image resizing instead of depending on image hosts resize
 
 ###SDK
 
@@ -32,7 +36,7 @@ This todo list contains all useful ideas for improvement, not necessarily for th
 
 ######Crawler
 
-- [ ] Update Amazon.com/.de plugin
+- [ ] Update missing plugins to match new interface (incl. full update of Amazon.com/.de)
 
 ######Crypter
 
