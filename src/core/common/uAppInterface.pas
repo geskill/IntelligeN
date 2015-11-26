@@ -758,12 +758,12 @@ type
 
   IPublishJob = interface
     ['{D874E548-AFD7-4EDE-B1D9-C865CE5F2EF1}']
-    function GetUniqueID: Longword;
-    procedure SetUniqueID(AUniqueID: Longword);
+    function GetUniqueID: LongWord;
+    procedure SetUniqueID(AUniqueID: LongWord);
     function GetDescription: WideString;
     function GetUpload(const IndexOrName: OleVariant): IPublishTab;
 
-    property UniqueID: Longword read GetUniqueID write SetUniqueID;
+    property UniqueID: LongWord read GetUniqueID write SetUniqueID;
     property Description: WideString read GetDescription;
     property Upload[const IndexOrName: OleVariant]: IPublishTab read GetUpload;
     function Count: Integer;
@@ -771,9 +771,9 @@ type
 
   IPublishManager = interface(IThreadManager)
     ['{D49455B7-1B06-4884-9A40-EF2245FD3A7C}']
-    function AddPublishJob(const APublishJob: IPublishJob): Longword;
+    function AddPublishJob(const APublishJob: IPublishJob): LongWord;
     procedure RemovePublishJob(const APublishJob: IPublishJob); overload;
-    procedure RemovePublishJob(const AUniqueID: Longword); overload;
+    procedure RemovePublishJob(const AUniqueID: LongWord); overload;
     procedure RemoveAllPublishJobs;
 
     procedure Resume;

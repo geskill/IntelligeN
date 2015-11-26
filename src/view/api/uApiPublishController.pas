@@ -142,6 +142,8 @@ type
     FTabConnection: ITabSheetController;
     FCMSCollectionItem: TCMSCollectionItem;
     FCMSWebsiteCollectionItem: TCMSWebsitesCollectionItem;
+    FActiveChanged: Boolean;
+    FActiveBuffer: Boolean;
     FDataChanged: Boolean;
     FDataBuffer: ITabSheetData;
     FControlsBuffer, FMirrorBuffer: Boolean;
@@ -849,6 +851,7 @@ end;
 
 procedure TICMSWebsiteContainer.WebsiteChange(ACMSItemChangeType: TCMSItemChangeType; AIndex, AParam: Integer);
 begin
+  FActiveChanged := True;
   FDataChanged := True;
 end;
 
@@ -856,6 +859,7 @@ procedure TICMSWebsiteContainer.ControlChange(const Sender: IControlBasic);
 var
   LNeedUpdate: Boolean;
 begin
+  FActiveChanged := True;
   FDataChanged := True;
 
   with FICMSWebsiteContainerActiveController do
@@ -874,6 +878,7 @@ procedure TICMSWebsiteContainer.MirrorChange(const Sender: IInterface);
 var
   LNeedUpdate: Boolean;
 begin
+  FActiveChanged := True;
   FDataChanged := True;
 
   with FICMSWebsiteContainerActiveController do
@@ -941,7 +946,13 @@ end;
 
 function TICMSWebsiteContainer.GetActive: Boolean;
 begin
-  Result := FICMSWebsiteContainerActiveController.Active;
+  if FActiveChanged then
+  begin
+    FActiveBuffer := FICMSWebsiteContainerActiveController.Active;
+    FActiveChanged := False;
+  end;
+
+  Result := FActiveBuffer;
 end;
 
 function TICMSWebsiteContainer.GetEnabled: Boolean;
@@ -1030,6 +1041,9 @@ begin
   FTabConnection := ATabConnection;
   FCMSCollectionItem := ACMSCollectionItem;
   FCMSWebsiteCollectionItem := ACMSWebsitesCollectionItem;
+
+  FActiveChanged := True; // Need to be true to make first update.
+  FActiveBuffer := False;
 
   FDataChanged := True; // Need to be true to make first update.
   FDataBuffer := nil;

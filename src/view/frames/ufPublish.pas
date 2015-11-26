@@ -113,7 +113,7 @@ end;
 
 procedure TfPublish.UpdateCMSList(const Sender: IPublishController);
 var
-  I: Integer;
+  LSenderIndex: Integer;
 begin
   with tvSections do
   begin
@@ -125,11 +125,13 @@ begin
         if Assigned(Sender) then
         begin
           RecordCount := Sender.Count;
-          for I := 0 to Sender.Count - 1 do
-            Values[I, tvSectionsColumn.Index] := Sender.CMS[I].Name;
+          for LSenderIndex := 0 to Sender.Count - 1 do
+            Values[LSenderIndex, tvSectionsColumn.Index] := Sender.CMS[LSenderIndex].Name;
         end
         else
+        begin
           RecordCount := 0;
+        end;
       end;
 
     finally
@@ -139,47 +141,57 @@ begin
 
   if Assigned(Sender) then
   begin
-    for I := 0 to Sender.Count - 1 do
-      UpdateCMSWebsiteList(Sender.CMS[I], I);
+    with tvSections do
+    begin
+      BeginUpdate;
+      try
+        for LSenderIndex := 0 to Sender.Count - 1 do
+          UpdateCMSWebsiteList(Sender.CMS[LSenderIndex], LSenderIndex);
 
-    tvSections.ViewData.Expand(True);
+        ViewData.Expand(True);
+      finally
+        EndUpdate;
+      end;
+    end;
   end;
 end;
 
 procedure TfPublish.UpdateCMSWebsiteList(const Sender: ICMSContainer; CMSIndex: Integer);
 var
-  I: Integer;
-  CustomDataController: TcxCustomDataController;
+  LSenderIndex: Integer;
+  LCustomDataController: TcxCustomDataController;
 begin
   with tvSections.DataController do
-    CustomDataController := GetDetailDataController(CMSIndex, Self.Values.Index);
+    LCustomDataController := GetDetailDataController(CMSIndex, Self.Values.Index);
 
-  with CustomDataController do
+  with LCustomDataController do
   begin
     BeginUpdate;
     try
 
       RecordCount := Sender.Count;
-      for I := 0 to Sender.Count - 1 do
+      for LSenderIndex := 0 to Sender.Count - 1 do
       begin
-        Values[I, tvValuesColumn1.Index] := Sender.Website[I].Active;
-        Values[I, tvValuesColumn2.Index] := Sender.Website[I].Name;
+        Values[LSenderIndex, tvValuesColumn1.Index] := Sender.Website[LSenderIndex].Active;
+        Values[LSenderIndex, tvValuesColumn2.Index] := Sender.Website[LSenderIndex].Name;
       end;
 
     finally
       EndUpdate;
     end;
   end;
+
+  LCustomDataController := nil;
 end;
 
 procedure TfPublish.UpdateCMSWebsite(CMSIndex, WebsiteIndex: Integer; NewStatus: WordBool);
 var
-  CustomDataController: TcxCustomDataController;
+  LCustomDataController: TcxCustomDataController;
 begin
   with tvSections.DataController do
-    CustomDataController := GetDetailDataController(CMSIndex, Self.Values.Index);
+    LCustomDataController := GetDetailDataController(CMSIndex, Self.Values.Index);
 
-  with CustomDataController do
+  with LCustomDataController do
   begin
     BeginUpdate;
     try
@@ -188,6 +200,8 @@ begin
       EndUpdate;
     end;
   end;
+
+  LCustomDataController := nil;
 end;
 
 constructor TfPublish.Create(AOwner: TComponent);
