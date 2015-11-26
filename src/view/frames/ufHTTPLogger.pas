@@ -9,7 +9,9 @@ uses
   cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit,
   cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxClasses, cxGridLevel, cxGrid, cxLabel, cxTextEdit, cxBlobEdit, cxNavigator,
   // HTTPManager
-  uHTTPInterface, uHTTPConst, uHTTPEvent, uHTTPManager;
+  uHTTPInterface, uHTTPConst, uHTTPEvent, uHTTPManager,
+  // API
+  uApiSettings;
 
 type
   TfHTTPLogger = class(TFrame)
@@ -34,6 +36,7 @@ type
     HTTPResponse: TcxGridLevel;
   private
     FIHTTPProcessEventHandler: IHTTPProcessEventHandler;
+    procedure AddHTTPProcessToGrid(const AHTTPProcess: IHTTPProcess);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -45,30 +48,7 @@ implementation
 
 {$R *.dfm}
 
-constructor TfHTTPLogger.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-
-  FIHTTPProcessEventHandler := TIHTTPProcessEventHandler.Create(AddHTTPProcess);
-
-  /// calling this in uApiHTTP inside initialization block
-  /// is problematic, because THTTPLogger is not created at
-  /// this point.
-  with THTTPManager.Instance() do
-    OnRequestDone.Add(FIHTTPProcessEventHandler);
-end;
-
-destructor TfHTTPLogger.Destroy;
-begin
-  with THTTPManager.Instance() do
-    OnRequestDone.Remove(FIHTTPProcessEventHandler);
-
-  FIHTTPProcessEventHandler := nil;
-
-  inherited Destroy;
-end;
-
-procedure TfHTTPLogger.AddHTTPProcess(const AHTTPProcess: IHTTPProcess);
+procedure TfHTTPLogger.AddHTTPProcessToGrid(const AHTTPProcess: IHTTPProcess);
 var
   I: Integer;
   CustomDataController: TcxCustomDataController;
@@ -264,6 +244,59 @@ begin
       Values[RecordCount - 1, tvHTTPRequestValue.Index] := AHTTPProcess.HTTPResult.HTTPResponse.CustomHeaders.Strings[I];
     end;
   end;
+end;
+
+constructor TfHTTPLogger.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  FIHTTPProcessEventHandler := TIHTTPProcessEventHandler.Create(AddHTTPProcess);
+
+  /// calling this in uApiHTTP inside initialization block
+  /// is problematic, because THTTPLogger is not created at
+  /// this point.
+  with THTTPManager.Instance() do
+    OnRequestDone.Add(FIHTTPProcessEventHandler);
+end;
+
+destructor TfHTTPLogger.Destroy;
+begin
+  with THTTPManager.Instance() do
+    OnRequestDone.Remove(FIHTTPProcessEventHandler);
+
+  FIHTTPProcessEventHandler := nil;
+
+  inherited Destroy;
+end;
+
+procedure TfHTTPLogger.AddHTTPProcess(const AHTTPProcess: IHTTPProcess);
+var
+  LCanAdd: Boolean;
+begin
+  LCanAdd := not (SettingsManager.Settings.Log.MaxHTTPLogEntries = 0);
+
+  with tvHTTPProcess.DataController do
+  begin
+    BeginUpdate;
+    try
+      if not LCanAdd then
+      begin
+        RecordCount := 0;
+      end
+      else
+      begin
+        while ((RecordCount + 1) > SettingsManager.Settings.Log.MaxHTTPLogEntries) do
+        begin
+          DeleteRecord(0);
+        end;
+      end;
+    finally
+      EndUpdate;
+    end;
+  end;
+
+  if LCanAdd then
+    AddHTTPProcessToGrid(AHTTPProcess);
 end;
 
 end.

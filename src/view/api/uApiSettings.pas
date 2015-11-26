@@ -371,20 +371,23 @@ type
 
   TSettings_HTTP = class(TPersistent)
   private
-    FConnectTimeout, FReadTimeout: Integer;
+    FMaxSimultaneousConnections, FConnectTimeout, FReadTimeout: Integer;
     FSettings_Proxy: TSettings_Proxy;
 
-    FConnectTimeoutLock, FReadTimeoutLock: TMultiReadExclusiveWriteSynchronizer;
+    FMaxSimultaneousConnectionsLock, FConnectTimeoutLock, FReadTimeoutLock: TMultiReadExclusiveWriteSynchronizer;
 
-    function GetReadTimeout: Integer;
-    procedure SetReadTimeout(const Value: Integer);
+    function GetMaxSimultaneousConnections: Integer;
+    procedure SetMaxSimultaneousConnections(const Value: Integer);
     function GetConnectTimeout: Integer;
     procedure SetConnectTimeout(const Value: Integer);
+    function GetReadTimeout: Integer;
+    procedure SetReadTimeout(const Value: Integer);
   public
     constructor Create;
     function GetProxy(AProxySubActivation: TProxySubActivation): IProxy;
     destructor Destroy; override;
   published
+    property MaxSimultaneousConnections: Integer read GetMaxSimultaneousConnections write SetMaxSimultaneousConnections;
     property ConnectTimeout: Integer read GetConnectTimeout write SetConnectTimeout;
     property ReadTimeout: Integer read GetReadTimeout write SetReadTimeout;
     property Proxy: TSettings_Proxy read FSettings_Proxy write FSettings_Proxy;
@@ -450,6 +453,14 @@ type
     property TemplateEditor: TLayoutforForms read FTemplateEditor write FTemplateEditor;
     property Publish: TLayoutforForms read FPublish write FPublish;
     property Layout: TCollection read FLayout write FLayout;
+  end;
+
+  TSettings_Log = class(TPersistent)
+  private
+    FMaxLogEntries, FMaxHTTPLogEntries: Integer;
+  published
+    property MaxLogEntries: Integer read FMaxLogEntries write FMaxLogEntries;
+    property MaxHTTPLogEntries: Integer read FMaxHTTPLogEntries write FMaxHTTPLogEntries;
   end;
 
   TSettings_DefaultStartup = class(TPersistent)
@@ -535,6 +546,7 @@ type
     FSettings_HTTP: TSettings_HTTP;
     FSettings_Publish: TSettings_Publish;
     FSettings_Layout: TSettings_Layout;
+    FSettings_Log: TSettings_Log;
     FSettings_ControlAligner: TSettings_ControlAligner;
     FSettings_Mody: TSettings_Mody;
     FSettings_Login: TSettings_Login;
@@ -566,6 +578,7 @@ type
     property HTTP: TSettings_HTTP read FSettings_HTTP write FSettings_HTTP;
     property Publish: TSettings_Publish read FSettings_Publish write FSettings_Publish;
     property Layout: TSettings_Layout read FSettings_Layout write FSettings_Layout;
+    property Log: TSettings_Log read FSettings_Log write FSettings_Log;
     property ControlAligner: TSettings_ControlAligner read FSettings_ControlAligner write FSettings_ControlAligner;
     property Mody: TSettings_Mody read FSettings_Mody write FSettings_Mody;
     property Login: TSettings_Login read FSettings_Login write FSettings_Login;
@@ -1210,6 +1223,26 @@ end;
 
 { ****************************************************************************** }
 
+function TSettings_HTTP.GetMaxSimultaneousConnections;
+begin
+  FMaxSimultaneousConnectionsLock.BeginRead;
+  try
+    Result := FMaxSimultaneousConnections;
+  finally
+    FMaxSimultaneousConnectionsLock.EndRead;
+  end;
+end;
+
+procedure TSettings_HTTP.SetMaxSimultaneousConnections(const Value: Integer);
+begin
+  FMaxSimultaneousConnectionsLock.BeginWrite;
+  try
+    FMaxSimultaneousConnections := Value;
+  finally
+    FMaxSimultaneousConnectionsLock.EndWrite;
+  end;
+end;
+
 function TSettings_HTTP.GetConnectTimeout: Integer;
 begin
   FConnectTimeoutLock.BeginRead;
@@ -1252,9 +1285,10 @@ end;
 
 constructor TSettings_HTTP.Create;
 begin
-  Proxy := TSettings_Proxy.Create;
+  FMaxSimultaneousConnectionsLock := TMultiReadExclusiveWriteSynchronizer.Create;
   FConnectTimeoutLock := TMultiReadExclusiveWriteSynchronizer.Create;
   FReadTimeoutLock := TMultiReadExclusiveWriteSynchronizer.Create;
+  Proxy := TSettings_Proxy.Create;
 end;
 
 function TSettings_HTTP.GetProxy(AProxySubActivation: TProxySubActivation): IProxy;
@@ -1268,9 +1302,10 @@ end;
 
 destructor TSettings_HTTP.Destroy;
 begin
+  Proxy.Free;
   FReadTimeoutLock.Free;
   FConnectTimeoutLock.Free;
-  Proxy.Free;
+  FMaxSimultaneousConnectionsLock.Free;
   inherited Destroy;
 end;
 
@@ -1385,6 +1420,7 @@ begin
   Controls := TSettings_Controls.Create;
   HTTP := TSettings_HTTP.Create;
   Publish := TSettings_Publish.Create;
+  Log := TSettings_Log.Create;
   Layout := TSettings_Layout.Create;
   ControlAligner := TSettings_ControlAligner.Create;
   Mody := TSettings_Mody.Create;
@@ -1398,6 +1434,7 @@ begin
   Controls.Free;
   HTTP.Free;
   Publish.Free;
+  Log.Free;
   Layout.Free;
   ControlAligner.Free;
   Mody.Free;
@@ -1453,6 +1490,7 @@ begin
 
     with HTTP do
     begin
+      MaxSimultaneousConnections := 1;
       // ConnectTimeout := 5000;
       // ReadTimeout := 10000;
     end;
@@ -1511,6 +1549,12 @@ begin
       ActiveLayoutName := 'default';
     end;
 
+    with Log do
+    begin
+      MaxLogEntries := 200;
+      MaxHTTPLogEntries := 15;
+    end;
+
     with ControlAligner do
     begin
       MirrorCount := 1;
@@ -1553,6 +1597,12 @@ begin
 
       if not(MirrorHeight >= 50) then
         MirrorHeight := 50;
+    end;
+
+    with HTTP do
+    begin
+      if not(MaxSimultaneousConnections > 0) then
+        MaxSimultaneousConnections := 1;
     end;
 
   end;

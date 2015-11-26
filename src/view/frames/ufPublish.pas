@@ -180,8 +180,6 @@ begin
       EndUpdate;
     end;
   end;
-
-  LCustomDataController := nil;
 end;
 
 procedure TfPublish.UpdateCMSWebsite(CMSIndex, WebsiteIndex: Integer; NewStatus: WordBool);
@@ -200,8 +198,6 @@ begin
       EndUpdate;
     end;
   end;
-
-  LCustomDataController := nil;
 end;
 
 constructor TfPublish.Create(AOwner: TComponent);

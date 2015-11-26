@@ -198,8 +198,6 @@ type
     cxGBTimeout: TcxGroupBox;
     cxLConnectTimeout: TcxLabel;
     cxLReadTimeout: TcxLabel;
-    cxTBConnectTimeout: TcxTrackBar;
-    cxTBReadTimeout: TcxTrackBar;
     cxCBCrypterUseFilePassword: TcxCheckBox;
     cxCBCrypterUseCNL: TcxCheckBox;
     cxLProxyServerType: TcxLabel;
@@ -240,6 +238,22 @@ type
     cxCBImageHosterUploadAfterCrawling: TcxCheckBox;
     cxLImageHosterUploadAfterCrawling: TcxLabel;
     cxCGBProxyRequireAuthentication: TdxCheckGroupBox;
+    cxGBManager: TcxGroupBox;
+    cxLMaxSimultaneousConnections: TcxLabel;
+    cxSPMaxSimultaneousConnections: TcxSpinEdit;
+    cxSEConnectTimeout: TcxSpinEdit;
+    cxLConnectTimeoutMSec: TcxLabel;
+    cxSEReadTimeout: TcxSpinEdit;
+    cxLReadTimeoutMSec: TcxLabel;
+    cxTSLog: TcxTabSheet;
+    cxGBLog: TcxGroupBox;
+    cxLMaxLogEntries: TcxLabel;
+    cxSEMaxLogEntries: TcxSpinEdit;
+    cxBGHTTPLog: TcxGroupBox;
+    cxLMaxHTTPLogEntries: TcxLabel;
+    cxSEMaxHTTPLogEntries: TcxSpinEdit;
+    cxLMaxLogEntriesInfo: TcxLabel;
+    cxLMaxHTTPLogEntriesInfo: TcxLabel;
     procedure cxcbNativeStylePropertiesChange(Sender: TObject);
     procedure cxcbUseSkinsPropertiesChange(Sender: TObject);
     procedure cxCOBDefaultSkinPropertiesChange(Sender: TObject);
@@ -347,8 +361,9 @@ type
     procedure cxSEDropDownRowsPropertiesChange(Sender: TObject);
     procedure cxBResetControlsClick(Sender: TObject);
 
-    procedure cxTBConnectTimeoutPropertiesChange(Sender: TObject);
-    procedure cxTBReadTimeoutPropertiesChange(Sender: TObject);
+    procedure cxSPMaxSimultaneousConnectionsPropertiesChange(Sender: TObject);
+    procedure cxSEConnectTimeoutPropertiesChange(Sender: TObject);
+    procedure cxSEReadTimeoutPropertiesChange(Sender: TObject);
     procedure cxCOBProxyServerTypePropertiesChange(Sender: TObject);
     procedure cxTEProxyServernamePropertiesChange(Sender: TObject);
     procedure cxCOBProxyServerPortPropertiesChange(Sender: TObject);
@@ -361,6 +376,8 @@ type
     procedure cxTBPublishDelaybetweenUploadsPropertiesChange(Sender: TObject);
     procedure cxTBRetryCountPropertiesChange(Sender: TObject);
 
+    procedure cxSEMaxLogEntriesPropertiesChange(Sender: TObject);
+
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -369,6 +386,7 @@ type
     procedure cxBExportSettingsClick(Sender: TObject);
     procedure cxBSaveSettingsClick(Sender: TObject);
     procedure cxCBImageHosterDirectUploadPropertiesChange(Sender: TObject);
+    procedure cxSEMaxHTTPLogEntriesPropertiesChange(Sender: TObject);
 
   private
     FOnCrawlerContingentChange: Boolean;
@@ -1529,16 +1547,19 @@ end;
 { ****************************************************************************** }
 {$REGION 'HTTP'}
 
-procedure TSettings.cxTBConnectTimeoutPropertiesChange(Sender: TObject);
+procedure TSettings.cxSPMaxSimultaneousConnectionsPropertiesChange(Sender: TObject);
 begin
-  cxTBConnectTimeout.Hint := FloatToStr(cxTBConnectTimeout.Position / 1000) + ' seconds';
-  SettingsManager.Settings.HTTP.ConnectTimeout := cxTBConnectTimeout.Position;
+  SettingsManager.Settings.HTTP.MaxSimultaneousConnections := cxSPMaxSimultaneousConnections.Value;
 end;
 
-procedure TSettings.cxTBReadTimeoutPropertiesChange(Sender: TObject);
+procedure TSettings.cxSEConnectTimeoutPropertiesChange(Sender: TObject);
 begin
-  cxTBReadTimeout.Hint := FloatToStr(cxTBReadTimeout.Position / 1000) + ' seconds';
-  SettingsManager.Settings.HTTP.ReadTimeout := cxTBReadTimeout.Position;
+  SettingsManager.Settings.HTTP.ConnectTimeout := cxSEConnectTimeout.Value;
+end;
+
+procedure TSettings.cxSEReadTimeoutPropertiesChange(Sender: TObject);
+begin
+  SettingsManager.Settings.HTTP.ReadTimeout := cxSEReadTimeout.Value;
 end;
 
 procedure TSettings.cxCOBProxyServerTypePropertiesChange(Sender: TObject);
@@ -1596,6 +1617,18 @@ procedure TSettings.cxTBRetryCountPropertiesChange(Sender: TObject);
 begin
   SettingsManager.Settings.Publish.RetryCount := cxTBRetryCount.Position;
   cxTBRetryCount.Hint := IntToStr(cxTBRetryCount.Position);
+end;
+
+{ ****************************************************************************** }
+
+procedure TSettings.cxSEMaxLogEntriesPropertiesChange(Sender: TObject);
+begin
+  SettingsManager.Settings.Log.MaxLogEntries := cxSEMaxLogEntries.Value;
+end;
+
+procedure TSettings.cxSEMaxHTTPLogEntriesPropertiesChange(Sender: TObject);
+begin
+  SettingsManager.Settings.Log.MaxHTTPLogEntries := cxSEMaxHTTPLogEntries.Value;
 end;
 
 { ****************************************************************************** }
@@ -2787,10 +2820,9 @@ begin
   cxCOBDefaultStartupDType.Text := SettingsManager.Settings.ControlAligner.DefaultStartup.TypeD;
   cxCOBDefaultStartupEType.Text := SettingsManager.Settings.ControlAligner.DefaultStartup.TypeE;
 
-  cxTBConnectTimeout.Hint := FloatToStr(SettingsManager.Settings.HTTP.ConnectTimeout / 1000) + ' seconds';
-  cxTBConnectTimeout.Position := SettingsManager.Settings.HTTP.ConnectTimeout;
-  cxTBReadTimeout.Hint := FloatToStr(SettingsManager.Settings.HTTP.ReadTimeout / 1000) + ' seconds';
-  cxTBReadTimeout.Position := SettingsManager.Settings.HTTP.ReadTimeout;
+  cxSPMaxSimultaneousConnections.Value := SettingsManager.Settings.HTTP.MaxSimultaneousConnections;
+  cxSEConnectTimeout.Value := SettingsManager.Settings.HTTP.ConnectTimeout;
+  cxSEReadTimeout.Value := SettingsManager.Settings.HTTP.ReadTimeout;
   cxCOBProxyServerType.ItemIndex := Integer(SettingsManager.Settings.HTTP.Proxy.ProxyType);
   cxTEProxyServername.Text := SettingsManager.Settings.HTTP.Proxy.Server;
   cxCOBProxyServerPort.Text := IntToStr(SettingsManager.Settings.HTTP.Proxy.Port);
@@ -2810,6 +2842,9 @@ begin
   cxTBPublishDelaybetweenUploads.Position := SettingsManager.Settings.Publish.PublishDelaybetweenUploads;
   cxTBRetryCount.Position := SettingsManager.Settings.Publish.RetryCount;
   cxTBRetryCount.Hint := IntToStr(cxTBRetryCount.Position);
+
+  cxSEMaxLogEntries.Value := SettingsManager.Settings.Log.MaxLogEntries;
+  cxSEMaxHTTPLogEntries.Value := SettingsManager.Settings.Log.MaxHTTPLogEntries;
 end;
 
 procedure TSettings.AddCMSWebsite(AFileName, AWebsiteName, AWebsiteType: string);

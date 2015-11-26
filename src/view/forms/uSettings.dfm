@@ -39,7 +39,7 @@ object Settings: TSettings
     Anchors = [akLeft, akTop, akRight, akBottom]
     Focusable = False
     TabOrder = 0
-    Properties.ActivePage = cxTSGeneral
+    Properties.ActivePage = cxTSLog
     Properties.CustomButtons.Buttons = <>
     Properties.HotTrack = True
     ClientRectBottom = 331
@@ -107,10 +107,6 @@ object Settings: TSettings
     object cxTSPlugins: TcxTabSheet
       Caption = 'Plugins'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         598
         307)
@@ -132,18 +128,10 @@ object Settings: TSettings
         object cxTSApp: TcxTabSheet
           Caption = 'App'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
         end
         object cxTSCAPTCHA: TcxTabSheet
           Caption = 'CAPTCHA'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
         end
         object cxTSCMS: TcxTabSheet
           Caption = 'CMS'
@@ -432,10 +420,6 @@ object Settings: TSettings
         object cxTSCrawler: TcxTabSheet
           Caption = 'Crawler'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           DesignSize = (
             584
             273)
@@ -519,10 +503,6 @@ object Settings: TSettings
         object cxTSCrypter: TcxTabSheet
           Caption = 'Crypter'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           DesignSize = (
             584
             273)
@@ -927,10 +907,6 @@ object Settings: TSettings
         object cxTSFileFormats: TcxTabSheet
           Caption = 'File Formats'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           DesignSize = (
             584
             273)
@@ -964,10 +940,6 @@ object Settings: TSettings
         object cxTSFileHoster: TcxTabSheet
           Caption = 'File Hoster'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
         end
         object cxTSImageHoster: TcxTabSheet
           Caption = 'Image Hoster'
@@ -1081,7 +1053,7 @@ object Settings: TSettings
         Properties.OnChange = cxSEMirrorCountPropertiesChange
         TabOrder = 0
         Value = 1
-        Width = 41
+        Width = 49
       end
       object cxSEMirrorColumns: TcxSpinEdit
         Left = 16
@@ -1092,7 +1064,7 @@ object Settings: TSettings
         Properties.OnChange = cxSEMirrorColumnsPropertiesChange
         TabOrder = 1
         Value = 1
-        Width = 41
+        Width = 49
       end
       object cxCOBMirrorPosition: TcxComboBox
         Left = 16
@@ -1103,7 +1075,7 @@ object Settings: TSettings
           'Bottom')
         Properties.OnChange = cxCOBMirrorPositionPropertiesChange
         TabOrder = 3
-        Width = 41
+        Width = 49
       end
       object cxLDefaultMirrorCount: TcxLabel
         Left = 16
@@ -1140,7 +1112,7 @@ object Settings: TSettings
         Properties.OnChange = cxSEMirrorHeightPropertiesChange
         TabOrder = 2
         Value = 50
-        Width = 41
+        Width = 49
       end
       object cxGBDefaultStartup: TcxGroupBox
         Left = 226
@@ -1290,17 +1262,13 @@ object Settings: TSettings
           'Icon')
         Properties.OnChange = cxCOBDirectlinksViewPropertiesChange
         TabOrder = 4
-        Width = 41
+        Width = 49
       end
     end
     object cxTSDatabase: TcxTabSheet
       Caption = 'Database'
       ImageIndex = 3
       TabVisible = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         598
         307)
@@ -1480,10 +1448,6 @@ object Settings: TSettings
     object cxTSControls: TcxTabSheet
       Caption = 'Controls'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         598
         307)
@@ -1505,10 +1469,6 @@ object Settings: TSettings
         object cxTSControls_: TcxTabSheet
           Caption = 'Controls'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           DesignSize = (
             584
             273)
@@ -1811,10 +1771,10 @@ object Settings: TSettings
       Caption = 'HTTP'
       ImageIndex = 5
       object cxGBProxy: TcxGroupBox
-        Left = 172
+        Left = 196
         Top = 16
         Caption = 'Proxy'
-        TabOrder = 1
+        TabOrder = 2
         Height = 273
         Width = 399
         object cxCGEnableProxyAt: TcxCheckGroup
@@ -1950,11 +1910,11 @@ object Settings: TSettings
       end
       object cxGBTimeout: TcxGroupBox
         Left = 3
-        Top = 16
+        Top = 95
         Caption = 'Timeout'
-        TabOrder = 0
+        TabOrder = 1
         Height = 120
-        Width = 163
+        Width = 187
         object cxLConnectTimeout: TcxLabel
           Left = 16
           Top = 16
@@ -1967,31 +1927,63 @@ object Settings: TSettings
           Caption = 'Read timeout:'
           Transparent = True
         end
-        object cxTBConnectTimeout: TcxTrackBar
-          Left = 13
+        object cxSEConnectTimeout: TcxSpinEdit
+          Left = 16
           Top = 36
-          ParentShowHint = False
-          Properties.Frequency = 5000
-          Properties.Max = 60000
-          Properties.OnChange = cxTBConnectTimeoutPropertiesChange
-          ShowHint = True
-          TabOrder = 2
-          Transparent = True
-          Height = 23
-          Width = 137
+          Properties.AssignedValues.MinValue = True
+          Properties.Increment = 1000.000000000000000000
+          Properties.LargeIncrement = 5000.000000000000000000
+          Properties.MaxValue = 60000.000000000000000000
+          Properties.OnChange = cxSEConnectTimeoutPropertiesChange
+          TabOrder = 1
+          Width = 57
         end
-        object cxTBReadTimeout: TcxTrackBar
-          Left = 13
-          Top = 83
-          ParentShowHint = False
-          Properties.Frequency = 5000
-          Properties.Max = 60000
-          Properties.OnChange = cxTBReadTimeoutPropertiesChange
-          ShowHint = True
-          TabOrder = 3
+        object cxLConnectTimeoutMSec: TcxLabel
+          Left = 79
+          Top = 37
+          Caption = '[msec, 0 = infinitely]'
           Transparent = True
-          Height = 23
-          Width = 137
+        end
+        object cxSEReadTimeout: TcxSpinEdit
+          Left = 16
+          Top = 83
+          Properties.AssignedValues.MinValue = True
+          Properties.Increment = 1000.000000000000000000
+          Properties.LargeIncrement = 5000.000000000000000000
+          Properties.MaxValue = 60000.000000000000000000
+          Properties.OnChange = cxSEReadTimeoutPropertiesChange
+          TabOrder = 4
+          Width = 57
+        end
+        object cxLReadTimeoutMSec: TcxLabel
+          Left = 79
+          Top = 84
+          Caption = '[msec, 0 = infinitely]'
+          Transparent = True
+        end
+      end
+      object cxGBManager: TcxGroupBox
+        Left = 3
+        Top = 16
+        Caption = 'Manager'
+        TabOrder = 0
+        Height = 73
+        Width = 187
+        object cxLMaxSimultaneousConnections: TcxLabel
+          Left = 16
+          Top = 16
+          Caption = 'Max simultaneous connections:'
+          Transparent = True
+        end
+        object cxSPMaxSimultaneousConnections: TcxSpinEdit
+          Left = 16
+          Top = 36
+          Properties.MaxValue = 99.000000000000000000
+          Properties.MinValue = 1.000000000000000000
+          Properties.OnChange = cxSPMaxSimultaneousConnectionsPropertiesChange
+          TabOrder = 1
+          Value = 1
+          Width = 49
         end
       end
     end
@@ -2053,6 +2045,70 @@ object Settings: TSettings
         Top = 141
         Caption = 'Retry count:'
         Transparent = True
+      end
+    end
+    object cxTSLog: TcxTabSheet
+      Caption = 'Log'
+      ImageIndex = 6
+      object cxGBLog: TcxGroupBox
+        Left = 3
+        Top = 16
+        Caption = 'Application log'
+        TabOrder = 0
+        Height = 73
+        Width = 187
+        object cxLMaxLogEntries: TcxLabel
+          Left = 16
+          Top = 16
+          Caption = 'Max log entries'
+          Transparent = True
+        end
+        object cxSEMaxLogEntries: TcxSpinEdit
+          Left = 16
+          Top = 36
+          Properties.AssignedValues.MinValue = True
+          Properties.MaxValue = 500.000000000000000000
+          Properties.OnChange = cxSEMaxLogEntriesPropertiesChange
+          TabOrder = 1
+          Value = 200
+          Width = 49
+        end
+        object cxLMaxLogEntriesInfo: TcxLabel
+          Left = 71
+          Top = 37
+          Caption = '[0 = disabled]'
+          Transparent = True
+        end
+      end
+      object cxBGHTTPLog: TcxGroupBox
+        Left = 3
+        Top = 95
+        Caption = 'HTTP log'
+        TabOrder = 1
+        Height = 73
+        Width = 187
+        object cxLMaxHTTPLogEntries: TcxLabel
+          Left = 16
+          Top = 16
+          Caption = 'Max log entries'
+          Transparent = True
+        end
+        object cxSEMaxHTTPLogEntries: TcxSpinEdit
+          Left = 16
+          Top = 36
+          Properties.AssignedValues.MinValue = True
+          Properties.MaxValue = 500.000000000000000000
+          Properties.OnChange = cxSEMaxHTTPLogEntriesPropertiesChange
+          TabOrder = 1
+          Value = 15
+          Width = 49
+        end
+        object cxLMaxHTTPLogEntriesInfo: TcxLabel
+          Left = 71
+          Top = 37
+          Caption = '[0 = disabled]'
+          Transparent = True
+        end
       end
     end
   end
