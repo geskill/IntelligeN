@@ -108,6 +108,7 @@ object IScriptDesigner: TIScriptDesigner
     ShowRightMargin = True
     SmartTabs = False
     TabOrder = 0
+    TabSize = 2
     TabStop = True
     TrimTrailingSpaces = True
     UILanguage.ScrollHint = 'Row'
@@ -124,7 +125,7 @@ object IScriptDesigner: TIScriptDesigner
     UrlStyle.BkColor = clWhite
     UrlStyle.Style = [fsUnderline]
     UseStyler = True
-    Version = '3.4.4.1'
+    Version = '3.4.6.0'
     WordWrap = wwNone
     OnGetAutoCompletionList = AdvMemoGetAutoCompletionList
     OnChange = AdvMemoChange
