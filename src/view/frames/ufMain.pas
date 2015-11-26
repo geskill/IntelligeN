@@ -367,7 +367,7 @@ end;
 
 procedure TfMain.CallControlAligner;
 begin
-  if (TabSheetCount > 0) and (SettingsManager.Settings.ControlAligner.Mode <> cpNone) then
+  if (TabSheetCount > 0) then
     with FControlAligner do
     begin
       TTabSheetController(pcMain.ActivePage).DataTabSheetItem.VertScrollBar.Position := 0;

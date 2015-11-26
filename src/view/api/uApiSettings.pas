@@ -480,7 +480,6 @@ type
     FModyBeforeCrypt, FSwichAfterCrypt: Boolean;
     FMirrorPosition: TMirrorPosition;
     FDirectlinksView: TDirectlinksView;
-    FControlAlignerMode: TControlAlignerMode;
     FPaddingLeft: Integer;
     FPaddingHeight: Integer;
     FPaddingWidth: Integer;
@@ -497,7 +496,6 @@ type
     property DefaultMirrorTabIndex: string read FDefaultMirrorTabIndex write FDefaultMirrorTabIndex;
     property ModyBeforeCrypt: Boolean read FModyBeforeCrypt write FModyBeforeCrypt;
     property SwichAfterCrypt: Boolean read FSwichAfterCrypt write FSwichAfterCrypt;
-    property Mode: TControlAlignerMode read FControlAlignerMode write FControlAlignerMode;
     property PaddingLeft: Integer read FPaddingLeft write FPaddingLeft;
     property PaddingHeight: Integer read FPaddingHeight write FPaddingHeight;
     property PaddingWidth: Integer read FPaddingWidth write FPaddingWidth;
@@ -586,6 +584,7 @@ type
   TSettingsManager = class(TSettingsManager<TSettings_>)
   protected
     procedure LoadDefaultSettings; override;
+    procedure VerifySettings; override;
   public
     procedure LoadSettings; override;
     function GetDefaultPluginLoadedFunc(const APluginType: TPlugInType; var ACollection: TCollection; var ACheckListBox: TcxCheckListBox): Boolean;
@@ -1520,7 +1519,6 @@ begin
       MirrorPosition := mpBottom;
       DirectlinksView := dlvGrid;
       DefaultMirrorTabIndex := StrDirectlinks;
-      Mode := cpLight;
       PaddingLeft := 6;
       PaddingHeight := 6;
       PaddingWidth := 6;
@@ -1537,6 +1535,26 @@ begin
     // UseSkins := True;
     // DefaultSkin := 'Blue';
     SaveOnClose := True;
+  end;
+end;
+
+procedure TSettingsManager.VerifySettings;
+begin
+  with SettingsManager.Settings do
+  begin
+
+    with ControlAligner do
+    begin
+      if not(MirrorCount > 0) then
+        MirrorCount := 1;
+
+      if not(MirrorColumns > 0) then
+        MirrorColumns := 1;
+
+      if not(MirrorHeight >= 50) then
+        MirrorHeight := 50;
+    end;
+
   end;
 end;
 

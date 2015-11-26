@@ -26,8 +26,6 @@ const
   BackupFilename = 'releases.sdb';
 
 type
-  TControlAlignerMode = (cpNone, cpLight, cpFull);
-
   RTemplateFileInfo = packed record
     TemplateType: TTypeID;
     FileName: WideString;

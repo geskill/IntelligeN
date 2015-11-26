@@ -1671,17 +1671,6 @@ object Main: TMain
       Action = aPublish
       Category = 7
     end
-    object dxBCControlAligner: TdxBarCombo
-      Category = 8
-      Visible = ivAlways
-      OnChange = dxBCControlAlignerChange
-      ShowEditor = False
-      Items.Strings = (
-        'Disable'
-        'Light parsing'
-        'Full parsing')
-      ItemIndex = -1
-    end
     object dxBBmiClose: TdxBarButton
       Action = aClose
       Category = 9
@@ -1706,18 +1695,6 @@ object Main: TMain
       Action = aPublishItemSettings
       Category = 10
     end
-  end
-  object dxBpmControlAligner: TdxBarPopupMenu
-    BarManager = dxBarManager
-    ItemLinks = <
-      item
-        Visible = True
-        ItemName = 'dxBCControlAligner'
-      end>
-    UseOwnFont = False
-    OnPopup = dxBpmControlAlignerPopup
-    Left = 264
-    Top = 560
   end
   object ImageList: TImageList
     ColorDepth = cd32Bit

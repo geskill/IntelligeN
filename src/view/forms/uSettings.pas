@@ -1871,8 +1871,6 @@ begin
     if Assigned(OnCMSChange) then
       OnCMSChange.Invoke(pctEnabled, AIndex, Byte(ANewState));
   end;
-
-  // Main.fPublish.GenerateColumns;
 end;
 
 procedure TSettings.CMSEndDrag(Sender: TObject; OldIndex: Integer; NewIndex: Integer);

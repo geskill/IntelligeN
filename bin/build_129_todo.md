@@ -67,5 +67,3 @@ This todo list contains all useful ideas for improvement, not necessarily for th
 - [ ] Add indication in the GUI if image hoster upload was successful or not (i.e. green/red shape at the icon)
 
 - [ ] Add possibility in WebsiteEditor to base general settings upon the TypeID (i.e. PCGames with intelligent_posting and Software not)
-
-- [ ] Verify loaded settings at startup (i.e. lower bounds check for ControlAligner)

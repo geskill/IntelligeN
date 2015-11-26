@@ -36,6 +36,7 @@ type
   protected
     procedure ResetInternalSettings;
     procedure LoadDefaultSettings; virtual;
+    procedure VerifySettings; virtual;
   public
     constructor Create(ASettingsFolder: TFileName);
 
@@ -99,6 +100,11 @@ begin
   //
 end;
 
+procedure TSettingsManager<T>.VerifySettings;
+begin
+  //
+end;
+
 constructor TSettingsManager<T>.Create(ASettingsFolder: TFileName);
 begin
   inherited Create;
@@ -126,6 +132,8 @@ begin
     finally
       XMLSerializer.Free;
     end;
+
+    VerifySettings;
   end
   else
   begin

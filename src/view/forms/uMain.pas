@@ -175,9 +175,6 @@ type
     cxBEILayout: TcxBarEditItem;
     dxBBSaveActiveDesktop: TdxBarButton;
 
-    dxBpmControlAligner: TdxBarPopupMenu;
-    dxBCControlAligner: TdxBarCombo;
-
     dxDockingManager: TdxDockingManager;
     dxDockSite: TdxDockSite;
     dxVertContainerDockSite1: TdxVertContainerDockSite;
@@ -296,8 +293,6 @@ type
     procedure cxBarEditItemEditorTypePropertiesInitPopup(Sender: TObject);
     procedure cxBEILayoutPropertiesCloseUp(Sender: TObject);
     procedure cxBEILayoutPropertiesInitPopup(Sender: TObject);
-    procedure dxBpmControlAlignerPopup(Sender: TObject);
-    procedure dxBCControlAlignerChange(Sender: TObject);
   private
     FOnStartup: INotifyEvent;
     FMainMenu: IMainMenu;
@@ -838,16 +833,6 @@ begin
   finally
     StringList.Free;
   end;
-end;
-
-procedure TMain.dxBpmControlAlignerPopup(Sender: TObject);
-begin
-  dxBCControlAligner.ItemIndex := Integer(SettingsManager.Settings.ControlAligner.Mode);
-end;
-
-procedure TMain.dxBCControlAlignerChange(Sender: TObject);
-begin
-  SettingsManager.Settings.ControlAligner.Mode := TControlAlignerMode(dxBCControlAligner.ItemIndex);
 end;
 
 procedure TMain.WMSysCommand(var Msg: TWMSysCommand);
