@@ -52,10 +52,10 @@ var
 begin
   inherited;
   FVersion := '3.0';
-  Description := 'JavaScript';
-  Filter := 'Javascript Files (*.js)|*.js';
+  Description := 'JScriptStyler';
+  Filter := 'JScript Files (*.js)|*.js';
   DefaultExtension := '.js';
-  StylerName := 'JavaScript';
+  StylerName := 'JScript';
   Extensions := 'js';
   EscapeChar := '\';
 
@@ -77,14 +77,6 @@ begin
   LItem.Font.Color := $00A00000;
   LItem.Font.Style := [fsBold];
   LItem.KeyWords.CommaText := AllJScriptKeyWords;
-  // ------------Simple Quote ' '----------------
-  LItem := AllStyles.Add;
-  LItem.StyleType := stBracket;
-  LItem.Info := 'Simple Quote';
-  LItem.Font.Color := clBlue;
-  LItem.Font.Style := [];
-  LItem.BracketStart := #39;
-  LItem.BracketEnd := #39;
   // ------------Double Quote " "----------------
   LItem := AllStyles.Add;
   LItem.StyleType := stBracket;

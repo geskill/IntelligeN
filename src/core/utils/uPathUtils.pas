@@ -31,6 +31,18 @@ function IsURL(const AUrl: string): Boolean;
 function ExtractUrlFileName(const AUrl: string): string;
 function ExtractUrlPath(const AUrl: string): string;
 function ExtractUrlProtocol(const AUrl: string): string;
+{$REGION 'Documentation'}
+/// <summary>
+///   Extracts the url host.
+/// </summary>
+/// <remarks>
+///   Delegation function for Indy's TIdURL class.
+/// </remarks>
+/// <example>
+///   http://www.sub.example.org/path/?name=value will be
+///   converted to www.sub.example.org.
+/// </example>
+{$ENDREGION}
 function ExtractUrlHost(const AUrl: string): string;
 function ExtractUrlHostWithPath(const AUrl: string): string;
 function BuildWebsiteUrl(const AUrl: string): string;

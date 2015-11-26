@@ -329,7 +329,7 @@ type
     // Additional
     procedure UpdateGUI;
     procedure Mody;
-    procedure CheckStatus;
+    function CheckStatus: WordBool;
 
     function GetPartName(AFileName: WideString): WideString;
 
@@ -771,7 +771,7 @@ type
 
   IPublishManager = interface(IThreadManager)
     ['{D49455B7-1B06-4884-9A40-EF2245FD3A7C}']
-    function AddPublishJob(const APublishJob: IPublishJob): LongWord;
+    function AddPublishJob(const APublishJob: IPublishJob): Longword;
     procedure RemovePublishJob(const APublishJob: IPublishJob); overload;
     procedure RemovePublishJob(const AUniqueID: Longword); overload;
     procedure RemoveAllPublishJobs;

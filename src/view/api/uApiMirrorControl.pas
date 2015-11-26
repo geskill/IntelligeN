@@ -1,6 +1,5 @@
 unit uApiMirrorControl;
-
-interface
+interface
 uses
   // Delphi
   Windows, SysUtils, Messages, Classes, Controls, Menus, StdCtrls, ExtCtrls, Graphics, Variants, Dialogs,
@@ -103,6 +102,7 @@ type
   private
     // Logic
     FDirectlinksPanel: IDirectlinksPanel;
+    FCustomHoster: Boolean;
     FLinksChecked: Boolean;
     FLinksInfoLock: TOmniMREW;
     FLinksInfo: TLinksInfo;
@@ -159,7 +159,7 @@ type
     property Focus: Boolean read GetFocus write SetFocus;
 
     procedure Mody;
-    procedure CheckStatus;
+    function CheckStatus: WordBool;
 
     function GetPartName(AFileName: WideString): WideString;
 
@@ -845,10 +845,12 @@ end;
 
 procedure TMycxTabSheet.VerifyCheckLinks;
 begin
-  if not(FLinksChecked or SameStr(Hoster, '')) then
+  if not(FLinksChecked) then
   begin
-    FLinksChecked := True;
-    CheckStatus;
+    if FCustomHoster then
+      FLinksChecked := True
+    else if CheckStatus then
+      FLinksChecked := True;
   end;
 end;
 
@@ -902,13 +904,13 @@ end;
 
 function TMycxTabSheet.GetParts;
 var
-  LPartCount: Integer;
+  LPartIndex: Integer;
 begin
   Result := 0;
   with FMycxRichEdit.Lines do
   begin
-    for LPartCount := 0 to Count - 1 do
-      if not SameStr('', Strings[LPartCount]) then
+    for LPartIndex := 0 to Count - 1 do
+      if not SameStr('', Strings[LPartIndex]) then
         Inc(Result);
   end;
 end;
@@ -976,15 +978,36 @@ end;
 
 function TMycxTabSheet.GetHoster(AShortName: Boolean): WideString;
 var
-  I: Integer;
+  LFileIndex: Integer;
+  LHost, LNormalizedHost: string;
 begin
   Result := '';
   with FMycxRichEdit.Lines do
-    for I := 0 to Min(Count - 1, 4) do
+    // Check at most 4 links
+    for LFileIndex := 0 to Min(Count - 1, 4) do
     begin
-      Result := THosterConfiguration.GetCustomisedHoster(RemoveW(ExtractUrlHost(Strings[I])), AShortName);
-      if not(Result = '') then
+      LHost := RemoveW(ExtractUrlHost(Strings[LFileIndex]));
+      if not SameStr('', LHost) then
+      begin
+        LNormalizedHost := THosterConfiguration.GetCustomisedHoster(LHost, AShortName);
+        if not SameStr('', LNormalizedHost) then
+        begin
+          FCustomHoster := False;
+
+          Result := LNormalizedHost;
+        end
+        else
+        begin
+          FCustomHoster := True;
+
+          if not AShortName then
+            Result := Uppercase(LHost[1]) + copy(LHost, 2)
+          else
+            Result := UpperCase(copy(LHost, 1, 2));
+        end;
+
         Break;
+      end;
     end;
 end;
 
@@ -1166,6 +1189,7 @@ begin
     OnPopup := FPopupMenuPopup;
   end;
 
+  FCustomHoster := False;
   with FLinksInfo do
   begin
     Status := csNotChecked;
@@ -1427,10 +1451,19 @@ begin
   end;
 end;
 
-procedure TMycxTabSheet.CheckStatus;
+function TMycxTabSheet.CheckStatus: WordBool;
+var
+  LHoster: string;
 begin
-  if not SameStr(Hoster, '') then
-    FDirectlinksPanel.MirrorControl.MirrorController.TabSheetController.PageController.FileHosterManager.AddHosterCheckJob(Self);
+  Result := False;
+
+  LHoster := Hoster;
+  with SettingsManager.Settings.Plugins do
+    if not SameStr('', LHoster) and Assigned(FindPlugInCollectionItemFromCollection(LHoster, FileHoster)) then
+    begin
+      FDirectlinksPanel.MirrorControl.MirrorController.TabSheetController.PageController.FileHosterManager.AddHosterCheckJob(Self);
+      Result := True;
+    end;
 end;
 
 function TMycxTabSheet.GetPartName(AFileName: WideString): WideString;
