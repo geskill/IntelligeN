@@ -836,8 +836,8 @@ begin
   begin
     ASearchValue := LIntelligentPostingSearchValue;
     ASearchIndex := LIntelligentPostingSearchIndex;
-    ARedoSearch := LIntelligentPostingRedoSearch;
   end;
+  ARedoSearch := LIntelligentPostingRedoSearch;
 
   LIntelligentPostingHelperWaitable := nil;
 
