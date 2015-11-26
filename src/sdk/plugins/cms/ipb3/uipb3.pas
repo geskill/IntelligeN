@@ -32,6 +32,7 @@ type
     property enableemo: Boolean read fenableemo write fenableemo;
     [AttrDefaultValue(True)]
     property enablesig: Boolean read fenablesig write fenablesig;
+
     [AttrDefaultValue(False)]
     property intelligent_posting;
     [AttrDefaultValue(False)]

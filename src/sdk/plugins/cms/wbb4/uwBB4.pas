@@ -21,7 +21,7 @@ type
   strict private
     ficon_field: string;
 
-    fpreParse, fenableSmilies, fenableBBCodes, fenableHtml, fshowSignature, fhasThank, fcloseThread, fdisableThread, fintelligent_posting, fintelligent_posting_helper, fintelligent_posting_boundedsearch: Boolean;
+    fpreParse, fenableSmilies, fenableBBCodes, fenableHtml, fshowSignature, fhasThank, fcloseThread, fdisableThread, fintelligent_posting_boundedsearch: Boolean;
 
     fprefix, ficon: Variant;
   public
@@ -45,10 +45,11 @@ type
     property closeThread: Boolean read fcloseThread write fcloseThread;
     [AttrDefaultValue(False)]
     property disableThread: Boolean read fdisableThread write fdisableThread;
+
     [AttrDefaultValue(False)]
-    property intelligent_posting: Boolean read fintelligent_posting write fintelligent_posting;
+    property intelligent_posting;
     [AttrDefaultValue(False)]
-    property intelligent_posting_helper: Boolean read fintelligent_posting_helper write fintelligent_posting_helper;
+    property intelligent_posting_helper;
     [AttrDefaultValue(False)]
     property intelligent_posting_boundedsearch: Boolean read fintelligent_posting_boundedsearch write fintelligent_posting_boundedsearch;
 

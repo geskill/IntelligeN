@@ -27,6 +27,7 @@ type
   published
     [AttrDefaultValue('prefix_id')]
     property prefix_field: string read fprefix_field write fprefix_field;
+
     [AttrDefaultValue(False)]
     property intelligent_posting;
     [AttrDefaultValue(False)]
