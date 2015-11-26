@@ -2,19 +2,21 @@
 
 This todo list contains all useful ideas for improvement, not necessarily for the next release.
 
+Checked items are planed for next release.
+
 ###Core
 
-- [ ] Handle DDos protection from Cloudflare
+- [x] Handle DDos protection from Cloudflare
 
-- [ ] Allow multiple downloads with HTTPManager at the same time
+- [x] Allow multiple downloads with HTTPManager at the same time
 
-- [ ] Allow to change HTTPManager settings
+- [x] Allow to change HTTPManager settings
 
-- [ ] Allow to change HTTPManager implementor on-the-fly
+- [x] Allow to change HTTPManager implementor on-the-fly
 
-- [ ] Optimize HTTPManager log amount (i.e. ALL, SOME)
+- [x] Optimize HTTPManager log amount (i.e. ALL, SOME)
 
-- [ ] Add custom fields in ITabSheetData that hold compiled IScript (required for WordPress custom files powered by IScript)
+- [x] Add custom fields in ITabSheetData that hold compiled IScript (required for WordPress custom files powered by IScript)
 
 - [ ] Add direct index based link access (i.e. IMirror[\<Index\>].Directlink[\<Index\>].Link[\<Index\>])
 
@@ -34,7 +36,7 @@ This todo list contains all useful ideas for improvement, not necessarily for th
 
 ######Crawler
 
-- [ ] Update missing plugins to match new interface (incl. full update of Amazon.com/.de)
+- [x] Update missing plugins to match new interface (incl. full update of Amazon.com/.de)
 
 ######Crypter
 
@@ -58,10 +60,12 @@ This todo list contains all useful ideas for improvement, not necessarily for th
 
 - [ ] Add simpler hoster ranking not defined by website (i.e. FileHoster ranking)
 
-- [ ] Implement a silent error logger
+- [x] Implement a silent error logger
 
 - [ ] Improve WebsiteEditor control arrangement in general tab
 
-- [ ] Add indication in the GUI if image hoster upload was successful or not (i.e. green/red shape at the icon)
+- [ ] Add progress bar or indication for crawling overall progress
+
+- [x] Add indication in the GUI if image hoster upload was successful or not (i.e. green/red shape at the icon)
 
 - [ ] Add possibility in WebsiteEditor to base general settings upon the TypeID (i.e. PCGames with intelligent_posting and Software not)

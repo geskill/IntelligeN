@@ -447,6 +447,8 @@
 
 * Improved ExtractUrlHost using TIdURI. (therefore Indy package is now part of framework.bpl)
 
+* Improved handling of non-normalized host
+
 * Improved OleInitialize/CoInitializeEx usage
 
 * Improved phpbb3 login error message
@@ -457,4 +459,10 @@
 
 * Fixed threaded draw process for images in Control Editor
 
+* Fixed bug not aborting using intelligent_posting_helper after first redo-search
+
+* Fixed wbb4, XenForo intelligent_posting
+
 * Fixed loading intelligen.xml.2 files with no templatetype
+
+* Changed IScriptEditor tab size to 2 (before 4)
