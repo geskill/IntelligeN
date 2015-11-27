@@ -318,7 +318,6 @@ StoredMenuItems := TList<TStoredMenuItem>.Create;
 
 finalization
 
-
 StoredMenuItems.Free;
 
 end.

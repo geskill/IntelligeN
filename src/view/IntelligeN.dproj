@@ -88,6 +88,9 @@
 			<DCCReference Include="forms\uSelectFolderDialog.pas">
 				<Form>SelectFolderDialog</Form>
 			</DCCReference>
+			<DCCReference Include="forms\uSplashScreen.pas">
+				<Form>SplashScreen</Form>
+			</DCCReference>
 			<DCCReference Include="forms\uNewDesignWindow.pas">
 				<Form>NewDesignWindow </Form>
 			</DCCReference>
@@ -277,6 +280,22 @@
 			<None Include="ModelSupport_IntelligeN\uApiFile\default.txvpck"/>
 			<None Include="ModelSupport_IntelligeN\uApiTabSheetControllerBase\default.txaPackage"/>
 			<None Include="ModelSupport_IntelligeN\uApiTabSheetData\default.txaPackage"/>
+			<RcItem Include="..\..\res\MainLogo\Logo.png">
+				<ResourceType>RCData</ResourceType>
+				<ResourceId>logo</ResourceId>
+			</RcItem>
+			<RcItem Include="..\..\res\Images\01.jpg">
+				<ResourceType>RCData</ResourceType>
+				<ResourceId>JpgImage0</ResourceId>
+			</RcItem>
+			<RcItem Include="..\..\res\Images\02.jpg">
+				<ResourceType>RCData</ResourceType>
+				<ResourceId>JpgImage1</ResourceId>
+			</RcItem>
+			<RcItem Include="..\..\res\Images\03.jpg">
+				<ResourceType>RCData</ResourceType>
+				<ResourceId>JpgImage2</ResourceId>
+			</RcItem>
 			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
 			</BuildConfiguration>

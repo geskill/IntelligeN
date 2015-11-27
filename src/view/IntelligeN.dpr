@@ -31,6 +31,7 @@ uses
   uIntelligentPosting in 'forms\uIntelligentPosting.pas' {IntelligentPosting},
   uSelectDialog in 'forms\uSelectDialog.pas' { SelectDialog },
   uSelectFolderDialog in 'forms\uSelectFolderDialog.pas' {SelectFolderDialog},
+  uSplashScreen in 'forms\uSplashScreen.pas' {SplashScreen},
   uNewDesignWindow in 'forms\uNewDesignWindow.pas' {NewDesignWindow },
   uApiBackupManager in 'api\uApiBackupManager.pas',
   uApiCodeTag in 'api\uApiCodeTag.pas',
@@ -139,42 +140,58 @@ uses
 {$R *.TLB}
 
 begin
-  if DirectoryExists(GetHiddenDataDir + 'update') then
-  begin
-    if FileExists(GetHiddenDataDir + 'update\sleep32.exe') then
-    begin
-      ShellExecute(0, 'open', PChar(GetHiddenDataDir + 'update\exec_update.bat'), nil, PChar(GetHiddenDataDir + 'update'), SW_SHOW);
-      Exit; // Application.Terminate funktioniert hier noch nicht, Programm würde weitermachen
-    end;
-    DeleteFile(GetHiddenDataDir + 'update');
-  end;
-
   Randomize;
 
-  Application.Initialize;
-  Application.MainFormOnTaskbar := True;
-  Application.Title := ProgrammName;
-{$IFDEF DEBUG}
-  UseLatestCommonDialogs := False;
-  ReportMemoryLeaksOnShutdown := True;
-{$ENDIF}
-  Application.HelpFile := ExtractFilePath(ParamStr(0)) + 'IntelligeN.chm';
-  if GenerateFolderSystem then
-  begin
-  Application.CreateForm(TMain, Main);
-  Application.CreateForm(TSettings, Settings);
-  Application.CreateForm(TUpdate, Update);
-  AnalyzeStartupParams;
-    if SettingsManager.Settings.Login.AutoLogin then
-      Main.fLogin.cxbLoginClick(nil);
-    if Assigned(SettingsManager.Settings.Layout.ActiveLayout) then
-      with Main do
-      begin
-        LoadLayout(SettingsManager.Settings.Layout.ActiveLayout);
-        Width := Width + 1;
-        Width := Width - 1;
-      end;
-    Application.Run;
-  end;
+  SplashScreen := TSplashScreen.Create(Application);
+  try
+    SplashScreen.Show;
+    SplashScreen.Update;
 
+    if DirectoryExists(GetHiddenDataDir + 'update') then
+    begin
+      if FileExists(GetHiddenDataDir + 'update\sleep32.exe') then
+      begin
+        ShellExecute(0, 'open', PChar(GetHiddenDataDir + 'update\exec_update.bat'), nil, PChar(GetHiddenDataDir + 'update'), SW_SHOW);
+        Exit; // Application.Terminate funktioniert hier noch nicht, Programm würde weitermachen
+      end;
+      DeleteFile(GetHiddenDataDir + 'update');
+    end;
+
+    SettingsManager.LoadSettings;
+
+    Application.Initialize;
+    Application.MainFormOnTaskbar := True;
+    Application.Title := ProgrammName;
+{$IFDEF DEBUG}
+    UseLatestCommonDialogs := False;
+    ReportMemoryLeaksOnShutdown := True;
+{$ENDIF}
+    Application.HelpFile := ExtractFilePath(ParamStr(0)) + 'IntelligeN.chm';
+    if GenerateFolderSystem then
+    begin
+      Application.CreateForm(TMain, Main);
+      Application.CreateForm(TSettings, Settings);
+      Application.CreateForm(TUpdate, Update);
+
+      AnalyzeStartupParams;
+
+      if SettingsManager.Settings.Login.AutoLogin then
+        Main.fLogin.cxbLoginClick(nil);
+
+      if Assigned(SettingsManager.Settings.Layout.ActiveLayout) then
+        with Main do
+        begin
+          LoadLayout(SettingsManager.Settings.Layout.ActiveLayout);
+          Width := Width + 1;
+          Width := Width - 1;
+        end;
+    end
+    else
+    begin
+      Exit;
+    end;
+  finally
+    SplashScreen.Close;
+  end;
+  Application.Run;
 end.

@@ -1682,7 +1682,6 @@ end;
 initialization
 
 SettingsManager := TSettingsManager.Create(GetSettingsFolder);
-SettingsManager.LoadSettings;
 
 finalization
 

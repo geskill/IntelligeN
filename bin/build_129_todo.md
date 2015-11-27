@@ -2,7 +2,7 @@
 
 This todo list contains all useful ideas for improvement, not necessarily for the next release.
 
-Checked items are planed for next release.
+Checked items are planned for next release.
 
 ###Core
 

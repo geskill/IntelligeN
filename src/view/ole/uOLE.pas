@@ -8,7 +8,7 @@ uses
   SysUtils, ComServ, ComObj, ActiveX, StdVcl,
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
-  //
+  // Ole
   IntelligeN_TLB;
 
 type
