@@ -11,7 +11,7 @@ uses
   uStringUtils;
 
 const
-  HTTP: string = 'http://';
+  HTTP: string = 'http';
 
 function GetWindowsFolder: string;
 function GetWindowsSystemFolder: string;
@@ -205,7 +205,7 @@ var
   LUrl: string;
 begin
   if not BeginsWithHTTP(AUrl) then
-    LUrl := HTTP + AUrl
+    LUrl := HTTP + '://' + AUrl
   else
     LUrl := AUrl;
 
