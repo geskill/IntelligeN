@@ -22,14 +22,30 @@ uses
   uHTTPConst,
   // Events
   uHTTPEvent,
-  // Implementor
-  uHTTPIndyImplementor,
   // Delphi
-  Windows, SysUtils, Math, ActiveX,
+  Windows, SysUtils, Classes, Math, ActiveX,
   // OmniThreadLibrary
   OtlCommon, OtlSync, OtlParallel;
 
 type
+  THTTPImplementationManager = class(TInterfacedObject, IHTTPImplementationManager)
+  private
+    FImplementations: TInterfaceList;
+    function FindImplementation(const AName: WideString): IHTTPImplementation;
+  protected
+    function GetCount: Integer; safecall;
+    function GetImplementation(AIndex: Integer): IHTTPImplementation; safecall;
+  public
+    constructor Create; virtual;
+    destructor Destroy; override;
+
+    function Register(const AHTTPImplementation: IHTTPImplementation): WordBool; safecall;
+    function Unregister(const AName: WideString): WordBool; safecall;
+
+    property Count: Integer read GetCount;
+    property Implementations[Index: Integer]: IHTTPImplementation read GetImplementation; default;
+  end;
+
 {$REGION 'Documentation'}
   /// <summary>
   /// <para>
@@ -60,7 +76,10 @@ type
     FBackgroundWorker: IOmniBackgroundWorker;
     FRequestArray: array of IHTTPProcess;
     FRequestArrayLock: TOmniMREW;
+    FConnectionMaximum: Integer;
+    FConnectionMaximumLock: TOmniMREW;
     FImplementor: IHTTPImplementation;
+    FImplementationManager: IHTTPImplementationManager;
     FRequestDoneEvent: IHTTPProcessEvent;
 
     class var FHTTPManager: IHTTPManager;
@@ -73,8 +92,11 @@ type
 
     constructor Create;
   protected
+    function GetConnectionMaximum: Integer; safecall;
+    procedure SetConnectionMaximum(const AConnectionMaximum: Integer); safecall;
     function GetImplementor: IHTTPImplementation; safecall;
     procedure SetImplementor(const AImplementor: IHTTPImplementation); safecall;
+    function GetImplementationManager: IHTTPImplementationManager; safecall;
     function GetRequestDone: IHTTPProcessEvent; safecall;
   public
 {$REGION 'Documentation'}
@@ -95,6 +117,8 @@ type
     class function Instance(): IHTTPManager;
     class procedure Wait(ARequestID: Double; AMilliseconds: Integer = 50);
     class destructor Destroy;
+
+    property ConnectionMaximum: Integer read GetConnectionMaximum write SetConnectionMaximum;
 {$REGION 'Documentation'}
     /// <summary>
     /// <para>
@@ -192,6 +216,7 @@ type
     function GetResult(AUniqueID: Double): IHTTPProcess; safecall;
 
     property Implementor: IHTTPImplementation read GetImplementor write SetImplementor;
+    property ImplementationManager: IHTTPImplementationManager read GetImplementationManager;
 {$REGION 'Documentation'}
     /// <summary>
     /// This event occurs when a HTTP request is processed.
@@ -207,7 +232,71 @@ type
 
 implementation
 
-  { TIdHTTPManager }
+{ THTTPImplementationManager }
+
+function THTTPImplementationManager.FindImplementation(const AName: WideString): IHTTPImplementation;
+var
+  LImplementationIndex: Integer;
+  LImplementation: IHTTPImplementation;
+begin
+  Result := nil;
+
+  for LImplementationIndex := 0 to FImplementations.Count - 1 do
+  begin
+    LImplementation := Implementations[LImplementationIndex];
+
+    if SameText(AName, LImplementation.Name) then
+    begin
+      Result := LImplementation;
+      break;
+    end;
+  end;
+end;
+
+function THTTPImplementationManager.GetCount: Integer;
+begin
+  Result := FImplementations.Count;
+end;
+
+function THTTPImplementationManager.GetImplementation(AIndex: Integer): IHTTPImplementation;
+begin
+  Result := FImplementations.Items[AIndex] as IHTTPImplementation;
+end;
+
+constructor THTTPImplementationManager.Create;
+begin
+  inherited Create;
+  FImplementations := TInterfaceList.Create;
+end;
+
+destructor THTTPImplementationManager.Destroy;
+begin
+  FImplementations.Free;
+  inherited Destroy;
+end;
+
+function THTTPImplementationManager.Register(const AHTTPImplementation: IHTTPImplementation): WordBool;
+begin
+  Result := not Assigned(FindImplementation(AHTTPImplementation.Name));
+  if Result then
+    FImplementations.Add(AHTTPImplementation)
+end;
+
+function THTTPImplementationManager.Unregister(const AName: WideString): WordBool;
+var
+  LImplementation: IHTTPImplementation;
+begin
+  LImplementation := FindImplementation(AName);
+  Result := Assigned(LImplementation);
+  if Result then
+    try
+      FImplementations.Remove(LImplementation);
+    finally
+      LImplementation := nil;
+    end;
+end;
+
+{ TIdHTTPManager }
 {$REGION 'HandleBlockingScripts'}
   (*
     procedure THTTPManager.HandleBlockingScripts(AHTTPHelper: THTTPHelper; AWebsite:string; AHTTPResponse: IHTTPResponse);
@@ -273,16 +362,11 @@ var
 begin
   HTTPData := IHTTPData(workItem.Data.AsInterface);
 
-  if Assigned(FImplementor) then
-  begin
-    try
-      FImplementor.Handle(HTTPData, HTTPResult);
-    except
-      OutputDebugString('Error!');
-    end;
-  end
-  else
-    raise Exception.Create('Assign a HTTPImplementor');
+  try
+    Implementor.Handle(HTTPData, HTTPResult);
+  except
+    OutputDebugString('HTTPManager execute error');
+  end;
 
   workItem.Result := TOmniValue.CastFrom(HTTPResult);
 end;
@@ -323,11 +407,15 @@ begin
 
   FBackgroundWorker := Parallel.BackgroundWorker;
 
-  FImplementor := THTTPIndyImplementation.Create;
+  SetLength(FRequestArray, 0);
+
+  FConnectionMaximum := 1;
+  FImplementor := nil;
+  FImplementationManager := THTTPImplementationManager.Create;
 
   FRequestDoneEvent := TIHTTPProcessEvent.Create;
 
-  FBackgroundWorker.NumTasks(1).Execute(Execute).OnRequestDone_Asy(
+  FBackgroundWorker.NumTasks(FConnectionMaximum).Execute(Execute).OnRequestDone_Asy(
     { } procedure(const Sender: IOmniBackgroundWorker; const workItem: IOmniWorkItem)
     { } var
     { . } HTTPProcess: IHTTPProcess;
@@ -351,13 +439,24 @@ begin
     { } begin
     { . } FRequestDoneEvent.Invoke(GetResult(workItem.UniqueID));
     { } end);
-
-  SetLength(FRequestArray, 0);
 end;
 
 function THTTPManager.GetImplementor: IHTTPImplementation;
 begin
+  if not Assigned(FImplementor) then
+  begin
+    if ImplementationManager.Count > 0 then
+      FImplementor := ImplementationManager.Implementations[0]
+    else
+      raise Exception.Create('Assign a HTTPImplementor');
+  end;
+
   Result := FImplementor;
+end;
+
+function THTTPManager.GetImplementationManager: IHTTPImplementationManager;
+begin
+  Result := FImplementationManager;
 end;
 
 procedure THTTPManager.SetImplementor(const AImplementor: IHTTPImplementation);
@@ -397,6 +496,30 @@ begin
   FHTTPManager := nil;
 end;
 
+function THTTPManager.GetConnectionMaximum: Integer;
+begin
+  FConnectionMaximumLock.EnterReadLock;
+  try
+    Result := FConnectionMaximum;
+  finally
+    FConnectionMaximumLock.ExitReadLock
+  end;
+end;
+
+procedure THTTPManager.SetConnectionMaximum(const AConnectionMaximum: Integer);
+begin
+  FConnectionMaximumLock.EnterWriteLock;
+  try
+    if not (AConnectionMaximum = FConnectionMaximum) then
+    begin
+      FConnectionMaximum := AConnectionMaximum;
+      FBackgroundWorker.NumTasks(AConnectionMaximum);
+    end;
+  finally
+    FConnectionMaximumLock.ExitWriteLock
+  end;
+end;
+
 function THTTPManager.Get(AURL: WideString; AFollowUp: Double; AHTTPOptions: IHTTPOptions = nil): Double;
 begin
   Result := DoRequest(mGET, AURL, AFollowUp, AHTTPOptions);
@@ -432,7 +555,6 @@ begin
 
   Index := Trunc(AUniqueID);
 
-  //OutputDebugString(PChar('THTTPManager START GetResult'));
   FRequestArrayLock.EnterReadLock;
   try
     if Index < length(FRequestArray) then
@@ -440,12 +562,12 @@ begin
   finally
     FRequestArrayLock.ExitReadLock;
   end;
-  //OutputDebugString(PChar('THTTPManager END GetResult'));
 end;
 
 destructor THTTPManager.Destroy;
 begin
   FRequestDoneEvent := nil;
+  FImplementationManager := nil;
   FImplementor := nil;
 
   SetLength(FRequestArray, 0);

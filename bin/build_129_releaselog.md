@@ -435,6 +435,8 @@
 
 * Added signature creation
 
+* Added possibility for multiple simultaneous connections with HTTPManager
+
 ######minor enhancements
 
 * Added host and subject in CAPTCHA and intelligent_posting-Helper window

@@ -19,7 +19,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // HTTPManager
-  uHTTPConst,
+  uHTTPConst, uHTTPManager,
   // DLLs
   uExport,
   // Utils
@@ -1550,6 +1550,7 @@ end;
 procedure TSettings.cxSPMaxSimultaneousConnectionsPropertiesChange(Sender: TObject);
 begin
   SettingsManager.Settings.HTTP.MaxSimultaneousConnections := cxSPMaxSimultaneousConnections.Value;
+  THTTPManager.Instance().ConnectionMaximum := cxSPMaxSimultaneousConnections.Value;
 end;
 
 procedure TSettings.cxSEConnectTimeoutPropertiesChange(Sender: TObject);
@@ -2820,6 +2821,7 @@ begin
   cxCOBDefaultStartupDType.Text := SettingsManager.Settings.ControlAligner.DefaultStartup.TypeD;
   cxCOBDefaultStartupEType.Text := SettingsManager.Settings.ControlAligner.DefaultStartup.TypeE;
 
+  THTTPManager.Instance().ConnectionMaximum := SettingsManager.Settings.HTTP.MaxSimultaneousConnections;
   cxSPMaxSimultaneousConnections.Value := SettingsManager.Settings.HTTP.MaxSimultaneousConnections;
   cxSEConnectTimeout.Value := SettingsManager.Settings.HTTP.ConnectTimeout;
   cxSEReadTimeout.Value := SettingsManager.Settings.HTTP.ReadTimeout;

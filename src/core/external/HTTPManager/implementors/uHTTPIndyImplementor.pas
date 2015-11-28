@@ -6,7 +6,7 @@ uses
   // Interface
   uHTTPInterface,
   // Classes
-  uHTTPManagerClasses, uHTTPClasses, uHTTPImplementation,
+  uHTTPManager, uHTTPManagerClasses, uHTTPClasses, uHTTPImplementation,
   // Const
   uHTTPConst,
   // Indy MOD
@@ -18,9 +18,8 @@ uses
 
 type
   THTTPIndyImplementation = class(THTTPImplementation)
-  protected
-    function GetName: WideString; override;
   public
+    class function GetImplementationName: string; override;
     procedure Handle(const AHTTPData: IHTTPData; out AHTTPResult: IHTTPResult); override;
   end;
 
@@ -28,7 +27,7 @@ implementation
 
 { THTTPIndyImplementation }
 
-function THTTPIndyImplementation.GetName: WideString;
+class function THTTPIndyImplementation.GetImplementationName: string;
 var
   LDummy: TIdBaseComponent;
 begin
@@ -274,5 +273,11 @@ begin
 
   AHTTPResult := THTTPResult.Create(HTTPResponse, HTTPResponseInfo);
 end;
+
+initialization
+  THTTPManager.Instance().ImplementationManager.Register(THTTPIndyImplementation.Create);
+
+finalization
+  THTTPManager.Instance().ImplementationManager.Unregister(THTTPIndyImplementation.GetImplementationName);
 
 end.

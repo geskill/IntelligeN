@@ -8,11 +8,7 @@ Checked items are planned for next release.
 
 - [x] Handle DDos protection from Cloudflare
 
-- [x] Allow multiple downloads with HTTPManager at the same time
-
-- [x] Allow to change HTTPManager settings
-
-- [x] Allow to change HTTPManager implementor on-the-fly
+- [ ] Allow to change HTTPManager implementor for a single request (settings record)
 
 - [x] Optimize HTTPManager log amount (i.e. ALL, SOME)
 
