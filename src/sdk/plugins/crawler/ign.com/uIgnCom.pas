@@ -9,207 +9,323 @@ uses
   RegExpr,
   // Common
   uBaseConst, uBaseInterface,
-  // Utils
-  uHTMLUtils,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrawlerClass, uPlugInHTTPClasses;
+  uPlugInCrawlerClass, uPlugInHTTPClasses,
+  // Utils
+  uPathUtils, uHTMLUtils, uStringUtils;
 
 type
   TIgnCom = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'http://www.ign.com/';
+
+    function IsSystem(const ATypeID: TTypeID; const ASystem: string): Boolean;
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
 
+{ TIgnCom }
+
+function TIgnCom.IsSystem(const ATypeID: TTypeID; const ASystem: string): Boolean;
+begin
+  Result := False;
+
+  // cNintendoDS, cPCGames, cPlayStation3, cPlayStation4, cPlayStationVita, cWii, cWiiU, cXbox360, cXboxOne
+
+  case ATypeID of
+    cNintendoDS:
+      begin
+        Result := (ASystem = 'NDS') or (ASystem = '3DS');
+      end;
+    cPCGames:
+      begin
+        Result := (ASystem = 'PC');
+      end;
+    cPlayStation3:
+      begin
+        Result := (ASystem = 'PC');
+      end;
+    cPlayStation4:
+      begin
+        Result := (ASystem = 'PC');
+      end;
+    cPlayStationVita:
+      begin
+        Result := (ASystem = 'PC');
+      end;
+    cWii:
+      begin
+        Result := (ASystem = 'Wii');
+      end;
+    cWiiU:
+      begin
+        Result := (ASystem = 'Wii U');
+      end;
+    cXbox360:
+      begin
+        Result := (ASystem = 'Xbox 360');
+      end;
+    cXboxOne:
+      begin
+        Result := (ASystem = 'Xbox One');
+      end;
+  end;
+end;
+
 function TIgnCom.GetName;
 begin
-  result := 'ign.com';
+  Result := 'ign.com';
 end;
 
-function TIgnCom.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TIgnCom.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [cNintendoDS, cPCGames, cPlayStation2, cPlayStation3, cPlayStationPortable, cWii, cXbox, cXbox360];
-  result := LongWord(_TemplateTypeIDs);
+  Result := cGames;
 end;
 
-function TIgnCom.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
+function TIgnCom.InternalGetAvailableControlIDs;
 begin
-  _ComponentIDs := [cPicture, cGenre, cDescription];
-  result := LongWord(_ComponentIDs);
+  Result := [cPicture, cGenre, cCreator, cPublisher, cDescription];
 end;
 
-function TIgnCom.GetControlIDDefaultValue;
+function TIgnCom.InternalGetControlIDDefaultValue;
 begin
-  result := True;
+  Result := True;
 end;
 
-function TIgnCom.GetResultsLimitDefaultValue;
+function TIgnCom.InternalGetDependentControlIDs;
 begin
-  result := 5;
+  Result := [cTitle];
 end;
 
-function TIgnCom.Exec;
-const
-  website = 'ign.com/';
-var
-  _ComponentIDs: TControlIDs;
-  _Title: string;
-  _Count: Integer;
+function TIgnCom.InternalExecute;
 
-  function GetPlatform(ATypeID: TTypeID): string;
+  procedure deep_search(AWebsiteSourceCode: string);
+  var
+    s: string;
+    LStringList: TStringList;
   begin
-    case ATypeID of
-      cAudio:
-        ;
-      cGameCube:
-        result := 'GameCube';
-      cMovie:
-        ;
-      cNintendoDS:
-        result := 'DS';
-      cPCGames:
-        result := 'PC';
-      cPlayStation2:
-        result := 'PS2';
-      cPlayStation3:
-        result := 'PS3';
-      cPlayStationPortable:
-        result := 'PSP';
-      cSoftware:
-        ;
-      cWii:
-        result := 'Wii';
-      cXbox:
-        result := 'Xbox';
-      cXbox360:
-        result := 'Xbox360';
-      cXXX:
-        ;
-      cOther:
-        result := 'Other';
-    end;
-
-  end;
-
-  procedure deep_search(AWebsitesourcecode: string);
-
-    procedure deep_genre_search(aGenrecode: string);
-    begin
+    if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
-          InputString := aGenrecode;
-          Expression := '(\S+)';
+          InputString := AWebsiteSourceCode;
+          Expression := '<img class="highlight-boxArt" src="(.*?)"';
 
           if Exec(InputString) then
           begin
-            repeat
-              aGenrecode := Match[1];
-              AControlController.FindControl(cGenre).AddProposedValue(GetName, aGenrecode);
-            until not ExecNext;
+            if Pos('ignimgs', string(Match[1])) > 0 then
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, StringReplace(Match[1], '_160h', '_640w', []))
+            else
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, StringReplace(Match[1], '_160h', '_160w', []));
           end;
         finally
           Free;
         end;
-    end;
 
-  begin
-    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if ACanUse(cGenre) then
       with TRegExpr.Create do
         try
-          ModifierS := False;
-          InputString := AWebsitesourcecode;
-          Expression := 'alt="(.*?)" title="(.*?)" src="(.*?)"';
+          InputString := AWebsiteSourceCode;
+          Expression := 'Genre<\/strong>:(.*?)<\/div>';
 
           if Exec(InputString) then
-            AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[3]);
+          begin
+            s := Match[1];
+
+            with TRegExpr.Create do
+            begin
+              try
+                InputString := s;
+                // proper: ([\w-]+)|<a .*?">(.*?)</a>
+                Expression := '<a.*?>(.*?)<\/a>';
+
+                if Exec(InputString) then
+                begin
+                  repeat
+                    AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(Match[1]));
+                  until not ExecNext;
+                end;
+              finally
+                Free;
+              end;
+            end;
+          end;
         finally
           Free;
         end;
 
-    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if ACanUse(cCreator) then
       with TRegExpr.Create do
         try
-          InputString := AWebsitesourcecode;
-          Expression := 'Genre: <\/strong>(.*?)<br\/>';
+          InputString := AWebsiteSourceCode;
+          Expression := 'Developer(s)?<\/strong>:(.*?)<\/div>';
 
           if Exec(InputString) then
-            deep_genre_search(Trim(HTML2Text(Match[1])));
+          begin
+            s := Match[2];
+
+            LStringList := TStringList.Create;
+            try
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := '<a.*?>(.*?)<\/a>';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      if not(LStringList.IndexOf(Match[1]) > 0) then
+                        LStringList.Add(Match[1]);
+                    until not ExecNext;
+
+                    AControlController.FindControl(cCreator).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            finally
+              LStringList.Free;
+            end;
+          end;
         finally
           Free;
         end;
 
-    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if ACanUse(cPublisher) then
       with TRegExpr.Create do
         try
-          ModifierS := True;
-          InputString := AWebsitesourcecode;
-          if Pos('<div class="column-about-boxart">', AWebsitesourcecode) = 0 then
-            Expression := '<div id="about-tabs-data" class="txt-para">(.*?)<div'
+          InputString := AWebsiteSourceCode;
+          Expression := 'Publisher(s)?<\/strong>:(.*?)<\/div>';
+
+          if Exec(InputString) then
+          begin
+            s := Match[2];
+
+            LStringList := TStringList.Create;
+            try
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := '<a.*?>(.*?)<\/a>';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      if not(LStringList.IndexOf(Match[1]) > 0) then
+                        LStringList.Add(Match[1]);
+                    until not ExecNext;
+
+                    AControlController.FindControl(cPublisher).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            finally
+              LStringList.Free;
+            end;
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cDescription) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          if Pos('ratingImage', AWebsiteSourceCode) > 0 then
+            Expression := '<div class="gameInfo">.*?a>(.*?)<\/p'
           else
-            Expression := '<div class="column-about-boxart">(.*?)<div';
+            Expression := '<div class="gameInfo">.*?p>(.*?)<\/p';
 
           if Exec(InputString) then
-            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(HTMLDecode(Match[1]))));
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
         finally
           Free;
         end;
   end;
 
 var
-  RequestID1, RequestID2: Double;
+  LTitle, s: string;
+  LCount: Integer;
 
-  ResponseStrSearchResult: string;
+  LRequestID1, LRequestID2, LRequestID3: Double;
+
+  LResponeStr: string;
 begin
-  LongWord(_ComponentIDs) := AControlIDs;
-  _Title := AControlController.FindControl(cTitle).Value;
-  _Count := 0;
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
 
-  RequestID1 := HTTPManager.Get(THTTPRequest.Create('http://search.' + website + 'products?sort=relevance&so=exact&platform=' + HTTPEncode
-        (GetPlatform(TTypeID(ATypeID))) + '&query=' + HTTPEncode(_Title)), TPlugInHTTPOptions.Create(Self));
+  // http://www.ign.com/search?q=Halo&page=0&count=10&type=object&objectType=game&filter=games&
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID1);
+  LResponeStr := GETRequest(WEBSITE + 'search?q=' + HTTPEncode(LTitle) + '&page=0&count=10&type=object&objectType=game&filter=games', LRequestID1);
 
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID1).HTTPResult.SourceCode;
+  if not(Pos('search-item', LResponeStr) = 0) then
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := LResponeStr;
+        Expression := 'data-type="game".*?item-title">\s+<a href=".*?".*?<a href=".*?">.*?<\/a>(.*?)<\/div>';
 
-  with TRegExpr.Create do
-    try
-      InputString := ResponseStrSearchResult;
-      // Expression := '"searchResultTitle"><a href="(.*?)"';
-      Expression := '<div class="result-image">\s+<a href="(.*?)"';
-
-      if Exec(InputString) then
-      begin
-        repeat
-          RequestID2 := HTTPManager.Get(Match[1], RequestID1, TPlugInHTTPOptions.Create(Self));
-
+        if Exec(InputString) then
+        begin
           repeat
-            sleep(50);
-          until HTTPManager.HasResult(RequestID2);
+            s := Match[1];
 
-          deep_search(HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode);
+            with TRegExpr.Create do
+            begin
+              try
+                InputString := s;
+                Expression := '<a href="(.*?)">(.*?)<\/a>';
 
-          Inc(_Count);
-        until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
+                if Exec(InputString) then
+                begin
+                  repeat
+
+                    if IsSystem(ATypeID, Match[2]) then
+                    begin
+                      LResponeStr := GETFollowUpRequest(Match[1], LRequestID1, LRequestID2);
+
+                      deep_search(LResponeStr);
+                    end;
+
+                  until not ExecNext;
+                end;
+              finally
+                Free;
+              end;
+            end;
+
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
+        end;
+      finally
+        Free;
       end;
-    finally
-      Free;
-    end;
+  end;
+
+  Result := True;
+end;
+
+function TIgnCom.GetResultsLimitDefaultValue;
+begin
+  Result := 5;
 end;
 
 end.

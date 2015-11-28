@@ -48,7 +48,6 @@ begin
     cNintendoDS:
       begin
         Result := (ASystem = 'DS') or (ASystem = 'DSiWare') or (Pos('3DS', ASystem) > 0);
-
       end;
     cWii:
       begin

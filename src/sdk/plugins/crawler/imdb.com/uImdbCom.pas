@@ -168,12 +168,28 @@ function TImdbCom.InternalExecute;
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := 'itemprop="description">(.*?)<\/';
+          Expression := 'Storyline<\/h2>.*?itemprop="description">(.*?)<\/p>';
 
           if Exec(InputString) then
           begin
             repeat
-              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
+              s := Match[1];
+
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := '<em.*?<\/em>';
+
+                  s := Replace(InputString, '', False);
+                finally
+                  Free;
+                end;
+              end;
+
+              // <a href="/updates?update=tt5111572%3Aoutlines.add.1&ref_=tt_ov_cn_pl">Add a Plot</a>
+              if (Pos('outlines.add', s) = 0) then
+                AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(s)));
             until not ExecNext;
           end;
         finally

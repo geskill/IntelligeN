@@ -18,69 +18,104 @@ uses
 
 type
   T1advdCh = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'http://www.1advd.ch/';
+
+    function GetBaseSearchType(const ATypeID: TTypeID): string;
+    function GetGameSearchType(const ATypeID: TTypeID): string;
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
 
+function T1advdCh.GetBaseSearchType(const ATypeID: TTypeID): string;
+begin
+  if (ATypeID in cGames) or (ATypeID = cSoftware) then
+    Result := 'G'
+  else
+  begin
+    case ATypeID of
+      cAudio:
+        Result := 'CD';
+      cEBook:
+        Result := 'B';
+      cMovie:
+        Result := '';
+      cXXX:
+        Result := 'A';
+      cOther:
+        Result := 'TOP';
+    end;
+  end;
+end;
+
+function T1advdCh.GetGameSearchType(const ATypeID: TTypeID): string;
+begin
+  case ATypeID of
+    cNintendoDS:
+      Result := '34';
+    cPCGames:
+      Result := '14';
+    cPlayStation3:
+      Result := '38';
+    cPlayStation4:
+      Result := '214';
+    cPlayStationVita:
+      Result := '48';
+    cWii:
+      Result := '37';
+    cWiiU:
+      Result := '212';
+    cXbox360:
+      Result := '36';
+    cXboxOne:
+      Result := '215';
+  end;
+end;
+
 function T1advdCh.GetName;
 begin
-  result := '1advd.ch';
+  Result := '1advd.ch';
 end;
 
-function T1advdCh.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function T1advdCh.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)];
-  result := LongWord(_TemplateTypeIDs);
+  Result := [low(TTypeID) .. high(TTypeID)];
 end;
 
-function T1advdCh.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
+function T1advdCh.InternalGetAvailableControlIDs;
 begin
-  _ComponentIDs := [cPicture, cGenre, cDescription];
-
-  result := LongWord(_ComponentIDs);
+  Result := [cPicture, cGenre, cDescription];
 end;
 
-function T1advdCh.GetControlIDDefaultValue;
+function T1advdCh.InternalGetControlIDDefaultValue;
 begin
-  result := True;
+  Result := True;
 end;
 
-function T1advdCh.GetResultsLimitDefaultValue;
+function T1advdCh.InternalGetDependentControlIDs;
 begin
-  result := 5;
+  Result := [cTitle];
 end;
 
-function T1advdCh.Exec;
-const
-  website = 'http://www.1advd.ch/';
-var
-  _ComponentIDs: TControlIDs;
-  _Title, _search_alias: string;
-  _Count: Integer;
-
-  function GetFilmID(ALink: string): string;
-  begin
-    result := copy(ALink, Pos('=', ALink) + 1);
-  end;
+function T1advdCh.InternalExecute;
 
   function SpecialL(AText: string): string;
   var
     Offset: Integer;
   begin
-    result := AText;
+    Result := AText;
 
     Offset := Pos('I', AText);
     while not(Offset = 0) do
@@ -91,7 +126,7 @@ var
       Offset := PosEx('I', AText, Offset + 1);
     end;
 
-    result := AText;
+    Result := AText;
     {
       with TRegExpr.Create do
       try
@@ -102,14 +137,14 @@ var
       }
   end;
 
-  procedure deep_search(aWebsitecode: string);
+  procedure deep_search(AWebsiteSourceCode: string);
   var
     s: string;
   begin
-    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '<img src="(.*?)"';
 
           if Exec(InputString) then
@@ -132,10 +167,11 @@ var
         finally
           Free;
         end;
-    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+
+    if ACanUse(cGenre) then
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := 'asp\?g=[0-9]+">(.*?)<\/a>';
 
           if Exec(InputString) then
@@ -147,17 +183,17 @@ var
         finally
           Free;
         end;
-    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+
+    if ACanUse(cDescription) then
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '[;|1]"><font face="Arial, Helvetica, sans-serif" size="2">(.*?)<\/font>';
 
           if Exec(InputString) then
           begin
             repeat
-
-              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(SpecialL(Match[1]))));
+              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(HTMLDecode(SpecialL(Match[1])))));
             until not ExecNext;
           end;
         finally
@@ -166,91 +202,67 @@ var
   end;
 
 var
-  HTTPRequest: IHTTPRequest;
+  LTitle: string;
+  LCount: Integer;
 
-  RequestID1, RequestID2: Double;
+  LSearchString: string;
 
-  ResponseStrSearchResult: string;
+  LHTTPRequest: IHTTPRequest;
+  LHTTPParams: IHTTPParams;
+  LRequestID1, LRequestID2: Double;
+
+  LResponeStr: string;
 begin
-  LongWord(_ComponentIDs) := AControlIDs;
-  _Title := AControlController.FindControl(cTitle).Value;
-  _Count := 0;
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
 
-  case TTypeID(ATypeID) of
-    cAudio:
-      _search_alias := 'CD';
-    cMovie:
-      _search_alias := '';
-    cGameCube, cNintendoDS, cPCGames, cPlayStation2, cPlayStation3, cPlayStationPortable, cSoftware, cWii, cXbox, cXbox360:
-      _search_alias := 'G';
-    cXXX:
-      _search_alias := 'A';
-    cOther:
-      _search_alias := 'B';
-  end;
+  // http://www.1advd.ch/Suchen.asp?sb=Fantastic+Four
+  // http://www.1advd.ch/SuchenG.asp?sb=Office&redef=17
 
-  HTTPRequest := THTTPRequest.Create(website + '/suchen' + _search_alias + '.asp?sb=' + HTTPEncode(_Title) + '&srt=2&hwAc=1');
-  HTTPRequest.Referer := website;
+  LSearchString := 'Suchen' + GetBaseSearchType(ATypeID) + '.asp?sb=' + HTTPEncode(LTitle);
 
-  RequestID1 := HTTPManager.Get(HTTPRequest, TPlugInHTTPOptions.Create(Self));
+  if (ATypeID in cGames) then
+    LSearchString := LSearchString + '&redef=' + GetGameSearchType(ATypeID)
+  else if (ATypeID = cSoftware) then
+    LSearchString := LSearchString + '&redef=17';
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID1);
+  LResponeStr := GETRequest(WEBSITE + LSearchString + '&hwAc=1', LRequestID1);
 
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID1).HTTPResult.SourceCode;
-
-  if not(Pos('<title>Suchergebnis</title>', ResponseStrSearchResult) = 0) then
+  if not(Pos('<title>Suchergebnis</title>', LResponeStr) = 0) then
   begin
     with TRegExpr.Create do
       try
-        InputString := ResponseStrSearchResult;
+        InputString := LResponeStr;
         if TTypeID(ATypeID) = cMovie then
-          Expression := '<td width=80% colspan="2"><font face="Arial, Helvetica, sans-serif" size="2"><b><a href="(.*?)"'
+          Expression := '<td width=80% colspan="2"><font face="Arial, Helvetica, sans-serif" size="2"><b><a href="\/(.*?)"'
         else
-          Expression := '<td rowspan=2 align="center" width=40><a href="(.*?)"';
-        // InputString := Get(website + 'suchenKPL.asp?sb=' + HTTPEncode(_Title) + '&aps=50');
-        // Expression := 'align=center valign=top><a href="(.*?)"';
+          Expression := '<td rowspan=2 align="center" width=40><a href="\/(.*?)"';
 
         if Exec(InputString) then
         begin
           repeat
-            RequestID2 := HTTPManager.Get(website + Match[1], RequestID1, TPlugInHTTPOptions.Create(Self));
+            LResponeStr := GETFollowUpRequest(WEBSITE + Match[1], LRequestID1, LRequestID2);
 
-            repeat
-              sleep(50);
-            until HTTPManager.HasResult(RequestID2);
+            deep_search(LResponeStr);
 
-            deep_search(HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode);
-
-            {
-              s1 := Match[1];
-              s2 := copy(s1, 1, Pos('.', s1) - 1);
-              case IndexText(s2, ['/DefaultCD', '/DefaultG', '/DefaultB']) of
-              0:
-              s2 := 'detailsCD/film';
-              1:
-              s2 := 'detailsG/film';
-              2:
-              s2 := 'detailsB/film';
-              else
-              s2 := 'details/film';
-              end;
-
-              s1 := '/' + s2 + GetFilmID(s1) + '.asp';
-
-              deep_search(Get(website + s1));
-              }
-            Inc(_Count);
-          until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
         end;
       finally
         Free;
       end;
   end
-  else
-    deep_search(ResponseStrSearchResult);
+  else if not(Pos('korb.asp?', LResponeStr) = 0) then
+  begin
+    deep_search(LResponeStr);
+  end;
 
+  Result := True;
+end;
+
+function T1advdCh.GetResultsLimitDefaultValue;
+begin
+  Result := 5;
 end;
 
 end.
