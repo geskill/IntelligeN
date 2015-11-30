@@ -1,8 +1,12 @@
 #IntelligeN
 A flexible content publishing application for nearly every content management system. [(read more ...)](https://github.com/geskill/IntelligeN/wiki)
 
-##for users
-coming soon ...
+##for end-users
+Due to the amount of functionality the usage might be complex at first sight. The [Getting Started](https://github.com/geskill/IntelligeN/wiki/Getting-Started) page is the first step to get in touch with the fundamental concepts of IntelligeN.
+
+* [Getting Started](https://github.com/geskill/IntelligeN/wiki/Getting-Started)
+* Usage basics
+* to continue ...
 
 ##for developers
 IntelligeN is build using Embarcadero® Delphi® 2010 Professional. The source code is split up in three parts: The CORE, SDK and VIEW folders. The CORE folder contains constants, interfaces and functions used by the SDK and VIEW part. The SDK folder contains files required by the VIEW, the plugins and the toolchain. Finally, the VIEW folder contains the graphical user interface of IntelligeN 2009.
