@@ -43,11 +43,11 @@ procedure TReleasename.RemoveSceneNames(var AName: string);
   end;
 
 const
-  SzeneNames: array [0 .. 112] of string = ('2CD', '3CD', '3DS', '480p', '720p', '1080p', 'AC3', 'AC3D', 'AC3LD', 'BDRIP', 'BLURAY', 'BRRIP', 'CAM', 'CENSORED', 'CLONEDVD', 'COMPLETE', 'CRACKED', 'DC', 'DISC', 'DISC1', 'DISC2', 'DL', 'DTS', 'DUAL',
+  SzeneNames: array [0 .. 113] of string = ('2CD', '3CD', '3DS', '480p', '720p', '1080p', 'AC3', 'AC3D', 'AC3LD', 'BDRIP', 'BLURAY', 'BRRIP', 'CAM', 'CENSORED', 'CLONEDVD', 'COMPLETE', 'CRACKED', 'DC', 'DISC', 'DISC1', 'DISC2', 'DL', 'DTS', 'DUAL',
     'Dubbed', 'DVD', 'DVDR', 'DVDRiP', 'DVDSCR', 'DVDSCREENER', 'EMUDVD', 'ENG', 'EUR', 'EXTENDED', 'FLV', 'FRA', 'FRE', 'GBA', 'GER', 'German', 'H264', 'HDRIP', 'HDTV', 'INTEGRATED', 'INTERNAL', 'JAV', 'JPN', 'JTAG', 'LD', 'LIMITED', 'Line', 'KOR',
     'MAC', 'MACOSX', 'MAG', 'MD', 'MOV', 'MP4', 'MULTI', 'MULTi2', 'MULTi3', 'MULTi4', 'MULTi5', 'MULTi6', 'MULTiLANGUAGE', 'NDS', 'NFO', 'NGC', 'NTSC', 'PAL', 'PPVRIP', 'PROPER', 'PROMO', 'PDVD', 'PS2', 'PS3', 'PS4', 'PSP', 'R3', 'R5', 'READNFO',
-    'REGION', 'REMUX', 'REPACK', 'RF', 'SCR', 'SCREENER', 'SUBBED', 'TELECINE', 'TC', 'TELESYNC', 'TS', 'UNCUT', 'UNTOUCHED', 'UNRATED', 'USA', 'VC1', 'VINYL', 'WEB', 'WEBRIP', 'WII', 'WIIU', 'WINALL', 'WORKPRINT', 'WS', 'x264', 'X360', 'XBLA',
-    'XBOX', 'XBOX360', 'XBOXONE', 'XViD', 'XXX');
+    'REGION', 'REMUX', 'REPACK', 'RERIP', 'RF', 'SCR', 'SCREENER', 'SUBBED', 'TELECINE', 'TC', 'TELESYNC', 'TS', 'UNCUT', 'UNTOUCHED', 'UNRATED', 'USA', 'VC1', 'VINYL', 'WEB', 'WEBRIP', 'WII', 'WIIU', 'WINALL', 'WORKPRINT', 'WS', 'x264', 'X360',
+    'XBLA', 'XBOX', 'XBOX360', 'XBOXONE', 'XViD', 'XXX');
 var
   LIndex, LastMatch, LastMatchEnd, NameLength: Integer;
 begin
@@ -124,7 +124,7 @@ begin
           Insert(' ', LTitle, Pos('-', LTitle) + 1);
       end;
 
-      // Für SAMPLER
+      // FÃ¼r SAMPLER
       if (copy(LTitle, 1, 5) = 'VA - ') then
         Delete(LTitle, 1, 5)
       else if (copy(LTitle, 1, 4) = 'VA--') then
@@ -135,12 +135,12 @@ begin
 
     // TODO: Only for german stuff useful. Detect german language or ignore?
 
-    LTitle := StringReplace(LTitle, 'ae', 'ä', [rfReplaceAll]);
-    LTitle := StringReplace(LTitle, 'Ae', 'Ä', [rfReplaceAll]);
-    LTitle := StringReplace(LTitle, 'oe', 'ö', [rfReplaceAll]);
-    LTitle := StringReplace(LTitle, 'Oe', 'Ö', [rfReplaceAll]);
-    LTitle := StringReplace(LTitle, 'ue', 'ü', [rfReplaceAll]);
-    LTitle := StringReplace(LTitle, 'Ue', 'Ü', [rfReplaceAll]);
+    LTitle := StringReplace(LTitle, 'ae', 'Ã¤', [rfReplaceAll]);
+    LTitle := StringReplace(LTitle, 'Ae', 'Ã„', [rfReplaceAll]);
+    LTitle := StringReplace(LTitle, 'oe', 'Ã¶', [rfReplaceAll]);
+    LTitle := StringReplace(LTitle, 'Oe', 'Ã–', [rfReplaceAll]);
+    LTitle := StringReplace(LTitle, 'ue', 'Ã¼', [rfReplaceAll]);
+    LTitle := StringReplace(LTitle, 'Ue', 'Ãœ', [rfReplaceAll]);
 
     RemoveSceneNames(LTitle);
 
