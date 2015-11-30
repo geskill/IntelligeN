@@ -10,6 +10,8 @@ Checked items are planned for next release.
 
 - [ ] Allow to change HTTPManager implementor for a single request (settings record)
 
+- [x] Implement non-visual "default" control that holds title of current tab (i.e. delegation for releasename or whatever)
+
 - [x] Optimize HTTPManager log amount (i.e. ALL, SOME)
 
 - [x] Add custom fields in ITabSheetData that hold compiled IScript (required for WordPress custom files powered by IScript)
@@ -61,6 +63,8 @@ Checked items are planned for next release.
 - [ ] Improve WebsiteEditor control arrangement in general tab
 
 - [ ] Add progress bar or indication for crawling overall progress
+
+- [x] Add indication in the GUI if file hoster check, crypter crypt/check was successful or not (i.e. icon in the tab)
 
 - [x] Add indication in the GUI if image hoster upload was successful or not (i.e. green/red shape at the icon)
 
