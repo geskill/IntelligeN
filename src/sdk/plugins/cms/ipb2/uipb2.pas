@@ -129,7 +129,7 @@ begin
 
         if Exec(InputString) then
         begin
-          Self.ErrorMsg := HTML2Text(Match[2]);
+          Self.ErrorMsg := Trim(ReduceWhitespace(HTML2Text(Match[2])));
         end;
       finally
         Free;
@@ -155,7 +155,7 @@ begin
         Expression := '<div class="errorwrap"(>| style=''margin-bottom:0px;padding-bottom:0px''>)(.*?)<\/div>';
 
         if Exec(InputString) then
-          Self.ErrorMsg := HTML2Text(Match[2]);
+          Self.ErrorMsg := Trim(ReduceWhitespace(HTML2Text(Match[2])));
       finally
         Free;
       end;
@@ -239,18 +239,35 @@ begin
   /// used Response.RawHeaders.Text
   Headers := AHTTPProcess.HTTPResult.HTTPResponse.CustomHeaders.Text;
 
-  Result := not(Pos('<div id="redirectwrap">', AResponseStr) = 0) and (Pos('topicsread=', Headers) = 0) and (Pos('showtopic=', Headers) = 0);
+  Result := (not(Pos('<div id="redirectwrap">', AResponseStr) = 0) and (Pos('topicsread=', Headers) = 0) and (Pos('showtopic=', Headers) = 0)) or
+  { . } (AHTTPProcess.HTTPResult.HTTPResponse.Cookies.IndexOf('topicsread') >= 0) or not(Pos('"topicsread"', AResponseStr) = 0);
+
   if not Result then
+  begin
     with TRegExpr.Create do
       try
         InputString := AResponseStr;
         Expression := '<div class="(tablepad|errorwrap)">(.*?)<\/div>';
 
         if Exec(InputString) then
-          Self.ErrorMsg := HTML2Text(Match[2]);
+          Self.ErrorMsg := Trim(ReduceWhitespace(HTML2Text(Match[2])));
       finally
         Free;
       end;
+  end
+  else
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := AResponseStr;
+        Expression := ';t=(\d+)';
+
+        if Exec(InputString) then
+          ArticleID := StrToIntDef(Match[1], 0);
+      finally
+        Free;
+      end;
+  end;
 end;
 
 function Tipb2.GetIDsRequestURL;
@@ -331,7 +348,11 @@ end;
 
 function Tipb2.BelongsTo;
 begin
-  Result := (Pos('act=Login&amp;CODE=00', string(AWebsiteSourceCode)) > 0) or (Pos('act=Reg&amp;CODE=00', string(AWebsiteSourceCode)) > 0);
+  Result := (Pos('act=Login&amp;CODE=00', string(AWebsiteSourceCode)) > 0) or
+  { . } (Pos('act=Reg&amp;CODE=00', string(AWebsiteSourceCode)) > 0) or
+  // for not escaped &amp; bug
+  { . } (Pos('act=Login&CODE=00', string(AWebsiteSourceCode)) > 0) or
+  { . } (Pos('act=Reg&CODE=00', string(AWebsiteSourceCode)) > 0);
 end;
 
 end.
