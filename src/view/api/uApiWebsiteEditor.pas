@@ -1757,34 +1757,46 @@ end;
 
 procedure TBasisWebsiteEditor.FcxGridFilterControlsTableViewColumn3PropertiesInitPopup(Sender: TObject);
 var
+  LValue: Variant;
   LTypeID: TTypeID;
   LControlID: TControlID;
-  StringList: TStringList;
+  LStringList: TStringList;
 begin
   with FcxGridFilterControlsTableView.DataController do
-    LControlID := StringToControlID(Values[GetFocusedRecordIndex, FcxGridFilterControlsTableViewColumn1.index]);
+    LValue := Values[GetFocusedRecordIndex, FcxGridFilterControlsTableViewColumn1.index];
 
-  with TStringList.Create do
-    try
-      Sorted := True;
-      Duplicates := dupIgnore;
+  if VarIsStr(LValue) then
+  begin
+    LControlID := StringToControlID(LValue);
 
-      for LTypeID := Low(TTypeID) to High(TTypeID) do
-      begin
-        StringList := TStringList.Create;
-        try
-          StringList.Text := FAppController.GetControlValues(LTypeID, LControlID);
-          AddStrings(StringList);
-        finally
-          StringList.Free;
+    with TStringList.Create do
+      try
+        Sorted := True;
+        Duplicates := dupIgnore;
+
+        for LTypeID := Low(TTypeID) to High(TTypeID) do
+        begin
+          LStringList := TStringList.Create;
+          try
+            LStringList.Text := FAppController.GetControlValues(LTypeID, LControlID);
+            AddStrings(LStringList);
+          finally
+            LStringList.Free;
+          end;
         end;
-      end;
 
-      TcxComboBoxProperties(FcxGridFilterControlsTableViewColumn3.Properties).Items.Text := Text;
-      TcxComboBox(Sender).Properties.Items.Text := Text;
-    finally
-      Free;
-    end;
+        with FcxGridFilterControlsTableView.DataController do
+          if not NewItemRowFocused then
+          begin
+            TcxComboBox(Sender).Properties.Items.Text := Text;
+            TcxComboBoxProperties(FcxGridFilterControlsTableViewColumn3.Properties).Items.Text := Text;
+          end
+          else
+            TcxComboBox(Sender).Properties.Items.Text := Text;
+      finally
+        Free;
+      end;
+  end;
 end;
 
 procedure TBasisWebsiteEditor.FcxGridFilterControlsTableViewColumn4GetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption;
@@ -2062,8 +2074,12 @@ begin
       Caption := 'Control name';
       PropertiesClass := TcxComboBoxProperties;
       with Properties as TcxComboBoxProperties do
+      begin
+        DropDownListStyle := lsFixedList;
+
         for LControlID := Low(TControlID) to High(TControlID) do
           Items.Add(ControlIDToString(LControlID));
+      end;
     end;
 
     FcxGridFilterControlsTableViewColumn2 := FcxGridFilterControlsTableView.CreateColumn;

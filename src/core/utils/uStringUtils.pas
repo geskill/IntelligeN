@@ -26,7 +26,7 @@ function RemoveTextBetween(const Str: string; const Delim1, Delim2: string): str
 
 function ReduceCapitals(const Str: string): string;
 
-function ReduceWhitespace(const Str: string; A: Boolean = False): string;
+function ReduceWhitespace(const Str: string; AComplete: Boolean = False): string;
 
 function RemoveW(AHost: string): string;
 
@@ -356,11 +356,11 @@ begin
     end;
 end;
 
-function ReduceWhitespace(const Str: string; A: Boolean = False): string;
+function ReduceWhitespace(const Str: string; AComplete: Boolean = False): string;
 begin
   with TRegExpr.Create do
     try
-      case A of
+      case AComplete of
         True:
           Result := ReplaceRegExpr('\s+', Str, '', False);
       else

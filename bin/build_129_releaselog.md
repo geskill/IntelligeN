@@ -453,6 +453,8 @@
 
 * Improved OleInitialize/CoInitializeEx usage
 
+* Improved ipb2 cms plug-in
+
 * Improved phpbb3 login error message
 
 * Improved phpbb3 forum id recognition if first forum is already sub-forum or portal mod is used
@@ -460,6 +462,8 @@
 * Improved xRel.to error detection
 
 * Fixed threaded draw process for images in Control Editor
+
+* Fixed filter selection bug in WebsiteEditor
 
 * Fixed bug not aborting using intelligent_posting_helper after first redo-search
 
