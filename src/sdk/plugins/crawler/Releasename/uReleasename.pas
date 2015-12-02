@@ -1,4 +1,4 @@
-unit uReleasename;
+﻿unit uReleasename;
 
 interface
 
@@ -43,11 +43,11 @@ procedure TReleasename.RemoveSceneNames(var AName: string);
   end;
 
 const
-  SzeneNames: array [0 .. 113] of string = ('2CD', '3CD', '3DS', '480p', '720p', '1080p', 'AC3', 'AC3D', 'AC3LD', 'BDRIP', 'BLURAY', 'BRRIP', 'CAM', 'CENSORED', 'CLONEDVD', 'COMPLETE', 'CRACKED', 'DC', 'DISC', 'DISC1', 'DISC2', 'DL', 'DTS', 'DUAL',
-    'Dubbed', 'DVD', 'DVDR', 'DVDRiP', 'DVDSCR', 'DVDSCREENER', 'EMUDVD', 'ENG', 'EUR', 'EXTENDED', 'FLV', 'FRA', 'FRE', 'GBA', 'GER', 'German', 'H264', 'HDRIP', 'HDTV', 'INTEGRATED', 'INTERNAL', 'JAV', 'JPN', 'JTAG', 'LD', 'LIMITED', 'Line', 'KOR',
-    'MAC', 'MACOSX', 'MAG', 'MD', 'MOV', 'MP4', 'MULTI', 'MULTi2', 'MULTi3', 'MULTi4', 'MULTi5', 'MULTi6', 'MULTiLANGUAGE', 'NDS', 'NFO', 'NGC', 'NTSC', 'PAL', 'PPVRIP', 'PROPER', 'PROMO', 'PDVD', 'PS2', 'PS3', 'PS4', 'PSP', 'R3', 'R5', 'READNFO',
-    'REGION', 'REMUX', 'REPACK', 'RERIP', 'RF', 'SCR', 'SCREENER', 'SUBBED', 'TELECINE', 'TC', 'TELESYNC', 'TS', 'UNCUT', 'UNTOUCHED', 'UNRATED', 'USA', 'VC1', 'VINYL', 'WEB', 'WEBRIP', 'WII', 'WIIU', 'WINALL', 'WORKPRINT', 'WS', 'x264', 'X360',
-    'XBLA', 'XBOX', 'XBOX360', 'XBOXONE', 'XViD', 'XXX');
+  SzeneNames: array [0 .. 121] of string = ('2CD', '3CD', '3DS', '480p', '720p', '1080p', 'AC3', 'AC3D', 'AC3LD', 'BDRIP', 'BLURAY', 'BRRIP', 'CAM', 'CENSORED', 'CLONEDVD', 'COMPLETE', 'CRACKED', 'DC', 'DISC', 'DISC1', 'DISC2', 'DL', 'DOCU', 'DOKU',
+    'DTS', 'DUAL', 'Dubbed', 'DVD', 'DVDR', 'DVDRiP', 'DVDSCR', 'DVDSCREENER', 'EMUDVD', 'ENG', 'EUR', 'EXTENDED', 'FESTiVAL', 'FLV', 'FRA', 'FRE', 'GBA', 'GER', 'German', 'H264', 'HDRIP', 'HDTV', 'INTEGRATED', 'INTERNAL', 'iSORiP', 'JAV', 'JPN',
+    'JTAG', 'LD', 'LIMITED', 'Line', 'KOR', 'MAC', 'MACOSX', 'MAG', 'MD', 'MOV', 'MP4', 'MULTI', 'MULTi2', 'MULTi3', 'MULTi4', 'MULTi5', 'MULTi6', 'MULTiLANGUAGE', 'NDS', 'NES', 'NFO', 'NGC', 'NTSC', 'PAL', 'PDTV', 'PPVRIP', 'PROPER', 'PROMO',
+    'PDVD', 'PS2', 'PS3', 'PS4', 'PSP', 'PSV', 'R3', 'R5', 'READNFO', 'REGION', 'REMASTERED', 'REMUX', 'REPACK', 'RERIP', 'RF', 'SCR', 'SCREENER', 'SUBBED', 'TELECINE', 'TC', 'TELESYNC', 'TS', 'UNCUT', 'UNTOUCHED', 'UNRATED', 'USA', 'VC1', 'VINYL',
+    'WEB', 'WEBRIP', 'WII', 'WIIU', 'WINALL', 'WORKPRINT', 'WS', 'x264', 'X360', 'XBLA', 'XBOX', 'XBOX360', 'XBOXONE', 'XViD', 'XXX');
 var
   LIndex, LastMatch, LastMatchEnd, NameLength: Integer;
 begin
