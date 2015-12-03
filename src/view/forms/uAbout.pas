@@ -17,8 +17,10 @@ type
     lVersion: TLabel;
     lVersionValue: TLabel;
     lCopyright: TLabel;
+    bDonate: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure bDonateClick(Sender: TObject);
   private
     { Private-Deklarationen }
   public
@@ -48,6 +50,11 @@ procedure TAbout.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   if Key = #27 then
     Close;
+end;
+
+procedure TAbout.bDonateClick(Sender: TObject);
+begin
+  ShellExecute(Handle, 'open', 'https://www.paypal.me/IntelligeN', nil, nil, SW_SHOW);
 end;
 
 end.
