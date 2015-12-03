@@ -22,7 +22,7 @@
 		<Import Project="..\..\plugin.optset" Condition="'$(Base)'!='' And Exists('..\..\plugin.optset')"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<UsePackages>true</UsePackages>
-			<DCC_UsePackage>framework</DCC_UsePackage>
+			<DCC_UsePackage>framework;frameworkX</DCC_UsePackage>
 			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\cdlexikonde.dll</DCC_DependencyCheckOutputName>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<GenDll>true</GenDll>

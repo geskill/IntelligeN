@@ -1,4 +1,4 @@
-package frameworkX;
+package frameworkUI;
 {$R *.res}
 {$ALIGN 8}
 {$ASSERTIONS ON}

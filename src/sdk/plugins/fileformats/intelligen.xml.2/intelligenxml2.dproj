@@ -24,7 +24,7 @@
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<DCC_UnitSearchPath>../../../api;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<UsePackages>true</UsePackages>
-			<DCC_UsePackage>framework;frameworkX</DCC_UsePackage>
+			<DCC_UsePackage>framework;frameworkX;frameworkUI</DCC_UsePackage>
 			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\intelligenxml2.dll</DCC_DependencyCheckOutputName>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<GenDll>true</GenDll>

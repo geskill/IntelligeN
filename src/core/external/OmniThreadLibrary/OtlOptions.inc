@@ -71,25 +71,27 @@
   {$DEFINE OTL_HasInterlockedCompareExchangePointer}
 {$IFEND}
 
-{$IF CompilerVersion <= 21} //D2010
-  {$DEFINE OTL_LimitedGenerics}
-{$IFEND}
-
 {$IF CompilerVersion >= 21} //D2010
   {$DEFINE OTL_ERTTI}
   {$DEFINE OTL_DeprecatedResume}
   {$DEFINE OTL_KnowsParamCount}
   {$DEFINE OTL_HasTkPointer}
   {$DEFINE OTL_HasArrayOfT}
+  {$DEFINE OTL_HasNameThreadForDebugging}
 {$IFEND}
 
 {$IF CompilerVersion >= 22} //DXE
   {$DEFINE OTL_TOmniValueImplicitDateTime}
+  {$DEFINE OTL_HasThreadID}
+  {$DEFINE OTL_HasTInterlocked}
+  {$DEFINE OTL_GoodGenerics}
+  {$DEFINE OTL_HasTThreadYield}
 {$IFEND}
 
 {$IF CompilerVersion >= 23} //DXE2
   {$DEFINE OTL_Supports64Bit}
   {$DEFINE OTL_HasSystemTypes}
+  {$DEFINE OTL_HasCorrectNativeInt}
 {$IFEND}
 
 {$IF CompilerVersion >= 24} //DXE3
@@ -99,4 +101,14 @@
 {$IF CompilerVersion >= 26} //DXE5
   {$DEFINE OTL_StrPasInAnsiStrings}
 {$IFEND}
+
+{$IF CompilerVersion >= 29} //DXE8
+  {$DEFINE OTL_MobileSupport}
+{$IFEND}
+
+{$IFNDEF MSWINDOWS}
+{$IFNDEF OTL_MobileSupport}
+{$MESSAGE ERROR 'Only Windows compilation is supported on this Delphi version (at least XE8 is required for non-Windows platforms.'}
+{$ENDIF ~OTL_MobileSupport}
+{$ENDIF ~MSWINDOWS}
 

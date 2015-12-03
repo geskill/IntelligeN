@@ -6,7 +6,7 @@ uses
   // Delphi
   Classes, ActiveX, AxCtrls,
   // HTTPManager
-  uHTTPInterface, uHTTPClasses, uHTTPManager;
+  uHTTPInterface, uHTTPClasses, uHTTPManager, uHTTPIndyImplementor;
 
 type
   TApiHTTP = class

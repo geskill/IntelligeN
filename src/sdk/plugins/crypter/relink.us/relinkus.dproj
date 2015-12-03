@@ -23,7 +23,7 @@
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\relinkus.dll</DCC_DependencyCheckOutputName>
 			<UsePackages>true</UsePackages>
-			<DCC_UsePackage>framework</DCC_UsePackage>
+			<DCC_UsePackage>framework;frameworkX</DCC_UsePackage>
 			<DCC_UnitSearchPath>../;../../;../../../3rdparty\HTTPManager;../../../3rdparty\MultiEvent;../../../3rdparty\TRegExpr\Source;../../../common;../../../utils;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<GenDll>true</GenDll>

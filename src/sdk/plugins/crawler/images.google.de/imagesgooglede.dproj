@@ -25,7 +25,7 @@
 		<Import Project="..\..\plugin.optset" Condition="'$(Base)'!='' And Exists('..\..\plugin.optset')"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<UsePackages>true</UsePackages>
-			<DCC_UsePackage>framework</DCC_UsePackage>
+			<DCC_UsePackage>framework;frameworkX</DCC_UsePackage>
 			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\imagesgooglede.dll</DCC_DependencyCheckOutputName>
 			<GenDll>true</GenDll>
 			<CfgDependentOn>..\..\plugin.optset</CfgDependentOn>

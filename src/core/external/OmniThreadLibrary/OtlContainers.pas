@@ -4,7 +4,7 @@
 ///<license>
 ///This software is distributed under the BSD license.
 ///
-///Copyright (c) 2012 Primoz Gabrijelcic
+///Copyright (c) 2015 Primoz Gabrijelcic
 ///All rights reserved.
 ///
 ///Redistribution and use in source and binary forms, with or without modification,
@@ -29,12 +29,19 @@
 ///SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///</license>
 ///<remarks><para>
-///   Author            : GJ, Primoz Gabrijelcic
+///   Home              : http://www.omnithreadlibrary.com
+///   Support           : https://plus.google.com/communities/112307748950248514961
+///   Author            : Primoz Gabrijelcic
+///     E-Mail          : primoz@gabrijelcic.org
+///     Blog            : http://thedelphigeek.com
+///   Contributors      : GJ, Sean B. Durkin
 ///   Creation date     : 2008-07-13
-///   Last modification : 2012-12-05
-///   Version           : 3.01a
+///   Last modification : 2015-10-03
+///   Version           : 3.02
 ///</para><para>
 ///   History:
+///     3.02: 2015-10-03
+///       - Imported mobile support by [Sean].
 ///     3.01a: 2012-12-05
 ///       - Prevent memory leak if (Queue|Stack).Initialize is called more than once
 ///         (thx to [h.hasenack]).
@@ -88,6 +95,7 @@
 unit OtlContainers;
 
 {$I OtlOptions.inc}
+
 {$OPTIMIZATION ON}
 {$WARN SYMBOL_PLATFORM OFF}
 {$IFNDEF CPUX64}
@@ -95,14 +103,25 @@ unit OtlContainers;
 {$ENDIF ~CPUX64}
 //DEFINE DEBUG_OMNI_QUEUE to enable assertions in TOmniBaseQueue
 
+//We don't have a platform-independant way of using cmpx8b/cmpx16b
+//(5-parameter OtlSync.CAS) so we can't use bus-locking on non-Windows targets.
+{$IFDEF MSWINDOWS}
+  {$DEFINE OTL_HaveCmpx16b}
+{$ELSE}
+  {$UNDEF OTL_HaveCmpx16b}
+{$ENDIF ~MSWINDOWS}
+
 interface
 
 uses
   Classes,
-  DSiWin32,
-  GpStuff,
   OtlCommon,
   OtlSync,
+  SyncObjs,
+{$IFDEF MSWINDOWS}
+  DSiWin32,
+  GpStuff,
+{$ENDIF}
   OtlContainerObserver;
 
 const
@@ -110,10 +129,6 @@ const
   CAlmostFullLoadFactor  = 0.9; // When an element count raises above 90%, the container is considered 'almost full'.
 
 type
-{$IF CompilerVersion < 23} //pre-XE2
-  NativeInt = integer;
-{$IFEND}
-
   {:Lock-free, multiple writer, multiple reader, bounded stack.
   }
   IOmniStack = interface ['{F4C57327-18A0-44D6-B95D-2D51A0EF32B4}']
@@ -136,10 +151,24 @@ type
     function  IsFull: boolean;
   end; { IOmniQueue }
 
+  {$IFDEF OTL_MobileSupport}
+  IOmniValueQueue = interface ['{3399B817-0502-4837-B1D7-BA167E8E03A7}']
+    function  GetContainerSubject: TOmniContainerSubject;
+    function  IsEmpty: boolean;
+    function  Dequeue: TOmniValue;
+    procedure Enqueue(const value: TOmniValue);
+    function  TryDequeue(var value: TOmniValue): boolean;
+    property  ContainerSubject: TOmniContainerSubject read GetContainerSubject;
+  end; { IOmniValueQueue }
+  {$ENDIF OTL_MobileSupport}
+
   PReferencedPtr = ^TReferencedPtr;
   TReferencedPtr = record
+    {$IFDEF OTL_MobileSupport}[Volatile]{$ENDIF}
     PData    : pointer;
+    {$IFDEF OTL_HaveCmpx16b} // references are only used in bus-locked implementation
     Reference: NativeInt;
+    {$ENDIF}
   end; { TReferencedPtr }
 
   TReferencedPtrBuffer = array [0..MaxInt shr 5] of TReferencedPtr;
@@ -167,16 +196,22 @@ type
     obsNumElements  : integer;
     obsPublicChainP : PReferencedPtr;
     obsRecycleChainP: PReferencedPtr;
+  {$IFNDEF OTL_HaveCmpx16b}
+    obsLock         : IOmniCriticalSection;
+  {$ENDIF ~OTL_HaveCmpx16b}
   class var
     class var obsIsInitialized: boolean;                //default is false
     class var obsTaskPopLoops : NativeInt;
     class var obsTaskPushLoops: NativeInt;
   strict protected
+    procedure Acquire; inline;
+    procedure Release; inline;
     procedure MeasureExecutionTimes;
     class function  PopLink(var chain: TReferencedPtr): POmniLinkedData; static;
     class procedure PushLink(const link: POmniLinkedData; var chain: TReferencedPtr); static;
   public
-    destructor Destroy; override;
+    constructor Create;
+    destructor  Destroy; override;
     procedure Empty;
     procedure Initialize(numElements, elementSize: integer); virtual;
     function  IsEmpty: boolean; inline;
@@ -191,7 +226,7 @@ type
   strict private
     osAlmostFullCount : integer;
     osContainerSubject: TOmniContainerSubject;
-    osInStackCount    : TGp4AlignedInt;
+    osInStackCount    : TOmniAlignedInt32;
     osPartlyEmptyCount: integer;
   public
     constructor Create(numElements, elementSize: integer;
@@ -212,17 +247,23 @@ type
     obqPublicRingMem    : pointer;
     obqRecycleRingBuffer: POmniRingBuffer;
     obqRecycleRingMem   : pointer;
+    {$IFNDEF OTL_HaveCmpx16b}
+    obqLock             : IOmniCriticalSection;
+    {$ENDIF ~OTL_HaveCmpx16b}
   class var
     class var obqIsInitialized  : boolean;
     class var obqTaskInsertLoops: NativeInt;             //default is false
     class var obqTaskRemoveLoops: NativeInt;
   strict protected
+    procedure Acquire; inline;
+    procedure Release; inline;
     class procedure InsertLink(const data: pointer; const ringBuffer: POmniRingBuffer);
       static;
     procedure MeasureExecutionTimes;
     class function  RemoveLink(const ringBuffer: POmniRingBuffer): pointer; static;
   public
-    destructor Destroy; override;
+    constructor Create;
+    destructor  Destroy; override;
     function  Dequeue(var value): boolean;
     procedure Empty;
     function  Enqueue(const value): boolean;
@@ -237,7 +278,7 @@ type
   strict private
     oqAlmostFullCount : integer;
     oqContainerSubject: TOmniContainerSubject;
-    oqInQueueCount    : TGp4AlignedInt;
+    oqInQueueCount    : TOmniAlignedInt32;
     oqPartlyEmptyCount: integer;
   public
     constructor Create(numElements, elementSize: integer;
@@ -260,7 +301,7 @@ type
     {$IFDEF CPUX64}
     Stuffing: array[1..4] of byte; // make TOmniTaggedValue 3 pointers big
     {$ENDIF CPUX64}
-    function CASTag(oldTag, newTag: TOmniQueueTag): boolean; inline;
+    function CASTag(oldTag, newTag: TOmniQueueTag): boolean; inline;            // atomic on Windows, composite on other platforms
   end; { TOmniTaggedValue }
   POmniTaggedValue = ^TOmniTaggedValue;
 
@@ -272,9 +313,10 @@ type
     {$ELSE CPUX64}
     Stuffing: array [1..7] of byte; // record size must be congruent to 0 (mod 8)
     {$ENDIF CPUX64}
-    function  CAS(oldSlot: POmniTaggedValue; oldTag: TOmniQueueTag;
-      newSlot: POmniTaggedValue; newTag: TOmniQueueTag): boolean; inline;
-    procedure Move(newSlot: POmniTaggedValue; newTag: TOmniQueueTag); inline;
+    function  CAS(
+      oldSlot: POmniTaggedValue; oldTag: TOmniQueueTag;
+      newSlot: POmniTaggedValue; newTag: TOmniQueueTag): boolean; inline;       // atomic on Windows, composite on other platforms
+    procedure Move(newSlot: POmniTaggedValue; newTag: TOmniQueueTag); inline;   // atomic on Windows, composite on other platforms
   end; { TOmniTaggedPointer }
   POmniTaggedPointer = ^TOmniTaggedPointer;
 
@@ -288,11 +330,15 @@ type
     obcMemStack   : TOmniBaseBoundedStack;
     obcNumSlots   : integer;
     obcTailPointer: POmniTaggedPointer;
+    {$IFNDEF OTL_HaveCmpx16b}
+    obcLock       : IOmniCriticalSection;
+    {$ENDIF ~OTL_HaveCmpx16b}
   strict protected
     {$IFDEF DEBUG_OMNI_QUEUE}
     procedure Assert(condition: boolean);
     {$ENDIF DEBUG_OMNI_QUEUE}
   strict protected
+    procedure Acquire; inline;
     function  AllocateBlock: POmniTaggedValue;
     procedure Cleanup; virtual;
     procedure Initialize; virtual;
@@ -300,6 +346,7 @@ type
     procedure PartitionMemory(memory: POmniTaggedValue);
     procedure PreallocateMemory;
     function  PrevSlot(slot: POmniTaggedValue): POmniTaggedValue; inline;
+    procedure Release; inline;
     procedure ReleaseBlock(firstSlot: POmniTaggedValue; forceFree: boolean = false);
   public
     constructor Create(blockSize: integer = 65536; numCachedBlocks: integer = 4);
@@ -323,12 +370,84 @@ type
     property ContainerSubject: TOmniContainerSubject read ocContainerSubject;
   end; { TOmniQueue }
 
+{$IFDEF OTL_MobileSupport}
+/// <param name="UseBusLocking">Set to true to use a spinlock. Otherwise synchronisation is achieved by a critical section.</param>
+/// <param name="ThresholdForFull">The count of OmniValues to which if the queue reaches or exceeds, it is considered full.
+///   Use a a value of -1 to indicate there is no threshold (and hence events like coiNotifyOnAlmostFull will never fire).</param>
+function CreateOmniValueQueue(UseBusLocking: boolean; ThresholdForFull: integer = -1): IOmniValueQueue;
+{$ENDIF OTL_MobileSupport}
+
 implementation
 
 uses
+  {$IFDEF MSWINDOWS}
   Windows,
+  {$ENDIF MSWINDOWS}
+  {$IFDEF OTL_MobileSupport}
+  Generics.Collections,
+  {$ENDIF OTL_MobileSupport}
   SysUtils;
 
+{$IFDEF OTL_MobileSupport}
+type
+  TInterestSet = set of TOmniContainerObserverInterest;
+
+  TOmniValueQueue = class(TInterfacedObject, IOmniValueQueue)
+  strict private
+    FAlmostFullThreshold : integer;
+    FContainerSubject    : TOmniContainerSubject;
+    FFullThreshold       : integer;
+    FInnerQueue          : TQueue<TOmniValue>;
+    FNotifiableEvents    : TInterestSet;
+    FPartlyEmptyThreshold: integer;
+  strict private
+    procedure CollectionNotifyEvent(Sender: TObject; const Item: TOmniValue; Action: TCollectionNotification);
+    function  Dequeue: TOmniValue;
+    procedure DoWithCritSec( Proc: TProc);
+    procedure Enqueue(const value: TOmniValue);
+    function  GetContainerSubject: TOmniContainerSubject;
+    function  IsEmpty: boolean;
+    procedure PropagateNotifications(Events: TInterestSet);
+    function  TryDequeue(var value: TOmniValue): boolean;
+  protected
+    procedure EnterCriticalSection; virtual; abstract;
+    procedure LeaveCriticalSection; virtual; abstract;
+  public
+    constructor Create(AThresholdForFull: integer);
+    destructor  Destroy; override;
+  end; { TOmniValueQueue }
+
+  TOmniValueQueueCS = class(TOmniValueQueue)
+  strict private
+    FCritSect: TFixedCriticalSection;
+  protected
+    procedure EnterCriticalSection; override;
+    procedure LeaveCriticalSection; override;
+  public
+    constructor Create(AThresholdForFull: integer);
+    destructor  Destroy; override;
+  end; { TOmniValueQueueCS }
+
+  TOmniValueQueueSpin = class(TOmniValueQueue)
+  strict private
+    FLock: TSpinLock;
+  protected
+    procedure EnterCriticalSection; override;
+    procedure LeaveCriticalSection; override;
+  public
+    constructor Create(AThresholdForFull: integer);
+  end; { TOmniValueQueueSpin }
+
+function CreateOmniValueQueue(UseBusLocking: boolean; ThresholdForFull: integer = -1): IOmniValueQueue;
+begin
+  if UseBusLocking then
+    Result := TOmniValueQueueSpin.Create(ThresholdForFull)
+  else
+    Result := TOmniValueQueueCS.Create(ThresholdForFull)
+end; { CreateOmniValueQueue }
+{$ENDIF OTL_MobileSupport}
+
+{$IFDEF MSWINDOWS}
 {$IFDEF CPUX64}
 procedure AsmInt3;
 asm
@@ -342,14 +461,35 @@ asm
   pause;
 end; { AsmPause }
 {$ENDIF CPUX64}
+{$ENDIF MSWINDOWS}
+
+function RoundUpTo(value: pointer; granularity: integer): pointer;
+begin
+  Result := pointer((((NativeInt(value) - 1) div granularity) + 1) * granularity);
+end; { RoundUpTo }
 
 { TOmniBaseBoundedStack }
+
+constructor TOmniBaseBoundedStack.Create;
+begin
+  inherited Create;
+  {$IFNDEF OTL_HaveCmpx16b}
+  obsLock := CreateOmniCriticalSection;
+  {$ENDIF ~OTL_HaveCmpx16b}
+end; { TOmniBaseBoundedStack.Create }
 
 destructor TOmniBaseBoundedStack.Destroy;
 begin
   FreeMem(obsDataBuffer);
   inherited;
 end; { TOmniBaseBoundedStack.Destroy }
+
+procedure TOmniBaseBoundedStack.Acquire;
+begin
+  {$IFNDEF OTL_HaveCmpx16b}
+  obsLock.Acquire;
+  {$ENDIF ~OTL_HaveCmpx16b}
+end; { TOmniBaseBoundedStack.Acquire }
 
 procedure TOmniBaseBoundedStack.Empty;
 var
@@ -382,7 +522,7 @@ begin
   //calculate buffer element size, round up to next aligned value
   bufferElementSize := ((SizeOf(TOmniLinkedData) + roundedElementSize) + SizeOf(pointer) - 1) AND NOT (SizeOf(pointer) - 1);
   //calculate DataBuffer
-  DSiFreeMemAndNil(obsDataBuffer);
+  FreeMem(obsDataBuffer);
   GetMem(obsDataBuffer, bufferElementSize * numElements + 2 * SizeOf(TReferencedPtr) + CASAlignment);
   dataBuffer := RoundUpTo(obsDataBuffer, CASAlignment);
   if NativeInt(dataBuffer) AND (SizeOf(pointer) - 1) <> 0 then
@@ -439,20 +579,24 @@ var
   end; { GetMinAndClear }
 
 var
+  {$IFDEF MSWINDOWS}
   affinity   : string;
+  {$ENDIF MSWINDOWS}
   currElement: POmniLinkedData;
   n          : integer;
 
 begin { TOmniBaseBoundedStack.MeasureExecutionTimes }
   if not obsIsInitialized then begin
+    {$IFDEF MSWINDOWS}
     affinity := DSiGetThreadAffinity;
     DSiSetThreadAffinity(affinity[1]);
     try
+    {$ENDIF MSWINDOWS}
       //Calculate  TaskPopDelay and TaskPushDelay counter values depend on CPU speed!!!}
       obsTaskPopLoops := 1;
       obsTaskPushLoops := 1;
       for n := 1 to NumOfSamples do begin
-        DSiYield;
+        {$IFDEF OTL_HasTThreadYield}TThread.Yield;{$ELSE}DSiYield;{$ENDIF}
         //Measure RemoveLink rutine delay
         TimeTestField[0, n] := GetCPUTimeStamp;
         currElement := PopLink(obsRecycleChainP^);
@@ -467,7 +611,9 @@ begin { TOmniBaseBoundedStack.MeasureExecutionTimes }
       //Calculate first 4 minimum average for InsertLink rutine
       obsTaskPushLoops := GetMinAndClear(1, 4) div 4;
       obsIsInitialized := true;
+    {$IFDEF MSWINDOWS}
     finally DSiSetThreadAffinity(affinity); end;
+    {$ENDIF MSWINDOWS}
   end;
 end;  { TOmniBaseBoundedStack.MeasureExecutionTimes }
 
@@ -475,18 +621,20 @@ function TOmniBaseBoundedStack.Pop(var value): boolean;
 var
   linkedData: POmniLinkedData;
 begin
-  linkedData := PopLink(obsPublicChainP^);
-  Result := assigned(linkedData);
-  if not Result then
-    Exit;
-  Move(linkedData.Data, value, ElementSize);
-  PushLink(linkedData, obsRecycleChainP^);
+  Acquire;
+  try
+    linkedData := PopLink(obsPublicChainP^);
+    Result := assigned(linkedData);
+    if not Result then
+      Exit;
+    Move(linkedData.Data, value, ElementSize);
+    PushLink(linkedData, obsRecycleChainP^);
+  finally Release; end;
 end; { TOmniBaseBoundedStack.Pop }
 
 class function TOmniBaseBoundedStack.PopLink(var chain: TReferencedPtr): POmniLinkedData;
 //nil << Link.Next << Link.Next << ... << Link.Next
-//FILO buffer logic                         ^------ < chainHead
-//Advanced stack PopLink model with idle/busy status bit
+//                                            ^------ < chainHead
 var
   AtStartReference: NativeInt;
   CurrentReference: NativeInt;
@@ -495,6 +643,7 @@ var
 label
   TryAgain;
 begin
+  {$IFDEF OTL_HaveCmpx16b}
   ThreadReference := GetThreadId + 1;                           //Reference.bit0 := 1
   with chain do begin
 TryAgain:
@@ -505,38 +654,44 @@ TryAgain:
       Dec(TaskCounter);
     until (TaskCounter = 0) or (CurrentReference AND 1 = 0);
     if (CurrentReference AND 1 <> 0) and (AtStartReference <> CurrentReference) or
-       not CAS(CurrentReference, ThreadReference, Reference)
+       not TInterlockedEx.CAS(CurrentReference, ThreadReference, Reference)
     then
       goto TryAgain;
     //Reference is set...
-    result := PData;
+    Result := PData;
     //Empty test
     if result = nil then
-      CAS(ThreadReference, 0, Reference)            //Clear Reference if task own reference
-    else
-      if not CAS(result, ThreadReference, result.Next, 0, chain) then
-        goto TryAgain;
-  end;
+      TInterlockedEx.CAS(ThreadReference, 0, Reference)         //Clear Reference if task own reference
+    else if not CAS(Result, ThreadReference, Result.Next, 0, chain) then
+      goto TryAgain;
+  end; //with chain
+  {$ELSE ~OTL_HaveCmpx16b}
+  Result := chain.PData;
+  chain.PData := Result^.Next;
+  {$ENDIF ~OTL_HaveCmpx16b}
 end; { TOmniBaseBoundedStack.PopLink }
 
 function TOmniBaseBoundedStack.Push(const value): boolean;
 var
   linkedData: POmniLinkedData;
 begin
-  linkedData := PopLink(obsRecycleChainP^);
-  Result := assigned(linkedData);
-  if not Result then
-    Exit;
-  Move(value, linkedData.Data, ElementSize);
-  PushLink(linkedData, obsPublicChainP^);
+  Acquire;
+  try
+    linkedData := PopLink(obsRecycleChainP^);
+    Result := assigned(linkedData);
+    if not Result then
+      Exit;
+    Move(value, linkedData.Data, ElementSize);
+    PushLink(linkedData, obsPublicChainP^);
+  finally Release; end;
 end; { TOmniBaseBoundedStack.Push }
 
 class procedure TOmniBaseBoundedStack.PushLink(const link: POmniLinkedData; var chain: TReferencedPtr);
-//Advanced stack PushLink model with idle/busy status bit
 var
   PMemData   : pointer;
   TaskCounter: NativeInt;
 begin
+  {$IFDEF OTL_HaveCmpx16b}
   with chain do begin
     for TaskCounter := 0 to obsTaskPushLoops do
       if (Reference AND 1 = 0) then
@@ -544,9 +699,20 @@ begin
     repeat
       PMemData := PData;
       link.Next := PMemData;
-    until CAS(PMemData, link, PData);
+    until TInterlockedEx.CAS(PMemData, link, PData);
   end;
+  {$ELSE ~OTL_HaveCmpx16b}
+  link.Next := chain.PData;
+  chain.PData := link;
+  {$ENDIF ~OTL_HaveCmpx16b}
 end; { TOmniBaseBoundedStack.PushLink }
+
+procedure TOmniBaseBoundedStack.Release;
+begin
+  {$IFNDEF OTL_HaveCmpx16b}
+  obsLock.Release;
+  {$ENDIF ~OTL_HaveCmpx16b}
+end; { TOmniBaseBoundedStack.Release }
 
 { TOmniBoundedStack }
 
@@ -599,6 +765,14 @@ end; { TOmniBoundedStack.Push }
 
 { TOmniBaseBoundedQueue }
 
+constructor TOmniBaseBoundedQueue.Create;
+begin
+  inherited Create;
+  {$IFNDEF OTL_HaveCmpx16b}
+  obqLock := CreateOmniCriticalSection;
+  {$ENDIF ~OTL_HaveCmpx16b}
+end; { TOmniBaseBoundedQueue.Create }
+
 destructor TOmniBaseBoundedQueue.Destroy;
 begin
   FreeMem(obqDataBuffer);
@@ -611,37 +785,53 @@ function TOmniBaseBoundedQueue.Dequeue(var value): boolean;
 var
   Data: pointer;
 begin
-  Data := RemoveLink(obqPublicRingBuffer);
-  Result := assigned(Data);
-  if not Result then
-    Exit;
-  Move(Data^, value, ElementSize);
-  InsertLink(Data, obqRecycleRingBuffer);
+  Acquire;
+  try
+    Data := RemoveLink(obqPublicRingBuffer);
+    Result := assigned(Data);
+    if not Result then
+      Exit;
+    Move(Data^, value, ElementSize);
+    InsertLink(Data, obqRecycleRingBuffer);
+  finally Release; end;
 end; { TOmniBaseBoundedQueue.Dequeue }
+
+procedure TOmniBaseBoundedQueue.Acquire;
+begin
+  {$IFNDEF OTL_HaveCmpx16b}
+  obqLock.Acquire;
+  {$ENDIF ~OTL_HaveCmpx16b}
+end; { TOmniBaseBoundedQueue.Acquire }
 
 procedure TOmniBaseBoundedQueue.Empty;
 var
   Data: pointer;
 begin
-  repeat
-    Data := RemoveLink(obqPublicRingBuffer);
-    if assigned(Data) then
-      InsertLink(Data, obqRecycleRingBuffer)
-    else
-      break;
-  until false;
+  Acquire;
+  try
+    repeat
+      Data := RemoveLink(obqPublicRingBuffer);
+      if assigned(Data) then
+        InsertLink(Data, obqRecycleRingBuffer)
+      else
+        break;
+    until false;
+  finally Release; end;
 end; { TOmniBaseBoundedQueue.Empty }
 
 function TOmniBaseBoundedQueue.Enqueue(const value): boolean;
 var
   Data: pointer;
 begin
-  Data := RemoveLink(obqRecycleRingBuffer);
-  Result := assigned(Data);
-  if not Result then
-    Exit;
-  Move(value, Data^, ElementSize);
-  InsertLink(Data, obqPublicRingBuffer);
+  Acquire;
+  try
+    Data := RemoveLink(obqRecycleRingBuffer);
+    Result := assigned(Data);
+    if not Result then
+      Exit;
+    Move(value, Data^, ElementSize);
+    InsertLink(Data, obqPublicRingBuffer);
+  finally Release; end;
 end; { TOmniBaseBoundedQueue.Enqueue }
 
 procedure TOmniBaseBoundedQueue.Initialize(numElements, elementSize: integer);
@@ -659,18 +849,18 @@ begin
   // calculate element size, round up to next aligned value
   roundedElementSize := (elementSize + SizeOf(pointer) - 1) AND NOT (SizeOf(pointer) - 1);
   // allocate obqDataBuffer
-  DSiFreeMemAndNil(obqDataBuffer);
+  FreeMem(obqDataBuffer);
   GetMem(obqDataBuffer, roundedElementSize * numElements + roundedElementSize + CASAlignment);
   dataBuffer := RoundUpTo(obqDataBuffer, CASAlignment);
   // allocate RingBuffers
   ringBufferSize := SizeOf(TReferencedPtr) * (numElements + 1) +
     SizeOf(TOmniRingBuffer) - SizeOf(TReferencedPtrBuffer);
-  DSiFreeMemAndNil(obqPublicRingMem);
+  FreeMem(obqPublicRingMem);
   obqPublicRingMem := AllocMem(ringBufferSize + SizeOf(pointer) * 2);
   obqPublicRingBuffer := RoundUpTo(obqPublicRingMem, SizeOf(pointer) * 2);
   Assert(NativeInt(obqPublicRingBuffer) mod (SizeOf(pointer) * 2) = 0,
     Format('TOmniBaseContainer: obcPublicRingBuffer is not %d-aligned', [SizeOf(pointer) * 2]));
-  DSiFreeMemAndNil(obqRecycleRingMem);
+  FreeMem(obqRecycleRingMem);
   obqRecycleRingMem := AllocMem(ringBufferSize + SizeOf(pointer) * 2);
   obqRecycleRingBuffer := RoundUpTo(obqRecycleRingMem, SizeOf(pointer) * 2);
   Assert(NativeInt(obqRecycleRingBuffer) mod (SizeOf(pointer) * 2) = 0,
@@ -705,6 +895,7 @@ var
 label
   TryAgain;
 begin
+  {$IFDEF OTL_HaveCmpx16b}
   ThreadReference := GetThreadId + 1;                           //Reference.bit0 := 1
   with ringBuffer^ do begin
 TryAgain:
@@ -715,17 +906,16 @@ TryAgain:
       Dec(TaskCounter);
     until (TaskCounter = 0) or (CurrentReference AND 1 = 0);
     if (CurrentReference AND 1 <> 0) and (AtStartReference <> CurrentReference) or
-       not CAS(CurrentReference, ThreadReference, LastIn.Reference)
+       not TInterlockedEx.CAS(CurrentReference, ThreadReference, LastIn.Reference)
     then
       goto TryAgain;
     //Reference is set...
     CurrentLastIn := LastIn.PData;
-    CAS(CurrentLastIn.Reference, ThreadReference, CurrentLastIn.Reference);
+    TInterlockedEx.CAS(CurrentLastIn.Reference, ThreadReference, CurrentLastIn.Reference);
     if (ThreadReference <> LastIn.Reference) or
-      not CAS(CurrentLastIn.PData, ThreadReference, data, ThreadReference, CurrentLastIn^)
+       not CAS(CurrentLastIn.PData, ThreadReference, data, ThreadReference, CurrentLastIn^)
     then
-      goto TryAgain;
-    //Calculate ringBuffer next LastIn address
+      goto TryAgain;    //Calculate ringBuffer next LastIn address
     NewLastIn := pointer(NativeInt(CurrentLastIn) + SizeOf(TReferencedPtr));
     if NativeInt(NewLastIn) > NativeInt(EndBuffer) then
       NewLastIn := StartBuffer;
@@ -733,6 +923,14 @@ TryAgain:
     if not CAS(CurrentLastIn, ThreadReference, NewLastIn, 0, LastIn) then
       goto TryAgain;
   end;
+  {$ELSE ~OTL_HaveCmpx16b}
+  CurrentLastIn := ringBuffer^.LastIn.PData;
+  CurrentLastIn^.PData := data;
+  NewLastIn := pointer(NativeInt(CurrentLastIn) + SizeOf(TReferencedPtr));
+  if NativeInt(NewLastIn) > NativeInt(ringBuffer^.EndBuffer) then
+    NewLastIn := ringBuffer^.StartBuffer;
+  ringBuffer^.LastIn.PData := NewLastIn;
+  {$ENDIF ~OTL_HaveCmpx16b}
 end; { TOmniBaseBoundedQueue.InsertLink }
 
 function TOmniBaseBoundedQueue.IsEmpty: boolean;
@@ -744,11 +942,14 @@ function TOmniBaseBoundedQueue.IsFull: boolean;
 var
   NewLastIn: pointer;
 begin
-  NewLastIn := pointer(NativeInt(obqPublicRingBuffer.LastIn.PData) + SizeOf(TReferencedPtr));
-  if NativeInt(NewLastIn) > NativeInt(obqPublicRingBuffer.EndBuffer) then
-    NewLastIn := obqPublicRingBuffer.StartBuffer;
-  result := (NativeInt(NewLastIn) = NativeInt(obqPublicRingBuffer.LastIn.PData)) or
-    (obqRecycleRingBuffer.FirstIn.PData = obqRecycleRingBuffer.LastIn.PData);
+  Acquire;
+  try
+    NewLastIn := pointer(NativeInt(obqPublicRingBuffer.LastIn.PData) + SizeOf(TReferencedPtr));
+    if NativeInt(NewLastIn) > NativeInt(obqPublicRingBuffer.EndBuffer) then
+      NewLastIn := obqPublicRingBuffer.StartBuffer;
+    result := (NativeInt(NewLastIn) = NativeInt(obqPublicRingBuffer.LastIn.PData)) or
+      (obqRecycleRingBuffer.FirstIn.PData = obqRecycleRingBuffer.LastIn.PData);
+  finally Release; end;
 end; { TOmniBaseBoundedQueue.IsFull }
 
 procedure TOmniBaseBoundedQueue.MeasureExecutionTimes;
@@ -775,20 +976,24 @@ var
   end; { GetMinAndClear }
 
 var
+  {$IFDEF MSWINDOWS}
   affinity   : string;
+  {$ENDIF MSWINDOWS}
   currElement: pointer;
   n          : integer;
 
 begin { TOmniBaseBoundedQueue.MeasureExecutionTimes }
   if not obqIsInitialized then begin
+    {$IFDEF MSWINDOWS}
     affinity := DSiGetThreadAffinity;
     DSiSetThreadAffinity(affinity[1]);
     try
+    {$ENDIF MSWINDOWS}
       //Calculate  TaskPopDelay and TaskPushDelay counter values depend on CPU speed!!!}
       obqTaskRemoveLoops := 1;
       obqTaskInsertLoops := 1;
       for n := 1 to NumOfSamples do  begin
-        DSiYield;
+        {$IFDEF OTL_HasTThreadYield}TThread.Yield;{$ELSE}DSiYield;{$ENDIF}
         //Measure RemoveLink rutine delay
         TimeTestField[0, n] := GetCPUTimeStamp;
         currElement := RemoveLink(obqRecycleRingBuffer);
@@ -801,13 +1006,20 @@ begin { TOmniBaseBoundedQueue.MeasureExecutionTimes }
       obqTaskRemoveLoops := GetMinAndClear(0, 4) div 4;
       obqTaskInsertLoops := GetMinAndClear(1, 4) div 4;
       obqIsInitialized := true;
+    {$IFDEF MSWINDOWS}
     finally DSiSetThreadAffinity(affinity); end;
+    {$ENDIF MSWINDOWS}
   end;
 end; { TOmniBaseBoundedQueue.MeasureExecutionTimes }
 
+procedure TOmniBaseBoundedQueue.Release;
+begin
+  {$IFNDEF OTL_HaveCmpx16b}
+  obqLock.Release;
+  {$ENDIF ~OTL_HaveCmpx16b}
+end; { TOmniBaseBoundedQueue.Release }
+
 class function TOmniBaseBoundedQueue.RemoveLink(const ringBuffer: POmniRingBuffer): pointer;
-//FIFO buffer logic
-//Remove link from queue model with idle/busy status bit
 var
   AtStartReference      : NativeInt;
   CurrentFirstIn        : pointer;
@@ -818,6 +1030,7 @@ var
 label
   TryAgain;
 begin
+  {$IFDEF OTL_HaveCmpx16b}
   Reference := GetThreadId + 1;                                 //Reference.bit0 := 1
   with ringBuffer^ do begin
 TryAgain:
@@ -828,7 +1041,7 @@ TryAgain:
       Dec(TaskCounter);
     until (TaskCounter = 0) or (CurrentReference AND 1 = 0);
     if (CurrentReference AND 1 <> 0) and (AtStartReference <> CurrentReference) or
-      not CAS(CurrentReference, Reference, FirstIn.Reference)
+      not TInterlockedEx.CAS(CurrentReference, Reference, FirstIn.Reference)
     then
       goto TryAgain;
     //Reference is set...
@@ -836,7 +1049,7 @@ TryAgain:
     //Empty test
     if CurrentFirstIn = LastIn.PData then begin
       //Clear Reference if task own reference
-      CAS(Reference, 0, FirstIn.Reference);
+      TInterlockedEx.CAS(Reference, 0, FirstIn.Reference);
       Result := nil;
       Exit;
     end;
@@ -850,6 +1063,16 @@ TryAgain:
     if not CAS(CurrentFirstIn, Reference, NewFirstIn, 0, FirstIn) then
       goto TryAgain;
   end;
+  {$ELSE ~OTL_HaveCmpx16b}
+  CurrentFirstIn := ringBuffer^.FirstIn.PData;
+  if CurrentFirstIn = ringBuffer^.LastIn.PData then
+    Exit(nil);
+  Result := PReferencedPtr(ringBuffer^.FirstIn.PData)^.PData;
+  NewFirstIn := pointer(NativeInt(CurrentFirstIn) + SizeOf(TReferencedPtr));
+  if NativeInt(NewFirstIn) > NativeInt(ringBuffer^.EndBuffer) then
+    NewFirstIn := ringBuffer^.StartBuffer;
+  ringBuffer^.FirstIn.PData := NewFirstIn;
+  {$ENDIF ~OTL_HaveCmpx16b}
 end; { TOmniBaseBoundedQueue.RemoveLink }
 
 { TOmniBoundedQueue }
@@ -900,6 +1123,11 @@ begin
       ContainerSubject.NotifyOnce(coiNotifyOnAlmostFull);
   end;
 end; { TOmniBoundedQueue.Enqueue }
+
+//Bus-locking queue implementation.
+//On non-Windows platforms same memory layout is used, but synchronisation
+//is achieved using a critical section, not with bus-locking because we
+//don't have a platform-independant equivalent of cmpx8b/cmpx16b.
 
 (*
 TOmniQueue
@@ -1003,25 +1231,46 @@ Dequeue:
 {$DEFINE USE_MOVEDPTR}
 {$IFDEF DEBUG_OMNI_QUEUE}{$UNDEF USE_MOVEDPTR}{$ENDIF}
 {$IFDEF OTL_OLDCPU}{$UNDEF USE_MOVEDPTR}{$ENDIF}
+{$IFNDEF OTL_HaveCmpx16b}{$DEFINE USE_MOVEDPTR}{$ENDIF} //bus locking not supported, Move is just a move, so use it
 
 { TOmniTaggedValue }
 
 function TOmniTaggedValue.CASTag(oldTag, newTag: TOmniQueueTag): boolean;
 begin
+  {$IFDEF OTL_HaveCmpx16b}
   Result := CAS8(Ord(oldTag), Ord(newTag), Tag);
+  {$ELSE}
+  Result := (Tag = oldTag);
+  if Result then
+    Tag := newTag;
+  {$ENDIF ~OTL_HaveCmpx16b}
 end; { TOmniTaggedValue.CASTag }
 
 { TOmniTaggedPointer }
 
-function TOmniTaggedPointer.CAS(oldSlot: POmniTaggedValue; oldTag: TOmniQueueTag;
+function TOmniTaggedPointer.CAS(
+  oldSlot: POmniTaggedValue; oldTag: TOmniQueueTag;
   newSlot: POmniTaggedValue; newTag: TOmniQueueTag): boolean;
 begin
+  {$IFDEF OTL_HaveCmpx16b}
   Result := OtlSync.CAS(oldSlot, NativeInt(oldTag), newSlot, NativeInt(newTag), Self);
+  {$ELSE}
+  Result := (Slot = oldSlot) and (Tag = oldTag);
+  if Result then begin
+    Slot := newSlot;
+    Tag := newTag;
+  end;
+  {$ENDIF ~OTL_HaveCmpx16b}
 end; { TOmniTaggedPointer.CAS }
 
 procedure TOmniTaggedPointer.Move(newSlot: POmniTaggedValue; newTag: TOmniQueueTag);
 begin
+  {$IFDEF OTL_HaveCmpx16b}
   MoveDPtr(newSlot, ord(newTag), Self);
+  {$ELSE}
+  Slot := newSlot;
+  Tag := newTag;
+  {$ENDIF OTL_HaveCmpx16b}
 end; { TOmniTaggedPointer.Move }
 
 { TOmniBaseQueue }
@@ -1063,6 +1312,13 @@ begin
   FreeAndNil(obcMemStack);
   inherited;
 end; { TOmniBaseQueue.Destroy }
+
+procedure TOmniBaseQueue.Acquire;
+begin
+  {$IFNDEF OTL_HaveCmpx16b}
+  obcLock.Acquire;
+  {$ENDIF OTL_HaveCmpx16b}
+end; { TOmniBaseQueue.Acquire }
 
 function TOmniBaseQueue.AllocateBlock: POmniTaggedValue;
 begin
@@ -1111,44 +1367,51 @@ var
   next     : POmniTaggedValue;
   head     : POmniTaggedValue;
 begin
-  repeat
-    head := obcHeadPointer.Slot;
-    if (obcHeadPointer.Tag = tagFree)
-       and obcHeadPointer.CAS(head, tagFree, head, tagAllocating)
-    then
-      break //repeat
-    else if (obcHeadPointer.Tag = tagEndOfList)
-            and obcHeadPointer.CAS(head, tagEndOfList, head, tagExtending)
-    then
-      break //repeat
-    else // very temporary condition, retry quickly
-      {$IFDEF CPUX64}AsmPause;{$ELSE}asm pause; end;{$ENDIF ~CPUX64}
-  until false;
-  {$IFDEF DEBUG_OMNI_QUEUE} Assert(head = obcHeadPointer.Slot); {$ENDIF}
-  if obcHeadPointer.Tag = tagAllocating then begin // enqueueing
-    next := NextSlot(head);
-    head.Value := value; // this works because the slot was initialized to zero when allocating
-    {$IFNDEF DEBUG_OMNI_QUEUE}
-    head.Tag := tagAllocated; {$ELSE} Assert(head.CASTag(tagFree, tagAllocated)); {$ENDIF}
-    {$IFDEF USE_MOVEDPTR} // release the lock
-    obcHeadPointer.Move(next, next.Tag); {$ELSE} Assert(obcHeadPointer.CAS(head, tagAllocating, next, next.Tag)); {$ENDIF}
-  end
-  else begin // allocating memory
-    {$IFDEF DEBUG_OMNI_QUEUE} Assert(obcHeadPointer.Tag = tagExtending); {$ENDIF}
-    extension := AllocateBlock; // returns pointer to the header
-    Inc(extension, 2);          // move over header and sentinel to the first data slot
-    {$IFNDEF DEBUG_OMNI_QUEUE}
-    extension.Tag := tagAllocated; {$ELSE} Assert(extension.CASTag(tagFree, tagAllocated)); {$ENDIF}
-    extension.Value := value;   // this works because the slot was initialized to zero when allocating
-    Dec(extension);             // forward reference points to the sentinel
-    head.Value := extension;
-    {$IFNDEF DEBUG_OMNI_QUEUE}
-    head.Tag := tagBlockPointer; {$ELSE} Assert(head.CASTag(tagEndOfList, tagBlockPointer)); {$ENDIF}
-    Inc(extension, 2); // get to the first free slot
-    {$IFDEF USE_MOVEDPTR} // release the lock
-    obcHeadPointer.Move(extension, extension.Tag); {$ELSE} Assert(obcHeadPointer.CAS(head, tagExtending, extension, extension.Tag)); {$ENDIF}
-    PreallocateMemory;
-  end;
+  Acquire;
+  try
+    repeat
+      head := obcHeadPointer.Slot;
+      if (obcHeadPointer.Tag = tagFree)
+         and obcHeadPointer.CAS(head, tagFree, head, tagAllocating)
+      then
+        break //repeat
+      else if (obcHeadPointer.Tag = tagEndOfList)
+              and obcHeadPointer.CAS(head, tagEndOfList, head, tagExtending)
+      then
+        break //repeat
+      else // very temporary condition, retry quickly
+        {$IFNDEF OTL_HaveCmpx16b}TThread.Yield;{$ELSE}{$IFDEF CPUX64}AsmPause;{$ELSE}asm pause; end;{$ENDIF}{$ENDIF}
+    until false;
+    {$IFDEF DEBUG_OMNI_QUEUE} Assert(head = obcHeadPointer.Slot); {$ENDIF}
+    if obcHeadPointer.Tag = tagAllocating then begin // enqueueing
+      next := NextSlot(head);
+      head.Value := value; // this works because the slot was initialized to zero when allocating
+      {$IFNDEF DEBUG_OMNI_QUEUE}
+      head.Tag := tagAllocated; {$ELSE} Assert(head.CASTag(tagFree, tagAllocated)); {$ENDIF}
+      {$IFDEF USE_MOVEDPTR} // release the lock
+      obcHeadPointer.Move(next, next.Tag);
+      {$ELSE}
+      Assert(obcHeadPointer.CAS(head, tagAllocating, next, next.Tag));
+      {$ENDIF}
+    end
+    else begin // allocating memory
+      {$IFDEF DEBUG_OMNI_QUEUE} Assert(obcHeadPointer.Tag = tagExtending); {$ENDIF}
+      extension := AllocateBlock; // returns pointer to the header
+      Inc(extension, 2);          // move over header and sentinel to the first data slot
+      {$IFNDEF DEBUG_OMNI_QUEUE}
+      extension.Tag := tagAllocated; {$ELSE} Assert(extension.CASTag(tagFree, tagAllocated)); {$ENDIF}
+      extension.Value := value;   // this works because the slot was initialized to zero when allocating
+      Dec(extension);             // forward reference points to the sentinel
+      head.Value := extension;
+      {$IFNDEF DEBUG_OMNI_QUEUE}
+      head.Tag := tagBlockPointer; {$ELSE} Assert(head.CASTag(tagEndOfList, tagBlockPointer)); {$ENDIF}
+      Inc(extension, 2); // get to the first free slot
+      {$IFDEF USE_MOVEDPTR} // release the lock
+      obcHeadPointer.Move(extension, extension.Tag);
+      {$ELSE} Assert(obcHeadPointer.CAS(head, tagExtending, extension, extension.Tag)); {$ENDIF}
+      PreallocateMemory;
+    end;
+  finally Release; end;
 end; { TOmniBaseQueue.Enqueue }
 
 procedure TOmniBaseQueue.Initialize;
@@ -1184,58 +1447,67 @@ var
   tag          : TOmniQueueTag;
   tail         : POmniTaggedValue;
 begin
-  // Basically the same as TryDequeue except that it doesn't dequeue anything.
-  Result := false; // to keep compiler happy
-  tag := tagSentinel;
-  while tag = tagSentinel do begin
-    repeat
-      tail := obcTailPointer.Slot;
-      caughtTheHead := NextSlot(obcTailPointer.Slot) = obcHeadPointer.Slot; // an approximation; we don't care if in a moment this won't be true anymore
-      if (obcTailPointer.Tag = tagAllocated) then begin
-        Result := false;
-        Exit;
-      end
-      else if (obcTailPointer.Tag = tagSentinel) then begin
-        if caughtTheHead then begin
-          Result := true;
+  Acquire;
+  try
+    // Basically the same as TryDequeue except that it doesn't dequeue anything.
+    Result := false; // to keep compiler happy
+    tag := tagSentinel;
+    while tag = tagSentinel do begin
+      repeat
+        tail := obcTailPointer.Slot;
+        caughtTheHead := NextSlot(obcTailPointer.Slot) = obcHeadPointer.Slot; // an approximation; we don't care if in a moment this won't be true anymore
+        if (obcTailPointer.Tag = tagAllocated) then begin
+          Result := false;
           Exit;
         end
-        else if obcTailPointer.CAS(tail, tagSentinel, tail, tagRemoving) then begin
-          tag := tagSentinel;
+        else if (obcTailPointer.Tag = tagSentinel) then begin
+          if caughtTheHead then begin
+            Result := true;
+            Exit;
+          end
+          else if obcTailPointer.CAS(tail, tagSentinel, tail, tagRemoving) then begin
+            tag := tagSentinel;
+            break; //repeat
+          end
+        end
+        else if (obcTailPointer.Tag = tagBlockPointer)
+                and obcTailPointer.CAS(tail, tagBlockPointer, tail, tagDestroying) then
+        begin
+          tag := tagBlockPointer;
           break; //repeat
         end
+        else
+          {$IFNDEF OTL_HaveCmpx16b}TThread.Yield;{$ELSE}{$IFDEF CPUX64}AsmPause;{$ELSE}asm pause; end;{$ENDIF}{$ENDIF}
+      until false;
+      {$IFDEF DEBUG_OMNI_QUEUE} Assert(tail = obcTailPointer.Slot); {$ENDIF}
+      header := tail;
+      Dec(header, header.Offset);
+      {$IFDEF DEBUG_OMNI_QUEUE} Assert(header.Tag = tagHeader); {$ENDIF}
+      {$IFDEF DEBUG_OMNI_QUEUE} Assert(tag <> tagAllocated); {$ENDIF}
+      {$IFDEF DEBUG_OMNI_QUEUE} Assert(not caughtTheHead); {$ENDIF}
+      if tag = tagSentinel then begin
+        next := NextSlot(tail);
+        {$IFDEF USE_MOVEDPTR} // release the lock
+        obcTailPointer.Move(next, next.Tag);
+        {$ELSE}
+        Assert(obcTailPointer.CAS(tail, tagRemoving, next, next.Tag));
+        {$ENDIF}
       end
-      else if (obcTailPointer.Tag = tagBlockPointer)
-              and obcTailPointer.CAS(tail, tagBlockPointer, tail, tagDestroying) then
-      begin
-        tag := tagBlockPointer;
-        break; //repeat
-      end
-      else
-        {$IFDEF CPUX64}AsmPause;{$ELSE}asm pause; end;{$ENDIF ~CPUX64}
-    until false;
-    {$IFDEF DEBUG_OMNI_QUEUE} Assert(tail = obcTailPointer.Slot); {$ENDIF}
-    header := tail;
-    Dec(header, header.Offset);
-    {$IFDEF DEBUG_OMNI_QUEUE} Assert(header.Tag = tagHeader); {$ENDIF}
-    {$IFDEF DEBUG_OMNI_QUEUE} Assert(tag <> tagAllocated); {$ENDIF}
-    {$IFDEF DEBUG_OMNI_QUEUE} Assert(not caughtTheHead); {$ENDIF}
-    if tag = tagSentinel then begin
-      next := NextSlot(tail);
-      {$IFDEF USE_MOVEDPTR} // release the lock
-      obcTailPointer.Move(next, next.Tag); {$ELSE} Assert(obcTailPointer.CAS(tail, tagRemoving, next, next.Tag)); {$ENDIF}
-    end
-    else begin // releasing memory
-      {$IFDEF DEBUG_OMNI_QUEUE} Assert(tag = tagBlockPointer); {$ENDIF}
-      next := POmniTaggedValue(tail.Value.AsPointer); // next points to the sentinel
-      {$IFDEF DEBUG_OMNI_QUEUE} Assert(next.Tag = tagSentinel); {$ENDIF}
-      {$IFDEF USE_MOVEDPTR} // release the lock
-      obcTailPointer.Move(next, tagSentinel); {$ELSE} Assert(obcTailPointer.CAS(tail, tagDestroying, next, tagSentinel)); {$ENDIF}
-      tag := tagSentinel; // retry
-    end;
-    if assigned(header) and (InterlockedDecrement(PInteger(header)^) = 0) then
-      ReleaseBlock(header);
-  end; //while tag = tagSentinel
+      else begin // releasing memory
+        {$IFDEF DEBUG_OMNI_QUEUE} Assert(tag = tagBlockPointer); {$ENDIF}
+        next := POmniTaggedValue(tail.Value.AsPointer); // next points to the sentinel
+        {$IFDEF DEBUG_OMNI_QUEUE} Assert(next.Tag = tagSentinel); {$ENDIF}
+        {$IFDEF USE_MOVEDPTR} // release the lock
+        obcTailPointer.Move(next, tagSentinel);
+        {$ELSE}
+        Assert(obcTailPointer.CAS(tail, tagDestroying, next, tagSentinel));
+        {$ENDIF}
+        tag := tagSentinel; // retry
+      end;
+      if assigned(header) and (TInterlockedEx.Decrement(PInteger(header)^) = 0) then
+        ReleaseBlock(header);
+    end; //while tag = tagSentinel
+  finally Release; end;
 end; { TOmniBaseQueue.IsEmpty }
 
 function TOmniBaseQueue.NextSlot(slot: POmniTaggedValue): POmniTaggedValue;
@@ -1281,13 +1553,20 @@ begin
   Dec(Result);
 end; { TOmniBaseQueue.PrevSlot }
 
+procedure TOmniBaseQueue.Release;
+begin
+  {$IFNDEF OTL_HaveCmpx16b}
+  obcLock.Release;
+  {$ENDIF OTL_HaveCmpx16b}
+end; { TOmniBaseQueue.Release }
+
 procedure TOmniBaseQueue.ReleaseBlock(firstSlot: POmniTaggedValue; forceFree: boolean);
 begin
   {$IFDEF DEBUG_OMNI_QUEUE}Assert(firstSlot.Tag = tagHeader);{$ENDIF DEBUG_OMNI_QUEUE}
   if forceFree or obcMemStack.IsFull then
     FreeMem(firstSlot)
   else begin
-    ZeroMemory(firstSlot, obcBlockSize);
+    FillChar(firstSlot^, obcBlockSize, 0);
     PartitionMemory(firstSlot);
     if not obcMemStack.Push(firstSlot) then
       FreeMem(firstSlot);
@@ -1302,69 +1581,77 @@ var
   next         : POmniTaggedValue;
   tag          : TOmniQueueTag;
 begin
-  tag := tagSentinel;
-  Result := true;
-  while Result and (tag = tagSentinel) do begin
-    repeat
-      tail := obcTailPointer.Slot;
-      caughtTheHead := NextSlot(obcTailPointer.Slot) = obcHeadPointer.Slot; // an approximation; we don't care if in a moment this won't be true anymore
-      if (obcTailPointer.Tag = tagAllocated)
-         and obcTailPointer.CAS(tail, tagAllocated, tail, tagRemoving) then
-      begin
-        tag := tagAllocated;
-        break; //repeat
-      end
-      else if (obcTailPointer.Tag = tagSentinel) then begin
-        if caughtTheHead then begin
-          Result := false;
+  Acquire;
+  try
+    tag := tagSentinel;
+    Result := true;
+    while Result and (tag = tagSentinel) do begin
+      repeat
+        tail := obcTailPointer.Slot;
+        caughtTheHead := NextSlot(obcTailPointer.Slot) = obcHeadPointer.Slot; // an approximation; we don't care if in a moment this won't be true anymore
+        if (obcTailPointer.Tag = tagAllocated)
+           and obcTailPointer.CAS(tail, tagAllocated, tail, tagRemoving) then
+        begin
+          tag := tagAllocated;
           break; //repeat
         end
-        else if obcTailPointer.CAS(tail, tagSentinel, tail, tagRemoving) then begin
-          tag := tagSentinel;
-          break; //repeat
+        else if (obcTailPointer.Tag = tagSentinel) then begin
+          if caughtTheHead then begin
+            Result := false;
+            break; //repeat
+          end
+          else if obcTailPointer.CAS(tail, tagSentinel, tail, tagRemoving) then begin
+            tag := tagSentinel;
+            break; //repeat
+          end
         end
-      end
-      else if (obcTailPointer.Tag = tagBlockPointer)
-              and obcTailPointer.CAS(tail, tagBlockPointer, tail, tagDestroying) then
-      begin
-        tag := tagBlockPointer;
-        break; //repeat
-      end
-      else
-        {$IFDEF CPUX64}AsmPause;{$ELSE}asm pause; end;{$ENDIF ~CPUX64}
-    until false;
-    if Result then begin // dequeueing
-      {$IFDEF DEBUG_OMNI_QUEUE} Assert(tail = obcTailPointer.Slot); {$ENDIF}
-      header := tail;
-      Dec(header, header.Offset);
-      {$IFDEF DEBUG_OMNI_QUEUE} Assert(header.Tag = tagHeader); {$ENDIF}
-      if tag in [tagSentinel, tagAllocated] then begin
-        next := NextSlot(tail);
-        if tag = tagAllocated then begin // sentinel doesn't contain any useful value
-          value := tail.Value;
-          tail.Value._ReleaseAndClear;
-        end;
-        if caughtTheHead then begin
-          {$IFDEF USE_MOVEDPTR} // release the lock; as this is the last element, don't move forward
-          obcTailPointer.Move(tail, tagSentinel); {$ELSE} Assert(obcTailPointer.CAS(tail, tagRemoving, tail, tagSentinel)); {$ENDIF}
-          header := nil; // do NOT decrement the counter; this slot will be retagged again
+        else if (obcTailPointer.Tag = tagBlockPointer)
+                and obcTailPointer.CAS(tail, tagBlockPointer, tail, tagDestroying) then
+        begin
+          tag := tagBlockPointer;
+          break; //repeat
         end
         else
+          {$IFDEF CPUX64}AsmPause;{$ELSE}asm pause; end;{$ENDIF ~CPUX64}
+      until false;
+      if Result then begin // dequeueing
+        {$IFDEF DEBUG_OMNI_QUEUE} Assert(tail = obcTailPointer.Slot); {$ENDIF}
+        header := tail;
+        Dec(header, header.Offset);
+        {$IFDEF DEBUG_OMNI_QUEUE} Assert(header.Tag = tagHeader); {$ENDIF}
+        if tag in [tagSentinel, tagAllocated] then begin
+          next := NextSlot(tail);
+          if tag = tagAllocated then begin // sentinel doesn't contain any useful value
+            value := tail.Value;
+            tail.Value._ReleaseAndClear;
+          end;
+          if caughtTheHead then begin
+            {$IFDEF USE_MOVEDPTR} // release the lock; as this is the last element, don't move forward
+            obcTailPointer.Move(tail, tagSentinel);
+            {$ELSE}
+            Assert(obcTailPointer.CAS(tail, tagRemoving, tail, tagSentinel));
+            {$ENDIF}
+            header := nil; // do NOT decrement the counter; this slot will be retagged again
+          end
+          else
+            {$IFDEF USE_MOVEDPTR} // release the lock
+            obcTailPointer.Move(next, next.Tag);
+            {$ELSE} Assert(obcTailPointer.CAS(tail, tagRemoving, next, next.Tag));
+            {$ENDIF}
+        end
+        else begin // releasing memory
+          {$IFDEF DEBUG_OMNI_QUEUE} Assert(tag = tagBlockPointer); {$ENDIF}
+          next := POmniTaggedValue(tail.Value.AsPointer); // next points to the sentinel
+          {$IFDEF DEBUG_OMNI_QUEUE} Assert(next.Tag = tagSentinel); {$ENDIF}
           {$IFDEF USE_MOVEDPTR} // release the lock
-          obcTailPointer.Move(next, next.Tag); {$ELSE} Assert(obcTailPointer.CAS(tail, tagRemoving, next, next.Tag)); {$ENDIF}
-      end
-      else begin // releasing memory
-        {$IFDEF DEBUG_OMNI_QUEUE} Assert(tag = tagBlockPointer); {$ENDIF}
-        next := POmniTaggedValue(tail.Value.AsPointer); // next points to the sentinel
-        {$IFDEF DEBUG_OMNI_QUEUE} Assert(next.Tag = tagSentinel); {$ENDIF}
-        {$IFDEF USE_MOVEDPTR} // release the lock
-        obcTailPointer.Move(next, tagSentinel); {$ELSE} Assert(obcTailPointer.CAS(tail, tagDestroying, next, tagSentinel)); {$ENDIF}
-        tag := tagSentinel; // retry
+          obcTailPointer.Move(next, tagSentinel); {$ELSE} Assert(obcTailPointer.CAS(tail, tagDestroying, next, tagSentinel)); {$ENDIF}
+          tag := tagSentinel; // retry
+        end;
+        if assigned(header) and (TInterlockedEx.Decrement(PInteger(header)^) = 0) then
+          ReleaseBlock(header);
       end;
-      if assigned(header) and (InterlockedDecrement(PInteger(header)^) = 0) then
-        ReleaseBlock(header);
-    end;
-  end; //while Result and (tag = tagSentinel)
+    end; //while Result and (tag = tagSentinel)
+  finally Release; end;
 end; { TOmniBaseQueue.TryDequeue }
 
 { initialization }
@@ -1413,10 +1700,189 @@ begin
     ContainerSubject.Notify(coiNotifyOnAllRemoves);
 end; { TOmniQueue.TryDequeue }
 
+{$IFDEF OTL_MobileSupport}
+
+{ TOmniValueQueue }
+
+constructor TOmniValueQueue.Create(AThresholdForFull: integer);
+begin
+  FContainerSubject := TOmniContainerSubject.Create;;
+  FInnerQueue := TQueue<TOmniValue>.Create;
+  FInnerQueue.OnNotify := CollectionNotifyEvent;
+  FFullThreshold := AThresholdForFull;
+  if FFullThreshold > 0 then begin
+    FPartlyEmptyThreshold := Round(FFullThreshold * CPartlyEmptyLoadFactor);
+    FAlmostFullThreshold  := Round(FFullThreshold * CAlmostFullLoadFactor);
+    if FPartlyEmptyThreshold = FAlmostFullThreshold then
+      Inc(FAlmostFullThreshold);
+  end
+  else begin
+    FPartlyEmptyThreshold := -1;
+    FAlmostFullThreshold  := -1
+  end;
+  FNotifiableEvents := [];
+end; { TOmniValueQueue.Create }
+
+destructor TOmniValueQueue.Destroy;
+begin
+  FreeAndNil(FContainerSubject);
+  FreeAndNil(FInnerQueue);
+  inherited
+end; { TOmniValueQueue.Destroy }
+
+procedure TOmniValueQueue.CollectionNotifyEvent(Sender: TObject;
+  const Item: TOmniValue; Action: TCollectionNotification);
+var
+  AfterCount: integer;
+begin
+  // This method occurs within the critical section.
+  AfterCount := FInnerQueue.Count;
+  case Action of
+    cnAdded:
+      begin
+        Include(FNotifiableEvents, coiNotifyOnAllInserts);
+        if AfterCount = FAlmostFullThreshold then
+          Include(FNotifiableEvents, coiNotifyOnAlmostFull);
+      end;
+    cnRemoved,
+    cnExtracted:
+      begin
+        Include(FNotifiableEvents, coiNotifyOnAllRemoves);
+        if AfterCount = FAlmostFullThreshold then
+          Include(FNotifiableEvents, coiNotifyOnPartlyEmpty);
+      end;
+  end; //case Action
+end; { TOmniValueQueue.CollectionNotifyEvent }
+
+procedure TOmniValueQueue.DoWithCritSec(Proc: TProc);
+var
+  PickUp: TInterestSet;
+begin
+  EnterCriticalSection;
+  try
+    FNotifiableEvents := [];
+    Proc;
+    PickUp := FNotifiableEvents;
+    FNotifiableEvents := []
+  finally EnterCriticalSection; end;
+  PropagateNotifications(PickUp);
+end; { TOmniValueQueue.DoWithCritSec }
+
+function TOmniValueQueue.Dequeue: TOmniValue;
+var
+  EnclosedResult: TOmniValue;
+begin
+  DoWithCritSec(
+    procedure
+    begin
+      if FInnerQueue.Count > 0 then
+        EnclosedResult := FInnerQueue.Dequeue
+      else
+        raise Exception.Create('TOmniBaseQueue.Dequeue: Message queue is empty');
+    end);
+  Result := EnclosedResult;
+end; { TOmniValueQueue.Dequeue }
+
+procedure TOmniValueQueue.Enqueue(const value: TOmniValue);
+var
+  LocalCopy: TOmniValue;
+begin
+  LocalCopy := value;
+  DoWithCritSec(
+    procedure
+    begin
+      FInnerQueue.Enqueue(LocalCopy);
+    end);
+end; { TOmniValueQueue.Enqueue }
+
+function TOmniValueQueue.GetContainerSubject: TOmniContainerSubject;
+begin
+  Result := FContainerSubject;
+end; { TOmniValueQueue.GetContainerSubject }
+
+function TOmniValueQueue.IsEmpty: boolean;
+begin
+  EnterCriticalSection;
+  Result := FInnerQueue.Count = 0;
+  LeaveCriticalSection;
+end; { TOmniValueQueue.IsEmpty }
+
+procedure TOmniValueQueue.PropagateNotifications(Events: TInterestSet);
+var
+  Ev: TOmniContainerObserverInterest;
+begin
+  if assigned(FContainerSubject) and (Events <> []) then
+    for Ev := Low(TOmniContainerObserverInterest) to Low(TOmniContainerObserverInterest) do
+      if Ev in Events then
+        FContainerSubject.Notify(Ev);
+end; { TOmniValueQueue.PropagateNotifications }
+
+function TOmniValueQueue.TryDequeue(var value: TOmniValue): boolean;
+var
+  EnclosedValue : TOmniValue;
+  EnclosedResult: boolean;
+begin
+  DoWithCritSec(
+    procedure
+    begin
+      EnclosedResult := FInnerQueue.Count > 0;
+      if EnclosedResult then
+        EnclosedValue := FInnerQueue.Dequeue;
+    end);
+  value  := EnclosedValue;
+  Result := EnclosedResult;
+end; { TOmniValueQueue.TryDequeue }
+
+{ TOmniValueQueueSpin }
+
+constructor TOmniValueQueueSpin.Create(AThresholdForFull: integer);
+begin
+  inherited Create(AThresholdForFull);
+  FLock.Create(True);
+end; { TOmniValueQueueSpin.Create }
+
+procedure TOmniValueQueueSpin.EnterCriticalSection;
+begin
+  FLock.Enter;
+end; { TOmniValueQueueSpin.EnterCriticalSection }
+
+procedure TOmniValueQueueSpin.LeaveCriticalSection;
+begin
+  FLock.Exit(True);
+end; { TOmniValueQueueSpin.LeaveCriticalSection }
+
+{ TOmniValueQueueCS }
+
+constructor TOmniValueQueueCS.Create(AThresholdForFull: integer);
+begin
+  inherited Create(AThresholdForFull);
+  FCritSect := TFixedCriticalSection.Create;
+end; { TOmniValueQueueCS.Create }
+
+destructor TOmniValueQueueCS.Destroy;
+begin
+  FCritSect.Free;
+  inherited;
+end; { TOmniValueQueueCS.Destroy }
+
+procedure TOmniValueQueueCS.EnterCriticalSection;
+begin
+  FCritSect.Enter;
+end; { TOmniValueQueueCS.EnterCriticalSection }
+
+procedure TOmniValueQueueCS.LeaveCriticalSection;
+begin
+  FCritSect.Leave;
+end; { TOmniValueQueueCS.LeaveCriticalSection }
+
+{$ENDIF OTL_MobileSupport}
+
 initialization
+  Assert(SizeOf(pointer) = SizeOf(NativeInt));
+  {$IFDEF OTL_HaveCmpx16b}
   Assert(SizeOf(TOmniTaggedValue) = {$IFDEF CPUX64}3{$ELSE}4{$ENDIF}*SizeOf(pointer));
   Assert(SizeOf(TOmniTaggedPointer) = 2*SizeOf(pointer));
-  Assert(SizeOf(pointer) = SizeOf(NativeInt));
   InitializeTimingInfo;
+  {$ENDIF OTL_HaveCmpx16b}
 end.
 

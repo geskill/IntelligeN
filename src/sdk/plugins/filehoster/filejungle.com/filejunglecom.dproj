@@ -23,7 +23,7 @@
 		<Import Project="..\..\plugin.optset" Condition="'$(Base)'!='' And Exists('..\..\plugin.optset')"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<UsePackages>true</UsePackages>
-			<DCC_UsePackage>framework</DCC_UsePackage>
+			<DCC_UsePackage>framework;frameworkX</DCC_UsePackage>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DCC_E>false</DCC_E>
 			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\filejunglecom.dll</DCC_DependencyCheckOutputName>

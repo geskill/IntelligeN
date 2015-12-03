@@ -347,7 +347,7 @@ begin
                     try
                       ModifierI := True;
                       InputString := _found_thread_name;
-                      Expression := StringReplace(GetSearchTitle(Subject, vBulletinSettings.intelligent_posting_keepshortwords), ' ', '.*?', [rfReplaceAll, rfIgnoreCase]);
+                      Expression := StringReplace(GetSearchTitle(Subject, True), ' ', '.*?', [rfReplaceAll, rfIgnoreCase]);
 
                       if Exec(InputString) then
                       begin

@@ -9,7 +9,7 @@ uses
   cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit,
   cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxClasses, cxGridLevel, cxGrid, cxLabel, cxTextEdit, cxBlobEdit, cxNavigator,
   // HTTPManager
-  uHTTPInterface, uHTTPConst, uHTTPEvent, uHTTPManager, uHTTPIndyImplementor,
+  uHTTPInterface, uHTTPConst, uHTTPEvent, uHTTPManager,
   // API
   uApiSettings;
 

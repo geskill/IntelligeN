@@ -22,7 +22,7 @@
 		<Import Project="..\..\plugin.optset" Condition="'$(Base)'!='' And Exists('..\..\plugin.optset')"/>
 		<Import Project="..\filehoster.optset" Condition="'$(Base)'!='' And Exists('..\filehoster.optset')"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
-			<DCC_UsePackage>framework</DCC_UsePackage>
+			<DCC_UsePackage>framework;frameworkX</DCC_UsePackage>
 			<UsePackages>true</UsePackages>
 			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\extabitcom.dll</DCC_DependencyCheckOutputName>
 			<GenDll>true</GenDll>

@@ -37,7 +37,7 @@
 		<Import Project="..\dll.optset" Condition="'$(Base)'!='' And Exists('..\dll.optset')"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<UsePackages>true</UsePackages>
-			<DCC_UsePackage>framework</DCC_UsePackage>
+			<DCC_UsePackage>framework;frameworkX</DCC_UsePackage>
 			<DCC_DependencyCheckOutputName>..\..\..\..\bin\IntelligeN.dll</DCC_DependencyCheckOutputName>
 			<GenDll>true</GenDll>
 			<CfgDependentOn>..\dll.optset</CfgDependentOn>

@@ -23,7 +23,7 @@
 		<Import Project="..\fileformats.optset" Condition="'$(Base)'!='' And Exists('..\fileformats.optset')"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<UsePackages>true</UsePackages>
-			<DCC_UsePackage>framework</DCC_UsePackage>
+			<DCC_UsePackage>framework;frameworkX</DCC_UsePackage>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\intelligenxml1.dll</DCC_DependencyCheckOutputName>
 			<GenDll>true</GenDll>

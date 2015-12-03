@@ -1,7 +1,7 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
 			<ProjectGuid>{2908CDD1-949C-407E-8EAE-2CFD2A941C7B}</ProjectGuid>
-			<MainSource>frameworkX.dpk</MainSource>
+			<MainSource>frameworkUI.dpk</MainSource>
 			<ProjectVersion>12.0</ProjectVersion>
 			<Config Condition="'$(Config)'==''">Debug</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
@@ -23,7 +23,7 @@
 			<DCC_DcpOutput>../../sdk\plugins</DCC_DcpOutput>
 			<DCC_DcuOutput>dcu</DCC_DcuOutput>
 			<DCC_BplOutput>../../../bin</DCC_BplOutput>
-			<DCC_DependencyCheckOutputName>..\..\..\bin\frameworkX.bpl</DCC_DependencyCheckOutputName>
+			<DCC_DependencyCheckOutputName>..\..\..\bin\frameworkUI.bpl</DCC_DependencyCheckOutputName>
 			<DCC_UnitSearchPath>../external\;../external\Abbrevia\source;../external\HtmlViewer\source;../../core\external\OmniThreadLibrary;../../core\external\OmniThreadLibrary\src;../../core\external\Spring4D\Base;../../core\external\Spring4D\Base\Collections;../../core\external\Spring4D\Base\Reflection;../../core\external\Spring4D\Core\Container;../../core\external\Spring4D\Core\Services;../../core\external\Spring4D\Extensions\Cryptography;../../core\external\Spring4D\Extensions\Utils;../../sdk\plugins;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<GenDll>true</GenDll>
@@ -42,7 +42,7 @@
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<ItemGroup>
-			<DelphiCompile Include="frameworkX.dpk">
+			<DelphiCompile Include="frameworkUI.dpk">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
 			<DCCReference Include="framework.dcp"/>
@@ -65,7 +65,7 @@
 			<BorlandProject>
 				<Delphi.Personality>
 					<Source>
-						<Source Name="MainSource">frameworkX.dpk</Source>
+						<Source Name="MainSource">frameworkUI.dpk</Source>
 					</Source>
 					<Language>
 						<Language Name="ProjectLang">$00000409</Language>
@@ -97,7 +97,7 @@
 						<VersionInfoKeys Name="InternalName"/>
 						<VersionInfoKeys Name="LegalCopyright">(c) 2015 Sebastian Klatte</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks"/>
-						<VersionInfoKeys Name="OriginalFilename">frameworkX.bpl</VersionInfoKeys>
+						<VersionInfoKeys Name="OriginalFilename">frameworkUI.bpl</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductName">IntelligeN 2009</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductVersion">2.5</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>

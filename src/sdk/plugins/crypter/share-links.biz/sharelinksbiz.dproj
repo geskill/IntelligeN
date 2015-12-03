@@ -25,7 +25,7 @@
 			<UsePackages>true</UsePackages>
 			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\sharelinksbiz.dll</DCC_DependencyCheckOutputName>
 			<GenDll>true</GenDll>
-			<DCC_UsePackage>framework</DCC_UsePackage>
+			<DCC_UsePackage>framework;frameworkX</DCC_UsePackage>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DCC_Platform>x86</DCC_Platform>
 			<CfgDependentOn>..\..\plugin.optset</CfgDependentOn>

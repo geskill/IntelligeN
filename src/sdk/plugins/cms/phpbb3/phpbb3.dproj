@@ -26,7 +26,7 @@
 		<Import Project="..\cms.optset" Condition="'$(Base)'!='' And Exists('..\cms.optset')"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<UsePackages>true</UsePackages>
-			<DCC_UsePackage>framework</DCC_UsePackage>
+			<DCC_UsePackage>framework;frameworkX</DCC_UsePackage>
 			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\phpbb3.dll</DCC_DependencyCheckOutputName>
 			<GenDll>true</GenDll>
 			<CfgDependentOn>..\..\plugin.optset;..\cms.optset</CfgDependentOn>

@@ -20,7 +20,6 @@
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
-			<DCC_UnitSearchPath>../external\;../external\DEC\Part_I;../external\MultiEvent;../external\TRegExpr\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_DcpOutput>../../sdk\plugins</DCC_DcpOutput>
 			<DCC_DcuOutput>dcu</DCC_DcuOutput>
 			<DCC_BplOutput>../../../bin</DCC_BplOutput>

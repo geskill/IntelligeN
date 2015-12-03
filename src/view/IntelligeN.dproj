@@ -27,7 +27,7 @@
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<UsePackages>true</UsePackages>
-			<DCC_UsePackage>framework;frameworkX</DCC_UsePackage>
+			<DCC_UsePackage>framework;frameworkX;frameworkUI</DCC_UsePackage>
 			<DCC_Define>MAINAPP;DRAGONSOFT;$(DCC_Define)</DCC_Define>
 			<DCC_DependencyCheckOutputName>..\..\bin\IntelligeN.exe</DCC_DependencyCheckOutputName>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
