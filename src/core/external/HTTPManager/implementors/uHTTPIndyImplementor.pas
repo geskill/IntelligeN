@@ -252,8 +252,6 @@ begin
           ErrorClassName := ErrorClass;
           ErrorMessage := ErrorMsg;
         end;
-
-        // HandleBlockingScripts(HTTPHelper, HTTPData.HTTPRequest.URL, HTTPResponse);
       finally
         HTTPHelper.Free;
       end;

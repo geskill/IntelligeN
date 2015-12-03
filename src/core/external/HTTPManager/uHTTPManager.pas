@@ -80,11 +80,11 @@ type
     FConnectionMaximumLock: TOmniMREW;
     FImplementor: IHTTPImplementation;
     FImplementationManager: IHTTPImplementationManager;
+    FRequestScrape: IHTTPScrapeEvent;
     FRequestDoneEvent: IHTTPProcessEvent;
 
     class var FHTTPManager: IHTTPManager;
 
-    // procedure HandleBlockingScripts(AHTTPHelper: THTTPHelper; AWebsite: string; AHTTPResponse: IHTTPResponse);
     procedure Execute(const workItem: IOmniWorkItem);
 
     function DoRequest(AHTTPMethod: THTTPMethod; AURL: string; AFollowUp: Double; AHTTPOptions: IHTTPOptions = nil; AHTTPParams: IHTTPParams = nil): Double; overload;
@@ -97,6 +97,7 @@ type
     function GetImplementor: IHTTPImplementation; safecall;
     procedure SetImplementor(const AImplementor: IHTTPImplementation); safecall;
     function GetImplementationManager: IHTTPImplementationManager; safecall;
+    function GetRequestScrape: IHTTPScrapeEvent; safecall;
     function GetRequestDone: IHTTPProcessEvent; safecall;
   public
 {$REGION 'Documentation'}
@@ -225,6 +226,7 @@ type
     /// The event call is synchronized.
     /// </remarks>
 {$ENDREGION}
+    property OnRequestScrape: IHTTPScrapeEvent read GetRequestScrape write FRequestScrape;
     property OnRequestDone: IHTTPProcessEvent read GetRequestDone write FRequestDoneEvent;
 
     destructor Destroy; override;
@@ -297,68 +299,18 @@ begin
 end;
 
 { TIdHTTPManager }
-{$REGION 'HandleBlockingScripts'}
-  (*
-    procedure THTTPManager.HandleBlockingScripts(AHTTPHelper: THTTPHelper; AWebsite:string; AHTTPResponse: IHTTPResponse);
-    var
-    I: Integer;
-    CookieStartString, CookieEndString, JavaScriptPage: string;
-    begin
-    if Pos('onload="scf(', string(AHTTPResponse.Content)) > 0 then
-    begin
-    CookieStartString := '';
-    with TRegExpr.Create do
-    try
-    InputString := AHTTPResponse.Content;
-    Expression := 'onload="scf\((.*?),';
-
-    if Exec(InputString) then
-    begin
-    for I := 1 to length(Match[1]) - 1 do
-    if Match[1][I] in ['0' .. '9', 'a' .. 'z', 'A' .. 'Z'] then
-    CookieStartString := CookieStartString + Match[1][I];
-    end;
-    finally
-    Free;
-    end;
-
-    with TRegExpr.Create do
-    try
-    InputString := AHTTPResponse.Content;
-    Expression := 'language="javascript" src="\/sc_(\w+)\.js"';
-
-    if Exec(InputString) then
-    JavaScriptPage := AHTTPHelper.Get(AWebsite + 'sc_' + Match[1] + '.js');
-    finally
-    Free;
-    end;
-
-    CookieEndString := '';
-    with TRegExpr.Create do
-    try
-    InputString := JavaScriptPage;
-    Expression := 'escape\(hsh \+ "(.*?)"\)';
-
-    if Exec(InputString) then
-    begin
-    for I := 1 to length(Match[1]) do
-    if Match[1][I] in ['0' .. '9', 'a' .. 'z', 'A' .. 'Z'] then
-    CookieEndString := CookieEndString + Match[1][I];
-    end;
-    finally
-    Free;
-    end;
-
-    AHTTPResponse.Cookies.Add('sitechrx=' + CookieStartString + CookieEndString);
-    end;
-    end;
-    *)
-{$ENDREGION}
 
 procedure THTTPManager.Execute(const workItem: IOmniWorkItem);
 var
   HTTPData: IHTTPData;
   HTTPResult: IHTTPResult;
+  HTTPProcess: IHTTPProcess;
+
+  ScrapeData: IHTTPData;
+  ScrapeHandled: WordBool;
+  ScrapeResult: IHTTPResult;
+
+  ScrapedData: IHTTPData;
 begin
   HTTPData := IHTTPData(workItem.Data.AsInterface);
 
@@ -368,7 +320,50 @@ begin
     OutputDebugString('HTTPManager execute error');
   end;
 
-  workItem.Result := TOmniValue.CastFrom(HTTPResult);
+  HTTPProcess := THTTPProcess.Create(workItem.UniqueID);
+  HTTPProcess.HTTPData := HTTPData;
+  if not workItem.IsExceptional then
+  begin
+    HTTPProcess.HTTPResult := HTTPResult;
+
+    ScrapeHandled := False;
+    FRequestScrape.Invoke(HTTPProcess, ScrapeData, ScrapeHandled);
+
+    if ScrapeHandled then
+    begin
+      HTTPProcess := nil;
+
+      try
+        Implementor.Handle(ScrapeData, ScrapeResult);
+      except
+        OutputDebugString('HTTPManager execute error (handling scrape)');
+      end;
+
+      HTTPProcess := THTTPProcess.Create(workItem.UniqueID);
+      HTTPProcess.HTTPData := ScrapeData;
+      HTTPProcess.HTTPResult := ScrapeResult;
+
+      HTTPProcess.HTTPData.HTTPRequest.URL := HTTPData.HTTPRequest.URL;
+      HTTPProcess.HTTPData.HTTPRequest.Referer := HTTPData.HTTPRequest.URL;
+
+      ScrapedData := THTTPData.Create(THTTPRequest.FollowUpClone(HTTPProcess, HTTPData.HTTPRequest), HTTPData.HTTPOptions, HTTPData.HTTPParams);
+      HTTPProcess := nil;
+      HTTPResult := nil;
+
+      try
+        Implementor.Handle(ScrapedData, HTTPResult);
+      except
+        OutputDebugString('HTTPManager execute error (after handling scrape)');
+      end;
+
+      HTTPProcess := THTTPProcess.Create(workItem.UniqueID);
+      HTTPProcess.HTTPData := ScrapedData;
+      if not workItem.IsExceptional then
+        HTTPProcess.HTTPResult := HTTPResult;
+    end;
+  end;
+
+  workItem.Result := TOmniValue.CastFrom(HTTPProcess);
 end;
 
 function THTTPManager.DoRequest(AHTTPMethod: THTTPMethod; AURL: string; AFollowUp: Double; AHTTPOptions: IHTTPOptions = nil; AHTTPParams: IHTTPParams = nil): Double;
@@ -413,6 +408,7 @@ begin
   FImplementor := nil;
   FImplementationManager := THTTPImplementationManager.Create;
 
+  FRequestScrape := TIHTTPScrapeEvent.Create;
   FRequestDoneEvent := TIHTTPProcessEvent.Create;
 
   FBackgroundWorker.NumTasks(FConnectionMaximum).Execute(Execute).OnRequestDone_Asy(
@@ -420,11 +416,7 @@ begin
     { } var
     { . } HTTPProcess: IHTTPProcess;
     { } begin
-
-    { . } HTTPProcess := THTTPProcess.Create(workItem.UniqueID);
-    { . } HTTPProcess.HTTPData := IHTTPData(workItem.Data.AsInterface);
-    { . } if not workItem.IsExceptional then
-    { ... } HTTPProcess.HTTPResult := IHTTPResult(workItem.Result.AsInterface);
+    { . } HTTPProcess := IHTTPProcess(workItem.Result.AsInterface);
 
     { . } FRequestArrayLock.EnterWriteLock;
     { . } try
@@ -462,6 +454,11 @@ end;
 procedure THTTPManager.SetImplementor(const AImplementor: IHTTPImplementation);
 begin
   FImplementor := AImplementor;
+end;
+
+function THTTPManager.GetRequestScrape: IHTTPScrapeEvent;
+begin
+  Result := FRequestScrape;
 end;
 
 function THTTPManager.GetRequestDone: IHTTPProcessEvent;
@@ -567,6 +564,7 @@ end;
 destructor THTTPManager.Destroy;
 begin
   FRequestDoneEvent := nil;
+  FRequestScrape := nil;
   FImplementationManager := nil;
   FImplementor := nil;
 

@@ -11,6 +11,7 @@ uses
   Generics.Collections;
 
 type
+  THTTPScrapeMethod = procedure(const AHTTPProcess: IHTTPProcess; out AHTTPData: IHTTPData; var AHandled: WordBool) of object;
   {$REGION 'Documentation'}
   ///	<summary>
   ///	  Event method for sending a full HTTP process.
@@ -20,6 +21,16 @@ type
   ///	</param>
   {$ENDREGION}
   THTTPProcessMethod = procedure(const AHTTPProcess: IHTTPProcess) of object;
+
+  TIHTTPScrapeEventHandler = class(TGenericEventHandler<THTTPScrapeMethod>, IHTTPScrapeEventHandler)
+  public
+    procedure Invoke(const AHTTPProcess: IHTTPProcess; out AHTTPData: IHTTPData; var AHandled: WordBool); safecall;
+  end;
+
+  TIHTTPScrapeEvent = class(TGenericEvent<IHTTPScrapeEventHandler>, IHTTPScrapeEvent)
+  public
+    procedure Invoke(const AHTTPProcess: IHTTPProcess; out AHTTPData: IHTTPData; var AHandled: WordBool); safecall;
+  end;
 
   TIHTTPProcessEventHandler = class(TGenericEventHandler<THTTPProcessMethod>, IHTTPProcessEventHandler)
   public
@@ -32,6 +43,25 @@ type
   end;
 
 implementation
+
+{ TIHTTPScrapeEventHandler }
+
+procedure TIHTTPScrapeEventHandler.Invoke(const AHTTPProcess: IHTTPProcess; out AHTTPData: IHTTPData; var AHandled: WordBool);
+begin
+  if (@FHandler <> nil) then
+    FHandler(AHTTPProcess, AHTTPData, AHandled);
+end;
+
+{ TIHTTPScrapeEvent }
+
+procedure TIHTTPScrapeEvent.Invoke(const AHTTPProcess: IHTTPProcess; out AHTTPData: IHTTPData; var AHandled: WordBool);
+var
+  HTTPScrapeEventHandler: IHTTPScrapeEventHandler;
+begin
+  for HTTPScrapeEventHandler in Methods do
+    if not AHandled then
+      HTTPScrapeEventHandler.Invoke(AHTTPProcess, AHTTPData, AHandled);
+end;
 
 { TIHTTPProcessEventHandler }
 

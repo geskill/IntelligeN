@@ -10,7 +10,7 @@ uses
   // Delphi
   SysUtils, Classes, Dialogs, StrUtils,
   // Indy
-  IdGlobal, IdGlobalProtocols, IdException, IdURI, IdCharsets, IdHTTP, IdCookieManager, IdCookie, IdZLib, IdCompressorZLib, IdSSLOpenSSL, IdSocks, IdMultipartFormData;
+  IdGlobal, IdGlobalProtocols, IdCTypes, IdException, IdURI, IdCharsets, IdHTTP, IdCookieManager, IdCookie, IdZLib, IdCompressorZLib, IdSSLOpenSSL, IdSSLOpenSSLHeaders, IdSocks, IdMultipartFormData;
 
 type
   THTTPIndyHelper = class(TIdHTTP)
@@ -35,6 +35,8 @@ type
     FIdCompressorZLib: TIdCompressorZLib;
     FIdSSLIOHandlerSocketOpenSSL: TIdSSLIOHandlerSocketOpenSSL;
     FIdSocksInfo: TIdSocksInfo;
+
+    procedure DoStatusInfoEx(ASender: TObject; const AsslSocket: PSSL; const AWhere, Aret: TIdC_INT; const AType, AMsg: String);
     procedure DoRequest(const AMethod: TIdHTTPMethod; AURL: string; ASource, AResponseContent: TStream; AIgnoreReplies: array of SmallInt); override;
   public
     constructor Create(AProxy: IProxy = nil); overload;
@@ -46,36 +48,35 @@ type
     property UseCompressor: Boolean read GetUseCompressor write SetUseCompressor;
 
     property HandleWrongProtocolException: Boolean read FHandleWrongProtocolException write FHandleWrongProtocolException;
-    {$REGION 'Documentation'}
-    ///	<summary>
-    ///	  <para>
-    ///	    Not all responses which send a
-    ///	    <see href="ms-help://embarcadero.rs2010/Indy/TIdResponseHeaderInfo_Location.html">Location</see>
-    ///	    header are redirected through the
-    ///	    <see href="ms-help://embarcadero.rs2010/Indy/TIdHTTP.html">TIdHTTP</see>
-    ///	    component because only redirects with a specific
-    ///	    <see href="ms-help://embarcadero.rs2010/Indy/TIdHTTPResponse_ResponseCode.html">ResponseCode</see>
-    ///	    are addressed.
-    ///	  </para>
-    ///	  <para>
-    ///	    By default this is True and after a POST-request the unhandled 
-    ///	    Location or Response header is processed by a additional
-    ///	    GET-request.
-    ///	  </para>
-    ///	</summary>
-    {$ENDREGION}
+{$REGION 'Documentation'}
+    /// <summary>
+    /// <para>
+    /// Not all responses which send a
+    /// <see href="ms-help://embarcadero.rs2010/Indy/TIdResponseHeaderInfo_Location.html">Location</see>
+    /// header are redirected through the
+    /// <see href="ms-help://embarcadero.rs2010/Indy/TIdHTTP.html">TIdHTTP</see>
+    /// component because only redirects with a specific
+    /// <see href="ms-help://embarcadero.rs2010/Indy/TIdHTTPResponse_ResponseCode.html">ResponseCode</see>
+    /// are addressed.
+    /// </para>
+    /// <para>
+    /// By default this is True and after a POST-request the unhandled
+    /// Location or Response header is processed by a additional
+    /// GET-request.
+    /// </para>
+    /// </summary>
+{$ENDREGION}
     property HandleSketchyRedirects: Boolean read FHandleSketchyRedirects write FHandleSketchyRedirects;
-
-    {$REGION 'Documentation'}
-    ///	<summary>
-    ///	  This additional header information is similar to the
-    ///	  <see href="ms-help://embarcadero.rs2010/Indy/TIdResponseHeaderInfo_Location.html">Location</see>
-    ///	  header.
-    ///	</summary>
-    ///	<seealso href="http://stackoverflow.com/questions/283752/refresh-http-header">
-    ///	  'Refresh' HTTP header
-    ///	</seealso>
-    {$ENDREGION}
+{$REGION 'Documentation'}
+    /// <summary>
+    /// This additional header information is similar to the
+    /// <see href="ms-help://embarcadero.rs2010/Indy/TIdResponseHeaderInfo_Location.html">Location</see>
+    /// header.
+    /// </summary>
+    /// <seealso href="http://stackoverflow.com/questions/283752/refresh-http-header">
+    /// 'Refresh' HTTP header
+    /// </seealso>
+{$ENDREGION}
     property Response_Refresh: string read GetResponseRefresh;
     class function Charsets: string;
     destructor Destroy; override;
@@ -154,7 +155,7 @@ end;
 
 function THTTPIndyHelper.IsWrongProtocolException(ALowerCaseSourceCode: string): Boolean;
 begin
-  Result := (not(Pos('<body', ALowerCaseSourceCode) = 0))
+  Result := (not(Pos('<body', ALowerCaseSourceCode) = 0));
 end;
 
 procedure THTTPIndyHelper.WriteErrorMsgToStream(AMsg: string; AStream: TStream);
@@ -165,6 +166,11 @@ end;
 procedure THTTPIndyHelper.Redirect(Sender: TObject; var dest: string; var NumRedirect: Integer; var Handled: Boolean; var VMethod: TIdHTTPMethod);
 begin
   FLastRedirect := dest;
+end;
+
+procedure THTTPIndyHelper.DoStatusInfoEx(ASender: TObject; const AsslSocket: PSSL; const AWhere, Aret: TIdC_INT; const AType, AMsg: String);
+begin
+  SSL_set_tlsext_host_name(AsslSocket, Request.Host);
 end;
 
 procedure THTTPIndyHelper.DoRequest(const AMethod: TIdHTTPMethod; AURL: string; ASource, AResponseContent: TStream; AIgnoreReplies: array of SmallInt);
@@ -191,7 +197,9 @@ begin
       else if ((not HandleRedirects) or (RedirectCount < RedirectMaximum)) and (ResponseCode = 302) then
         // don't raise for 302 Found errors
       else
+      begin
         raise ;
+      end;
     end;
     on Exception do
       raise ;
@@ -215,10 +223,14 @@ begin
 
   FIdCompressorZLib := TIdCompressorZLib.Create(nil);
   FIdSSLIOHandlerSocketOpenSSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
-  with FIdSSLIOHandlerSocketOpenSSL.SSLOptions do
+  with FIdSSLIOHandlerSocketOpenSSL do
   begin
-    Method := sslvTLSv1_2;
-    SSLVersions := [sslvTLSv1_2];
+    OnStatusInfoEx := DoStatusInfoEx;
+    with SSLOptions do
+    begin
+      Method := sslvTLSv1_2;
+      SSLVersions := [sslvTLSv1_2];
+    end;
   end;
   FIdSocksInfo := TIdSocksInfo.Create(nil);
 

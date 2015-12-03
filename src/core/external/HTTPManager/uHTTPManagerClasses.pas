@@ -15,13 +15,13 @@ type
   protected
     function GetWebsite: WideString; safecall;
     function GetHTTPParams: IHTTPParams; safecall;
-    procedure SetHTTPParams(AHTTPParams: IHTTPParams); safecall;
+    procedure SetHTTPParams(const AHTTPParams: IHTTPParams); safecall;
     function GetHTTPRequest: IHTTPRequest; safecall;
-    procedure SetHTTPRequest(AHTTPRequest: IHTTPRequest); safecall;
+    procedure SetHTTPRequest(const AHTTPRequest: IHTTPRequest); safecall;
     function GetHTTPOptions: IHTTPOptions; safecall;
-    procedure SetHTTPOptions(AHTTPOptions: IHTTPOptions); safecall;
+    procedure SetHTTPOptions(const AHTTPOptions: IHTTPOptions); safecall;
   public
-    constructor Create(AHTTPRequest: IHTTPRequest; AHTTPOptions: IHTTPOptions; AHTTPParams: IHTTPParams);
+    constructor Create(const AHTTPRequest: IHTTPRequest; const AHTTPOptions: IHTTPOptions; const AHTTPParams: IHTTPParams);
 
     property Website: WideString read GetWebsite;
     property HTTPParams: IHTTPParams read GetHTTPParams write SetHTTPParams;
@@ -39,7 +39,7 @@ type
     function GetHTTPResponse: IHTTPResponse; safecall;
     function GetHTTPResponseInfo: IHTTPResponseInfo; safecall;
   public
-    constructor Create(AHTTPResponse: IHTTPResponse; AHTTPResponseInfo: IHTTPResponseInfo);
+    constructor Create(const AHTTPResponse: IHTTPResponse; const AHTTPResponseInfo: IHTTPResponseInfo);
 
     property SourceCode: WideString read GetSourceCode;
     property HasError: WordBool read GetHasError;
@@ -55,11 +55,11 @@ type
   protected
     function GetUniqueID: Double; safecall;
     function GetHTTPData: IHTTPData; safecall;
-    procedure SetHTTPData(AHTTPData: IHTTPData); safecall;
+    procedure SetHTTPData(const AHTTPData: IHTTPData); safecall;
     function GetHTTPResult: IHTTPResult; safecall;
-    procedure SetHTTPResult(AHTTPResult: IHTTPResult); safecall;
+    procedure SetHTTPResult(const AHTTPResult: IHTTPResult); safecall;
   public
-    constructor Create(AUniqueID: Double);
+    constructor Create(const AUniqueID: Double);
 
     property UniqueID: Double read GetUniqueID;
     property HTTPData: IHTTPData read GetHTTPData write SetHTTPData;
@@ -70,7 +70,7 @@ implementation
 
 { THTTPData }
 
-constructor THTTPData.Create(AHTTPRequest: IHTTPRequest; AHTTPOptions: IHTTPOptions; AHTTPParams: IHTTPParams);
+constructor THTTPData.Create(const AHTTPRequest: IHTTPRequest; const AHTTPOptions: IHTTPOptions; const AHTTPParams: IHTTPParams);
 begin
   FHTTPRequest := AHTTPRequest;
   FHTTPOptions := AHTTPOptions;
@@ -87,7 +87,7 @@ begin
   Result := FHTTPParams;
 end;
 
-procedure THTTPData.SetHTTPParams(AHTTPParams: IHTTPParams);
+procedure THTTPData.SetHTTPParams(const AHTTPParams: IHTTPParams);
 begin
   FHTTPParams := AHTTPParams;
 end;
@@ -97,7 +97,7 @@ begin
   Result := FHTTPRequest;
 end;
 
-procedure THTTPData.SetHTTPRequest(AHTTPRequest: IHTTPRequest);
+procedure THTTPData.SetHTTPRequest(const AHTTPRequest: IHTTPRequest);
 begin
   FHTTPRequest := AHTTPRequest;
 end;
@@ -107,14 +107,14 @@ begin
   Result := FHTTPOptions;
 end;
 
-procedure THTTPData.SetHTTPOptions(AHTTPOptions: IHTTPOptions);
+procedure THTTPData.SetHTTPOptions(const AHTTPOptions: IHTTPOptions);
 begin
   FHTTPOptions := AHTTPOptions;
 end;
 
 { THTTPResult }
 
-constructor THTTPResult.Create(AHTTPResponse: IHTTPResponse; AHTTPResponseInfo: IHTTPResponseInfo);
+constructor THTTPResult.Create(const AHTTPResponse: IHTTPResponse; const AHTTPResponseInfo: IHTTPResponseInfo);
 begin
   FHTTPResponse := AHTTPResponse;
   FHTTPResponseInfo := AHTTPResponseInfo;
@@ -152,7 +152,7 @@ begin
   Result := FHTTPData;
 end;
 
-procedure THTTPProcess.SetHTTPData(AHTTPData: IHTTPData);
+procedure THTTPProcess.SetHTTPData(const AHTTPData: IHTTPData);
 begin
   FHTTPData := AHTTPData;
 end;
@@ -162,12 +162,12 @@ begin
   Result := FHTTPResult;
 end;
 
-procedure THTTPProcess.SetHTTPResult(AHTTPResult: IHTTPResult);
+procedure THTTPProcess.SetHTTPResult(const AHTTPResult: IHTTPResult);
 begin
   FHTTPResult := AHTTPResult;
 end;
 
-constructor THTTPProcess.Create(AUniqueID: Double);
+constructor THTTPProcess.Create(const AUniqueID: Double);
 begin
   FUniqueID := AUniqueID;
 end;
