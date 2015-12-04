@@ -70,7 +70,7 @@ type
   public
     function GetName: WideString; override;
     function Start(const AAppController: IAppController): WordBool; override;
-    procedure Stop; override;
+    function Stop: WordBool; override;
   end;
 
 var
@@ -414,14 +414,14 @@ function TMirrorSort.Start;
 begin
   FAppController := AAppController;
 
-  Result := True;
-
   FNotifyEvent := TINotifyEventHandler.Create(OnClick);
   with FAppController.MainMenu.GetMenuItems.GetItem(3) do
     FNewMenuItem := InsertMenuItem(GetMenuItems.GetCount, 'MirrorSort', 'This sorts mirrors', Menus.ShortCut(Ord('D'), [ssAlt]), 22, 0, FNotifyEvent);
+
+  Result := True;
 end;
 
-procedure TMirrorSort.Stop;
+function TMirrorSort.Stop;
 begin
   if FMirrorSortActive then
     FMirrorSort.Free;
@@ -429,6 +429,8 @@ begin
   FAppController.MainMenu.GetMenuItems.GetItem(3).GetMenuItems.RemoveItem(FNewMenuItem);
   FNotifyEvent := nil;
   FAppController := nil;
+
+  Result := True;
 end;
 
 end.

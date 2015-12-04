@@ -21,7 +21,7 @@ type
     function GetType: TPlugInType; override; safecall;
 
     function Start(const AAppController: IAppController): WordBool; virtual; safecall; abstract;
-    procedure Stop; virtual; safecall; abstract;
+    function Stop: WordBool; virtual; safecall; abstract;
   end;
 
 implementation

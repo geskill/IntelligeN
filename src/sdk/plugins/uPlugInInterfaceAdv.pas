@@ -21,7 +21,7 @@ type
   IAppPlugIn = interface(IPlugIn)
     ['{DB81AD44-5514-4F6E-BF24-663E8A0AD66A}']
     function Start(const AAppController: IAppController): WordBool; safecall;
-    procedure Stop; safecall;
+    function Stop: WordBool; safecall;
   end;
 
   IFileFormatPlugIn = interface(IPlugIn)

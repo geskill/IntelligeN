@@ -64,7 +64,7 @@ type
     class procedure LoadImageHosterPlugin(ARelativPluginPath: string; AImageHosterPluginProc: TImageHosterPluginProc; AErrorProc: TPluginErrorProc = nil);
   public
     class function AppLoad(App: TAppCollectionItem; const AAppController: IAppController): Boolean;
-    class procedure AppUnLoad(App: TAppCollectionItem);
+    class function AppUnLoad(App: TAppCollectionItem): Boolean;
 
     class function CAPTCHAExec(const ACAPTCHAPluginPath: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString;
       AErrorProc: TPluginErrorProc = nil): WordBool;
@@ -515,21 +515,33 @@ begin
   Result := LResult;
 end;
 
-class procedure TPluginBasic.AppUnLoad(App: TAppCollectionItem);
+class function TPluginBasic.AppUnLoad(App: TAppCollectionItem): Boolean;
 var
   LLibraryHandle: Cardinal;
+  LDoUnload: Boolean;
 begin
+  Result := False;
+
+  LDoUnload := True;
   LLibraryHandle := App.LibraryID;
   if not(LLibraryHandle = 0) then
   begin
     try
-      TPluginBasic.UninitializePlugin(App.Plugin);
-      App.Plugin.Stop;
+      LDoUnload := App.Plugin.Stop;
+      if LDoUnload then
+        TPluginBasic.UninitializePlugin(App.Plugin)
+      else
+        TPluginBasic.ReturnError(Format(StrPluginCanNotUnLoad, [App.Name, ExtractFileName(App.Path)]));
     finally
-      App.Plugin := nil;
+      if LDoUnload then
+       App.Plugin := nil;
     end;
   end;
-  TPluginBasic.UnLoadPluginBase(LLibraryHandle);
+  if LDoUnload then
+  begin
+    TPluginBasic.UnLoadPluginBase(LLibraryHandle);
+    result := True;
+  end;
 end;
 
 class function TPluginBasic.CAPTCHAExec(const ACAPTCHAPluginPath: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString;

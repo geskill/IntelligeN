@@ -453,17 +453,23 @@
 
 * Improved OleInitialize/CoInitializeEx usage
 
+* Improved app interface to check, whether a app plug-in can be unloaded
+
 * Improved ipb2 cms plug-in
 
 * Improved phpbb3 login error message
 
 * Improved phpbb3 forum id recognition if first forum is already sub-forum or portal mod is used
 
+* Improved releasename title detection
+
 * Improved xRel.to error detection
 
 * Fixed threaded draw process for images in Control Editor
 
 * Fixed filter selection bug in WebsiteEditor
+
+* Fixed intelligent_posting (intelligent_posting_keepshortwords is only allowed in search title generation, not as match title for comparison with search list)
 
 * Fixed bug not aborting using intelligent_posting_helper after first redo-search
 
@@ -472,3 +478,8 @@
 * Fixed loading intelligen.xml.2 files with no templatetype
 
 * Changed IScriptEditor tab size to 2 (before 4)
+
+* Updated HTTPManager
+
+* Updated about dialog
+

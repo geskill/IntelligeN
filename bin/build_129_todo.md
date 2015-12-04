@@ -6,8 +6,6 @@ Checked items are planned for next release.
 
 ###Core
 
-- [x] Handle DDos protection from Cloudflare
-
 - [ ] Allow to change HTTPManager implementor for a single request (settings record)
 
 - [x] Implement non-visual "default" control that holds title of current tab (i.e. delegation for releasename or whatever)

@@ -38,7 +38,7 @@ type
   public
     function GetName: WideString; override;
     function Start(const AAppController: IAppController): WordBool; override;
-    procedure Stop; override;
+    function Stop: WordBool; override;
   end;
 
 implementation
@@ -371,17 +371,19 @@ function TLinkGrabber.Start(const AAppController: IAppController): WordBool;
 begin
   FAppController := AAppController;
 
-  Result := True;
-
   FNotifyEventHandler := TINotifyEventHandler.Create(OnClick);
   with FAppController.MainMenu.GetMenuItems.GetItem(3) do
     FNewMenuItem := InsertMenuItem(GetMenuItems.GetCount, 'LinkGraber', 'This grabs links', 0, -1, 0, FNotifyEventHandler);
+
+  Result := True;
 end;
 
-procedure TLinkGrabber.Stop;
+function TLinkGrabber.Stop: WordBool;
 begin
   FAppController.MainMenu.GetMenuItems.GetItem(3).GetMenuItems.RemoveItem(FNewMenuItem);
   FNotifyEventHandler := nil;
+
+  Result := True;
 end;
 
 end.

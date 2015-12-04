@@ -1793,12 +1793,21 @@ end;
 
 procedure TSettings.AppClickCheck(Sender: TObject; AIndex: Integer; APrevState: TcxCheckBoxState; ANewState: TcxCheckBoxState);
 begin
-  TPlugInCollectionItem(SettingsManager.Settings.Plugins.App.Items[AIndex]).Enabled := (ANewState = cbsChecked);
-
-  if (ANewState = cbsChecked) then
-    TPluginBasic.AppLoad(TAppCollectionItem(SettingsManager.Settings.Plugins.App.Items[AIndex]), Main)
+  if (ANewState = cbsUnchecked) then
+  begin
+    try
+      TPluginBasic.AppUnLoad(TAppCollectionItem(SettingsManager.Settings.Plugins.App.Items[AIndex]));
+    except
+      TcxCheckListBox(Sender).Items[AIndex].State := cbsChecked;
+      raise ;
+    end;
+  end
   else
-    TPluginBasic.AppUnLoad(TAppCollectionItem(SettingsManager.Settings.Plugins.App.Items[AIndex]));
+  begin
+    TPluginBasic.AppLoad(TAppCollectionItem(SettingsManager.Settings.Plugins.App.Items[AIndex]), Main);
+  end;
+
+  TPlugInCollectionItem(SettingsManager.Settings.Plugins.App.Items[AIndex]).Enabled := (ANewState = cbsChecked);
 end;
 
 procedure TSettings.AddAppClick(Sender: TObject);

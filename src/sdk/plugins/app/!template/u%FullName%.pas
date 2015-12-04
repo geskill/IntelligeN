@@ -30,7 +30,7 @@ type
   public
     function GetName: WideString; override;
     function Start(const AAppController: IAppController): WordBool; override;
-    procedure Stop; override;
+    function Stop: WordBool; override;
   end;
 
 implementation
@@ -65,19 +65,21 @@ function T%FullName%.Start(const AAppController: IAppController): WordBool;
 begin
   FAppController := AAppController;
 
-  Result := True;
-
   { TODO : add menu items here }
   FNotifyEventHandler := TINotifyEventHandler.Create(OnClick);
   with FAppController.MainMenu.GetMenuItems.GetItem(3) do
     FNewMenuItem := InsertMenuItem(GetMenuItems.GetCount, '%FullName%', '%FullName%', 0, -1, 0, FNotifyEventHandler);
+	
+  Result := True;
 end;
 
-procedure T%FullName%.Stop;
+function T%FullName%.Stop: WordBool;
 begin
   { TODO : dont forget to remove the menu items here }
   FAppController.MainMenu.GetMenuItems.GetItem(3).GetMenuItems.RemoveItem(FNewMenuItem);
   FNotifyEventHandler := nil;
+  
+  Result := True;
 end;
 
 end.
