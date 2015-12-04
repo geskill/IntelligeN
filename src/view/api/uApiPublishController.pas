@@ -772,13 +772,13 @@ begin
                 if Assigned(LPicture) then
                 begin
                   for LControlIndex := 0 to LPicture.MirrorCount - 1 do
-                    if SameText(LWhitelist.Strings[LWhitelistIndex], LPicture.Mirror[LControlIndex].Name) then
+                    if SameText(LWhitelist.Strings[LWhitelistIndex], LPicture.Mirror[LControlIndex].Name) and not SameStr('', LPicture.Mirror[LControlIndex].Value) then
                     begin
                       AControlList.Add(LPicture.Mirror[LControlIndex].CloneInstance());
                       LHasPicture := True;
                       Break;
                     end
-                    else if SameText(LWhitelist.Strings[LWhitelistIndex], 'OriginalValue') then
+                    else if SameText(LWhitelist.Strings[LWhitelistIndex], 'OriginalValue') and not SameStr('', LPicture.Value) then
                     begin
                       AControlList.Add(LPicture.CloneInstance());
                       LHasPicture := True;
@@ -811,7 +811,7 @@ begin
             if Assigned(LPicture) and not LHasPicture then
             begin
               for LControlIndex := 0 to LPicture.MirrorCount - 1 do
-                if (LBlackList.IndexOf(LPicture.Mirror[LControlIndex].Name) = -1) then
+                if (LBlackList.IndexOf(LPicture.Mirror[LControlIndex].Name) = -1) and not SameStr('', LPicture.Mirror[LControlIndex].Value) then
                 begin
                   AControlList.Add(LPicture.Mirror[LControlIndex].CloneInstance());
                   LHasPicture := True;
@@ -834,7 +834,7 @@ begin
     end;
   end;
 
-  // Handle if nothing is defined
+  // Handle if nothing is defined // TODO: Check if this is ever the case
   if not LHasMirror then
   begin
     for LControlIndex := 0 to TabSheetController.MirrorController.MirrorCount - 1 do

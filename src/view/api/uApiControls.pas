@@ -1442,7 +1442,9 @@ end;
 
 procedure TPictureMirror.SetHint;
 begin
-  if not SameStr('', ErrorMsg) then
+  if SameStr('', ErrorMsg) and SameStr('', Value) then
+    FImage.Hint := ''
+  else if not SameStr('', ErrorMsg) then
     FImage.Hint := Name + ' Error:' + sLineBreak + ErrorMsg
   else
     FImage.Hint := Name + ': ' + Value;
