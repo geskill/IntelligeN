@@ -287,6 +287,8 @@ type
     procedure SetErrorMsg(AErrorMsg: WideString); override; safecall;
     procedure SetHint;
     procedure ResetErrorMsgAndValue();
+    procedure DrawIconRectangle();
+    procedure DrawStatusRectangle();
   public
     constructor Create(AOwner: TWinControl; APicture: IPicture; AImageHosterName: WideString); reintroduce;
     destructor Destroy; override;
@@ -1444,12 +1446,38 @@ begin
     FImage.Hint := Name + ' Error:' + sLineBreak + ErrorMsg
   else
     FImage.Hint := Name + ': ' + Value;
+  DrawStatusRectangle();
 end;
 
 procedure TPictureMirror.ResetErrorMsgAndValue;
 begin
   ErrorMsg := '';
   Value := '';
+  DrawStatusRectangle();
+end;
+
+procedure TPictureMirror.DrawIconRectangle;
+begin
+  with SettingsManager.Settings.Plugins do
+    FImage.Picture.Bitmap.Assign(TImageHosterCollectionItem(FindPlugInCollectionItemFromCollection(Name, ImageHoster)).Icon);
+end;
+
+procedure TPictureMirror.DrawStatusRectangle;
+begin
+  if SameStr('', ErrorMsg) and SameStr('', Value) then
+    DrawIconRectangle()
+  else
+  begin
+    with FImage.Canvas do
+    begin
+      if not SameStr('', ErrorMsg) then
+        Brush.Color := clRed
+      else
+        Brush.Color := clLime;
+
+      FillRect(Rect(10, 0, 16, 6));
+    end;
+  end;
 end;
 
 constructor TPictureMirror.Create(AOwner: TWinControl; APicture: IPicture; AImageHosterName: WideString);
@@ -1469,8 +1497,7 @@ begin
     Height := 16;
     Width := 16;
 
-    with SettingsManager.Settings.Plugins do
-      Picture.Icon.Assign(TImageHosterCollectionItem(FindPlugInCollectionItemFromCollection(AImageHosterName, ImageHoster)).Icon);
+    DrawIconRectangle();
 
     OnDblClick := FOnClickIconClick; // Double click required
   end;
@@ -1486,13 +1513,11 @@ end;
 
 procedure TPictureMirror.LocalUpload(ALocalPath: WideString);
 begin
-  ResetErrorMsgAndValue;
   FPicture.ControlController.TabSheetController.PageController.ImageHosterManager.AddLocalUploadJob(Self, ALocalPath);
 end;
 
 procedure TPictureMirror.RemoteUpload;
 begin
-  ResetErrorMsgAndValue;
   FPicture.ControlController.TabSheetController.PageController.ImageHosterManager.AddRemoteUploadJob(Self, OriginalValue);
 end;
 {$ENDREGION}

@@ -439,6 +439,10 @@
 
 ######minor enhancements
 
+* Add indication in the GUI if the file hoster check, crypter crypt/check was not successful
+
+* Add indication in the GUI if the image hoster upload was successful or not
+
 * Added host and subject in CAPTCHA and intelligent_posting-Helper window
 
 * Improved performance

@@ -200,6 +200,8 @@ type
     function GetPicture: IPicture;
     procedure SetPicture(APicture: IPicture);
 
+    procedure ResetErrorMsgAndValue();
+
     property Picture: IPicture read GetPicture write SetPicture;
 
     procedure LocalUpload(ALocalPath: WideString);
@@ -321,6 +323,11 @@ type
     function GetFocus: Boolean;
     procedure SetFocus(AFocus: Boolean);
 
+    function GetErrorMsg: WideString;
+    procedure SetErrorMsg(AErrorMsg: WideString);
+
+    procedure ResetErrorMsg();
+
     // Base
     property Value: WideString read GetValue { . } write SetValue;
     property Size: Double read GetSize { . } write SetSize;
@@ -339,6 +346,7 @@ type
 
     property Title: WideString read GetTitle write SetTitle;
     property Focus: Boolean read GetFocus write SetFocus;
+    property ErrorMsg: WideString read GetErrorMsg write SetErrorMsg;
 
     // Cloning
     function CloneInstance(): IDirectlink;
@@ -358,8 +366,11 @@ type
 
     function GetVisible: Boolean;
     procedure SetVisible(AVisible: Boolean);
+
     function GetFocus: Boolean;
     procedure SetFocus(AFocus: Boolean);
+
+    function GetErrorMsg: WideString;
 
     // Base
     property Directlink[const Index: Integer]: IDirectlinksMirror read GetDirectlink;
@@ -377,6 +388,7 @@ type
 
     property Visible: Boolean read GetVisible write SetVisible;
     property Focus: Boolean read GetFocus write SetFocus;
+    property ErrorMsg: WideString read GetErrorMsg;
 
     // Cloning
     function CloneInstance(): IDirectlinkContainer;
@@ -402,6 +414,11 @@ type
     function GetFocus: Boolean;
     procedure SetFocus(AFocus: Boolean);
 
+    function GetErrorMsg: WideString;
+    procedure SetErrorMsg(AErrorMsg: WideString);
+
+    procedure ResetErrorMsg();
+
     procedure UpdateGUI;
 
     // Base
@@ -419,6 +436,7 @@ type
 
     property Visible: Boolean read GetVisible write SetVisible;
     property Focus: Boolean read GetFocus write SetFocus;
+    property ErrorMsg: WideString read GetErrorMsg write SetErrorMsg;
 
     // Cloning
     function CloneInstance(): ICrypter;
@@ -474,6 +492,8 @@ type
 
     function AddCrypter(AName: WideString): Integer;
     function RemoveCrypter(AIndex: Integer): Boolean;
+
+    procedure UpdateErrorMsg(AName, AErrorMsg: WideString);
 
     // Cloning
     function CloneInstance(): IMirrorContainer;

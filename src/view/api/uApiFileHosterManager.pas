@@ -31,6 +31,7 @@ type
   protected
     FLinks: string;
     FLinksInfo: TLinksInfo;
+    procedure DefaultErrorHandler(AErrorMsg: string); override;
   public
     constructor Create(const ADirectlink: IDirectlinksMirror);
     destructor Destroy; override;
@@ -65,6 +66,15 @@ end;
 
 { THosterCheckThread }
 
+procedure TFileHosterCheckThread.DefaultErrorHandler(AErrorMsg: string);
+begin
+  task.Invoke(
+    { } procedure
+    { } begin
+    { . } Data.Directlink.ErrorMsg := AErrorMsg;
+    { } end);
+end;
+
 constructor TFileHosterCheckThread.Create(const ADirectlink: IDirectlinksMirror);
 begin
   inherited Create;
@@ -72,6 +82,8 @@ begin
   Data.TabSheetController := ADirectlink.DirectlinksPanel.MirrorControl.MirrorController.TabSheetController;
 
   Data.Directlink := ADirectlink;
+
+  Data.Directlink.ResetErrorMsg();
 
   with SettingsManager.Settings.Plugins do
     Data.FileHosterCollectionItem := TPlugInCollectionItem(FindPlugInCollectionItemFromCollection(ADirectlink.Hoster, FileHoster));

@@ -62,8 +62,4 @@ Checked items are planned for next release.
 
 - [ ] Add progress bar or indication for crawling overall progress
 
-- [x] Add indication in the GUI if file hoster check, crypter crypt/check was successful or not (i.e. icon in the tab)
-
-- [x] Add indication in the GUI if image hoster upload was successful or not (i.e. green/red shape at the icon)
-
 - [ ] Add possibility in WebsiteEditor to base general settings upon the TypeID (i.e. PCGames with intelligent_posting and Software not)

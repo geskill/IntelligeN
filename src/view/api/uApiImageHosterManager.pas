@@ -93,6 +93,8 @@ begin
 
   Data.PictureMirror := APictureMirror;
 
+  Data.PictureMirror.ResetErrorMsgAndValue();
+
   with SettingsManager.Settings.Plugins do
     Data.ImageHosterCollectionItem := TImageHosterCollectionItem(FindPlugInCollectionItemFromCollection(APictureMirror.Name, ImageHoster));
 end;

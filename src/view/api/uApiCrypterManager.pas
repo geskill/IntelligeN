@@ -30,6 +30,7 @@ type
   TCrypterThread = class(TThreadWorker<TCrypterData>)
   protected
     FFolderInfo: TCrypterFolderInfo;
+    procedure DefaultErrorHandler(AErrorMsg: string); override;
   public
     constructor Create(const ACrypterPanel: ICrypterPanel); reintroduce;
     destructor Destroy; override;
@@ -84,6 +85,15 @@ end;
 
 { TCrypterThread }
 
+procedure TCrypterThread.DefaultErrorHandler(AErrorMsg: string);
+begin
+  task.Invoke(
+    { } procedure
+    { } begin
+    { . } Data.CrypterPanel.ErrorMsg := AErrorMsg;
+    { } end);
+end;
+
 constructor TCrypterThread.Create(const ACrypterPanel: ICrypterPanel);
 begin
   inherited Create;
@@ -91,6 +101,8 @@ begin
   Data.TabSheetController := ACrypterPanel.MirrorControl.MirrorController.TabSheetController;
 
   Data.CrypterPanel := ACrypterPanel;
+
+  Data.CrypterPanel.ResetErrorMsg();
 
   with SettingsManager.Settings.Plugins do
     Data.CrypterCollectionItem := TCrypterCollectionItem(FindPlugInCollectionItemFromCollection(ACrypterPanel.Name, Crypter));

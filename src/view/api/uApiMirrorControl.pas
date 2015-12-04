@@ -35,7 +35,7 @@ type
     property OnDropFiles: TWndMethod read FOnDropFiles write FOnDropFiles;
   end;
 
-  TStatusGrid = class
+  TStatusGrid = class(TObject)
   private
     FcxGridInfo: TcxGrid;
     FcxGridInfoLevel: TcxGridLevel;
@@ -73,6 +73,7 @@ type
     FMycxRichEdit: TMycxRichEdit;
     FTransparentPanel: TEZTexturePanel;
     FStatusGrid: TStatusGrid;
+    FErrorMsg: string;
     FStatusImage, FHosterImage: TImage;
     FPartsLabel, FSizeLabel: TLabel;
     FModyHintStyleController: TcxHintStyleController;
@@ -131,6 +132,9 @@ type
     procedure SetValue(AValue: WideString);
     function GetFocus: Boolean;
     procedure SetFocus(AFocus: Boolean);
+    function GetErrorMsg: WideString;
+    procedure SetErrorMsg(AErrorMsg: WideString);
+    procedure ResetErrorMsg();
   public
     constructor Create(AOwner: TComponent);
     procedure PostCreate;
@@ -157,6 +161,7 @@ type
 
     property Title: WideString read GetTitle write SetTitle;
     property Focus: Boolean read GetFocus write SetFocus;
+    property ErrorMsg: WideString read GetErrorMsg write SetErrorMsg;
 
     procedure Mody;
     function CheckStatus: WordBool;
@@ -174,6 +179,7 @@ type
     FcxTextEditLink: TcxTextEdit;
     FcxButtonLinkCheck: TcxButton;
     FStatusGrid: TStatusGrid;
+    FErrorMsg: string;
     // GUI
     procedure FPanelContextPopup(Sender: TObject; MousePos: TPoint; var Handled: Boolean);
     procedure FcxTextEditLinkChange(Sender: TObject);
@@ -214,6 +220,11 @@ type
 
     function GetFocus: Boolean;
     procedure SetFocus(AFocus: Boolean);
+
+    function GetErrorMsg: WideString;
+    procedure SetErrorMsg(AErrorMsg: WideString);
+
+    procedure ResetErrorMsg();
   public
     constructor Create(AOwner: TComponent; const AMirrorControl: IMirrorControl; ACrypter: TCrypterCollectionItem);
     destructor Destroy; override;
@@ -240,6 +251,7 @@ type
 
     property Visible: Boolean read GetVisible write SetVisible;
     property Focus: Boolean read GetFocus write SetFocus;
+    property ErrorMsg: WideString read GetErrorMsg write SetErrorMsg;
 
     procedure CreateFolder;
     procedure CheckFolder(const AUseCheckDelay: Boolean = False);
@@ -294,6 +306,7 @@ type
     procedure SetVisible(AVisible: Boolean);
     function GetFocus: Boolean;
     procedure SetFocus(AFocus: Boolean);
+    function GetErrorMsg: WideString;
   public
     constructor Create(AOwner: TComponent; AMirrorControl: IMirrorControl);
     destructor Destroy; override;
@@ -319,6 +332,7 @@ type
 
     property Visible: Boolean read GetVisible write SetVisible;
     property Focus: Boolean read GetFocus write SetFocus;
+    property ErrorMsg: WideString read GetErrorMsg;
 
     function Add(ALinks: WideString = ''): Integer;
     procedure Remove(ATabIndex: Integer);
@@ -443,6 +457,8 @@ type
 
     function AddCrypter(AName: WideString): Integer;
     function RemoveCrypter(AIndex: Integer): Boolean;
+
+    procedure UpdateErrorMsg(AName, AErrorMsg: WideString);
 
     // Cloning
     function CloneInstance(): IMirrorContainer;
@@ -1003,7 +1019,7 @@ begin
           if not AShortName then
             Result := Uppercase(LHost[1]) + copy(LHost, 2)
           else
-            Result := UpperCase(copy(LHost, 1, 2));
+            Result := Uppercase(copy(LHost, 1, 2));
         end;
 
         Break;
@@ -1056,6 +1072,22 @@ procedure TMycxTabSheet.SetFocus(AFocus: Boolean);
 begin
   if AFocus and FMycxRichEdit.CanFocusEx then
     FMycxRichEdit.SetFocus;
+end;
+
+function TMycxTabSheet.GetErrorMsg: WideString;
+begin
+  Result := FErrorMsg;
+end;
+
+procedure TMycxTabSheet.SetErrorMsg(AErrorMsg: WideString);
+begin
+  FErrorMsg := AErrorMsg;
+  DirectlinksPanel.MirrorControl.UpdateErrorMsg(StrDirectlinks, AErrorMsg);
+end;
+
+procedure TMycxTabSheet.ResetErrorMsg();
+begin
+  ErrorMsg := '';
 end;
 
 ///
@@ -1687,6 +1719,22 @@ begin
     FcxTextEditLink.SetFocus;
 end;
 
+function TCrypterPanel.GetErrorMsg: WideString;
+begin
+  Result := FErrorMsg;
+end;
+
+procedure TCrypterPanel.SetErrorMsg(AErrorMsg: WideString);
+begin
+  FErrorMsg := AErrorMsg;
+  MirrorControl.UpdateErrorMsg(Name, AErrorMsg);
+end;
+
+procedure TCrypterPanel.ResetErrorMsg();
+begin
+  ErrorMsg := '';
+end;
+
 constructor TCrypterPanel.Create(AOwner: TComponent; const AMirrorControl: IMirrorControl; ACrypter: TCrypterCollectionItem);
 begin
   inherited Create;
@@ -1986,6 +2034,26 @@ begin
   Directlink[ActiveMirrorIndex].Focus := AFocus;
 end;
 
+function TDirectlinksPanel.GetErrorMsg: WideString;
+var
+  LStringList: TStringList;
+  LDirectlinksMirrorIndex: Integer;
+  LErrorMsg: string;
+begin
+  LStringList := TStringList.Create;
+  try
+    for LDirectlinksMirrorIndex := 0 to DirectlinkCount - 1 do
+    begin
+      LErrorMsg := Directlink[LDirectlinksMirrorIndex].ErrorMsg;
+      if not SameStr('', LErrorMsg) then
+        LStringList.Add('Mirror ' + IntToStr(LDirectlinksMirrorIndex + 1) + ': ' + LErrorMsg);
+    end;
+    Result := StringListSplit(LStringList, sLineBreak);
+  finally
+    LStringList.Free;
+  end;
+end;
+
 constructor TDirectlinksPanel.Create;
 begin
   MirrorControl := AMirrorControl;
@@ -2030,8 +2098,6 @@ begin
 
     OnDblClick := FcxPageControlDblClick;
     OnPageChanging := FcxPageControlPageChanging;
-
-    Show;
   end;
 
   FcxLFirstSubMirrorInfo := TcxLabel.Create(FcxPageControl);
@@ -2057,8 +2123,6 @@ begin
     Transparent := True;
 
     OnDblClick := FcxPageControlDblClick;
-
-    Show;
   end;
 end;
 
@@ -2097,8 +2161,6 @@ begin
     FMycxRichEdit.Lines.Text := ALinks;
 
     Result := PageIndex;
-
-    Show;
   end;
 end;
 
@@ -2671,17 +2733,23 @@ begin
     // Workaround for: http://www.devexpress.com/issue=B202502
     HideTabs := True;
     HotTrack := True;
+    Images := Main.ImageList;
     Options := Options + [pcoFixedTabWidthWhenRotated];
 
     NavigatorPosition := npRightBottom;
 
-    Rotate := True;
-    ShowFrame := True;
-    TabPosition := tpLeft;
+    with Properties do
+    begin
+      Rotate := True;
+      ShowFrame := True;
+      ShowTabHints := True;
+      TabPosition := tpLeft;
+    end;
 
     LookAndFeel.Refresh;
 
     Tabs.Add(StrDirectlinks);
+    Tabs[0].ImageIndex := -1;
 
     PopupMenu := FPopupMenu;
 
@@ -2781,18 +2849,20 @@ function TMirrorControl.AddCrypter;
 var
   I: Integer;
   LNewMenuItem: TMenuItem;
+  LTabIndex: Integer;
   LCrypterPanel: ICrypterPanel;
 begin
   Result := -1;
 
   for I := 0 to CrypterCount - 1 do
-    if (AName = Crypter[I].name) then
+    if SameText(AName, Crypter[I].Name) then
     begin
       Result := I;
       Exit;
     end;
 
-  FcxTabControl.Tabs.Add(AName);
+  LTabIndex := FcxTabControl.Tabs.Add(AName);
+  FcxTabControl.Tabs[LTabIndex].ImageIndex := -1;
 
   with SettingsManager.Settings.Plugins do
     LCrypterPanel := TCrypterPanel.Create(FcxTabControl, Self, TCrypterCollectionItem(FindPlugInCollectionItemFromCollection(AName, Crypter)));
@@ -2848,6 +2918,24 @@ begin
   else
     with FcxButtonCrypt do
       Width := GetTabControlTabWidth - Left - 1;
+end;
+
+procedure TMirrorControl.UpdateErrorMsg(AName, AErrorMsg: WideString);
+var
+  LTabIndex: Integer;
+  LHasError: Boolean;
+begin
+  with FcxTabControl do
+    for LTabIndex := 0 to Tabs.Count - 1 do
+      with Tabs[LTabIndex] do
+        if SameText(AName, Caption) then
+        begin
+          LHasError := not SameStr('', AErrorMsg);
+          ImageIndex := IfThen(LHasError, 6, -1);
+          Hint := AErrorMsg;
+          ShowHint := LHasError;
+          Break;
+        end;
 end;
 
 function TMirrorControl.CloneInstance;
