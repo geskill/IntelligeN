@@ -9,8 +9,6 @@ uses
   dxDockControl, cxCheckListBox,
   // AnyDAC
   // uADStanIntf,
-  // Utils
-  uFileUtils, uPathUtils, uStringUtils,
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface, uFileInterface,
   // DLLs
@@ -20,7 +18,9 @@ uses
   // HTTPManager
   uHTTPConst, uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInConst, uPlugInInterface, uPlugInInterfaceAdv;
+  uPlugInConst, uPlugInInterface, uPlugInInterfaceAdv,
+  // Utils
+  uFileUtils, uPathUtils, uStringUtils, uURLUtils;
 
 type
 {$REGION 'T...PlugInCollectionItem'}

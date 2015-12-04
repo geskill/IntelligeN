@@ -23,7 +23,7 @@ uses
   // plugin system
   uPlugInFileHosterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
-  uPathUtils;
+  uPathUtils, uSizeUtils, uURLUtils;
 
 type
   TFilesonicCom = class(TFileHosterPlugIn)

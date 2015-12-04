@@ -21,7 +21,7 @@ uses
   // plugin system
   uPlugInFileHosterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
-  uPathUtils, uSizeUtils;
+  uPathUtils, uSizeUtils, uURLUtils;
 
 type
   TIfileIt = class(TFileHosterPlugIn)

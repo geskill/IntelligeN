@@ -19,7 +19,7 @@ uses
   // Plugin system
   uPlugInConst, uPlugInInterface, uPlugInClass, uPlugInHTTPClasses,
   // Utils
-  uPathUtils;
+  uURLUtils;
 
 type
   TCrawlerCanUseFunc = reference to function(AControlID: TControlID): WordBool;
@@ -36,10 +36,10 @@ type
     function GetAccountPassword: WideString; safecall;
     procedure SetAccountPassword(AAccountPassword: WideString); safecall;
 
-    function InternalGetAvailableTypeIDs: TTypeIDs; virtual; safecall; abstract;
-    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; virtual; safecall; abstract;
-    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; virtual; safecall; abstract;
-    function InternalGetDependentControlIDs: TControlIDs; virtual; safecall; abstract;
+    function InternalGetAvailableTypeIDs: TTypeIDs; virtual; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; virtual; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; virtual; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; virtual; safecall;
 
     function GETRequest(const AURL: string; out ARequestID: Double; AHTTPOptions: IHTTPOptions = nil): string;
     function GETFollowUpRequest(const AURL: string; AFollowUp: Double; out ARequestID: Double; AHTTPOptions: IHTTPOptions = nil): string;
@@ -94,19 +94,38 @@ begin
   FAccountpassword := AAccountPassword;
 end;
 
+function TCrawlerPlugIn.InternalGetAvailableTypeIDs: TTypeIDs;
+begin
+  Result := [low(TTypeID) .. high(TTypeID)];
+end;
+
+function TCrawlerPlugIn.InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs;
+begin
+  Result := [low(TControlID) .. high(TControlID)];
+end;
+
+function TCrawlerPlugIn.InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool;
+begin
+  Result := True;
+end;
+
+function TCrawlerPlugIn.InternalGetDependentControlIDs: TControlIDs;
+begin
+  Result := [];
+end;
+
 function TCrawlerPlugIn.GETRequest(const AURL: string; out ARequestID: Double; AHTTPOptions: IHTTPOptions = nil): string;
 var
   LHTTPRequest: IHTTPRequest;
   LHTTPOptions: IHTTPOptions;
   LRequestID: Double;
-  LHTTPProcess: IHTTPProcess;
 begin
   Result := '';
 
   LHTTPRequest := THTTPRequest.Create(AURL);
   with LHTTPRequest do
   begin
-    Referer := ExtractUrlWebsite(AURL);
+    Referer := ExtractUrlPath(AURL);
   end;
 
   if not Assigned(AHTTPOptions) then
@@ -128,7 +147,6 @@ function TCrawlerPlugIn.GETFollowUpRequest(const AURL: string; AFollowUp: Double
 var
   LHTTPOptions: IHTTPOptions;
   LRequestID: Double;
-  LHTTPProcess: IHTTPProcess;
 begin
   Result := '';
 

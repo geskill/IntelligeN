@@ -16,7 +16,7 @@ uses
   // OmniThreadLibrary
   OtlParallel, OtlTaskControl,
   // HTTPManager
-  uHTTPInterface, uHTTPClasses, uHTTPManager,
+  uHTTPInterface, uHTTPClasses, uHTTPManager, uHTTPIndyImplementor,
   // Common
   uBaseConst,
   // Export

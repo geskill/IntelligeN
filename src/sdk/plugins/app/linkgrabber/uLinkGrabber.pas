@@ -21,10 +21,10 @@ uses
   uLkJSON,
   // Common
   uBaseConst, uAppInterface,
-  // Utils
-  uPathUtils, uStringUtils,
   // Plugin system
-  uPlugInAppClass, uPlugInHTTPClasses;
+  uPlugInAppClass, uPlugInHTTPClasses,
+  // Utils
+  uPathUtils, uStringUtils, uURLUtils;
 
 type
   TLinkGrabber = class(TAppPlugIn)

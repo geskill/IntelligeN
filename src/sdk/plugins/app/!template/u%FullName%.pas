@@ -18,7 +18,7 @@ uses
   // Plugin system
   uPlugInAppClass, uPlugInHTTPClasses,
   // Utils,
-  uPathUtils, uStringUtils;
+  uPathUtils, uStringUtils, uURLUtils;
 
 type
   T%FullName% = class(TAppPlugIn)

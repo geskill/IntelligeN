@@ -18,11 +18,8 @@ uses
   uBaseConst;
 
 const
-{$IFDEF DEBUG}
-  Homepage = 'http://localhost/IntelligeN%202009/';
-{$ELSE}
   Homepage = 'http://intelligen2009.com/';
-{$ENDIF}
+
   BackupFilename = 'releases.sdb';
 
 type

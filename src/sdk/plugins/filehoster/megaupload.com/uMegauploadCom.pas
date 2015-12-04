@@ -21,7 +21,7 @@ uses
   // plugin system
   uPlugInFileHosterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
-  uPathUtils;
+  uPathUtils, uSizeUtils, uURLUtils;
 
 type
   TMegauploadCom = class(TFileHosterPlugIn)

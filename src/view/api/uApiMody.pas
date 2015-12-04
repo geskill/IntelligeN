@@ -10,7 +10,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Utils
-  uPathUtils;
+  uURLUtils;
 
 type
   TModyResult = record

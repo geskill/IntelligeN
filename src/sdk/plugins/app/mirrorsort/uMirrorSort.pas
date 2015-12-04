@@ -14,10 +14,10 @@ uses
   Generics.MultiEvents.NotifyHandler,
   // Mods
   uMycxRichEdit,
-  // Utils
-  uPathUtils, uStringUtils,
   // Plugin system
-  uPlugInAppClass;
+  uPlugInAppClass,
+  // Utils,
+  uPathUtils, uStringUtils, uURLUtils;
 
 type
   TMyTabSheet = class(TTabSheet)

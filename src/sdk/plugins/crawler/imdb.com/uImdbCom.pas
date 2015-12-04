@@ -14,7 +14,7 @@ uses
   // Plugin system
   uPlugInCrawlerClass, uPlugInHTTPClasses,
   // Utils
-  uPathUtils, uHTMLUtils, uStringUtils;
+  uPathUtils, uHTMLUtils, uStringUtils, uURLUtils;
 
 type
   TImdbCom = class(TCrawlerPlugIn)

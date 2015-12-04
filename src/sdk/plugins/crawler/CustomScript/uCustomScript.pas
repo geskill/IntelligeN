@@ -19,12 +19,9 @@ type
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
@@ -34,35 +31,14 @@ begin
   Result := 'CustomScript';
 end;
 
-function TCustomScript.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TCustomScript.InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool;
 begin
-  _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)];
-  Result := LongWord(_TemplateTypeIDs);
-end;
-
-function TCustomScript.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
-begin
-  _ComponentIDs := [ low(TControlID) .. high(TControlID)];
-  Result := LongWord(_ComponentIDs);
-end;
-
-function TCustomScript.GetControlIDDefaultValue;
-begin
-  Result := True;
+  {TODO: Add IScript reader}
 end;
 
 function TCustomScript.GetResultsLimitDefaultValue;
 begin
   Result := 0;
-end;
-
-function TCustomScript.Exec;
-begin
-  { TODO : your code here }
 end;
 
 end.

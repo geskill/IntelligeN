@@ -1,7 +1,7 @@
 object fMain: TfMain
   Left = 0
   Top = 0
-  ActiveControl = rbAddNewServer
+  ActiveControl = rbAddNewPath
   Caption = 'Update Manager'
   ClientHeight = 338
   ClientWidth = 635
@@ -21,7 +21,7 @@ object fMain: TfMain
     Top = 0
     Width = 635
     Height = 338
-    ActivePage = JvWizardInteriorPageServer
+    ActivePage = JvWizardWelcomePage
     ButtonBarHeight = 42
     ButtonStart.Caption = 'To &Start Page'
     ButtonStart.NumGlyphs = 1
@@ -84,7 +84,6 @@ object fMain: TfMain
         Hint = 'select root dir'
         Anchors = [akTop, akRight]
         Caption = '...'
-        Enabled = False
         Flat = True
         OnClick = sbSelectRootDirClick
       end
@@ -94,7 +93,6 @@ object fMain: TfMain
         Width = 376
         Height = 21
         Anchors = [akLeft, akTop, akRight]
-        Enabled = False
         TabOrder = 1
         OnChange = eRootDirChange
       end
@@ -179,7 +177,6 @@ object fMain: TfMain
         Width = 322
         Height = 21
         Anchors = [akLeft, akTop, akRight]
-        Enabled = False
         TabOrder = 1
         Text = 'http://'
         OnChange = eServerDirChange
@@ -211,7 +208,6 @@ object fMain: TfMain
         Width = 76
         Height = 21
         Anchors = [akTop, akRight]
-        Enabled = False
         TabOrder = 2
         TextHint = '(optional)'
       end

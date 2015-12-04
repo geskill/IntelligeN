@@ -21,7 +21,7 @@ uses
   // plugin system
   uPlugInFileHosterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
-  uPathUtils, uSizeUtils, uHTMLUtils;
+  uHTMLUtils, uPathUtils, uSizeUtils, uURLUtils;
 
 type
   TX7To = class(TFileHosterPlugIn)

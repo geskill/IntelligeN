@@ -16,7 +16,7 @@ uses
   // DLLs
   uExport,
   // Utils
-  uStringUtils, uPathUtils;
+  uStringUtils, uPathUtils, uURLUtils;
 
 type
   TIScirptParser = class

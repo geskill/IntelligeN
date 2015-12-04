@@ -10,7 +10,7 @@ uses
   // Api
   uAppConst,
   // Utils
-  uPathUtils;
+  uURLUtils;
 
 type
   TfLinklist = class(TFrame)

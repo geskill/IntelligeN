@@ -20,7 +20,7 @@ uses
   // Plugin system
   uPlugInConst, uPlugInInterface, uPlugInInterfaceAdv,
   // Utils
-  uPathUtils;
+  uPathUtils, uURLUtils;
 
 type
   TApiCAPTCHA = class

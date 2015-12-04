@@ -24,7 +24,7 @@ uses
   // Plugin system
   uPlugInConst,
   // Utils
-  uPathUtils, uStringUtils, uVariantUtils;
+  uPathUtils, uStringUtils, uVariantUtils, uURLUtils;
 
 type
   TEZTexturePanel = class(EZTexturePanel.TEZTexturePanel)

@@ -14,7 +14,7 @@ uses
   // Plugin system
   uPlugInCrawlerClass, uPlugInHTTPClasses,
   // Utils
-  uHTMLUtils;
+  uHTMLUtils, uURLUtils;
 
 type
   T%FullName% = class(TCrawlerPlugIn)

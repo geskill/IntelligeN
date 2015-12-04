@@ -14,7 +14,7 @@ uses
   // Api
   uApiCodeTag, uApiFile,
   // Utils
-  uFileUtils, uPathUtils, uStringUtils, uVariantUtils;
+  uFileUtils, uStringUtils, uVariantUtils, uURLUtils;
 
 type
   TTemplateInfo = record

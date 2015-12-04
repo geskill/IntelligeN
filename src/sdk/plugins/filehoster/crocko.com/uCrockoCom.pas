@@ -23,7 +23,7 @@ uses
   // plugin system
   uPlugInFileHosterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
-  uPathUtils, uSizeUtils;
+  uPathUtils, uSizeUtils, uURLUtils;
 
 type
   TCrockoCom = class(TFileHosterPlugIn)

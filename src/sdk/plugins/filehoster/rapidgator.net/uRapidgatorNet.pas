@@ -23,7 +23,7 @@ uses
   // plugin system
   uPlugInFileHosterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
-  uPathUtils, uSizeUtils, uStringUtils;
+  uPathUtils, uSizeUtils, uStringUtils, uURLUtils;
 
 type
   TRapidgatorNet = class(TFileHosterPlugIn)

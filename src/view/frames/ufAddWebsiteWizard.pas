@@ -22,7 +22,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPIndyHelper, uHTTPManager,
   // Utils
-  uFileUtils, uPathUtils, uStringUtils;
+  uFileUtils, uStringUtils, uURLUtils;
 
 type
   TfAddWebsiteWizard = class(TFrame)

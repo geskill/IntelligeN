@@ -12,7 +12,7 @@ uses
   // plugin system
   uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
-  uPathUtils, uStringUtils;
+  uPathUtils, uStringUtils, uURLUtils;
 
 type
   TRelinkUs = class(TCrypterPlugIn)
