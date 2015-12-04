@@ -273,7 +273,8 @@ begin
                         // Crypter[Y].StatusImage := VarToStrDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['statusimage'], '');
                         // Crypter[Y].StatusImageText := VarToStrDef(ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].Attributes['statusimagetext'], '');
 
-                        Crypter[Y].CheckFolder;
+                        if not SameStr('', Crypter[Y].Value) then
+                          Crypter[Y].CheckFolder;
                         break;
                       end;
                   end;
