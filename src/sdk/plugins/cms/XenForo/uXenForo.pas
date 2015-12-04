@@ -123,7 +123,7 @@ begin
     AddFormField('password', AccountPassword);
     AddFormField('remember', '1');
     AddFormField('cookie_check', '0');
-    AddFormField('redirect', '');
+    AddFormField('redirect', '/');
     AddFormField('_xfToken', '');
   end;
 
