@@ -48,35 +48,31 @@ type
     property UseCompressor: Boolean read GetUseCompressor write SetUseCompressor;
 
     property HandleWrongProtocolException: Boolean read FHandleWrongProtocolException write FHandleWrongProtocolException;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// <para>
-    /// Not all responses which send a
-    /// <see href="ms-help://embarcadero.rs2010/Indy/TIdResponseHeaderInfo_Location.html">Location</see>
-    /// header are redirected through the
-    /// <see href="ms-help://embarcadero.rs2010/Indy/TIdHTTP.html">TIdHTTP</see>
-    /// component because only redirects with a specific
-    /// <see href="ms-help://embarcadero.rs2010/Indy/TIdHTTPResponse_ResponseCode.html">ResponseCode</see>
-    /// are addressed.
-    /// </para>
-    /// <para>
-    /// By default this is True and after a POST-request the unhandled
-    /// Location or Response header is processed by a additional
-    /// GET-request.
-    /// </para>
+    ///   <para>
+    ///     Not all responses which send a <see href="ms-help://embarcadero.rs2010/Indy/TIdResponseHeaderInfo_Location.html">
+    ///     Location</see> header are redirected through the <see href="ms-help://embarcadero.rs2010/Indy/TIdHTTP.html">
+    ///     TIdHTTP</see> component because only redirects with a specific <see href="ms-help://embarcadero.rs2010/Indy/TIdHTTPResponse_ResponseCode.html">
+    ///     ResponseCode</see> are addressed.
+    ///   </para>
+    ///   <para>
+    ///     By default this is True and after a POST-request the unhandled
+    ///     Location or Response header is processed by a additional
+    ///     GET-request.
+    ///   </para>
     /// </summary>
-{$ENDREGION}
+    {$ENDREGION}
     property HandleSketchyRedirects: Boolean read FHandleSketchyRedirects write FHandleSketchyRedirects;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// This additional header information is similar to the
-    /// <see href="ms-help://embarcadero.rs2010/Indy/TIdResponseHeaderInfo_Location.html">Location</see>
-    /// header.
+    ///   This additional header information is similar to the <see href="ms-help://embarcadero.rs2010/Indy/TIdResponseHeaderInfo_Location.html">
+    ///   Location</see> header.
     /// </summary>
     /// <seealso href="http://stackoverflow.com/questions/283752/refresh-http-header">
-    /// 'Refresh' HTTP header
+    ///   'Refresh' HTTP header
     /// </seealso>
-{$ENDREGION}
+    {$ENDREGION}
     property Response_Refresh: string read GetResponseRefresh;
     class function Charsets: string;
     destructor Destroy; override;

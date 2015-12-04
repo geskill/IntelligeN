@@ -1,12 +1,12 @@
 {$REGION 'Documentation'}
 /// <summary>
-/// <para>
-/// This is the main unit for managing everything.
-/// </para>
-/// <para>
-/// Use only the interface <see cref="uHTTPInterface|IHTTPManager" /> for
-/// distribution (i.e. for COM compatible DLLs).
-/// </para>
+///   <para>
+///     This is the main unit for managing everything.
+///   </para>
+///   <para>
+///     Use only the interface <see cref="uHTTPInterface|IHTTPManager" /> for
+///     distribution (i.e. for COM compatible DLLs).
+///   </para>
 /// </summary>
 {$ENDREGION}
 unit uHTTPManager;
@@ -46,29 +46,29 @@ type
     property Implementations[Index: Integer]: IHTTPImplementation read GetImplementation; default;
   end;
 
-{$REGION 'Documentation'}
+  {$REGION 'Documentation'}
   /// <summary>
-  /// <para>
-  /// This is the base class, which handles the queued access for the
-  /// HTTP-requests. Every GET/POST request gets a unique number. Through
-  /// this you can check via
-  /// <see cref="HasResult">HasResult(&lt;UniqueID&gt;)</see> whether a
-  /// specific request is full-filled or not. If the request is finished
-  /// [i.e. <see cref="HasResult" /> = True], you can call
-  /// <see cref="GetResult">GetResult(&lt;UniqueID&gt;)</see> to access the
-  /// HTTP-request result.
-  /// </para>
-  /// <para>
-  /// Be sure to create (using the Instance function) the class before you
-  /// access it outside of your main application! You can customize
-  /// (override) the internal constructor <see cref="Create" /> for your
-  /// own needs (i.e. connect HTTP logging feature).
-  /// </para>
+  ///   <para>
+  ///     This is the base class, which handles the queued access for the
+  ///     HTTP-requests. Every GET/POST request gets a unique number. Through
+  ///     this you can check via <see cref="HasResult">
+  ///     HasResult(&lt;UniqueID&gt;)</see> whether a specific request is
+  ///     full-filled or not. If the request is finished [i.e. <see cref="HasResult" />
+  ///      = True], you can call <see cref="GetResult">
+  ///     GetResult(&lt;UniqueID&gt;)</see> to access the HTTP-request
+  ///     result.
+  ///   </para>
+  ///   <para>
+  ///     Be sure to create (using the Instance function) the class before
+  ///     you access it outside of your main application! You can customize
+  ///     (override) the internal constructor <see cref="Create" /> for your
+  ///     own needs (i.e. connect HTTP logging feature).
+  ///   </para>
   /// </summary>
   /// <remarks>
-  /// This class is a singleton.
+  ///   This class is a singleton.
   /// </remarks>
-{$ENDREGION}
+  {$ENDREGION}
   THTTPManager = class(TInterfacedObject, IHTTPManager)
   strict private
     class var FLock: TOmniCS;
@@ -100,132 +100,129 @@ type
     function GetRequestScrape: IHTTPScrapeEvent; safecall;
     function GetRequestDone: IHTTPProcessEvent; safecall;
   public
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// This returns the single instance to this class. If this class is not
-    /// created, this functions creates it.
+    ///   This returns the single instance to this class. If this class is not
+    ///   created, this functions creates it.
     /// </summary>
     /// <returns>
-    /// The instance of this class.
+    ///   The instance of this class.
     /// </returns>
     /// <remarks>
-    /// Be sure to create the class before you access it outside of your main
-    /// application! You can customize (override) the internal constructor
-    /// <see cref="Create" /> for your own needs (i.e. connect HTTP logging
-    /// feature).
+    ///   Be sure to create the class before you access it outside of your main
+    ///   application! You can customize (override) the internal constructor <see cref="Create" />
+    ///    for your own needs (i.e. connect HTTP logging feature).
     /// </remarks>
-{$ENDREGION}
+    {$ENDREGION}
     class function Instance(): IHTTPManager;
     class procedure Wait(ARequestID: Double; AMilliseconds: Integer = 50);
     class destructor Destroy;
 
     property ConnectionMaximum: Integer read GetConnectionMaximum write SetConnectionMaximum;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// <para>
-    /// Adds a follow-up GET-request to the internal queue and returns
-    /// immediately.
-    /// </para>
-    /// <para>
-    /// A follow-up request is a new request based upon a previous request.
-    /// All HTTP header information from the previous request like
-    /// <see cref="uHTTPInterface|IHTTPHeader.Cookies">Cookies</see>,
-    /// <see cref="uHTTPInterface|IHTTPHeader.CharSet">CharSet</see> as
-    /// well as
-    /// <see cref="uHTTPInterface|IHTTPHeader.CustomHeaders">CustomHeaders</see>
-    /// are copied into this new request.
-    /// </para>
+    ///   <para>
+    ///     Adds a follow-up GET-request to the internal queue and returns
+    ///     immediately.
+    ///   </para>
+    ///   <para>
+    ///     A follow-up request is a new request based upon a previous
+    ///     request. All HTTP header information from the previous request
+    ///     like <see cref="uHTTPInterface|IHTTPHeader.Cookies">Cookies</see>
+    ///     , <see cref="uHTTPInterface|IHTTPHeader.CharSet">CharSet</see> as
+    ///     well as <see cref="uHTTPInterface|IHTTPHeader.CustomHeaders">
+    ///     CustomHeaders</see> are copied into this new request.
+    ///   </para>
     /// </summary>
     /// <seealso cref="Get(IHTTPRequest,IHTTPOptions)">
-    /// Get(AHTTPRequest: IHTTPRequest; AHTTPOptions: IHTTPOptions = nil):
-    /// Double;
+    ///   Get(AHTTPRequest: IHTTPRequest; AHTTPOptions: IHTTPOptions = nil):
+    ///   Double;
     /// </seealso>
-{$ENDREGION}
+    {$ENDREGION}
     function Get(AURL: WideString; AFollowUp: Double; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// Adds a new GET-request to the internal queue and returns immediately.
+    ///   Adds a new GET-request to the internal queue and returns immediately.
     /// </summary>
     /// <seealso cref="Get(WideString,Double,IHTTPOptions)">
-    /// Get(AURL: WideString; AFollowUp: Double; AHTTPOptions: IHTTPOptions =
-    /// nil): Double;
+    ///   Get(AURL: WideString; AFollowUp: Double; AHTTPOptions: IHTTPOptions =
+    ///   nil): Double;
     /// </seealso>
-{$ENDREGION}
+    {$ENDREGION}
     function Get(AHTTPRequest: IHTTPRequest; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// <para>
-    /// Adds a follow-up HTTP-request to the internal queue and returns
-    /// immediately.
-    /// </para>
-    /// <para>
-    /// A follow-up request is a new request based upon a previous request.
-    /// All HTTP header information from the previous request like
-    /// <see cref="uHTTPInterface|IHTTPHeader.Cookies">Cookies</see>,
-    /// <see cref="uHTTPInterface|IHTTPHeader.CharSet">CharSet</see> as
-    /// well as
-    /// <see cref="uHTTPInterface|IHTTPHeader.CustomHeaders">CustomHeaders</see>
-    /// are copied into this new request.
-    /// </para>
+    ///   <para>
+    ///     Adds a follow-up HTTP-request to the internal queue and returns
+    ///     immediately.
+    ///   </para>
+    ///   <para>
+    ///     A follow-up request is a new request based upon a previous
+    ///     request. All HTTP header information from the previous request
+    ///     like <see cref="uHTTPInterface|IHTTPHeader.Cookies">Cookies</see>
+    ///     , <see cref="uHTTPInterface|IHTTPHeader.CharSet">CharSet</see> as
+    ///     well as <see cref="uHTTPInterface|IHTTPHeader.CustomHeaders">
+    ///     CustomHeaders</see> are copied into this new request.
+    ///   </para>
     /// </summary>
     /// <seealso cref="Post(IHTTPRequest,IHTTPParams,IHTTPOptions)">
-    /// Post(AHTTPRequest: IHTTPRequest; AHTTPParams: IHTTPParams;
-    /// AHTTPOptions: IHTTPOptions = nil): Double;
+    ///   Post(AHTTPRequest: IHTTPRequest; AHTTPParams: IHTTPParams;
+    ///   AHTTPOptions: IHTTPOptions = nil): Double;
     /// </seealso>
-{$ENDREGION}
+    {$ENDREGION}
     function Post(AURL: WideString; AFollowUp: Double; AHTTPParams: IHTTPParams; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// Adds a new HTTP-request to the internal queue and returns
-    /// immediately.
+    ///   Adds a new HTTP-request to the internal queue and returns
+    ///   immediately.
     /// </summary>
     /// <seealso cref="Post(WideString,Double,IHTTPParams,IHTTPOptions)">
-    /// Post(AURL: WideString; AFollowUp: Double; AHTTPParams: IHTTPParams;
-    /// AHTTPOptions: IHTTPOptions = nil): Double;
+    ///   Post(AURL: WideString; AFollowUp: Double; AHTTPParams: IHTTPParams;
+    ///   AHTTPOptions: IHTTPOptions = nil): Double;
     /// </seealso>
-{$ENDREGION}
+    {$ENDREGION}
     function Post(AHTTPRequest: IHTTPRequest; AHTTPParams: IHTTPParams; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// The function returns True if the given request is processed and False
-    /// otherwise.
+    ///   The function returns True if the given request is processed and False
+    ///   otherwise.
     /// </summary>
     /// <param name="AUniqueID">
-    /// Unique request id
+    ///   Unique request id
     /// </param>
     /// <returns>
-    /// True if the given request is processed and False otherwise.
+    ///   True if the given request is processed and False otherwise.
     /// </returns>
     /// <remarks>
-    /// The function uses internally <see cref="GetResult" /> to check it the
-    /// request is processed.
+    ///   The function uses internally <see cref="GetResult" /> to check it the
+    ///   request is processed.
     /// </remarks>
-{$ENDREGION}
+    {$ENDREGION}
     function HasResult(AUniqueID: Double): WordBool; safecall;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// This function returns the information about the full HTTP process if
-    /// completed and nil otherwise.
+    ///   This function returns the information about the full HTTP process if
+    ///   completed and nil otherwise.
     /// </summary>
     /// <param name="AUniqueID">
-    /// Unique request id
+    ///   Unique request id
     /// </param>
     /// <returns>
-    /// The full HTTP process if completed and nil otherwise.
+    ///   The full HTTP process if completed and nil otherwise.
     /// </returns>
-{$ENDREGION}
+    {$ENDREGION}
     function GetResult(AUniqueID: Double): IHTTPProcess; safecall;
 
     property Implementor: IHTTPImplementation read GetImplementor write SetImplementor;
     property ImplementationManager: IHTTPImplementationManager read GetImplementationManager;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// This event occurs when a HTTP request is processed.
+    ///   This event occurs when a HTTP request is processed.
     /// </summary>
     /// <remarks>
-    /// The event call is synchronized.
+    ///   The event call is synchronized.
     /// </remarks>
-{$ENDREGION}
+    {$ENDREGION}
     property OnRequestScrape: IHTTPScrapeEvent read GetRequestScrape write FRequestScrape;
     property OnRequestDone: IHTTPProcessEvent read GetRequestDone write FRequestDoneEvent;
 
@@ -344,7 +341,7 @@ begin
       HTTPProcess.HTTPResult := ScrapeResult;
 
       HTTPProcess.HTTPData.HTTPRequest.URL := HTTPData.HTTPRequest.URL;
-      HTTPProcess.HTTPData.HTTPRequest.Referer := HTTPData.HTTPRequest.URL;
+      HTTPProcess.HTTPData.HTTPRequest.Referer := HTTPData.HTTPRequest.Referer;
 
       ScrapedData := THTTPData.Create(THTTPRequest.FollowUpClone(HTTPProcess, HTTPData.HTTPRequest), HTTPData.HTTPOptions, HTTPData.HTTPParams);
       HTTPProcess := nil;

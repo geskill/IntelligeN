@@ -475,6 +475,8 @@
 
 * Fixed wbb4, XenForo intelligent_posting
 
+* Fixed XenForo login
+
 * Fixed loading intelligen.xml.2 files with no templatetype
 
 * Changed IScriptEditor tab size to 2 (before 4)
