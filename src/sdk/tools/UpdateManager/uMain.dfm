@@ -149,6 +149,9 @@ object fMain: TfMain
       EnabledButtons = [bkStart, bkLast, bkBack, bkFinish, bkCancel, bkHelp]
       OnPage = JvWizardInteriorPageServerPage
       OnNextButtonClick = JvWizardInteriorPageServerNextButtonClick
+      ExplicitLeft = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         490
         296)
@@ -233,6 +236,9 @@ object fMain: TfMain
       Header.Subtitle.Font.Style = []
       EnabledButtons = [bkStart, bkLast, bkBack, bkFinish, bkCancel, bkHelp]
       OnPage = JvWizardInteriorPageServerInfoPage
+      ExplicitLeft = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         490
         296)
@@ -330,11 +336,14 @@ object fMain: TfMain
       OnPage = JvWizardInteriorPageLocalFilesPage
       OnExitPage = JvWizardInteriorPageLocalFilesExitPage
       OnNextButtonClick = JvWizardInteriorPageLocalFilesNextButtonClick
+      ExplicitLeft = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object lFileSystem: TLabel
         AlignWithMargins = True
         Left = 5
         Top = 282
-        Width = 480
+        Width = 3
         Height = 13
         Cursor = crHandPoint
         Margins.Left = 5
@@ -343,7 +352,6 @@ object fMain: TfMain
         Margins.Bottom = 1
         Align = alBottom
         OnClick = lFileSystemClick
-        ExplicitWidth = 3
       end
       object cxGLocalFiles: TcxGrid
         AlignWithMargins = True
@@ -438,6 +446,9 @@ object fMain: TfMain
       Header.Subtitle.Font.Style = []
       OnPage = JvWizardInteriorPageUpdateFilesPage
       OnNextButtonClick = JvWizardInteriorPageUpdateFilesNextButtonClick
+      ExplicitLeft = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object cxGUpdateFiles: TcxGrid
         AlignWithMargins = True
         Left = 3
@@ -523,6 +534,9 @@ object fMain: TfMain
       Header.Subtitle.Font.Style = []
       EnabledButtons = [bkStart, bkLast, bkBack, bkFinish, bkCancel, bkHelp]
       OnPage = JvWizardInteriorPageUpdateVersionPage
+      ExplicitLeft = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         490
         296)
@@ -626,6 +640,9 @@ object fMain: TfMain
       Header.Subtitle.Font.Style = []
       EnabledButtons = [bkStart, bkLast, bkFinish, bkCancel, bkHelp]
       OnPage = JvWizardInteriorPageUploadFilesPage
+      ExplicitLeft = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       DesignSize = (
         490
         296)
@@ -730,6 +747,9 @@ object fMain: TfMain
       Header.Subtitle.Font.Style = []
       VisibleButtons = [bkBack, bkFinish, bkCancel]
       OnFinishButtonClick = JvWizardInteriorPagePublishFinishButtonClick
+      ExplicitLeft = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
     end
     object JvWizardRouteMapNodes: TJvWizardRouteMapNodes
       Left = 0

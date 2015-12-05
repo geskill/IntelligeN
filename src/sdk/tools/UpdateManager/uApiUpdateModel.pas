@@ -10,7 +10,7 @@ uses
   // Export
   uDynamicExport,
   // Api
-  uApiUpdateConst, uApiUpdateInterface, uApiUpdateModelBase;
+  uApiUpdateConst, uApiUpdateInterfaceBase, uApiUpdateInterface, uApiUpdateModelBase;
 
 type
   TIUpdateManagerVersion = class(TIFileVersion, IUpdateManagerVersion)
@@ -69,14 +69,11 @@ type
     property Actions: TUpdateActions read GetActions write SetActions;
   end;
 
-  TIUpdateManagerSystemFile = class(TIUpdateSystemFile, IUpdateManagerSystemFile)
+  TIUpdateManagerLocalSystemFile = class(TIUpdateSystemFile, IUpdateManagerLocalSystemFile)
   private
-    FID: Integer;
     FFileBase: IUpdateManagerSystemFileBase;
     FLocalFile: IUpdateManagerLocalFile;
   protected
-    function GetID: Integer;
-    procedure SetID(AID: Integer);
     function GetFileBase: IUpdateManagerSystemFileBase; reintroduce; overload;
     procedure SetFileBase(const AFileBase: IUpdateManagerSystemFileBase); reintroduce; overload;
     function GetLocalFile: IUpdateManagerLocalFile;
@@ -86,9 +83,26 @@ type
 
     function GetCompressedFileName: WideString;
 
-    property ID: Integer read GetID write SetID;
     property FileBase: IUpdateManagerSystemFileBase read GetFileBase write SetFileBase;
     property LocalFile: IUpdateManagerLocalFile read GetLocalFile write SetLocalFile;
+
+    destructor Destroy;
+  end;
+
+  TIUpdateManagerOnlineSystemFile = class(TIUpdateSystemFile, IUpdateManagerOnlineSystemFile)
+  private
+    FID: Integer;
+    FFileBase: IUpdateManagerSystemFileBase;
+  protected
+    function GetID: Integer;
+    procedure SetID(AID: Integer);
+    function GetFileBase: IUpdateManagerSystemFileBase; reintroduce; overload;
+    procedure SetFileBase(const AFileBase: IUpdateManagerSystemFileBase); reintroduce; overload;
+  public
+    constructor Create(const AFileID: Integer; const AFileBase: IUpdateManagerSystemFileBase; const AFileVersion: IFileVersion);
+
+    property ID: Integer read GetID write SetID;
+    property FileBase: IUpdateManagerSystemFileBase read GetFileBase write SetFileBase;
 
     destructor Destroy;
   end;
@@ -230,39 +244,29 @@ begin
   FActions := [];
 end;
 
-{ TIUpdateManagerSystemFile }
+{ TIUpdateManagerLocalSystemFile }
 
-function TIUpdateManagerSystemFile.GetID: Integer;
-begin
-  Result := FID;
-end;
-
-procedure TIUpdateManagerSystemFile.SetID(AID: Integer);
-begin
-  FID := AID;
-end;
-
-function TIUpdateManagerSystemFile.GetFileBase: IUpdateManagerSystemFileBase;
+function TIUpdateManagerLocalSystemFile.GetFileBase: IUpdateManagerSystemFileBase;
 begin
   Result := FFileBase;
 end;
 
-procedure TIUpdateManagerSystemFile.SetFileBase(const AFileBase: IUpdateManagerSystemFileBase);
+procedure TIUpdateManagerLocalSystemFile.SetFileBase(const AFileBase: IUpdateManagerSystemFileBase);
 begin
   FFileBase := AFileBase;
 end;
 
-function TIUpdateManagerSystemFile.GetLocalFile: IUpdateManagerLocalFile;
+function TIUpdateManagerLocalSystemFile.GetLocalFile: IUpdateManagerLocalFile;
 begin
   Result := FLocalFile;
 end;
 
-procedure TIUpdateManagerSystemFile.SetLocalFile(const ALocalFile: IUpdateManagerLocalFile);
+procedure TIUpdateManagerLocalSystemFile.SetLocalFile(const ALocalFile: IUpdateManagerLocalFile);
 begin
   FLocalFile := ALocalFile;
 end;
 
-constructor TIUpdateManagerSystemFile.Create;
+constructor TIUpdateManagerLocalSystemFile.Create;
 begin
   if not Assigned(ALocalFile) then
   begin
@@ -274,22 +278,69 @@ begin
     inherited Create(ExtractFileName(ALocalFile.FileName));
     FLocalFile := ALocalFile;
   end;
-  FID := 0;
   if not Assigned(AFileBase) then
     FFileBase := TIUpdateManagerSystemFileBase.Create
   else
     FFileBase := AFileBase;
 end;
 
-function TIUpdateManagerSystemFile.GetCompressedFileName: WideString;
+function TIUpdateManagerLocalSystemFile.GetCompressedFileName: WideString;
 begin
   Result := FileChecksum + '.zip';
 end;
 
-destructor TIUpdateManagerSystemFile.Destroy;
+destructor TIUpdateManagerLocalSystemFile.Destroy;
 begin
   FFileBase := nil;
   FLocalFile := nil;
+  inherited Destroy;
+end;
+
+{ TIUpdateManagerOnlineSystemFile }
+
+function TIUpdateManagerOnlineSystemFile.GetID: Integer;
+begin
+  Result := FID;
+end;
+
+procedure TIUpdateManagerOnlineSystemFile.SetID(AID: Integer);
+begin
+  FID := AID;
+end;
+
+function TIUpdateManagerOnlineSystemFile.GetFileBase: IUpdateManagerSystemFileBase;
+begin
+  Result := FFileBase;
+end;
+
+procedure TIUpdateManagerOnlineSystemFile.SetFileBase(const AFileBase: IUpdateManagerSystemFileBase);
+begin
+  FFileBase := AFileBase;
+end;
+
+constructor TIUpdateManagerOnlineSystemFile.Create(const AFileID: Integer; const AFileBase: IUpdateManagerSystemFileBase; const AFileVersion: IFileVersion);
+var
+  LFileBase: IUpdateManagerSystemFileBase;
+  LFileVersion: IFileVersion;
+begin
+  if not Assigned(AFileBase) then
+    LFileBase := TIUpdateManagerSystemFileBase.Create
+  else
+    LFileBase := AFileBase;
+
+  if not Assigned(AFileBase) then
+    LFileVersion := TIFileVersion.Create
+  else
+    LFileVersion := AFileVersion;
+
+  inherited Create(LFileBase, LFileVersion);
+  FID := AFileID;
+  FFileBase := LFileBase;
+end;
+
+destructor TIUpdateManagerOnlineSystemFile.Destroy;
+begin
+  FFileBase := nil;
   inherited Destroy;
 end;
 

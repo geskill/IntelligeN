@@ -59,10 +59,8 @@ type
     property Actions: TUpdateActions read GetActions write SetActions;
   end;
 
-  IUpdateManagerSystemFile = interface(IUpdateSystemFile)
+  IUpdateManagerLocalSystemFile = interface(IUpdateSystemFile)
     ['{4666FFA3-9D57-45B5-A15F-D29C36103ABB}']
-    function GetID: Integer;
-    procedure SetID(AID: Integer);
     function GetFileBase: IUpdateManagerSystemFileBase;
     procedure SetFileBase(const AFileBase: IUpdateManagerSystemFileBase);
     function GetLocalFile: IUpdateManagerLocalFile;
@@ -70,9 +68,19 @@ type
 
     function GetCompressedFileName: WideString;
 
-    property ID: Integer read GetID write SetID;
     property FileBase: IUpdateManagerSystemFileBase read GetFileBase write SetFileBase;
     property LocalFile: IUpdateManagerLocalFile read GetLocalFile write SetLocalFile;
+  end;
+
+  IUpdateManagerOnlineSystemFile = interface(IUpdateSystemFile)
+    ['{6220391C-D96C-4FB9-B2CD-6F09689F4FF1}']
+    function GetID: Integer;
+    procedure SetID(AID: Integer);
+    function GetFileBase: IUpdateManagerSystemFileBase;
+    procedure SetFileBase(const AFileBase: IUpdateManagerSystemFileBase);
+
+    property ID: Integer read GetID write SetID;
+    property FileBase: IUpdateManagerSystemFileBase read GetFileBase write SetFileBase;
   end;
 
   IServer = interface

@@ -10,7 +10,7 @@ uses
   // Common
   uBaseConst,
   // Api
-  uApiServerInterface, uApiServerClasses, uApiUpdateModel, uApiUpdateInterface,
+  uApiServerInterface, uApiServerClasses, uApiUpdateModelBase, uApiUpdateModel, uApiUpdateInterfaceBase, uApiUpdateInterface,
   // Utils
   uStringUtils, uVariantUtils;
 
@@ -18,7 +18,7 @@ type
   TServerXMLReader = class
   type
     TIBasicMeta = class of TIBasicServerResponse;
-    TServerRequestType = (srtVersions, srtSystems, srtFTPServer, srtVersionAdd, srtSystemsAdd, srtFilesAdd, srtActivateVersion);
+    TServerRequestType = (srtVersions, srtSystems, srtFTPServer, srtFilesToVersion, srtVersionAdd, srtSystemsAdd, srtFilesAdd, srtActivateVersion);
   private
     class function GetClassType(AType: TServerRequestType): TIBasicMeta;
   protected
@@ -28,6 +28,7 @@ type
     class function ReadVersions(AXMLContent: string): IVersionsResponse;
     class function ReadSystems(AXMLContent: string): ISystemsResponse;
     class function ReadFTPServer(AXMLContent: string): IFTPServerResponse;
+    class function ReadFilesToVersion(AXMLContent: string): IFilesToVersionResponse;
     class function ReadVersionAdd(AXMLContent: string): IVersionAddResponse;
     class function ReadSystemsAdd(AXMLContent: string): IBasicServerResponse;
     class function ReadFilesAdd(AXMLContent: string): IBasicServerResponse;
@@ -47,6 +48,8 @@ begin
       Result := TISystemsResponse;
     srtFTPServer:
       Result := TIFTPServerResponse;
+    srtFilesToVersion:
+      Result := TIFilesToVersionResponse;
     srtVersionAdd:
       Result := TIVersionAddResponse;
     srtSystemsAdd:
@@ -70,6 +73,7 @@ var
 
   LUpdateVersion: IUpdateManagerVersion;
   LUpdateSystemFileBase: IUpdateManagerSystemFileBase;
+  LUpdateManagerOnlineSystemFile: IUpdateManagerOnlineSystemFile;
 begin
   LBasicServerResponse := GetClassType(AType).Create;
 
@@ -157,6 +161,23 @@ begin
                       Password := VarToStr(ChildNodes.Nodes['password'].NodeValue);
                     end;
                 end;
+              srtFilesToVersion:
+                with (Result as IFilesToVersionResponse) do
+                begin
+                  if Assigned(ChildNodes.FindNode('files')) then
+                    with ChildNodes.Nodes['files'] do
+                      for XMLNodeIndex := 0 to ChildNodes.Count - 1 do
+                      begin
+                        (* TODO:
+                        LUpdateManagerOnlineSystemFile := TIUpdateSystemFile.Create();
+                        with ChildNodes.Nodes[XMLNodeIndex], LUpdateManagerOnlineSystemFile do
+                        begin
+
+                        end;
+                        Files.Add(LUpdateManagerOnlineSystemFile);
+                        *)
+                      end;
+                end;
               srtVersionAdd:
                 with (Result as IVersionAddResponse) do
                 begin
@@ -189,6 +210,11 @@ end;
 class function TServerXMLReader.ReadFTPServer(AXMLContent: string): IFTPServerResponse;
 begin
   Result := TServerXMLReader.Read(AXMLContent, srtFTPServer) as IFTPServerResponse;
+end;
+
+class function TServerXMLReader.ReadFilesToVersion(AXMLContent: string): IFilesToVersionResponse;
+begin
+  Result := TServerXMLReader.Read(AXMLContent, srtFilesToVersion) as IFilesToVersionResponse;
 end;
 
 class function TServerXMLReader.ReadVersionAdd(AXMLContent: string): IVersionAddResponse;

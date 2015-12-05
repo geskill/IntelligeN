@@ -1009,6 +1009,9 @@ begin
       begin
         LErrorMsg := '';
 
+        // TODO: Retrieve already updated files...
+        // LLocalUploadController.GetFilesToVersion(FVersionID, )
+
         LUploadFiles := TUpdateManagerLocalFileList.Create;
         try
           // Make list of upload files

@@ -28,11 +28,13 @@ uses
   uFileUtils;
 
 type
-  TUpdateManagerLocalFileList = TList<IUpdateManagerSystemFile>;
+  TUpdateManagerLocalFileList = TList<IUpdateManagerLocalSystemFile>;
 
   TUpdateManagerVersionsList = TList<IUpdateManagerVersion>;
   TUpdateManagerSystemsList = TList<IUpdateManagerSystemFileBase>;
   TUpdateSystemFileBaseList = TList<IUpdateSystemFileBase>;
+
+  TUpdateManagerOnlineFileList = TList<IUpdateManagerOnlineSystemFile>;
 
   TUploadProgress = reference to procedure(Sender: TObject; Position: Integer);
 
@@ -46,12 +48,12 @@ type
     FOnUpdateUploading: TUploadProgress;
 
   type
-    TLocalFileProcess = reference to procedure(const ALocalSystemFile: IUpdateManagerSystemFile);
+    TLocalFileProcess = reference to procedure(const ALocalSystemFile: IUpdateManagerLocalSystemFile);
   protected
-    procedure InspectPossibleActions(const ALocalSystemFile: IUpdateManagerSystemFile);
-    procedure GatherBaseLocalFileInformation(const ALocalSystemFile: IUpdateManagerSystemFile);
-    procedure GatherLocalFileInformation(const ALocalSystemFile: IUpdateManagerSystemFile);
-    procedure CompressLocalFile(const ALocalSystemFile: IUpdateManagerSystemFile);
+    procedure InspectPossibleActions(const ALocalSystemFile: IUpdateManagerLocalSystemFile);
+    procedure GatherBaseLocalFileInformation(const ALocalSystemFile: IUpdateManagerLocalSystemFile);
+    procedure GatherLocalFileInformation(const ALocalSystemFile: IUpdateManagerLocalSystemFile);
+    procedure CompressLocalFile(const ALocalSystemFile: IUpdateManagerLocalSystemFile);
 
     procedure ProcessLocalFiles(ALocalFileProcess: TLocalFileProcess; AList: TUpdateManagerLocalFileList);
 
@@ -84,6 +86,7 @@ type
     procedure RequestGetVersions(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
     procedure RequestGetSystems(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
     procedure RequestFTPServer(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
+    procedure RequestFilesToVersion(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
     procedure RequestVersionAdd(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
     procedure RequestSystemsAdd(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
     procedure RequestFilesAdd(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
@@ -97,6 +100,8 @@ type
     function GetSystems(out ASystemsList: TUpdateManagerSystemsList; out AErrorMsg: WideString): WordBool;
     function GetFTPServer(out AFTPServer: IFTPServer; out AErrorMsg: WideString): WordBool;
 
+    function GetFilesToVersion(AVersionID: Integer; out ASystemFileList: TUpdateManagerOnlineFileList; out AErrorMsg: WideString): WordBool;
+
     function AddVersion(AMajorVersion, AMinorVersion, AMajorBuild, AMinorBuild: Integer; out AVersionID: Integer; out AErrorMsg: WideString): WordBool;
     function AddSystems(ASystemFileBaseList: TUpdateSystemFileBaseList; out AErrorMsg: WideString): WordBool;
     function AddFiles(AVersionID: Integer; AList: TUpdateManagerLocalFileList; out AErrorMsg: WideString): WordBool;
@@ -107,7 +112,7 @@ type
 
 implementation
 
-procedure TLocalUpdateController.InspectPossibleActions(const ALocalSystemFile: IUpdateManagerSystemFile);
+procedure TLocalUpdateController.InspectPossibleActions(const ALocalSystemFile: IUpdateManagerLocalSystemFile);
 begin
   with ALocalSystemFile.LocalFile do
     case Condition of
@@ -142,7 +147,7 @@ begin
     end;
 end;
 
-procedure TLocalUpdateController.GatherBaseLocalFileInformation(const ALocalSystemFile: IUpdateManagerSystemFile);
+procedure TLocalUpdateController.GatherBaseLocalFileInformation(const ALocalSystemFile: IUpdateManagerLocalSystemFile);
 begin
   with ALocalSystemFile do
   begin
@@ -152,7 +157,7 @@ begin
   end;
 end;
 
-procedure TLocalUpdateController.GatherLocalFileInformation(const ALocalSystemFile: IUpdateManagerSystemFile);
+procedure TLocalUpdateController.GatherLocalFileInformation(const ALocalSystemFile: IUpdateManagerLocalSystemFile);
 var
   LFileVersion: TFileVersionInfo;
 begin
@@ -172,7 +177,7 @@ begin
   end;
 end;
 
-procedure TLocalUpdateController.CompressLocalFile(const ALocalSystemFile: IUpdateManagerSystemFile);
+procedure TLocalUpdateController.CompressLocalFile(const ALocalSystemFile: IUpdateManagerLocalSystemFile);
 var
   LNewFileName: string;
 begin
@@ -242,7 +247,7 @@ var
   LFileList: TStringList;
   LFileIndex, LSystemFileIndex: Integer;
 
-  LUpdateManagerSystemFile: IUpdateManagerSystemFile;
+  LUpdateManagerLocalSystemFile: IUpdateManagerLocalSystemFile;
   LUpdateManagerLocalFile: IUpdateManagerLocalFile;
   LUpdateManagerSystemFileBase: IUpdateManagerSystemFileBase;
 
@@ -282,14 +287,14 @@ begin
           end;
       end;
 
-      LUpdateManagerSystemFile := TIUpdateManagerSystemFile.Create(LUpdateManagerLocalFile, LUpdateManagerSystemFileBase);
+      LUpdateManagerLocalSystemFile := TIUpdateManagerLocalSystemFile.Create(LUpdateManagerLocalFile, LUpdateManagerSystemFileBase);
 
       if (LLocalFileNotInSystem) then
       begin
-        GatherBaseLocalFileInformation(LUpdateManagerSystemFile);
+        GatherBaseLocalFileInformation(LUpdateManagerLocalSystemFile);
       end;
 
-      AList.Add(LUpdateManagerSystemFile);
+      AList.Add(LUpdateManagerLocalSystemFile);
     end;
   finally
     LFileList.Free;
@@ -310,15 +315,15 @@ begin
 
     if not LLocalFileNotFound then
     begin
-      LUpdateManagerSystemFile := TIUpdateManagerSystemFile.Create(nil, nil);
+      LUpdateManagerLocalSystemFile := TIUpdateManagerLocalSystemFile.Create(nil, nil);
 
-      with LUpdateManagerSystemFile do
+      with LUpdateManagerLocalSystemFile do
       begin
         LocalFile.Online := False;
         LocalFile.Status := True;
         LocalFile.Condition := ucMissing;
       end;
-      AList.Add(LUpdateManagerSystemFile);
+      AList.Add(LUpdateManagerLocalSystemFile);
     end;
   end;
 end;
@@ -486,6 +491,19 @@ begin
   oResponse := LFTPServerResponse;
 end;
 
+procedure TLocalUploadController.RequestFilesToVersion(const HTTPResult: IHTTPResult; out oResponse: IBasicServerResponse; out oErrorMsg: WideString);
+var
+  LFilesToVersionResponse: IFilesToVersionResponse;
+begin
+  LFilesToVersionResponse := TServerXMLReader.ReadFilesToVersion(HTTPResult.SourceCode);
+
+  if LFilesToVersionResponse.HasError then
+    oErrorMsg := LFilesToVersionResponse.Msg
+  else
+    oErrorMsg := '';
+  oResponse := LFilesToVersionResponse;
+end;
+
 procedure TLocalUploadController.RequestVersionAdd;
 var
   LVersionAddResponse: IVersionAddResponse;
@@ -611,6 +629,30 @@ begin
     AFTPServer := LFTPServerResponse.Server;
 
   Result := Assigned(LFTPServerResponse) and TryStrToInt(LFTPServerResponse.Server.Port, buf);
+end;
+
+function TLocalUploadController.GetFilesToVersion(AVersionID: Integer; out ASystemFileList: TUpdateManagerOnlineFileList; out AErrorMsg: WideString): WordBool;
+var
+  LHTTPParams: IHTTPParams;
+
+  LBasicServerResponse: IBasicServerResponse;
+  LFilesToVersionResponse: IFilesToVersionResponse;
+begin
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
+  begin
+    AddFormField('version_id', IntToStr(AVersionID));
+  end;
+
+  Request(THTTPManager.Instance().Post(THTTPRequest.Create(FServer.Name + 'p.php?action=upload_v2&upload=get_version_files_v2&access_token=' + HTTPEncode(FServer.AccessToken)), LHTTPParams), { }
+    RequestFilesToVersion, { }
+    LBasicServerResponse, { }
+    AErrorMsg);
+
+  if Assigned(LBasicServerResponse) and (LBasicServerResponse.QueryInterface(IFilesToVersionResponse, LFilesToVersionResponse) = 0) then
+    ASystemFileList := LFilesToVersionResponse.Files;
+
+  Result := Assigned(LFilesToVersionResponse);
 end;
 
 function TLocalUploadController.AddVersion(AMajorVersion, AMinorVersion, AMajorBuild, AMinorBuild: Integer; out AVersionID: Integer; out AErrorMsg: WideString): WordBool;

@@ -722,7 +722,7 @@ class SQLSystem
 			// Search for last upgrade files
 			$last_upgrade_files = null;
 			if(!is_null($last_upgrade)) {
-				$code++;
+				$code = 4;
 				$last_upgrade_files = $this->GetUpdateFilesByVersionId($last_upgrade);
 			}
 
@@ -730,7 +730,7 @@ class SQLSystem
 			$last_update_files = null;
 			if(!is_null($last_update)) {
 
-				$code = ($code == 1) ? 4 : 3;
+				$code = ($code == 1) ? 2 : 3;
 
 				$last_update_files = $this->GetUpdateFilesByVersionId($last_update);
 			}

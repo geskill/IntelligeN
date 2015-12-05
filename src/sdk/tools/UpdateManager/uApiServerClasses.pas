@@ -69,6 +69,19 @@ type
     destructor Destroy; override;
   end;
 
+  TIFilesToVersionResponse = class(TIBasicServerResponse, IFilesToVersionResponse)
+  private
+    FList: TList<IUpdateManagerOnlineSystemFile>;
+  protected
+    function GetFiles: TList<IUpdateManagerOnlineSystemFile>;
+  public
+    constructor Create; override;
+
+    property Files: TList<IUpdateManagerOnlineSystemFile>read GetFiles;
+
+    destructor Destroy; override;
+  end;
+
   TIVersionAddResponse = class(TIBasicServerResponse, IVersionAddResponse)
   private
     FVersionID: Integer;
@@ -177,6 +190,25 @@ end;
 destructor TIFTPServerResponse.Destroy;
 begin
   FFTPServer := nil;
+  inherited Destroy;
+end;
+
+{ TIFilesToVersionResponse }
+
+constructor TIFilesToVersionResponse.Create;
+begin
+  inherited Create;
+  FList := TList<IUpdateManagerOnlineSystemFile>.Create();
+end;
+
+function TIFilesToVersionResponse.GetFiles: TList<IUpdateManagerOnlineSystemFile>;
+begin
+  Result := FList;
+end;
+
+destructor TIFilesToVersionResponse.Destroy;
+begin
+  FList := nil; // .Free;
   inherited Destroy;
 end;
 

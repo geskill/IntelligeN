@@ -3,7 +3,7 @@
 			<ProjectGuid>{EA17A186-1DD1-40F0-9E9B-5557FD8128C8}</ProjectGuid>
 			<ProjectVersion>12.0</ProjectVersion>
 			<MainSource>UpdateManager.dpr</MainSource>
-			<Config Condition="'$(Config)'==''">Release</Config>
+			<Config Condition="'$(Config)'==''">Debug</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Basis' or '$(Base)'!=''">
@@ -38,6 +38,7 @@
 			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
+			<DCC_Optimize>false</DCC_Optimize>
 			<DCC_MapFile>3</DCC_MapFile>
 			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
 			<DCC_Define>DEBUG;EUREKALOG;EUREKALOG_VER7;$(DCC_Define)</DCC_Define>

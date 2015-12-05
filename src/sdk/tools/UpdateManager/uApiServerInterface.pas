@@ -46,6 +46,13 @@ type
     property Server: IFTPServer read GetFTPServer;
   end;
 
+  IFilesToVersionResponse = interface(IBasicServerResponse)
+    ['{AC2D03AE-8BA3-4C26-A6E4-AF7D3B4D395F}']
+    function GetFiles: TList<IUpdateManagerOnlineSystemFile>;
+
+    property Files: TList<IUpdateManagerOnlineSystemFile>read GetFiles;
+  end;
+
   IVersionAddResponse = interface(IBasicServerResponse)
     ['{EDDB207A-6EF0-4B54-B33E-B1A7BA6B446B}']
     function GetVersionID: Integer;
