@@ -33,10 +33,10 @@ type
     FLinksInfo: TLinksInfo;
     procedure DefaultErrorHandler(AErrorMsg: string); override;
   public
-    constructor Create(const ADirectlink: IDirectlinksMirror);
+    constructor Create(const ADirectlink: IDirectlinksMirror); reintroduce;
     destructor Destroy; override;
 
-    procedure Execute();
+    procedure Execute; override;
   end;
 
   TFileHosterManager = class(TThreadManager<TFileHosterData>, IFileHosterManager)

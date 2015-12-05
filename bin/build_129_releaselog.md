@@ -471,6 +471,8 @@
 
 * Fixed threaded draw process for images in Control Editor
 
+* Fixed issue not displaying any IPicture value because of using a some empty value instead of available image link
+
 * Fixed filter selection bug in WebsiteEditor
 
 * Fixed intelligent_posting (intelligent_posting_keepshortwords is only allowed in search title generation, not as match title for comparison with search list)

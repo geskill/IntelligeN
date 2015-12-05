@@ -60,7 +60,7 @@ type
     function GetFilePathAppendix: WideString;
     procedure SetFilePathAppendix(AFilePathAppendix: WideString);
   public
-    constructor Create(AFileName: WideString);
+    constructor Create(AFileName: WideString); override;
     constructor Clone(const AUpdateSystemFileBase: IUpdateSystemFileBase);
 
     property FileSystem: TFileSystem read GetFileSystem write SetFileSystem;
@@ -96,7 +96,7 @@ type
     property FileSizeCompressed: Integer read GetFileSizeCompressed write SetFileSizeCompressed;
     property FileChecksum: WideString read GetFileChecksum write SetFileChecksum;
 
-    destructor Destroy;
+    destructor Destroy; override;
   end;
 
 implementation

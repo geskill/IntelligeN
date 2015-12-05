@@ -357,8 +357,6 @@ begin
 end;
 
 function TIScirptParser.Execute(AIScript: string): RIScriptResult;
-var
-  LIScirptResult: RIScriptResult;
 begin
   Result := ErrorAnalysis(AIScript);
   if not Result.HasError then

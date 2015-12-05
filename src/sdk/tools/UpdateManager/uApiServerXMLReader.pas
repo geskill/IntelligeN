@@ -73,6 +73,8 @@ var
 
   LUpdateVersion: IUpdateManagerVersion;
   LUpdateSystemFileBase: IUpdateManagerSystemFileBase;
+
+
   LUpdateManagerOnlineSystemFile: IUpdateManagerOnlineSystemFile;
 begin
   LBasicServerResponse := GetClassType(AType).Create;
@@ -168,14 +170,34 @@ begin
                     with ChildNodes.Nodes['files'] do
                       for XMLNodeIndex := 0 to ChildNodes.Count - 1 do
                       begin
-                        (* TODO:
-                        LUpdateManagerOnlineSystemFile := TIUpdateSystemFile.Create();
+                        LUpdateManagerOnlineSystemFile := TIUpdateManagerOnlineSystemFile.Create();
                         with ChildNodes.Nodes[XMLNodeIndex], LUpdateManagerOnlineSystemFile do
                         begin
+                          ID := VarToIntDef(ChildNodes.Nodes['id'].NodeValue, 0);
 
+                          with ChildNodes.Nodes['system'], FileBase do
+                          begin
+                            ID := VarToIntDef(ChildNodes.Nodes['id'].NodeValue, 0);
+
+                            FileName := VarToStr(ChildNodes.Nodes['name'].NodeValue);
+
+                            if (IsNumber(ChildNodes.Nodes['filesystem_id'].NodeValue)) then
+                              FileSystem := TFileSystem(VarToIntDef(ChildNodes.Nodes['filesystem_id'].NodeValue, 0))
+                            else
+                              FileSystem := TEnum.Parse<TFileSystem>(VarToStr(ChildNodes.Nodes['filesystem_id'].NodeValue));
+
+                            FilePathAppendix := VarToStr(ChildNodes.Nodes['path_appendix'].NodeValue);
+                          end;
+
+                          FileVersion.MajorVersion := VarToIntDef(ChildNodes.Nodes['major_version'].NodeValue, 0);
+                          FileVersion.MinorVersion := VarToIntDef(ChildNodes.Nodes['minor_version'].NodeValue, 0);
+                          FileVersion.MajorBuild := VarToIntDef(ChildNodes.Nodes['major_build'].NodeValue, 0);
+                          FileVersion.MinorBuild := VarToIntDef(ChildNodes.Nodes['minor_build'].NodeValue, 0);
+
+                          FileSizeCompressed := VarToIntDef(ChildNodes.Nodes['size_compressed'].NodeValue, 0);
+                          FileChecksum := VarToStr(ChildNodes.Nodes['checksum'].NodeValue);
                         end;
                         Files.Add(LUpdateManagerOnlineSystemFile);
-                        *)
                       end;
                 end;
               srtVersionAdd:

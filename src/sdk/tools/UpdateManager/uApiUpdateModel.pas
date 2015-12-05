@@ -34,7 +34,7 @@ type
     function GetID: Integer;
     procedure SetID(AID: Integer);
   public
-    constructor Create;
+    constructor Create; reintroduce;
 
     function GetFullFileName(AIntelligeNFileSystem: TIntelligeNFileSystem): WideString;
 
@@ -86,7 +86,7 @@ type
     property FileBase: IUpdateManagerSystemFileBase read GetFileBase write SetFileBase;
     property LocalFile: IUpdateManagerLocalFile read GetLocalFile write SetLocalFile;
 
-    destructor Destroy;
+    destructor Destroy; override;
   end;
 
   TIUpdateManagerOnlineSystemFile = class(TIUpdateSystemFile, IUpdateManagerOnlineSystemFile)
@@ -99,12 +99,13 @@ type
     function GetFileBase: IUpdateManagerSystemFileBase; reintroduce; overload;
     procedure SetFileBase(const AFileBase: IUpdateManagerSystemFileBase); reintroduce; overload;
   public
-    constructor Create(const AFileID: Integer; const AFileBase: IUpdateManagerSystemFileBase; const AFileVersion: IFileVersion);
+    constructor Create(); overload;
+    constructor Create(const AFileID: Integer; const AFileBase: IUpdateManagerSystemFileBase; const AFileVersion: IFileVersion); overload;
 
     property ID: Integer read GetID write SetID;
     property FileBase: IUpdateManagerSystemFileBase read GetFileBase write SetFileBase;
 
-    destructor Destroy;
+    destructor Destroy; override;
   end;
 
   TIFTPServer = class(TInterfacedObject, IFTPServer)
@@ -316,6 +317,11 @@ end;
 procedure TIUpdateManagerOnlineSystemFile.SetFileBase(const AFileBase: IUpdateManagerSystemFileBase);
 begin
   FFileBase := AFileBase;
+end;
+
+constructor TIUpdateManagerOnlineSystemFile.Create;
+begin
+  Create(0, nil, nil);
 end;
 
 constructor TIUpdateManagerOnlineSystemFile.Create(const AFileID: Integer; const AFileBase: IUpdateManagerSystemFileBase; const AFileVersion: IFileVersion);
