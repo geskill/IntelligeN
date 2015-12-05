@@ -18,6 +18,8 @@ Checked items are planned for next release.
 
 - [ ] Add direct index based filename access (i.e. Mirror[\<Index\>].Directlink[\<Index\>].FileName[\<Index\>])
 
+- [x] Implement NFO Stripper based on iNFekt NFO Viewer (https://infekt.ws/)
+
 - [ ] Implement image resizing instead of depending on image hosts resize
 
 ###SDK
@@ -57,6 +59,8 @@ Checked items are planned for next release.
 - [ ] Add simpler hoster ranking not defined by website (i.e. FileHoster ranking)
 
 - [x] Implement a silent error logger
+
+- [x] Improve PublishQueue (delete old entries)
 
 - [ ] Improve WebsiteEditor control arrangement in general tab
 
