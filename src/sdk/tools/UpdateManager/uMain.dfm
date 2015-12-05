@@ -1,7 +1,7 @@
 object fMain: TfMain
   Left = 0
   Top = 0
-  ActiveControl = rbAddNewPath
+  ActiveControl = JvWizardInteriorPageUpdateServer
   Caption = 'Update Manager'
   ClientHeight = 338
   ClientWidth = 635
@@ -21,7 +21,7 @@ object fMain: TfMain
     Top = 0
     Width = 635
     Height = 338
-    ActivePage = JvWizardWelcomePage
+    ActivePage = JvWizardInteriorPageUpdateServer
     ButtonBarHeight = 42
     ButtonStart.Caption = 'To &Start Page'
     ButtonStart.NumGlyphs = 1
@@ -149,9 +149,6 @@ object fMain: TfMain
       EnabledButtons = [bkStart, bkLast, bkBack, bkFinish, bkCancel, bkHelp]
       OnPage = JvWizardInteriorPageServerPage
       OnNextButtonClick = JvWizardInteriorPageServerNextButtonClick
-      ExplicitLeft = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         490
         296)
@@ -236,9 +233,6 @@ object fMain: TfMain
       Header.Subtitle.Font.Style = []
       EnabledButtons = [bkStart, bkLast, bkBack, bkFinish, bkCancel, bkHelp]
       OnPage = JvWizardInteriorPageServerInfoPage
-      ExplicitLeft = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         490
         296)
@@ -336,14 +330,11 @@ object fMain: TfMain
       OnPage = JvWizardInteriorPageLocalFilesPage
       OnExitPage = JvWizardInteriorPageLocalFilesExitPage
       OnNextButtonClick = JvWizardInteriorPageLocalFilesNextButtonClick
-      ExplicitLeft = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object lFileSystem: TLabel
         AlignWithMargins = True
         Left = 5
         Top = 282
-        Width = 3
+        Width = 480
         Height = 13
         Cursor = crHandPoint
         Margins.Left = 5
@@ -352,6 +343,7 @@ object fMain: TfMain
         Margins.Bottom = 1
         Align = alBottom
         OnClick = lFileSystemClick
+        ExplicitWidth = 3
       end
       object cxGLocalFiles: TcxGrid
         AlignWithMargins = True
@@ -446,9 +438,6 @@ object fMain: TfMain
       Header.Subtitle.Font.Style = []
       OnPage = JvWizardInteriorPageUpdateFilesPage
       OnNextButtonClick = JvWizardInteriorPageUpdateFilesNextButtonClick
-      ExplicitLeft = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object cxGUpdateFiles: TcxGrid
         AlignWithMargins = True
         Left = 3
@@ -534,9 +523,6 @@ object fMain: TfMain
       Header.Subtitle.Font.Style = []
       EnabledButtons = [bkStart, bkLast, bkBack, bkFinish, bkCancel, bkHelp]
       OnPage = JvWizardInteriorPageUpdateVersionPage
-      ExplicitLeft = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         490
         296)
@@ -619,6 +605,88 @@ object fMain: TfMain
         Width = 41
       end
     end
+    object JvWizardInteriorPageUpdateServer: TJvWizardInteriorPage
+      Header.Title.Color = clNone
+      Header.Title.Text = 'Update Server'
+      Header.Title.Anchors = [akLeft, akTop, akRight]
+      Header.Title.Font.Charset = DEFAULT_CHARSET
+      Header.Title.Font.Color = clWindowText
+      Header.Title.Font.Height = -16
+      Header.Title.Font.Name = 'Tahoma'
+      Header.Title.Font.Style = [fsBold]
+      Header.Subtitle.Color = clNone
+      Header.Subtitle.Text = 'Your files are now verified by the server. Just wait a moment.'
+      Header.Subtitle.Anchors = [akLeft, akTop, akRight, akBottom]
+      Header.Subtitle.Font.Charset = DEFAULT_CHARSET
+      Header.Subtitle.Font.Color = clWindowText
+      Header.Subtitle.Font.Height = -11
+      Header.Subtitle.Font.Name = 'Tahoma'
+      Header.Subtitle.Font.Style = []
+      OnPage = JvWizardInteriorPageUpdateServerPage
+      DesignSize = (
+        490
+        296)
+      object lUpdateInfoError: TLabel
+        Left = 24
+        Top = 264
+        Width = 28
+        Height = 13
+        Anchors = [akLeft, akBottom]
+        Caption = 'Error:'
+        Visible = False
+      end
+      object lAddingTheNewSystems: TLabel
+        Left = 47
+        Top = 122
+        Width = 212
+        Height = 13
+        Caption = 'Adding the new systems to the database ...'
+      end
+      object JvLEDAddSystems: TJvLED
+        Left = 24
+        Top = 120
+        ColorOff = clSilver
+        Status = False
+      end
+      object JvLEDAddVersion: TJvLED
+        Left = 24
+        Top = 88
+        ColorOff = clSilver
+        Status = False
+      end
+      object lAddVersion: TLabel
+        Left = 47
+        Top = 90
+        Width = 208
+        Height = 13
+        Caption = 'Adding the new version to the database ...'
+      end
+      object lRetrieveFilesFromServer: TLabel
+        Left = 47
+        Top = 154
+        Width = 231
+        Height = 13
+        Caption = 'Retrieve files for this version from the server ...'
+      end
+      object JvLEDRetrieveFiles: TJvLED
+        Left = 24
+        Top = 152
+        ColorOff = clSilver
+        Status = False
+      end
+      object eUpdateInfoError: TEdit
+        Left = 58
+        Top = 264
+        Width = 255
+        Height = 13
+        Anchors = [akLeft, akBottom]
+        BorderStyle = bsNone
+        Color = clBtnFace
+        ReadOnly = True
+        TabOrder = 0
+        Visible = False
+      end
+    end
     object JvWizardInteriorPageUploadFiles: TJvWizardInteriorPage
       Header.Title.Color = clNone
       Header.Title.Text = 'Upload Files'
@@ -640,60 +708,31 @@ object fMain: TfMain
       Header.Subtitle.Font.Style = []
       EnabledButtons = [bkStart, bkLast, bkFinish, bkCancel, bkHelp]
       OnPage = JvWizardInteriorPageUploadFilesPage
-      ExplicitLeft = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         490
         296)
-      object JvLEDAddVersion: TJvLED
+      object JvLEDCompressLocalFiles: TJvLED
         Left = 24
         Top = 88
         ColorOff = clSilver
         Status = False
       end
-      object lAddVersion: TLabel
-        Left = 47
-        Top = 90
-        Width = 208
-        Height = 13
-        Caption = 'Adding the new version to the database ...'
-      end
-      object JvLEDAddSystems: TJvLED
-        Left = 24
-        Top = 120
-        ColorOff = clSilver
-        Status = False
-      end
-      object lAddingTheNewSystems: TLabel
-        Left = 47
-        Top = 122
-        Width = 212
-        Height = 13
-        Caption = 'Adding the new systems to the database ...'
-      end
-      object JvLEDCompressLocalFiles: TJvLED
-        Left = 24
-        Top = 152
-        ColorOff = clSilver
-        Status = False
-      end
       object lCompressingLocalFiles: TLabel
         Left = 47
-        Top = 154
+        Top = 90
         Width = 122
         Height = 13
         Caption = 'Compressing local files ...'
       end
       object JvLEDUploadLocalFiles: TJvLED
         Left = 24
-        Top = 184
+        Top = 120
         ColorOff = clSilver
         Status = False
       end
       object lUploadingLocalFiles: TLabel
         Left = 47
-        Top = 186
+        Top = 122
         Width = 108
         Height = 13
         Caption = 'Uploading local files ...'
@@ -709,7 +748,7 @@ object fMain: TfMain
       end
       object pbUploadProgress: TProgressBar
         Left = 47
-        Top = 207
+        Top = 143
         Width = 242
         Height = 17
         TabOrder = 0
@@ -747,9 +786,6 @@ object fMain: TfMain
       Header.Subtitle.Font.Style = []
       VisibleButtons = [bkBack, bkFinish, bkCancel]
       OnFinishButtonClick = JvWizardInteriorPagePublishFinishButtonClick
-      ExplicitLeft = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
     end
     object JvWizardRouteMapNodes: TJvWizardRouteMapNodes
       Left = 0

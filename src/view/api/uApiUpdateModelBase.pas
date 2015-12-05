@@ -63,6 +63,8 @@ type
     constructor Create(AFileName: WideString); override;
     constructor Clone(const AUpdateSystemFileBase: IUpdateSystemFileBase);
 
+    function Equals(AValue: IUpdateSystemFileBase): Boolean;
+
     property FileSystem: TFileSystem read GetFileSystem write SetFileSystem;
     property FilePathAppendix: WideString read GetFilePathAppendix write SetFilePathAppendix;
   end;
@@ -223,6 +225,11 @@ begin
 
   FFileSystem := AUpdateSystemFileBase.FileSystem;
   FFilePathAppendix := AUpdateSystemFileBase.FilePathAppendix;
+end;
+
+function TIUpdateSystemFileBase.Equals(AValue: IUpdateSystemFileBase): Boolean;
+begin
+  Result := (FileSystem = AValue.FileSystem) and (FilePathAppendix = AValue.FilePathAppendix) and (FileName = AValue.FileName);
 end;
 
 { TIUpdateSystemFile }

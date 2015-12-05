@@ -146,7 +146,7 @@ class UploadSystem
 			}
 			else {
 
-				$result = versions_message(1, 1, "OK", $files);
+				$result = files_to_version_message(1, 1, "OK", $files);
 			}
 		}
 		else {
@@ -191,7 +191,7 @@ class UploadSystem
 
 				$result = status_message(1, 1, 'Files have been added successfully.');
 			}
-			else  {
+			else {
 
 				$result = status_message(0, 0, 'Files not added.');
 			}
@@ -233,6 +233,12 @@ class UploadSystem
 		return $result;
 	}
 
+	private function deleteUnusedFiles()
+	{
+		$sqlsystem = new SQLSystem();
+		return $sqlsystem->deleteUnusedFiles();
+	}
+
 	/**
 	 *
 	 */
@@ -271,6 +277,10 @@ class UploadSystem
 
 					case 'activate_version_v2':
 						echo $this->activateVersion();
+						break;
+
+					case 'delete_unused_files_v2':
+						echo $this->deleteUnusedFiles();
 						break;
 
 					default:

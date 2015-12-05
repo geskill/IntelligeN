@@ -37,11 +37,14 @@ type
 
   IUpdateSystemFileBase = interface(IFile)
     ['{8E95B78E-D1E0-4A9F-B372-95B73E886E43}']
+
     function GetFileSystem: TFileSystem;
     procedure SetFileSystem(AFileSystem: TFileSystem);
 
     function GetFilePathAppendix: WideString;
     procedure SetFilePathAppendix(AFilePathAppendix: WideString);
+
+    function Equals(AValue: IUpdateSystemFileBase): Boolean;
 
     property FileSystem: TFileSystem read GetFileSystem write SetFileSystem;
     property FilePathAppendix: WideString read GetFilePathAppendix write SetFilePathAppendix;

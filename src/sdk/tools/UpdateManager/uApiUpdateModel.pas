@@ -168,6 +168,11 @@ begin
   FID := AID;
 end;
 
+constructor TIUpdateManagerSystemFileBase.Create;
+begin
+  inherited Create('');
+end;
+
 function TIUpdateManagerSystemFileBase.GetFullFileName(AIntelligeNFileSystem: TIntelligeNFileSystem): WideString;
 begin
   Result := IncludeTrailingPathDelimiter(
@@ -175,11 +180,6 @@ begin
     { ... } FilePathAppendix
     { . } ) +
   { . } FileName;
-end;
-
-constructor TIUpdateManagerSystemFileBase.Create;
-begin
-  inherited Create('');
 end;
 
 { TIUpdateManagerLocalFile }
