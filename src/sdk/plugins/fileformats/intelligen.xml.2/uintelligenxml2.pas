@@ -71,6 +71,7 @@ begin
         Options := Options + [doNodeAutoIndent];
         DocumentElement := CreateElement('xml', '');
         Active := True;
+        Encoding := 'utf-8';
       end;
       with XMLDoc.DocumentElement do
       begin

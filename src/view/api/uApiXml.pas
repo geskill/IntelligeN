@@ -450,6 +450,7 @@ begin
           LoadFromFile(AFileName);
 
         Active := True;
+        Encoding := 'utf-8';
 
         with DocumentElement do
         begin

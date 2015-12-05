@@ -54,10 +54,10 @@ begin
     try
       with XMLDoc do
       begin
-        Encoding := 'iso-8859-1';
         Options := Options + [doNodeAutoIndent];
         DocumentElement := CreateElement('Settings', '');
         Active := True;
+        Encoding := 'iso-8859-1';
       end;
       with XMLDoc.DocumentElement do
       begin

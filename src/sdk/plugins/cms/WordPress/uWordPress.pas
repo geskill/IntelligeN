@@ -451,10 +451,10 @@ function TWordPress.GetIDs;
       try
         with XMLDoc do
         begin
-          Active := True;
-          Encoding := 'UTF-8';
-          StandAlone := 'yes';
           Options := Options + [doNodeAutoIndent];
+          Active := True;
+          Encoding := 'utf-8';
+          StandAlone := 'yes';
         end;
 
         with XMLDoc.AddChild('methodCall') do

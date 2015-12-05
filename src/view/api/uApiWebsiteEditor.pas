@@ -1581,6 +1581,7 @@ begin
         LoadFromFile(WebsiteSettingsFileName);
 
         Active := True;
+        Encoding := 'utf-8';
 
         with DocumentElement do
           if HasChildNodes then
