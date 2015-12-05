@@ -153,6 +153,42 @@ class SQLSystem
 	private $link;
 
 	/**
+	 * @param $version_id
+	 * @return SQLUpdateVersion|null
+	 */
+	private function GetVersion($version_id) {
+
+		$result = null;
+
+		// Select all entries from systems.
+		$sql = "SELECT * FROM `intelligen_2k9_update_versions` WHERE (`id` = '" . $this->link->escape_string($version_id) . "')";
+
+		$query_result = $this->link->query($sql);
+		if(!$query_result)
+		{
+			die(status_message(0, 0, 'There was an error running the query [' . $this->link->error . ']'));
+		}
+
+		if ($query_result->num_rows == 1)
+		{
+			$result = new SQLUpdateVersion();
+
+			$row = $query_result->fetch_assoc();
+
+			$result->id = $row['id'];
+			$result->active = $row['active'];
+			$result->major_version = $row['major_version'];
+			$result->minor_version = $row['minor_version'];
+			$result->major_build = $row['major_build'];
+			$result->minor_build = $row['minor_build'];
+			$result->created = $row['created'];
+			$result->modified = $row['modified'];
+		}
+
+		return $result;
+	}
+
+	/**
 	 * @param $major_version
 	 * @param $minor_version
 	 * @param $major_build
@@ -490,7 +526,7 @@ class SQLSystem
 	 * @param $major_build
 	 * @param $minor_build
 	 * @return int|mixed
-     */
+	 */
 	function AddVersion($major_version, $minor_version, $major_build, $minor_build) {
 
 		$result = 0;
@@ -507,6 +543,25 @@ class SQLSystem
 			}
 
 			return $this->link->insert_id;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * @param $version_id
+	 * @return SQLUpdateVersionFile[]|null
+	 */
+	function GetFilesToVersion($version_id) {
+
+		$result = null;
+
+		// Get version object from version id
+		$version = $this->GetVersion($version_id);
+
+		if(!is_null($version)) {
+
+			$result = $this->GetUpdateFilesByVersionId($version);
 		}
 
 		return $result;

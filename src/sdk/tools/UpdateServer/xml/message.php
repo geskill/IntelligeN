@@ -125,6 +125,22 @@ function versions_message($status, $code, $msg, $data = null) {
  * @param $status
  * @param $code
  * @param $msg
+ * @param SQLUpdateVersionFile[]|null $files
+ * @return XML
+ */
+function files_to_version_message($status, $code, $msg, $files = null) {
+
+	$xml = status_message($status, $code, $msg);
+
+	add_files_to_version_message($xml->rootnode, $files);
+
+	return $xml;
+}
+
+/**
+ * @param $status
+ * @param $code
+ * @param $msg
  * @return XML
  */
 function ftp_server_message($status, $code, $msg) {
@@ -183,6 +199,39 @@ function add_files_to_files_message($node, $data) {
 			XML::addElement($file, 'filesystem_id', $VersionFile->file->system->filesystem_id);
 			XML::addElement($file, 'path_appendix', $VersionFile->file->system->path_appendix);
 			XML::addElement($file, 'name', $VersionFile->file->system->name);
+		}
+	}
+}
+
+/**
+ * @param $node
+ * @param SQLUpdateVersionFile[]|null $data
+ */
+function add_files_to_version_message($node, $data) {
+
+	if (!is_null($data)) {
+
+		$files = XML::addElement($node, 'files');
+
+		foreach ($data as $VersionFile)  {
+
+			$file = XML::addElement($files, 'file');
+
+			XML::addElement($file, 'id', $VersionFile->file->id);
+
+			$file_system = XML::addElement($file, 'system');
+			XML::addElement($file_system, 'id', $VersionFile->file->system->id);
+			XML::addElement($file_system, 'filesystem_id', $VersionFile->file->system->filesystem_id);
+			XML::addElement($file_system, 'path_appendix', $VersionFile->file->system->path_appendix);
+			XML::addElement($file_system, 'name', $VersionFile->file->system->name);
+
+			XML::addElement($file, 'major_version', $VersionFile->file->major_version);
+			XML::addElement($file, 'minor_version', $VersionFile->file->minor_version);
+			XML::addElement($file, 'major_build', $VersionFile->file->major_build);
+			XML::addElement($file, 'minor_build', $VersionFile->file->minor_build);
+
+			XML::addElement($file, 'size_compressed', $VersionFile->file->size_compressed);
+			XML::addElement($file, 'checksum', $VersionFile->file->checksum);
 		}
 	}
 }

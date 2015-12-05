@@ -131,6 +131,32 @@ class UploadSystem
 		return $result;
 	}
 
+	private function getFilesToVersion()
+	{
+		$result = null;
+
+		if (isset($_REQUEST['version_id'])) {
+
+			$sqlsystem = new SQLSystem();
+			$files = $sqlsystem->GetFilesToVersion($_REQUEST['version_id']);
+
+			if (is_null($files) || count($files) == 0) {
+
+				$result = status_message(0, 0, 'No files yet uploaded.');
+			}
+			else {
+
+				$result = versions_message(1, 1, "OK", $files);
+			}
+		}
+		else {
+
+			$result = status_message(0, 0, 'No version id specified.');
+		}
+
+		return $result;
+	}
+
 	/**
 	 * @return null|XML
      */
@@ -233,6 +259,10 @@ class UploadSystem
 						break;
 					case 'add_version_v2':
 						echo $this->addVersion();
+						break;
+
+					case 'get_version_files_v2':
+						echo $this->getFilesToVersion();
 						break;
 
 					case 'add_files_v2':
