@@ -15,7 +15,11 @@ uses
 type
   TReleasename = class(TCrawlerPlugIn)
   private
+    procedure RemoveDotsOrUnderscores(var AName: string);
+    procedure RemoveGroupName(var AName: string);
     procedure RemoveSceneNames(var AName: string);
+  protected
+    function InSceneString(AStrings: array of string; const AName: string): Boolean;
   public
     function GetName: WideString; override; safecall;
 
@@ -31,33 +35,82 @@ type
 
 implementation
 
+procedure TReleasename.RemoveDotsOrUnderscores(var AName: string);
+begin
+  if CharCount('_', AName) > CharCount('.', AName) then
+    AName := StringReplace(AName, '_', ' ', [rfReplaceAll])
+  else
+    AName := StringReplace(AName, '.', ' ', [rfReplaceAll]);
+end;
+
+procedure TReleasename.RemoveGroupName(var AName: string);
+var
+  LPosition: Integer;
+begin
+  LPosition := LastDelimiter('-', AName);
+  if (LPosition > 0) then
+    Delete(AName, LPosition, Length(AName) - LPosition + 1);
+end;
+
 procedure TReleasename.RemoveSceneNames(var AName: string);
 
-  function ReversePos(SubStr, S: string): Integer;
+  function LoadStringsFromResourceByName(const AResourceName: string): TStrings;
+  var
+    LResourceStream: TResourceStream;
   begin
-    SubStr := ReverseString(SubStr);
-    S := ReverseString(S);
-    Result := Pos(SubStr, S);
-    if 0 <> Result then
-      Result := Length(S) - Length(SubStr) - Result + 2;
+    Result := TStringList.Create;
+
+    LResourceStream := TResourceStream.Create(HInstance, AResourceName, RT_RCDATA);
+    try
+      try
+        Result.LoadFromStream(LResourceStream);
+      except
+        raise ;
+      end;
+    finally
+      LResourceStream.Free;
+    end;
   end;
 
-const
-  SzeneNames: array [0 .. 121] of string = ('2CD', '3CD', '3DS', '480p', '720p', '1080p', 'AC3', 'AC3D', 'AC3LD', 'BDRIP', 'BLURAY', 'BRRIP', 'CAM', 'CENSORED', 'CLONEDVD', 'COMPLETE', 'CRACKED', 'DC', 'DISC', 'DISC1', 'DISC2', 'DL', 'DOCU', 'DOKU',
-    'DTS', 'DUAL', 'Dubbed', 'DVD', 'DVDR', 'DVDRiP', 'DVDSCR', 'DVDSCREENER', 'EMUDVD', 'ENG', 'EUR', 'EXTENDED', 'FESTiVAL', 'FLV', 'FRA', 'FRE', 'GBA', 'GER', 'German', 'H264', 'HDRIP', 'HDTV', 'INTEGRATED', 'INTERNAL', 'iSORiP', 'JAV', 'JPN',
-    'JTAG', 'LD', 'LIMITED', 'Line', 'KOR', 'MAC', 'MACOSX', 'MAG', 'MD', 'MOV', 'MP4', 'MULTI', 'MULTi2', 'MULTi3', 'MULTi4', 'MULTi5', 'MULTi6', 'MULTiLANGUAGE', 'NDS', 'NES', 'NFO', 'NGC', 'NTSC', 'PAL', 'PDTV', 'PPVRIP', 'PROPER', 'PROMO',
-    'PDVD', 'PS2', 'PS3', 'PS4', 'PSP', 'PSV', 'R3', 'R5', 'READNFO', 'REGION', 'REMASTERED', 'REMUX', 'REPACK', 'RERIP', 'RF', 'SCR', 'SCREENER', 'SUBBED', 'TELECINE', 'TC', 'TELESYNC', 'TS', 'UNCUT', 'UNTOUCHED', 'UNRATED', 'USA', 'VC1', 'VINYL',
-    'WEB', 'WEBRIP', 'WII', 'WIIU', 'WINALL', 'WORKPRINT', 'WS', 'x264', 'X360', 'XBLA', 'XBOX', 'XBOX360', 'XBOXONE', 'XViD', 'XXX');
 var
-  LIndex, LastMatch, LastMatchEnd, NameLength: Integer;
+  LIndex, LNameLength, LSzeneNameLength, LLastMatch, LLastMatchEnd: Integer;
+  LSzeneName: string;
 begin
-  for LIndex := low(SzeneNames) to high(SzeneNames) do
+  with LoadStringsFromResourceByName('SceneNames') do
+    try
+      for LIndex := 0 to Count - 1 do
+      begin
+        LNameLength := Length(AName);
+
+        // Assume that SzeneNames are all in upper case
+        LSzeneName := Strings[LIndex];
+        LSzeneNameLength := Length(LSzeneName);
+
+        LLastMatch := ReversePos(' ' + LSzeneName, UpperCase(AName));
+        LLastMatchEnd := LLastMatch + LSzeneNameLength;
+
+        if (LLastMatch > 0) and ((LLastMatchEnd = LNameLength) or ((LLastMatchEnd < LNameLength) and SameStr(' ', AName[LLastMatchEnd + 1]))) then
+          AName := copy(AName, 1, LLastMatch);
+      end;
+    finally
+      Free;
+    end;
+end;
+
+function TReleasename.InSceneString(AStrings: array of string; const AName: string): Boolean;
+var
+  LArrayIndex: Integer;
+begin
+  Result := False;
+
+  for LArrayIndex := low(AStrings) to High(AStrings) do
   begin
-    LastMatch := ReversePos(' ' + LowerCase(SzeneNames[LIndex]), LowerCase(AName));
-    LastMatchEnd := LastMatch + Length(SzeneNames[LIndex]);
-    NameLength := Length(AName);
-    if (LastMatch > 0) and ((LastMatchEnd = NameLength) or ((LastMatchEnd < NameLength) and SameText(AName[LastMatchEnd + 1], ' '))) then
-      AName := copy(AName, 1, LastMatch);
+    if not(Pos(AStrings[LArrayIndex], AName) > 0) then // Optimization
+      Continue;
+
+    if (Pos('_' + AStrings[LArrayIndex] + '_', AName) > 0) or (Pos('_' + AStrings[LArrayIndex] + '-', AName) > 0) or
+    { . } (Pos('.' + AStrings[LArrayIndex] + '.', AName) > 0) or (Pos('.' + AStrings[LArrayIndex] + '-', AName) > 0) then
+      Exit(True);
   end;
 end;
 
@@ -73,7 +126,7 @@ end;
 
 function TReleasename.InternalGetAvailableControlIDs;
 begin
-  Result := [cDirector, cTitle, cLanguage];
+  Result := [cDirector, cTitle, cLanguage, cNotes];
 
   if (ATypeID = cMovie) or (ATypeID = cXXX) then
     Result := Result + [cAudioStream, cVideoCodec, cVideoStream];
@@ -101,21 +154,20 @@ begin
 
   if ACanUse(cTitle) then
   begin
-    if CharCount('_', LReleasename) > CharCount('.', LReleasename) then
-      LTitle := StringReplace(LReleasename, '_', ' ', [rfReplaceAll])
-    else
-      LTitle := StringReplace(LReleasename, '.', ' ', [rfReplaceAll]);
-    if (LastDelimiter('-', LTitle) > 0) then
-      Delete(LTitle, LastDelimiter('-', LTitle), Length(LTitle) - LastDelimiter('-', LTitle) + 1);
+    LTitle := LReleasename;
 
-    if (TTypeID(ATypeID) = cAudio) then
+    RemoveDotsOrUnderscores(LTitle);
+
+    RemoveGroupName(LTitle);
+
+    if (ATypeID = cAudio) then
     begin
-      // Alle bis auf den ersten Bindestrich entfernen
+      // Remove all hyphen except the first occurrence
       for LIndex := Pos('-', LTitle) + 1 to Length(LTitle) do
         if (LTitle[LIndex] = '-') then
           LTitle[LIndex] := ' ';
 
-      // Leerzeichen zwischen Interpret und Songtitel
+      // Space between artist and song title
       if Pos('-', LTitle) > 1 then
       begin
         if not(LTitle[Pos('-', LTitle) - 1] = ' ') then
@@ -124,7 +176,7 @@ begin
           Insert(' ', LTitle, Pos('-', LTitle) + 1);
       end;
 
-      // Für SAMPLER
+      // For SAMPLER
       if (copy(LTitle, 1, 5) = 'VA - ') then
         Delete(LTitle, 1, 5)
       else if (copy(LTitle, 1, 4) = 'VA--') then
@@ -134,13 +186,15 @@ begin
     end;
 
     // TODO: Only for german stuff useful. Detect german language or ignore?
-
-    LTitle := StringReplace(LTitle, 'ae', 'ä', [rfReplaceAll]);
-    LTitle := StringReplace(LTitle, 'Ae', 'Ä', [rfReplaceAll]);
-    LTitle := StringReplace(LTitle, 'oe', 'ö', [rfReplaceAll]);
-    LTitle := StringReplace(LTitle, 'Oe', 'Ö', [rfReplaceAll]);
-    LTitle := StringReplace(LTitle, 'ue', 'ü', [rfReplaceAll]);
-    LTitle := StringReplace(LTitle, 'Ue', 'Ü', [rfReplaceAll]);
+    // https://github.com/shuyo/language-detection
+    (*
+      LTitle := StringReplace(LTitle, 'ae', 'ä', [rfReplaceAll]);
+      LTitle := StringReplace(LTitle, 'Ae', 'Ä', [rfReplaceAll]);
+      LTitle := StringReplace(LTitle, 'oe', 'ö', [rfReplaceAll]);
+      LTitle := StringReplace(LTitle, 'Oe', 'Ö', [rfReplaceAll]);
+      LTitle := StringReplace(LTitle, 'ue', 'ü', [rfReplaceAll]);
+      LTitle := StringReplace(LTitle, 'Ue', 'Ü', [rfReplaceAll]);
+      *)
 
     RemoveSceneNames(LTitle);
 
@@ -148,9 +202,8 @@ begin
       if (LTitle[Length(LTitle)] in [' ', '-', '.', '_']) then
         Delete(LTitle, Length(LTitle), 1);
 
-    if not(TTypeID(ATypeID) = cSoftware) then
-      if Length(LTitle) > 4
-      { 11 } then
+    if not(ATypeID = cSoftware) then
+      if (Length(LTitle) > 4) then
         if (LTitle[Length(LTitle)] in ['0' .. '9']) and (LTitle[Length(LTitle) - 1] in ['0' .. '9']) and (LTitle[Length(LTitle) - 2] in ['0' .. '9']) and (LTitle[Length(LTitle) - 3] in ['1' .. '9']) and (LTitle[Length(LTitle) - 4] = ' ') then
           LTitle := copy(LTitle, 1, Length(LTitle) - 5);
 
@@ -158,129 +211,196 @@ begin
       if (LTitle[LIndex] = ' ') and (LTitle[LIndex - 1] in ['0' .. '9']) and (LTitle[LIndex + 1] in ['0' .. '9']) then
         LTitle[LIndex] := '.';
 
-    { ReduceCapitals eher schlecht
-      for I := Length(s) downto 1 do
-      if (s[I] in ['A' .. 'Z']) and (s[I - 1] in ['A' .. 'Z']) then
-      s[I] := LowerCase(s)[I];
-      }
-
-    if (ATypeID = cAudio) then
-    begin
-      if (AControlController.FindControl(cCreator) <> nil) and (cCreator in AControlIDs) then
-        AControlController.FindControl(cCreator).AddProposedValue(GetName, Trim(copy(LTitle, 1, Pos('-', LTitle) - 1)));
-    end;
+    // ReduceCapitals not worth
 
     AControlController.FindControl(cTitle).AddProposedValue(GetName, LTitle);
+  end;
+
+  if (ATypeID = cAudio) and ACanUse(cTitle) then
+  begin
+    AControlController.FindControl(cCreator).AddProposedValue(GetName, Trim(copy(LTitle, 1, Pos('-', LTitle) - 1)));
   end;
 
   LReleasename := LowerCase(LReleasename);
 
   if ACanUse(cLanguage) then
   begin
-    if (TTypeID(ATypeID) = cMovie) and (Pos('german', LReleasename) > 0) and (Pos('.dl', LReleasename) > 0) then
+    if (ATypeID = cMovie) and (Pos('german', LReleasename) > 0) and (Pos('.dl', LReleasename) > 0) then
       AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'german;english')
+
     else if Pos('german', LReleasename) > 0 then
       AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'german')
+
     else if Pos('english', LReleasename) > 0 then
       AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'english')
+
     else if Pos('spanish', LReleasename) > 0 then
       AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'spanish')
-    else if (Pos('japanese', LReleasename) > 0) or ((Pos('jav', LReleasename) > 0) and (TTypeID(ATypeID) = cXXX)) then
+
+    else if (Pos('japanese', LReleasename) > 0) or ((ATypeID = cXXX) and (Pos('jav', LReleasename) > 0)) then
       AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'japanese')
+
     else
-      // if (TTypeID(ATypeID) = cMovie) or (TTypeID(ATypeID) = cPCGames) or (TTypeID(ATypeID) = cSoftware) or (TTypeID(ATypeID) = cXXX) then
       AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'english')
+  end;
+
+  if ACanUse(cNotes) then
+  begin
+    if InSceneString(['uncut'], LReleasename) then
+      AControlController.FindControl(cNotes).AddProposedValue(GetName, 'uncut')
+
+    else if InSceneString(['unrated'], LReleasename) then
+      AControlController.FindControl(cNotes).AddProposedValue(GetName, 'unrated')
+
+    else if InSceneString(['dc', 'directors.cut'], LReleasename) then
+      AControlController.FindControl(cNotes).AddProposedValue(GetName, 'director''s cut')
+
+    else if (ATypeID = cMovie) and InSceneString(['extended'], LReleasename) then
+      AControlController.FindControl(cNotes).AddProposedValue(GetName, 'extended')
+
+    else if (ATypeID = cMovie) and InSceneString(['theatrical'], LReleasename) then
+      AControlController.FindControl(cNotes).AddProposedValue(GetName, 'theatrical')
   end;
 
   if ACanUse(cAudioStream) then
   begin
-    if Pos('.ac3', LReleasename) > 0 then
-      AControlController.FindControl(cAudioStream).AddProposedValue(GetName, 'ac3')
-    else if Pos('.dts', LReleasename) > 0 then
-      AControlController.FindControl(cAudioStream).AddProposedValue(GetName, 'dts')
-    else if Pos('.mic', LReleasename) > 0 then
+    if InSceneString(['mic', 'md', 'ac3md'], LReleasename) then
       AControlController.FindControl(cAudioStream).AddProposedValue(GetName, 'mic')
-    else if Pos('.md', LReleasename) > 0 then
-      AControlController.FindControl(cAudioStream).AddProposedValue(GetName, 'mic')
-    else if Pos('.ld', LReleasename) > 0 then
+
+    else if InSceneString(['line', 'ld', 'ac3ld'], LReleasename) then
       AControlController.FindControl(cAudioStream).AddProposedValue(GetName, 'line')
-    else if (TTypeID(ATypeID) = cMovie) or (TTypeID(ATypeID) = cXXX) then
-      AControlController.FindControl(cAudioStream).AddProposedValue(GetName, 'stereo')
+
+    else if InSceneString(['aac'], LReleasename) then
+      AControlController.FindControl(cAudioStream).AddProposedValue(GetName, 'aac')
+
+    else if InSceneString(['ac3', 'ac3d', 'ac3.dubbed', 'dd51', 'dd5.1'], LReleasename) then
+      AControlController.FindControl(cAudioStream).AddProposedValue(GetName, 'ac3')
+
+    else if InSceneString(['dts', 'dtsd', 'dtshd', 'dts-hd', 'bluray'], LReleasename) then
+      AControlController.FindControl(cAudioStream).AddProposedValue(GetName, 'dts')
+
+    else
+      AControlController.FindControl(cAudioStream).AddProposedValue(GetName, 'ac3')
   end;
 
   if ACanUse(cVideoCodec) then
   begin
-    if Pos('.xvid', LReleasename) > 0 then
+    if InSceneString(['xvid'], LReleasename) then
       AControlController.FindControl(cVideoCodec).AddProposedValue(GetName, 'xvid')
-    else if Pos('.divx', LReleasename) > 0 then
+
+    else if InSceneString(['divx'], LReleasename) then
       AControlController.FindControl(cVideoCodec).AddProposedValue(GetName, 'divx')
-    else if Pos('.dvdr', LReleasename) > 0 then
-      AControlController.FindControl(cVideoCodec).AddProposedValue(GetName, 'dvdr')
-    else if Pos('.svcd', LReleasename) > 0 then
-      AControlController.FindControl(cVideoCodec).AddProposedValue(GetName, 'svcd')
-    else if Pos('.x264', LReleasename) > 0 then
+
+    else if InSceneString(['x264', 'h264'], LReleasename) then
       AControlController.FindControl(cVideoCodec).AddProposedValue(GetName, 'x264')
-    else if Pos('.complete.bluray', LReleasename) > 0 then
+
+    else if InSceneString(['x265', 'h265'], LReleasename) then
+      AControlController.FindControl(cVideoCodec).AddProposedValue(GetName, 'x265')
+
+    else if InSceneString(['dvdr'], LReleasename) then
+      AControlController.FindControl(cVideoCodec).AddProposedValue(GetName, 'dvdr')
+
+    else if InSceneString(['complete.bluray'], LReleasename) then
       AControlController.FindControl(cVideoCodec).AddProposedValue(GetName, 'vc-1')
+
+    else if InSceneString(['svcd'], LReleasename) then
+      AControlController.FindControl(cVideoCodec).AddProposedValue(GetName, 'svcd')
+
+    else if InSceneString(['vcd'], LReleasename) then
+      AControlController.FindControl(cVideoCodec).AddProposedValue(GetName, 'vcd')
   end;
 
   if ACanUse(cVideoStream) then
   begin
-    if (Pos('.screener.', LReleasename) > 0) then
-      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'screener')
-    else if (Pos('.dvdscr.', LReleasename) > 0) then
-      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'dvdscr')
-    else if Pos('.dvdrip.', LReleasename) > 0 then
-      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'dvdrip')
-    else if Pos('.dvdr.', LReleasename) > 0 then
-      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'dvdr')
-    else if (Pos('.bdrip.', LReleasename) > 0) or (Pos('.hdrip.', LReleasename) > 0) then
-      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'bdrip')
-    else if Pos('.bluray.', LReleasename) > 0 then
+    if InSceneString(['cam', 'hdcam'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'cam')
+
+    else if InSceneString(['bluray'], LReleasename) then
       AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'bluray')
-    else if Pos('.ts.', LReleasename) > 0 then
-      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'ts')
-    else if Pos('.telesync.', LReleasename) > 0 then
-      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'telesync')
-    else if Pos('.r3.', LReleasename) > 0 then
+
+    else if InSceneString(['bdrip', 'bd.rip', 'bd-rip', 'hdrip', 'hd.rip', 'hd-rip'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'bdrip')
+
+    else if InSceneString(['bdscr', 'bd.scr', 'bd-scr', 'hdscr', 'hd.scr', 'hd-scr'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'bdscr')
+
+    else if InSceneString(['dvd5', 'dvdr'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'dvd5')
+
+    else if InSceneString(['dvd9'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'dvd9')
+
+    else if InSceneString(['dvdrip'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'dvdrip')
+
+    else if InSceneString(['dvdscr', 'dvd-scr'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'dvdscr')
+
+    else if InSceneString(['ppv', 'ppvrip'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'ppvrip')
+
+    else if InSceneString(['r1'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'r1')
+    else if InSceneString(['r2'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'r2')
+    else if InSceneString(['r3'], LReleasename) then
       AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'r3')
-    else if Pos('.r5.', LReleasename) > 0 then
+    else if InSceneString(['r4'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'r4')
+    else if InSceneString(['r5'], LReleasename) then
       AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'r5')
-    else if Pos('.hdtv.', LReleasename) > 0 then
+    else if InSceneString(['r6'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'r6')
+
+    else if InSceneString(['scr', 'screener'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'scr')
+
+    else if InSceneString(['tc', 'telecine'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'tc')
+
+    else if InSceneString(['ts', 'telesync', 'hdts', 'hd-ts'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'ts')
+
+    else if InSceneString(['hdtv'], LReleasename) then
       AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'hdtv')
-    else if Pos('.workprint.', LReleasename) > 0 then
+
+    else if InSceneString(['vhs'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'vhs')
+
+    else if InSceneString(['webdl', 'web-dl'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'webdl')
+
+    else if InSceneString(['webrip', 'web.rip', 'web-rip'], LReleasename) then
+      AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'webrip')
+
+    else if InSceneString(['workprint'], LReleasename) then
       AControlController.FindControl(cVideoStream).AddProposedValue(GetName, 'workprint')
   end;
 
   if ACanUse(cVideoSystem) then
   begin
-    if (ATypeID = cMovie) then
+    if InSceneString(['pal'], LReleasename) then
+      AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'pal')
+
+    else if InSceneString(['ntsc'], LReleasename) then
+      AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'ntsc')
+
+    else if InSceneString(['secam'], LReleasename) then
+      AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'secam');
+
+    if (ATypeID in cConsole) then
     begin
-      if (Pos('.pal.', LReleasename) > 0) or (Pos('_pal_', LReleasename) > 0) then
-        AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'PAL')
-      else if (Pos('.ntsc.', LReleasename) > 0) or (Pos('_ntsc_', LReleasename) > 0) then
-        AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'NTSC')
-    end
-    else if (ATypeID in cConsole) then
-    begin
-      if (Pos('.rf.', LReleasename) > 0) or (Pos('_rf_', LReleasename) > 0) then
-        AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'REGION FREE')
-      else if (Pos('.pal.', LReleasename) > 0) or (Pos('_pal_', LReleasename) > 0) then
-        AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'PAL')
-      else if (Pos('.ntsc.', LReleasename) > 0) or (Pos('_ntsc_', LReleasename) > 0) then
-        AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'NTSC')
-      else if (Pos('.eur.', LReleasename) > 0) or (Pos('_eur_', LReleasename) > 0) then
-        AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'EUR')
-      else if (Pos('.ger.', LReleasename) > 0) or (Pos('_ger_', LReleasename) > 0) then
-        AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'EUR')
-      else if (Pos('.fra.', LReleasename) > 0) or (Pos('_fra_', LReleasename) > 0) then
-        AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'EUR')
-      else if (Pos('.usa.', LReleasename) > 0) or (Pos('_usa_', LReleasename) > 0) then
-        AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'USA')
-      else if (Pos('.jpn.', LReleasename) > 0) or (Pos('_jpn_', LReleasename) > 0) then
-        AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'JPN')
-      else if (Pos('.jap.', LReleasename) > 0) or (Pos('_jap_', LReleasename) > 0) then
-        AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'JPN')
+      if InSceneString(['rf'], LReleasename) then
+        AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'rf')
+
+      else if InSceneString(['eur', 'ger', 'fra'], LReleasename) then
+        AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'eur')
+
+      else if InSceneString(['usa'], LReleasename) then
+        AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'usa')
+
+      else if InSceneString(['jpn', 'jap'], LReleasename) then
+        AControlController.FindControl(cVideoSystem).AddProposedValue(GetName, 'jpn')
     end;
   end;
 

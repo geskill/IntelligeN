@@ -18,11 +18,13 @@ function StringReplaceMultiple(const Source: string; const OldPatterns, NewPatte
 
 function IsNumber(AVariant: Variant): Boolean;
 
-function CharCount(const SubStr, S: string): Integer;
-
 function ExtractTextBetween(const Str: string; const Delim1, Delim2: string): string;
 
 function RemoveTextBetween(const Str: string; const Delim1, Delim2: string): string;
+
+function CharCount(const SubStr, S: string): Integer;
+
+function ReversePos(SubStr, S: string): Integer;
 
 function ReduceCapitals(const Str: string): string;
 
@@ -341,6 +343,15 @@ begin
     I := PosEx(SubStr, S, I) + 1;
     Inc(Result);
   end;
+end;
+
+function ReversePos(SubStr, S: string): Integer;
+begin
+  SubStr := ReverseString(SubStr);
+  S := ReverseString(S);
+  Result := Pos(SubStr, S);
+  if 0 <> Result then
+    Result := Length(S) - Length(SubStr) - Result + 2;
 end;
 
 function ReduceCapitals(const Str: string): string;

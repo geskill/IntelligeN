@@ -1,5 +1,7 @@
 library releasename;
 
+{$R *.dres}
+
 uses
   uPlugInInterface,
   uPlugInCrawlerClass,
