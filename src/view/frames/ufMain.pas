@@ -38,6 +38,7 @@ type
     procedure pcMainNewTabButtonClick(Sender: TObject; var AHandled: Boolean);
     procedure cxTCViewChange(Sender: TObject);
   private
+    FLockCount: Integer;
     FBackupManager: TBackupManager;
     FControlAligner: TControlAligner;
     FPublishManager: IPublishManager;
@@ -47,6 +48,8 @@ type
     FImageHosterManager: IImageHosterManager;
     FChange: INotifyEvent;
     FViewChange: IViewChangeEvent;
+    function LockPageControl: Boolean;
+    function UnlockPageControl: Boolean;
     procedure CrawlerGUIInteraction(const AControlController: IControlController; AStatus: TCrawlerTaskStatus; AProgressPosition: Extended; AMessage: string);
     function GetPagesAvailable: Boolean;
     procedure SetPagesAvailable(APagesAvailable: Boolean);
@@ -64,6 +67,7 @@ type
     function GetChange: INotifyEvent;
     function GetViewChange: IViewChangeEvent;
   public
+    constructor Create(AOwner: TComponent); override;
     procedure PostCreate; // called after all frames are created
 
     procedure CallBackupManager;
@@ -197,6 +201,27 @@ begin
   CommonActiveViewTypeChange(ActiveViewType);
 end;
 
+function TfMain.LockPageControl: Boolean;
+begin
+  if (FLockCount = 0) then
+  begin
+    SendMessage(pcMain.Handle, WM_SETREDRAW, WPARAM(False), 0);
+  end;
+
+  Inc(FLockCount);
+end;
+
+function TfMain.UnlockPageControl: Boolean;
+begin
+  Dec(FLockCount);
+
+  if (FLockCount = 0) then
+  begin
+    SendMessage(pcMain.Handle, WM_SETREDRAW, 1, 0);
+    RedrawWindow(pcMain.Handle, nil, 0, RDW_ERASE or RDW_FRAME or RDW_INVALIDATE or RDW_ALLCHILDREN);
+  end;
+end;
+
 procedure TfMain.CrawlerGUIInteraction(const AControlController: IControlController; AStatus: TCrawlerTaskStatus; AProgressPosition: Extended; AMessage: string);
 begin
   with cxPBAutocompletion do
@@ -213,6 +238,13 @@ begin
     Position := AProgressPosition;
     Repaint;
   end;
+end;
+
+constructor TfMain.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  FLockCount := 0;
 end;
 
 function TfMain.GetPagesAvailable;
@@ -370,13 +402,18 @@ begin
   if (TabSheetCount > 0) then
     with FControlAligner do
     begin
-      TTabSheetController(pcMain.ActivePage).DataTabSheetItem.VertScrollBar.Position := 0;
+      LockPageControl;
+      try
+        TTabSheetController(pcMain.ActivePage).DataTabSheetItem.VertScrollBar.Position := 0;
 
-      WorkPanelWidth := pcMain.ActivePage.Width;
+        WorkPanelWidth := pcMain.ActivePage.Width;
 
-      ControlController := ActiveTabSheetController.ControlController;
-      MirrorController := ActiveTabSheetController.MirrorController;
-      Start;
+        ControlController := ActiveTabSheetController.ControlController;
+        MirrorController := ActiveTabSheetController.MirrorController;
+        Start;
+      finally
+        UnlockPageControl;
+      end;
     end;
 end;
 
@@ -503,7 +540,7 @@ var
   LNewTabSheetController: TTabSheetController;
   LMirrorIndex: Integer;
 begin
-  SendMessage(pcMain.Handle, WM_SETREDRAW, WPARAM(False), 0);
+  LockPageControl;
   try
     pcMain.Properties.BeginUpdate;
     try
@@ -546,8 +583,7 @@ begin
       end;
     end;
   finally
-    SendMessage(pcMain.Handle, WM_SETREDRAW, 1, 0);
-    RedrawWindow(pcMain.Handle, nil, 0, RDW_ERASE or RDW_FRAME or RDW_INVALIDATE or RDW_ALLCHILDREN);
+    UnlockPageControl;
   end;
 
   with LNewTabSheetController do
