@@ -106,7 +106,7 @@ begin
   LItem.KeyWords.CommaText := '"INTTOSTR","FLOATTOSTR","BOOLTOSTR","VARTOSTR","STRTOINT","STRTOINT64","STRTOFLOAT","STRTOBOOL","FORMAT","FORMATFLOAT",' +
   { . } '"LENGTH","COPY","POS","DELETE","DELETESTR","INSERT","UPPERCASE","LOWERCASE","TRIM","NAMECASE","COMPARETEXT","CHR","ORD","SETLENGTH",' +
   { . } '"ROUND","TRUNC","INT","FRAC","SQRT","ABS","SIN","COS","ARCTAN","TAN","EXP","LN","PI","INC","DEC",' +
-  { . } '"CHARCOUNT","POSEX","REDUCECAPITALS","STRINGREPLACE","EXTRACTURLFILENAME","EXTRACTURLPATH","EXTRACTURLPROTOCOL","EXTRACTURLHOST","EXTRACTURLHOSTWITHPATH","BUILDWEBSITEURL","INCLUDETRAILINGURLDELIMITER","EXCLUDETRAILINGURLDELIMITER",' +
+  { . } '"CHARCOUNT","NFOSTRIPPER","POSEX","REDUCECAPITALS","STRINGREPLACE","EXTRACTURLFILENAME","EXTRACTURLPATH","EXTRACTURLPROTOCOL","EXTRACTURLHOST","EXTRACTURLHOSTWITHPATH","BUILDWEBSITEURL","INCLUDETRAILINGURLDELIMITER","EXCLUDETRAILINGURLDELIMITER",' +
   { . } '"MATCHTEXT","REPLACEREGEXPR"';
 
   with HintParameter.Parameters do
@@ -165,6 +165,7 @@ begin
     Add('printFile(const AFileName: string)');
 
     Add('CharCount(const SubStr: string, S: string): Integer');
+    Add('NFOStripper(const NFO: string, const ARequiredOccurrences: Integer = 5): string');
     Add('PosEx(const SubStr: string, S: string, Offset: Integer = 1): Integer');
     Add('ReduceCapitals(const Str: string): string');
     Add('StringReplace(const S, OldPattern, NewPattern: string): string');
@@ -234,6 +235,7 @@ begin
     Add('procedure printFile(const AFileName: string)');
 
     Add('function CharCount(const SubStr: string, S: string): Integer');
+    Add('function NFOStripper(const NFO: string, const ARequiredOccurrences: Integer = 5): string');
     Add('function PosEx(const SubStr: string, S: string, Offset: Integer = 1): Integer');
     Add('function ReduceCapitals(const Str: string): string');
     Add('function StringReplace(const S, OldPattern, NewPattern: string): string');

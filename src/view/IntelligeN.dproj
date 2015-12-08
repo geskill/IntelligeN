@@ -227,6 +227,7 @@
 			<DCCReference Include="..\core\utils\uHTMLUtils.pas"/>
 			<DCCReference Include="..\core\utils\uImageUtils.pas"/>
 			<DCCReference Include="..\core\utils\uPathUtils.pas"/>
+			<DCCReference Include="..\core\utils\uNFOUtils.pas"/>
 			<DCCReference Include="..\core\utils\uReleasenameUtils.pas"/>
 			<DCCReference Include="..\core\utils\uSetUtils.pas"/>
 			<DCCReference Include="..\core\utils\uSizeUtils.pas"/>

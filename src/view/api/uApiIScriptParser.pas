@@ -16,7 +16,7 @@ uses
   // DLLs
   uExport,
   // Utils
-  uStringUtils, uPathUtils, uURLUtils;
+  uNFOUtils, uPathUtils, uStringUtils, uURLUtils;
 
 type
   TIScirptParser = class
@@ -124,6 +124,8 @@ begin
   end
   else if MethodName = 'CHARCOUNT' then
     Result := CharCount(Params[0], Params[1])
+  else if MethodName = 'NFOSTRIPPER' then
+    Result := TNFOUtils.AsStrippedText(Params[0], Params[1])
   else if MethodName = 'POSEX' then
     Result := PosEx(Params[0], Params[1], Params[2])
   else if MethodName = 'REDUCECAPITALS' then
@@ -262,6 +264,7 @@ begin
     AddMethod('procedure printFile(const AFileName: string)', CallMethod);
 
     AddMethod('function CharCount(const SubStr, S: string): Integer', CallMethod);
+    AddMethod('function NFOStripper(const NFO: string; const ARequiredOccurrences: Integer = 5): string', CallMethod);
     AddMethod('function PosEx(const SubStr, S: string; Offset: Integer = 1): Integer', CallMethod);
     AddMethod('function ReduceCapitals(const Str: string): string', CallMethod);
     AddMethod('function StringReplace(const S, OldPattern, NewPattern: string): string', CallMethod);

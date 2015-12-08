@@ -127,6 +127,7 @@ uses
   uHTMLUtils in '..\core\utils\uHTMLUtils.pas',
   uImageUtils in '..\core\utils\uImageUtils.pas',
   uPathUtils in '..\core\utils\uPathUtils.pas',
+  uNFOUtils in '..\core\utils\uNFOUtils.pas',
   uReleasenameUtils in '..\core\utils\uReleasenameUtils.pas',
   uSetUtils in '..\core\utils\uSetUtils.pas',
   uSizeUtils in '..\core\utils\uSizeUtils.pas',

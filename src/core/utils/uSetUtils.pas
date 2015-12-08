@@ -62,12 +62,12 @@ end;
 
 procedure StringToSet(Info: PTypeInfo; var SetParam; const Value: String);
 var
-  P: PAnsiChar;
+  P: PChar;
   EnumInfo: PTypeInfo;
   EnumName: String;
   EnumValue, SetValue: Longint;
 
-  function NextWord(var P: PAnsiChar): String;
+  function NextWord(var P: PChar): String;
   var
     I: Integer;
   begin
@@ -88,7 +88,7 @@ begin
     Exit;
 
   SetValue := 0;
-  P := PAnsiChar(Value);
+  P := PChar(Value);
   // skip leading bracket and whitespace
   while P^ in ['[', ' '] do
     Inc(P);
