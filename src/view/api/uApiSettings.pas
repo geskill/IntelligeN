@@ -1490,7 +1490,7 @@ begin
 
     with HTTP do
     begin
-      MaxSimultaneousConnections := 1;
+      MaxSimultaneousConnections := 4;
       // ConnectTimeout := 5000;
       // ReadTimeout := 10000;
     end;

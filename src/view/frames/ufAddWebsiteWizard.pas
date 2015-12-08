@@ -248,7 +248,7 @@ begin
         try
           Filter := 'Website Templates (*.xml)|*.xml';
           InitialDir := ExcludeTrailingPathDelimiter(GetTemplatesSiteFolder);
-          FileName := TrueFilename(RemoveW(ExtractUrlHost(cxTEPageURL.Text)));
+          FileName := TrueFilename(RemoveW(ExtractUrlHost(cxTEFormattedURL.Text)));
 
           if Execute then
           begin
@@ -347,7 +347,7 @@ end;
 
 procedure TfAddWebsiteWizard.cxCBEditFormattedURLPropertiesChange(Sender: TObject);
 begin
-  cxTEFormattedURL.Properties.readonly := not cxCBEditFormattedURL.Checked;
+  cxTEFormattedURL.Properties.ReadOnly := not cxCBEditFormattedURL.Checked;
 end;
 
 procedure TfAddWebsiteWizard.cxCOBURLCMSPropertiesChange(Sender: TObject);
@@ -366,8 +366,8 @@ var
   HTTPOptions: IHTTPOptions;
   RequestID: Double;
 begin
-  HTTPRequest := THTTPRequest.Create(cxTEPageURL.Text);
-  HTTPRequest.Referer := cxTEPageURL.Text;
+  HTTPRequest := THTTPRequest.Create(cxTEFormattedURL.Text);
+  HTTPRequest.Referer := cxTEFormattedURL.Text;
 
   HTTPOptions := THTTPOptions.Create(SettingsManager.Settings.http.GetProxy(psaCMS));
   HTTPOptions.ConnectTimeout := SettingsManager.Settings.http.ConnectTimeout;
