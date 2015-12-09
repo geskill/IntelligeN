@@ -8,17 +8,17 @@ Checked items are planned for next release.
 
 - [ ] Allow to change HTTPManager implementor for a single request (settings record)
 
-- [x] Implement non-visual "default" control that holds title of current tab (i.e. delegation for releasename or whatever)
+- [ ] Implement non-visual "default" control that holds title of current tab (i.e. delegation for releasename or whatever)
 
 - [x] Optimize HTTPManager log amount (i.e. ALL, SOME)
 
-- [x] Add custom fields in ITabSheetData that hold compiled IScript (required for WordPress custom files powered by IScript)
+- [ ] Add custom fields in ITabSheetData that hold compiled IScript (required for WordPress custom files powered by IScript)
 
 - [ ] Add direct index based link access (i.e. IMirror[\<Index\>].Directlink[\<Index\>].Link[\<Index\>])
 
 - [ ] Add direct index based filename access (i.e. Mirror[\<Index\>].Directlink[\<Index\>].FileName[\<Index\>])
 
-- [x] Implement NFO Stripper based on iNFekt NFO Viewer (https://infekt.ws/)
+- [ ] Implement access for APP-plugins to add function to the IScript
 
 - [ ] Implement image resizing instead of depending on image hosts resize
 
