@@ -164,11 +164,11 @@ begin
 
   {
     Wie benutze ich die Crypt-API?
-    Die API wird über die URL http://api.relink.us/api.php aufgerufen. Die benötigten Argumente werden dabei über POST-Werte übergeben.
+    Die API wird Ã¼ber die URL http://api.relink.us/api.php aufgerufen. Die benÃ¶tigten Argumente werden dabei Ã¼ber POST-Werte Ã¼bergeben.
 
     Welche Argumente erfordert die Crypt-API?Wert	Beschreibung
-    api	Dein API-Schüssel
-    url	Die zu verschlüsselten URLs (per Semikolon getrennt, letzter Link OHNE Semikolon!) (erforderlich)
+    api	Dein API-SchÃ¼ssel
+    url	Die zu verschlÃ¼sselten URLs (per Semikolon getrennt, letzter Link OHNE Semikolon!) (erforderlich)
     title	Titel des Ordners (Falls kein Titel angegeben ist, werden die globalen Einstellungen benutzt. Um Titel leer zu lassen "empty" senden.) (optional)
     comment	Kommentar (Falls kein Kommentar angegeben ist, werden die globalen Einstellungen benutzt. Um Kommentar leer zu lassen "empty" senden.) (optional)
     password	Ordner-Passwort (Falls kein Ordner-Passwort angegeben ist, werden die globalen Einstellungen benutzt. Um Ordner-Passwort leer zu lassen "empty" senden.) (optional)
@@ -177,10 +177,10 @@ begin
     cnl	CnL-Funktion erstellen (yes=Ja, no=Nein) (Falls die Variable nicht angegeben ist, werden die globalen Einstellungen benutzt.) (optional)
 
 
-    Alle Werte müssen über die POST-Methode übermittelt werden.
+    Alle Werte mÃ¼ssen Ã¼ber die POST-Methode Ã¼bermittelt werden.
 
-    Was erhalte ich als Rückgabe?
-    Durch die Rückgabe lässt sich feststellen, ob die Erstellung des Ordners erfolgreich war. Folgende Rückgabe-Werte sind möglich:
+    Was erhalte ich als RÃ¼ckgabe?
+    Durch die RÃ¼ckgabe lÃ¤sst sich feststellen, ob die Erstellung des Ordners erfolgreich war. Folgende RÃ¼ckgabe-Werte sind mÃ¶glich:
     1 - [Der Link zum neuen Relink-Ordner]
     2 - API Key is invalid.
     3 - Not all Links are valid.
@@ -288,7 +288,8 @@ begin
       ACrypterFolderInfo.Status := csMixedOnOffline
     else
       ACrypterFolderInfo.Status := csUnknown;
-
+      
+    ACrypterFolderInfo.Link := AFolderIdentifier;
     ACrypterFolderInfo.Size := RoundTo((LSizeInBytes / 1048576), -2);
     ACrypterFolderInfo.PartSize := RoundTo((LPartSizeInBytes / 1048576), -2);
     ACrypterFolderInfo.StatusImage := GetStatusImageLink(ACrypterFolderInfo.Link);
@@ -303,15 +304,15 @@ begin
 
   {
     Wie benutze ich die Container Link-API?
-    Die Container Link-API wird über die URL http://api.relink.us/container_link_info.php aufgerufen.
-    Das benötigte Argument wird dabei mit GET übergeben.
+    Die Container Link-API wird Ã¼ber die URL http://api.relink.us/container_link_info.php aufgerufen.
+    Das benÃ¶tigte Argument wird dabei mit GET Ã¼bergeben.
 
     Welches Argument erfordert die Container Link-API?Wert	Beschreibung
     id	Container ID (erforderlich)
 
 
-    Was erhalte ich als Rückgabe?
-    Als Rückgabe bekommt man folgende Informationen getrennt mit ";", einzelne Links werden mit "|" getrennt:
+    Was erhalte ich als RÃ¼ckgabe?
+    Als RÃ¼ckgabe bekommt man folgende Informationen getrennt mit ";", einzelne Links werden mit "|" getrennt:
     fortlaufende Nummer (1, 2, 3, ...);status (unknown, online, offline);hoster;filename;size in bytes|
     }
 end;
