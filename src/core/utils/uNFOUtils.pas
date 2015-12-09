@@ -4,11 +4,14 @@ interface
 
 uses
   // Delphi
-  Classes, SysUtils, Generics.Collections, Math;
+  Classes, SysUtils, Generics.Collections, Math,
+  // RegExpr
+  RegExpr;
 
 type
   TNFOUtils = class
   private
+    class function IsAcceptedChar(C: Char; const ASpace: Boolean = True): Boolean;
     class function IsAscii(C: Char): Boolean;
     class function IsLineBreak(C: Char): Boolean;
 
@@ -21,11 +24,20 @@ type
     class function TrimLeftMax(const S, SubStr: string; const AMaximum: Integer = 0): string;
 
     class function CalculateLeftTrimCount(const ANFO: string; const ARequiredOccurrences: Integer = 5): Integer;
+
+    class function ConvertLeft(const ALine: string): string;
+
+    class function ApplyRegularExpressions(const ANFO: string): string;
   public
     class function AsStrippedText(const ANFO: string; const ARequiredOccurrences: Integer = 5): string;
   end;
 
 implementation
+
+class function TNFOUtils.IsAcceptedChar(C: Char; const ASpace: Boolean = True): Boolean;
+begin
+  Result := (C in ['A' .. 'Z', 'a' .. 'z', '0' .. '9']) or (ASpace and (C = ' '));
+end;
 
 class function TNFOUtils.IsAscii(C: Char): Boolean;
 begin
@@ -178,6 +190,117 @@ begin
   end;
 end;
 
+class function TNFOUtils.ConvertLeft(const ALine: string): string;
+const
+  WIDTH = 3;
+var
+  I, LRightPos: Integer;
+begin
+  Result := ALine;
+
+  for I := 1 to Length(ALine) - 1 do
+  begin
+    if not IsAcceptedChar(ALine[I]) then
+    begin
+      LRightPos := 1;
+      while (I < (Length(ALine) - 1 - LRightPos)) and not IsAcceptedChar(ALine[I + LRightPos], False) do
+      begin
+        Inc(LRightPos);
+        if (LRightPos = WIDTH) then
+        begin
+          Result[I] := ' ';
+          break;
+        end;
+      end;
+    end;
+  end;
+end;
+
+class function TNFOUtils.ApplyRegularExpressions(const ANFO: string): string;
+/// The following code is from the iNFekt project + xREL-Team
+/// Copyright (C) 2010-2014 syndicode
+/// https://github.com/syndicodefront/infekt/blob/master/src/lib/nfo_data.cpp
+/// Licenced under GNU GENERAL PUBLIC LICENSE Version 2
+var
+  LNFO: string;
+begin
+  LNFO := ANFO;
+
+  with TRegExpr.Create do
+    try
+      ModifierM := True;
+
+      InputString := LNFO;
+      Expression := '^[^a-zA-Z0-9]+$';
+
+      LNFO := Replace(InputString, '', False);
+    finally
+      Free;
+    end;
+
+  with TRegExpr.Create do
+    try
+      ModifierM := True;
+
+      InputString := LNFO;
+      Expression := '^(.)\1+$';
+
+      LNFO := Replace(InputString, '', False);
+    finally
+      Free;
+    end;
+
+  with TRegExpr.Create do
+    try
+      ModifierM := True;
+
+      InputString := LNFO;
+      Expression := '^([\S])\1+\s{3,}(.+?)$';
+
+      LNFO := Replace(InputString, '$2', True);
+    finally
+      Free;
+    end;
+
+  with TRegExpr.Create do
+    try
+      ModifierM := True;
+
+      InputString := LNFO;
+      Expression := '^(.+?)\s{3,}([\S])\2+$';
+
+      LNFO := Replace(InputString, '$1', True);
+    finally
+      Free;
+    end;
+
+  with TRegExpr.Create do
+    try
+      ModifierM := True;
+
+      InputString := LNFO;
+      Expression := '\s+[\\\/:.#_|()\[\]*@=+ \t-]{4,}$'; // modified with 4 instead of 3
+
+      LNFO := Replace(InputString, '', False);
+    finally
+      Free;
+    end;
+
+  with TRegExpr.Create do
+    try
+      ModifierM := True;
+
+      InputString := LNFO;
+      Expression := '^\s*.{1,3}\s*$';
+
+      LNFO := Replace(InputString, '', True);
+    finally
+      Free;
+    end;
+
+  Result := LNFO;
+end;
+
 class function TNFOUtils.AsStrippedText(const ANFO: string; const ARequiredOccurrences: Integer = 5): string;
 var
   LInitialNFO, LNFO: string;
@@ -224,6 +347,8 @@ begin
 
   LNFO := AdjustLineBreaks(LNFO, tlbsCRLF);
 
+  LNFO := ApplyRegularExpressions(LNFO);
+
   if (ARequiredOccurrences = 0) then
     LBestLeftTrimValue := MaxInt
   else
@@ -234,6 +359,8 @@ begin
       Text := LNFO;
       for LIndex := 0 to Count - 1 do
       begin
+        Strings[LIndex] := ConvertLeft(Strings[LIndex]);
+
         Strings[LIndex] := TrimLeftMax(Strings[LIndex], ' ', LBestLeftTrimValue);
       end;
 
