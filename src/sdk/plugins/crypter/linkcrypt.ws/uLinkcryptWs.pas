@@ -11,7 +11,7 @@ uses
   uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
-  // plugin system
+  // Plugin system
   uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
   uVariantUtils;
@@ -20,7 +20,7 @@ type
   // see: http://linkcrypt.ws/image/Linkcrypt.ws_API-Create_folder_DE.pdf
   TLinkcryptWs = class(TCrypterPlugIn)
   private const
-    website = 'http://linkcrypt.ws/';
+    WEBSITE = 'http://linkcrypt.ws/';
 
     function GetFolderID(AFolderURL: string): string;
     function GetStatusImageLink(AFolderIdentifier: WideString; Small: WordBool = True): WideString;
@@ -136,7 +136,7 @@ begin
       AddFormField('mirror_' + IntToStr(LDirectlinkIndex), StringReplace(AMirrorContainer.Directlink[LDirectlinkIndex].Value, sLineBreak, ';', [rfReplaceAll]));
   end;
 
-  LRequestID := HTTPManager.Post(THTTPRequest.Create(website + 'api.html?api=create_V2'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
+  LRequestID := HTTPManager.Post(THTTPRequest.Create(WEBSITE + 'api.html?api=create_V2'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
@@ -232,7 +232,7 @@ begin
     AddFormField('folderKey', GetFolderID(AFolderIdentifier));
   end;
 
-  LRequestID := HTTPManager.Post(THTTPRequest.Create(website + 'api.html?api=getFolder_V2'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
+  LRequestID := HTTPManager.Post(THTTPRequest.Create(WEBSITE + 'api.html?api=getFolder_V2'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
