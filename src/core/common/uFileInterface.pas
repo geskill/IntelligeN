@@ -85,6 +85,8 @@ type
 
   IControl = interface(IChangeable)
     ['{491D7F7E-82EC-4EC5-8982-E2B9CFE5BBCD}']
+    function GetCategory: WideString;
+    procedure SetCategory(ACategory: WideString);
     function GetName: WideString;
     procedure SetName(AName: WideString);
     function GetRelation: WideString;
@@ -92,6 +94,7 @@ type
     function GetValue: WideString;
     procedure SetValue(AValue: WideString);
 
+    property Category: WideString read GetCategory write SetCategory;
     property Name: WideString read GetName write SetName;
     property Relation: WideString read GetRelation write SetRelation;
     property Value: WideString read GetValue write SetValue;

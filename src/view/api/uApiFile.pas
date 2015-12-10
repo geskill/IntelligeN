@@ -127,8 +127,10 @@ type
 
   TControl = class(TChangeableObject, IControl)
   private
-    FName, FRelation, FValue: string;
+    FCategory, FName, FRelation, FValue: string;
   protected
+    function GetCategory: WideString;
+    procedure SetCategory(ACategory: WideString);
     function GetName: WideString;
     procedure SetName(AName: WideString);
     function GetRelation: WideString;
@@ -136,6 +138,7 @@ type
     function GetValue: WideString;
     procedure SetValue(AValue: WideString);
   public
+    property Category: WideString read GetCategory write SetCategory;
     property Name: WideString read GetName write SetName;
     property Relation: WideString read GetRelation write SetRelation;
     property Value: WideString read GetValue write SetValue;
@@ -541,6 +544,17 @@ end;
 {$ENDREGION}
 {$REGION 'TControl'}
 { TControl }
+
+function TControl.GetCategory: WideString;
+begin
+  Result := FCategory;
+end;
+
+procedure TControl.SetCategory(ACategory: WideString);
+begin
+  FCategory := ACategory;
+  Change;
+end;
 
 function TControl.GetName: WideString;
 begin

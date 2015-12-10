@@ -217,6 +217,7 @@ type
     FcxGridFilterControlsTableViewColumn2: TcxGridColumn;
     FcxGridFilterControlsTableViewColumn3: TcxGridColumn;
     FcxGridFilterControlsTableViewColumn4: TcxGridColumn;
+    FcxGridFilterControlsTableViewColumn5: TcxGridColumn;
     FcxTSHoster: TcxTabSheet;
     FHosterPanelList: TList<THosterPanel>;
     FcxTCHoster: TcxTabControl;
@@ -231,10 +232,10 @@ type
     procedure FcxBAcceptClick(Sender: TObject);
     procedure FcxTCIDsChange(Sender: TObject);
     procedure FcxCBFilterEnabledChange(Sender: TObject);
-    procedure FcxGridFilterControlsTableViewColumn3PropertiesInitPopup(Sender: TObject);
-    procedure FcxGridFilterControlsTableViewColumn4GetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption;
+    procedure FcxGridFilterControlsTableViewColumn4PropertiesInitPopup(Sender: TObject);
+    procedure FcxGridFilterControlsTableViewColumn5GetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption;
       var AIsHintMultiLine: Boolean; var AHintTextRect: TRect);
-    procedure FcxGridFilterControlsTableViewColumn4PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
+    procedure FcxGridFilterControlsTableViewColumn5PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     procedure FcxTCHosterChange(Sender: TObject);
     procedure FcxGridCustomFieldsTableViewColumn3GetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption; var AIsHintMultiLine: Boolean;
       var AHintTextRect: TRect);
@@ -1667,9 +1668,10 @@ begin
                   begin
                     with AddChild('control') do
                     begin
-                      Attributes['name'] := VarToStr(Values[I, FcxGridFilterControlsTableViewColumn1.index]);
-                      Attributes['rel'] := VarToStr(Values[I, FcxGridFilterControlsTableViewColumn2.index]);
-                      NodeValue := VarToStr(Values[I, FcxGridFilterControlsTableViewColumn3.index]);
+                      Attributes['category'] := VarToStr(Values[I, FcxGridFilterControlsTableViewColumn1.index]);
+                      Attributes['name'] := VarToStr(Values[I, FcxGridFilterControlsTableViewColumn2.index]);
+                      Attributes['rel'] := VarToStr(Values[I, FcxGridFilterControlsTableViewColumn3.index]);
+                      NodeValue := VarToStr(Values[I, FcxGridFilterControlsTableViewColumn4.index]);
                     end;
                   end;
                 end;
@@ -1756,33 +1758,50 @@ begin
   FcxGridFilterControls.Enabled := FcxCBFilterEnabled.Checked;
 end;
 
-procedure TBasisWebsiteEditor.FcxGridFilterControlsTableViewColumn3PropertiesInitPopup(Sender: TObject);
+procedure TBasisWebsiteEditor.FcxGridFilterControlsTableViewColumn4PropertiesInitPopup(Sender: TObject);
 var
-  LValue: Variant;
+  LType: Variant;
+  LControl: Variant;
   LTypeID: TTypeID;
   LControlID: TControlID;
   LStringList: TStringList;
 begin
   with FcxGridFilterControlsTableView.DataController do
-    LValue := Values[GetFocusedRecordIndex, FcxGridFilterControlsTableViewColumn1.index];
-
-  if VarIsStr(LValue) then
   begin
-    LControlID := StringToControlID(LValue);
+    LType := Values[GetFocusedRecordIndex, FcxGridFilterControlsTableViewColumn1.Index];
+    LControl := Values[GetFocusedRecordIndex, FcxGridFilterControlsTableViewColumn2.Index];
+  end;
+
+  if VarIsStr(LControl) then
+  begin
+    LControlID := StringToControlID(LControl);
 
     with TStringList.Create do
       try
         Sorted := True;
         Duplicates := dupIgnore;
 
-        for LTypeID := Low(TTypeID) to High(TTypeID) do
+        if VarIsStr(LType) and StringInTypeID(LType) then
         begin
           LStringList := TStringList.Create;
           try
-            LStringList.Text := FAppController.GetControlValues(LTypeID, LControlID);
+            LStringList.Text := FAppController.GetControlValues(StringToTypeID(LType), LControlID);
             AddStrings(LStringList);
           finally
             LStringList.Free;
+          end;
+        end
+        else
+        begin
+          for LTypeID := Low(TTypeID) to High(TTypeID) do
+          begin
+            LStringList := TStringList.Create;
+            try
+              LStringList.Text := FAppController.GetControlValues(LTypeID, LControlID);
+              AddStrings(LStringList);
+            finally
+              LStringList.Free;
+            end;
           end;
         end;
 
@@ -1790,7 +1809,7 @@ begin
           if not NewItemRowFocused then
           begin
             TcxComboBox(Sender).Properties.Items.Text := Text;
-            TcxComboBoxProperties(FcxGridFilterControlsTableViewColumn3.Properties).Items.Text := Text;
+            TcxComboBoxProperties(FcxGridFilterControlsTableViewColumn4.Properties).Items.Text := Text;
           end
           else
             TcxComboBox(Sender).Properties.Items.Text := Text;
@@ -1800,7 +1819,7 @@ begin
   end;
 end;
 
-procedure TBasisWebsiteEditor.FcxGridFilterControlsTableViewColumn4GetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption;
+procedure TBasisWebsiteEditor.FcxGridFilterControlsTableViewColumn5GetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption;
   var AIsHintMultiLine: Boolean; var AHintTextRect: TRect);
 begin
   with FcxGridFilterControlsTableView.DataController do
@@ -1810,7 +1829,7 @@ begin
       AHintText := 'Remove selected detail filter';
 end;
 
-procedure TBasisWebsiteEditor.FcxGridFilterControlsTableViewColumn4PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
+procedure TBasisWebsiteEditor.FcxGridFilterControlsTableViewColumn5PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
 begin
   with FcxGridFilterControlsTableView.DataController do
     if NewItemRowFocused then
@@ -2072,6 +2091,22 @@ begin
     FcxGridFilterControlsTableViewColumn1 := FcxGridFilterControlsTableView.CreateColumn;
     with FcxGridFilterControlsTableViewColumn1 do
     begin
+      Caption := 'Category';
+      PropertiesClass := TcxComboBoxProperties;
+      with Properties as TcxComboBoxProperties do
+      begin
+        DropDownListStyle := lsFixedList;
+
+        Items.Add('*');
+
+        for LTypeID := Low(TTypeID) to High(TTypeID) do
+          Items.Add(TypeIDToString(LTypeID));
+      end;
+    end;
+
+    FcxGridFilterControlsTableViewColumn2 := FcxGridFilterControlsTableView.CreateColumn;
+    with FcxGridFilterControlsTableViewColumn2 do
+    begin
       Caption := 'Control name';
       PropertiesClass := TcxComboBoxProperties;
       with Properties as TcxComboBoxProperties do
@@ -2083,8 +2118,8 @@ begin
       end;
     end;
 
-    FcxGridFilterControlsTableViewColumn2 := FcxGridFilterControlsTableView.CreateColumn;
-    with FcxGridFilterControlsTableViewColumn2 do
+    FcxGridFilterControlsTableViewColumn3 := FcxGridFilterControlsTableView.CreateColumn;
+    with FcxGridFilterControlsTableViewColumn3 do
     begin
       Caption := 'Relationship';
       PropertiesClass := TcxComboBoxProperties;
@@ -2098,19 +2133,19 @@ begin
       Width := 20;
     end;
 
-    FcxGridFilterControlsTableViewColumn3 := FcxGridFilterControlsTableView.CreateColumn;
-    with FcxGridFilterControlsTableViewColumn3 do
+    FcxGridFilterControlsTableViewColumn4 := FcxGridFilterControlsTableView.CreateColumn;
+    with FcxGridFilterControlsTableViewColumn4 do
     begin
       Caption := 'Control value';
       PropertiesClass := TcxComboBoxProperties;
       with Properties as TcxComboBoxProperties do
       begin
-        OnInitPopup := FcxGridFilterControlsTableViewColumn3PropertiesInitPopup;
+        OnInitPopup := FcxGridFilterControlsTableViewColumn4PropertiesInitPopup;
       end;
     end;
 
-    FcxGridFilterControlsTableViewColumn4 := FcxGridFilterControlsTableView.CreateColumn;
-    with FcxGridFilterControlsTableViewColumn4 do
+    FcxGridFilterControlsTableViewColumn5 := FcxGridFilterControlsTableView.CreateColumn;
+    with FcxGridFilterControlsTableViewColumn5 do
     begin
       Caption := 'Add/Delete';
       PropertiesClass := TcxButtonEditProperties;
@@ -2123,11 +2158,11 @@ begin
       begin
         ViewStyle := vsButtonsOnly;
 
-        OnButtonClick := FcxGridFilterControlsTableViewColumn4PropertiesButtonClick;
+        OnButtonClick := FcxGridFilterControlsTableViewColumn5PropertiesButtonClick;
       end;
       Width := 20;
 
-      OnGetCellHint := FcxGridFilterControlsTableViewColumn4GetCellHint;
+      OnGetCellHint := FcxGridFilterControlsTableViewColumn5GetCellHint;
     end;
   end;
 
@@ -2645,9 +2680,10 @@ begin
 
                       for I := 0 to ChildNodes.Count - 1 do
                       begin
-                        Values[I, FcxGridFilterControlsTableViewColumn1.index] := VarToStr(ChildNodes.Nodes[I].Attributes['name']);
-                        Values[I, FcxGridFilterControlsTableViewColumn2.index] := VarToStr(ChildNodes.Nodes[I].Attributes['rel']);
-                        Values[I, FcxGridFilterControlsTableViewColumn3.index] := VarToStr(ChildNodes.Nodes[I].NodeValue);
+                        Values[I, FcxGridFilterControlsTableViewColumn1.index] := VarToStr(ChildNodes.Nodes[I].Attributes['category']);
+                        Values[I, FcxGridFilterControlsTableViewColumn2.index] := VarToStr(ChildNodes.Nodes[I].Attributes['name']);
+                        Values[I, FcxGridFilterControlsTableViewColumn3.index] := VarToStr(ChildNodes.Nodes[I].Attributes['rel']);
+                        Values[I, FcxGridFilterControlsTableViewColumn4.index] := VarToStr(ChildNodes.Nodes[I].NodeValue);
                       end;
                     end;
 
@@ -2767,6 +2803,7 @@ begin
 
   FcxTSHoster.Free;
 
+  FcxGridFilterControlsTableViewColumn5.Free;
   FcxGridFilterControlsTableViewColumn4.Free;
   FcxGridFilterControlsTableViewColumn3.Free;
   FcxGridFilterControlsTableViewColumn2.Free;

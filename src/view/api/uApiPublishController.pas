@@ -522,17 +522,24 @@ function TICMSWebsiteContainer.TICMSWebsiteContainerActiveController.IsControlVa
 
 var
   I: Integer;
+  LCategory: string;
+  LIsCategory: Boolean;
   Allowed: Boolean;
 begin
   Result := True;
   for I := 0 to FACMSCollectionItem.Filter.Controls.Count - 1 do
-    if AControl.ControlID = StringToControlID(FACMSCollectionItem.Filter.Controls.Items[I].Name) then
+  begin
+    LCategory := FACMSCollectionItem.Filter.Controls.Items[I].Category;
+    LIsCategory := StringInTypeID(LCategory);
+    if (not LIsCategory or ((LIsCategory) and (AControl.TypeID = StringToTypeID(LCategory)))) and
+    { . } (AControl.ControlID = StringToControlID(FACMSCollectionItem.Filter.Controls.Items[I].Name)) then
     begin
       Allowed := RelToBool(FACMSCollectionItem.Filter.Controls.Items[I].Relation) = MatchTextMask(FACMSCollectionItem.Filter.Controls.Items[I].Value, AControl.Value);
 
       if not Allowed then
         Exit(False);
     end;
+  end;
 end;
 
 function TICMSWebsiteContainer.TICMSWebsiteContainerActiveController.IsHosterAllowed(AHoster: IMirrorControl): Boolean;

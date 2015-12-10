@@ -480,7 +480,7 @@ type
     property TypeE: string read FTE write FTE;
   end;
 
-  TMirrorPosition = (mpTop, mpBottom);
+  TMirrorPosition = (mpBottom, mpTop);
   TDirectlinksView = (dlvGrid, dlvIcon);
 
   TSettings_ControlAligner = class(TPersistent)

@@ -353,6 +353,7 @@ begin
                             Control := TControl.Create;
                             with Control do
                             begin
+                              Category := VarToStr(ChildNodes.Nodes[I].Attributes['category']);
                               Name := VarToStr(ChildNodes.Nodes[I].Attributes[XML_NAME]);
                               Relation := VarToStr(ChildNodes.Nodes[I].Attributes['rel']);
                               Value := VarToStr(ChildNodes.Nodes[I].NodeValue);
@@ -510,6 +511,7 @@ begin
                   for Control in IntelligeNConfigurationFile.WebsiteFilter.Controls do
                     with AddChild('control') do
                     begin
+                      Attributes['category'] := Control.Category;
                       Attributes[XML_NAME] := Control.Name;
                       Attributes['rel'] := Control.Relation;
                       NodeValue := Control.Value;
