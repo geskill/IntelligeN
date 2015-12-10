@@ -143,22 +143,22 @@ uses
 
 begin
   Randomize;
-
+  
+  if DirectoryExists(GetHiddenDataDir + 'update') then
+  begin
+    if FileExists(GetHiddenDataDir + 'update\sleep32.exe') then
+    begin
+      ShellExecute(0, 'open', PChar(GetHiddenDataDir + 'update\exec_update.bat'), nil, PChar(GetHiddenDataDir + 'update'), SW_SHOW);
+      Exit; // Application.Terminate funktioniert hier noch nicht, Programm wÃ¼rde weitermachen
+    end;
+    DeleteFile(GetHiddenDataDir + 'update');
+  end;  
+  
   SplashScreen := TSplashScreen.Create(Application);
   try
     SplashScreen.Show;
     SplashScreen.Update;
-
-    if DirectoryExists(GetHiddenDataDir + 'update') then
-    begin
-      if FileExists(GetHiddenDataDir + 'update\sleep32.exe') then
-      begin
-        ShellExecute(0, 'open', PChar(GetHiddenDataDir + 'update\exec_update.bat'), nil, PChar(GetHiddenDataDir + 'update'), SW_SHOW);
-        Exit; // Application.Terminate funktioniert hier noch nicht, Programm würde weitermachen
-      end;
-      DeleteFile(GetHiddenDataDir + 'update');
-    end;
-
+    
     SettingsManager.LoadSettings;
 
     Application.Initialize;
