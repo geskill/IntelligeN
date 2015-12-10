@@ -439,11 +439,13 @@
 
 ######minor enhancements
 
-* Add indication in the GUI if the file hoster check, crypter crypt/check was not successful
+* Added indication in the GUI if the file hoster check, crypter crypt/check was not successful
 
-* Add indication in the GUI if the image hoster upload was successful or not
+* Added indication in the GUI if the image hoster upload was successful or not
 
 * Added host and subject in CAPTCHA and intelligent_posting-Helper window
+
+* Added NFOStripper
 
 * Improved performance
 
@@ -457,6 +459,8 @@
 
 * Improved OleInitialize/CoInitializeEx usage
 
+* Improved control filters in WebsiteEditor
+
 * Improved app interface to check, whether a app plug-in can be unloaded
 
 * Improved ipb2 cms plug-in
@@ -465,9 +469,15 @@
 
 * Improved phpbb3 forum id recognition if first forum is already sub-forum or portal mod is used
 
-* Improved releasename title detection
+* Improved releasename crawler (thx to Sena_x3)
 
 * Improved xRel.to error detection
+
+* Fixed a bug in the update process, doing the update at the next start
+
+* Fixed a bug in the website wizard
+
+* Fixed a bug drawing a new tab with crypters
 
 * Fixed threaded draw process for images in Control Editor
 
@@ -482,6 +492,8 @@
 * Fixed wbb4, XenForo intelligent_posting
 
 * Fixed XenForo login
+
+* Fixed uRelink.us folder images
 
 * Fixed loading intelligen.xml.2 files with no templatetype
 

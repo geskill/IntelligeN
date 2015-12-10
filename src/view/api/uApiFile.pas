@@ -184,7 +184,7 @@ type
     function GetActive: WordBool;
     procedure SetActive(AActive: WordBool);
     function GetCategories: WideString;
-    function GetCategoriesAsTTemplateTypeIDs: TTypeIDs;
+    function GetCategoriesAsTTypeIDs: TTypeIDs;
     procedure SetCategories(ACategories: WideString);
     function GetControls: TList<IControl>;
     function GetHoster: TList<IHoster>;
@@ -692,7 +692,7 @@ begin
   Result := FCategories;
 end;
 
-function TFilter.GetCategoriesAsTTemplateTypeIDs: TTypeIDs;
+function TFilter.GetCategoriesAsTTypeIDs: TTypeIDs;
 var
   I: Integer;
 begin

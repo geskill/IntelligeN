@@ -100,16 +100,14 @@ type
       FControlsSide: Boolean;
       FHosterSide: Boolean;
 
-      function GetControlsSide: Boolean;
-      procedure SetControlsSide(AControlsSide: Boolean);
-
       function IsControlValueAllowed(AControl: IControlBasic): Boolean;
       function IsHosterAllowed(AHoster: IMirrorControl): Boolean;
 
+      function IsAllowed: Boolean;
       function AllControlsAllowed: Boolean;
       function HasAtLeastOneHosterAllowed: Boolean;
 
-      property ControlsSide: Boolean read GetControlsSide write SetControlsSide;
+      property ControlsSide: Boolean read FControlsSide write FControlsSide;
       property HosterSide: Boolean read FHosterSide write FHosterSide;
     public
       constructor Create(const ATabConnection: ITabSheetController; ACMSWebsitesCollectionItem: TCMSWebsitesCollectionItem); reintroduce;
@@ -146,7 +144,7 @@ type
     FActiveBuffer: Boolean;
     FDataChanged: Boolean;
     FDataBuffer: ITabSheetData;
-    FControlsBuffer, FMirrorBuffer: Boolean;
+    FControlsPreviousValue, FMirrorPreviousValue: Boolean;
     FIWebsiteChange: TICMSItemChangeEventHandler;
     FIControlChange: TIControlEventHandler;
     FIMirrorChange: TINotifyEventHandler;
@@ -495,7 +493,7 @@ end;
 
 { TICMSWebsiteContainer.TICMSWebsiteContainerActiveController }
 
-function TICMSWebsiteContainer.TICMSWebsiteContainerActiveController.GetControlsSide: Boolean;
+function TICMSWebsiteContainer.TICMSWebsiteContainerActiveController.IsAllowed: Boolean;
 begin
   Result := True;
 
@@ -503,14 +501,9 @@ begin
     if Active then
     begin
       if not CanUpdatePartly then
-        FControlsCategories := FTabConnection.ControlController.TypeID in FACMSCollectionItem.Filter.GetCategoriesAsTTemplateTypeIDs;
-      Result := FControlsCategories and FControlsSide;
+        FControlsCategories := FTabConnection.ControlController.TypeID in FACMSCollectionItem.Filter.GetCategoriesAsTTypeIDs;
+      Result := FControlsCategories;
     end;
-end;
-
-procedure TICMSWebsiteContainer.TICMSWebsiteContainerActiveController.SetControlsSide(AControlsSide: Boolean);
-begin
-  FControlsSide := AControlsSide;
 end;
 
 function TICMSWebsiteContainer.TICMSWebsiteContainerActiveController.IsControlValueAllowed(AControl: IControlBasic): Boolean;
@@ -560,12 +553,13 @@ var
   Allowed: Boolean;
 begin
   Result := True;
-  for I := 0 to FTabConnection.ControlController.ControlCount - 1 do
-  begin
-    Allowed := IsControlValueAllowed(FTabConnection.ControlController.Control[I]);
-    if not Allowed then
-      Exit(False);
-  end;
+  if FACMSCollectionItem.Filter.Active then
+    for I := 0 to FTabConnection.ControlController.ControlCount - 1 do
+    begin
+      Allowed := IsControlValueAllowed(FTabConnection.ControlController.Control[I]);
+      if not Allowed then
+        Exit(False);
+    end;
 end;
 
 function TICMSWebsiteContainer.TICMSWebsiteContainerActiveController.HasAtLeastOneHosterAllowed: Boolean;
@@ -593,8 +587,7 @@ function TICMSWebsiteContainer.TICMSWebsiteContainerActiveController.Active(APar
 begin
   case APartlyType of
     ptControls:
-      if FACMSCollectionItem.Filter.Active then
-        ControlsSide := AllControlsAllowed;
+      ControlsSide := IsAllowed and AllControlsAllowed;
     ptMirrors:
       HosterSide := HasAtLeastOneHosterAllowed;
   end;
@@ -603,12 +596,15 @@ end;
 
 function TICMSWebsiteContainer.TICMSWebsiteContainerActiveController.Active: Boolean;
 begin
-  ControlsSide := AllControlsAllowed;
-  HosterSide := HasAtLeastOneHosterAllowed;
+  if not CanUpdatePartly then
+  begin
+    Active(ptControls);
+    Active(ptMirrors);
+
+    FCanUpdatePartly := True;
+  end;
 
   Result := ControlsSide and HosterSide;
-
-  FCanUpdatePartly := True;
 end;
 
 destructor TICMSWebsiteContainer.TICMSWebsiteContainerActiveController.Destroy;
@@ -857,14 +853,28 @@ begin
 end;
 
 procedure TICMSWebsiteContainer.WebsiteChange(ACMSItemChangeType: TCMSItemChangeType; AIndex, AParam: Integer);
+var
+  LNewValue: Boolean;
 begin
   FActiveChanged := True;
   FDataChanged := True;
+
+  with FICMSWebsiteContainerActiveController do
+  begin
+    FICMSWebsiteContainerActiveController.FCanUpdatePartly := False;
+    LNewValue := FICMSWebsiteContainerActiveController.Active;
+    if not(LNewValue = FActiveBuffer) then
+    begin
+      FActiveBuffer := LNewValue;
+      FTabConnection.PublishController.OnUpdateCMSWebsite.Invoke(TopIndex, Index, LNewValue);
+    end;
+    FActiveChanged := False;
+  end;
 end;
 
 procedure TICMSWebsiteContainer.ControlChange(const Sender: IControlBasic);
 var
-  LNeedUpdate: Boolean;
+  LNewValue: Boolean;
 begin
   FActiveChanged := True;
   FDataChanged := True;
@@ -872,18 +882,18 @@ begin
   with FICMSWebsiteContainerActiveController do
     if CanUpdatePartly then
     begin
-      LNeedUpdate := FICMSWebsiteContainerActiveController.Active(ptControls);
-      if not(LNeedUpdate = FControlsBuffer) then
+      LNewValue := FICMSWebsiteContainerActiveController.Active(ptControls);
+      if not(LNewValue = FControlsPreviousValue) then
       begin
-        FControlsBuffer := LNeedUpdate;
-        FTabConnection.PublishController.OnUpdateCMSWebsite.Invoke(TopIndex, Index, LNeedUpdate);
+        FControlsPreviousValue := LNewValue;
+        FTabConnection.PublishController.OnUpdateCMSWebsite.Invoke(TopIndex, Index, LNewValue);
       end;
     end;
 end;
 
 procedure TICMSWebsiteContainer.MirrorChange(const Sender: IInterface);
 var
-  LNeedUpdate: Boolean;
+  LNewValue: Boolean;
 begin
   FActiveChanged := True;
   FDataChanged := True;
@@ -891,11 +901,11 @@ begin
   with FICMSWebsiteContainerActiveController do
     if CanUpdatePartly then
     begin
-      LNeedUpdate := FICMSWebsiteContainerActiveController.Active(ptMirrors);
-      if not(LNeedUpdate = FMirrorBuffer) then
+      LNewValue := FICMSWebsiteContainerActiveController.Active(ptMirrors);
+      if not(LNewValue = FMirrorPreviousValue) then
       begin
-        FMirrorBuffer := LNeedUpdate;
-        FTabConnection.PublishController.OnUpdateCMSWebsite.Invoke(TopIndex, Index, LNeedUpdate);
+        FMirrorPreviousValue := LNewValue;
+        FTabConnection.PublishController.OnUpdateCMSWebsite.Invoke(TopIndex, Index, LNewValue);
       end;
     end;
 end;
@@ -1055,8 +1065,8 @@ begin
   FDataChanged := True; // Need to be true to make first update.
   FDataBuffer := nil;
 
-  FControlsBuffer := False;
-  FMirrorBuffer := False;
+  FControlsPreviousValue := False;
+  FMirrorPreviousValue := False;
 
   FIWebsiteChange := TICMSItemChangeEventHandler.Create(WebsiteChange);
   FCMSCollectionItem.OnWebsitesChange.Add(FIWebsiteChange);
