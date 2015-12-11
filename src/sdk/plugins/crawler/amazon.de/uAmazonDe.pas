@@ -14,10 +14,13 @@ uses
 
 type
   TAmazonDe = class(TAmazonCom)
+  protected { . }
+  const
+    WEBSITE = 'http://www.amazon.de/';
   public
     function GetName: WideString; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
   end;
 
 implementation
@@ -29,27 +32,31 @@ begin
   Result := 'Amazon.de';
 end;
 
-function TAmazonDe.Exec;
-const
-  website = 'http://www.amazon.de/';
-var
-  _TemplateTypeID: TTypeID;
-  _ComponentIDs: TControlIDs;
+function TAmazonDe.InternalExecute;
 
-  _Title, _search_alias: string;
-  _Count: Integer;
-
-  ResponseStrSearchResult: string;
-  RequestID: Double;
-
-  procedure deep_search(aWebsitecode: string);
+  procedure deep_search(AWebsitecode: string);
   var
-    _tracklist: string;
+    LTrackList: string;
   begin
-    if (AControlController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
+    if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
+          InputString := AWebsitecode;
+          Expression := 'data-old-hires="(.*?)"';
+
+          if Exec(InputString) then
+          begin
+            if not(Pos('no-img', string(Match[1])) > 0) then
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, AmazonOriginalSize(Match[1]));
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cRuntime) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsitecode;
           Expression := '<li> <b>Spieldauer:<\/b> (\d+) Minuten<\/li>';
 
           if Exec(InputString) then
@@ -57,10 +64,11 @@ var
         finally
           Free;
         end;
-    if (AControlController.FindControl(cVideoSystem) <> nil) and (cVideoSystem in _ComponentIDs) then
+
+    if ACanUse(cVideoSystem) then
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
+          InputString := AWebsitecode;
           Expression := '<li> <b>Format:<\/b> (.*?)<\/li>';
 
           if Exec(InputString) then
@@ -73,28 +81,30 @@ var
         finally
           Free;
         end;
-    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+
+    if ACanUse(cDescription) then
     begin
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
+          InputString := AWebsitecode;
           Expression := '<tr class="\w+">\s+<td>\s+(.*?)\s<\/td>';
 
           if Exec(InputString) then
           begin
-            _tracklist := '';
+            LTrackList := '';
             repeat
-              _tracklist := _tracklist + Trim(Match[1]) + sLineBreak;
+              LTrackList := LTrackList + Trim(Match[1]) + sLineBreak;
             until not ExecNext;
-            AControlController.FindControl(cDescription).AddProposedValue(GetName, copy(_tracklist, 1, length(_tracklist) - 2));
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, copy(LTrackList, 1, length(LTrackList) - 2));
           end;
         finally
           Free;
         end;
+
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
-          Expression := '<div class="productDescriptionWrapper"[ ]?>(.*?)<div class="emptyClear"';
+          InputString := AWebsitecode;
+          Expression := 'productDescription" class="a-section a-spacing-small">(.*?)(<a class="a-link-normal"|<\/div>)';
 
           if Exec(InputString) then
           begin
@@ -106,108 +116,67 @@ var
           Free;
         end;
     end;
-    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
-      with TRegExpr.Create do
-        try
-          InputString := aWebsitecode;
-          Expression := 'i\.src = "(.*?)"';
-
-          if Exec(InputString) then
-          begin
-            if not(Pos('no-img', string(Match[1])) > 0) then
-              AControlController.FindControl(cPicture).AddProposedValue(GetName, AmazonOriginalSize(Match[1]));
-          end;
-        finally
-          Free;
-        end;
   end;
 
-  procedure other_search(aWebsitecode: string);
+var
+  LTitle: string;
+  LCount: Integer;
+
+  LRequestID1, LRequestID2: Double;
+
+  LResponeStr, s: string;
+begin
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
+
+  LResponeStr := AmazonSearchRequest(WEBSITE, GetBaseSearchType(ATypeID), LTitle, LRequestID1);
+
+  if not(Pos('result-count', LResponeStr) = 0) then
   begin
     with TRegExpr.Create do
       try
-        InputString := aWebsitecode;
-
-        Expression := '<a class="title" href="(.*?)">.*?<\/a>';
-        if Exec(InputString) then
-          deep_search(AmazonDetailedPageRequest(RequestID, Match[1]));
-
-        Expression := '<a href="(.*?)">.*?<\/a>';
-        if Exec(InputString) then
-          deep_search(AmazonDetailedPageRequest(RequestID, Match[1]));
-      finally
-        Free;
-      end;
-  end;
-
-  procedure game_table_search(aWebsitecode: string; AFilter: Boolean = False);
-  begin
-    with TRegExpr.Create do
-      try
-        InputString := aWebsitecode;
-        Expression := '<td class="tpType">\s+<a .*?href="(.*?)">(.*?)<\/a>';
+        InputString := LResponeStr;
+        Expression := '<li id="result_\d+"(.*?)<\/li>';
 
         if Exec(InputString) then
         begin
           repeat
-            if (not AFilter) or (AFilter and (_TemplateTypeID = AmazonExtractGameCategory(Match[2]))) then
-              deep_search(AmazonDetailedPageRequest(RequestID, Match[1]));
-          until not ExecNext;
+            s := Match[0];
+
+            with TRegExpr.Create do
+            begin
+              try
+                InputString := s;
+
+                if Pos('twister', s) > 0 then
+                  Expression := 'a-text-normal" title="(.*?)" href="(.*?)"'
+                else
+                  Expression := 'a-link-normal\s+a-text-normal" title="(.*?)" href="(.*?)"';
+
+                if Exec(InputString) then
+                begin
+                  repeat
+
+                    if (not(ATypeID in cGames)) or ((ATypeID in cGames) and IsSystem(ATypeID, Match[2])) then
+                    begin
+                      LResponeStr := GETFollowUpRequest(Match[1], LRequestID1, LRequestID2);
+
+                      deep_search(LResponeStr);
+                    end;
+
+                  until not ExecNext;
+                end;
+              finally
+                Free;
+              end;
+            end;
+
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
         end;
       finally
         Free;
       end;
-  end;
-
-begin
-  _TemplateTypeID := TTypeID(ATypeID);
-  LongWord(_ComponentIDs) := AControlIDs;
-  _Title := AControlController.FindControl(cTitle).Value;
-  _Count := 0;
-
-  case _TemplateTypeID of
-    cAudio:
-      _search_alias := 'search-alias=popular';
-    cGameCube, cNintendoDS, cPCGames, cPlayStation2, cPlayStation3, cPlayStationPortable, cWii, cXbox, cXbox360:
-      _search_alias := 'search-alias=videogames';
-    cMovie:
-      _search_alias := 'search-alias=dvd';
-    cSoftware:
-      _search_alias := 'search-alias=software';
-    cOther:
-      _search_alias := 'search-alias=aps';
-  end;
-
-  ResponseStrSearchResult := AmazonSearchRequest(website, _search_alias, _Title, RequestID);
-
-  with TRegExpr.Create do
-  begin
-    try
-      InputString := ResponseStrSearchResult;
-      Expression := 'div id="result_\d+"(.*?)(clear="all"|class="unfloat")';
-
-      if Exec(InputString) then
-      begin
-        repeat
-
-          if _TemplateTypeID in cGames then
-          begin
-            if Pos('class="formats" colspan=2>Plattformen', string(Match[1])) > 0 then
-              game_table_search(Match[1], True)
-
-            else if _TemplateTypeID = AmazonExtractGameCategory(Match[1], True) then
-              game_table_search(Match[1]);
-          end
-          else
-            other_search(Match[1]);
-
-          Inc(_Count);
-        until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
-      end;
-
-    finally
-      Free;
-    end;
   end;
 end;
 

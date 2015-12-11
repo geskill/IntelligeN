@@ -57,15 +57,15 @@ begin
       end;
     cPlayStation3:
       begin
-        Result := (ASystem = 'PC');
+        Result := (ASystem = 'PS3');
       end;
     cPlayStation4:
       begin
-        Result := (ASystem = 'PC');
+        Result := (ASystem = 'PS4');
       end;
     cPlayStationVita:
       begin
-        Result := (ASystem = 'PC');
+        Result := (ASystem = 'Vita');
       end;
     cWii:
       begin
