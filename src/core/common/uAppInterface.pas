@@ -404,6 +404,8 @@ type
 
     procedure SetSize(ASize: Double);
     procedure SetPartSize(APartSize: Double);
+    procedure SetStatusImage(AStatusImage: WideString);
+    procedure SetStatusImageText(AStatusImageText: WideString);
 
     function GetCrypterFolderInfo: TCrypterFolderInfo;
     procedure SetCrypterFolderInfo(ACrypterFolderInfo: TCrypterFolderInfo);
@@ -425,6 +427,8 @@ type
     property Value: WideString read GetValue { . } write SetValue;
     property Size: Double read GetSize { . } write SetSize;
     property PartSize: Double read GetPartSize { . } write SetPartSize;
+    property StatusImage: WideString read GetStatusImage { . } write SetStatusImage;
+    property StatusImageText: WideString read GetStatusImageText { . } write SetStatusImageText;
 
     // Additional
     property MirrorControl: IMirrorControl read GetMirrorControl write SetMirrorControl;

@@ -144,8 +144,8 @@ begin
               with Nodes['container'].ChildNodes do
               begin
                 ACrypterFolderInfo.Link := Nodes['link'].NodeValue;
-                ACrypterFolderInfo.StatusImage := Nodes['smallimg'].NodeValue;
-                ACrypterFolderInfo.StatusImageText := Nodes['bigimg'].NodeValue;
+                ACrypterFolderInfo.StatusImage := Nodes['smallimg'].NodeValue + '.png';
+                ACrypterFolderInfo.StatusImageText := Nodes['bigimg'].NodeValue + '.png';
               end;
               Result := True;
             end

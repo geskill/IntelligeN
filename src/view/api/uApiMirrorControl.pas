@@ -211,6 +211,8 @@ type
 
     procedure SetSize(ASize: Double);
     procedure SetPartSize(APartSize: Double);
+    procedure SetStatusImage(AStatusImage: WideString);
+    procedure SetStatusImageText(AStatusImageText: WideString);
 
     function GetCrypterFolderInfo: TCrypterFolderInfo;
     procedure SetCrypterFolderInfo(ACrypterFolderInfo: TCrypterFolderInfo);
@@ -241,8 +243,8 @@ type
     property HosterShort: WideString read GetHosterShort;
     property Parts: Integer read GetParts;
     property Name: WideString read GetName;
-    property StatusImage: WideString read GetStatusImage;
-    property StatusImageText: WideString read GetStatusImageText;
+    property StatusImage: WideString read GetStatusImage { . } write SetStatusImage;
+    property StatusImageText: WideString read GetStatusImageText { . } write SetStatusImageText;
 
     // Additional
     property MirrorControl: IMirrorControl read GetMirrorControl write SetMirrorControl;
@@ -1673,6 +1675,26 @@ begin
   FCrypterFolderInfoLock.EnterWriteLock;
   try
     FCrypterFolderInfo.PartSize := APartSize;
+  finally
+    FCrypterFolderInfoLock.ExitWriteLock;
+  end;
+end;
+
+procedure TCrypterPanel.SetStatusImage(AStatusImage: WideString);
+begin
+  FCrypterFolderInfoLock.EnterWriteLock;
+  try
+    FCrypterFolderInfo.StatusImage := AStatusImage;
+  finally
+    FCrypterFolderInfoLock.ExitWriteLock;
+  end;
+end;
+
+procedure TCrypterPanel.SetStatusImageText(AStatusImageText: WideString);
+begin
+  FCrypterFolderInfoLock.EnterWriteLock;
+  try
+    FCrypterFolderInfo.StatusImageText := AStatusImageText;
   finally
     FCrypterFolderInfoLock.ExitWriteLock;
   end;

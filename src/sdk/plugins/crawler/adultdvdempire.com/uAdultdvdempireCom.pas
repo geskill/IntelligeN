@@ -18,15 +18,20 @@ uses
 
 type
   TAdultdvdempireCom = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'http://www.adultdvdempire.com/';
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
@@ -38,49 +43,56 @@ begin
   Result := 'adultdvdempire.com';
 end;
 
-function TAdultdvdempireCom.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TAdultdvdempireCom.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [cXXX];
-  Result := LongWord(_TemplateTypeIDs);
+  Result := [cXXX];
 end;
 
-function TAdultdvdempireCom.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
+function TAdultdvdempireCom.InternalGetAvailableControlIDs;
 begin
-  _ComponentIDs := [cPicture, cGenre, cDescription];
-
-  Result := LongWord(_ComponentIDs);
+  Result := [cPicture, cGenre, cDescription];
 end;
 
-function TAdultdvdempireCom.GetControlIDDefaultValue;
+function TAdultdvdempireCom.InternalGetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TAdultdvdempireCom.GetResultsLimitDefaultValue;
+function TAdultdvdempireCom.InternalGetDependentControlIDs;
 begin
-  Result := 5;
+  Result := [cTitle];
 end;
 
-function TAdultdvdempireCom.Exec;
-const
-  website = 'http://www.adultdvdempire.com/';
-var
-  _ComponentIDs: TControlIDs;
-  _Title: string;
-  _Count: Integer;
+function TAdultdvdempireCom.InternalExecute;
 
-  procedure CrawlDetailedGenre(AGenreList: string);
-  begin
-    if (Pos('/', AGenreList) > 0) or (Pos(',', AGenreList) > 0) or (Pos('|', AGenreList) > 0) then
+  procedure deep_search(AWebsiteSourceCode: string);
+
+    function MakeLinebreaks(const AHTMLText: string): string;
     begin
+      Result := StringReplace(AHTMLText, '</p><p>', sLineBreak, [rfReplaceAll, rfIgnoreCase]);
+    end;
+
+  begin
+    if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
-          InputString := AGenreList;
-          Expression := '([^\/,|]+)';
+          InputString := AWebsiteSourceCode;
+          Expression := 'property=''og:image'' content="(.*?)"';
+
+          if Exec(InputString) then
+          begin
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, StringReplace(Match[1], 'h.', 'bh.', [rfIgnoreCase]));
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cGenre) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := '"Category" \/>(.*?)<\/';
 
           if Exec(InputString) then
           begin
@@ -91,109 +103,71 @@ var
         finally
           Free;
         end;
-    end
-    else
-      AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(AGenreList));
-  end;
 
-  procedure deep_search(aWebsitecode: string);
-
-    function MakeLinebreaks(AHTMLText: string): string;
-    begin
-      Result := StringReplace(AHTMLText, '</p><p>', sLineBreak, [rfReplaceAll, rfIgnoreCase])
-    end;
-
-  begin
-    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if ACanUse(cDescription) then
     begin
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
-          Expression := '<p class="Tagline">(.*?)<\/div>';
+          InputString := AWebsiteSourceCode;
+          Expression := '<h4.*?>(.*?)<\/h4>';
 
           if Exec(InputString) then
           begin
-            repeat
-              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(ReduceWhitespace(HTML2Text(MakeLinebreaks(Match[1])))));
-            until not ExecNext;
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(ReduceWhitespace(HTML2Text(MakeLinebreaks(Match[1])))));
           end;
         finally
           Free;
         end;
     end;
-    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
-      with TRegExpr.Create do
-        try
-          InputString := aWebsitecode;
-          Expression := 'Categories<\/h2>(.*?)<h2>';
-
-          if Exec(InputString) then
-            CrawlDetailedGenre(Trim(ReduceWhitespace(HTML2Text(Match[1], False))));
-        finally
-          Free;
-        end;
-    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
-      with TRegExpr.Create do
-        try
-          InputString := aWebsitecode;
-          Expression := '<img src="(.*?)"';
-
-          if Exec(InputString) then
-          begin
-            AControlController.FindControl(cPicture).AddProposedValue(GetName, StringReplace(Match[1], 'm.', 'h.', []));
-            AControlController.FindControl(cPicture).AddProposedValue(GetName, StringReplace(Match[1], 'm.', 'bh.', []));
-          end;
-        finally
-          Free;
-        end;
   end;
 
 var
-  HTTPRequest: IHTTPRequest;
+  LTitle: string;
+  LCount: Integer;
 
-  RequestID1, RequestID2: Double;
+  LSearchString: string;
 
-  ResponseStrSearchResult: string;
+  LHTTPRequest: IHTTPRequest;
+  LHTTPParams: IHTTPParams;
+  LRequestID1, LRequestID2: Double;
+
+  LResponeStr: string;
 begin
-  LongWord(_ComponentIDs) := AControlIDs;
-  _Title := AControlController.FindControl(cTitle).Value;
-  _Count := 0;
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
 
   // http://www.adultdvdempire.com/allsearch/search?q=Mollys%20Life%2018
 
-  HTTPRequest := THTTPRequest.Create(website + 'allsearch/search?sort=released&exactMatch=' + HTTPEncode(_Title) + '&q=' + HTTPEncode(_Title));
-  HTTPRequest.Referer := website;
+  LResponeStr := GETRequest(WEBSITE + 'allsearch/search?sort=released&q=' + HTTPEncode(LTitle), LRequestID1);
 
-  RequestID1 := HTTPManager.Get(HTTPRequest, TPlugInHTTPOptions.Create(Self));
+  if not(Pos('searchRefineForm', LResponeStr) = 0) then
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := LResponeStr;
+        Expression := 'item-cover"><a href=" \/(.*?)"';
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID1);
-
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID1).HTTPResult.SourceCode;
-
-  with TRegExpr.Create do
-    try
-      InputString := ResponseStrSearchResult;
-      Expression := '<p class="title"><a href="\/(.*?)"';
-
-      if Exec(InputString) then
-      begin
-        repeat
-          RequestID2 := HTTPManager.Get(website + Match[1], RequestID1, TPlugInHTTPOptions.Create(Self));
-
+        if Exec(InputString) then
+        begin
           repeat
-            sleep(50);
-          until HTTPManager.HasResult(RequestID2);
+            LResponeStr := GETFollowUpRequest(WEBSITE + Match[1], LRequestID1, LRequestID2);
 
-          deep_search(HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode);
+            deep_search(LResponeStr);
 
-          Inc(_Count);
-        until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
+        end;
+      finally
+        Free;
       end;
-    finally
-      Free;
-    end;
+  end;
+
+  Result := True;
+end;
+
+function TAdultdvdempireCom.GetResultsLimitDefaultValue;
+begin
+  Result := 5;
 end;
 
 end.
