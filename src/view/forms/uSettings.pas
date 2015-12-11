@@ -163,9 +163,6 @@ type
     cxLMirrorHeight: TcxLabel;
     cxSEMirrorHeight: TcxSpinEdit;
     cxTSApp: TcxTabSheet;
-    cxTSPublish: TcxTabSheet;
-    cxLPublishMaxCount: TcxLabel;
-    cxTBPublishMaxCount: TcxTrackBar;
     cxCBCMSAll: TcxCheckBox;
     cxGCMSTableView1Column7: TcxGridColumn;
     cxPCControls: TcxPageControl;
@@ -187,10 +184,14 @@ type
     cxLProxyAccountPassword: TcxLabel;
     cxTEProxyAccountPassword: TcxTextEdit;
     cxCGEnableProxyAt: TcxCheckGroup;
+    cxTSPublish: TcxTabSheet;
+    cxLPublishMaxCount: TcxLabel;
+    cxSEPublishMaxCount: TcxSpinEdit;
     cxLPublishDelaybetweenUploads: TcxLabel;
-    cxTBPublishDelaybetweenUploads: TcxTrackBar;
+    cxSEPublishDelaybetweenUploads: TcxSpinEdit;
+    cxLPublishDelaybetweenUploadsMSec: TcxLabel;
     cxLRetryCount: TcxLabel;
-    cxTBRetryCount: TcxTrackBar;
+    cxSERetryCount: TcxSpinEdit;
     pFileFormatsSettings: TPanel;
     cxCBFileFormatsForceAddCrypter: TcxCheckBox;
     cxCBFileFormatsForceAddImageMirror: TcxCheckBox;
@@ -307,6 +308,7 @@ type
     procedure cxTEImageHosterAccountPasswordPropertiesChange(Sender: TObject);
     procedure cxCBImageHosterUseAccountPropertiesChange(Sender: TObject);
     procedure cxCOBImageHosterResizePropertiesChange(Sender: TObject);
+    procedure cxCBImageHosterDirectUploadPropertiesChange(Sender: TObject);
 
     procedure cxSEMirrorCountPropertiesChange(Sender: TObject);
     procedure cxSEMirrorColumnsPropertiesChange(Sender: TObject);
@@ -371,12 +373,12 @@ type
     procedure cxTEProxyAccountNamePropertiesChange(Sender: TObject);
     procedure cxTEProxyAccountPasswordPropertiesChange(Sender: TObject);
     procedure cxCGEnableProxyAtPropertiesChange(Sender: TObject);
-
-    procedure cxTBPublishMaxCountPropertiesChange(Sender: TObject);
-    procedure cxTBPublishDelaybetweenUploadsPropertiesChange(Sender: TObject);
-    procedure cxTBRetryCountPropertiesChange(Sender: TObject);
+    procedure cxSEPublishMaxCountPropertiesChange(Sender: TObject);
+    procedure cxSEPublishDelaybetweenUploadsPropertiesChange(Sender: TObject);
+    procedure cxSERetryCountPropertiesChange(Sender: TObject);
 
     procedure cxSEMaxLogEntriesPropertiesChange(Sender: TObject);
+    procedure cxSEMaxHTTPLogEntriesPropertiesChange(Sender: TObject);
 
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -385,9 +387,6 @@ type
     procedure cxCBSaveOnCloseClick(Sender: TObject);
     procedure cxBExportSettingsClick(Sender: TObject);
     procedure cxBSaveSettingsClick(Sender: TObject);
-    procedure cxCBImageHosterDirectUploadPropertiesChange(Sender: TObject);
-    procedure cxSEMaxHTTPLogEntriesPropertiesChange(Sender: TObject);
-
   private
     FOnCrawlerContingentChange: Boolean;
     FAppPluginsCheckListBox, FCAPTCHAPluginsCheckListBox, FCMSPluginsCheckListBox, FCrawlerPluginsCheckListBox, FCrypterPluginsCheckListBox, FFileFormatsPluginsCheckListBox, FFileHosterPluginsCheckListBox,
@@ -462,6 +461,7 @@ type
     procedure UpdateAllOpenedTabs(AActiveControlAccess: TActiveControlAccess); overload;
     procedure UpdateAllOpenedTabs(ATypeID: TTypeID; AComponentID: TControlID; AActiveControlAccess: TActiveControlAccess); overload;
     function GetSelectedTemplateTypes(TemplateTypeListView: TcxListView): TTypeIDs;
+    procedure UpdatePublishDelaybetweenUploadsHint;
   public
     procedure SetComponentStatusFromSettings;
     property CMSPluginsCheckListBox: TPluginsCheckListBox read FCMSPluginsCheckListBox write FCMSPluginsCheckListBox;
@@ -1600,24 +1600,20 @@ end;
 {$ENDREGION}
 { ****************************************************************************** }
 
-procedure TSettings.cxTBPublishMaxCountPropertiesChange(Sender: TObject);
+procedure TSettings.cxSEPublishMaxCountPropertiesChange(Sender: TObject);
 begin
-  SettingsManager.Settings.Publish.PublishMaxCount := cxTBPublishMaxCount.Position;
-  cxTBPublishMaxCount.Hint := IntToStr(cxTBPublishMaxCount.Position);
+  SettingsManager.Settings.Publish.PublishMaxCount := cxSEPublishMaxCount.Value;
 end;
 
-procedure TSettings.cxTBPublishDelaybetweenUploadsPropertiesChange(Sender: TObject);
+procedure TSettings.cxSEPublishDelaybetweenUploadsPropertiesChange(Sender: TObject);
 begin
-  cxTBPublishDelaybetweenUploads.Hint := IntToStr(cxTBPublishDelaybetweenUploads.Position) + ' seconds';
-  if cxTBPublishDelaybetweenUploads.Position > 60 then
-    cxTBPublishDelaybetweenUploads.Hint := cxTBPublishDelaybetweenUploads.Hint + ' (' + FloatToStr(RoundTo(cxTBPublishDelaybetweenUploads.Position / 60, -2)) + ' minutes)';
-  SettingsManager.Settings.Publish.PublishDelaybetweenUploads := cxTBPublishDelaybetweenUploads.Position;
+  SettingsManager.Settings.Publish.PublishDelaybetweenUploads := cxSEPublishDelaybetweenUploads.Value;
+  UpdatePublishDelaybetweenUploadsHint;
 end;
 
-procedure TSettings.cxTBRetryCountPropertiesChange(Sender: TObject);
+procedure TSettings.cxSERetryCountPropertiesChange(Sender: TObject);
 begin
-  SettingsManager.Settings.Publish.RetryCount := cxTBRetryCount.Position;
-  cxTBRetryCount.Hint := IntToStr(cxTBRetryCount.Position);
+  SettingsManager.Settings.Publish.RetryCount := cxSERetryCount.Value;
 end;
 
 { ****************************************************************************** }
@@ -2845,14 +2841,10 @@ begin
   cxCBControlsIRichEditWrapText.Checked := SettingsManager.Settings.Controls.IRichEditWrapText;
   cxSEDropDownRows.Value := SettingsManager.Settings.Controls.DropDownRows;
 
-  cxTBPublishMaxCount.Position := SettingsManager.Settings.Publish.PublishMaxCount;
-  cxTBPublishMaxCount.Hint := IntToStr(cxTBPublishMaxCount.Position);
-  cxTBPublishDelaybetweenUploads.Hint := IntToStr(cxTBPublishDelaybetweenUploads.Position) + ' seconds';
-  if cxTBPublishDelaybetweenUploads.Position > 60 then
-    cxTBPublishDelaybetweenUploads.Hint := cxTBPublishDelaybetweenUploads.Hint + ' (' + FloatToStr(RoundTo(cxTBPublishDelaybetweenUploads.Position / 60, -2)) + ' minutes)';
-  cxTBPublishDelaybetweenUploads.Position := SettingsManager.Settings.Publish.PublishDelaybetweenUploads;
-  cxTBRetryCount.Position := SettingsManager.Settings.Publish.RetryCount;
-  cxTBRetryCount.Hint := IntToStr(cxTBRetryCount.Position);
+  cxSEPublishMaxCount.Value := SettingsManager.Settings.Publish.PublishMaxCount;
+  cxSEPublishDelaybetweenUploads.Value := SettingsManager.Settings.Publish.PublishDelaybetweenUploads;
+  UpdatePublishDelaybetweenUploadsHint;
+  cxSERetryCount.Value := SettingsManager.Settings.Publish.RetryCount;
 
   cxSEMaxLogEntries.Value := SettingsManager.Settings.Log.MaxLogEntries;
   cxSEMaxHTTPLogEntries.Value := SettingsManager.Settings.Log.MaxHTTPLogEntries;
@@ -3123,6 +3115,21 @@ begin
     for I := 0 to Count - 1 do
       if Item[I].Selected then
         Result := Result + [StringToTypeID(Item[I].Caption)];
+end;
+
+procedure TSettings.UpdatePublishDelaybetweenUploadsHint;
+var
+  LPublishDelayInMSec: Integer;
+begin
+  LPublishDelayInMSec := cxSEPublishDelaybetweenUploads.Value;
+
+  if (LPublishDelayInMSec > 0) then
+  begin
+    if (LPublishDelayInMSec < 60000) then
+      cxSEPublishDelaybetweenUploads.Hint := IntToStr(round(LPublishDelayInMSec / 1000)) + ' seconds'
+    else
+      cxSEPublishDelaybetweenUploads.Hint := FloatToStr(RoundTo(LPublishDelayInMSec / 60000, -2)) + ' minutes';
+  end;
 end;
 {$ENDREGION}
 

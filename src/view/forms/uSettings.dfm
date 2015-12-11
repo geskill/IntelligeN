@@ -39,7 +39,7 @@ object Settings: TSettings
     Anchors = [akLeft, akTop, akRight, akBottom]
     Focusable = False
     TabOrder = 0
-    Properties.ActivePage = cxTSLog
+    Properties.ActivePage = cxTSPublish
     Properties.CustomButtons.Buttons = <>
     Properties.HotTrack = True
     ClientRectBottom = 331
@@ -107,10 +107,6 @@ object Settings: TSettings
     object cxTSPlugins: TcxTabSheet
       Caption = 'Plugins'
       ImageIndex = 3
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         598
         307)
@@ -132,18 +128,10 @@ object Settings: TSettings
         object cxTSApp: TcxTabSheet
           Caption = 'App'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
         end
         object cxTSCAPTCHA: TcxTabSheet
           Caption = 'CAPTCHA'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
         end
         object cxTSCMS: TcxTabSheet
           Caption = 'CMS'
@@ -432,10 +420,6 @@ object Settings: TSettings
         object cxTSCrawler: TcxTabSheet
           Caption = 'Crawler'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           DesignSize = (
             584
             273)
@@ -519,10 +503,6 @@ object Settings: TSettings
         object cxTSCrypter: TcxTabSheet
           Caption = 'Crypter'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           DesignSize = (
             584
             273)
@@ -927,10 +907,6 @@ object Settings: TSettings
         object cxTSFileFormats: TcxTabSheet
           Caption = 'File Formats'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           DesignSize = (
             584
             273)
@@ -964,10 +940,6 @@ object Settings: TSettings
         object cxTSFileHoster: TcxTabSheet
           Caption = 'File Hoster'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
         end
         object cxTSImageHoster: TcxTabSheet
           Caption = 'Image Hoster'
@@ -1297,10 +1269,6 @@ object Settings: TSettings
       Caption = 'Database'
       ImageIndex = 3
       TabVisible = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         598
         307)
@@ -1480,10 +1448,6 @@ object Settings: TSettings
     object cxTSControls: TcxTabSheet
       Caption = 'Controls'
       ImageIndex = 4
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       DesignSize = (
         598
         307)
@@ -1505,10 +1469,6 @@ object Settings: TSettings
         object cxTSControls_: TcxTabSheet
           Caption = 'Controls'
           ImageIndex = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           DesignSize = (
             584
             273)
@@ -2032,59 +1992,62 @@ object Settings: TSettings
       ImageIndex = 4
       object cxLPublishMaxCount: TcxLabel
         Left = 16
-        Top = 43
+        Top = 16
         Caption = 'Maximum publish rate:'
         Transparent = True
       end
-      object cxTBPublishMaxCount: TcxTrackBar
-        Left = 16
-        Top = 63
-        ParentShowHint = False
-        Position = 5
-        Properties.Max = 25
-        Properties.Min = 1
-        Properties.OnChange = cxTBPublishMaxCountPropertiesChange
-        ShowHint = True
-        TabOrder = 1
-        Transparent = True
-        Height = 23
-        Width = 121
-      end
       object cxLPublishDelaybetweenUploads: TcxLabel
         Left = 16
-        Top = 92
+        Top = 63
         Caption = 'Delay between uploads:'
         Transparent = True
       end
-      object cxTBPublishDelaybetweenUploads: TcxTrackBar
-        Left = 16
-        Top = 112
-        ParentShowHint = False
-        Properties.Frequency = 60
-        Properties.Max = 1800
-        Properties.OnChange = cxTBPublishDelaybetweenUploadsPropertiesChange
-        ShowHint = True
-        TabOrder = 3
-        Transparent = True
-        Height = 23
-        Width = 121
-      end
-      object cxTBRetryCount: TcxTrackBar
-        Left = 16
-        Top = 164
-        ParentShowHint = False
-        Properties.OnChange = cxTBRetryCountPropertiesChange
-        ShowHint = True
-        TabOrder = 4
-        Transparent = True
-        Height = 23
-        Width = 121
-      end
       object cxLRetryCount: TcxLabel
         Left = 16
-        Top = 141
+        Top = 110
         Caption = 'Retry count:'
         Transparent = True
+      end
+      object cxSEPublishMaxCount: TcxSpinEdit
+        Left = 16
+        Top = 36
+        Properties.LargeIncrement = 5.000000000000000000
+        Properties.MaxValue = 25.000000000000000000
+        Properties.MinValue = 1.000000000000000000
+        Properties.OnChange = cxSEPublishMaxCountPropertiesChange
+        TabOrder = 1
+        Value = 2
+        Width = 65
+      end
+      object cxSEPublishDelaybetweenUploads: TcxSpinEdit
+        Left = 16
+        Top = 83
+        ParentShowHint = False
+        Properties.AssignedValues.MinValue = True
+        Properties.Increment = 10000.000000000000000000
+        Properties.LargeIncrement = 30000.000000000000000000
+        Properties.MaxValue = 1800000.000000000000000000
+        Properties.OnChange = cxSEPublishDelaybetweenUploadsPropertiesChange
+        ShowHint = True
+        TabOrder = 3
+        Width = 65
+      end
+      object cxLPublishDelaybetweenUploadsMSec: TcxLabel
+        Left = 87
+        Top = 84
+        Caption = '[msec, 0 = disabled]'
+        Transparent = True
+      end
+      object cxSERetryCount: TcxSpinEdit
+        Left = 16
+        Top = 130
+        Properties.AssignedValues.MinValue = True
+        Properties.LargeIncrement = 5.000000000000000000
+        Properties.MaxValue = 10.000000000000000000
+        Properties.OnChange = cxSERetryCountPropertiesChange
+        TabOrder = 6
+        Value = 2
+        Width = 65
       end
     end
     object cxTSLog: TcxTabSheet
