@@ -1431,6 +1431,11 @@ end;
 procedure TPictureMirror.SetValue(AValue: WideString);
 begin
   inherited SetValue(AValue);
+
+  with Picture.ControlController do
+    if Assigned(OnControlChange) then
+      OnControlChange.Invoke(Picture);
+
   SetHint;
 end;
 
