@@ -170,6 +170,9 @@ begin
     Add('ReduceCapitals(const Str: string): string');
     Add('StringReplace(const S, OldPattern, NewPattern: string): string');
 
+    Add('URLEncode(const ASrc: string): string');
+    Add('URLDecode(const ASrc: string): string');
+
     Add('ExtractUrlFileName(const AUrl: string): string');
     Add('ExtractUrlPath(const AUrl: string): string');
     Add('ExtractUrlProtocol(const AUrl: string): string');
@@ -239,6 +242,9 @@ begin
     Add('function PosEx(const SubStr: string, S: string, Offset: Integer = 1): Integer');
     Add('function ReduceCapitals(const Str: string): string');
     Add('function StringReplace(const S, OldPattern, NewPattern: string): string');
+
+    Add('function URLEncode(const ASrc: string): string');
+    Add('function URLDecode(const ASrc: string): string');
 
     Add('function ExtractUrlFileName(const AUrl: string): string');
     Add('function ExtractUrlPath(const AUrl: string): string');
