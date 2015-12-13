@@ -22,6 +22,7 @@ type
     procedure SetHTTPOptions(const AHTTPOptions: IHTTPOptions); safecall;
   public
     constructor Create(const AHTTPRequest: IHTTPRequest; const AHTTPOptions: IHTTPOptions; const AHTTPParams: IHTTPParams);
+    destructor Destroy; override;
 
     property Website: WideString read GetWebsite;
     property HTTPParams: IHTTPParams read GetHTTPParams write SetHTTPParams;
@@ -40,6 +41,7 @@ type
     function GetHTTPResponseInfo: IHTTPResponseInfo; safecall;
   public
     constructor Create(const AHTTPResponse: IHTTPResponse; const AHTTPResponseInfo: IHTTPResponseInfo);
+    destructor Destroy; override;
 
     property SourceCode: WideString read GetSourceCode;
     property HasError: WordBool read GetHasError;
@@ -60,6 +62,7 @@ type
     procedure SetHTTPResult(const AHTTPResult: IHTTPResult); safecall;
   public
     constructor Create(const AUniqueID: Double);
+    destructor Destroy; override;
 
     property UniqueID: Double read GetUniqueID;
     property HTTPData: IHTTPData read GetHTTPData write SetHTTPData;
@@ -75,6 +78,14 @@ begin
   FHTTPRequest := AHTTPRequest;
   FHTTPOptions := AHTTPOptions;
   FHTTPParams := AHTTPParams;
+end;
+
+destructor THTTPData.Destroy;
+begin
+  FHTTPParams := nil;
+  FHTTPOptions := nil;
+  FHTTPRequest := nil;
+  inherited;
 end;
 
 function THTTPData.GetWebsite: WideString;
@@ -118,6 +129,13 @@ constructor THTTPResult.Create(const AHTTPResponse: IHTTPResponse; const AHTTPRe
 begin
   FHTTPResponse := AHTTPResponse;
   FHTTPResponseInfo := AHTTPResponseInfo;
+end;
+
+destructor THTTPResult.Destroy;
+begin
+  FHTTPResponseInfo := nil;
+  FHTTPResponse := nil;
+  inherited Destroy;
 end;
 
 function THTTPResult.GetSourceCode: WideString;
@@ -170,6 +188,13 @@ end;
 constructor THTTPProcess.Create(const AUniqueID: Double);
 begin
   FUniqueID := AUniqueID;
+end;
+
+destructor THTTPProcess.Destroy;
+begin
+  FHTTPResult := nil;
+  FHTTPData := nil;
+  inherited Destroy;
 end;
 
 end.

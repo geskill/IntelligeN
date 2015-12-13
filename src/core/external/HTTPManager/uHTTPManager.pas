@@ -45,7 +45,6 @@ type
     property Count: Integer read GetCount;
     property Implementations[Index: Integer]: IHTTPImplementation read GetImplementation; default;
   end;
-
   {$REGION 'Documentation'}
   /// <summary>
   ///   <para>
@@ -69,6 +68,7 @@ type
   ///   This class is a singleton.
   /// </remarks>
   {$ENDREGION}
+
   THTTPManager = class(TInterfacedObject, IHTTPManager)
   strict private
     class var FLock: TOmniCS;
@@ -76,12 +76,15 @@ type
     FBackgroundWorker: IOmniBackgroundWorker;
     FRequestArray: array of IHTTPProcess;
     FRequestArrayLock: TOmniMREW;
-    FConnectionMaximum: Integer;
-    FConnectionMaximumLock: TOmniMREW;
+    FRequestArrayLowerBoundUpdate: Boolean;
+    FRequestArrayLowerBound: TOmniAlignedInt32;
+    FConnectionMaximum: TOmniAlignedInt32;
     FImplementor: IHTTPImplementation;
     FImplementationManager: IHTTPImplementationManager;
     FRequestScrape: IHTTPScrapeEvent;
     FRequestDoneEvent: IHTTPProcessEvent;
+
+    procedure UpdateCapacity(const ARequestArrayLength: Integer);
 
     class var FHTTPManager: IHTTPManager;
 
@@ -297,6 +300,27 @@ end;
 
 { TIdHTTPManager }
 
+procedure THTTPManager.UpdateCapacity(const ARequestArrayLength: Integer);
+var
+  Index, Threshold, NewLowerBound: Integer;
+begin
+  Threshold := FConnectionMaximum.Value * 10;
+  if not FRequestArrayLowerBoundUpdate and ((ARequestArrayLength - FRequestArrayLowerBound.Value) > Threshold) then
+  begin
+    FRequestArrayLowerBoundUpdate := True;
+    NewLowerBound := FRequestArrayLowerBound.Value + Threshold;
+    FRequestArrayLock.EnterWriteLock;
+    try
+      for Index := FRequestArrayLowerBound.Value + 1 to NewLowerBound do
+        FRequestArray[Index] := nil;
+    finally
+      FRequestArrayLock.ExitWriteLock;
+    end;
+    FRequestArrayLowerBound.Value := NewLowerBound;
+    FRequestArrayLowerBoundUpdate := False;
+  end;
+end;
+
 procedure THTTPManager.Execute(const workItem: IOmniWorkItem);
 var
   HTTPData: IHTTPData;
@@ -400,28 +424,33 @@ begin
   FBackgroundWorker := Parallel.BackgroundWorker;
 
   SetLength(FRequestArray, 0);
+  FRequestArrayLowerBoundUpdate := False;
+  FRequestArrayLowerBound.Value := 0;
 
-  FConnectionMaximum := 1;
+  FConnectionMaximum.Value := 1;
   FImplementor := nil;
   FImplementationManager := THTTPImplementationManager.Create;
 
   FRequestScrape := TIHTTPScrapeEvent.Create;
   FRequestDoneEvent := TIHTTPProcessEvent.Create;
 
-  FBackgroundWorker.NumTasks(FConnectionMaximum).Execute(Execute).OnRequestDone_Asy(
+  FBackgroundWorker.NumTasks(FConnectionMaximum.Value).Execute(Execute).OnRequestDone_Asy(
     { } procedure(const Sender: IOmniBackgroundWorker; const workItem: IOmniWorkItem)
     { } var
     { . } HTTPProcess: IHTTPProcess;
+    { . } NewArrayLength: Integer;
     { } begin
     { . } HTTPProcess := IHTTPProcess(workItem.Result.AsInterface);
 
     { . } FRequestArrayLock.EnterWriteLock;
     { . } try
-    { ... } SetLength(FRequestArray, Max(workItem.UniqueID, length(FRequestArray)) + 1);
+    { ... } NewArrayLength := Max(workItem.UniqueID, length(FRequestArray));
+    { ... } SetLength(FRequestArray, NewArrayLength + 1);
     { ... } FRequestArray[workItem.UniqueID] := HTTPProcess;
     { . } finally
     { ... } FRequestArrayLock.ExitWriteLock;
     { . } end;
+    { . } UpdateCapacity(NewArrayLength);
 
     { } end).OnRequestDone(
     { } procedure(const Sender: IOmniBackgroundWorker; const workItem: IOmniWorkItem)
@@ -492,25 +521,15 @@ end;
 
 function THTTPManager.GetConnectionMaximum: Integer;
 begin
-  FConnectionMaximumLock.EnterReadLock;
-  try
-    Result := FConnectionMaximum;
-  finally
-    FConnectionMaximumLock.ExitReadLock
-  end;
+  Result := FConnectionMaximum.Value;
 end;
 
 procedure THTTPManager.SetConnectionMaximum(const AConnectionMaximum: Integer);
 begin
-  FConnectionMaximumLock.EnterWriteLock;
-  try
-    if not (AConnectionMaximum = FConnectionMaximum) then
-    begin
-      FConnectionMaximum := AConnectionMaximum;
-      FBackgroundWorker.NumTasks(AConnectionMaximum);
-    end;
-  finally
-    FConnectionMaximumLock.ExitWriteLock
+  if not(AConnectionMaximum = FConnectionMaximum.Value) then
+  begin
+    FConnectionMaximum.Value := AConnectionMaximum;
+    FBackgroundWorker.NumTasks(AConnectionMaximum);
   end;
 end;
 
@@ -551,7 +570,7 @@ begin
 
   FRequestArrayLock.EnterReadLock;
   try
-    if Index < length(FRequestArray) then
+    if (Index > FRequestArrayLowerBound.Value) and (Index < length(FRequestArray)) then
       Result := FRequestArray[Index];
   finally
     FRequestArrayLock.ExitReadLock;

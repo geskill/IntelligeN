@@ -177,6 +177,8 @@ type
     property ContentType: WideString read GetContentType write SetContentType;
 
     property CustomHeaders: ICOMList read GetCustomHeaders write SetCustomHeaders;
+
+    destructor Destroy; override;
   end;
 
   THTTPRequest = class(THTTPHeader, IHTTPRequest)
@@ -294,6 +296,8 @@ type
     property HandleRedirects: WordBool read GetHandleRedirects write SetHandleRedirects;
     property HandleSketchyRedirects: WordBool read GetHandleSketchyRedirects write SetHandleSketchyRedirects;
     property RedirectMaximum: Integer read GetRedirectMaximum write SetRedirectMaximum;
+
+    destructor Destroy; override;
   end;
 
   THTTPResponseInfo = class(TInterfacedObject, IHTTPResponseInfo)
@@ -773,6 +777,13 @@ begin
   FCustomHeaders := ACustomHeaders;
 end;
 
+destructor THTTPHeader.Destroy;
+begin
+  FCustomHeaders := nil;
+  FCookies := nil;
+  inherited Destroy;
+end;
+
 { THTTPRequest }
 
 constructor THTTPRequest.Create(AURL: WideString);
@@ -1135,6 +1146,12 @@ end;
 procedure THTTPOptions.SetRedirectMaximum(ARedirectMaximum: Integer);
 begin
   FRedirectMaximum := ARedirectMaximum;
+end;
+
+destructor THTTPOptions.Destroy;
+begin
+  FProxy := nil;
+  inherited Destroy;
 end;
 
 { THTTPResponseInfo }
