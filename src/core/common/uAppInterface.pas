@@ -529,9 +529,9 @@ type
 
     function IndexOf(const Item: IMirrorControl): Integer;
     function Add: Integer;
-    procedure Insert(index: Integer; const Item: IMirrorControl); overload;
-    function Insert(index: Integer): IMirrorControl; overload;
-    function Remove(index: Integer): Boolean;
+    procedure Insert(Index: Integer; const Item: IMirrorControl); overload;
+    function Insert(Index: Integer): IMirrorControl; overload;
+    function Remove(Index: Integer): Boolean;
 
     // Cloning
     function CloneInstance(): IMirrorControllerBase;

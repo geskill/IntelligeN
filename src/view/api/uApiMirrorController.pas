@@ -59,9 +59,9 @@ type
 
     function IndexOf(const Item: IMirrorControl): Integer;
     function Add: Integer;
-    procedure Insert(index: Integer; const Item: IMirrorControl); overload;
-    function Insert(index: Integer): IMirrorControl; overload;
-    function Remove(index: Integer): Boolean;
+    procedure Insert(Index: Integer; const Item: IMirrorControl); overload;
+    function Insert(Index: Integer): IMirrorControl; overload;
+    function Remove(Index: Integer): Boolean;
 
     // Cloning
     function CloneInstance(): IMirrorControllerBase;
@@ -197,16 +197,16 @@ var
   Point: TPoint;
 begin
   with TControlAligner.Create do
-  try
-    WorkPanelWidth := FWorkPanel.Width;
-    ControlController := TabSheetController.ControlController;
-    MirrorController := Self;
-    Point := NextMirrorPosition;
-    ControlController := nil;
-    MirrorController := nil;
-  finally
-    Free;
-  end;
+    try
+      WorkPanelWidth := FWorkPanel.Width;
+      ControlController := TabSheetController.ControlController;
+      MirrorController := Self;
+      Point := NextMirrorPosition;
+      ControlController := nil;
+      MirrorController := nil;
+    finally
+      Free;
+    end;
 
   MirrorControl := TMirrorControl.Create(FWorkPanel, Point.X, Point.Y);
   MirrorControl.MirrorController := Self;
@@ -214,38 +214,38 @@ begin
   Result := FMirrorList.Add(MirrorControl);
 end;
 
-procedure TMirrorController.Insert(index: Integer; const Item: IMirrorControl);
+procedure TMirrorController.Insert(Index: Integer; const Item: IMirrorControl);
 begin
-  FMirrorList.Insert(index, Item as IMirrorControl);
+  FMirrorList.Insert(Index, Item as IMirrorControl);
 end;
 
-function TMirrorController.Insert(index: Integer): IMirrorControl;
+function TMirrorController.Insert(Index: Integer): IMirrorControl;
 begin
   Result := TMirrorControl.Create(FWorkPanel);
   Result.MirrorController := Self;
-  FMirrorList.Insert(index, Result);
+  FMirrorList.Insert(Index, Result);
 end;
 
-function TMirrorController.Remove(index: Integer): Boolean;
+function TMirrorController.Remove(Index: Integer): Boolean;
 var
   I: Integer;
 begin
   Result := True;
   try
-    for I := 0 to Mirror[index].DirectlinkCount - 1 do
+    for I := 0 to Mirror[Index].DirectlinkCount - 1 do
     begin
-      TabSheetController.PageController.FileHosterManager.RemoveHosterJob(Mirror[index].Directlink[I]);
-      Mirror[index].Directlink[I].DirectlinksPanel := nil;
+      TabSheetController.PageController.FileHosterManager.RemoveHosterJob(Mirror[Index].Directlink[I]);
+      Mirror[Index].Directlink[I].DirectlinksPanel := nil;
     end;
-    for I := 0 to Mirror[index].CrypterCount - 1 do
+    for I := 0 to Mirror[Index].CrypterCount - 1 do
     begin
-      TabSheetController.PageController.CrypterManager.RemoveCrypterJob(Mirror[index].Crypter[I]);
-      Mirror[index].Crypter[I].MirrorControl := nil;
+      TabSheetController.PageController.CrypterManager.RemoveCrypterJob(Mirror[Index].Crypter[I]);
+      Mirror[Index].Crypter[I].MirrorControl := nil;
     end;
-    Mirror[index].GetDirectlink.MirrorControl := nil;
-    Mirror[index].MirrorController := nil;
+    Mirror[Index].GetDirectlink.MirrorControl := nil;
+    Mirror[Index].MirrorController := nil;
 
-    FMirrorList.Delete(index);
+    FMirrorList.Delete(Index);
   except
     Result := False;
   end;

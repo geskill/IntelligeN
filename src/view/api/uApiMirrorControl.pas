@@ -1,5 +1,6 @@
 unit uApiMirrorControl;
-interface
+interface
+
 uses
   // Delphi
   Windows, SysUtils, Messages, Classes, Controls, Menus, StdCtrls, ExtCtrls, Graphics, Variants, Dialogs,
@@ -502,7 +503,7 @@ var
   LImageRect, LTextRect: TRect;
   LImageIndex: Integer;
 begin
-  if FcxGridInfoTableView.DataController.Values[AViewInfo.GridRecord.index, 0] = 'Status' then
+  if FcxGridInfoTableView.DataController.Values[AViewInfo.GridRecord.Index, 0] = 'Status' then
   begin
     ACanvas.Brush.Color := AViewInfo.Params.Color;
     ACanvas.FillRect(AViewInfo.Bounds);
@@ -1828,8 +1829,6 @@ end;
 
 destructor TCrypterPanel.Destroy;
 begin
-  FCrypter := nil;
-
   FStatusGrid.Free;
 
   FcxButtonLinkCheck.Free;
@@ -1837,6 +1836,7 @@ begin
 
   FPanel.Free;
 
+  FCrypter := nil;
   FMirrorControl := nil;
 
   inherited Destroy;
@@ -2285,13 +2285,13 @@ end;
 
 procedure TMirrorControl.FmiMirrorIndexClick(Sender: TObject);
 begin
-  index := (Sender as TMenuItem).Tag;
+  Index := (Sender as TMenuItem).Tag;
   Main.fMain.CallControlAligner;
 end;
 
 procedure TMirrorControl.FmiRemoveMirrorClick(Sender: TObject);
 begin
-  MirrorController.Remove(Self.index);
+  MirrorController.Remove(Self.Index);
   // FcxTabControl.Free; // ???
   Main.fMain.CallControlAligner;
 end;
@@ -2523,37 +2523,37 @@ end;
 procedure TMirrorControl.SetIndex(AIndex: Integer);
 var
   I, J: Integer;
-  CrypterFound: Boolean;
+  LCrypterFound: Boolean;
 begin
   with MirrorController.Insert(AIndex) do
   begin
     for I := 0 to Self.DirectlinkCount - 1 do
       GetDirectlink.Add(Self.Directlink[I].Value);
+
     for I := 0 to Self.CrypterCount - 1 do
     begin
-      CrypterFound := False;
-      for J := 0 to CrypterCount - 1 do
-        if SameText(Self.Crypter[I].name, Crypter[J].name) then
-        begin
-          Crypter[J].Value := Self.Crypter[I].Value;
-          CrypterFound := True;
-        end;
-      if not CrypterFound then
-        with Crypter[AddCrypter(Self.Crypter[I].name)] do
-        begin
-          Value := Self.Crypter[I].Value;
-          CheckFolder;
-        end;
+      LCrypterFound := False;
+      for J := 0 to CrypterCount - 1 do                                  // TODO: Some error in here
+        if SameText(Self.Crypter[I].Name, Crypter[J].Name) then          // Without this works fine
+        begin                                                            //
+          Crypter[J].Value := Self.Crypter[I].Value;                     //
+          LCrypterFound := True;                                         //
+        end;                                                             //
+      if not LCrypterFound then                                          //
+        with Crypter[AddCrypter(Self.Crypter[I].Name)] do                //
+        begin                                                            //
+          Value := Self.Crypter[I].Value;                                //
+        end;                                                             //
     end;
     TabIndex := Self.TabIndex;
     //
-    Self.MirrorController.Remove(Self.index);
-    Self.FcxTabControl.Free;
+    Self.MirrorController.Remove(Self.Index);                            // OR Without this works fine
+    // Self.FcxTabControl.Free; // ???
     //
     for I := 0 to CrypterCount - 1 do
-      Crypter[I].CheckFolder;
+      if not SameStr('',  Crypter[I].Value) then
+        Crypter[I].CheckFolder;
   end;
-
 end;
 
 function TMirrorControl.GetTabIndex: Integer;
