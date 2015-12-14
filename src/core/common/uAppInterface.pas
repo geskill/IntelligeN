@@ -580,9 +580,15 @@ type
     procedure SetIndex(AIndex: Integer);
     function GetActive: Boolean;
 
+    function GetWebsite: WideString;
+
+    function GetSubject: WideString;
     function GetSubjectFileName: WideString;
     procedure SetSubjectFileName(ASubjectFileName: WideString);
 
+    function GetTags: WideString;
+
+    function GetMessage: WideString;
     function GetMessageFileName: WideString;
     procedure SetMessageFileName(AMessageFileName: WideString);
 
@@ -602,7 +608,14 @@ type
     function GeneratePublishTab: IPublishTab;
     function GeneratePublishJob: IPublishJob;
 
+    property Website: WideString read GetWebsite;
+
+    property Subject: WideString read GetSubject;
     property SubjectFileName: WideString read GetSubjectFileName write SetSubjectFileName;
+
+    property Tags: WideString read GetTags;
+
+    property Message: WideString read GetMessage;
     property MessageFileName: WideString read GetMessageFileName write SetMessageFileName;
   end;
 
