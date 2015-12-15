@@ -443,7 +443,11 @@
 
 * Added indication in the GUI if the image hoster upload was successful or not
 
+* Added possibility to change website in code or design view via double click on website in publish window
+
 * Added host and subject in CAPTCHA and intelligent_posting-Helper window
+
+* Added URLEncode/URLDecode to IScript
 
 * Added NFOStripper
 
@@ -483,6 +487,8 @@
 
 * Fixed issue not displaying any IPicture value because of using a some empty value instead of available image link
 
+* Fixed issue not using imagehoster mirror if filters-tag in website xml file is undefined or empty
+
 * Fixed filter selection bug in WebsiteEditor
 
 * Fixed intelligent_posting (intelligent_posting_keepshortwords is only allowed in search title generation, not as match title for comparison with search list)
@@ -499,7 +505,8 @@
 
 * Changed IScriptEditor tab size to 2 (before 4)
 
-* Updated HTTPManager
+* Updated HTTPManager (among others fixed RAM issue)
 
 * Updated about dialog
 
+* Updated openSSL librarys
