@@ -36,6 +36,7 @@ object fPublish: TfPublish
     object tvValues: TcxGridTableView
       OnMouseMove = tvValuesMouseMove
       Navigator.Buttons.CustomButtons = <>
+      OnCellDblClick = tvValuesCellDblClick
       DataController.Summary.DefaultGroupSummaryItems = <>
       DataController.Summary.FooterSummaryItems = <>
       DataController.Summary.SummaryGroups = <>
@@ -45,6 +46,7 @@ object fPublish: TfPublish
         6C75655479706502000000445855464D54000004000000540072007500650001
         445855464D54000004000000540072007500650001}
       OptionsBehavior.CellHints = True
+      OptionsBehavior.ImmediateEditor = False
       OptionsView.ShowEditButtons = gsebAlways
       OptionsView.ColumnAutoWidth = True
       OptionsView.GroupByBox = False

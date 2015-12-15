@@ -144,6 +144,7 @@ type
     dxBBSaveAsXML: TdxBarButton;
     dxBBLoadFromXML: TdxBarButton;
     dxBBAutoCompletion: TdxBarButton;
+    dxBBPublish: TdxBarButton;
 
     dxBarManagerBarType: TdxBar;
     dxBCType: TdxBarCombo;
@@ -189,6 +190,7 @@ type
     dxDPMain: TdxDockPanel;
     fMain: TfMain;
     dxDPErrorLogger: TdxDockPanel;
+    fErrorLogger: TfErrorLogger;
     dxDPHTTPLogger: TdxDockPanel;
     fHTTPLogger: TfHTTPLogger;
     dxVertContainerDockSite2: TdxVertContainerDockSite;
@@ -210,12 +212,10 @@ type
     dxBBmiCloseAllOther: TdxBarButton;
 
     dxBpmPublishDropDownClick: TdxBarPopupMenu;
-    dxBBPublishItemVisit: TdxBarButton;
     dxBBPublishItemPreview: TdxBarButton;
     dxBBPublishItemPublish: TdxBarButton;
     dxBBPublishItemSettings: TdxBarButton;
-    fErrorLogger: TfErrorLogger;
-    dxBBPublish: TdxBarButton;
+    dxBBPublishItemVisit: TdxBarButton;
 
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);

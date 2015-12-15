@@ -31,6 +31,7 @@ type
     tvValues: TcxGridTableView;
     tvValuesColumn1: TcxGridColumn;
     tvValuesColumn2: TcxGridColumn;
+    procedure tvValuesCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
     procedure tvValuesMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure tvValuesColumn2PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
   private
@@ -64,17 +65,17 @@ uses
 
 {$R *.dfm}
 
-procedure TfPublish.tvValuesColumn2PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
+procedure TfPublish.tvValuesCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 var
-  APoint: TPoint;
+  LColumn: TcxGridColumn;
+  LCMSWebsitesCollectionItem: TCMSWebsitesCollectionItem;
 begin
-  with TcxButtonEdit(Sender) do
-  begin
-    APoint.X := Left + Width - 17;
-    APoint.Y := Top + Height;
-    APoint := Parent.ClientToScreen(APoint);
+  LColumn := ACellViewInfo.Item as TcxGridColumn;
 
-    Main.dxBpmPublishDropDownClick.Popup(APoint.X, APoint.Y);
+  if (LColumn.Index = tvValuesColumn2.Index) and (Main.fMain.ActiveViewType in [vtCode, vtPreview]) then
+  begin
+    LCMSWebsitesCollectionItem := GetSelectedCMSCollectionItem;
+    Main.fMain.ActiveTabSheetController.ActiveWebsite := LCMSWebsitesCollectionItem.Website;
   end;
 end;
 
@@ -97,18 +98,32 @@ begin
   end;
 end;
 
+procedure TfPublish.tvValuesColumn2PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
+var
+  APoint: TPoint;
+begin
+  with TcxButtonEdit(Sender) do
+  begin
+    APoint.X := Left + Width - 17;
+    APoint.Y := Top + Height;
+    APoint := Parent.ClientToScreen(APoint);
+
+    Main.dxBpmPublishDropDownClick.Popup(APoint.X, APoint.Y);
+  end;
+end;
+
 function TfPublish.GetSelectedCMSCollectionItem: TCMSWebsitesCollectionItem;
 var
-  CMSType, CMSPluginName: string;
+  LCMSType, LCMSPluginName: string;
 begin
   with FtvDataController do
   begin
-    CMSType := GetMasterDataController.Values[GetMasterDataController.FocusedRecordIndex, tvSectionsColumn.index];
-    CMSPluginName := Values[FocusedRecordIndex, tvValuesColumn2.index];
+    LCMSType := GetMasterDataController.Values[GetMasterDataController.FocusedRecordIndex, tvSectionsColumn.Index];
+    LCMSPluginName := Values[FocusedRecordIndex, tvValuesColumn2.index];
   end;
 
   with SettingsManager.Settings.Plugins do
-    result := TCMSCollectionItem(FindPlugInCollectionItemFromCollection(CMSType, CMS)).FindCMSWebsite(CMSPluginName);
+    result := TCMSCollectionItem(FindPlugInCollectionItemFromCollection(LCMSType, CMS)).FindCMSWebsite(LCMSPluginName);
 end;
 
 procedure TfPublish.UpdateCMSList(const Sender: IPublishController);
@@ -213,33 +228,29 @@ end;
 
 procedure TfPublish.ExecuteActivePublishItem(AAction: Byte);
 var
-  CMSType: string;
-  CMSWebsitesCollectionItem: TCMSWebsitesCollectionItem;
+  LCMSType: string;
+  LCMSWebsitesCollectionItem: TCMSWebsitesCollectionItem;
 begin
   with FtvDataController do
-    CMSType := GetMasterDataController.Values[GetMasterDataController.FocusedRecordIndex, tvSectionsColumn.index];
+    LCMSType := GetMasterDataController.Values[GetMasterDataController.FocusedRecordIndex, tvSectionsColumn.Index];
 
-  CMSWebsitesCollectionItem := GetSelectedCMSCollectionItem;
+  LCMSWebsitesCollectionItem := GetSelectedCMSCollectionItem;
 
   case AAction of
-    0: // Visit
-      begin
-        ShellExecute(Handle, 'open', PChar(CMSWebsitesCollectionItem.Website), nil, nil, SW_SHOW);
-      end;
-    1: // Preview
+    0: // Preview
       begin
         with Main.fMain do
         begin
           ActiveViewType := vtPreview;
-          ActiveTabSheetController.ActiveWebsite := CMSWebsitesCollectionItem.Name;
+          ActiveTabSheetController.ActiveWebsite := LCMSWebsitesCollectionItem.Name;
         end;
       end;
-    2: // Publish
+    1: // Publish
       begin
         with Main.fMain do
-          PublishManager.AddPublishJob(ActiveTabSheetController.PublishController.CMS[CMSType].Website[FtvDataController.FocusedRecordIndex].GeneratePublishJob);
+          PublishManager.AddPublishJob(ActiveTabSheetController.PublishController.CMS[LCMSType].Website[FtvDataController.FocusedRecordIndex].GeneratePublishJob);
       end;
-    3: // Settings
+    2: // Settings
       begin
         with Settings do
         begin
@@ -248,12 +259,16 @@ begin
           with CMSPluginsCheckListBox do
           begin
             with InnerCheckListBox do
-              ItemIndex := Items.IndexOf(CMSType);
+              ItemIndex := Items.IndexOf(LCMSType);
             OnClick(nil);
           end;
           Show;
-          cxGCMSTableView1.DataController.FocusedRecordIndex := CMSWebsitesCollectionItem.Index;
+          cxGCMSTableView1.DataController.FocusedRecordIndex := LCMSWebsitesCollectionItem.Index;
         end;
+      end;
+    3: // Visit
+      begin
+        ShellExecute(Handle, 'open', PChar(LCMSWebsitesCollectionItem.Website), nil, nil, SW_SHOW);
       end;
   end;
 end;

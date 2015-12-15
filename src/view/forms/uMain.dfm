@@ -697,27 +697,27 @@ object Main: TMain
       OnExecute = aSeriesCrypterCheckExecute
     end
     object aPublishItemVisit: TAction
+      Tag = 3
       Category = 'PublishItem'
       Caption = 'Visit'
       Hint = 'Visit'
       OnExecute = aPublishItemExecute
     end
     object aPublishItemPreview: TAction
-      Tag = 1
       Category = 'PublishItem'
       Caption = 'Preview'
       Hint = 'Preview'
       OnExecute = aPublishItemExecute
     end
     object aPublishItemPublish: TAction
-      Tag = 2
+      Tag = 1
       Category = 'PublishItem'
       Caption = 'Publish'
       Hint = 'Publish'
       OnExecute = aPublishItemExecute
     end
     object aPublishItemSettings: TAction
-      Tag = 3
+      Tag = 2
       Category = 'PublishItem'
       Caption = 'Settings'
       Hint = 'Settings'
@@ -4395,10 +4395,6 @@ object Main: TMain
     ItemLinks = <
       item
         Visible = True
-        ItemName = 'dxBBPublishItemVisit'
-      end
-      item
-        Visible = True
         ItemName = 'dxBBPublishItemPreview'
       end
       item
@@ -4408,6 +4404,10 @@ object Main: TMain
       item
         Visible = True
         ItemName = 'dxBBPublishItemSettings'
+      end
+      item
+        Visible = True
+        ItemName = 'dxBBPublishItemVisit'
       end>
     UseOwnFont = False
     Left = 560
