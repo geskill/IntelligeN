@@ -11,7 +11,7 @@ uses
   uBaseConst, uAppConst;
 
 const
-  AllJScriptKeyWords = '"FOR","IMPORT","IF","THIS","DO","WHILE","BREAK","{","}","(",")","SWITCH","CASE","DEFAULT","ELSE","FUNCTION",";","RESULT","VAR"';
+  AllJScriptKeyWords = '"FOR","IMPORT","IN","IF","THIS","DO","WHILE","BREAK","{","}","(",")","SWITCH","CASE","DEFAULT","ELSE","FUNCTION",";","RESULT","VAR"';
 
 type
   TAdvJScriptMemoStyler = class(TAdvCustomMemoStyler)

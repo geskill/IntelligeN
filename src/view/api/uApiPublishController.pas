@@ -837,7 +837,7 @@ begin
     end;
   end;
 
-  // Handle if nothing is defined // TODO: Check if this is ever the case
+  // Handle if nothing is defined i.e. "filters"-tag not specified
   if not LHasMirror then
   begin
     for LControlIndex := 0 to TabSheetController.MirrorController.MirrorCount - 1 do
@@ -845,7 +845,16 @@ begin
   end;
   if Assigned(LPicture) and not LHasPicture then
   begin
-    AControlList.Add(LPicture.CloneInstance());
+    for LControlIndex := 0 to LPicture.MirrorCount - 1 do
+      if not SameStr('', LPicture.Mirror[LControlIndex].Value) then
+      begin
+        AControlList.Add(LPicture.Mirror[LControlIndex].CloneInstance());
+        LHasPicture := True;
+        Break;
+      end;
+
+    if not LHasPicture then
+      AControlList.Add(LPicture.CloneInstance());
   end;
 
   LPicture := nil;

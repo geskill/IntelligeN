@@ -342,9 +342,9 @@ begin
                   with ChildNodes.Nodes[XML_FILTERS] do
                     with WebsiteFilter do
                     begin
-                      Active := Attributes['active'];
+                      Active := VarToBoolDef(Attributes['active'], False);
 
-                      Categories := VarToStr(ChildNodes.Nodes['categories'].NodeValue);
+                      Categories := VarToStrDef(ChildNodes.Nodes['categories'].NodeValue, '');
 
                       if Assigned(ChildNodes.FindNode('controls')) then
                         with ChildNodes.Nodes['controls'] do

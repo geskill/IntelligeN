@@ -8,6 +8,7 @@ uses
 
 function HasUsefulValue(AValue: Variant): Boolean;
 
+function VarToBoolDef(const V: Variant; const ADefault: Boolean): Boolean;
 function VarToIntDef(const V: Variant; const ADefault: Integer): Integer;
 function VarToFloatDef(const V: Variant; const ADefault: Extended): Extended; overload;
 function VarToFloatDef(const V: Variant; const ADefault: Extended; const FormatSettings: TFormatSettings): Extended; overload;
@@ -27,6 +28,14 @@ begin
   else
     Result := False;
   end;
+end;
+
+function VarToBoolDef(const V: Variant; const ADefault: Boolean): Boolean;
+begin
+  if not VarIsNull(V) then
+    Result := StrToBoolDef(V, ADefault)
+  else
+    Result := ADefault;
 end;
 
 function VarToIntDef(const V: Variant; const ADefault: Integer): Integer;
