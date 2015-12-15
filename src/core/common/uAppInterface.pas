@@ -531,6 +531,7 @@ type
     function Add: Integer;
     procedure Insert(Index: Integer; const Item: IMirrorControl); overload;
     function Insert(Index: Integer): IMirrorControl; overload;
+    procedure Move(CurIndex, NewIndex: Integer);
     function Remove(Index: Integer): Boolean;
 
     // Cloning

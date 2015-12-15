@@ -61,6 +61,7 @@ type
     function Add: Integer;
     procedure Insert(Index: Integer; const Item: IMirrorControl); overload;
     function Insert(Index: Integer): IMirrorControl; overload;
+    procedure Move(CurIndex, NewIndex: Integer);
     function Remove(Index: Integer): Boolean;
 
     // Cloning
@@ -226,21 +227,26 @@ begin
   FMirrorList.Insert(Index, Result);
 end;
 
+procedure TMirrorController.Move(CurIndex, NewIndex: Integer);
+begin
+  FMirrorList.Move(CurIndex, NewIndex);
+end;
+
 function TMirrorController.Remove(Index: Integer): Boolean;
 var
   I: Integer;
 begin
   Result := True;
   try
-    for I := 0 to Mirror[Index].DirectlinkCount - 1 do
-    begin
-      TabSheetController.PageController.FileHosterManager.RemoveHosterJob(Mirror[Index].Directlink[I]);
-      Mirror[Index].Directlink[I].DirectlinksPanel := nil;
-    end;
     for I := 0 to Mirror[Index].CrypterCount - 1 do
     begin
       TabSheetController.PageController.CrypterManager.RemoveCrypterJob(Mirror[Index].Crypter[I]);
       Mirror[Index].Crypter[I].MirrorControl := nil;
+    end;
+    for I := 0 to Mirror[Index].DirectlinkCount - 1 do
+    begin
+      TabSheetController.PageController.FileHosterManager.RemoveHosterJob(Mirror[Index].Directlink[I]);
+      Mirror[Index].Directlink[I].DirectlinksPanel := nil;
     end;
     Mirror[Index].GetDirectlink.MirrorControl := nil;
     Mirror[Index].MirrorController := nil;

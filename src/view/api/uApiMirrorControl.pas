@@ -137,7 +137,7 @@ type
     procedure SetErrorMsg(AErrorMsg: WideString);
     procedure ResetErrorMsg();
   public
-    constructor Create(AOwner: TComponent);
+    constructor Create(AOwner: TComponent); override;
     procedure PostCreate;
     procedure PreDestroy;
     destructor Destroy; override;
@@ -495,6 +495,7 @@ begin
 end;
 
 { ****************************************************************************** }
+{$REGION 'TStatusGrid'}
 
 procedure TStatusGrid.FcxGridInfoTableViewColumn2CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
 const
@@ -665,7 +666,7 @@ begin
   if not(LRecordIndex = -1) then
     FcxGridInfoTableView.DataController.Values[LRecordIndex, 1] := IntToStr(FMirrorData.Parts);
 end;
-
+{$ENDREGION}
 { ****************************************************************************** }
 {$REGION 'TMycxTabSheet'}
 
@@ -2521,39 +2522,10 @@ begin
 end;
 
 procedure TMirrorControl.SetIndex(AIndex: Integer);
-var
-  I, J: Integer;
-  LCrypterFound: Boolean;
 begin
-  with MirrorController.Insert(AIndex) do
-  begin
-    for I := 0 to Self.DirectlinkCount - 1 do
-      GetDirectlink.Add(Self.Directlink[I].Value);
-
-    for I := 0 to Self.CrypterCount - 1 do
-    begin
-      LCrypterFound := False;
-      for J := 0 to CrypterCount - 1 do                                  // TODO: Some error in here
-        if SameText(Self.Crypter[I].Name, Crypter[J].Name) then          // Without this works fine
-        begin                                                            //
-          Crypter[J].Value := Self.Crypter[I].Value;                     //
-          LCrypterFound := True;                                         //
-        end;                                                             //
-      if not LCrypterFound then                                          //
-        with Crypter[AddCrypter(Self.Crypter[I].Name)] do                //
-        begin                                                            //
-          Value := Self.Crypter[I].Value;                                //
-        end;                                                             //
-    end;
-    TabIndex := Self.TabIndex;
-    //
-    Self.MirrorController.Remove(Self.Index);                            // OR Without this works fine
-    // Self.FcxTabControl.Free; // ???
-    //
-    for I := 0 to CrypterCount - 1 do
-      if not SameStr('',  Crypter[I].Value) then
-        Crypter[I].CheckFolder;
-  end;
+  if AIndex > Index then
+    Dec(AIndex);
+  MirrorController.Move(Index, AIndex);
 end;
 
 function TMirrorControl.GetTabIndex: Integer;
@@ -2929,12 +2901,15 @@ end;
 
 function TMirrorControl.RemoveCrypter;
 begin
-  if FcxTabControl.TabIndex = AIndex + 1 then
+  if (FcxTabControl.TabIndex = AIndex + 1) then
     FcxTabControl.TabIndex := AIndex;
   FcxTabControl.Tabs.Delete(AIndex + 1);
-  FCrypterList.Items[AIndex]._Release;
-  FCrypterList.Delete(AIndex);
   FCrypterPopupMenu.Items.Items[AIndex].Free;
+
+  FCrypterList[AIndex].MirrorControl := nil;
+  FCrypterList[AIndex]._Release; // forcing because of instance in TStatusGrid
+  FCrypterList.Delete(AIndex);
+
   if (CrypterCount = 0) then
     FreeAndNil(FcxButtonCrypt)
   else
