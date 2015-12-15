@@ -120,6 +120,6 @@ end;
 
 initialization
 
-TAutoObjectFactory.Create(ComServer, TIntelligeN2009, Class_IntelligeN2009, ciMultiInstance, tmApartment);
+TAutoObjectFactory.Create(ComServer, TIntelligeN2009, CLASS_IntelligeN2009, ciMultiInstance, tmApartment);
 
 end.

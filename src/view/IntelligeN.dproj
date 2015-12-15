@@ -238,7 +238,7 @@
 			<DCCReference Include="ole\uOLE.pas">
 				<CoClasses>IntelligeN2009</CoClasses>
 			</DCCReference>
-			<RidlCompile Include="IntelligeN.ridl"/>
+			<RidlCompile Include="ole\IntelligeN.ridl"/>
 			<RcItem Include="..\..\res\barmanager.txt">
 				<ContainerId>ResourceItem</ContainerId>
 				<ResourceType>RCData</ResourceType>

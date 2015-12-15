@@ -12,11 +12,11 @@ unit IntelligeN_TLB;
 // ************************************************************************ //
 
 // $Rev: 17244 $
-// Datei am 26.12.2012 23:28:24 erzeugt aus der unten beschriebenen Typbibliothek.
+// Datei am 16.12.2015 00:31:24 erzeugt aus der unten beschriebenen Typbibliothek.
 
 // ************************************************************************  //
-// Typbib.: C:\Users\geskill\Documents\RAD Studio\Projekte\IntelligeN 2009\src\ole\IntelligeN (1)
-// LIBID: {81C4A9A6-6D8E-4077-99DB-AD246E0FBD51}
+// Typbib.: C:\Users\geskill\Documents\RAD Studio\Projekte\intelligen-2k9\src\view\ole\IntelligeN (1)
+// LIBID: {9A4A475B-F7FF-40CD-876B-3C22B88BC8DF}
 // LCID: 0
 // Hilfedatei:
 // Hilfe-String:
@@ -44,10 +44,10 @@ const
   IntelligeNMajorVersion = 1;
   IntelligeNMinorVersion = 0;
 
-  LIBID_IntelligeN: TGUID = '{81C4A9A6-6D8E-4077-99DB-AD246E0FBD51}';
+  LIBID_IntelligeN: TGUID = '{9A4A475B-F7FF-40CD-876B-3C22B88BC8DF}';
 
-  IID_IIntelligeN2009: TGUID = '{49828A90-6AD0-4451-A5B9-B5E999509D4D}';
-  CLASS_IntelligeN2009: TGUID = '{33F80641-1EE9-4DB1-BD02-744B0FAFB085}';
+  IID_IIntelligeN2009: TGUID = '{9A66CF41-F8C1-4B09-A8B6-3CB436BFFB50}';
+  CLASS_IntelligeN2009: TGUID = '{24FDCC6F-9031-484C-92D2-6999265FF263}';
 type
 
 // *********************************************************************//
@@ -66,10 +66,10 @@ type
 // *********************************************************************//
 // Interface: IIntelligeN2009
 // Flags:     (4416) Dual OleAutomation Dispatchable
-// GUID:      {49828A90-6AD0-4451-A5B9-B5E999509D4D}
+// GUID:      {9A66CF41-F8C1-4B09-A8B6-3CB436BFFB50}
 // *********************************************************************//
   IIntelligeN2009 = interface(IDispatch)
-    ['{49828A90-6AD0-4451-A5B9-B5E999509D4D}']
+    ['{9A66CF41-F8C1-4B09-A8B6-3CB436BFFB50}']
     procedure openfile(const AFileName: WideString); safecall;
     procedure savefile(const AFileName: WideString); safecall;
     procedure close; safecall;
@@ -86,10 +86,10 @@ type
 // *********************************************************************//
 // DispIntf:  IIntelligeN2009Disp
 // Flags:     (4416) Dual OleAutomation Dispatchable
-// GUID:      {49828A90-6AD0-4451-A5B9-B5E999509D4D}
+// GUID:      {9A66CF41-F8C1-4B09-A8B6-3CB436BFFB50}
 // *********************************************************************//
   IIntelligeN2009Disp = dispinterface
-    ['{49828A90-6AD0-4451-A5B9-B5E999509D4D}']
+    ['{9A66CF41-F8C1-4B09-A8B6-3CB436BFFB50}']
     procedure openfile(const AFileName: WideString); dispid 1;
     procedure savefile(const AFileName: WideString); dispid 2;
     procedure close; dispid 3;

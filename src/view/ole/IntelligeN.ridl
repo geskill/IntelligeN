@@ -1,17 +1,17 @@
 // ************************************************************************ //
-// WARNUNG                                                                    
-// -------                                                                    
-// Diese Datei wird von dem Typbibliotheks-Importer oder dem Typbibliothekseditor 
-// erzeugt. Außer Syntaxfehlern analysiert der Editor an der Datei vorgenommene 
-// Änderungen. Wenn Sie aber Änderungen mit dem Editor vornehmen, wird diese  
-// Datei neu erzeugt und Kommentare oder Formatänderungen gehen verloren.     
+// WARNUNG
+// -------
+// Diese Datei wird von dem Typbibliotheks-Importer oder dem Typbibliothekseditor
+// erzeugt. Außer Syntaxfehlern analysiert der Editor an der Datei vorgenommene
+// Änderungen. Wenn Sie aber Änderungen mit dem Editor vornehmen, wird diese
+// Datei neu erzeugt und Kommentare oder Formatänderungen gehen verloren.
 // ************************************************************************ //
-// Datei erzeugt am 03.01.2013 20:57:25 (- $Rev: 12980 $, 7884384).
+// Datei erzeugt am 16.12.2015 00:29:49 (- $Rev: 12980 $, 16114060).
 
 [
-  uuid(81C4A9A6-6D8E-4077-99DB-AD246E0FBD51), 
+  uuid(9A4A475B-F7FF-40CD-876B-3C22B88BC8DF),
   version(1.0)
-    
+
 ]
 library IntelligeN
 {
@@ -23,9 +23,9 @@ library IntelligeN
 
 
   [
-    uuid(49828A90-6AD0-4451-A5B9-B5E999509D4D), 
-    helpstring("Dispatch-Interface für IntelligeN2009-Objekt"), 
-    dual, 
+    uuid(9A66CF41-F8C1-4B09-A8B6-3CB436BFFB50),
+    helpstring("Dispatch-Interface für IntelligeN2009-Objekt"),
+    dual,
     oleautomation
   ]
   interface IIntelligeN2009: IDispatch
@@ -55,7 +55,7 @@ library IntelligeN
   };
 
   [
-    uuid(33F80641-1EE9-4DB1-BD02-744B0FAFB085), 
+    uuid(24FDCC6F-9031-484C-92D2-6999265FF263),
     helpstring("IntelligeN2009 Objekt")
   ]
   coclass IntelligeN2009
