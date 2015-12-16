@@ -111,6 +111,8 @@
 			<DCCReference Include="api\uApiImageHosterManager.pas"/>
 			<DCCReference Include="api\uApiIScriptFormatter.pas"/>
 			<DCCReference Include="api\uApiIScriptParser.pas"/>
+			<DCCReference Include="api\uApiLog.pas"/>
+			<DCCReference Include="api\uApiLogManager.pas"/>
 			<DCCReference Include="api\uApiMain.pas"/>
 			<DCCReference Include="api\uApiMainMenu.pas"/>
 			<DCCReference Include="api\uApiMirrorControl.pas"/>

@@ -18,7 +18,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiCodeTag, uApiConst, uApiMainMenu, uApiMain, uApiSettings, uApiTabSheetController, uApiXml,
+  uApiCodeTag, uApiConst, uApiLogManager, uApiMainMenu, uApiMain, uApiSettings, uApiTabSheetController, uApiXml,
   // DLLs
   uExport,
   // Forms
@@ -306,6 +306,7 @@ type
     procedure LayoutClick(Sender: TObject);
     procedure LayoutChanged(Sender: TObject);
     procedure InsertTextBetweenSelected(TagName: string);
+    function GetLogManager: ILogManager;
     function GetMainMenu: IMainMenu;
     function GetPageController: IPageController;
     function GetFileHosters: WideString;
@@ -927,6 +928,11 @@ procedure TMain.InsertTextBetweenSelected(TagName: string);
 
 begin
   TTabSheetController(fMain.pcMain.ActivePage).DesignTabSheetItem.InsertTextBetweenSelected(GetCodeTag(TagName));
+end;
+
+function TMain.GetLogManager;
+begin
+  Result := TLogManager.Instance();
 end;
 
 function TMain.GetMainMenu;

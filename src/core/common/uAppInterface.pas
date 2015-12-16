@@ -887,10 +887,41 @@ type
     property OnViewChange: IViewChangeEvent read GetViewChange;
   end;
 
+  // // // Log Manager // // //
+
+  ILog = interface
+    ['{BD83311F-C2B9-4EB0-BF9E-141EF7707E06}']
+    function GetTime: TDateTime; safecall;
+    function GetMessage: WideString; safecall;
+
+    property Time: TDateTime read GetTime;
+    property Message: WideString read GetMessage;
+  end;
+
+  ILogEventHandler = interface(IUnknown)
+    ['{FA3D954A-1661-4EBE-8AA3-5541E83DE47F}']
+    procedure Invoke(const ALog: ILog); safecall;
+  end;
+
+  ILogEvent = interface(IUnknown)
+    ['{9730386D-1128-48B2-B17D-A2F94CACF46D}']
+    procedure Add(const AHandler: ILogEventHandler); safecall;
+    procedure Remove(const AHandler: ILogEventHandler); safecall;
+    procedure Invoke(const ALog: ILog); safecall;
+  end;
+
+  ILogManager = interface
+    ['{E05EA9D2-5185-4740-AA2F-393967CE9B68}']
+    function GetNewLog: ILogEvent; safecall;
+
+    property OnNewLog: ILogEvent read GetNewLog;
+  end;
+
   // // // App Controller // // //
 
   IAppController = interface
     ['{80AF47FD-847E-429D-922C-0F3B812AB637}']
+    function GetLogManager: ILogManager;
     function GetMainMenu: IMainMenu;
     function GetPageController: IPageController;
 
@@ -899,6 +930,7 @@ type
     function GetCustomisedHoster(const AHoster: WideString; AShortName: WordBool = False): WideString;
     function GetControlValues(const ATypeID: TTypeID; const AControlID: TControlID): WideString;
 
+    property LogManager: ILogManager read GetLogManager;
     property MainMenu: IMainMenu read GetMainMenu;
     property PageController: IPageController read GetPageController;
   end;

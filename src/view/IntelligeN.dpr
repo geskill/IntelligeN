@@ -1,4 +1,4 @@
-program IntelligeN;
+﻿program IntelligeN;
 
 {$R *.dres}
 
@@ -50,6 +50,8 @@ uses
   uApiImageHosterManager in 'api\uApiImageHosterManager.pas',
   uApiIScriptFormatter in 'api\uApiIScriptFormatter.pas',
   uApiIScriptParser in 'api\uApiIScriptParser.pas',
+  uApiLog in 'api\uApiLog.pas',
+  uApiLogManager in 'api\uApiLogManager.pas',
   uApiMain in 'api\uApiMain.pas',
   uApiMainMenu in 'api\uApiMainMenu.pas',
   uApiMirrorControl in 'api\uApiMirrorControl.pas',
