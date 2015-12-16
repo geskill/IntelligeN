@@ -914,6 +914,8 @@ type
     ['{E05EA9D2-5185-4740-AA2F-393967CE9B68}']
     function GetNewLog: ILogEvent; safecall;
 
+    procedure Add(const AMessage: WideString); safecall;
+
     property OnNewLog: ILogEvent read GetNewLog;
   end;
 

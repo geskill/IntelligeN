@@ -37,6 +37,7 @@ object fHTTPLogger: TfHTTPLogger
       object tvHTTPProcessURI: TcxGridColumn
         Caption = 'URI'
         PropertiesClassName = 'TcxTextEditProperties'
+        Properties.ReadOnly = True
         Width = 413
       end
       object tvHTTPProcessStatusCode: TcxGridColumn

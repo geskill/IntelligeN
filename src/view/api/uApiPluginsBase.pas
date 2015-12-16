@@ -10,7 +10,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
-  uApiConst, uApiMain,
+  uApiConst, uApiLogManager, uApiMain,
   // Plugin system
   uPlugInConst, uPlugInInterface;
 
@@ -34,6 +34,8 @@ implementation
 
 class procedure TPluginBase.ReturnError;
 begin
+  TLogManager.Instance().Add(AErrorMsg);
+
   if Assigned(AErrorProc) then
     AErrorProc(AErrorMsg)
   else

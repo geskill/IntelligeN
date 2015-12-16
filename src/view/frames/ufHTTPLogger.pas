@@ -10,7 +10,7 @@ uses
   cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxClasses, cxGridLevel, cxGrid, cxLabel, cxTextEdit, cxBlobEdit, cxNavigator,
   // HTTPManager
   uHTTPInterface, uHTTPConst, uHTTPEvent, uHTTPManager,
-  // API
+  // Api
   uApiSettings;
 
 type

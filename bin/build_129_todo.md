@@ -56,8 +56,6 @@ Checked items are planned for next release.
 
 - [ ] Add simpler hoster ranking not defined by website (i.e. FileHoster ranking)
 
-- [x] Implement a silent error logger
-
 - [x] Improve PublishQueue (delete old entries)
 
 - [ ] Improve WebsiteEditor control arrangement in general tab
