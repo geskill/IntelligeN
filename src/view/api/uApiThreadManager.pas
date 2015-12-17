@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, Classes, Messages, Dialogs,
+  Windows, SysUtils, Classes, Math, Messages, Dialogs,
   // Spring Framework
   Spring.Collections.Lists,
   // OmniThreadLibrary
@@ -36,7 +36,7 @@ type
     constructor Create; virtual;
     destructor Destroy; override;
     procedure Execute; virtual; abstract;
-    procedure Finish;
+    procedure Finish(const AByItSelf: Boolean = False);
 
     property Data: T read FData;
   end;
@@ -75,6 +75,7 @@ const
   MSG_CONTINUE_TASK = 1;
   MSG_QUIT_TASK = 2;
   MSG_TASK_QUIT = 3;
+  MSG_TASK_QUIT_BY_ITSELF = 4;
 
 implementation
 
@@ -126,7 +127,7 @@ begin
 
   if (LMessage.MsgID = MSG_QUIT_TASK) then
   begin
-    Finish;
+    // Do not do the Finish() call here!!
     Result := True;
   end;
 end;
@@ -135,7 +136,11 @@ function TThreadWorker<T>.Initialize: Boolean;
 begin
   Result := inherited Initialize;
   if not Result or InBlackList then
-    Exit;
+  begin
+    // Make the Finish() call but indicate that the task will be quit by itself
+    Finish(True);
+    Exit(False);
+  end;
   Result := True;
 end;
 
@@ -151,12 +156,13 @@ begin
   inherited Destroy;
 end;
 
-procedure TThreadWorker<T>.Finish;
+procedure TThreadWorker<T>.Finish(const AByItSelf: Boolean = False);
 var
   LOmniValue: TOmniValue;
 begin
   LOmniValue := TOmniValue.CastFrom<T>(Data);
-  task.Comm.Send(MSG_TASK_QUIT, [task.UniqueID, LOmniValue.AsObject]);
+  task.Comm.Send(IfThen(AByItSelf, MSG_TASK_QUIT_BY_ITSELF, MSG_TASK_QUIT), [task.UniqueID, LOmniValue.AsObject]);
+  OutputDebugString(PChar(ClassName + ' Send: MSG_TASK_QUIT'));
 end;
 
 { TThreadManager<T> }
@@ -232,13 +238,22 @@ begin
           task.Comm.Send(MSG_CONTINUE_TASK, [msg.MsgData[0].AsInt64]);
         end;
       end;
-    MSG_TASK_QUIT:
+    MSG_TASK_QUIT, MSG_TASK_QUIT_BY_ITSELF:
       begin
+        OutputDebugString(PChar(ClassName + ' Retrieve: MSG_TASK_QUIT'));
         FInList.Remove(LJobWorkData);
+        OutputDebugString(PChar(ClassName + ' Removed from worklist:' + IntToStr(FInList.Count)));
         if FBlackList.Contains(LJobWorkData) then
+        begin
           FBlackList.Remove(LJobWorkData);
+          OutputDebugString('Removed from blacklist');
+        end;
 
-        task.Terminate;
+        if (msg.MsgID = MSG_TASK_QUIT) then
+        begin
+          task.Terminate;
+          OutputDebugString('task.Terminate;');
+        end;
       end;
   end;
 end;
@@ -253,6 +268,7 @@ begin
   if CanAddJob(AJobWorkData) then
   begin
     FInList.Add(AJobWorkData);
+    OutputDebugString(PChar(ClassName + 'Added to worklist'));
     Result := True;
   end
   else
@@ -268,11 +284,13 @@ end;
 
 function TThreadManager<T>.RemoveJob(const AJobWorkData: T): Boolean;
 begin
+  Result := True;
   if CanRemoveJob(AJobWorkData) then
   begin
     if not InBlackList(AJobWorkData) then
     begin
       FBlackList.Add(AJobWorkData);
+      OutputDebugString(PChar(ClassName + 'Added to blacklist'));
     end;
   end
   else
@@ -296,20 +314,28 @@ var
   LListIndex: Integer;
   LListItem: T;
   LRemove: Boolean;
+  LRemoveList: TThreadList<T>;
 begin
   Result := True;
-  LList := FInList.LockList;
+  LRemoveList := TThreadList<T>.Create(False);
   try
-    for LListIndex := 0 to LList.Count - 1 do
-    begin
-      LListItem := LList[LListIndex];
-      LRemove := False;
-      ARemoveProc(LListItem, LRemove);
-      if LRemove then
-        Result := Result and RemoveJob(LList[LListIndex]);
+    LList := FInList.LockList;
+    try
+      for LListIndex := 0 to LList.Count - 1 do
+      begin
+        LListItem := LList[LListIndex];
+        LRemove := False;
+        ARemoveProc(LListItem, LRemove);
+        if LRemove then
+          LRemoveList.Add(LList[LListIndex]);
+      end;
+    finally
+      FInList.UnlockList;
     end;
+    for LListItem in LRemoveList do
+      Result := Result and RemoveJob(LListItem);
   finally
-    FInList.UnlockList;
+    LRemoveList.Free;
   end;
 end;
 
@@ -339,8 +365,8 @@ end;
 
 destructor TThreadManager<T>.Destroy;
 begin
-  FInList.Free;
   FBlackList.Free;
+  FInList.Free;
   FOmniEM.Free;
   inherited Destroy;
 end;

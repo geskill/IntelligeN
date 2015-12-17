@@ -87,6 +87,7 @@ type
   TPublishThread = class(TThreadWorker<TPublishData>)
   protected
     FInnerPublishManager: TPublishInnerManager;
+    function Initialize: Boolean; override;
   public
     constructor Create(const APublishJob: IPublishJob; APublishRate, APublishDelay, APublishRetry: Integer; AOnGUIInteractionItem: TGUIInteractionItemEvent); reintroduce;
     destructor Destroy; override;
@@ -183,6 +184,7 @@ var
 begin
   LOmniValue := TOmniValue.CastFrom<TPublishInnerData>(Data);
   task.Comm.Send(MSG_PUBLISH_ITEM_TASK_CREATED, [task.UniqueID, LOmniValue.AsObject]);
+  OutputDebugString('MSG_PUBLISH_ITEM_TASK_CREATED');
 
   if not task.Terminated then
   begin
@@ -199,6 +201,7 @@ begin
             finally
               Free;
             end;
+          OutputDebugString('Publish finished');
 
           if FHasError then
           begin
@@ -213,12 +216,14 @@ begin
 
       finally
         task.Comm.Send(MSG_PUBLISH_ITEM_TASK_COMPLETED, [task.UniqueID, LOmniValue.AsObject]);
+        OutputDebugString('MSG_PUBLISH_ITEM_TASK_COMPLETED');
       end;
 
     finally
       Finish;
     end;
   end;
+  OutputDebugString('TPublishInnerThread.Execute END');
 end;
 
 { TPublishInnerManager }
@@ -349,6 +354,11 @@ end;
 
 { TPublishThread }
 
+function TPublishThread.Initialize: Boolean;
+begin
+  Result := True; // Do not check for InBlackList
+end;
+
 constructor TPublishThread.Create(const APublishJob: IPublishJob; APublishRate, APublishDelay, APublishRetry: Integer; AOnGUIInteractionItem: TGUIInteractionItemEvent);
 begin
   inherited Create;
@@ -385,12 +395,12 @@ begin
         if (FPublishJobIndex > 0) and (Data.PublishDelay > 0) then
         begin
           sleep(Data.PublishDelay);
+        end;
 
-          if InBlackList then
-          begin
-            task.Comm.Send(MSG_PUBLISH_TASK_CANCELED, [task.UniqueID, LOmniValue.AsObject]);
-            Exit;
-          end;
+        if InBlackList then // Check here for InBlackList because not done in TPublishThread.Initialize
+        begin
+          task.Comm.Send(MSG_PUBLISH_TASK_CANCELED, [task.UniqueID, LOmniValue.AsObject]);
+          Exit;
         end;
 
         for FPublishJobItemIndex := 0 to Data.PublishJob.Upload[FPublishJobIndex].Count - 1 do
@@ -429,6 +439,7 @@ begin
     // this musst be done here (instead of in Cleanup) because when user calls cancel, this call is not allowed
     task.Comm.Send(MSG_PUBLISH_TASK_FINISHED, [task.UniqueID, LOmniValue.AsObject]);
   finally
+
     Finish;
   end;
 end;
