@@ -105,12 +105,12 @@ end;
 
 function TBigfishgamesCom.InternalExecute;
 
-  procedure deep_search(AWebsitecode: string);
+  procedure deep_search(AWebsiteSourceCode: string);
   begin
     if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
-          InputString := AWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '<div class="bfg-col-xs-12">\s+<img src="(.*?)"';
 
           if Exec(InputString) then
@@ -122,7 +122,7 @@ function TBigfishgamesCom.InternalExecute;
     if ACanUse(cTrailer) then
       with TRegExpr.Create do
         try
-          InputString := AWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '<div class="flash-frame">\s+<a href="(.*?)"';
 
           if Exec(InputString) then
@@ -134,7 +134,7 @@ function TBigfishgamesCom.InternalExecute;
     if ACanUse(cDescription) then
       with TRegExpr.Create do
         try
-          InputString := AWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '<div class="long">(.*?)<\/div>';
 
           if Exec(InputString) then

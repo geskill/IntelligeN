@@ -10,7 +10,7 @@ uses
   // Common
   uBaseConst, uBaseInterface,
   // Utils
-  uHTMLUtils,
+  uHTMLUtils, uStringUtils,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
@@ -18,186 +18,316 @@ uses
 
 type
   TGamingUniverseDe = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'http://www.gaming-universe.org/';
+
+    function GetGameSearchType(const ATypeID: TTypeID): string;
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
 
 { TGamingUniverseDe }
 
+function TGamingUniverseDe.GetGameSearchType(const ATypeID: TTypeID): string;
+begin
+  Result := '';
+
+  // cNintendoDS, cPlayStation3, cPlayStation4, cPlayStationVita, cWii, cWiiU, cXbox360, cXboxOne
+
+  case ATypeID of
+    cNintendoDS:
+      begin
+        Result := 'nintendo3ds';
+      end;
+    cPlayStation3:
+      begin
+        Result := 'playstation3';
+      end;
+    cPlayStation4:
+      begin
+        Result := 'playstation4';
+      end;
+    cPlayStationVita:
+      begin
+        Result := 'psvita';
+      end;
+    cWii:
+      begin
+        Result := 'wii';
+      end;
+    cWiiU:
+      begin
+        Result := 'wiiu';
+      end;
+    cXbox360:
+      begin
+        Result := 'xbox360';
+      end;
+    cXboxOne:
+      begin
+        Result := 'xboxone';
+      end;
+  end;
+end;
+
 function TGamingUniverseDe.GetName;
 begin
-  Result := 'gaming-universe.de';
+  Result := 'gaming-universe.org';
 end;
 
-function TGamingUniverseDe.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TGamingUniverseDe.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [cGameCube, cNintendoDS, cPlayStation2, cPlayStation3, cPlayStationPortable, cWii, cXbox, cXbox360];
-  Result := LongWord(_TemplateTypeIDs);
+  Result := cConsole;
 end;
 
-function TGamingUniverseDe.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
+function TGamingUniverseDe.InternalGetAvailableControlIDs;
 begin
-  _ComponentIDs := [cPicture, cGenre, cDescription];
-  Result := LongWord(_ComponentIDs);
+  Result := [cPicture, cTrailer, cGenre, cCreator, cPublisher, cDescription];
 end;
 
-function TGamingUniverseDe.GetControlIDDefaultValue;
+function TGamingUniverseDe.InternalGetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TGamingUniverseDe.GetResultsLimitDefaultValue;
+function TGamingUniverseDe.InternalGetDependentControlIDs;
 begin
-  Result := 5;
+  Result := [cTitle];
 end;
 
-function TGamingUniverseDe.Exec;
-const
-  website = 'http://gaming-universe.de/spiele/';
-var
-  _ComponentIDs: TControlIDs;
-  _Count: Integer;
-  _Title, _Website: string;
+function TGamingUniverseDe.InternalExecute;
 
-  function GetPlatform(ATypeID: TTypeID): string;
+  procedure deep_search(AWebsiteSourceCode: string);
+  var
+    s: string;
+    LStringList: TStringList;
   begin
-    case ATypeID of
-      cGameCube:
-        Result := 'gamecube';
-      cNintendoDS:
-        Result := 'nintendods';
-      cPlayStation2:
-        Result := 'playstation2';
-      cPlayStation3:
-        Result := 'playstation3';
-      cPlayStationPortable:
-        Result := 'playstationportable';
-      cWii:
-        Result := 'wii';
-      cXbox:
-        Result := 'xbox';
-      cXbox360:
-        Result := 'xbox360';
-    end;
-  end;
-
-  procedure deep_search(AWebsitesourcecode: string);
-  begin
-    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
-    begin
+    if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
-          InputString := AWebsitesourcecode;
-          Expression := ''', ''(.*?)'',';
+          InputString := AWebsiteSourceCode;
+          Expression := 'newFenster\(.*?, ''(.*?)''';
 
           if Exec(InputString) then
             AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
         finally
           Free;
         end;
-    end;
 
-    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
-    begin
-
+    if ACanUse(cTrailer) then
       with TRegExpr.Create do
         try
-          InputString := AWebsitesourcecode;
+          InputString := AWebsiteSourceCode;
+          Expression := 'data-youtube-plid=''.*?'' src=''(.*?)''';
+
+          if Exec(InputString) then
+            AControlController.FindControl(cTrailer).AddProposedValue(GetName, HTMLDecode(Match[1]));
+        finally
+          Free;
+        end;
+
+    if ACanUse(cGenre) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
           Expression := 'Genre:<\/b><br>(.*?)<br>';
 
           if Exec(InputString) then
           begin
-            AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[1]);
+            s := Match[1];
+
+            with TRegExpr.Create do
+            begin
+              try
+                InputString := s;
+                Expression := '([^\/,|]+)';
+
+                if Exec(InputString) then
+                begin
+                  repeat
+                    AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(Match[1]));
+                  until not ExecNext;
+                end;
+              finally
+                Free;
+              end;
+            end;
           end;
         finally
           Free;
         end;
-    end;
 
-    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
-    begin
+    if ACanUse(cCreator) then
       with TRegExpr.Create do
         try
-          InputString := AWebsitesourcecode;
-          Expression := '<\/div>\s+<\/div>\s+<div.*?<div style=''text\-align.*?>(.*?)<\/div';
+          InputString := AWebsiteSourceCode;
+          Expression := 'Entwickler:<\/b><br>(.*?)<br>';
 
           if Exec(InputString) then
-            if not(SameStr(Trim(Match[1]), '') or (copy(Match[1], 1, 1) = #$D)) then
-              AControlController.FindControl(cDescription).AddProposedValue(GetName, HTML2Text(Match[1]));
+          begin
+            s := Match[1];
+
+            LStringList := TStringList.Create;
+            try
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := '<a.*?>(.*?)<\/a>';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      if not(LStringList.IndexOf(Match[1]) > 0) then
+                        LStringList.Add(Match[1]);
+                    until not ExecNext;
+
+                    AControlController.FindControl(cCreator).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            finally
+              LStringList.Free;
+            end;
+          end;
         finally
           Free;
         end;
-    end;
+
+    if ACanUse(cPublisher) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'Publisher:<\/b><br>(.*?)<br>';
+
+          if Exec(InputString) then
+          begin
+            s := Match[1];
+
+            LStringList := TStringList.Create;
+            try
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := '<a.*?>(.*?)<\/a>';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      if not(LStringList.IndexOf(Match[1]) > 0) then
+                        LStringList.Add(Match[1]);
+                    until not ExecNext;
+
+                    AControlController.FindControl(cPublisher).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            finally
+              LStringList.Free;
+            end;
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cDescription) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'Review<\/div>.*?<\/b><br>(.*?)<br>';
+
+          if Exec(InputString) then
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
+        finally
+          Free;
+        end;
   end;
 
 var
-  HTTPRequest: IHTTPRequest;
-  HTTPParams: IHTTPParams;
+  LTitle: string;
+  LCount: Integer;
 
-  RequestID1, RequestID2: Double;
+  LWebsite: string;
 
-  ResponseStrSearchResult: string;
+  LHTTPRequest: IHTTPRequest;
+  LHTTPParams: IHTTPParams;
+
+  LRequestID1, LRequestID2: Double;
+
+  LResponeStr: string;
 begin
-  LongWord(_ComponentIDs) := AControlIDs;
-  _Title := AControlController.FindControl(cTitle).Value;
-  _Website := 'http://' + GetPlatform(TTypeID(ATypeID)) + '.gaming-universe.de/';
-  _Count := 0;
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
 
-  HTTPRequest := THTTPRequest.Create(_Website + 'spiele/');
-  HTTPRequest.Referer := website;
+  LWebsite := 'http://' + GetGameSearchType(ATypeID) + '.gaming-universe.org/';
 
-  HTTPParams := THTTPParams.Create;
-  with HTTPParams do
+  LHTTPRequest := THTTPRequest.Create(LWebsite + 'spiele/');
+  with LHTTPRequest do
   begin
-    AddFormField('game_keyw', _Title);
+    Referer := LWebsite;
+  end;
+
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
+  begin
+    AddFormField('game_keyw', LTitle);
     AddFormField('game_suche', '');
     AddFormField('game_suche', 'Abschicken');
   end;
 
-  RequestID1 := HTTPManager.Post(HTTPRequest, HTTPParams, TPlugInHTTPOptions.Create(Self));
+  LRequestID1 := HTTPManager.Post(LHTTPRequest, LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID1);
+  until HTTPManager.HasResult(LRequestID1);
 
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID1).HTTPResult.SourceCode;
+  LResponeStr := HTTPManager.GetResult(LRequestID1).HTTPResult.SourceCode;
 
-  with TRegExpr.Create do
-    try
-      InputString := ResponseStrSearchResult;
-      // Expression := '"searchResultTitle"><a href="(.*?)"';
-      Expression := 'class=''fl_390''><a href=''(.*?)''>';
+  if not(Pos('<div><a href=''', LResponeStr) = 0) then
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := LResponeStr;
+        Expression := '<div><a href=''\/(.*?)''>';
 
-      if Exec(InputString) then
-      begin
-        repeat
-          RequestID2 := HTTPManager.Get(website + Match[1], RequestID1, TPlugInHTTPOptions.Create(Self));
-
+        if Exec(InputString) then
+        begin
           repeat
-            sleep(50);
-          until HTTPManager.HasResult(RequestID2);
+            LResponeStr := GETFollowUpRequest(LWebsite + Match[1], LRequestID1, LRequestID2);
 
-          deep_search(HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode);
+            deep_search(LResponeStr);
 
-          Inc(_Count);
-        until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
+        end;
+      finally
+        Free;
       end;
-    finally
-      Free;
-    end;
+  end;
+
+  Result := True;
+end;
+
+function TGamingUniverseDe.GetResultsLimitDefaultValue;
+begin
+  Result := 5;
 end;
 
 end.

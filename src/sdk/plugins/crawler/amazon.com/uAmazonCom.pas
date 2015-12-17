@@ -172,14 +172,14 @@ end;
 
 function TAmazonCom.InternalExecute;
 
-  procedure deep_search(AWebsitecode: string);
+  procedure deep_search(AWebsiteSourceCode: string);
   var
     LTrackList, s: string;
   begin
     if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
-          InputString := AWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := 'data-old-hires="(.*?)"';
 
           if Exec(InputString) then
@@ -194,7 +194,7 @@ function TAmazonCom.InternalExecute;
     if ACanUse(cRuntime) then
       with TRegExpr.Create do
         try
-          InputString := AWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '<li> <b>Run Time:<\/b> (\d+) minutes<\/li>';
 
           if Exec(InputString) then
@@ -206,7 +206,7 @@ function TAmazonCom.InternalExecute;
     if ACanUse(cVideoSystem) then
       with TRegExpr.Create do
         try
-          InputString := AWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '<li> <b>Format:<\/b> (.*?)<\/li>';
 
           if Exec(InputString) then
@@ -224,7 +224,7 @@ function TAmazonCom.InternalExecute;
     begin
       with TRegExpr.Create do
         try
-          InputString := AWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := 'iframeContent = "(.*?)"';
 
           if Exec(InputString) then
@@ -234,7 +234,7 @@ function TAmazonCom.InternalExecute;
             with TRegExpr.Create do
             begin
               try
-                InputString := AWebsitecode;
+                InputString := AWebsiteSourceCode;
                 Expression := '<tr class="\w+">\s+<td>\s+(.*?)\s<\/td>';
 
                 if Exec(InputString) then

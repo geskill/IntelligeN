@@ -63,11 +63,11 @@ end;
 
 function TBinsearchInfo.InternalExecute;
 
-  procedure deep_search(AWebsitecode: string);
+  procedure deep_search(AWebsiteSourceCode: string);
   begin
     with TRegExpr.Create do
       try
-        InputString := AWebsitecode;
+        InputString := AWebsiteSourceCode;
         Expression := '<pre>(.*?)<\/pre>';
 
         if Exec(InputString) then

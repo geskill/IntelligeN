@@ -16,15 +16,20 @@ uses
 
 type
   TGamestarDe = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'http://www.gamestar.de/';
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
@@ -36,48 +41,46 @@ begin
   Result := 'gamestar.de';
 end;
 
-function TGamestarDe.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TGamestarDe.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [cPCGames];
-  Result := LongWord(_TemplateTypeIDs);
+  Result := [cPCGames];
 end;
 
-function TGamestarDe.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
+function TGamestarDe.InternalGetAvailableControlIDs;
 begin
-  _ComponentIDs := [cPicture, cGenre, cDescription];
-  Result := LongWord(_ComponentIDs);
+  Result := [cPicture, cGenre, cDescription];
 end;
 
-function TGamestarDe.GetControlIDDefaultValue;
+function TGamestarDe.InternalGetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TGamestarDe.GetResultsLimitDefaultValue;
+function TGamestarDe.InternalGetDependentControlIDs;
 begin
-  Result := 5;
+  Result := [cTitle];
 end;
 
-function TGamestarDe.Exec;
-const
-  website = 'http://www.gamestar.de/';
-var
-  _Count: Integer;
-  _Title: string;
-  _ComponentIDs: TControlIDs;
+function TGamestarDe.InternalExecute;
 
-  procedure deep_search(ASourceCode: string);
+  procedure deep_search(AWebsiteSourceCode: string);
   begin
-    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
-    begin
-
+    if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
-          InputString := ASourceCode;
+          InputString := AWebsiteSourceCode;
+          Expression := 'productPackshot.*?\/idgwpgsgp\/bdb\/(\d+)\/';
+
+          if Exec(InputString) then
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, 'http://1images.cgames.de/images/idgwpgsgp/bdb/' + Match[1] + '/600x.jpg');
+        finally
+          Free;
+        end;
+
+    if ACanUse(cGenre) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
           Expression := '<td>(Genre|Untergenre:)<\/td>\s+<td>(.*?>|-)(.*?)<\/';
 
           if Exec(InputString) then
@@ -90,90 +93,63 @@ var
         finally
           Free;
         end;
-    end;
-    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
-    begin
 
+    if ACanUse(cDescription) then
       with TRegExpr.Create do
         try
-          InputString := ASourceCode;
+          InputString := AWebsiteSourceCode;
           Expression := '<div class="productFooterDescription">(.*?)<\/div>';
 
-          if Exec(InputString) and (Match[1] <> '') then
-            AControlController.FindControl(cDescription).AddProposedValue(GetName, Match[1]);
+          if Exec(InputString) and not SameStr('', Match[1]) then
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(Match[1]));
         finally
           Free;
         end;
-    end;
-  end;
-
-  procedure deep_image_search(ASourceCode: string);
-  begin
-    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
-    begin
-      with TRegExpr.Create do
-        try
-          InputString := ASourceCode;
-          Expression := '<p style="border:1px solid #C9C9C9">\s+<img src="(.*?)"';
-
-          if Exec(InputString) then
-            AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
-        finally
-          Free;
-        end;
-    end;
   end;
 
 var
-  RequestID1, RequestID2, RequestID3: Double;
+  LTitle, LImageRequestURL: string;
+  LCount: Integer;
 
-  ResponseStrSearchResult, ImageRequestURL: string;
+  LRequestID1, LRequestID2, LRequestID3: Double;
+
+  LResponeStr: string;
 begin
-  _Count := 0;
-  _Title := AControlController.FindControl(cTitle).Value;
-  LongWord(_ComponentIDs) := AControlIDs;
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
 
-  RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + 'index.cfm?pid=1669&filter=search&s=' + HTTPEncode(_Title)), TPlugInHTTPOptions.Create(Self));
+  // http://www.gamestar.de/index.cfm?pid=1669&filter=search&s=Halo+2
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID1);
+  LResponeStr := GETRequest(WEBSITE + 'index.cfm?pid=1669&filter=search&s=' + HTTPEncode(LTitle), LRequestID1);
 
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID1).HTTPResult.SourceCode;
+  if (Pos('keine passenden Spiele gefunden', LResponeStr) = 0) then
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := LResponeStr;
+        Expression := '<div class="genreReleaseDate">.*?<\/div>.*?<a href="\/(.*?)"';
 
-  with TRegExpr.Create do
-    try
-      InputString := ResponseStrSearchResult;
-      Expression := '<div class="genreReleaseDate">.*?<\/div>.*?<a href="(.*?)"';
-
-      if Exec(InputString) then
-      begin
-        repeat
-          RequestID2 := HTTPManager.Get(HTMLDecode(website + Match[1]), RequestID1, TPlugInHTTPOptions.Create(Self));
-
+        if Exec(InputString) then
+        begin
           repeat
-            sleep(50);
-          until HTTPManager.HasResult(RequestID2);
+            LResponeStr := GETFollowUpRequest(WEBSITE + Match[1], LRequestID1, LRequestID2);
 
-          deep_search(HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode);
+            deep_search(LResponeStr);
 
-          ImageRequestURL := website + HTMLDecode(copy(Match[1], 1, LastDelimiter('/', Match[1])) + 'cover/' + copy(Match[1],
-              LastDelimiter('/', Match[1]) + 1));
-
-          RequestID3 := HTTPManager.Get(ImageRequestURL, RequestID2, TPlugInHTTPOptions.Create(Self));
-
-          repeat
-            sleep(50);
-          until HTTPManager.HasResult(RequestID3);
-
-          deep_image_search(HTTPManager.GetResult(RequestID3).HTTPResult.SourceCode);
-
-          Inc(_Count);
-        until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
+        end;
+      finally
+        Free;
       end;
-    finally
-      Free;
-    end;
+  end;
+
+  Result := True;
+end;
+
+function TGamestarDe.GetResultsLimitDefaultValue;
+begin
+  Result := 5;
 end;
 
 end.

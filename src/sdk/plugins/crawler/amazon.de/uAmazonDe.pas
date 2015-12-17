@@ -34,14 +34,14 @@ end;
 
 function TAmazonDe.InternalExecute;
 
-  procedure deep_search(AWebsitecode: string);
+  procedure deep_search(AWebsiteSourceCode: string);
   var
     LTrackList: string;
   begin
     if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
-          InputString := AWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := 'data-old-hires="(.*?)"';
 
           if Exec(InputString) then
@@ -56,7 +56,7 @@ function TAmazonDe.InternalExecute;
     if ACanUse(cRuntime) then
       with TRegExpr.Create do
         try
-          InputString := AWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '<li> <b>Spieldauer:<\/b> (\d+) Minuten<\/li>';
 
           if Exec(InputString) then
@@ -68,7 +68,7 @@ function TAmazonDe.InternalExecute;
     if ACanUse(cVideoSystem) then
       with TRegExpr.Create do
         try
-          InputString := AWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '<li> <b>Format:<\/b> (.*?)<\/li>';
 
           if Exec(InputString) then
@@ -86,7 +86,7 @@ function TAmazonDe.InternalExecute;
     begin
       with TRegExpr.Create do
         try
-          InputString := AWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '<tr class="\w+">\s+<td>\s+(.*?)\s<\/td>';
 
           if Exec(InputString) then
@@ -103,7 +103,7 @@ function TAmazonDe.InternalExecute;
 
       with TRegExpr.Create do
         try
-          InputString := AWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := 'productDescription" class="a-section a-spacing-small">(.*?)(<a class="a-link-normal"|<\/div>)';
 
           if Exec(InputString) then

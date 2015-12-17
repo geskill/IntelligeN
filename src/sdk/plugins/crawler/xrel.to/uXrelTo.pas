@@ -287,32 +287,30 @@ begin
 
               if Exec(InputString) then
               begin
-                repeat
-                  s := Match[1];
-                  if (Pos('/', s) > 0) or (Pos(',', s) > 0) or (Pos('|', s) > 0) then
+                s := Match[1];
+                if (Pos('/', s) > 0) or (Pos(',', s) > 0) or (Pos('|', s) > 0) then
+                begin
+                  with TRegExpr.Create do
                   begin
-                    with TRegExpr.Create do
-                    begin
-                      try
-                        InputString := s;
-                        Expression := '([^\/,|]+)';
+                    try
+                      InputString := s;
+                      Expression := '([^\/,|]+)';
 
-                        if Exec(InputString) then
-                        begin
-                          repeat
-                            AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(Match[1]));
-                          until not ExecNext;
-                        end;
-                      finally
-                        Free;
+                      if Exec(InputString) then
+                      begin
+                        repeat
+                          AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(Match[1]));
+                        until not ExecNext;
                       end;
+                    finally
+                      Free;
                     end;
-                  end
-                  else
-                  begin
-                    AControlController.FindControl(cGenre).AddProposedValue(GetName, s);
                   end;
-                until not ExecNext;
+                end
+                else
+                begin
+                  AControlController.FindControl(cGenre).AddProposedValue(GetName, s);
+                end;
               end;
             finally
               Free;
