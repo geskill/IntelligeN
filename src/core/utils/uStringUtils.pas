@@ -361,7 +361,7 @@ begin
   Result := Str;
 
   for LStringIndex := Length(Str) downto 2 do
-    if ((Str[LStringIndex] in ['A' .. 'Z']) and (Str[LStringIndex - 1] in ['A' .. 'Z'])) then
+    if CharInSet(Str[LStringIndex], ['A' .. 'Z']) and CharInSet(Str[LStringIndex - 1], ['A' .. 'Z']) then
     begin
       Result[LStringIndex] := LowerCase(Str[LStringIndex])[1];
     end;

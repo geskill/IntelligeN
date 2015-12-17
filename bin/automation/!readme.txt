@@ -1,0 +1,1 @@
+Register IntelligeN.exe via this bat-file to use with OLE Automation. Be sure to keep IntelligeN.exe in the same folder or re-register.

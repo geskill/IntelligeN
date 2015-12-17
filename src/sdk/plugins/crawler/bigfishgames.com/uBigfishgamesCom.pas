@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, Classes, StrUtils, HTTPApp,
+  Windows, SysUtils, Classes, StrUtils, Math, HTTPApp,
   // RegEx
   RegExpr,
   // Utils
@@ -18,76 +18,64 @@ uses
 
 type
   TBigfishgamesCom = class(TCrawlerPlugIn)
-  protected
-    function BigfishgamesURL: string; virtual;
-    function BigfishgamesMaskTitle(ATitle: string): string;
-    procedure BigfishgamesGamesList(AStrings: TStrings);
+  protected { . }
+  const
+    WEBSITE = 'http://www.bigfishgames.com/';
+
+    function BigfishgamesGetWebsite: string; virtual;
+    function BigfishgamesSearchRequest(AWebsite, ATitle: string; out AFollowUpRequest: Double): string;
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
 
-{ TBigfishgamesDe }
+{ TBigfishgamesCom }
 
-function TBigfishgamesCom.BigfishgamesURL: string;
-const
-  website = 'http://www.bigfishgames.com/';
+function TBigfishgamesCom.BigfishgamesGetWebsite: string;
 begin
-  Result := website + 'download-games/';
+  Result := WEBSITE;
 end;
 
-function TBigfishgamesCom.BigfishgamesMaskTitle(ATitle: string): string;
-begin
-  Result := Trim(ATitle);
-
-  with TRegExpr.Create do
-    try
-      Result := ReplaceRegExpr('[^\w\s]', Result, '%', False);
-    finally
-      Free;
-    end;
-
-  Result := '%' + Result + '%';
-end;
-
-procedure TBigfishgamesCom.BigfishgamesGamesList(AStrings: TStrings);
+function TBigfishgamesCom.BigfishgamesSearchRequest(AWebsite, ATitle: string; out AFollowUpRequest: Double): string;
 var
-  HTTPRequest: IHTTPRequest;
-
-  RequestID: Double;
-
-  ResponseStr: string;
+  LHTTPRequest: IHTTPRequest;
+  LHTTPParams: IHTTPParams;
 begin
-  HTTPRequest := THTTPRequest.Create(BigfishgamesURL + 'all.html');
 
-  RequestID := HTTPManager.Get(HTTPRequest, TPlugInHTTPOptions.Create(Self));
+  LHTTPRequest := THTTPRequest.Create(AWebsite + 'ajax.php');
+  with LHTTPRequest do
+  begin
+    Referer := AWebsite;
+    CustomHeaders.Add('X-Requested-With: XMLHttpRequest');
+  end;
+
+  LHTTPParams := THTTPParams.Create;
+  with LHTTPParams do
+  begin
+    AddFormField('search', 'true');
+    AddFormField('response_type', 'results_page');
+    AddFormField('type_sname', 'pc');
+    AddFormField('rand', IntToStr(Floor(Random(100000000))));
+    AddFormField('q', ATitle);
+  end;
+
+  AFollowUpRequest := HTTPManager.Post(LHTTPRequest, LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  until HTTPManager.HasResult(AFollowUpRequest);
 
-  ResponseStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
-
-  with TRegExpr.Create do
-    try
-      InputString := ResponseStr;
-      Expression := 'data-gid="(\d+)">(.*?)<\/a><\/li>';
-
-      if Exec(InputString) then
-        repeat
-          AStrings.Add(Match[1] + AStrings.NameValueSeparator + HTML2Text(Match[2]));
-        until not ExecNext;
-    finally
-      Free;
-    end;
+  Result := HTTPManager.GetResult(AFollowUpRequest).HTTPResult.SourceCode;
 end;
 
 function TBigfishgamesCom.GetName;
@@ -95,113 +83,109 @@ begin
   Result := 'bigfishgames.com';
 end;
 
-function TBigfishgamesCom.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TBigfishgamesCom.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [cPCGames];
-  Result := LongWord(_TemplateTypeIDs);
+  Result := [cPCGames];
 end;
 
-function TBigfishgamesCom.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
+function TBigfishgamesCom.InternalGetAvailableControlIDs;
 begin
-  _ComponentIDs := [cPicture, cDescription];
-  Result := LongWord(_ComponentIDs);
+  Result := [cPicture, cTrailer, cDescription];
 end;
 
-function TBigfishgamesCom.GetControlIDDefaultValue;
+function TBigfishgamesCom.InternalGetControlIDDefaultValue;
 begin
+  Result := True;
+end;
+
+function TBigfishgamesCom.InternalGetDependentControlIDs;
+begin
+  Result := [cTitle];
+end;
+
+function TBigfishgamesCom.InternalExecute;
+
+  procedure deep_search(AWebsitecode: string);
+  begin
+    if ACanUse(cPicture) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsitecode;
+          Expression := '<div class="bfg-col-xs-12">\s+<img src="(.*?)"';
+
+          if Exec(InputString) then
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
+        finally
+          Free;
+        end;
+
+    if ACanUse(cTrailer) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsitecode;
+          Expression := '<div class="flash-frame">\s+<a href="(.*?)"';
+
+          if Exec(InputString) then
+            AControlController.FindControl(cTrailer).AddProposedValue(GetName, Match[1]);
+        finally
+          Free;
+        end;
+
+    if ACanUse(cDescription) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsitecode;
+          Expression := '<div class="long">(.*?)<\/div>';
+
+          if Exec(InputString) then
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
+        finally
+          Free;
+        end;
+  end;
+
+var
+  LTitle: string;
+  LCount: Integer;
+
+  LRequestID1, LRequestID2: Double;
+
+  LResponeStr: string;
+begin
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
+
+  LResponeStr := BigfishgamesSearchRequest(BigfishgamesGetWebsite, LTitle, LRequestID1);
+
+  if not(Pos('"code":"first_results"', LResponeStr) = 0) then
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := LResponeStr;
+        Expression := 'download-games\\\/(\d+)\\';
+
+        if Exec(InputString) then
+        begin
+          repeat
+
+            LResponeStr := GETFollowUpRequest(BigfishgamesGetWebsite + 'download-games/' + Match[1], LRequestID1, LRequestID2);
+
+            deep_search(LResponeStr);
+
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
+        end;
+      finally
+        Free;
+      end;
+  end;
+
   Result := True;
 end;
 
 function TBigfishgamesCom.GetResultsLimitDefaultValue;
 begin
   Result := 1;
-end;
-
-function TBigfishgamesCom.Exec;
-var
-  I: Integer;
-  GamesList: TStringList;
-  _Title, _ImageCode: string;
-  _ComponentIDs: TControlIDs;
-
-  RequestID: Double;
-  ResponseStr: string;
-begin
-  LongWord(_ComponentIDs) := AControlIDs;
-  _Title := AControlController.FindControl(cTitle).Value;
-
-  if Assigned(AControlController.FindControl(cTitle)) and ((Assigned(AControlController.FindControl(cPicture)) and (cPicture in _ComponentIDs)) or
-      (Assigned(AControlController.FindControl(cDescription)) and (cDescription in _ComponentIDs))) then
-  begin
-    GamesList := TStringList.Create;
-    try
-      BigfishgamesGamesList(GamesList);
-
-      for I := 0 to GamesList.Count - 1 do
-        if MatchTextMask(BigfishgamesMaskTitle(_Title), GamesList.ValueFromIndex[I]) then
-        begin
-
-          RequestID := HTTPManager.Get(THTTPRequest.Create(BigfishgamesURL + GamesList.Names[I] + '/'), TPlugInHTTPOptions.Create(Self));
-
-          repeat
-            sleep(50);
-          until HTTPManager.HasResult(RequestID);
-
-          ResponseStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
-
-          if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
-          begin
-            with TRegExpr.Create do
-              try
-                InputString := ResponseStr;
-                Expression := '<p class="dlgi_description_text">(.*?)<\/p>';
-
-                if Exec(InputString) then
-                  AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
-              finally
-                Free;
-              end;
-          end;
-
-          if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
-            with TRegExpr.Create do
-              try
-                InputString := ResponseStr;
-                Expression := '<div class="dlgi_featureimage"(.*?)<\/div>';
-
-                if Exec(InputString) then
-                begin
-                  _ImageCode := Match[1];
-
-                  with TRegExpr.Create do
-                    try
-                      InputString := _ImageCode;
-                      Expression := 'data-src="(.*?)"';
-
-                      if Exec(InputString) then
-                        AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1], GetName)
-                      else
-                      begin
-                        Expression := 'src="(.*?)"';
-                        if Exec(InputString) then
-                          AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
-                      end;
-                    finally
-                      Free;
-                    end;
-                end;
-              finally
-                Free;
-              end;
-        end;
-    finally
-      GamesList.Free;
-    end;
-  end;
 end;
 
 end.

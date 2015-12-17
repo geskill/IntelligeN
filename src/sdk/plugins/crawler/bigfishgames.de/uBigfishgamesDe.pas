@@ -18,8 +18,11 @@ uses
 
 type
   TBigfishgamesDe = class(TBigfishgamesCom)
-  protected
-    function BigfishgamesURL: string; override;
+  protected { . }
+  const
+    WEBSITE: string = 'http://www.bigfishgames.de/';
+
+    function BigfishgamesGetWebsite: string; override;
   public
     function GetName: WideString; override; safecall;
   end;
@@ -28,11 +31,9 @@ implementation
 
 { TBigfishgamesDe }
 
-function TBigfishgamesDe.BigfishgamesURL: string;
-const
-  website = 'http://www.bigfishgames.de/';
+function TBigfishgamesDe.BigfishgamesGetWebsite: string;
 begin
-  Result := website + 'download-spiele/';
+  Result := WEBSITE;
 end;
 
 function TBigfishgamesDe.GetName;

@@ -18,15 +18,20 @@ uses
 
 type
   TBinsearchInfo = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'http://binsearch.info/';
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
@@ -36,41 +41,33 @@ begin
   Result := 'Binsearch.info';
 end;
 
-function TBinsearchInfo.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TBinsearchInfo.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)];
-  Result := LongWord(_TemplateTypeIDs);
+  Result := [low(TTypeID) .. high(TTypeID)];
 end;
 
-function TBinsearchInfo.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
+function TBinsearchInfo.InternalGetAvailableControlIDs;
 begin
-  _ComponentIDs := [cNFO];
-  Result := LongWord(_ComponentIDs);
+  Result := [cNFO];
 end;
 
-function TBinsearchInfo.GetControlIDDefaultValue;
+function TBinsearchInfo.InternalGetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TBinsearchInfo.GetResultsLimitDefaultValue;
+function TBinsearchInfo.InternalGetDependentControlIDs;
 begin
-  Result := 5;
+  Result := [cReleaseName];
 end;
 
-function TBinsearchInfo.Exec;
-const
-  website = 'http://binsearch.info';
+function TBinsearchInfo.InternalExecute;
 
-  procedure deep_search(AWebsite: string);
+  procedure deep_search(AWebsitecode: string);
   begin
     with TRegExpr.Create do
       try
-        InputString := AWebsite;
+        InputString := AWebsitecode;
         Expression := '<pre>(.*?)<\/pre>';
 
         if Exec(InputString) then
@@ -85,51 +82,46 @@ const
   end;
 
 var
-  _ComponentIDs: TControlIDs;
-  _ReleaseName: string;
+  LReleasename: string;
+  LCount: Integer;
 
-  RequestID1, RequestID2: Double;
+  LRequestID1, LRequestID2: Double;
 
-  ResponseStrSearchResult: string;
+  LResponeStr: string;
 begin
-  LongWord(_ComponentIDs) := AControlIDs;
+  LReleasename := AControlController.FindControl(cReleaseName).Value;
+  LCount := 0;
 
-  _ReleaseName := AControlController.FindControl(cReleaseName).Value;
+  LResponeStr := GETRequest(WEBSITE + '/index.php?q=' + HTTPEncode(LReleasename) + '&max=250&adv_age=&server=', LRequestID1);
 
-  // '&m=n&max=25&adv_age=365&adv_sort=date&adv_nfo=on'
-  RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + '/index.php?q=' + HTTPEncode(_ReleaseName) + '&max=250&adv_age=&server='),
-    TPlugInHTTPOptions.Create(Self));
+  if not(Pos('viewNFO', LResponeStr) = 0) then
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := LResponeStr;
+        Expression := 'viewNFO\.php\?oid=(.*?)&amp;';
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID1);
-
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID1).HTTPResult.SourceCode;
-
-  with TRegExpr.Create do
-    try
-      // ModifierG := False;
-      InputString := ResponseStrSearchResult;
-      Expression := 'viewNFO\.php\?oid=(.*?)&amp;';
-
-      if Exec(InputString) then
-      begin
-        repeat
-
-          RequestID2 := HTTPManager.Get(website + '/viewNFO.php?oid=' + Match[1], RequestID1, TPlugInHTTPOptions.Create(Self));
-
+        if Exec(InputString) then
+        begin
           repeat
-            sleep(50);
-          until HTTPManager.HasResult(RequestID2);
+            LResponeStr := GETFollowUpRequest(WEBSITE + '/viewNFO.php?oid=' + Match[1], LRequestID1, LRequestID2);
 
-          deep_search(HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode);
+            deep_search(LResponeStr);
 
-        until not ExecNext;
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
+        end;
+      finally
+        Free;
       end;
-    finally
-      Free;
-    end;
+  end;
 
+  Result := True;
+end;
+
+function TBinsearchInfo.GetResultsLimitDefaultValue;
+begin
+  Result := 5;
 end;
 
 end.
