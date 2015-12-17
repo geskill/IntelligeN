@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <xml>
   <HTML>
     <bold param1="bolded text">&lt;strong&gt;{param1}{selection=$param1}&lt;/strong&gt;</bold>

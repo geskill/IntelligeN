@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <hoster>
 	<hoster name="4fastfile.com" short="4F">
 		<alsoknownas>4fastfile</alsoknownas>
@@ -47,27 +47,24 @@
 	<hoster name="Filecloud.ws" short="FC">
 		<alsoknownas>Filecloud</alsoknownas>
 	</hoster>
+	<hoster name="Files.Mail.ru" short="FM">
+		<alsoknownas>Files.Mail</alsoknownas>
+		<alsoknownas>Mail.ru</alsoknownas>
+	</hoster>
 	<hoster name="Filefactory.com" short="FF">
 		<alsoknownas>Filefactory</alsoknownas>
 	</hoster>
-	<hoster name="Filegag.com" short="FG">
-		<alsoknownas>Filegag</alsoknownas>
-	</hoster>
-	<hoster name="Filejungle.com" short="FJ">
-		<alsoknownas>Filejungle</alsoknownas>
+	<hoster name="Fileparadox.in" short="FX">
+		<alsoknownas>Fileparadox</alsoknownas>
 	</hoster>
 	<hoster name="Filepost.com" short="FP">
 		<alsoknownas>Filepost</alsoknownas>
-	</hoster>
-	<hoster name="Filesega.com" short="FS">
-		<alsoknownas>Filesega</alsoknownas>
-		<alsoknownas>File$ega</alsoknownas>
 	</hoster>
 	<hoster name="Fileserve.com" short="FV">
 		<alsoknownas>Fileserve</alsoknownas>
 		<alsoknownas>fsrv</alsoknownas>
 	</hoster>
-	<hoster name="Filestore.to" short="FS">
+	<hoster name="Filestore.to" short="FT">
 		<alsoknownas>Filestore</alsoknownas>
 	</hoster>
 	<hoster name="Freakshare.com" short="FS">
@@ -82,6 +79,9 @@
 	</hoster>
 	<hoster name="Hotfile.com" short="HF">
 		<alsoknownas>Hotfile</alsoknownas>
+	</hoster>
+	<hoster name="Hugefiles.net" short="HU">
+		<alsoknownas>Hugefiles</alsoknownas>
 	</hoster>
 	<hoster name="Junocloud.me" short="JC">
 		<alsoknownas>Junocloud</alsoknownas>
@@ -106,6 +106,9 @@
 	</hoster>
 	<hoster name="Netuploaded.com" short="NU">
 		<alsoknownas>Netuploaded</alsoknownas>
+	</hoster>
+	<hoster name="Oboom.com" short="OB">
+		<alsoknownas>Oboom</alsoknownas>
 	</hoster>
 	<hoster name="Qshare.com" short="QS">
 		<alsoknownas>Qshare</alsoknownas>
@@ -140,6 +143,9 @@
 	</hoster>
 	<hoster name="Shragle.com" short="SH">
 		<alsoknownas>Shragle</alsoknownas>
+	</hoster>
+	<hoster name="Sockshare.com" short="SK">
+		<alsoknownas>Sockshare</alsoknownas>
 	</hoster>
 	<hoster name="Speedshare.org" short="SH">
 		<alsoknownas>Speedshare</alsoknownas>
