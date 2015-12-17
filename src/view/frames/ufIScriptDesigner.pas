@@ -248,8 +248,9 @@ end;
 
 procedure TIScriptDesigner.InsertText(AText: WideString);
 var
-  _beforeinsert, _inputstring: string;
-  _pos, _charcount: Integer;
+  LBeforeInsert, LAfterInsert, LInputString: string;
+  LBeforeQuoteCount, LAfterQuoteCount, LPosition: Integer;
+  LNeedFinalQuote: Boolean;
 
   function CharCountEx(const SubStr, s: string): Integer;
   var
@@ -272,31 +273,35 @@ var
   end;
 
 begin
-  AdvMemo.TextFromPos(AdvMemo.CurX, AdvMemo.CurY, _pos);
+  AdvMemo.TextFromPos(AdvMemo.CurX, AdvMemo.CurY, LPosition);
 
-  _beforeinsert := copy(AdvMemo.Lines.Text, 1, _pos);
-  _charcount := CharCountEx('"', _beforeinsert);
-  if (_charcount mod 2) = 0 then
+  LBeforeInsert := copy(AdvMemo.Lines.Text, 1, LPosition);
+  LAfterInsert := copy(AdvMemo.Lines.Text, LPosition + 1);
+  LBeforeQuoteCount := CharCountEx('"', LBeforeInsert);
+  LAfterQuoteCount := CharCountEx('"', LAfterInsert);
+  LNeedFinalQuote := (LAfterQuoteCount mod 2) = 0;
+  if (LBeforeQuoteCount mod 2) = 0 then
   begin
-    _inputstring := copy(_beforeinsert, LastDelimiter('"', _beforeinsert));
-    if SameStr('"', _inputstring) then
-      AdvMemo.InsertText(' + "' + EscapeText(AText) + '"')
+    LInputString := copy(LBeforeInsert, LastDelimiter('"', LBeforeInsert));
+
+    if SameStr('"', LInputString) then
+      AdvMemo.InsertText(' + "' + EscapeText(AText) + IfThen(LNeedFinalQuote, '"'))
     else
       with TRegExpr.Create do
         try
-          InputString := _inputstring;
+          InputString := LInputString;
           Expression := '\"([\+\s+]*)';
 
-          if (Exec(InputString) and (Pos('+', Match[1]) > 0)) or (_charcount = 0) or SameStr('', Match[1]) then
-            AdvMemo.InsertText('"' + EscapeText(AText) + '"')
+          if (Exec(InputString) and (Pos('+', Match[1]) > 0)) or (LBeforeQuoteCount = 0) or SameStr('', Match[1]) then
+            AdvMemo.InsertText('"' + EscapeText(AText) + IfThen(LNeedFinalQuote, '"'))
           else
-            AdvMemo.InsertText('+ "' + EscapeText(AText) + '"');
+            AdvMemo.InsertText('+ "' + EscapeText(AText) + IfThen(LNeedFinalQuote, '"'));
         finally
           Free;
         end;
   end
   else
-    AdvMemo.InsertText(EscapeText(AText) + '"');
+    AdvMemo.InsertText(EscapeText(AText) + IfThen(LNeedFinalQuote, '"'));
 end;
 
 function TIScriptDesigner.EscapeText(AText: string): string;
