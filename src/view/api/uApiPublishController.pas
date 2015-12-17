@@ -1597,13 +1597,13 @@ end;
 
 function TIPublishController.GeneratePublishJob: IPublishJob;
 var
-  PublishJob: TIPublishJob;
+  LPublishJob: TIPublishJob;
 begin
-  PublishJob := TIPublishJob.Create('All active for ' + TabSheetController.ReleaseName);
+  LPublishJob := TIPublishJob.Create('All active for ' + TabSheetController.ReleaseNameShort);
 
-  PublishJob.Add(GeneratePublishTab);
+  LPublishJob.Add(GeneratePublishTab);
 
-  Result := PublishJob;
+  Result := LPublishJob;
 end;
 
 destructor TIPublishController.Destroy;

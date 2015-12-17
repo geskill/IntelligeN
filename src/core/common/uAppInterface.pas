@@ -734,6 +734,7 @@ type
     function GetFileType: WideString;
     function GetReleaseName: WideString;
     procedure SetReleaseName(AReleaseName: WideString);
+    function GetReleaseNameShort: WideString;
     function GetTypeID: TTypeID;
     function GetActiveWebsite: WideString;
     procedure SetActiveWebsite(AWebsite: WideString);
@@ -753,6 +754,7 @@ type
     property FileType: WideString read GetFileType;
 
     property ReleaseName: WideString read GetReleaseName write SetReleaseName;
+    property ReleaseNameShort: WideString read GetReleaseNameShort;
 
     procedure Save(AFileName, AFileType: WideString);
     procedure ResetDataChanged(AFileName, AFileType: WideString);

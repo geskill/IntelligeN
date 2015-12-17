@@ -12,7 +12,7 @@ uses
   // DLLs
   uExport,
   // Api
-  uApiPlugins, uApiTabSheetItem,
+  uApiConst, uApiPlugins, uApiTabSheetItem,
   // MultiEvent
   Generics.MultiEvents.Handler, Generics.MultiEvents.NotifyHandler,
   // Plugin
@@ -57,6 +57,7 @@ type
     procedure SetFileType(AFileType: WideString);
     function GetReleaseName: WideString;
     procedure SetReleaseName(AReleaseName: WideString);
+    function GetReleaseNameShort: WideString;
     function GetDataChanged: Boolean;
     procedure SetDataChanged(ADataChanged: Boolean);
     function GetTypeID: TTypeID;
@@ -92,6 +93,7 @@ type
     property FileType: WideString read GetFileType write SetFileType;
 
     property ReleaseName: WideString read GetReleaseName write SetReleaseName;
+    property ReleaseNameShort: WideString read GetReleaseNameShort;
 
     procedure Save(AFileName, AFileType: WideString);
     procedure ResetDataChanged(AFileName, AFileType: WideString);
@@ -217,6 +219,14 @@ begin
   TabHint := ReleaseName;
 end;
 
+function TTabSheetController.GetReleaseNameShort: WideString;
+begin
+  if not SameStr('', ReleaseName) then
+    Result := MinimizeReleaseName(ReleaseName, 30)
+  else
+    Result := StrReleaseNameEmpty;
+end;
+
 function TTabSheetController.GetDataChanged: Boolean;
 begin
   Result := FDataChanged;
@@ -245,12 +255,8 @@ end;
 
 procedure TTabSheetController.UpdateCaption;
 begin
-  if not(ReleaseName = '') then
-    Self.Caption := MinimizeReleaseName(ReleaseName, 30)
-  else
-    Self.Caption := '<ReleaseName>';
   if DataChanged then
-    Self.Caption := Self.Caption + '*';
+    Self.Caption := ReleaseNameShort + '*';
 end;
 
 procedure TTabSheetController.ReleaseNameChange(const AReleaseName: WideString);
