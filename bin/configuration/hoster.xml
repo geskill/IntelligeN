@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <hoster>
-	<hoster name="4fastfile.com" short="4F">
-		<alsoknownas>4fastfile</alsoknownas>
+	<hoster name="2shared.com" short="2S">
+		<alsoknownas>2shared</alsoknownas>
+	</hoster>
+	<hoster name="4shared.com" short="4S">
+		<alsoknownas>4shared</alsoknownas>
 	</hoster>
 	<hoster name="Bayfiles.com" short="BF">
 		<alsoknownas>Bayfiles</alsoknownas>
@@ -9,28 +12,17 @@
 	<hoster name="Bitshare.com" short="BS">
 		<alsoknownas>Bitshare</alsoknownas>
 	</hoster>
-	<hoster name="Cloudzer.net" short="CZ">
-		<alsoknownas>Cloudzer</alsoknownas>
-		<alsoknownas>clz.to</alsoknownas>
-	</hoster>
 	<hoster name="Crocko.com" short="CC">
 		<alsoknownas>Crocko</alsoknownas>
 		<alsoknownas>Easy-share.com</alsoknownas>
 		<alsoknownas>Easy-share</alsoknownas>
 		<alsoknownas>Easyshare</alsoknownas>
 	</hoster>
-	<hoster name="Data-loading.com" short="DL">
-		<alsoknownas>Data-loading</alsoknownas>
-		<alsoknownas>Dataloading</alsoknownas>
-	</hoster>
 	<hoster name="Datei.to" short="DT">
 		<alsoknownas>Datei</alsoknownas>
 		<alsoknownas>Sharebase.to</alsoknownas>
 		<alsoknownas>Sharebase</alsoknownas>
 		<alsoknownas>sb</alsoknownas>
-	</hoster>
-	<hoster name="Ddlstorage.com" short="DS">
-		<alsoknownas>Ddlstorage</alsoknownas>
 	</hoster>
 	<hoster name="Depositfiles.com" short="DF">
 		<alsoknownas>Depositfiles</alsoknownas>
@@ -41,21 +33,12 @@
 	<hoster name="Extabit.com" short="EB">
 		<alsoknownas>Extabit</alsoknownas>
 	</hoster>
-	<hoster name="Fiberupload.com" short="FU">
-		<alsoknownas>Fiberupload</alsoknownas>
-	</hoster>
-	<hoster name="Filecloud.ws" short="FC">
-		<alsoknownas>Filecloud</alsoknownas>
-	</hoster>
 	<hoster name="Files.Mail.ru" short="FM">
 		<alsoknownas>Files.Mail</alsoknownas>
 		<alsoknownas>Mail.ru</alsoknownas>
 	</hoster>
 	<hoster name="Filefactory.com" short="FF">
 		<alsoknownas>Filefactory</alsoknownas>
-	</hoster>
-	<hoster name="Fileparadox.in" short="FX">
-		<alsoknownas>Fileparadox</alsoknownas>
 	</hoster>
 	<hoster name="Filepost.com" short="FP">
 		<alsoknownas>Filepost</alsoknownas>
@@ -71,23 +54,14 @@
 		<alsoknownas>Freakshare.net</alsoknownas>
 		<alsoknownas>Freakshare</alsoknownas>
 	</hoster>
-	<hoster name="Henchfile.com" short="HF">
-		<alsoknownas>Henchfile</alsoknownas>
-	</hoster>
 	<hoster name="Hitfile.net" short="HF">
 		<alsoknownas>Hitfile</alsoknownas>
-	</hoster>
-	<hoster name="Hotfile.com" short="HF">
-		<alsoknownas>Hotfile</alsoknownas>
 	</hoster>
 	<hoster name="Hugefiles.net" short="HU">
 		<alsoknownas>Hugefiles</alsoknownas>
 	</hoster>
 	<hoster name="Junocloud.me" short="JC">
 		<alsoknownas>Junocloud</alsoknownas>
-	</hoster>
-	<hoster name="Kewlshare.com" short="KS">
-		<alsoknownas>Kewlshare</alsoknownas>
 	</hoster>
 	<hoster name="Letitbit.net" short="LB">
 		<alsoknownas>Letitbit</alsoknownas>
@@ -98,27 +72,11 @@
 	<hoster name="Mediafire.com" short="MF">
 		<alsoknownas>Mediafire</alsoknownas>
 	</hoster>
-	<hoster name="Megaupload.com" short="MU">
-		<alsoknownas>Megaupload</alsoknownas>
-	</hoster>
-	<hoster name="Netload.in" short="NL">
-		<alsoknownas>Netload</alsoknownas>
-	</hoster>
-	<hoster name="Netuploaded.com" short="NU">
-		<alsoknownas>Netuploaded</alsoknownas>
-	</hoster>
 	<hoster name="Oboom.com" short="OB">
 		<alsoknownas>Oboom</alsoknownas>
 	</hoster>
-	<hoster name="Qshare.com" short="QS">
-		<alsoknownas>Qshare</alsoknownas>
-		<alsoknownas>s1.qshare.com</alsoknownas>
-	</hoster>
 	<hoster name="Rapidgator.net" short="RG">
 		<alsoknownas>Rapidgator</alsoknownas>
-	</hoster>	
-	<hoster name="Rapidshare.com" short="RS">
-		<alsoknownas>Rapidshare</alsoknownas>
 	</hoster>
 	<hoster name="Remixshare.com" short="RX">
 		<alsoknownas>Remixshare</alsoknownas>
@@ -131,9 +89,6 @@
 		<alsoknownas>Sendspace</alsoknownas>
 		<alsoknownas>ssp</alsoknownas>
 	</hoster>
-	<hoster name="Share-now.net" short="SN">
-		<alsoknownas>Share-now</alsoknownas>
-	</hoster>
 	<hoster name="Share-online.biz" short="SO">
 		<alsoknownas>Share-online</alsoknownas>
 		<alsoknownas>Shareonline</alsoknownas>
@@ -141,27 +96,14 @@
 		<alsoknownas>Egoshare</alsoknownas>
 		<alsoknownas>ego</alsoknownas>
 	</hoster>
-	<hoster name="Shragle.com" short="SH">
-		<alsoknownas>Shragle</alsoknownas>
+	<hoster name="Shareplace.com" short="SC">
+		<alsoknownas>Shareplace</alsoknownas>
 	</hoster>
 	<hoster name="Sockshare.com" short="SK">
 		<alsoknownas>Sockshare</alsoknownas>
 	</hoster>
-	<hoster name="Speedshare.org" short="SH">
-		<alsoknownas>Speedshare</alsoknownas>
-	</hoster>
-	<hoster name="Terabit.to" short="TE">
-		<alsoknownas>Terabit</alsoknownas>
-		<alsoknownas>ter</alsoknownas>
-	</hoster>
 	<hoster name="Turbobit.net" short="TB">
 		<alsoknownas>Turbobit</alsoknownas>
-	</hoster>
-	<hoster name="Uload.to" short="UL">
-		<alsoknownas>Uload</alsoknownas>
-	</hoster>
-	<hoster name="Ultramegabit.info" short="UM">
-		<alsoknownas>Ultramegabit</alsoknownas>
 	</hoster>
 	<hoster name="Uploaded.net" short="UL">
 		<alsoknownas>Uploaded.to</alsoknownas>
@@ -171,14 +113,11 @@
 	<hoster name="Uploading.com" short="UP">
 		<alsoknownas>Uploading</alsoknownas>
 	</hoster>
-	<hoster name="Uploadspace.pl" short="US">
-		<alsoknownas>Uploadspace</alsoknownas>
-	</hoster>
-	<hoster name="Uploadstation.com" short="US">
-		<alsoknownas>Uploadstation</alsoknownas>
-	</hoster>
 	<hoster name="Uploadstube.de" short="US">
 		<alsoknownas>Uploadstube</alsoknownas>
+	</hoster>
+	<hoster name="Userscloud.com" short="UC">
+		<alsoknownas>Userscloud</alsoknownas>
 	</hoster>
 	<hoster name="Xup.in" short="XU">
 		<alsoknownas>Xup</alsoknownas>
