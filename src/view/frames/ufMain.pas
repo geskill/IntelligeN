@@ -24,6 +24,7 @@ uses
 
 type
   TfMain = class(TFrame, IPageController)
+    tResize: TTimer;
     pcMain: TcxPageControl;
     dxStatusBar: TdxStatusBar;
     dxStatusBarContainer3: TdxStatusBarContainerControl;
@@ -31,6 +32,7 @@ type
     dxStatusBarContainer6: TdxStatusBarContainerControl;
     cxTCView: TcxTabControl;
     procedure FrameResize(Sender: TObject);
+    procedure tResizeTimer(Sender: TObject);
     procedure pcMainCanCloseEx(Sender: TObject; ATabIndex: Integer; var ACanClose: Boolean);
     procedure pcMainChange(Sender: TObject);
     procedure pcMainGetTabHint(Sender: TObject; ATabIndex: Integer; var AHint: string; var ACanShow: Boolean);
@@ -136,7 +138,16 @@ type
 
 procedure TfMain.FrameResize(Sender: TObject);
 begin
+  //OutputDebugString('CALL');
+  //CallControlAligner;
+  tResize.Enabled := True;
+end;
+
+procedure TfMain.tResizeTimer(Sender: TObject);
+begin
+  //OutputDebugString('CALL');
   CallControlAligner;
+  tResize.Enabled := False;
 end;
 
 procedure TfMain.pcMainCanCloseEx(Sender: TObject; ATabIndex: Integer; var ACanClose: Boolean);
@@ -547,7 +558,11 @@ begin
       LNewTabSheetController := TTabSheetController.Create(pcMain, Self, ATypeID);
       with LNewTabSheetController do
       begin
+        ParentColor := False;
+
         PageControl := pcMain;
+
+        Color := clWhite;
 
         // FileName := AFileName;
         ImageIndex := Integer(ATypeID);

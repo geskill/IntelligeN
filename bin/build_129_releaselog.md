@@ -510,3 +510,14 @@
 * Updated about dialog
 
 * Updated openSSL librarys
+
+
+###BETA 7
+
+######major enhancements
+
+
+
+######minor enhancements
+
+

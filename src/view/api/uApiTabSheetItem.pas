@@ -44,8 +44,13 @@ type
   end;
 
   TTabSheetItem = class(TcxScrollBox)
+  protected
+    FTabSheetController: ITabSheetController;
+
+    procedure HandleReleaseMirror(var Msg: TMessage); message WM_USER;
   public
-    constructor Create(AOwner: TComponent; ATabSheetController: ITabSheetController); reintroduce; virtual;
+    constructor Create(const AOwner: TWinControl; ATabSheetController: ITabSheetController); reintroduce; virtual;
+    destructor Destroy; override;
   end;
 
   TDataTabSheetItem = class(TTabSheetItem)
@@ -64,7 +69,7 @@ type
 
     procedure PopupMenuChange(const Sender: Integer);
   public
-    constructor Create(AOwner: TComponent; ATabSheetController: ITabSheetController); override;
+    constructor Create(const AOwner: TWinControl; ATabSheetController: ITabSheetController); override;
     procedure CreateInner(ATabSheetController: ITabSheetController);
 
     property ControlController: IControlController read FComponentController write FComponentController;
@@ -76,7 +81,6 @@ type
 
   TDesignTabSheetItem = class(TTabSheetItem)
   private
-    FTabSheetController: ITabSheetController;
     FPublishController: IPublishController;
 
     FActiveDesigner: TIScriptDesigner;
@@ -145,7 +149,7 @@ type
     procedure UpdateHTMLView(ASubject, AMessage: RIScriptResult);
     procedure RenderHTMLView;
   public
-    constructor Create(AOwner: TComponent; ATabSheetController: ITabSheetController); override;
+    constructor Create(const AOwner: TWinControl; ATabSheetController: ITabSheetController); override;
     destructor Destroy; override;
 
     property ActiveWebsite: WideString read GetActiveWebsite write SetActiveWebsite;
@@ -177,10 +181,17 @@ end;
 
 { TTabSheetItem }
 
+procedure TTabSheetItem.HandleReleaseMirror(var Msg: TMessage);
+begin
+  // see: TMirrorControl.FmiRemoveMirrorClick(Sender: TObject);
+  FTabSheetController.MirrorController.Remove(Msg.WParam);
+  Main.fMain.CallControlAligner;
+end;
+
 constructor TTabSheetItem.Create;
 begin
   inherited Create(AOwner);
-  Parent := TWinControl(AOwner);
+  Parent := AOwner;
   Align := alClient;
   BorderStyle := cxcbsNone;
   // Color := clWhite;
@@ -191,6 +202,14 @@ begin
   Transparent := True;
 
   Visible := False;
+
+  FTabSheetController := ATabSheetController;
+end;
+
+destructor TTabSheetItem.Destroy;
+begin
+  FTabSheetController := nil;
+  inherited Destroy;
 end;
 
 { TDataTabSheetItem }
@@ -233,6 +252,8 @@ begin
   OnMouseDown := FScrollBoxMouseDown;
 
   Visible := True;
+
+  PopupMenu := Main.dxBpmMirrorRightClick;
 
   Main.fControlEditor.Control := nil;
 
@@ -978,8 +999,6 @@ begin
   end;
 
   FPublishController := nil;
-
-  FTabSheetController := nil;
 
   inherited Destroy;
 end;

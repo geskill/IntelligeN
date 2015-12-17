@@ -106,12 +106,6 @@ object fMain: TfMain
     Height = 490
     Align = alClient
     Focusable = False
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Tahoma'
-    Font.Style = []
-    ParentFont = False
     TabOrder = 0
     Properties.AllowTabDragDrop = True
     Properties.CloseButtonMode = cbmActiveAndHoverTabs
@@ -129,5 +123,12 @@ object fMain: TfMain
     ClientRectLeft = 4
     ClientRectRight = 614
     ClientRectTop = 4
+  end
+  object tResize: TTimer
+    Enabled = False
+    Interval = 350
+    OnTimer = tResizeTimer
+    Left = 568
+    Top = 432
   end
 end

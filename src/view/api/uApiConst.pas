@@ -6,7 +6,7 @@ resourcestring
   StrAdd = 'Add';
   StrAll = 'All';
   StrAllFiles = 'All files';
-  StrButtom = 'Buttom';
+  StrBottom = 'Bottom';
   StrCheck = 'Check';
   StrCheckLinks = 'Check links';
   StrClear = 'Clear';

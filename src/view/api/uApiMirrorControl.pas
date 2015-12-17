@@ -1,5 +1,6 @@
 unit uApiMirrorControl;
-interface
+
+interface
 
 uses
   // Delphi
@@ -54,6 +55,7 @@ type
 
     procedure UpdateGUI;
 
+    property MirrorData: IMirrorData read FMirrorData write FMirrorData;
     property Visible: Boolean read GetVisible write SetVisible;
   end;
 
@@ -347,19 +349,20 @@ type
   TMirrorControl = class(TInterfacedObject, IMirrorControl)
   private
     // GUI
-    FPopupMenu: TPopupMenu;
-    FmiAddMirror: TMenuItem;
-    FmiMirrorIndex: TMenuItem;
-    FmiRemoveMirror: TMenuItem;
-    FmiMirrorSettings: TMenuItem;
-    FmiMirrorColumns: TMenuItem;
-    FmiMirrorColumns1: TMenuItem;
-    FmiMirrorColumns2: TMenuItem;
-    FmiMirrorColumns3: TMenuItem;
-    FmiMirrorPosition: TMenuItem;
-    FmiMirrorPosition_Top: TMenuItem;
-    FmiMirrorPosition_Buttom: TMenuItem;
-    FCrypterPopupMenu: TPopupMenu;
+    FOwner: TWinControl;
+    FPopupMenu: TdxBarPopupMenu;
+    FmiAddMirror: TdxBarButton;
+    FmiMirrorIndex: TdxBarSubItem;
+    FmiRemoveMirror: TdxBarButton;
+    FmiMirrorSettings: TdxBarSubItem;
+    FmiMirrorColumns: TdxBarSubItem;
+    FmiMirrorColumns1: TdxBarButton;
+    FmiMirrorColumns2: TdxBarButton;
+    FmiMirrorColumns3: TdxBarButton;
+    FmiMirrorPosition: TdxBarSubItem;
+    FmiMirrorPosition_Bottom: TdxBarButton;
+    FmiMirrorPosition_Top: TdxBarButton;
+    FCrypterPopupMenu: TdxBarPopupMenu;
     FcxTabControl: TcxTabControl;
     FcxButtonCrypt: TcxButton;
     // GUI
@@ -425,7 +428,7 @@ type
     function GetFocus: Boolean;
     procedure SetFocus(AFocus: Boolean);
   public
-    constructor Create(AOwner: TComponent; ALeft: Integer = 0; ATop: Integer = 0);
+    constructor Create(const AOwner: TWinControl; ALeft: Integer = 0; ATop: Integer = 0);
     destructor Destroy; override;
 
     // Base
@@ -512,7 +515,8 @@ begin
     LImageRect.Right := LImageRect.Left + Main.ILContainerStatusImages.Width + IMAGE_INDENT;
     LTextRect := AViewInfo.ContentBounds;
     LTextRect.Left := LImageRect.Right + IMAGE_INDENT;
-    LImageIndex := Integer(FMirrorData.Status);
+    if Assigned(FMirrorData) then
+      LImageIndex := Integer(FMirrorData.Status);
 
     cxDrawImage(ACanvas.Handle, LImageRect, LImageRect, nil, Main.ILContainerStatusImages, LImageIndex, idmNormal, False, 0, Main.ImageList.BkColor, False);
 
@@ -596,6 +600,7 @@ end;
 
 destructor TStatusGrid.Destroy;
 begin
+  OutputDebugString('TStatusGrid.Destroy');
   FcxGridInfoTableViewColumn2.Free;
   FcxGridInfoTableViewColumn1.Free;
   FcxGridInfoTableView.Free;
@@ -605,6 +610,7 @@ begin
   FMirrorData := nil;
 
   inherited Destroy;
+  OutputDebugString('TStatusGrid.Destroy END');
 end;
 
 procedure TStatusGrid.UpdateGUI;
@@ -630,41 +636,44 @@ var
   LRecordIndex: Integer;
   LStatusString: string;
 begin
-  LRecordIndex := FindRecordIndexByText('Status');
-  if not(LRecordIndex = -1) then
+  if Assigned(FMirrorData) then
   begin
-    case FMirrorData.Status of
-      csOffline:
-        LStatusString := StrOffline;
-      csOnline:
-        LStatusString := StrOnline;
-      csUnknown:
-        LStatusString := StrUnknown;
-      csTemporaryOffline:
-        LStatusString := StrTemporaryOffline;
-      csMixedOnOffline:
-        LStatusString := StrMixed;
-      csNotChecked:
-        LStatusString := StrNotChecked;
+    LRecordIndex := FindRecordIndexByText('Status');
+    if not(LRecordIndex = -1) then
+    begin
+      case FMirrorData.Status of
+        csOffline:
+          LStatusString := StrOffline;
+        csOnline:
+          LStatusString := StrOnline;
+        csUnknown:
+          LStatusString := StrUnknown;
+        csTemporaryOffline:
+          LStatusString := StrTemporaryOffline;
+        csMixedOnOffline:
+          LStatusString := StrMixed;
+        csNotChecked:
+          LStatusString := StrNotChecked;
+      end;
+
+      FcxGridInfoTableView.DataController.Values[LRecordIndex, 1] := LStatusString;
     end;
 
-    FcxGridInfoTableView.DataController.Values[LRecordIndex, 1] := LStatusString;
+    LRecordIndex := FindRecordIndexByText('Hoster');
+    if not(LRecordIndex = -1) then
+      if SameStr('', FMirrorData.Hoster) then
+        FcxGridInfoTableView.DataController.Values[LRecordIndex, 1] := 'n/a'
+      else
+        FcxGridInfoTableView.DataController.Values[LRecordIndex, 1] := string(FMirrorData.Hoster) + ' (' + string(FMirrorData.HosterShort) + ')';
+
+    LRecordIndex := FindRecordIndexByText(StrSize);
+    if not(LRecordIndex = -1) then
+      FcxGridInfoTableView.DataController.Values[LRecordIndex, 1] := FloatToStr(FMirrorData.Size) + ' MB (' + FloatToStr(FMirrorData.PartSize) + ' MB)';
+
+    LRecordIndex := FindRecordIndexByText(StrParts);
+    if not(LRecordIndex = -1) then
+      FcxGridInfoTableView.DataController.Values[LRecordIndex, 1] := IntToStr(FMirrorData.Parts);
   end;
-
-  LRecordIndex := FindRecordIndexByText('Hoster');
-  if not(LRecordIndex = -1) then
-    if SameStr('', FMirrorData.Hoster) then
-      FcxGridInfoTableView.DataController.Values[LRecordIndex, 1] := 'n/a'
-    else
-      FcxGridInfoTableView.DataController.Values[LRecordIndex, 1] := string(FMirrorData.Hoster) + ' (' + string(FMirrorData.HosterShort) + ')';
-
-  LRecordIndex := FindRecordIndexByText(StrSize);
-  if not(LRecordIndex = -1) then
-    FcxGridInfoTableView.DataController.Values[LRecordIndex, 1] := FloatToStr(FMirrorData.Size) + ' MB (' + FloatToStr(FMirrorData.PartSize) + ' MB)';
-
-  LRecordIndex := FindRecordIndexByText(StrParts);
-  if not(LRecordIndex = -1) then
-    FcxGridInfoTableView.DataController.Values[LRecordIndex, 1] := IntToStr(FMirrorData.Parts);
 end;
 {$ENDREGION}
 { ****************************************************************************** }
@@ -1389,6 +1398,7 @@ end;
 
 destructor TMycxTabSheet.Destroy;
 begin
+  OutputDebugString('TMycxTabSheet.Destroy');
   FModyHintTimer.Free;
   FModyHintStyleController.Free;
 
@@ -1415,6 +1425,8 @@ begin
   inherited Destroy;
 
   FDirectlinksPanel := nil;
+
+  OutputDebugString('TMycxTabSheet.Destroy END');
 end;
 
 procedure TMycxTabSheet.UpdateGUI;
@@ -1769,14 +1781,14 @@ begin
   FPanel := TPanel.Create(AOwner);
   with FPanel do
   begin
-    ParentBackground := False;
+    // ParentBackground := False;
     Parent := TWinControl(AOwner);
 
     Align := alClient;
     Anchors := [akLeft, akTop, akRight, akBottom];
     BevelOuter := bvNone;
     Caption := '';
-    Color := clWhite;
+    // Color := clWhite;
 
     OnContextPopup := FPanelContextPopup;
   end;
@@ -1830,6 +1842,7 @@ end;
 
 destructor TCrypterPanel.Destroy;
 begin
+  OutputDebugString('TCrypterPanel.Destroy');
   FStatusGrid.Free;
 
   FcxButtonLinkCheck.Free;
@@ -1841,6 +1854,7 @@ begin
   FMirrorControl := nil;
 
   inherited Destroy;
+  OutputDebugString('TCrypterPanel.Destroy END');
 end;
 
 procedure TCrypterPanel.UpdateGUI;
@@ -2153,6 +2167,7 @@ destructor TDirectlinksPanel.Destroy;
 var
   I: Integer;
 begin
+  OutputDebugString('TDirectlinksPanel.Destroy');
   // for I := FcxPageControl.PageCount - 1 downto 0 do
   // Remove(I);
 
@@ -2166,6 +2181,9 @@ begin
   FPopupMenu.Free;
 
   MirrorControl := nil;
+
+  inherited Destroy();
+  OutputDebugString('TDirectlinksPanel.Destroy END');
 end;
 
 function TDirectlinksPanel.Add;
@@ -2245,36 +2263,40 @@ end;
 
 procedure TMirrorControl.FPopupMenuPopup(Sender: TObject);
 var
-  I: Integer;
-  NewMenuItem: TMenuItem;
+  LIndex: Integer;
+  LBarButton: TdxBarButton;
 begin
   with SettingsManager.Settings.ControlAligner do
   begin
-    FmiMirrorIndex.Clear;
-    for I := 0 to MirrorController.MirrorCount - 1 do
+    with FmiMirrorIndex.ItemLinks do
+      for LIndex := Count - 1 downto 0 do
+        Items[LIndex].Free;
+
+    for LIndex := 0 to MirrorController.MirrorCount - 1 do
     begin
-      NewMenuItem := TMenuItem.Create(FPopupMenu);
-      with NewMenuItem do
+      LBarButton := TdxBarButton.Create(FPopupMenu);
+      with LBarButton do
       begin
-        AutoCheck := True;
-        RadioItem := True;
-        Caption := IntToStr(I + 1);
-        Checked := (I = index);
-        if (I >= index) then
-          Tag := I + 1
-        else
-          Tag := I;
+        Index := LIndex;
+        ButtonStyle := bsChecked;
+        Caption := IntToStr(LIndex + 1);
+        Down := (LIndex = Self.Index);
+        Tag := LIndex;
         OnClick := FmiMirrorIndexClick;
       end;
-      FmiMirrorIndex.Add(NewMenuItem);
+      with FmiMirrorIndex.ItemLinks.Add do
+      begin
+        Index := LBarButton.Index;
+        Item := LBarButton;
+      end;
     end;
 
-    FmiMirrorPosition_Buttom.Checked := MirrorPosition = mpBottom;
-    FmiMirrorPosition_Top.Checked := MirrorPosition = mpTop;
+    FmiMirrorPosition_Bottom.Down := MirrorPosition = mpBottom;
+    FmiMirrorPosition_Top.Down := MirrorPosition = mpTop;
 
-    FmiMirrorColumns1.Checked := MirrorColumns = 1;
-    FmiMirrorColumns2.Checked := MirrorColumns = 2;
-    FmiMirrorColumns3.Checked := MirrorColumns = 3;
+    FmiMirrorColumns1.Down := MirrorColumns = 1;
+    FmiMirrorColumns2.Down := MirrorColumns = 2;
+    FmiMirrorColumns3.Down := MirrorColumns = 3;
   end;
 end;
 
@@ -2286,36 +2308,36 @@ end;
 
 procedure TMirrorControl.FmiMirrorIndexClick(Sender: TObject);
 begin
-  Index := (Sender as TMenuItem).Tag;
+  Index := (Sender as TdxBarButton).Tag;
   Main.fMain.CallControlAligner;
 end;
 
 procedure TMirrorControl.FmiRemoveMirrorClick(Sender: TObject);
 begin
-  MirrorController.Remove(Self.Index);
-  // FcxTabControl.Free; // ???
-  Main.fMain.CallControlAligner;
+  // MirrorController.Remove(Self.Index);
+  // see: TTabSheetItem.HandleReleaseMirror(var Msg: TMessage);
+  PostMessage(FOwner.Handle, WM_USER, Self.Index, 0);
 end;
 
 procedure TMirrorControl.FmiMirrorColumnsClick(Sender: TObject);
 begin
   with SettingsManager.Settings.ControlAligner do
-    MirrorColumns := (Sender as TMenuItem).Tag;
-  Settings.cxSEMirrorColumns.Value := (Sender as TMenuItem).Tag;
+    MirrorColumns := (Sender as TdxBarButton).Tag;
+  Settings.cxSEMirrorColumns.Value := (Sender as TdxBarButton).Tag;
   Main.fMain.CallControlAligner;
 end;
 
 procedure TMirrorControl.FmiMirrorPositionClick(Sender: TObject);
 begin
   with SettingsManager.Settings.ControlAligner do
-    MirrorPosition := TMirrorPosition((Sender as TMenuItem).Tag);
-  Settings.cxCOBMirrorPosition.ItemIndex := (Sender as TMenuItem).Tag;
+    MirrorPosition := TMirrorPosition((Sender as TdxBarButton).Tag);
+  Settings.cxCOBMirrorPosition.ItemIndex := (Sender as TdxBarButton).Tag;
   Main.fMain.CallControlAligner;
 end;
 
 procedure TMirrorControl.FmiCrypterClick(Sender: TObject);
 begin
-  Crypter[(Sender as TMenuItem).MenuIndex].CreateFolder;
+  Crypter[(Sender as TdxBarButton).Tag].CreateFolder;
 end;
 
 procedure TMirrorControl.FmiAllCrypterClick(Sender: TObject);
@@ -2523,8 +2545,6 @@ end;
 
 procedure TMirrorControl.SetIndex(AIndex: Integer);
 begin
-  if AIndex > Index then
-    Dec(AIndex);
   MirrorController.Move(Index, AIndex);
 end;
 
@@ -2608,113 +2628,143 @@ var
 begin
   inherited Create();
 
-  FPopupMenu := TPopupMenu.Create(AOwner);
+  FOwner := AOwner;
+
+  FPopupMenu := TdxBarPopupMenu.Create(AOwner);
   FPopupMenu.OnPopup := FPopupMenuPopup;
-  with FPopupMenu.Items do
+  with FPopupMenu do
   begin
-    FmiAddMirror := TMenuItem.Create(FPopupMenu);
+    FmiAddMirror := TdxBarButton.Create(FPopupMenu);
     with FmiAddMirror do
     begin
       Caption := StrAdd;
       OnClick := FmiAddMirrorClick;
     end;
-    Add(FmiAddMirror);
+    with ItemLinks.Add do
+    begin
+      Item := FmiAddMirror;
+    end;
 
-    FmiMirrorIndex := TMenuItem.Create(FPopupMenu);
+    FmiMirrorIndex := TdxBarSubItem.Create(FPopupMenu);
     with FmiMirrorIndex do
     begin
       Caption := 'Index';
     end;
-    Add(FmiMirrorIndex);
+    with ItemLinks.Add do
+    begin
+      Item := FmiMirrorIndex;
+    end;
 
-    FmiRemoveMirror := TMenuItem.Create(FPopupMenu);
+    FmiRemoveMirror := TdxBarButton.Create(FPopupMenu);
     with FmiRemoveMirror do
     begin
       Caption := StrRemove;
       OnClick := FmiRemoveMirrorClick;
     end;
-    Add(FmiRemoveMirror);
+    with ItemLinks.Add do
+    begin
+      Item := FmiRemoveMirror;
+    end;
 
-    FmiMirrorSettings := TMenuItem.Create(FPopupMenu);
+    FmiMirrorSettings := TdxBarSubItem.Create(FPopupMenu);
     with FmiMirrorSettings do
     begin
       Caption := StrSettings;
 
-      FmiMirrorColumns := TMenuItem.Create(FPopupMenu);
+      FmiMirrorColumns := TdxBarSubItem.Create(FPopupMenu);
       with FmiMirrorColumns do
       begin
         Caption := 'Columns';
 {$REGION 'Columns'}
-        FmiMirrorColumns1 := TMenuItem.Create(FPopupMenu);
+        FmiMirrorColumns1 := TdxBarButton.Create(FPopupMenu);
         with FmiMirrorColumns1 do
         begin
-          AutoCheck := True;
-          RadioItem := True;
+          ButtonStyle := bsChecked;
           Caption := '1';
           Tag := 1;
           OnClick := FmiMirrorColumnsClick;
         end;
-        Add(FmiMirrorColumns1);
+        with ItemLinks.Add do
+        begin
+          Item := FmiMirrorColumns1;
+        end;
 
-        FmiMirrorColumns2 := TMenuItem.Create(FPopupMenu);
+        FmiMirrorColumns2 := TdxBarButton.Create(FPopupMenu);
         with FmiMirrorColumns2 do
         begin
-          AutoCheck := True;
-          RadioItem := True;
+          ButtonStyle := bsChecked;
           Caption := '2';
           Tag := 2;
           OnClick := FmiMirrorColumnsClick;
         end;
-        Add(FmiMirrorColumns2);
+        with ItemLinks.Add do
+        begin
+          Item := FmiMirrorColumns2;
+        end;
 
-        FmiMirrorColumns3 := TMenuItem.Create(FPopupMenu);
+        FmiMirrorColumns3 := TdxBarButton.Create(FPopupMenu);
         with FmiMirrorColumns3 do
         begin
-          AutoCheck := True;
-          RadioItem := True;
+          ButtonStyle := bsChecked;
           Caption := '3';
           Tag := 3;
           OnClick := FmiMirrorColumnsClick;
         end;
-        Add(FmiMirrorColumns3);
+        with ItemLinks.Add do
+        begin
+          Item := FmiMirrorColumns3;
+        end;
 {$ENDREGION}
       end;
-      Add(FmiMirrorColumns);
+      with ItemLinks.Add do
+      begin
+        Item := FmiMirrorColumns;
+      end;
 
-      FmiMirrorPosition := TMenuItem.Create(FPopupMenu);
+      FmiMirrorPosition := TdxBarSubItem.Create(FPopupMenu);
       with FmiMirrorPosition do
       begin
         Caption := 'Position';
 {$REGION 'Positions'}
-        FmiMirrorPosition_Top := TMenuItem.Create(FPopupMenu);
-        with FmiMirrorPosition_Top do
+        FmiMirrorPosition_Bottom := TdxBarButton.Create(FPopupMenu);
+        with FmiMirrorPosition_Bottom do
         begin
-          AutoCheck := True;
-          RadioItem := True;
-          Caption := StrTop;
+          ButtonStyle := bsChecked;
+          Caption := StrBottom;
           Tag := 0;
           OnClick := FmiMirrorPositionClick;
         end;
-        Add(FmiMirrorPosition_Top);
-
-        FmiMirrorPosition_Buttom := TMenuItem.Create(FPopupMenu);
-        with FmiMirrorPosition_Buttom do
+        with ItemLinks.Add do
         begin
-          AutoCheck := True;
-          RadioItem := True;
-          Caption := StrButtom;
+          Item := FmiMirrorPosition_Bottom;
+        end;
+
+        FmiMirrorPosition_Top := TdxBarButton.Create(FPopupMenu);
+        with FmiMirrorPosition_Top do
+        begin
+          ButtonStyle := bsChecked;
+          Caption := StrTop;
           Tag := 1;
           OnClick := FmiMirrorPositionClick;
         end;
-        Add(FmiMirrorPosition_Buttom);
+        with ItemLinks.Add do
+        begin
+          Item := FmiMirrorPosition_Top;
+        end;
 {$ENDREGION}
       end;
-      Add(FmiMirrorPosition);
+      with ItemLinks.Add do
+      begin
+        Item := FmiMirrorPosition;
+      end;
     end;
-    Add(FmiMirrorSettings);
+    with ItemLinks.Add do
+    begin
+      Item := FmiMirrorSettings;
+    end;
   end;
 
-  FCrypterPopupMenu := TPopupMenu.Create(AOwner);
+  FCrypterPopupMenu := TdxBarPopupMenu.Create(AOwner);
 
   FcxTabControl := TcxTabControl.Create(AOwner);
   with FcxTabControl do
@@ -2780,10 +2830,11 @@ end;
 
 destructor TMirrorControl.Destroy;
 var
-  LCrypterIndex: Integer;
+  LIndex: Integer;
 begin
-  for LCrypterIndex := CrypterCount - 1 downto 0 do
-    RemoveCrypter(LCrypterIndex);
+  OutputDebugString('TMirrorControl.Destroy');
+  for LIndex := CrypterCount - 1 downto 0 do
+    RemoveCrypter(LIndex);
 
   FcxButtonCrypt.Free;
 
@@ -2797,7 +2848,7 @@ begin
 
   FCrypterPopupMenu.Free;
 
-  FmiMirrorPosition_Buttom.Free;
+  FmiMirrorPosition_Bottom.Free;
   FmiMirrorPosition_Top.Free;
   FmiMirrorPosition.Free;
   FmiMirrorColumns3.Free;
@@ -2806,13 +2857,18 @@ begin
   FmiMirrorColumns.Free;
   FmiMirrorSettings.Free;
   FmiRemoveMirror.Free;
-  FmiMirrorIndex.Clear;
+  with FmiMirrorIndex.ItemLinks do
+    for LIndex := Count - 1 downto 0 do
+      Items[LIndex].Free;
   FmiMirrorIndex.Free;
   FmiAddMirror.Free;
 
   FPopupMenu.Free;
 
+  FOwner := nil;
+
   inherited Destroy();
+  OutputDebugString('TMirrorControl.Destroy END');
 end;
 
 function TMirrorControl.FindCrypter(const AName: WideString): ICrypter;
@@ -2841,17 +2897,17 @@ end;
 
 function TMirrorControl.AddCrypter;
 var
-  I: Integer;
-  LNewMenuItem: TMenuItem;
+  LIndex: Integer;
+  LBarButton: TdxBarButton;
   LTabIndex: Integer;
   LCrypterPanel: ICrypterPanel;
 begin
   Result := -1;
 
-  for I := 0 to CrypterCount - 1 do
-    if SameText(AName, Crypter[I].Name) then
+  for LIndex := 0 to CrypterCount - 1 do
+    if SameText(AName, Crypter[LIndex].Name) then
     begin
-      Result := I;
+      Result := LIndex;
       Exit;
     end;
 
@@ -2861,15 +2917,21 @@ begin
   with SettingsManager.Settings.Plugins do
     LCrypterPanel := TCrypterPanel.Create(FcxTabControl, Self, TCrypterCollectionItem(FindPlugInCollectionItemFromCollection(AName, Crypter)));
 
-  Result := FCrypterList.Add(LCrypterPanel);
+  LIndex := FCrypterList.Add(LCrypterPanel);
 
-  LNewMenuItem := TMenuItem.Create(FCrypterPopupMenu);
-  FCrypterPopupMenu.Items.Add(LNewMenuItem);
-  with LNewMenuItem do
+  LBarButton := TdxBarButton.Create(FCrypterPopupMenu);
+  with LBarButton do
   begin
+    Index := LIndex;
     Caption := AName;
     // ShortCut := Menus.ShortCut($5A,[ssCtrl]);
+    Tag := LIndex;
     OnClick := FmiCrypterClick;
+  end;
+  with FCrypterPopupMenu.ItemLinks.Add do
+  begin
+    Index := LBarButton.Index;
+    Item := LBarButton;
   end;
 
   if not Assigned(FcxButtonCrypt) then
@@ -2897,6 +2959,8 @@ begin
   { TODO : Width not correctly, when changing NativeStyle }
   with FcxButtonCrypt do
     Width := GetTabControlTabWidth - Left - 1;
+
+  Result := LIndex;
 end;
 
 function TMirrorControl.RemoveCrypter;
@@ -2904,7 +2968,7 @@ begin
   if (FcxTabControl.TabIndex = AIndex + 1) then
     FcxTabControl.TabIndex := AIndex;
   FcxTabControl.Tabs.Delete(AIndex + 1);
-  FCrypterPopupMenu.Items.Items[AIndex].Free;
+  FCrypterPopupMenu.ItemLinks.Items[AIndex].Free;
 
   FCrypterList[AIndex].MirrorControl := nil;
   FCrypterList[AIndex]._Release; // forcing because of instance in TStatusGrid
@@ -2943,4 +3007,4 @@ end;
 { ****************************************************************************** }
 
 end.
-
+

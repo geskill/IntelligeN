@@ -21,7 +21,7 @@ type
   private
     FControlList: TInterfaceList<IControlBasic>;
 
-    FWorkPanel: TControl;
+    FWorkPanel: TWinControl;
     FTabSheetController: ITabSheetController;
     FTypeID: TTypeID;
 
@@ -58,7 +58,7 @@ type
     function GetPopupMenuChange: IPopupMenuChange;
     procedure SetPopupMenuChange(APopupMenuChange: IPopupMenuChange);
   public
-    constructor Create(AWorkPanel: TControl);
+    constructor Create(const AWorkPanel: TWinControl);
     destructor Destroy; override;
 
     // Base (see above on stackoverflow.com)

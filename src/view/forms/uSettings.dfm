@@ -39,7 +39,7 @@ object Settings: TSettings
     Anchors = [akLeft, akTop, akRight, akBottom]
     Focusable = False
     TabOrder = 0
-    Properties.ActivePage = cxTSPublish
+    Properties.ActivePage = cxTSControlAligner
     Properties.CustomButtons.Buttons = <>
     Properties.HotTrack = True
     ClientRectBottom = 331
@@ -1071,8 +1071,8 @@ object Settings: TSettings
         Top = 177
         Properties.DropDownListStyle = lsFixedList
         Properties.Items.Strings = (
-          'Top'
-          'Bottom')
+          'Bottom'
+          'Top')
         Properties.OnChange = cxCOBMirrorPositionPropertiesChange
         TabOrder = 3
         Width = 49

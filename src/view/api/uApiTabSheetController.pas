@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, Classes,
+  Windows, SysUtils, Classes, Controls, Messages,
   // Dev Express
   cxPC,
   // Common
@@ -74,6 +74,7 @@ type
     function GetPublishController: IPublishController;
   public
     constructor Create(AOwner: TComponent; APageController: IPageController; ATypeID: TTypeID); reintroduce;
+
     procedure Install;
     procedure AddEvents;
 

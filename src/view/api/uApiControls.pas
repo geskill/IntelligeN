@@ -90,7 +90,7 @@ type
 
     procedure LoadDefaultConfiguration; virtual;
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AControlID: TControlID); virtual;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AControlID: TControlID); virtual;
     destructor Destroy; override;
 
     // Internal
@@ -124,7 +124,7 @@ type
     function GetControlValue: WideString; override;
     procedure SetControlValue(AValue: WideString); override;
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
     destructor Destroy; override;
   end;
 
@@ -143,7 +143,7 @@ type
     procedure SetControlValue(AValue: WideString); override;
     procedure LoadDefaultConfiguration; override;
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
     property List: WideString read GetList write SetList;
     property DropDownRows: Integer read GetDropDownRows write SetDropDownRows;
     destructor Destroy; override;
@@ -154,7 +154,7 @@ type
     // Internal
     procedure SetControlValue(AValue: WideString); override;
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIControlCheckComboBox = class(TIControlBasic, IControlCheckComboBox)
@@ -173,7 +173,7 @@ type
     procedure SetControlValue(AValue: WideString); override;
     procedure LoadDefaultConfiguration; override;
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
     property List: WideString read GetList write SetList;
     property DropDownRows: Integer read GetDropDownRows write SetDropDownRows;
     destructor Destroy; override;
@@ -188,7 +188,7 @@ type
     function GetControlValue: WideString; override;
     procedure SetControlValue(AValue: WideString); override;
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
     destructor Destroy; override;
   end;
 
@@ -201,7 +201,7 @@ type
     function GetControlValue: WideString; override;
     procedure SetControlValue(AValue: WideString); override;
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
     destructor Destroy; override;
   end;
 
@@ -210,12 +210,12 @@ type
     // Internal
     procedure ControlOnChange(Sender: TObject); override;
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIReleaseDate = class(TIControlDateEdit)
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TITags = class(TIControlEdit)
@@ -242,12 +242,12 @@ type
   private
     procedure FCheckComboBoxPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIPassword = class(TIControlComboBox)
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TPictureMirrorData = class(TIControlData, IPictureMirrorData)
@@ -290,7 +290,7 @@ type
     procedure DrawIconRectangle();
     procedure DrawStatusRectangle();
   public
-    constructor Create(AOwner: TWinControl; APicture: IPicture; AImageHosterName: WideString); reintroduce;
+    constructor Create(const AOwner: TWinControl; APicture: IPicture; AImageHosterName: WideString); reintroduce;
     destructor Destroy; override;
 
     property Picture: IPicture read GetPicture write SetPicture;
@@ -346,7 +346,7 @@ type
     function AddMirror(AName: WideString): Integer; safecall;
     function RemoveMirror(AIndex: Integer): WordBool; safecall;
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
     destructor Destroy; override;
 
     // Base
@@ -372,7 +372,7 @@ type
     // Internal
     procedure FPopupMenuPopup(Sender: TObject); override;
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
     destructor Destroy; override;
   end;
 
@@ -382,7 +382,7 @@ type
 
   TIAudioBitrate = class(TIControlComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIAudioBitrateType = class(TIControlComboBoxList)
@@ -391,27 +391,27 @@ type
 
   TIAudioEncoder = class(TIControlComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIAudioSamplingRate = class(TIControlComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIAudioStream = class(TIControlComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIGenre = class(TIControlComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TILanguage = class(TIControlCheckComboBox)
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIRuntime = class(TIControlEdit)
@@ -420,17 +420,17 @@ type
 
   TIVideoCodec = class(TIControlComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIVideoStream = class(TIControlComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIVideoSystem = class(TIControlComboBoxList)
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TINFO = class(TIControlRichEdit)
@@ -443,7 +443,7 @@ type
     // Internal
     procedure ControlOnChange(Sender: TObject); override;
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
 
     destructor Destroy; override;
   end;
@@ -453,7 +453,7 @@ type
     // Internal
     procedure ControlOnChange(Sender: TObject); override;
   public
-    constructor Create(AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
 implementation
@@ -697,15 +697,14 @@ begin
     Parent := AOwner;
 
     BevelOuter := bvNone;
+    Caption := '';
+    Color := clWhite;
 
     with Constraints do
     begin
       MinHeight := 13;
       MinWidth := 10;
     end;
-
-    Caption := '';
-    Color := clWhite;
 
     OnMouseDown := FPanelMouseDown;
     OnResize := FPanelResize;
@@ -1487,7 +1486,7 @@ begin
   end;
 end;
 
-constructor TPictureMirror.Create(AOwner: TWinControl; APicture: IPicture; AImageHosterName: WideString);
+constructor TPictureMirror.Create(const AOwner: TWinControl; APicture: IPicture; AImageHosterName: WideString);
 begin
   inherited Create(AImageHosterName, APicture.Value);
 
@@ -1871,6 +1870,8 @@ begin
     Left := FTitleLabel.Left + FTitleLabel.Width + 6;
     Height := 16;
     Width := FClearLabel.Left - Left - 6;
+
+    OnMouseDown := FPanelMouseDown;
   end;
 
   with FPopupMenu do

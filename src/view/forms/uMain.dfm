@@ -203,6 +203,12 @@ object Main: TMain
               TabOrder = 0
               ExplicitWidth = 516
               ExplicitHeight = 569
+              inherited cxGrid: TcxGrid
+                Width = 516
+                Height = 569
+                ExplicitWidth = 516
+                ExplicitHeight = 569
+              end
             end
           end
         end
@@ -874,6 +880,13 @@ object Main: TMain
       Hint = 'AutoPublish'
       OnExecute = aSeriesPublishExecute
     end
+    object aMirrorItemAdd: TAction
+      Category = 'MirrorItem'
+      Caption = 'Add'
+      Hint = 'Add'
+      ImageIndex = 0
+      OnExecute = aMirrorItemAddExecute
+    end
   end
   object dxDockingManager: TdxDockingManager
     Color = clBtnFace
@@ -917,8 +930,10 @@ object Main: TMain
       'QuickBar'
       'ControlAlignerRightClick'
       'PageControlRightClick'
-      'PublishDropDownClick')
+      'PublishDropDownClick'
+      'MirrorRightClick')
     Categories.ItemsVisibles = (
+      2
       2
       2
       2
@@ -931,6 +946,7 @@ object Main: TMain
       2
       2)
     Categories.Visibles = (
+      True
       True
       True
       True
@@ -1270,10 +1286,6 @@ object Main: TMain
       Action = aHide
       Category = 0
     end
-    object nWindowPublishQueue: TdxBarButton
-      Action = aWindowPublishQueue
-      Category = 0
-    end
     object nFile: TdxBarSubItem
       Caption = 'File'
       Category = 1
@@ -1436,6 +1448,10 @@ object Main: TMain
     end
     object nWindowPublish: TdxBarButton
       Action = aWindowPublish
+      Category = 3
+    end
+    object nWindowPublishQueue: TdxBarButton
+      Action = aWindowPublishQueue
       Category = 3
     end
     object nDesktop: TdxBarSubItem
@@ -1694,6 +1710,10 @@ object Main: TMain
     object dxBBPublishItemSettings: TdxBarButton
       Action = aPublishItemSettings
       Category = 10
+    end
+    object dxBBMirrorItemAdd: TdxBarButton
+      Action = aMirrorItemAdd
+      Category = 11
     end
   end
   object ImageList: TImageList
@@ -4387,7 +4407,7 @@ object Main: TMain
         ItemName = 'dxBBmiCloseAllOther'
       end>
     UseOwnFont = False
-    Left = 408
+    Left = 416
     Top = 560
   end
   object dxBpmPublishDropDownClick: TdxBarPopupMenu
@@ -4411,6 +4431,17 @@ object Main: TMain
       end>
     UseOwnFont = False
     Left = 560
+    Top = 560
+  end
+  object dxBpmMirrorRightClick: TdxBarPopupMenu
+    BarManager = dxBarManager
+    ItemLinks = <
+      item
+        Visible = True
+        ItemName = 'dxBBMirrorItemAdd'
+      end>
+    UseOwnFont = False
+    Left = 280
     Top = 560
   end
 end

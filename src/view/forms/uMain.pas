@@ -79,6 +79,7 @@ type
     aPublishItemPreview: TAction;
     aPublishItemPublish: TAction;
     aPublishItemSettings: TAction;
+    aMirrorItemAdd: TAction;
     aSeriesAutoCompletion: TAction;
     aSeriesCrypterCrypt: TAction;
     aSeriesCrypterCheck: TAction;
@@ -216,6 +217,8 @@ type
     dxBBPublishItemPublish: TdxBarButton;
     dxBBPublishItemSettings: TdxBarButton;
     dxBBPublishItemVisit: TdxBarButton;
+    dxBpmMirrorRightClick: TdxBarPopupMenu;
+    dxBBMirrorItemAdd: TdxBarButton;
 
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -274,6 +277,8 @@ type
     procedure aPublishExecute(Sender: TObject);
     // ActivePublishItem
     procedure aPublishItemExecute(Sender: TObject);
+    // ActiveMirrorItem
+    procedure aMirrorItemAddExecute(Sender: TObject);
     // Series
     procedure aSeriesAutoCompletionExecute(Sender: TObject);
     procedure aSeriesCrypterCryptExecute(Sender: TObject);
@@ -717,6 +722,12 @@ begin
   fPublish.ExecuteActivePublishItem(TComponent(Sender).Tag);
 end;
 
+procedure TMain.aMirrorItemAddExecute(Sender: TObject);
+begin
+  fMain.ActiveTabSheetController.MirrorController.Add;
+  fMain.CallControlAligner;
+end;
+
 procedure TMain.aSeriesAutoCompletionExecute(Sender: TObject);
 begin
   fMain.CallSeriesAutoCompletion;
@@ -874,39 +885,39 @@ end;
 
 procedure TMain.LayoutChanged(Sender: TObject);
 var
-  I: Integer;
-  StringList: TStrings;
-  dxBarButton: TdxBarButton;
+  LIndex: Integer;
 
+  StringList: TStrings;
+  LBarButton: TdxBarButton;
 begin
   with cxBEILayout do
     EditValue := SettingsManager.Settings.Layout.ActiveLayoutName;
 
   with nDesktop.ItemLinks do
-    for I := Count - 4 downto 0 do
-      Items[I].Free;
+    for LIndex := Count - 4 downto 0 do
+      Items[LIndex].Free;
 
   StringList := SettingsManager.Settings.Layout.GetLayoutItemList;
   try
     aDeleteDesktop.Enabled := (StringList.Count > 0);
 
-    for I := 0 to StringList.Count - 1 do
+    for LIndex := 0 to StringList.Count - 1 do
     begin
-      dxBarButton := TdxBarButton.Create(nDesktop);
-      with dxBarButton do
+      LBarButton := TdxBarButton.Create(nDesktop);
+      with LBarButton do
       begin
-        index := I;
+        Index := LIndex;
         ButtonStyle := bsChecked;
-        Caption := StringList[I];
-        if (StringList[I] = SettingsManager.Settings.Layout.ActiveLayoutName) then
+        Caption := StringList[LIndex];
+        if (StringList[LIndex] = SettingsManager.Settings.Layout.ActiveLayoutName) then
           Down := True;
 
         OnClick := LayoutClick;
       end;
       with nDesktop.ItemLinks.Add do
       begin
-        index := dxBarButton.index;
-        Item := dxBarButton;
+        Index := LBarButton.Index;
+        Item := LBarButton;
       end;
     end;
 

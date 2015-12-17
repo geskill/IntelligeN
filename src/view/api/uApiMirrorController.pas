@@ -19,7 +19,7 @@ type
   private
     FMirrorList: TInterfaceList<IMirrorControl>;
 
-    FWorkPanel: TControl;
+    FWorkPanel: TWinControl;
     FTabSheetController: ITabSheetController;
 
     FSpaceMouseDown: INotifyEventHandler;
@@ -43,7 +43,7 @@ type
     function GetPopupMenuChange: IPopupMenuChange;
     procedure SetPopupMenuChange(APopupMenuChange: IPopupMenuChange);
   public
-    constructor Create(AWorkPanel: TControl);
+    constructor Create(const AWorkPanel: TWinControl);
     destructor Destroy; override;
 
     // Base
@@ -238,19 +238,18 @@ var
 begin
   Result := True;
   try
-    for I := 0 to Mirror[Index].CrypterCount - 1 do
-    begin
-      TabSheetController.PageController.CrypterManager.RemoveCrypterJob(Mirror[Index].Crypter[I]);
-      Mirror[Index].Crypter[I].MirrorControl := nil;
-    end;
     for I := 0 to Mirror[Index].DirectlinkCount - 1 do
     begin
       TabSheetController.PageController.FileHosterManager.RemoveHosterJob(Mirror[Index].Directlink[I]);
       Mirror[Index].Directlink[I].DirectlinksPanel := nil;
     end;
+    for I := 0 to Mirror[Index].CrypterCount - 1 do
+    begin
+      TabSheetController.PageController.CrypterManager.RemoveCrypterJob(Mirror[Index].Crypter[I]);
+      Mirror[Index].Crypter[I].MirrorControl := nil;
+    end;
     Mirror[Index].GetDirectlink.MirrorControl := nil;
     Mirror[Index].MirrorController := nil;
-
     FMirrorList.Delete(Index);
   except
     Result := False;
