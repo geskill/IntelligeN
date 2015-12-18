@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, Classes, Controls, Messages,
+  Windows, SysUtils, StrUtils, Classes, Controls, Messages,
   // Dev Express
   cxPC,
   // Common
@@ -255,8 +255,7 @@ end;
 
 procedure TTabSheetController.UpdateCaption;
 begin
-  if DataChanged then
-    Self.Caption := ReleaseNameShort + '*';
+  Self.Caption := ReleaseNameShort + IfThen(DataChanged, '*');
 end;
 
 procedure TTabSheetController.ReleaseNameChange(const AReleaseName: WideString);
