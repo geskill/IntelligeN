@@ -24,7 +24,7 @@
 			<DCC_DcuOutput>dcu</DCC_DcuOutput>
 			<DCC_BplOutput>../../../bin</DCC_BplOutput>
 			<DCC_DependencyCheckOutputName>..\..\..\bin\frameworkX.bpl</DCC_DependencyCheckOutputName>
-			<DCC_UnitSearchPath>../../core\external\;../../core\external\BESEN;../../core\external\DEC\Part_I;../../core\external\MultiEvent;../../core\external\OmniThreadLibrary;../../core\external\OmniThreadLibrary\src;../../core\external\Spring4D\Base;../../core\external\Spring4D\Base\Collections;../../core\external\Spring4D\Base\Reflection;../../core\external\Spring4D\Core\Container;../../core\external\Spring4D\Core\Services;../../core\external\Spring4D\Extensions\Cryptography;../../core\external\Spring4D\Extensions\Utils;../../core\external\TRegExpr\Source;../../sdk\plugins;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_UnitSearchPath>../../core\external\;../../core\external\BESEN;../../core\external\BESEN\src\;../../core\external\DEC\Part_I;../../core\external\MultiEvent;../../core\external\OmniThreadLibrary;../../core\external\OmniThreadLibrary\src;../../core\external\Spring4D\Base;../../core\external\Spring4D\Base\Collections;../../core\external\Spring4D\Base\Reflection;../../core\external\Spring4D\Core\Container;../../core\external\Spring4D\Core\Services;../../core\external\Spring4D\Extensions\Cryptography;../../core\external\Spring4D\Extensions\Utils;../../core\external\TRegExpr\Source;../../sdk\plugins;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<GenDll>true</GenDll>
 			<GenPackage>true</GenPackage>
@@ -108,11 +108,3 @@
 			<ProjectFileVersion>12</ProjectFileVersion>
 		</ProjectExtensions>
 	</Project>
-
-<!-- EurekaLog First Line
-[Exception Log]
-EurekaLog Version=7007
-Activate=0
-DeleteMapAfterCompile=1
-Encrypt Password=""
-EurekaLog Last Line -->
