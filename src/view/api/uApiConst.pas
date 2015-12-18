@@ -48,6 +48,7 @@ resourcestring
   StrPluginDefect = 'DDL file of %s plugin defect [%s]';
   StrPluginIncompatible = 'Plugin version (%s) by definition incompatible for this version (%s) ~ %s ~';
   StrPluginFileNotFound = 'Plugin file not found ~ %s ~';
+  StrPluginCouldNotLoad = 'The %s app plugin could not be loaded ~ %s ~';
   StrPluginCanNotUnLoad = 'The %s app plugin is still in use ~ %s ~';
   StrReleaseNameEmpty = '<ReleaseName>';
 

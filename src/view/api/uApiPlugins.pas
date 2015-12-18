@@ -476,16 +476,17 @@ begin
     { ....... } LResult := LAppPlugin.Start(AAppController);
     { ..... } except
     { ....... } LHighException := True;
+    { ....... } LDoUnload := True;
     { ....... } LAppPlugin.Stop;
     { ....... } TPluginBasic.UninitializePlugin(LAppPlugin);
-    { ....... } TPluginBasic.UnLoadPluginBase(LLibraryHandle);
     { ....... } LAppPlugin := nil;
-    { ....... } LDoUnload := True;
     { ..... } end;
     { ... } except
-    { ..... } if not LDoUnload then
-    { ....... } TPluginBasic.UnLoadPluginBase(LLibraryHandle);
     { ..... } LAppPlugin := nil;
+    { ..... } if LDoUnload then
+    { ..... } begin
+    { ....... } TPluginBasic.UnLoadPluginBase(LLibraryHandle);
+    { ..... } end;
     { ... } end;
 
     { ... } if LResult then
@@ -495,11 +496,9 @@ begin
     { ... } else
     { ... } if not LResult and not LHighException then
     { ... } begin
-    { ..... } LAppPlugin.Stop;
     { ..... } TPluginBasic.UninitializePlugin(LAppPlugin);
-    { ..... } TPluginBasic.UnLoadPluginBase(LLibraryHandle);
     { ..... } LAppPlugin := nil;
-    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [LAppPlugin.ErrorMsg, ExtractFileName(LPluginFile)]));
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginCouldNotLoad, [App.Name, ExtractFileName(LPluginFile)]));
     { ... } end
     { ... } else
     { ... } begin

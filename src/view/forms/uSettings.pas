@@ -1800,7 +1800,12 @@ begin
   end
   else
   begin
-    TPluginBasic.AppLoad(TAppCollectionItem(SettingsManager.Settings.Plugins.App.Items[AIndex]), Main);
+    try
+      TPluginBasic.AppLoad(TAppCollectionItem(SettingsManager.Settings.Plugins.App.Items[AIndex]), Main);
+    except
+      TcxCheckListBox(Sender).Items[AIndex].State := cbsUnchecked;
+      raise ;
+    end;
   end;
 
   TPlugInCollectionItem(SettingsManager.Settings.Plugins.App.Items[AIndex]).Enabled := (ANewState = cbsChecked);
