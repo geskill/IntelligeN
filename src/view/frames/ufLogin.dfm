@@ -40,6 +40,7 @@ object fLogin: TfLogin
       Anchors = [akTop, akRight]
       Caption = 'Register'
       TabOrder = 5
+      Visible = False
       OnClick = cxbRegisterClick
     end
     object eLoginname: TcxTextEdit

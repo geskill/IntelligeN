@@ -67,11 +67,11 @@ type
     function CallDirectlinkMethod(Instance: TObject; ClassType: TClass; const MethodName: string; var Params: Variant): Variant;
     function CallMirrorMethod(Instance: TObject; ClassType: TClass; const MethodName: string; var Params: Variant): Variant;
 
-    function Compile(AIScript: string): Boolean;
+    function Compile(const AIScript: string): Boolean;
   public
-    constructor Create(AWebsiteCMS, AWebsite: string; ACMSWebsiteData: ITabSheetData);
-    function Execute(AIScript: string): RIScriptResult;
-    function ErrorAnalysis(AIScript: string): RIScriptResult;
+    constructor Create(const AWebsiteCMS, AWebsite: string; const ACMSWebsiteData: ITabSheetData);
+    function Execute(const AIScript: string): RIScriptResult;
+    function ErrorAnalysis(const AIScript: string): RIScriptResult;
     destructor Destroy; override;
   end;
 
@@ -256,7 +256,7 @@ begin
     Result := Integer(IMirrorContainer(Instance as TIMirrorContainer).Directlink[Params[0]] as TIDirectlink)
 end;
 
-function TIScirptParser.Compile(AIScript: string): Boolean;
+function TIScirptParser.Compile(const AIScript: string): Boolean;
 var
   I: Integer;
 begin
@@ -368,7 +368,7 @@ begin
   FIMirror := TIMirror.Create(FCMSWebsiteData);
 end;
 
-function TIScirptParser.Execute(AIScript: string): RIScriptResult;
+function TIScirptParser.Execute(const AIScript: string): RIScriptResult;
 begin
   Result := ErrorAnalysis(AIScript);
   if not Result.HasError then
@@ -387,7 +387,7 @@ begin
   end;
 end;
 
-function TIScirptParser.ErrorAnalysis(AIScript: string): RIScriptResult;
+function TIScirptParser.ErrorAnalysis(const AIScript: string): RIScriptResult;
 begin
   Result.Init;
   Result.HasError := not Compile(AIScript);

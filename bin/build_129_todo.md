@@ -32,6 +32,8 @@ Checked items are planned for next release.
 
 ######Crawler
 
+- [ ] Implement a CustomScript crawler, which crawls in already crawled content
+
 - [x] Update missing plugins to match new interface (incl. full update of Amazon.com/.de)
 
 ######Crypter
@@ -57,8 +59,6 @@ Checked items are planned for next release.
 - [ ] Add simpler hoster ranking not defined by website (i.e. FileHoster ranking)
 
 - [x] Improve PublishQueue (delete old entries)
-
-- [ ] Improve WebsiteEditor control arrangement in general tab
 
 - [ ] Add progress bar or indication for crawling overall progress
 
