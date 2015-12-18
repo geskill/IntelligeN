@@ -387,20 +387,32 @@ begin
 end;
 
 function TXenForo.DoAnalyzePost;
+var
+  LArticleID, LCurrentTime, LMaxTime: Integer;
 begin
-  // <input type="checkbox" name="posts[]" value="5" class="InlineModCheck item" data-target="#post-5" title="Select this post by root" />
+  LArticleID := -1;
+  LMaxTime := -1;
 
-  Result := not(Pos('type="checkbox" name="posts[]"', AResponseStr) = 0);
+  Result := not(Pos('class="privateControls"', AResponseStr) = 0);
 
   if Result then
   begin
     with TRegExpr.Create do
       try
         InputString := AResponseStr;
-        Expression := 'type="checkbox" name="posts\[\]" value="(\d+)"';
+        Expression := '"privateControls".*?data\-time="(\d+)".*?posts\/(\d+)\/permalink';
 
         if Exec(InputString) then
-          ArticleID := StrToInt(Match[1]);
+        begin
+          repeat
+            LCurrentTime := StrToInt(Match[1]);
+
+            if (LCurrentTime >= LMaxTime) then
+            begin
+              LArticleID := StrToInt(Match[2]);
+            end;
+          until not ExecNext;
+        end;
       finally
         Free;
       end;
