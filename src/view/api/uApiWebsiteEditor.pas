@@ -8,7 +8,7 @@ uses
   ActiveX,
   // DevExpress
   dxBar, cxPC, cxLabel, cxTreeView, cxListView, cxButtons, cxTextEdit, cxCheckBox, cxDropDownEdit, cxGrid, cxGridLevel, cxGridCustomTableView,
-  cxGridTableView, cxDataStorage, cxFilter, cxBlobEdit, cxButtonEdit, cxListBox, cxEdit, cxCheckComboBox,
+  cxGridTableView, cxDataStorage, cxFilter, cxBlobEdit, cxButtonEdit, cxListBox, cxEdit, cxCheckComboBox, dxLayoutControl, dxLayoutContainer,
   // Dev Express Mod
   uMycxCheckComboBox,
   // HTTPManager implementation
@@ -38,8 +38,6 @@ type
   TIDInfos = array of TIDInfo;
 
   TSettingsEdit = record
-    FBasis: TPanel;
-    FTitle: TcxLabel;
     FTextEdit: TcxTextEdit;
     FName: string;
     FTop: Boolean;
@@ -201,7 +199,8 @@ type
     FcxTSGeneral: TcxTabSheet;
     FEditArray: array of TSettingsEdit;
     FCheckboxArray: array of TSettingsCheckbox;
-    FFlowPanel: TFlowPanel;
+    FLayoutControl: TdxLayoutControl;
+    FLayoutControlRoot: TdxCustomLayoutGroup;
     FcxTSIDs: TcxTabSheet;
     FIDPanelList: TList<TIDPanel>;
     FcxTCIDs: TcxTabControl;
@@ -1890,6 +1889,14 @@ begin
   ClientWidth := 635;
   Position := poMainFormCenter;
 
+  with Padding do
+  begin
+    Bottom := 8 + 31;
+    Left := 8;
+    Right := 8;
+    Top := 8;
+  end;
+
   OnShow := Show;
 
   FcxPCWebsiteSettings := TcxPageControl.Create(Self);
@@ -1897,14 +1904,8 @@ begin
   begin
     Parent := Self;
 
-    Left := 8;
-    Top := 8;
-    Width := Self.ClientWidth - 16;
-    Height := Self.ClientHeight - 16 - 31;
-
+    Align := alClient;
     Focusable := False;
-
-    Anchors := [akLeft, akTop, akRight, akBottom];
   end;
 
   FcxTSGeneral := TcxTabSheet.Create(FcxPCWebsiteSettings);
@@ -1915,21 +1916,30 @@ begin
     Caption := 'General';
   end;
 
-  FFlowPanel := TFlowPanel.Create(FcxTSGeneral);
-  with FFlowPanel do
+  FLayoutControl := TdxLayoutControl.Create(FcxTSGeneral);
+  with FLayoutControl do
   begin
     Parent := FcxTSGeneral;
 
+    BevelInner := bvNone;
     BevelOuter := bvNone;
-    Caption := '';
-    ShowCaption := False;
 
-    Left := 8;
-    Top := 8;
-    Width := Self.ClientWidth - 16;
-    Height := Self.ClientHeight - 16;
+    Align := alClient;
+    ParentBackground := True;
 
-    Anchors := [akLeft, akTop, akRight, akBottom];
+    with OptionsItem do
+    begin
+      AllowGroupWrapItems := True;
+    end;
+
+    FLayoutControlRoot := FLayoutControl.Items;
+    with FLayoutControlRoot do
+    begin
+      AlignHorz := ahLeft;
+      AlignVert := avTop;
+      LayoutDirection := ldHorizontal;
+      // ShowBorder := False;
+    end;
   end;
 
   FcxTSIDs := TcxTabSheet.Create(FcxPCWebsiteSettings);
@@ -2354,39 +2364,13 @@ var
 begin
   with SettingsEdit do
   begin
-    FBasis := TPanel.Create(Self);
-    with FBasis do
+    FTextEdit := TcxTextEdit.Create(Self);
+    with FTextEdit do
     begin
-      Parent := FFlowPanel;
-
-      BevelOuter := bvNone;
-
-      Caption := '';
-      ParentColor := True;
-    end;
-
-    FTitle := TcxLabel.Create(FBasis);
-    with FTitle do
-    begin
-      Parent := FBasis;
+      FLayoutControlRoot.CreateItemForControl(FTextEdit).Caption := AName;
 
       Top := 0;
       Left := 0;
-
-      Caption := AName;
-      Transparent := True;
-
-      Show;
-    end;
-
-    FTextEdit := TcxTextEdit.Create(FBasis);
-    with FTextEdit do
-    begin
-      Parent := FBasis;
-
-      Top := 16;
-      Left := 0;
-      Width := FBasis.Width;
 
       Anchors := [akLeft, akTop, akRight];
 
@@ -2476,7 +2460,7 @@ begin
     FCheckBox := TcxCheckBox.Create(Self);
     with FCheckBox do
     begin
-      Parent := FFlowPanel;
+      FLayoutControlRoot.CreateItemForControl(FCheckBox).Caption := '';
 
       Width := 185; // default width of TPanel
 
@@ -2830,14 +2814,13 @@ begin
     with FEditArray[I] do
     begin
       FTextEdit.Free;
-      FTitle.Free;
-      FBasis.Free;
     end;
 
   for I := 0 to length(FCheckboxArray) - 1 do
     FCheckboxArray[I].FCheckBox.Free;
 
-  FFlowPanel.Free;
+  FLayoutControlRoot := nil;
+  FLayoutControl.Free;
 
   FcxTSGeneral.Free;
 
