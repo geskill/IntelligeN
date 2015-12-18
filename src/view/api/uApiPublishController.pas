@@ -1153,7 +1153,7 @@ function TICMSWebsiteContainer.GeneratePublishJob: IPublishJob;
 var
   PublishJob: TIPublishJob;
 begin
-  PublishJob := TIPublishJob.Create(TabSheetController.ReleaseName + ' @ ' + Website);
+  PublishJob := TIPublishJob.Create(TabSheetController.ReleaseNameShort + ' @ ' + Website);
 
   PublishJob.Add(GeneratePublishTab);
 
