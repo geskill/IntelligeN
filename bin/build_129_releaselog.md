@@ -520,4 +520,20 @@
 
 ######minor enhancements
 
+* Added "short_title" subjects
+
+* Added redirect in XenForo settings
+
 * Improved IScript generation
+
+* Improved PublishJob caption
+
+* Improved WebsiteEditor using DevExpress LayoutControl
+
+* Improved loading app plug-ins
+
+* Fixed issue canceling publish jobs
+
+* Fixed XenForo DoAnalyzePost
+
+* Updated hoster.xml removed deleted hosters
