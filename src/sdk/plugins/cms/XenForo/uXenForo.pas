@@ -19,7 +19,7 @@ uses
 type
   TXenForoSettings = class(TCMSBoardIPPlugInSettings)
   strict private
-    fprefix_field: string;
+    fprefix_field, fredirect: string;
     fintelligent_posting_boundedsearch: Boolean;
     fprefix: Variant;
   public
@@ -27,6 +27,9 @@ type
   published
     [AttrDefaultValue('prefix_id')]
     property prefix_field: string read fprefix_field write fprefix_field;
+
+    [AttrDefaultValue('/')]
+    property redirect: string read fredirect write fredirect;
 
     [AttrDefaultValue(False)]
     property intelligent_posting;
@@ -123,7 +126,7 @@ begin
     AddFormField('password', AccountPassword);
     AddFormField('remember', '1');
     AddFormField('cookie_check', '0');
-    AddFormField('redirect', '/');
+    AddFormField('redirect', XenForoSettings.redirect);
     AddFormField('_xfToken', '');
   end;
 

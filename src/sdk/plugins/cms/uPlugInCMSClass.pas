@@ -30,15 +30,17 @@ type
 
   TCMSCustomFields = class(TPersistent)
   private
+    FOwnsObjects: Boolean;
     FCustomFieldsList: TList<TCMSCustomField>;
   protected
     function GetField(Index: Integer): TCMSCustomField;
     function GetFieldCount: Integer;
   public
-    constructor Create;
+    constructor Create(const AOwnsObjects: Boolean = True);
     function Add(const ACMSCustomField: TCMSCustomField): Integer;
     property Field[Index: Integer]: TCMSCustomField read GetField;
     property FieldCount: Integer read GetFieldCount;
+    procedure ReleaseObjects;
     destructor Destroy; override;
   end;
 
@@ -178,17 +180,27 @@ begin
   Result := FCustomFieldsList.Add(ACMSCustomField);
 end;
 
-constructor TCMSCustomFields.Create;
+procedure TCMSCustomFields.ReleaseObjects;
+var
+  LIndex: Integer;
 begin
+  for LIndex := FCustomFieldsList.Count - 1 downto 0 do
+  begin
+    FCustomFieldsList.Items[LIndex].Free;
+    FCustomFieldsList.Delete(LIndex);
+  end;
+end;
+
+constructor TCMSCustomFields.Create(const AOwnsObjects: Boolean = True);
+begin
+  FOwnsObjects := AOwnsObjects;
   FCustomFieldsList := TList<TCMSCustomField>.Create;
 end;
 
 destructor TCMSCustomFields.Destroy;
-var
-  I: Integer;
 begin
-  for I := 0 to FCustomFieldsList.Count - 1 do
-    FCustomFieldsList.Items[I].Free;
+  if FOwnsObjects then
+    ReleaseObjects;
   FCustomFieldsList.Free;
   inherited Destroy;
 end;
