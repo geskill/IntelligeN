@@ -344,9 +344,9 @@ begin
     fsCMS:
       result := '%intelligen_templates_cms%';
     fsCMSSubject:
-      result := '%intelligen_templates_cms%\message\';
-    fsCMSMessage:
       result := '%intelligen_templates_cms%\subject\';
+    fsCMSMessage:
+      result := '%intelligen_templates_cms%\message\';
     fsSite:
       result := '%intelligen_templates_site%';
     fsType:
