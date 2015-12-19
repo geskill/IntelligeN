@@ -1619,8 +1619,6 @@ begin
     begin
       TCMSCollectionItem(Settings.Plugins.CMS.Items[LCMSIndex]).UpdateWebsites;
     end;
-
-    // TODO: Validate lower bounds (i.e. ControlAligner.MirrorColumns > 0 OR ControlAligner.PaddingLeft > 0)
   end;
 end;
 

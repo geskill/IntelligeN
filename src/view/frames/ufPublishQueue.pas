@@ -176,13 +176,12 @@ begin
   cxBStop.Enabled := True;
   UpdateOverallProgress;
 
-  if FCompletedList.Count > 25 then
+  if FCompletedList.Count > 20 then
     RemoveCompletedJobs(5);
 end;
 
 procedure TfPublishQueue.JobFinished(const AID: Longword);
 begin
-  FCompletedList.Add(AID);
   Inc(FCompletedCount);
   UpdateOverallProgress;
 end;
@@ -272,17 +271,22 @@ begin
     pmisWORKING, pmisERROR, pmisFINISHED:
       begin
         LIndex := FindRecordByID(PublishJob.UniqueID);
+
+        if (pmisFINISHED = Status) then
+          FCompletedList.Add(PublishJob.UniqueID);
+
         if not(LIndex = -1) then
         begin
           with cxGPublishQueueTableView.DataController do
           begin
             BeginUpdate;
             try
-              Values[LIndex, cxGPublishQueueTableViewColumnProgress.Index] := Round(AProgressPosition);
               if (pmisERROR = Status) then
                 Values[LIndex, cxGPublishQueueTableViewColumnErrorMsg.Index] := VarToStr(Values[LIndex, cxGPublishQueueTableViewColumnErrorMsg.Index]) + sLineBreak + msg
               else
                 Values[LIndex, cxGPublishQueueTableViewColumnHint.Index] := StringReplace(msg, ',', ', ', [rfReplaceAll]);
+
+              Values[LIndex, cxGPublishQueueTableViewColumnProgress.Index] := Round(AProgressPosition);
             finally
               EndUpdate;
             end;
