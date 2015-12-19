@@ -212,7 +212,7 @@ begin
           Inc(LRepeatIndex);
           // LRepeatIndex = 1, 2, 3
 
-        until (LSuccess or (LRepeatIndex >= Data.PublishRetry));
+        until (LSuccess or (LRepeatIndex > Data.PublishRetry));
 
       finally
         task.Comm.Send(MSG_PUBLISH_ITEM_TASK_COMPLETED, [task.UniqueID, LOmniValue.AsObject]);
