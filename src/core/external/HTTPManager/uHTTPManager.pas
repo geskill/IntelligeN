@@ -304,7 +304,7 @@ procedure THTTPManager.UpdateCapacity(const ARequestArrayLength: Integer);
 var
   Index, Threshold, NewLowerBound: Integer;
 begin
-  Threshold := FConnectionMaximum.Value * 10;
+  Threshold := FConnectionMaximum.Value * 100;
   if not FRequestArrayLowerBoundUpdate and ((ARequestArrayLength - FRequestArrayLowerBound.Value) > Threshold) then
   begin
     FRequestArrayLowerBoundUpdate := True;
