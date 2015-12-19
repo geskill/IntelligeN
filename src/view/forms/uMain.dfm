@@ -333,11 +333,6 @@ object Main: TMain
                 Height = 256
                 ExplicitWidth = 196
                 ExplicitHeight = 256
-                inherited cxGPublishQueueTableView: TcxGridTableView
-                  inherited cxGPublishQueueTableViewColumnCanel: TcxGridColumn
-                    Properties.Images = ImageList
-                  end
-                end
               end
             end
           end

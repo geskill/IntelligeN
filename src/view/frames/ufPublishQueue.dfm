@@ -101,17 +101,8 @@ object fPublishQueue: TfPublishQueue
       end
       object cxGPublishQueueTableViewColumnCanel: TcxGridColumn
         Caption = 'Cancel'
-        PropertiesClassName = 'TcxButtonEditProperties'
-        Properties.Buttons = <
-          item
-            Caption = 'Cancel'
-            Default = True
-            ImageIndex = 48
-            Hint = 'Cancel'
-            Kind = bkGlyph
-          end>
-        Properties.ViewStyle = vsButtonsOnly
-        Properties.OnButtonClick = cxGPublishQueueTableViewColumnCanelPropertiesButtonClick
+        RepositoryItem = cxERCancelButtonActive
+        OnGetProperties = cxGPublishQueueTableViewColumnCanelGetProperties
         MinWidth = 24
         Options.Filtering = False
         Options.ShowEditButtons = isebAlways
@@ -130,7 +121,7 @@ object fPublishQueue: TfPublishQueue
       GridView = cxGPublishQueueTableView
     end
   end
-  object cxERProgressBar: TcxEditRepository
+  object cxEditRepo: TcxEditRepository
     Left = 88
     Top = 64
     object cxERProgressBarOK: TcxEditRepositoryProgressBar
@@ -142,6 +133,32 @@ object fPublishQueue: TfPublishQueue
       Properties.BarStyle = cxbsAnimation
       Properties.BeginColor = clRed
       Properties.SolidTextColor = True
+    end
+    object cxERCancelButtonActive: TcxEditRepositoryButtonItem
+      Properties.Buttons = <
+        item
+          Caption = 'Cancel'
+          Default = True
+          ImageIndex = 48
+          Hint = 'Cancel'
+          Kind = bkGlyph
+        end>
+      Properties.Images = Main.ImageList
+      Properties.ViewStyle = vsButtonsOnly
+      Properties.OnButtonClick = cxERCancelButtonActivePropertiesButtonClick
+    end
+    object cxERCancelButtonDisabled: TcxEditRepositoryButtonItem
+      Properties.Buttons = <
+        item
+          Caption = 'Cancel'
+          Default = True
+          Enabled = False
+          ImageIndex = 48
+          Hint = 'Cancel'
+          Kind = bkGlyph
+        end>
+      Properties.Images = Main.ImageList
+      Properties.ViewStyle = vsButtonsOnly
     end
   end
 end

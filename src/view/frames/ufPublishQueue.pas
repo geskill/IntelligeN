@@ -5,9 +5,12 @@ interface
 uses
   // Delphi
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Menus, StdCtrls, ExtCtrls, Dialogs,
+  // Spring Framework
+  Spring.Collections.Lists,
   // DevExpress
-  cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxControls, cxContainer, cxEdit, cxProgressBar, cxButtons, cxStyles, cxCustomData, cxFilter, cxData,
-  cxDataStorage, cxNavigator, cxLabel, cxButtonEdit, cxGridCustomTableView, cxGridTableView, cxGridCustomView, cxClasses, cxGridLevel, cxGrid, cxExtEditRepositoryItems,
+  cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxControls, cxContainer, cxEdit, cxProgressBar, cxButtons, cxStyles,
+  cxCustomData, cxFilter, cxData, cxDataStorage, cxNavigator, cxLabel, cxButtonEdit, cxGridCustomTableView,
+  cxGridTableView, cxGridCustomView, cxClasses, cxGridLevel, cxGrid, cxExtEditRepositoryItems, cxEditRepositoryItems,
   // MultiEvent
   Generics.MultiEvents.NotifyEvent,
   Generics.MultiEvents.NotifyInterface,
@@ -34,27 +37,32 @@ type
     cxGPublishQueueTableViewColumnCanel: TcxGridColumn;
     cxGPublishQueueTableViewColumnHint: TcxGridColumn;
     cxGPublishQueueTableViewColumnErrorMsg: TcxGridColumn;
-    cxERProgressBar: TcxEditRepository;
+    cxEditRepo: TcxEditRepository;
     cxERProgressBarOK: TcxEditRepositoryProgressBar;
     cxERProgressBarError: TcxEditRepositoryProgressBar;
+    cxERCancelButtonActive: TcxEditRepositoryButtonItem;
+    cxERCancelButtonDisabled: TcxEditRepositoryButtonItem;
     procedure cxBStartClick(Sender: TObject);
     procedure cxBPauseClick(Sender: TObject);
     procedure cxBStopClick(Sender: TObject);
-    procedure cxGPublishQueueTableViewColumnProgressGetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
-      ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption; var AIsHintMultiLine: Boolean; var AHintTextRect: TRect);
-    procedure cxGPublishQueueTableViewColumnProgressGetProperties(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
-      var AProperties: TcxCustomEditProperties);
-    procedure cxGPublishQueueTableViewColumnCanelPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
+    procedure cxGPublishQueueTableViewColumnProgressGetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption;
+      var AIsHintMultiLine: Boolean; var AHintTextRect: TRect);
+    procedure cxGPublishQueueTableViewColumnProgressGetProperties(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AProperties: TcxCustomEditProperties);
+    procedure cxGPublishQueueTableViewColumnCanelGetProperties(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AProperties: TcxCustomEditProperties);
+    procedure cxERCancelButtonActivePropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
   private
     FCompletedCount, FTotalCount: Integer;
+    FCompletedList: TList<Integer>;
 
     procedure UpdateOverallProgress;
-    function FindRecordByID(AID: Longword): Integer;
-    procedure AddJob(AID: Longword; ADescription: string);
-    procedure JobFinished(AID: Longword);
-    procedure RemoveJob(AID: Longword);
+    function FindRecordByID(const AID: Longword): Integer;
+    procedure AddJob(const AID: Longword; const ADescription: string);
+    procedure JobFinished(const AID: Longword);
+    procedure RemoveJob(const AID: Longword);
+    procedure RemoveCompletedJobs(const ARemaining: Integer = 0);
   public
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
 
     procedure GUIInteractionEvent(Status: TPublishManagerStatus);
     procedure GUIInteractionItemEvent(Status: TPublishManagerItemStatus; PublishJob: IPublishJob; AProgressPosition: Extended; msg: string);
@@ -82,16 +90,15 @@ begin
   Main.fMain.PublishManager.RemoveAllPublishJobs;
 end;
 
-procedure TfPublishQueue.cxGPublishQueueTableViewColumnProgressGetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
-  ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption; var AIsHintMultiLine: Boolean; var AHintTextRect: TRect);
+procedure TfPublishQueue.cxGPublishQueueTableViewColumnProgressGetCellHint(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; ACellViewInfo: TcxGridTableDataCellViewInfo; const AMousePos: TPoint; var AHintText: TCaption;
+  var AIsHintMultiLine: Boolean; var AHintTextRect: TRect);
 var
   HasError: Boolean;
 begin
   HasError := not SameStr('', VarToStr(ARecord.Values[cxGPublishQueueTableViewColumnErrorMsg.Index]));
   if HasError then
   begin
-    AHintText := Trim(VarToStr(ARecord.Values[cxGPublishQueueTableViewColumnHint.Index]) + sLineBreak + VarToStr
-        (ARecord.Values[cxGPublishQueueTableViewColumnErrorMsg.Index]));
+    AHintText := Trim(VarToStr(ARecord.Values[cxGPublishQueueTableViewColumnHint.Index]) + sLineBreak + VarToStr(ARecord.Values[cxGPublishQueueTableViewColumnErrorMsg.Index]));
   end
   else
   begin
@@ -100,8 +107,7 @@ begin
   AIsHintMultiLine := HasError;
 end;
 
-procedure TfPublishQueue.cxGPublishQueueTableViewColumnProgressGetProperties(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
-  var AProperties: TcxCustomEditProperties);
+procedure TfPublishQueue.cxGPublishQueueTableViewColumnProgressGetProperties(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AProperties: TcxCustomEditProperties);
 begin
   if Assigned(ARecord) and not SameStr('', VarToStr(ARecord.Values[cxGPublishQueueTableViewColumnErrorMsg.Index])) then
     AProperties := cxERProgressBarError.Properties
@@ -109,12 +115,20 @@ begin
     AProperties := cxERProgressBarOK.Properties;
 end;
 
-procedure TfPublishQueue.cxGPublishQueueTableViewColumnCanelPropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
+procedure TfPublishQueue.cxGPublishQueueTableViewColumnCanelGetProperties(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AProperties: TcxCustomEditProperties);
+begin
+  if Assigned(ARecord) and not FCompletedList.Contains(ARecord.Values[cxGPublishQueueTableViewColumnPosition.Index]) then
+    AProperties := cxERCancelButtonActive.Properties
+  else
+    AProperties := cxERCancelButtonDisabled.Properties;
+end;
+
+procedure TfPublishQueue.cxERCancelButtonActivePropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
 var
   ID: Longword;
 begin
   with cxGPublishQueueTableView.DataController do
-    ID := Values[GetFocusedRecordIndex, cxGPublishQueueTableViewColumnPosition.index];
+    ID := Values[GetFocusedRecordIndex, cxGPublishQueueTableViewColumnPosition.Index];
   Main.fMain.PublishManager.RemovePublishJob(ID);
 end;
 
@@ -123,7 +137,7 @@ begin
   cxPBPublishOverallProgress.Position := FCompletedCount / FTotalCount * 100;
 end;
 
-function TfPublishQueue.FindRecordByID(AID: Longword): Integer;
+function TfPublishQueue.FindRecordByID(const AID: Longword): Integer;
 var
   I: Integer;
 begin
@@ -134,7 +148,7 @@ begin
         Exit(I);
 end;
 
-procedure TfPublishQueue.AddJob(AID: Longword; ADescription: string);
+procedure TfPublishQueue.AddJob(const AID: Longword; const ADescription: string);
 begin
   with cxGPublishQueueTableView.DataController do
   begin
@@ -161,15 +175,19 @@ begin
   Inc(FTotalCount);
   cxBStop.Enabled := True;
   UpdateOverallProgress;
+
+  if FCompletedList.Count > 25 then
+    RemoveCompletedJobs(5);
 end;
 
-procedure TfPublishQueue.JobFinished(AID: Longword);
+procedure TfPublishQueue.JobFinished(const AID: Longword);
 begin
+  FCompletedList.Add(AID);
   Inc(FCompletedCount);
   UpdateOverallProgress;
 end;
 
-procedure TfPublishQueue.RemoveJob(AID: Longword);
+procedure TfPublishQueue.RemoveJob(const AID: Longword);
 var
   Index: Integer;
 begin
@@ -190,12 +208,42 @@ begin
   UpdateOverallProgress;
 end;
 
+procedure TfPublishQueue.RemoveCompletedJobs(const ARemaining: Integer = 0);
+var
+  LIndex, LRecordIndex: Integer;
+begin
+  with cxGPublishQueueTableView.DataController do
+  begin
+    BeginUpdate;
+    try
+      for LIndex := FCompletedList.Count - 1 - ARemaining downto 0 do
+      begin
+        LRecordIndex := FindRecordByID(FCompletedList.Items[LIndex]);
+        if not(LRecordIndex = -1) then
+          DeleteRecord(LRecordIndex);
+
+        FCompletedList.Delete(LIndex);
+      end;
+    finally
+      EndUpdate;
+    end;
+  end;
+end;
+
 constructor TfPublishQueue.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
   FCompletedCount := 0;
   FTotalCount := 0;
+
+  FCompletedList := TList<Integer>.Create;
+end;
+
+destructor TfPublishQueue.Destroy;
+begin
+  FCompletedList.Free;
+  inherited Destroy;
 end;
 
 procedure TfPublishQueue.GUIInteractionEvent;
@@ -216,26 +264,25 @@ end;
 
 procedure TfPublishQueue.GUIInteractionItemEvent;
 var
-  Index: Integer;
+  LIndex: Integer;
 begin
   case Status of
     pmisCREATED:
       AddJob(PublishJob.UniqueID, PublishJob.Description);
     pmisWORKING, pmisERROR, pmisFINISHED:
       begin
-        Index := FindRecordByID(PublishJob.UniqueID);
-        if not(Index = -1) then
+        LIndex := FindRecordByID(PublishJob.UniqueID);
+        if not(LIndex = -1) then
         begin
           with cxGPublishQueueTableView.DataController do
           begin
             BeginUpdate;
             try
-              Values[Index, cxGPublishQueueTableViewColumnProgress.index] := round(AProgressPosition);
+              Values[LIndex, cxGPublishQueueTableViewColumnProgress.Index] := Round(AProgressPosition);
               if (pmisERROR = Status) then
-                Values[Index, cxGPublishQueueTableViewColumnErrorMsg.index] := VarToStr(Values[Index, cxGPublishQueueTableViewColumnErrorMsg.index])
-                  + sLineBreak + msg
+                Values[LIndex, cxGPublishQueueTableViewColumnErrorMsg.Index] := VarToStr(Values[LIndex, cxGPublishQueueTableViewColumnErrorMsg.Index]) + sLineBreak + msg
               else
-                Values[Index, cxGPublishQueueTableViewColumnHint.index] := StringReplace(msg, ',', ', ', [rfReplaceAll]);
+                Values[LIndex, cxGPublishQueueTableViewColumnHint.Index] := StringReplace(msg, ',', ', ', [rfReplaceAll]);
             finally
               EndUpdate;
             end;

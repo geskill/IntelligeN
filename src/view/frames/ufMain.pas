@@ -220,6 +220,7 @@ begin
   end;
 
   Inc(FLockCount);
+  Result := True;
 end;
 
 function TfMain.UnlockPageControl: Boolean;
@@ -231,6 +232,7 @@ begin
     SendMessage(pcMain.Handle, WM_SETREDRAW, 1, 0);
     RedrawWindow(pcMain.Handle, nil, 0, RDW_ERASE or RDW_FRAME or RDW_INVALIDATE or RDW_ALLCHILDREN);
   end;
+  Result := True;
 end;
 
 procedure TfMain.CrawlerGUIInteraction(const AControlController: IControlController; AStatus: TCrawlerTaskStatus; AProgressPosition: Extended; AMessage: string);
