@@ -156,6 +156,7 @@ begin
 
       rttiContext := TRttiContext.Create();
       try
+        // TODO: This is somehow not thread-safe or causes other errors
         rttiType := rttiContext.GetType(ASettings.ClassType);
 
         for rttiProperty in rttiType.GetDeclaredProperties do
