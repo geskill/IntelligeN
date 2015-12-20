@@ -542,6 +542,8 @@
 
 * Fixed issue canceling publish jobs
 
+* Fixed logger multithreading issue
+
 * Fixed XenForo DoAnalyzePost
 
 * Updated hoster.xml removed deleted hosters

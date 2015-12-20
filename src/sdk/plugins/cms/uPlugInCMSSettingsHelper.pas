@@ -153,8 +153,8 @@ begin
         if HasChildNodes then
           ASettings.Charset := VarToStr(ChildNodes.Nodes['charset'].NodeValue);
 
-      rttiContext := TRttiContext.Create();
-      try
+      //rttiContext := TRttiContext.Create();
+      //try
         // TODO: This is somehow not thread-safe or causes other errors
         rttiType := rttiContext.GetType(ASettings.ClassType);
 
@@ -243,9 +243,9 @@ begin
           end;
         end;
 
-      finally
-        rttiContext.Free;
-      end;
+      //finally
+        //rttiContext.Free;
+      //end;
 
     finally
       XMLDoc := nil;
@@ -279,8 +279,8 @@ var
 
   DefaultValue: Variant;
 begin
-  rttiContext := TRttiContext.Create();
-  try
+  //rttiContext := TRttiContext.Create();
+  //try
     rttiType := rttiContext.GetType(AClass);
 
     for rttiProperty in rttiType.GetDeclaredProperties do
@@ -309,9 +309,9 @@ begin
         AddWebsiteEditorComponent(rttiProperty.Name, rttiProperty.PropertyType.TypeKind, DefaultValue);
       end;
     end;
-  finally
-    rttiContext.Free;
-  end;
+  //finally
+    //rttiContext.Free;
+  //end;
 end;
 
 end.
