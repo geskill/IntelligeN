@@ -89,7 +89,7 @@ begin
       end
       else
       begin
-        while ((RecordCount + 1) > SettingsManager.Settings.Log.MaxHTTPLogEntries) do
+        while ((RecordCount + 1) > SettingsManager.Settings.Log.MaxLogEntries) do
         begin
           DeleteRecord(0);
         end;

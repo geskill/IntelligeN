@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils,
+  Windows, SysUtils, Classes,
   // OmniThreadLibrary
   OtlCommon, OtlSync,
   // MultiEvent
@@ -106,7 +106,15 @@ var
   LLog: ILog;
 begin
   LLog := TLog.Create(AMessage);
-  FNewLogEvent.Invoke(LLog);
+
+  if not(GetCurrentThreadId = MainThreadID) then
+  begin
+    TThread.Queue(nil, procedure begin FNewLogEvent.Invoke(LLog); end);
+  end
+  else
+  begin
+    FNewLogEvent.Invoke(LLog);
+  end;
 end;
 
 destructor TLogManager.Destroy;
