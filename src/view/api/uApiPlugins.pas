@@ -93,7 +93,7 @@ type
     procedure LoadImageHosterPlugin(AImageHoster: TImageHosterCollectionItem; AImageHosterPluginProc: TImageHosterPluginProc; AErrorProc: TPluginErrorProc = nil);
   public
     constructor Create(const ATask: IOmniTask; AErrorHandler: TPluginErrorProc = nil);
-    destructor Destroy();
+    destructor Destroy(); override;
 
     function CMSExec(const APublishItem: IPublishItem; ACAPTCHAInput: TCAPTCHAInput = nil; AIntelligentPostingHandler: TIntelligentPostingHelper = nil): Boolean;
 

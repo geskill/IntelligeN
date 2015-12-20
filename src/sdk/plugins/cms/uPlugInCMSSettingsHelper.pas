@@ -127,7 +127,6 @@ var
 
   CMSCustomField: TCMSCustomField;
 
-  IsTopValue: Boolean;
   // HasDefaultValue: Boolean;
   IDValue, DefaultValue: Variant;
 
@@ -219,15 +218,10 @@ begin
           end
           else
           begin
-            IsTopValue := False;
             DefaultValue := Unassigned;
             // HasDefaultValue := False;
             for rttiAttribute in rttiProperty.GetAttributes() do
             begin
-              if rttiAttribute is AttrTopValue then
-              begin
-                IsTopValue := True;
-              end;
               if rttiAttribute is AttrDefaultValue then
               begin
                 // HasDefaultValue := True;
@@ -238,26 +232,13 @@ begin
             with XMLDoc.DocumentElement do
               if HasChildNodes then
               begin
-                if IsTopValue then
-                begin
-                  with ChildNodes.Nodes['name'] do
-                    if AttributeNodes.FindNode(rttiProperty.Name) = nil then
-                      rttiProperty.SetValue(ASettings, TValue.FromVariant(DefaultValue))
-                    else
-                    begin
-                      rttiProperty.SetValue(ASettings, TValue.FromVariant(VariantFix(Attributes[rttiProperty.Name], rttiProperty.PropertyType.TypeKind)));
-                    end;
-                end
-                else
-                begin
-                  with ChildNodes.Nodes['settings'] do
-                    if ChildNodes.FindNode(rttiProperty.Name) = nil then
-                      rttiProperty.SetValue(ASettings, TValue.FromVariant(DefaultValue))
-                    else
-                    begin
-                      rttiProperty.SetValue(ASettings, TValue.FromVariant(VariantFix(ChildNodes.Nodes[rttiProperty.Name].NodeValue, rttiProperty.PropertyType.TypeKind)));
-                    end;
-                end;
+                with ChildNodes.Nodes['settings'] do
+                  if ChildNodes.FindNode(rttiProperty.Name) = nil then
+                    rttiProperty.SetValue(ASettings, TValue.FromVariant(DefaultValue))
+                  else
+                  begin
+                    rttiProperty.SetValue(ASettings, TValue.FromVariant(VariantFix(ChildNodes.Nodes[rttiProperty.Name].NodeValue, rttiProperty.PropertyType.TypeKind)));
+                  end;
               end;
           end;
         end;
@@ -278,15 +259,15 @@ end;
 
 class procedure TPlugInCMSSettingsHelper.LoadSettingsToWebsiteEditor(AFileName: TFileName; AClass: TClass; AWebsiteEditor: IWebsiteEditor);
 
-  procedure AddWebsiteEditorComponent(AName: string; ATypeKind: TTypeKind; ADefaultValue: Variant; ATopValue: Boolean = False);
+  procedure AddWebsiteEditorComponent(AName: string; ATypeKind: TTypeKind; ADefaultValue: Variant);
   begin
     case ATypeKind of
       tkEnumeration:
-        AWebsiteEditor.AddCheckbox(AName, ADefaultValue, ATopValue);
+        AWebsiteEditor.AddCheckbox(AName, ADefaultValue);
       // tkInteger:
       // s  ;
     else
-      AWebsiteEditor.AddEdit(AName, ADefaultValue, ATopValue);
+      AWebsiteEditor.AddEdit(AName, ADefaultValue);
     end;
   end;
 
@@ -296,7 +277,6 @@ var
   rttiType: TRttiType;
   rttiAttribute: TCustomAttribute;
 
-  IsTopValue: Boolean;
   DefaultValue: Variant;
 begin
   rttiContext := TRttiContext.Create();
@@ -315,15 +295,10 @@ begin
       end
       else
       begin
-        IsTopValue := False;
         DefaultValue := Unassigned;
         // HasDefaultValue := False;
         for rttiAttribute in rttiProperty.GetAttributes() do
         begin
-          if rttiAttribute is AttrTopValue then
-          begin
-            IsTopValue := True;
-          end;
           if rttiAttribute is AttrDefaultValue then
           begin
             // HasDefaultValue := True;
@@ -331,7 +306,7 @@ begin
           end;
         end;
 
-        AddWebsiteEditorComponent(rttiProperty.Name, rttiProperty.PropertyType.TypeKind, DefaultValue, IsTopValue);
+        AddWebsiteEditorComponent(rttiProperty.Name, rttiProperty.PropertyType.TypeKind, DefaultValue);
       end;
     end;
   finally

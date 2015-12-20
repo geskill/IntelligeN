@@ -40,13 +40,11 @@ type
   TSettingsEdit = record
     FTextEdit: TcxTextEdit;
     FName: string;
-    FTop: Boolean;
   end;
 
   TSettingsCheckbox = record
     FCheckBox: TcxCheckBox;
     FName: string;
-    FTop: Boolean;
   end;
 
   TBasisWebsiteEditor = class;
@@ -243,8 +241,8 @@ type
     procedure SetCustomFields(ACustomFields: WordBool); safecall;
   public
     constructor Create(ACMSPlugIn: ICMSPlugIn; AAppController: IAppController; AWebsiteSettingsFileName: TFileName); reintroduce; virtual;
-    procedure AddEdit(AName: WideString; ADefaultValue: WideString = ''; ATopValue: WordBool = False); safecall;
-    procedure AddCheckbox(AName: WideString; ADefaultValue: WordBool = False; ATopValue: WordBool = False); safecall;
+    procedure AddEdit(AName: WideString; ADefaultValue: WideString = ''); safecall;
+    procedure AddCheckbox(AName: WideString; ADefaultValue: WordBool = False); safecall;
     procedure AddCategoryTab(AName: WideString); safecall;
     procedure AddHosterTab(AHosterType: THosterType);
     property CustomFields: WordBool read GetCustomFields write SetCustomFields;
@@ -1596,29 +1594,23 @@ begin
             for I := 0 to length(FEditArray) - 1 do
             begin
               with FEditArray[I] do
-                if FTop then
-                  ChildNodes.Nodes['name'].Attributes[FName] := FTextEdit.Text
-                else
-                  with ChildNodes.Nodes['settings'] do
-                  begin
-                    if ChildNodes.FindNode(FName) = nil then
-                      AddChild(FName);
-                    ChildNodes.Nodes[FName].NodeValue := FTextEdit.Text;
-                  end;
+                with ChildNodes.Nodes['settings'] do
+                begin
+                  if ChildNodes.FindNode(FName) = nil then
+                    AddChild(FName);
+                  ChildNodes.Nodes[FName].NodeValue := FTextEdit.Text;
+                end;
             end;
 
             for I := 0 to length(FCheckboxArray) - 1 do
             begin
               with FCheckboxArray[I] do
-                if FTop then
-                  ChildNodes.Nodes['name'].Attributes[FName] := FCheckBox.Checked
-                else
-                  with ChildNodes.Nodes['settings'] do
-                  begin
-                    if ChildNodes.FindNode(FName) = nil then
-                      AddChild(FName);
-                    ChildNodes.Nodes[FName].NodeValue := FCheckBox.Checked;
-                  end;
+                with ChildNodes.Nodes['settings'] do
+                begin
+                  if ChildNodes.FindNode(FName) = nil then
+                    AddChild(FName);
+                  ChildNodes.Nodes[FName].NodeValue := FCheckBox.Checked;
+                end;
             end;
 
             for I := 0 to FcxTCIDs.Tabs.Count - 1 do
@@ -2358,7 +2350,7 @@ begin
   end;
 end;
 
-procedure TBasisWebsiteEditor.AddEdit(AName: WideString; ADefaultValue: WideString = ''; ATopValue: WordBool = False);
+procedure TBasisWebsiteEditor.AddEdit(AName: WideString; ADefaultValue: WideString = '');
 var
   SettingsEdit: TSettingsEdit;
 begin
@@ -2377,14 +2369,13 @@ begin
       Text := ADefaultValue;
     end;
     FName := AName;
-    FTop := ATopValue;
   end;
 
   SetLength(FEditArray, length(FEditArray) + 1);
   FEditArray[length(FEditArray) - 1] := SettingsEdit;
 end;
 
-procedure TBasisWebsiteEditor.AddCheckbox(AName: WideString; ADefaultValue: WordBool = False; ATopValue: WordBool = False);
+procedure TBasisWebsiteEditor.AddCheckbox(AName: WideString; ADefaultValue: WordBool = False);
 const
   CheckboxInfo: array [0 .. 60, 0 .. 2] of string = ( { }
     ('use_plainlinks', 'Plainlinks', 'if active IntelligeN uses directlinks, otherwise it uses the links form the first crypter'), { }
@@ -2484,7 +2475,6 @@ begin
       Transparent := True;
     end;
     FName := AName;
-    FTop := ATopValue;
   end;
 
   SetLength(FCheckboxArray, length(FCheckboxArray) + 1);
@@ -2603,35 +2593,21 @@ begin
             for I := 0 to length(FEditArray) - 1 do
             begin
               with FEditArray[I] do
-                if FTop then
-                begin
-                  with ChildNodes.Nodes['name'] do
-                    if Assigned(AttributeNodes.FindNode(FName)) then
-                      FTextEdit.Text := VarToStr(Attributes[FName]);
-                end
-                else
-                begin
-                  with ChildNodes.Nodes['settings'] do
-                    if Assigned(ChildNodes.FindNode(FName)) then
-                      FTextEdit.Text := VarToStr(ChildNodes.Nodes[FName].NodeValue);
-                end;
+              begin
+                with ChildNodes.Nodes['settings'] do
+                  if Assigned(ChildNodes.FindNode(FName)) then
+                    FTextEdit.Text := VarToStr(ChildNodes.Nodes[FName].NodeValue);
+              end;
             end;
 
             for I := 0 to length(FCheckboxArray) - 1 do
             begin
               with FCheckboxArray[I] do
-                if FTop then
-                begin
-                  with ChildNodes.Nodes['name'] do
-                    if Assigned(AttributeNodes.FindNode(FName)) then
-                      FCheckBox.Checked := Attributes[FName];
-                end
-                else
-                begin
-                  with ChildNodes.Nodes['settings'] do
-                    if Assigned(ChildNodes.FindNode(FName)) then
-                      FCheckBox.Checked := ChildNodes.Nodes[FName].NodeValue;
-                end;
+              begin
+                with ChildNodes.Nodes['settings'] do
+                  if Assigned(ChildNodes.FindNode(FName)) then
+                    FCheckBox.Checked := ChildNodes.Nodes[FName].NodeValue;
+              end;
             end;
 
             for I := 0 to FcxTCIDs.Tabs.Count - 1 do

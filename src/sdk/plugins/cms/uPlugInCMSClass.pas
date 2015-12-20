@@ -141,10 +141,6 @@ type
     function ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEditor): WordBool; safecall;
   end;
 
-  AttrTopValue = class(TCustomAttribute)
-
-  end;
-
   AttrDefaultValue = class(TCustomAttribute)
   private
     FValue: Variant;
