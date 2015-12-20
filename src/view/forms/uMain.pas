@@ -389,14 +389,7 @@ begin
     FOneInstance.OnGetParams := OneInstanceGetParams;
     }
 
-  with SettingsManager.Settings.Layout.Main do
-  begin
-    Self.Left := Left;
-    Self.Height := Height;
-    Self.Top := Top;
-    Self.Width := Width;
-    Self.WindowState := WindowState;
-  end;
+  SettingsManager.Settings.Layout.Main.LoadLayout(Self);
 
   Caption := ProgrammName;
 
@@ -426,14 +419,7 @@ begin
   FOnStartup := nil;
   FMainMenu := nil;
 
-  with SettingsManager.Settings.Layout.Main do
-  begin
-    Left := Self.Left;
-    Height := Self.Height;
-    Top := Self.Top;
-    Width := Self.Width;
-    WindowState := Self.WindowState;
-  end;
+  SettingsManager.Settings.Layout.Main.SaveLayout(Self);
 
   // FOneInstance.Free;
 end;

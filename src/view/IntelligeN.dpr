@@ -174,9 +174,9 @@ begin
     if GenerateFolderSystem then
     begin
       Application.CreateForm(TMain, Main);
-  Application.CreateForm(TSettings, Settings);
-  Application.CreateForm(TUpdate, Update);
-  AnalyzeStartupParams;
+      Application.CreateForm(TSettings, Settings);
+      Application.CreateForm(TUpdate, Update);
+      AnalyzeStartupParams;
 
       if SettingsManager.Settings.Login.AutoLogin then
         Main.fLogin.cxbLoginClick(nil);
@@ -185,8 +185,6 @@ begin
         with Main do
         begin
           LoadLayout(SettingsManager.Settings.Layout.ActiveLayout);
-          Width := Width + 1;
-          Width := Width - 1;
         end;
     end
     else

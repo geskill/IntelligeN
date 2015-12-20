@@ -1670,14 +1670,7 @@ begin
   for LControlID := Low(TControlID) to High(TControlID) do
     cxTCControls.Tabs.Add(ControlIDToString(LControlID));
 
-  with SettingsManager.Settings.Layout.Settings do
-  begin
-    Self.Left := Left;
-    Self.Height := Height;
-    Self.Top := Top;
-    Self.Width := Width;
-    Self.WindowState := WindowState;
-  end;
+  SettingsManager.Settings.Layout.Settings.LoadLayout(Self);
 
   cxPCMain.ActivePageIndex := 0;
   cxPCPlugins.ActivePageIndex := 0;
@@ -1717,14 +1710,7 @@ procedure TSettings.FormDestroy(Sender: TObject);
 begin
   UnloadAppPlugins;
 
-  with SettingsManager.Settings.Layout.Settings do
-  begin
-    Left := Self.Left;
-    Height := Self.Height;
-    Top := Self.Top;
-    Width := Self.Width;
-    WindowState := Self.WindowState;
-  end;
+  SettingsManager.Settings.Layout.Settings.SaveLayout(Self);
 
   FImageHosterPluginsCheckListBox.Free;
   FFileHosterPluginsCheckListBox.Free;

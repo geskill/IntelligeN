@@ -422,6 +422,9 @@ type
     FTop: Integer;
     FWidth: Integer;
     FWindowState: TWindowState;
+  public
+    procedure SaveLayout(const AForm: TForm);
+    procedure LoadLayout(const AForm: TForm);
   published
     property Left: Integer read FLeft write FLeft;
     property Height: Integer read FHeight write FHeight;
@@ -433,7 +436,7 @@ type
   TSettings_Layout = class(TPersistent)
   private
     FActiveLayoutName: string;
-    FMain, FSettings, FTemplateEditor, FPublish: TLayoutforForms;
+    FMain, FSettings: TLayoutforForms;
     FLayout: TCollection;
     FOnLayoutChanged: TNotifyEvent;
     function GetActiveLayout: TLayoutCollectionItem;
@@ -450,8 +453,6 @@ type
     property ActiveLayoutName: string read FActiveLayoutName write SetActiveLayoutName;
     property Main: TLayoutforForms read FMain write FMain;
     property Settings: TLayoutforForms read FSettings write FSettings;
-    property TemplateEditor: TLayoutforForms read FTemplateEditor write FTemplateEditor;
-    property Publish: TLayoutforForms read FPublish write FPublish;
     property Layout: TCollection read FLayout write FLayout;
   end;
 
@@ -1324,6 +1325,44 @@ begin
 end;
 
 { ****************************************************************************** }
+
+{ TLayoutforForms }
+
+procedure TLayoutforForms.LoadLayout(const AForm: TForm);
+begin
+  AForm.Left := Left;
+  AForm.Height := Height;
+  AForm.Top := Top;
+  AForm.Width := Width;
+
+  if (WindowState = wsMaximized) then
+  begin
+    AForm.WindowState := wsNormal;
+    ShowWindowAsync(AForm.Handle, SW_MAXIMIZE);
+  end
+  else
+  begin
+    AForm.WindowState := WindowState;
+  end;
+end;
+
+procedure TLayoutforForms.SaveLayout(const AForm: TForm);
+begin
+  if (AForm.WindowState = wsMaximized) then
+  begin
+    WindowState := wsMaximized;
+  end
+  else
+  begin
+    Left := AForm.Left;
+    Height := AForm.Height;
+    Top := AForm.Top;
+    Width := AForm.Width;
+    WindowState := AForm.WindowState;
+  end;
+end;
+
+{ ****************************************************************************** }
 {$REGION 'TSettings_Layout'}
 
 function TSettings_Layout.GetActiveLayout;
@@ -1357,8 +1396,6 @@ begin
 
   FMain := TLayoutforForms.Create;
   FSettings := TLayoutforForms.Create;
-  FTemplateEditor := TLayoutforForms.Create;
-  FPublish := TLayoutforForms.Create;
   FLayout := TCollection.Create(TLayoutCollectionItem);
 end;
 
@@ -1389,8 +1426,6 @@ end;
 destructor TSettings_Layout.Destroy;
 begin
   FLayout.Free;
-  FPublish.Free;
-  FTemplateEditor.Free;
   FSettings.Free;
   FMain.Free;
 
@@ -1517,24 +1552,6 @@ begin
         Height := 412;
         Top := 0;
         Width := 622;
-        WindowState := wsNormal;
-      end;
-
-      with TemplateEditor do
-      begin
-        Left := 0;
-        Height := 325;
-        Top := 0;
-        Width := 540;
-        WindowState := wsNormal;
-      end;
-
-      with Publish do
-      begin
-        Left := 0;
-        Height := 350;
-        Top := 0;
-        Width := 450;
         WindowState := wsNormal;
       end;
 
