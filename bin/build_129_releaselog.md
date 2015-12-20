@@ -526,6 +526,8 @@
 
 * Improve PublishQueue (delete old entries)
 
+* Improved Main and Settings form layout
+
 * Improved IScript generation (NeedFinalQuote)
 
 * Improved PublishJob caption
@@ -533,6 +535,8 @@
 * Improved WebsiteEditor using DevExpress LayoutControl
 
 * Improved loading app plug-ins
+
+* Fixed IScriptEditor issue with active edit reference
 
 * Fixed PublishRetry
 

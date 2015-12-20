@@ -3,19 +3,19 @@ unit ufIScriptDesigner;
 interface
 
 uses
-  // Delphi 
+  // Delphi
   Windows, SysUtils, Classes, Controls, Forms, StrUtils, FileCtrl, ShellAPI, ExtCtrls, Menus, StdCtrls,
-  // DevExpress 
+  // DevExpress
   dxBar, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxControls, cxContainer, cxEdit, cxLabel, cxButtons,
-  // AdvMemo 
+  // AdvMemo
   AdvMemo, AdvFindDialogForm, AdvReplaceDialogForm,
-  // RegEx 
+  // RegEx
   RegExpr,
-  // Mods 
+  // Mods
   uMyAdvmJScriptStyler,
-  // Common 
+  // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
-  // Utils 
+  // Utils
   uStringUtils;
 
 type
@@ -80,7 +80,10 @@ end;
 
 procedure TIScriptDesigner.AdvMemoChange(Sender: TObject);
 begin
-  FIScriptData.Code := AdvMemo.Lines.Text;
+  if Assigned(FIScriptData) then
+  begin
+    FIScriptData.Code := AdvMemo.Lines.Text;
+  end;
   DataChanged := True;
 end;
 
@@ -180,7 +183,10 @@ end;
 
 procedure TIScriptDesigner.cxLFileNameDblClick(Sender: TObject);
 begin
-  ShellExecute(Handle, nil, PChar(ExtractFilePath(FIScriptData.FileName)), nil, nil, SW_SHOW);
+  if Assigned(FIScriptData) then
+  begin
+    ShellExecute(Handle, nil, PChar(ExtractFilePath(FIScriptData.FileName)), nil, nil, SW_SHOW);
+  end;
 end;
 
 procedure TIScriptDesigner.ToogleEnabledStatus(AStatus: Boolean);
@@ -197,7 +203,11 @@ procedure TIScriptDesigner.UpdateDisplayFileName;
 var
   LFileName: TFileName;
 begin
-  LFileName := FIScriptData.FileName + IfThen(DataChanged and AdvMemo.Enabled, '*');
+  LFileName := '';
+  if Assigned(FIScriptData) then
+  begin
+    LFileName := FIScriptData.FileName + IfThen(DataChanged and AdvMemo.Enabled, '*');
+  end;
   cxLFileName.Caption := MinimizeName(LFileName, cxLFileName.Canvas.Canvas, cxLFileName.Width - 5);
 end;
 
@@ -214,7 +224,7 @@ end;
 
 function TIScriptDesigner.GetData: WideString;
 begin
-  Result := FIScriptData.Code;
+  Result := AdvMemo.Lines.Text;
 end;
 
 procedure TIScriptDesigner.SetData(const AData: WideString);
@@ -318,22 +328,24 @@ begin
 
     ToogleEnabledStatus(False);
     AdvMemo.Lines.Clear;
+
+    DataChanged := False;
   end
   else if not Assigned(FIScriptData) or not SameFileName(AIScriptData.FileName, FIScriptData.FileName) then
   begin
     FIScriptData := AIScriptData;
 
     LFileExists := FileExists(FIScriptData.FileName);
-    
+
     ToogleEnabledStatus(LFileExists);
 
     if LFileExists then
       AdvMemo.Lines.Text := FIScriptData.Code
     else
       AdvMemo.Lines.Clear;
-  end;
 
-  DataChanged := not CompareTextByMD5(FIScriptData.Code, FIScriptData.OriginalCode);
+    DataChanged := not CompareTextByMD5(FIScriptData.Code, FIScriptData.OriginalCode);
+  end;
 end;
 
 destructor TIScriptDesigner.Destroy;
