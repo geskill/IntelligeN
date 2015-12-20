@@ -41,7 +41,7 @@ type
       function GetMirror(const IndexOrName: OleVariant): IMirrorContainer;
       function GetCount: Integer;
     public
-      constructor Create(ACMSWebsiteData: ITabSheetData);
+      constructor Create(const ACMSWebsiteData: ITabSheetData);
 
       property Mirror[const IndexOrName: OleVariant]: IMirrorContainer read GetMirror; default;
       property Count: Integer read GetCount;
@@ -79,7 +79,7 @@ implementation
 
 { TIScirptParser.TIMirror }
 
-constructor TIScirptParser.TIMirror.Create(ACMSWebsiteData: ITabSheetData);
+constructor TIScirptParser.TIMirror.Create(const ACMSWebsiteData: ITabSheetData);
 begin
   inherited Create;
   FCMSWebsiteData := ACMSWebsiteData;

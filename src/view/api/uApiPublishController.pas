@@ -6,7 +6,7 @@ uses
   // Delphi
   Windows, SysUtils, Classes, StrUtils, Math, Dialogs, Variants,
   // Spring Framework
-  Spring.Collections.Lists,
+  Spring.Collections.Lists, Spring.Collections.Dictionaries, Spring.Cryptography,
   // MultiEvent
   Generics.MultiEvents.NotifyInterface, Generics.MultiEvents.NotifyHandler,
   // Common
@@ -121,6 +121,47 @@ type
     FICMSWebsiteContainerActiveController: TICMSWebsiteContainerActiveController;
 
   type
+    TIScriptType = (itSubject, itMessage);
+    TIScriptFunc = reference to function(const AIScript: WideString): RIScriptResult;
+
+    TICMSWebsiteIScriptData = class(TInterfacedObject, ICMSWebsiteIScriptData)
+    private
+      FIScriptType: TIScriptType;
+      FCMSWebsiteCollectionItem: TCMSWebsitesCollectionItem;
+      FCheckFunc, FParseFunc: TIScriptFunc;
+      FCodeChanged: Boolean;
+      FCode: WideString;
+      FResult: RIScriptResult;
+      function LoadFromFile(const AFileName: string): string;
+      procedure ResetCode;
+    protected
+      function GetFileName: WideString;
+      procedure SetFileName(const AFileName: WideString);
+      function GetOriginalCode: WideString;
+      function GetCode: WideString;
+      procedure SetCode(const ACode: WideString);
+      function GetPreview: WideString;
+
+      function GetCheckedResult: RIScriptResult;
+      function GetParsedResult: RIScriptResult;
+    public
+      constructor Create(const AIScriptType: TIScriptType; const ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; const ACheckFunc, AParseFunc: TIScriptFunc);
+      destructor Destroy; override;
+
+      property FileName: WideString read GetFileName write SetFileName;
+      property OriginalCode: WideString read GetOriginalCode;
+      property Code: WideString read GetCode write SetCode;
+      property Preview: WideString read GetPreview;
+
+      property CheckedResult: RIScriptResult read GetCheckedResult;
+      property ParsedResult: RIScriptResult read GetParsedResult;
+    end;
+
+  var
+    FICMSWebsiteSubjectIScriptData: ICMSWebsiteIScriptData;
+    FICMSWebsiteMessageIScriptData: ICMSWebsiteIScriptData;
+
+  type
     TIPublishItem = class(TICMSWebsite, IPublishItem)
     private
       FCMSPluginPath: WideString;
@@ -151,7 +192,6 @@ type
 
     procedure ValidateFile(ARelativeFileName, AFileName, AFileType: string);
     function ValidateFiles: Boolean;
-    function LoadFromFile(AFileName: string): string;
 
     procedure HandleBlackWhitelist(ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; out AControlList: TControlDataList; out AMirrorList: TMirrorContainerList);
 
@@ -182,12 +222,12 @@ type
     function GetWebsite: WideString;
 
     function GetSubject: WideString;
-    function GetSubjectFileName: WideString;
-    procedure SetSubjectFileName(ASubjectFileName: WideString);
+    function GetSubjectData: ICMSWebsiteIScriptData;
+
     function GetTags: WideString;
+
     function GetMessage: WideString;
-    function GetMessageFileName: WideString;
-    procedure SetMessageFileName(AMessageFileName: WideString);
+    function GetMessageData: ICMSWebsiteIScriptData;
   public
     constructor Create(const ATabConnection: ITabSheetController; ACMSCollectionItem: TCMSCollectionItem; ACMSWebsitesCollectionItem: TCMSWebsitesCollectionItem);
     property TabSheetController: ITabSheetController read GetTabSheetController write SetTabSheetController;
@@ -201,8 +241,9 @@ type
     property AccountName: WideString read GetAccountName write SetAccountName;
     property AccountPassword: WideString read GetAccountPassword write SetAccountPassword;
 
-    function CheckIScript(AIScript: WideString): RIScriptResult;
-    function ParseIScript(AIScript: WideString): RIScriptResult;
+    function CheckIScript(const AIScript: WideString): RIScriptResult;
+    function ParseIScript(const AIScript: WideString): RIScriptResult;
+
     function GenerateData: ITabSheetData;
 
     function GeneratePublishItem: IPublishItem;
@@ -215,10 +256,12 @@ type
     property Website: WideString read GetWebsite;
 
     property Subject: WideString read GetSubject;
-    property SubjectFileName: WideString read GetSubjectFileName write SetSubjectFileName;
+    property SubjectData: ICMSWebsiteIScriptData read GetSubjectData;
+
     property Tags: WideString read GetTags;
+
     property Message: WideString read GetMessage;
-    property MessageFileName: WideString read GetMessageFileName write SetMessageFileName;
+    property MessageData: ICMSWebsiteIScriptData read GetMessageData;
 
     destructor Destroy; override;
   end;
@@ -254,6 +297,7 @@ type
   TIPublishController = class(TInterfacedObject, IPublishController)
   private
     FTabSheetController: ITabSheetController;
+    FIScriptBuffer: TDictionary<string, RIScriptResult>;
     FCMSList: TInterfaceList<ICMSContainer>;
     FActive: Boolean;
     FUpdateCMSList: IUpdateCMSListEvent;
@@ -289,6 +333,9 @@ type
 
     function GeneratePublishTab: IPublishTab;
     function GeneratePublishJob: IPublishJob;
+
+    function CheckIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData :ITabSheetData): RIScriptResult;
+    function ParseIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData :ITabSheetData): RIScriptResult;
 
     property OnUpdateCMSList: IUpdateCMSListEvent read GetUpdateCMSList;
     property OnUpdateCMSWebsiteList: IUpdateCMSWebsiteListEvent read GetUpdateCMSWebsiteList;
@@ -614,6 +661,108 @@ begin
   inherited Destroy;
 end;
 
+{ TICMSWebsiteContainer.TICMSWebsiteIScriptData }
+
+function TICMSWebsiteContainer.TICMSWebsiteIScriptData.LoadFromFile(const AFileName: string): string;
+begin
+  with TStringStream.Create do
+    try
+      LoadFromFile(AFileName);
+      Result := DataString;
+    finally
+      Free;
+    end;
+end;
+
+procedure TICMSWebsiteContainer.TICMSWebsiteIScriptData.ResetCode;
+begin
+  if FileExists(FileName) then
+    Code := LoadFromFile(FileName)
+  else
+    Code := '';
+end;
+
+function TICMSWebsiteContainer.TICMSWebsiteIScriptData.GetFileName: WideString;
+begin
+  case FIScriptType of
+    itSubject:
+      Result := FCMSWebsiteCollectionItem.GetSubjectFileName;
+    itMessage:
+      Result := FCMSWebsiteCollectionItem.GetMessageFileName;
+  end;
+end;
+
+procedure TICMSWebsiteContainer.TICMSWebsiteIScriptData.SetFileName(const AFileName: WideString);
+begin
+  case FIScriptType of
+    itSubject:
+      FCMSWebsiteCollectionItem.SubjectFileName := ExtractRelativePath(GetTemplatesCMSFolder, AFileName);
+    itMessage:
+      FCMSWebsiteCollectionItem.MessageFileName := ExtractRelativePath(GetTemplatesCMSFolder, AFileName);
+  end;
+end;
+
+function TICMSWebsiteContainer.TICMSWebsiteIScriptData.GetOriginalCode: WideString;
+begin
+  Result := LoadFromFile(FileName);
+end;
+
+function TICMSWebsiteContainer.TICMSWebsiteIScriptData.GetCode: WideString;
+begin
+  Result := FCode;
+end;
+
+procedure TICMSWebsiteContainer.TICMSWebsiteIScriptData.SetCode(const ACode: WideString);
+begin
+  if not CompareTextByMD5(ACode, FCode) then
+  begin
+    FCode := ACode;
+    FCodeChanged := True;
+  end;
+end;
+
+function TICMSWebsiteContainer.TICMSWebsiteIScriptData.GetPreview: WideString;
+begin
+  Result := ParsedResult.CompiledText;
+end;
+
+function TICMSWebsiteContainer.TICMSWebsiteIScriptData.GetCheckedResult: RIScriptResult;
+begin
+  Result := FCheckFunc(FCode);
+end;
+
+function TICMSWebsiteContainer.TICMSWebsiteIScriptData.GetParsedResult: RIScriptResult;
+begin
+  if FCodeChanged then
+  begin
+    FResult := FParseFunc(FCode);
+  end;
+
+  Result := FResult;
+end;
+
+constructor TICMSWebsiteContainer.TICMSWebsiteIScriptData.Create(const AIScriptType: TIScriptType; const ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; const ACheckFunc, AParseFunc: TIScriptFunc);
+begin
+  inherited Create;
+  FIScriptType := AIScriptType;
+  FCMSWebsiteCollectionItem := ACMSWebsiteCollectionItem;
+  FCheckFunc := ACheckFunc;
+  FParseFunc := AParseFunc;
+  FCodeChanged := False;
+  FCode := '';
+  FResult.Init;
+
+  ResetCode;
+end;
+
+destructor TICMSWebsiteContainer.TICMSWebsiteIScriptData.Destroy;
+begin
+  FParseFunc := nil;
+  FCheckFunc := nil;
+  FCMSWebsiteCollectionItem := nil;
+  inherited Destroy;
+end;
+
 { TICMSWebsiteContainer.TIPublishItem }
 
 function TICMSWebsiteContainer.TIPublishItem.GetCMSPluginPath: WideString;
@@ -653,8 +802,8 @@ function TICMSWebsiteContainer.ValidateFiles: Boolean;
 begin
   Result := True;
   try
-    ValidateFile(FCMSWebsiteCollectionItem.SubjectFileName, SubjectFileName, 'Subject');
-    ValidateFile(FCMSWebsiteCollectionItem.MessageFileName, MessageFileName, 'Message');
+    ValidateFile(FCMSWebsiteCollectionItem.SubjectFileName, FICMSWebsiteSubjectIScriptData.FileName, 'Subject');
+    ValidateFile(FCMSWebsiteCollectionItem.MessageFileName, FICMSWebsiteMessageIScriptData.FileName, 'Message');
   except
     on E: Exception do
     begin
@@ -662,17 +811,6 @@ begin
       MessageDlg(E.Message, mtError, [mbOK], 0);
     end;
   end;
-end;
-
-function TICMSWebsiteContainer.LoadFromFile(AFileName: string): string;
-begin
-  with TStringStream.Create do
-    try
-      LoadFromFile(AFileName);
-      Result := DataString;
-    finally
-      Free;
-    end;
 end;
 
 procedure TICMSWebsiteContainer.HandleBlackWhitelist(ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; out AControlList: TControlDataList; out AMirrorList: TMirrorContainerList);
@@ -1023,17 +1161,12 @@ end;
 
 function TICMSWebsiteContainer.GetSubject: WideString;
 begin
-  Result := ParseIScript(LoadFromFile(SubjectFileName)).CompiledText;
+  Result := FICMSWebsiteSubjectIScriptData.Preview;
 end;
 
-function TICMSWebsiteContainer.GetSubjectFileName: WideString;
+function TICMSWebsiteContainer.GetSubjectData: ICMSWebsiteIScriptData;
 begin
-  Result := FCMSWebsiteCollectionItem.GetSubjectFileName;
-end;
-
-procedure TICMSWebsiteContainer.SetSubjectFileName(ASubjectFileName: WideString);
-begin
-  FCMSWebsiteCollectionItem.SubjectFileName := ExtractRelativePath(GetTemplatesCMSFolder, ASubjectFileName);
+  Result := FICMSWebsiteSubjectIScriptData;
 end;
 
 function TICMSWebsiteContainer.GetTags: WideString;
@@ -1045,22 +1178,20 @@ end;
 
 function TICMSWebsiteContainer.GetMessage: WideString;
 begin
-  Result := ParseIScript(LoadFromFile(MessageFileName)).CompiledText;
+  Result := FICMSWebsiteMessageIScriptData.Preview;
 end;
 
-function TICMSWebsiteContainer.GetMessageFileName: WideString;
+function TICMSWebsiteContainer.GetMessageData: ICMSWebsiteIScriptData;
 begin
-  Result := FCMSWebsiteCollectionItem.GetMessageFileName;
-end;
-
-procedure TICMSWebsiteContainer.SetMessageFileName(AMessageFileName: WideString);
-begin
-  FCMSWebsiteCollectionItem.MessageFileName := ExtractRelativePath(GetTemplatesCMSFolder, AMessageFileName);
+  Result := FICMSWebsiteMessageIScriptData;
 end;
 
 constructor TICMSWebsiteContainer.Create;
 begin
   FICMSWebsiteContainerActiveController := TICMSWebsiteContainerActiveController.Create(ATabConnection, ACMSWebsitesCollectionItem);
+
+  FICMSWebsiteSubjectIScriptData := TICMSWebsiteIScriptData.Create(itSubject, ACMSWebsitesCollectionItem, CheckIScript, ParseIScript);
+  FICMSWebsiteMessageIScriptData := TICMSWebsiteIScriptData.Create(itMessage, ACMSWebsitesCollectionItem, CheckIScript, ParseIScript);
 
   FTopIndex := -1;
   FIndex := -1;
@@ -1087,24 +1218,14 @@ begin
   FTabConnection.MirrorController.OnChange.Add(FIMirrorChange);
 end;
 
-function TICMSWebsiteContainer.CheckIScript(AIScript: WideString): RIScriptResult;
+function TICMSWebsiteContainer.CheckIScript(const AIScript: WideString): RIScriptResult;
 begin
-  with TIScirptParser.Create(CMS, Website, GenerateData) do
-    try
-      Result := ErrorAnalysis(AIScript);
-    finally
-      Free;
-    end;
+  Result := TabSheetController.PublishController.CheckIScript(CMS, Website, AIScript, GenerateData);
 end;
 
-function TICMSWebsiteContainer.ParseIScript(AIScript: WideString): RIScriptResult;
+function TICMSWebsiteContainer.ParseIScript(const AIScript: WideString): RIScriptResult;
 begin
-  with TIScirptParser.Create(CMS, Website, GenerateData) do
-    try
-      Result := Execute(AIScript);
-    finally
-      Free;
-    end;
+  Result := TabSheetController.PublishController.ParseIScript(CMS, Website, AIScript, GenerateData);
 end;
 
 function TICMSWebsiteContainer.GenerateData: ITabSheetData;
@@ -1172,6 +1293,8 @@ begin
   FTabConnection := nil;
   FCMSCollectionItem := nil;
   FCMSWebsiteCollectionItem := nil;
+  FICMSWebsiteMessageIScriptData := nil;
+  FICMSWebsiteSubjectIScriptData := nil;
   FICMSWebsiteContainerActiveController.Free;
   inherited Destroy;
 end;
@@ -1481,6 +1604,8 @@ constructor TIPublishController.Create;
 begin
   FTabSheetController := ATabConnection;
 
+  FIScriptBuffer := TDictionary<string, RIScriptResult>.Create;
+
   FCMSList := TInterfaceList<ICMSContainer>.Create;
 
   FUpdateCMSList := TIUpdateCMSListEvent.Create;
@@ -1606,6 +1731,38 @@ begin
   Result := LPublishJob;
 end;
 
+function TIPublishController.CheckIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData: ITabSheetData): RIScriptResult;
+begin
+  with TIScirptParser.Create(ACMS, AWebsite, ATabSheetData) do
+    try
+      Result := ErrorAnalysis(AIScript);
+    finally
+      Free;
+    end;
+end;
+
+function TIPublishController.ParseIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData: ITabSheetData): RIScriptResult;
+var
+  LHash: string;
+begin
+  LHash := CreateMD5.ComputeHash(Trim(AIScript)).ToHexString;
+  if (FIScriptBuffer.Count > 20) then
+  begin
+    FIScriptBuffer.Clear;
+  end;
+  if not FIScriptBuffer.ContainsKey(LHash) then
+  begin
+    with TIScirptParser.Create(ACMS, AWebsite, ATabSheetData) do
+      try
+        FIScriptBuffer.Add(LHash, Execute(AIScript));
+      finally
+        Free;
+      end;
+  end;
+
+  Result := FIScriptBuffer[LHash];
+end;
+
 destructor TIPublishController.Destroy;
 begin
   // TODO: test this
@@ -1618,6 +1775,8 @@ begin
   FUpdateCMSWebsiteList := nil;
   FUpdateCMSList := nil;
   FCMSList.Free;
+
+  FIScriptBuffer.Free;
 
   FTabSheetController := nil;
 

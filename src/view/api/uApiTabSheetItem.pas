@@ -384,7 +384,7 @@ begin
     if SameStr(ActiveWebsite, LCMSWebsitesCollectionItem.Website) then
     begin
       if Assigned(ActiveWebsiteData) then
-        FSubjectDesigner.SetFileName(ActiveWebsiteData.SubjectFileName);
+        FSubjectDesigner.SetIScriptData(ActiveWebsiteData.SubjectData);
       RenderHTMLView;
     end;
   end;
@@ -401,7 +401,7 @@ begin
     if SameStr(ActiveWebsite, LCMSWebsitesCollectionItem.Website) then
     begin
       if Assigned(ActiveWebsiteData) then
-        FMessageDesigner.SetFileName(ActiveWebsiteData.MessageFileName);
+        FMessageDesigner.SetIScriptData(ActiveWebsiteData.MessageData);
       RenderHTMLView;
     end;
   end;
@@ -474,7 +474,7 @@ end;
 procedure TDesignTabSheetItem.FCopySubjectToClipboardButtonClick(Sender: TObject);
 begin
   if Assigned(ActiveWebsiteData) then
-    Clipboard.AsText := ActiveWebsiteData.ParseIScript(FSubjectDesigner.Data).CompiledText;
+    Clipboard.AsText := ActiveWebsiteData.Subject;
 end;
 
 procedure TDesignTabSheetItem.FCheckMessageScriptButtonClick(Sender: TObject);
@@ -491,7 +491,7 @@ end;
 procedure TDesignTabSheetItem.FCopyMessageToClipboardButtonClick(Sender: TObject);
 begin
   if Assigned(ActiveWebsiteData) then
-    Clipboard.AsText := ActiveWebsiteData.ParseIScript(FMessageDesigner.Data).CompiledText;
+    Clipboard.AsText := ActiveWebsiteData.Message;
 end;
 
 procedure TDesignTabSheetItem.FSubjectMemoEnter(Sender: TObject);
@@ -606,8 +606,8 @@ begin
     DeregisterWebsite;
     RegisterWebsite;
 
-    FSubjectDesigner.SetFileName(ActiveWebsiteData.SubjectFileName);
-    FMessageDesigner.SetFileName(ActiveWebsiteData.MessageFileName);
+    FSubjectDesigner.SetIScriptData(ActiveWebsiteData.SubjectData);
+    FMessageDesigner.SetIScriptData(ActiveWebsiteData.MessageData);
 
     RenderHTMLView;
   end
@@ -615,8 +615,8 @@ begin
   begin
     DeregisterWebsite;
 
-    FSubjectDesigner.SetFileName('');
-    FMessageDesigner.SetFileName('');
+    FSubjectDesigner.SetIScriptData(nil);
+    FMessageDesigner.SetIScriptData(nil);
   end;
 end;
 
@@ -772,7 +772,7 @@ begin
 
   if Assigned(ActiveWebsiteData) then
   begin
-    UpdateHTMLView(ActiveWebsiteData.ParseIScript(FSubjectDesigner.Data), ActiveWebsiteData.ParseIScript(FMessageDesigner.Data));
+    UpdateHTMLView(ActiveWebsiteData.SubjectData.ParsedResult, ActiveWebsiteData.MessageData.ParsedResult);
   end;
 end;
 

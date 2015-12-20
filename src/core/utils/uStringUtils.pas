@@ -5,8 +5,12 @@ interface
 uses
   // Delphi
   Windows, Classes, Variants, SysUtils, StrUtils,
+  // Spring Framework
+  Spring.Cryptography,
   // RegEx
   RegExpr;
+
+function CompareTextByMD5(const AText, AComparison: string): Boolean;
 
 function MatchTextMask(const Mask, S: WideString; CaseSensitive: Boolean = False): Boolean;
 
@@ -43,6 +47,25 @@ function PadLeft(S: string; Ch: Char; Len: Integer): string;
 function PadRight(S: string; Ch: Char; Len: Integer): string;
 
 implementation
+
+function CompareTextByMD5(const AText, AComparison: string): Boolean;
+var
+  LTrim1, LTrim2: string;
+  LHash1, LHash2: string;
+begin
+  Result := False;
+
+  LTrim1 := Trim(AText);
+  LTrim2 := Trim(AComparison);
+
+  if (length(LTrim1) = length(LTrim2)) then
+  begin
+    LHash1 := CreateMD5.ComputeHash(LTrim1).ToHexString;
+    LHash2 := CreateMD5.ComputeHash(LTrim2).ToHexString;
+
+    Result := SameStr(LHash1, LHash2);
+  end;
+end;
 
 function MatchTextMask(const Mask, S: WideString; CaseSensitive: Boolean = False): Boolean;
 var

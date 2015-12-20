@@ -568,6 +568,29 @@ type
     property Message: WideString read GetMessage;
   end;
 
+  ICMSWebsiteIScriptData = interface
+    ['{3D8B43FB-8F15-4F3D-9F8D-F172056F8EC1}']
+    function GetFileName: WideString;
+    procedure SetFileName(const AFileName: WideString);
+    function GetOriginalCode: WideString;
+    function GetCode: WideString;
+    procedure SetCode(const ACode: WideString);
+    function GetPreview: WideString;
+
+    function GetCheckedResult: RIScriptResult;
+    function GetParsedResult: RIScriptResult;
+
+    property FileName: WideString read GetFileName write SetFileName;
+    property OriginalCode: WideString read GetOriginalCode;
+    property Code: WideString read GetCode write SetCode;
+    property Preview: WideString read GetPreview;
+
+    property CheckedResult: RIScriptResult read GetCheckedResult;
+    property ParsedResult: RIScriptResult read GetParsedResult;
+
+    // TODO: Improve this interface-architecture to allow SetCode externally
+  end;
+
   ICMSWebsiteContainer = interface(ICMSWebsite)
     ['{A78282FB-748E-453C-BD2A-5DFE847DE8D6}']
     function GetTabSheetController: ITabSheetController;
@@ -584,14 +607,12 @@ type
     function GetWebsite: WideString;
 
     function GetSubject: WideString;
-    function GetSubjectFileName: WideString;
-    procedure SetSubjectFileName(ASubjectFileName: WideString);
+    function GetSubjectData: ICMSWebsiteIScriptData;
 
     function GetTags: WideString;
 
     function GetMessage: WideString;
-    function GetMessageFileName: WideString;
-    procedure SetMessageFileName(AMessageFileName: WideString);
+    function GetMessageData: ICMSWebsiteIScriptData;
 
     property TabSheetController: ITabSheetController read GetTabSheetController; // write SetTabSheetController;
     property CMS: WideString read GetCMS;
@@ -601,8 +622,8 @@ type
     property Index: Integer read GetIndex write SetIndex;
     property Active: Boolean read GetActive;
 
-    function CheckIScript(AIScript: WideString): RIScriptResult;
-    function ParseIScript(AIScript: WideString): RIScriptResult;
+    function CheckIScript(const AIScript: WideString): RIScriptResult;
+    function ParseIScript(const AIScript: WideString): RIScriptResult;
     function GenerateData: ITabSheetData;
 
     function GeneratePublishItem: IPublishItem;
@@ -612,12 +633,12 @@ type
     property Website: WideString read GetWebsite;
 
     property Subject: WideString read GetSubject;
-    property SubjectFileName: WideString read GetSubjectFileName write SetSubjectFileName;
+    property SubjectData: ICMSWebsiteIScriptData read GetSubjectData;
 
     property Tags: WideString read GetTags;
 
     property Message: WideString read GetMessage;
-    property MessageFileName: WideString read GetMessageFileName write SetMessageFileName;
+    property MessageData: ICMSWebsiteIScriptData read GetMessageData;
   end;
 
   ICMSContainer = interface
@@ -701,6 +722,9 @@ type
     function GeneratePublishTab: IPublishTab;
     function GeneratePublishJob: IPublishJob;
 
+    function CheckIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData :ITabSheetData): RIScriptResult;
+    function ParseIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData :ITabSheetData): RIScriptResult;
+
     property OnUpdateCMSList: IUpdateCMSListEvent read GetUpdateCMSList;
     property OnUpdateCMSWebsiteList: IUpdateCMSWebsiteListEvent read GetUpdateCMSWebsiteList;
     property OnUpdateCMSWebsite: IUpdateCMSWebsiteEvent read GetUpdateCMSWebsite;
@@ -716,7 +740,7 @@ type
 
     property Data: WideString read GetData;
 
-    procedure InsertText(AText: WideString);
+    procedure InsertText(const AText: WideString);
   end;
 
   // // // Tab Controller // // //

@@ -3,19 +3,19 @@ unit ufIScriptDesigner;
 interface
 
 uses
-  // Delphi
+  // Delphi 
   Windows, SysUtils, Classes, Controls, Forms, StrUtils, FileCtrl, ShellAPI, ExtCtrls, Menus, StdCtrls,
-  // DevExpress
+  // DevExpress 
   dxBar, cxGraphics, cxLookAndFeels, cxLookAndFeelPainters, cxControls, cxContainer, cxEdit, cxLabel, cxButtons,
-  // AdvMemo
+  // AdvMemo 
   AdvMemo, AdvFindDialogForm, AdvReplaceDialogForm,
-  // RegEx
+  // RegEx 
   RegExpr,
-  // Mods
+  // Mods 
   uMyAdvmJScriptStyler,
-  // Common
+  // Common 
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
-  // Utils
+  // Utils 
   uStringUtils;
 
 type
@@ -39,7 +39,7 @@ type
     procedure cxLFileNameDblClick(Sender: TObject);
   private
     FDataChanged: Boolean;
-    FFileName: TFileName;
+    FIScriptData: ICMSWebsiteIScriptData;
     FAdvJScriptMemoStyler: TAdvJScriptMemoStyler;
 
     procedure ToogleEnabledStatus(AStatus: Boolean);
@@ -47,10 +47,10 @@ type
     procedure UpdateDisplayFileName;
 
     function GetDataChanged: WordBool;
-    procedure SetDataChanged(ADataChanged: WordBool);
+    procedure SetDataChanged(const ADataChanged: WordBool);
 
     function GetData: WideString;
-    procedure SetData(AData: WideString);
+    procedure SetData(const AData: WideString);
   public
     constructor Create(AOwner: TComponent); override;
 
@@ -58,10 +58,10 @@ type
 
     property Data: WideString read GetData write SetData;
 
-    procedure InsertText(AText: WideString);
-    function EscapeText(AText: string): string;
+    procedure InsertText(const AText: WideString);
+    function EscapeText(const AText: string): string;
 
-    procedure SetFileName(AFileName: TFileName);
+    procedure SetIScriptData(const AIScriptData: ICMSWebsiteIScriptData);
 
     destructor Destroy; override;
   end;
@@ -80,6 +80,7 @@ end;
 
 procedure TIScriptDesigner.AdvMemoChange(Sender: TObject);
 begin
+  FIScriptData.Code := AdvMemo.Lines.Text;
   DataChanged := True;
 end;
 
@@ -158,7 +159,7 @@ procedure TIScriptDesigner.cxBSaveClick(Sender: TObject);
 var
   I: Integer;
 begin
-  AdvMemo.Lines.SaveToFile(FFileName);
+  AdvMemo.Lines.SaveToFile(FIScriptData.FileName);
   for I := 0 to AdvMemo.Lines.Count - 1 do
     if AdvMemo.LineModifiedInt[I] = lmModified then
       AdvMemo.LineModifiedInt[I] := lmSaved;
@@ -170,7 +171,7 @@ procedure TIScriptDesigner.cxBResetChangesClick(Sender: TObject);
 var
   I: Integer;
 begin
-  AdvMemo.Lines.LoadFromFile(FFileName);
+  AdvMemo.Lines.LoadFromFile(FIScriptData.FileName);
   for I := 0 to AdvMemo.Lines.Count - 1 do
     AdvMemo.LineModifiedInt[I] := lmUnmodified;
 
@@ -179,7 +180,7 @@ end;
 
 procedure TIScriptDesigner.cxLFileNameDblClick(Sender: TObject);
 begin
-  ShellExecute(Handle, nil, PChar(ExtractFilePath(FFileName)), nil, nil, SW_SHOW);
+  ShellExecute(Handle, nil, PChar(ExtractFilePath(FIScriptData.FileName)), nil, nil, SW_SHOW);
 end;
 
 procedure TIScriptDesigner.ToogleEnabledStatus(AStatus: Boolean);
@@ -194,13 +195,10 @@ end;
 
 procedure TIScriptDesigner.UpdateDisplayFileName;
 var
-  FileName: TFileName;
+  LFileName: TFileName;
 begin
-  if DataChanged and AdvMemo.Enabled then
-    FileName := FFileName + '*'
-  else
-    FileName := FFileName;
-  cxLFileName.Caption := MinimizeName(FileName, cxLFileName.Canvas.Canvas, cxLFileName.Width - 5);
+  LFileName := FIScriptData.FileName + IfThen(DataChanged and AdvMemo.Enabled, '*');
+  cxLFileName.Caption := MinimizeName(LFileName, cxLFileName.Canvas.Canvas, cxLFileName.Width - 5);
 end;
 
 function TIScriptDesigner.GetDataChanged: WordBool;
@@ -208,7 +206,7 @@ begin
   Result := FDataChanged;
 end;
 
-procedure TIScriptDesigner.SetDataChanged(ADataChanged: WordBool);
+procedure TIScriptDesigner.SetDataChanged(const ADataChanged: WordBool);
 begin
   FDataChanged := ADataChanged;
   UpdateDisplayFileName;
@@ -216,10 +214,10 @@ end;
 
 function TIScriptDesigner.GetData: WideString;
 begin
-  Result := AdvMemo.Lines.Text;
+  Result := FIScriptData.Code;
 end;
 
-procedure TIScriptDesigner.SetData(AData: WideString);
+procedure TIScriptDesigner.SetData(const AData: WideString);
 begin
   AdvMemo.Lines.Text := AData;
   DataChanged := True;
@@ -239,6 +237,7 @@ begin
   cxBFormatScript.OptionsImage.Images := Main.ImageList;
 
   FDataChanged := False;
+  FIScriptData := nil;
 
   FAdvJScriptMemoStyler := TAdvJScriptMemoStyler.Create(nil);
   AdvMemo.SyntaxStyles := FAdvJScriptMemoStyler;
@@ -246,7 +245,7 @@ begin
   ToogleEnabledStatus(False);
 end;
 
-procedure TIScriptDesigner.InsertText(AText: WideString);
+procedure TIScriptDesigner.InsertText(const AText: WideString);
 var
   LBeforeInsert, LAfterInsert, LInputString: string;
   LBeforeQuoteCount, LAfterQuoteCount, LPosition: Integer;
@@ -304,30 +303,42 @@ begin
     AdvMemo.InsertText(EscapeText(AText) + IfThen(LNeedFinalQuote, '"'));
 end;
 
-function TIScriptDesigner.EscapeText(AText: string): string;
+function TIScriptDesigner.EscapeText(const AText: string): string;
 begin
   Result := StringReplaceMultiple(AText, ['"', '\'], ['\"', '\\']);
 end;
 
-procedure TIScriptDesigner.SetFileName(AFileName: TFileName);
+procedure TIScriptDesigner.SetIScriptData(const AIScriptData: ICMSWebsiteIScriptData);
+var
+  LFileExists: Boolean;
 begin
-  if not SameFileName(AFileName, FFileName) then
+  if not Assigned(AIScriptData) then
   begin
-    ToogleEnabledStatus(FileExists(AFileName));
+    FIScriptData := nil;
 
-    if AdvMemo.Enabled then
-      AdvMemo.Lines.LoadFromFile(AFileName)
+    ToogleEnabledStatus(False);
+    AdvMemo.Lines.Clear;
+  end
+  else if not Assigned(FIScriptData) or not SameFileName(AIScriptData.FileName, FIScriptData.FileName) then
+  begin
+    FIScriptData := AIScriptData;
+
+    LFileExists := FileExists(FIScriptData.FileName);
+    
+    ToogleEnabledStatus(LFileExists);
+
+    if LFileExists then
+      AdvMemo.Lines.Text := FIScriptData.Code
     else
       AdvMemo.Lines.Clear;
   end;
 
-  FFileName := AFileName;
-
-  DataChanged := False;
+  DataChanged := not CompareTextByMD5(FIScriptData.Code, FIScriptData.OriginalCode);
 end;
 
 destructor TIScriptDesigner.Destroy;
 begin
+  FIScriptData := nil;
   FAdvJScriptMemoStyler.Free;
   inherited Destroy;
 end;
