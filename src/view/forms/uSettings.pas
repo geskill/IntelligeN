@@ -1794,8 +1794,12 @@ begin
     try
       TPluginBasic.AppUnLoad(TAppCollectionItem(SettingsManager.Settings.Plugins.App.Items[AIndex]));
     except
-      TcxCheckListBox(Sender).Items[AIndex].State := cbsChecked;
-      raise ;
+      on E: Exception do
+      begin
+        ANewState := cbsChecked;
+        TcxCheckListBox(Sender).Items[AIndex].State := cbsChecked;
+        MessageDlg(E.Message, mtError, [mbOK], 0);
+      end;
     end;
   end
   else
@@ -1803,8 +1807,12 @@ begin
     try
       TPluginBasic.AppLoad(TAppCollectionItem(SettingsManager.Settings.Plugins.App.Items[AIndex]), Main);
     except
-      TcxCheckListBox(Sender).Items[AIndex].State := cbsUnchecked;
-      raise ;
+      on E: Exception do
+      begin
+        ANewState := cbsUnchecked;
+        TcxCheckListBox(Sender).Items[AIndex].State := cbsUnchecked;
+        MessageDlg(E.Message, mtError, [mbOK], 0);
+      end;
     end;
   end;
 
@@ -2674,7 +2682,18 @@ begin
             Enabled := False;
 
           if Enabled and Checked then
-            TPluginBasic.AppLoad(TAppCollectionItem(Items[I]), Main)
+          begin
+            try
+              TPluginBasic.AppLoad(TAppCollectionItem(Items[I]), Main);
+            except
+              on E: Exception do
+              begin
+                TPlugInCollectionItem(Items[I]).Enabled := False;
+                Checked := False;
+                MessageDlg(E.Message, mtError, [mbOK], 0);
+              end;
+            end;
+          end;
         end;
       end;
     end;

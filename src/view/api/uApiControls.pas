@@ -1752,8 +1752,7 @@ begin
     end;
 
   except
-    AMemoryStream.SaveToFile(ExtractFilePath(ParamStr(0)) + 'Fehlerbild' + '.jpg');
-    // TODO: This image file has problems
+    // This is not a image file. i.e. 404 error page not found
   end;
 
   SetValuePicture(AIndex, LPictureInfo);
