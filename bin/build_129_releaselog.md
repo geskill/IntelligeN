@@ -516,7 +516,7 @@
 
 ######major enhancements
 
-
+* Improved IScriptEditor performance
 
 ######minor enhancements
 
@@ -524,13 +524,17 @@
 
 * Added redirect in XenForo settings
 
-* Improved IScript generation
+* Improve PublishQueue (delete old entries)
+
+* Improved IScript generation (NeedFinalQuote)
 
 * Improved PublishJob caption
 
 * Improved WebsiteEditor using DevExpress LayoutControl
 
 * Improved loading app plug-ins
+
+* Fixed PublishRetry
 
 * Fixed issue canceling publish jobs
 

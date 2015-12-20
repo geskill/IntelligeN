@@ -58,8 +58,6 @@ Checked items are planned for next release.
 
 - [ ] Add simpler hoster ranking not defined by website (i.e. FileHoster ranking)
 
-- [x] Improve PublishQueue (delete old entries)
-
 - [ ] Add progress bar or indication for crawling overall progress
 
 - [ ] Add possibility in WebsiteEditor to base general settings upon the TypeID (i.e. PCGames with intelligent_posting and Software not)
