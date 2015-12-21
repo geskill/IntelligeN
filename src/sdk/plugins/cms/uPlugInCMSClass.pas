@@ -141,16 +141,6 @@ type
     function ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEditor): WordBool; safecall;
   end;
 
-  AttrDefaultValue = class(TCustomAttribute)
-  private
-    FValue: Variant;
-  public
-    constructor Create(Value: string); overload;
-    constructor Create(Value: Integer); overload;
-    constructor Create(Value: Boolean); overload;
-    property Value: Variant read FValue write FValue;
-  end;
-
 resourcestring
   StrAbortedThrougthCAP = 'Aborted througth CAPTCHA-Helper';
 
@@ -623,23 +613,6 @@ function TCMSPlugIn.ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEdit
 begin
   TPlugInCMSSettingsHelper.LoadSettingsToWebsiteEditor(SettingsFileName, SettingsClass, AWebsiteEditor);
   Result := IsPositiveResult(AWebsiteEditor.ShowModal);
-end;
-
-{ AttrDefaultValue }
-
-constructor AttrDefaultValue.Create(Value: string);
-begin
-  FValue := Value;
-end;
-
-constructor AttrDefaultValue.Create(Value: Integer);
-begin
-  FValue := Value;
-end;
-
-constructor AttrDefaultValue.Create(Value: Boolean);
-begin
-  FValue := Value;
 end;
 
 end.

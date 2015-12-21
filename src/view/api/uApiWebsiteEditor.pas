@@ -241,9 +241,9 @@ type
     procedure SetCustomFields(ACustomFields: WordBool); safecall;
   public
     constructor Create(ACMSPlugIn: ICMSPlugIn; AAppController: IAppController; AWebsiteSettingsFileName: TFileName); reintroduce; virtual;
-    procedure AddEdit(AName: WideString; ADefaultValue: WideString = ''); safecall;
-    procedure AddCheckbox(AName: WideString; ADefaultValue: WordBool = False); safecall;
-    procedure AddCategoryTab(AName: WideString); safecall;
+    procedure AddEdit(const AName: WideString; const ADefaultValue: WideString = ''); safecall;
+    procedure AddCheckbox(const AName: WideString; const ADefaultValue: WordBool = False); safecall;
+    procedure AddCategoryTab(const AName: WideString); safecall;
     procedure AddHosterTab(AHosterType: THosterType);
     property CustomFields: WordBool read GetCustomFields write SetCustomFields;
 
@@ -2350,7 +2350,7 @@ begin
   end;
 end;
 
-procedure TBasisWebsiteEditor.AddEdit(AName: WideString; ADefaultValue: WideString = '');
+procedure TBasisWebsiteEditor.AddEdit(const AName: WideString; const ADefaultValue: WideString = '');
 var
   SettingsEdit: TSettingsEdit;
 begin
@@ -2375,7 +2375,7 @@ begin
   FEditArray[length(FEditArray) - 1] := SettingsEdit;
 end;
 
-procedure TBasisWebsiteEditor.AddCheckbox(AName: WideString; ADefaultValue: WordBool = False);
+procedure TBasisWebsiteEditor.AddCheckbox(const AName: WideString; const ADefaultValue: WordBool = False);
 const
   CheckboxInfo: array [0 .. 60, 0 .. 2] of string = ( { }
     ('use_plainlinks', 'Plainlinks', 'if active IntelligeN uses directlinks, otherwise it uses the links form the first crypter'), { }
@@ -2481,7 +2481,7 @@ begin
   FCheckboxArray[length(FCheckboxArray) - 1] := SettingsCheckbox;
 end;
 
-procedure TBasisWebsiteEditor.AddCategoryTab(AName: WideString);
+procedure TBasisWebsiteEditor.AddCategoryTab(const AName: WideString);
 var
   NewIDPanel: TIDPanel;
 begin

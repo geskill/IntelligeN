@@ -22,16 +22,17 @@ type
     fcomment_status, fdraft, fsticky: Boolean;
 
     fcustomfields: TCMSCustomFields;
+  protected
+    function comment_status_default: Boolean;
+    function draft_default: Boolean;
+    function sticky_default: Boolean;
   public
     constructor Create; override;
     destructor Destroy; override;
   published
-    [AttrDefaultValue(True)]
-    property comment_status: Boolean read fcomment_status write fcomment_status;
-    [AttrDefaultValue(False)]
-    property draft: Boolean read fdraft write fdraft;
-    [AttrDefaultValue(False)]
-    property sticky: Boolean read fsticky write fsticky;
+    property comment_status: Boolean read fcomment_status write fcomment_status stored comment_status_default;
+    property draft: Boolean read fdraft write fdraft stored draft_default;
+    property sticky: Boolean read fsticky write fsticky stored sticky_default;
 
     property categorys;
 
@@ -67,6 +68,21 @@ type
 implementation
 
 { TWordPressSettings }
+
+function TWordPressSettings.comment_status_default: Boolean;
+begin
+  Result := True;
+end;
+
+function TWordPressSettings.draft_default: Boolean;
+begin
+  Result := False;
+end;
+
+function TWordPressSettings.sticky_default: Boolean;
+begin
+  Result := False;
+end;
 
 constructor TWordPressSettings.Create;
 begin

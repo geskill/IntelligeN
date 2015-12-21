@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, Variants, XMLDoc, XMLIntf, ActiveX, TypInfo, Rtti,
+  Windows, SysUtils, Variants, XMLDoc, XMLIntf, ActiveX, TypInfo,
   // Common
   uBaseConst, uBaseInterface, uAppConst,
   // Utils,
@@ -15,22 +15,32 @@ uses
 type
   TIntegerArray = array of Integer;
 
-function InArray(AInteger: Integer; AArray: TIntegerArray): Boolean;
+function InArray(const AInteger: Integer; const AArray: TIntegerArray): Boolean;
 
 type
   TXMLAccess = reference to procedure(AXMLNode: IXMLNode);
 
   TPlugInCMSSettingsHelper = class
+  private { . }
+  type
+    // from: JclRTTI.pas // Project JEDI Code Library (JCL)
+    TAddr = Cardinal;
+    TPropSpecKind = (pskNone, pskStaticMethod, pskVirtualMethod, pskField, pskConstant);
+
+  class function GetSpecKind(const Value: TAddr): TPropSpecKind;
+  class function GetSpecValue(const Value: TAddr): TAddr;
+
+  class function InheritedProperty(const AClassInfo: PTypeInfo; const AProperty: string): Boolean;
   public
-    class function GetID(ANode: IXMLNode): string;
-    class procedure SubSearch(ANode: IXMLNode; const AData: ITabSheetData; var AID: Variant);
-    class function LoadSettingsToClass(AFileName: TFileName; ASettings: TCMSPlugInSettings; const AData: ITabSheetData = nil; AXMLAccess: TXMLAccess = nil): TIntegerArray;
-    class procedure LoadSettingsToWebsiteEditor(AFileName: TFileName; AClass: TClass; AWebsiteEditor: IWebsiteEditor);
+    class function GetID(const ANode: IXMLNode): string;
+    class procedure SubSearch(const ANode: IXMLNode; const AData: ITabSheetData; var AID: Variant);
+    class function LoadSettingsToClass(const AFileName: TFileName; ASettings: TCMSPlugInSettings; const AData: ITabSheetData = nil; AXMLAccess: TXMLAccess = nil): TIntegerArray;
+    class procedure LoadSettingsToWebsiteEditor(const AFileName: TFileName; const AClass: TClass; const AWebsiteEditor: IWebsiteEditor);
   end;
 
 implementation
 
-function InArray(AInteger: Integer; AArray: TIntegerArray): Boolean;
+function InArray(const AInteger: Integer; const AArray: TIntegerArray): Boolean;
 var
   I: Integer;
 begin
@@ -42,7 +52,64 @@ end;
 
 { TPlugInCMSSettings }
 
-class function TPlugInCMSSettingsHelper.GetID(ANode: IXMLNode): string;
+class function TPlugInCMSSettingsHelper.GetSpecKind(const Value: TAddr): TPropSpecKind;
+var
+  P: Integer;
+begin
+  P := Value shr 24;
+  case P of
+    $00:
+      if Value < 2 then
+        Result := pskConstant
+      else
+        Result := pskStaticMethod;
+    $FE:
+      Result := pskVirtualMethod;
+    $FF:
+      Result := pskField;
+  else
+    Result := pskStaticMethod;
+  end;
+end;
+
+class function TPlugInCMSSettingsHelper.GetSpecValue(const Value: TAddr): TAddr;
+begin
+  case GetSpecKind(Value) of
+    pskStaticMethod, pskConstant:
+      Result := Value;
+    pskVirtualMethod:
+      Result := Value and $0000FFFF;
+    pskField:
+      Result := Value and $00FFFFFF;
+  else
+    Result := 0;
+  end;
+end;
+
+class function TPlugInCMSSettingsHelper.InheritedProperty(const AClassInfo: PTypeInfo; const AProperty: string): Boolean;
+var
+  LPropIndex: Integer;
+  LPropCount: Integer;
+  LPropList: PPropList;
+  LPropInfo: PPropInfo;
+begin
+  Result := False;
+  if not Assigned(AClassInfo) then
+    Exit(False);
+  LPropCount := GetPropList(AClassInfo, LPropList);
+  try
+    for LPropIndex := 0 to LPropCount - 1 do
+    begin
+      LPropInfo := LPropList^[LPropIndex];
+      if LPropInfo^.Name = AProperty then
+        Exit(True);
+    end;
+  finally
+    FreeMem(LPropList);
+  end;
+end;
+
+class function TPlugInCMSSettingsHelper.GetID(const ANode: IXMLNode): string;
 const
   IDNames: array [0 .. 4] of string = ('id', 'f', 't', 'p', 'i');
 var
@@ -54,7 +121,7 @@ begin
       Exit(VarToStr(ANode.Attributes[IDNames[I]]));
 end;
 
-class procedure TPlugInCMSSettingsHelper.SubSearch;
+class procedure TPlugInCMSSettingsHelper.SubSearch(const ANode: IXMLNode; const AData: ITabSheetData; var AID: Variant);
 var
   z: Integer;
   LControlID: string;
@@ -73,16 +140,16 @@ begin
             if (ChildNodes.Nodes[z].AttributeNodes.Count = 0) then
               raise Exception.Create('no ID attribute');
 
-            AID := TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[z]);
-            TPlugInCMSSettingsHelper.SubSearch(ChildNodes.Nodes[z], AData, AID);
+            AID := GetID(ChildNodes.Nodes[z]);
+            SubSearch(ChildNodes.Nodes[z], AData, AID);
             Break;
           end;
       end;
 end;
 
-class function TPlugInCMSSettingsHelper.LoadSettingsToClass;
+class function TPlugInCMSSettingsHelper.LoadSettingsToClass(const AFileName: TFileName; ASettings: TCMSPlugInSettings; const AData: ITabSheetData = nil; AXMLAccess: TXMLAccess = nil): TIntegerArray;
 
-  function VariantFix(AVariant: Variant; ATypeKind: TTypeKind): Variant;
+  function VariantFix(const AVariant: Variant; const ATypeKind: TTypeKind): Variant;
   begin
     if ATypeKind = tkEnumeration then
       Result := VarAsType(AVariant, varBoolean)
@@ -92,7 +159,7 @@ class function TPlugInCMSSettingsHelper.LoadSettingsToClass;
       Result := VarToStr(AVariant);
   end;
 
-  procedure SubAllSearch(ANode: IXMLNode; var AArray: TIntegerArray);
+  procedure SubAllSearch(const ANode: IXMLNode; var AArray: TIntegerArray);
   var
     z: Integer;
   begin
@@ -103,12 +170,12 @@ class function TPlugInCMSSettingsHelper.LoadSettingsToClass;
           if (ChildNodes.Nodes[z].AttributeNodes.Count = 0) then
             raise Exception.Create('no ID attribute');
 
-          if not InArray(StrToIntDef(TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[z]), 0), AArray) then
+          if not InArray(StrToIntDef(GetID(ChildNodes.Nodes[z]), 0), AArray) then
           begin
-            if IsNumber(TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[z])) then
+            if IsNumber(GetID(ChildNodes.Nodes[z])) then
             begin
               SetLength(AArray, length(AArray) + 1);
-              AArray[length(AArray) - 1] := StrToInt(TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[z]));
+              AArray[length(AArray) - 1] := StrToInt(GetID(ChildNodes.Nodes[z]));
             end;
             SubAllSearch(ChildNodes.Nodes[z], AArray);
           end;
@@ -116,27 +183,24 @@ class function TPlugInCMSSettingsHelper.LoadSettingsToClass;
   end;
 
 var
-  XMLDoc: IXMLDocument;
+  LXMLDoc: IXMLDocument;
+  LXMLIndex: Integer;
 
-  rttiContext: TRttiContext;
-  rttiProperty: TRttiProperty;
-  rttiType: TRttiType;
-  rttiAttribute: TCustomAttribute;
+  LPropIndex: Integer;
+  LPropCount: Integer;
+  LPropList: PPropList;
+  LPropInfo: PPropInfo;
 
-  I: Integer;
+  LCMSCustomField: TCMSCustomField;
 
-  CMSCustomField: TCMSCustomField;
-
-  // HasDefaultValue: Boolean;
-  IDValue, DefaultValue: Variant;
-
+  LIDValue, LDefaultValue: Variant;
 begin
   SetLength(Result, 0);
   CoInitializeEx(nil, COINIT_MULTITHREADED);
   try
-    XMLDoc := NewXMLDocument;
+    LXMLDoc := NewXMLDocument;
     try
-      with XMLDoc do
+      with LXMLDoc do
       begin
         Options := Options + [doNodeAutoIndent];
         NodeIndentStr := #9;
@@ -147,108 +211,97 @@ begin
       end;
 
       if Assigned(AXMLAccess) then
-        AXMLAccess(XMLDoc.DocumentElement);
+        AXMLAccess(LXMLDoc.DocumentElement);
 
-      with XMLDoc.DocumentElement do
+      with LXMLDoc.DocumentElement do
         if HasChildNodes then
           ASettings.Charset := VarToStr(ChildNodes.Nodes['charset'].NodeValue);
 
-      //rttiContext := TRttiContext.Create();
-      //try
-        // TODO: This is somehow not thread-safe or causes other errors
-        rttiType := rttiContext.GetType(ASettings.ClassType);
-
-        for rttiProperty in rttiType.GetDeclaredProperties do
+      // see: http://stackoverflow.com/questions/10188459/how-to-loop-all-properties-in-a-class
+      LPropCount := GetPropList(ASettings.ClassInfo, LPropList);
+      try
+        for LPropIndex := 0 to LPropCount - 1 do
         begin
-          if rttiProperty.PropertyType.TypeKind = tkVariant then
+          LPropInfo := LPropList^[LPropIndex];
+
+          if (LPropInfo.PropType^.Kind = tkVariant) then
           begin
-            IDValue := null;
+            LIDValue := null;
 
             if Assigned(AData) then
             begin
-              with XMLDoc.DocumentElement do
+              with LXMLDoc.DocumentElement do
                 if HasChildNodes then
-                  with ChildNodes.Nodes[rttiProperty.Name] do
+                  with ChildNodes.Nodes[LPropInfo.Name] do
                     if HasChildNodes then
-                      for I := 0 to ChildNodes.Count - 1 do
-                        if SameText(VarToStr(ChildNodes.Nodes[I].Attributes['name']), TypeIDToString(AData.TypeID)) then
+                      for LXMLIndex := 0 to ChildNodes.Count - 1 do
+                        if SameText(VarToStr(ChildNodes.Nodes[LXMLIndex].Attributes['name']), TypeIDToString(AData.TypeID)) then
                         begin
-                          if (ChildNodes.Nodes[I].AttributeNodes.Count = 0) then
+                          if (ChildNodes.Nodes[LXMLIndex].AttributeNodes.Count = 0) then
                             raise Exception.Create('no ID attribute');
 
-                          IDValue := TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[I]);
+                          LIDValue := GetID(ChildNodes.Nodes[LXMLIndex]);
 
-                          if SameText(rttiProperty.Name, 'forums') then
+                          if SameText(LPropInfo.Name, 'forums') then
                           begin
-                            if IsNumber(TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[I])) then
+                            if IsNumber(GetID(ChildNodes.Nodes[LXMLIndex])) then
                             begin
                               SetLength(Result, 1);
-                              Result[0] := StrToInt(TPlugInCMSSettingsHelper.GetID(ChildNodes.Nodes[I]));
+                              Result[0] := StrToInt(GetID(ChildNodes.Nodes[LXMLIndex]));
                             end;
-                            SubAllSearch(ChildNodes.Nodes[I], Result);
+                            SubAllSearch(ChildNodes.Nodes[LXMLIndex], Result);
                           end;
 
-                          TPlugInCMSSettingsHelper.SubSearch(ChildNodes.Nodes[I], AData, IDValue);
+                          SubSearch(ChildNodes.Nodes[LXMLIndex], AData, LIDValue);
                           Break;
                         end;
             end;
-            // workaround for: http://stackoverflow.com/questions/2206681/how-to-set-null-to-variant-field-using-rtti
-            if VarIsNull(IDValue) then
-              rttiProperty.SetValue(ASettings, TValue.From<Variant>(null))
-            else
-              rttiProperty.SetValue(ASettings, TValue.FromVariant(IDValue));
+            SetPropValue(ASettings, LPropInfo, LIDValue);
           end
-          else if SameStr(rttiProperty.PropertyType.Name, TCMSCustomFields.ClassName) then
+          else if SameStr(LPropInfo.PropType^.Name, TCMSCustomFields.ClassName) then
           begin
-            with XMLDoc.DocumentElement do
+            with LXMLDoc.DocumentElement do
               if HasChildNodes then
-                with ChildNodes.Nodes[rttiProperty.Name] do
+                with ChildNodes.Nodes[LPropInfo.Name] do
                   if HasChildNodes then
-                    for I := 0 to ChildNodes.Count - 1 do
+                    for LXMLIndex := 0 to ChildNodes.Count - 1 do
                     begin
-                      if not ChildNodes.Nodes[I].HasAttribute('name') then
+                      if not ChildNodes.Nodes[LXMLIndex].HasAttribute('name') then
                         raise Exception.Create('no name attribute');
 
-                      CMSCustomField := TCMSCustomField.Create;
-                      CMSCustomField.Name := VarToStr(ChildNodes.Nodes[I].Attributes['name']);
-                      CMSCustomField.Value := VarToStr(ChildNodes.Nodes[I].NodeValue);
+                      LCMSCustomField := TCMSCustomField.Create;
+                      LCMSCustomField.Name := VarToStr(ChildNodes.Nodes[LXMLIndex].Attributes['name']);
+                      LCMSCustomField.Value := VarToStr(ChildNodes.Nodes[LXMLIndex].NodeValue);
 
-                      TCMSCustomFields(rttiProperty.GetValue(ASettings).AsObject).Add(CMSCustomField);
+                      TCMSCustomFields(GetObjectProp(ASettings, LPropInfo)).Add(LCMSCustomField);
                     end;
           end
           else
           begin
-            DefaultValue := Unassigned;
-            // HasDefaultValue := False;
-            for rttiAttribute in rttiProperty.GetAttributes() do
-            begin
-              if rttiAttribute is AttrDefaultValue then
-              begin
-                // HasDefaultValue := True;
-                DefaultValue := AttrDefaultValue(rttiAttribute).Value;
-              end;
-            end;
+            if InheritedProperty(GetTypeData(PTypeInfo(ASettings.ClassInfo)).ParentInfo^, LPropInfo.Name) then
+              Continue;
 
-            with XMLDoc.DocumentElement do
+            if Assigned(LPropInfo^.StoredProc) then
+              LDefaultValue := GetSpecValue(TAddr(LPropInfo^.StoredProc));
+
+            with LXMLDoc.DocumentElement do
               if HasChildNodes then
-              begin
                 with ChildNodes.Nodes['settings'] do
-                  if ChildNodes.FindNode(rttiProperty.Name) = nil then
-                    rttiProperty.SetValue(ASettings, TValue.FromVariant(DefaultValue))
+                begin
+                  if not Assigned(ChildNodes.FindNode(LPropInfo.Name)) then
+                    SetPropValue(ASettings, LPropInfo, LDefaultValue)
                   else
                   begin
-                    rttiProperty.SetValue(ASettings, TValue.FromVariant(VariantFix(ChildNodes.Nodes[rttiProperty.Name].NodeValue, rttiProperty.PropertyType.TypeKind)));
+                    SetPropValue(ASettings, LPropInfo, VariantFix(ChildNodes.Nodes[LPropInfo.Name].NodeValue, LPropInfo.PropType^.Kind));
                   end;
-              end;
+                end;
           end;
         end;
-
-      //finally
-        //rttiContext.Free;
-      //end;
-
+      finally
+        FreeMem(LPropList);
+      end;
     finally
-      XMLDoc := nil;
+      LXMLDoc := nil;
     end;
   finally
     CoUninitialize;
@@ -257,7 +310,7 @@ end;
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
-class procedure TPlugInCMSSettingsHelper.LoadSettingsToWebsiteEditor(AFileName: TFileName; AClass: TClass; AWebsiteEditor: IWebsiteEditor);
+class procedure TPlugInCMSSettingsHelper.LoadSettingsToWebsiteEditor(const AFileName: TFileName; const AClass: TClass; const AWebsiteEditor: IWebsiteEditor);
 
   procedure AddWebsiteEditorComponent(AName: string; ATypeKind: TTypeKind; ADefaultValue: Variant);
   begin
@@ -265,53 +318,49 @@ class procedure TPlugInCMSSettingsHelper.LoadSettingsToWebsiteEditor(AFileName: 
       tkEnumeration:
         AWebsiteEditor.AddCheckbox(AName, ADefaultValue);
       // tkInteger:
-      // s  ;
+      // ;
     else
       AWebsiteEditor.AddEdit(AName, ADefaultValue);
     end;
   end;
 
 var
-  rttiContext: TRttiContext;
-  rttiProperty: TRttiProperty;
-  rttiType: TRttiType;
-  rttiAttribute: TCustomAttribute;
+  LPropIndex: Integer;
+  LPropCount: Integer;
+  LPropList: PPropList;
+  LPropInfo: PPropInfo;
 
-  DefaultValue: Variant;
+  LDefaultValue: Variant;
 begin
-  //rttiContext := TRttiContext.Create();
-  //try
-    rttiType := rttiContext.GetType(AClass);
-
-    for rttiProperty in rttiType.GetDeclaredProperties do
+  // see: http://stackoverflow.com/questions/10188459/how-to-loop-all-properties-in-a-class
+  LPropCount := GetPropList(AClass.ClassInfo, LPropList);
+  try
+    for LPropIndex := 0 to LPropCount - 1 do
     begin
-      if rttiProperty.PropertyType.TypeKind = tkVariant then
+      LPropInfo := LPropList^[LPropIndex];
+
+      if (LPropInfo.PropType^.Kind = tkVariant) then
       begin
-        AWebsiteEditor.AddCategoryTab(rttiProperty.Name);
+        AWebsiteEditor.AddCategoryTab(LPropInfo.Name);
       end
-      else if SameStr(rttiProperty.PropertyType.Name, TCMSCustomFields.ClassName) then
+      else if SameStr(LPropInfo.PropType^.Name, TCMSCustomFields.ClassName) then
       begin
         AWebsiteEditor.CustomFields := True;
       end
       else
       begin
-        DefaultValue := Unassigned;
-        // HasDefaultValue := False;
-        for rttiAttribute in rttiProperty.GetAttributes() do
-        begin
-          if rttiAttribute is AttrDefaultValue then
-          begin
-            // HasDefaultValue := True;
-            DefaultValue := AttrDefaultValue(rttiAttribute).Value;
-          end;
-        end;
+        if InheritedProperty(GetTypeData(PTypeInfo(AClass.ClassInfo)).ParentInfo^, LPropInfo.Name) then
+          Continue;
 
-        AddWebsiteEditorComponent(rttiProperty.Name, rttiProperty.PropertyType.TypeKind, DefaultValue);
+        if Assigned(LPropInfo^.StoredProc) then
+          LDefaultValue := GetSpecValue(TAddr(LPropInfo^.StoredProc));
+
+        AddWebsiteEditorComponent(LPropInfo.Name, LPropInfo.PropType^.Kind, LDefaultValue);
       end;
     end;
-  //finally
-    //rttiContext.Free;
-  //end;
+  finally
+    FreeMem(LPropList);
+  end;
 end;
 
 end.

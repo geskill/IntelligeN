@@ -145,9 +145,9 @@ type
     function GetCustomFields: WordBool; safecall;
     procedure SetCustomFields(ACustomFields: WordBool); safecall;
 
-    procedure AddEdit(AName: WideString; ADefaultValue: WideString = ''); safecall;
-    procedure AddCheckbox(AName: WideString; ADefaultValue: WordBool = False); safecall;
-    procedure AddCategoryTab(AName: WideString); safecall;
+    procedure AddEdit(const AName: WideString; const ADefaultValue: WideString = ''); safecall;
+    procedure AddCheckbox(const AName: WideString; const ADefaultValue: WordBool = False); safecall;
+    procedure AddCategoryTab(const AName: WideString); safecall;
 
     property CustomFields: WordBool read GetCustomFields write SetCustomFields;
 
