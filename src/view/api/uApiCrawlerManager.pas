@@ -37,6 +37,7 @@ type
 
     procedure SetPossibleControlValue;
     procedure UpdateControlValues;
+    procedure CallCrawlingFinished;
     procedure InitiateImageRemoteUpload;
   public
     constructor Create(const AControlController: IControlController); reintroduce;
@@ -122,6 +123,11 @@ begin
         LControlBase := nil;
       end;
     end;
+end;
+
+procedure TCrawlerThread.CallCrawlingFinished;
+begin
+  Data.ControlController.OnCrawlingFinished.Invoke(Self);
 end;
 
 procedure TCrawlerThread.InitiateImageRemoteUpload;
@@ -230,10 +236,11 @@ begin
   task.Invoke(
     { } procedure
     { } begin
-    { .. } UpdateControlValues;
-    { .. } InitiateImageRemoteUpload;
+    { . } UpdateControlValues;
+    { . } CallCrawlingFinished;
+    { . } InitiateImageRemoteUpload;
 
-    { .. } Finish;
+    { . } Finish;
     { } end);
 
   task.Comm.Send(MSG_CRAWLER_TASK_FINISHED, [task.UniqueID, LOmniValue.AsObject]);

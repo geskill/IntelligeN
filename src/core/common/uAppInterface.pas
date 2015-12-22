@@ -275,6 +275,7 @@ type
     procedure SetReleaseNameChange(AReleaseNameChange: IReleaseNameChange);
     function GetPopupMenuChange: IPopupMenuChange;
     procedure SetPopupMenuChange(APopupMenuChange: IPopupMenuChange);
+    function GetCrawlingFinished: INotifyEvent;
 
     // Base
     function FindControl(const AControlID: TControlID): IControlBasic; safecall;
@@ -297,6 +298,7 @@ type
     property OnControlExit: IControlEventHandler read GetControlExit write SetControlExit; { only for internal usage }
     property OnReleaseNameChange: IReleaseNameChange read GetReleaseNameChange write SetReleaseNameChange; { only for internal usage }
     property OnPopupMenuChange: IPopupMenuChange read GetPopupMenuChange write SetPopupMenuChange; { only for internal usage }
+    property OnCrawlingFinished: INotifyEvent read GetCrawlingFinished;
   end;
 
   // // // Mirror Controls // // //

@@ -8,7 +8,7 @@ uses
   // Spring Framework
   Spring.Collections.Lists,
   // MultiEvent
-  Generics.MultiEvents.NotifyInterface,
+  Generics.MultiEvents.NotifyEvent, Generics.MultiEvents.NotifyInterface,
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
@@ -30,6 +30,7 @@ type
     FControlEnter, FControlExit: IControlEventHandler;
     FReleaseNameChange: IReleaseNameChange;
     FPopupMenuChange: IPopupMenuChange;
+    FCrawlingFinished: INotifyEvent;
 
     function GetClassType(AType: TControlID): TIControlBasicMeta;
   protected
@@ -57,6 +58,7 @@ type
     procedure SetReleaseNameChange(AReleaseNameChange: IReleaseNameChange);
     function GetPopupMenuChange: IPopupMenuChange;
     procedure SetPopupMenuChange(APopupMenuChange: IPopupMenuChange);
+    function GetCrawlingFinished: INotifyEvent;
   public
     constructor Create(const AWorkPanel: TWinControl);
     destructor Destroy; override;
@@ -86,6 +88,7 @@ type
     property OnControlExit: IControlEventHandler read GetControlExit write SetControlExit;
     property OnReleaseNameChange: IReleaseNameChange read GetReleaseNameChange write SetReleaseNameChange;
     property OnPopupMenuChange: IPopupMenuChange read GetPopupMenuChange write SetPopupMenuChange;
+    property OnCrawlingFinished: INotifyEvent read GetCrawlingFinished;
   end;
 
 implementation
@@ -248,6 +251,11 @@ begin
   FPopupMenuChange := APopupMenuChange;
 end;
 
+function TControlController.GetCrawlingFinished: INotifyEvent;
+begin
+  Result := FCrawlingFinished;
+end;
+
 constructor TControlController.Create;
 begin
   inherited Create;
@@ -256,10 +264,12 @@ begin
   FControlList := TInterfaceList<IControlBasic>.Create;
 
   FControlChange := TIControlChangeEvent.Create;
+  FCrawlingFinished := TINotifyEvent.Create;
 end;
 
 destructor TControlController.Destroy;
 begin
+  FCrawlingFinished := nil;
   FSpaceMouseDown := nil;
   FControlChange := nil;
   FControlEnter := nil;

@@ -122,7 +122,7 @@ type
 
   type
     TIScriptCheckFunc = reference to function(const AIScript: WideString): RIScriptResult;
-    TIScriptParseFunc = reference to function(const AIScript: WideString; AIScriptType: TIScriptType = itMessage): RIScriptResult;
+    TIScriptParseFunc = reference to function(const AIScript: WideString; AIScriptType: TIScriptType): RIScriptResult;
 
     TICMSWebsiteIScriptData = class(TInterfacedObject, ICMSWebsiteIScriptData)
     private
