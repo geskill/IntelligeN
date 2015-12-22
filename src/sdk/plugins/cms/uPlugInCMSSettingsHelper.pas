@@ -21,7 +21,15 @@ type
   TXMLAccess = reference to procedure(AXMLNode: IXMLNode);
 
   TPlugInCMSSettingsHelper = class
-  private { . }
+  private
+    class function AfterString(P: Pointer): Pointer;
+    class function GetPropData(TypeData: PTypeData): PPropData;
+    class function NextPropInfo(PropInfo: PPropInfo): PPropInfo;
+  protected { . }
+    // see: http://stackoverflow.com/questions/34397112/possible-to-loop-only-declared-properties-of-a-class
+    class procedure GetDeclaredPropInfos(TypeInfo: PTypeInfo; PropList: PPropList);
+    class function GetDeclaredPropList(TypeInfo: PTypeInfo; out PropList: PPropList): Integer; overload;
+    class function GetDeclaredPropList(AObject: TObject; out PropList: PPropList): Integer; overload;
   public
     class function GetID(const ANode: IXMLNode): string;
     class procedure SubSearch(const ANode: IXMLNode; const AData: ITabSheetData; var AID: Variant);
@@ -42,6 +50,54 @@ begin
 end;
 
 { TPlugInCMSSettings }
+
+class function TPlugInCMSSettingsHelper.AfterString(P: Pointer): Pointer;
+begin
+  Result := Pointer(NativeUInt(P) + (PByte(P)^ + 1));
+end;
+
+class function TPlugInCMSSettingsHelper.GetPropData(TypeData: PTypeData): PPropData;
+begin
+  Result := AfterString(@TypeData^.UnitName);
+end;
+
+class function TPlugInCMSSettingsHelper.NextPropInfo(PropInfo: PPropInfo): PPropInfo;
+begin
+  Result := AfterString(@PropInfo^.Name);
+end;
+
+class procedure TPlugInCMSSettingsHelper.GetDeclaredPropInfos(TypeInfo: PTypeInfo; PropList: PPropList);
+var
+  TypeData: PTypeData;
+  PropData: PPropData;
+  PropInfo: PPropInfo;
+  I: Integer;
+begin
+  TypeData := GetTypeData(TypeInfo);
+  PropData := GetPropData(TypeData);
+  FillChar(PropList^, Sizeof(PPropInfo) * PropData^.PropCount, 0);
+  PropInfo := PPropInfo(@PropData^.PropList);
+  for I := 0 to PropData^.PropCount - 1 do
+  begin
+    PropList^[I] := PropInfo;
+    PropInfo := NextPropInfo(PropInfo);
+  end;
+end;
+
+class function TPlugInCMSSettingsHelper.GetDeclaredPropList(TypeInfo: PTypeInfo; out PropList: PPropList): Integer;
+begin
+  Result := GetPropData(GetTypeData(TypeInfo))^.PropCount;
+  if Result > 0 then
+  begin
+    GetMem(PropList, Result * SizeOf(Pointer));
+    GetDeclaredPropInfos(TypeInfo, PropList);
+  end;
+end;
+
+class function TPlugInCMSSettingsHelper.GetDeclaredPropList(AObject: TObject; out PropList: PPropList): Integer;
+begin
+  Result := GetDeclaredPropList(PTypeInfo(AObject.ClassInfo), PropList);
+end;
 
 class function TPlugInCMSSettingsHelper.GetID(const ANode: IXMLNode): string;
 const
@@ -142,7 +198,7 @@ begin
           ASettings.Charset := VarToStr(ChildNodes.Nodes['charset'].NodeValue);
 
       // see: http://stackoverflow.com/questions/10188459/how-to-loop-all-properties-in-a-class
-      LPropCount := GetPropList(ASettings.ClassInfo, LPropList);
+      LPropCount := GetDeclaredPropList(ASettings.ClassInfo, LPropList);
       try
         for LPropIndex := 0 to LPropCount - 1 do
         begin
@@ -247,7 +303,7 @@ var
   LDefaultValue: Variant;
 begin
   // see: http://stackoverflow.com/questions/10188459/how-to-loop-all-properties-in-a-class
-    LPropCount := GetPropList(ASettings.ClassInfo, LPropList);
+    LPropCount := GetDeclaredPropList(ASettings.ClassInfo, LPropList);
     try
       for LPropIndex := 0 to LPropCount - 1 do
       begin

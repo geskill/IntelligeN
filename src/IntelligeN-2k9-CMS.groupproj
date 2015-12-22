@@ -1,0 +1,336 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{D81C2114-4C37-4158-AFF3-70E85E834421}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="view\IntelligeN.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\Blogger\blogger.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\cherryCMS\cherrycms.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\Discuz!\discuz.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\Discuz!X\discuzx.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\DLE\dle.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\FluxBB\fluxbb.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\HTW\htw.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\iCMS\icms.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\ipb2\ipb2.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\ipb3\ipb3.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\Joomla\joomla.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\LoadIT\loadit.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\MyBB\mybb.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\N3m0CMS\n3m0cms.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\phpbb2\phpbb2.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\phpbb3\phpbb3.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\smf\smf.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\uCMS\ucms.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\vBulletin\vbulletin.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\wbb2\wbb2.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\wbb3\wbb3.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\wbb4\wbb4.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\wFusion\wfusion.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\WordPress\wordpress.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="sdk\plugins\cms\XenForo\xenforo.dproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="IntelligeN">
+			<MSBuild Projects="view\IntelligeN.dproj"/>
+		</Target>
+		<Target Name="IntelligeN:Clean">
+			<MSBuild Targets="Clean" Projects="view\IntelligeN.dproj"/>
+		</Target>
+		<Target Name="IntelligeN:Make">
+			<MSBuild Targets="Make" Projects="view\IntelligeN.dproj"/>
+		</Target>
+		<Target Name="blogger">
+			<MSBuild Projects="sdk\plugins\cms\Blogger\blogger.dproj"/>
+		</Target>
+		<Target Name="blogger:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\Blogger\blogger.dproj"/>
+		</Target>
+		<Target Name="blogger:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\Blogger\blogger.dproj"/>
+		</Target>
+		<Target Name="cherrycms">
+			<MSBuild Projects="sdk\plugins\cms\cherryCMS\cherrycms.dproj"/>
+		</Target>
+		<Target Name="cherrycms:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\cherryCMS\cherrycms.dproj"/>
+		</Target>
+		<Target Name="cherrycms:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\cherryCMS\cherrycms.dproj"/>
+		</Target>
+		<Target Name="discuz">
+			<MSBuild Projects="sdk\plugins\cms\Discuz!\discuz.dproj"/>
+		</Target>
+		<Target Name="discuz:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\Discuz!\discuz.dproj"/>
+		</Target>
+		<Target Name="discuz:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\Discuz!\discuz.dproj"/>
+		</Target>
+		<Target Name="discuzx">
+			<MSBuild Projects="sdk\plugins\cms\Discuz!X\discuzx.dproj"/>
+		</Target>
+		<Target Name="discuzx:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\Discuz!X\discuzx.dproj"/>
+		</Target>
+		<Target Name="discuzx:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\Discuz!X\discuzx.dproj"/>
+		</Target>
+		<Target Name="dle">
+			<MSBuild Projects="sdk\plugins\cms\DLE\dle.dproj"/>
+		</Target>
+		<Target Name="dle:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\DLE\dle.dproj"/>
+		</Target>
+		<Target Name="dle:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\DLE\dle.dproj"/>
+		</Target>
+		<Target Name="fluxbb">
+			<MSBuild Projects="sdk\plugins\cms\FluxBB\fluxbb.dproj"/>
+		</Target>
+		<Target Name="fluxbb:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\FluxBB\fluxbb.dproj"/>
+		</Target>
+		<Target Name="fluxbb:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\FluxBB\fluxbb.dproj"/>
+		</Target>
+		<Target Name="htw">
+			<MSBuild Projects="sdk\plugins\cms\HTW\htw.dproj"/>
+		</Target>
+		<Target Name="htw:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\HTW\htw.dproj"/>
+		</Target>
+		<Target Name="htw:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\HTW\htw.dproj"/>
+		</Target>
+		<Target Name="icms">
+			<MSBuild Projects="sdk\plugins\cms\iCMS\icms.dproj"/>
+		</Target>
+		<Target Name="icms:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\iCMS\icms.dproj"/>
+		</Target>
+		<Target Name="icms:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\iCMS\icms.dproj"/>
+		</Target>
+		<Target Name="ipb2">
+			<MSBuild Projects="sdk\plugins\cms\ipb2\ipb2.dproj"/>
+		</Target>
+		<Target Name="ipb2:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\ipb2\ipb2.dproj"/>
+		</Target>
+		<Target Name="ipb2:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\ipb2\ipb2.dproj"/>
+		</Target>
+		<Target Name="ipb3">
+			<MSBuild Projects="sdk\plugins\cms\ipb3\ipb3.dproj"/>
+		</Target>
+		<Target Name="ipb3:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\ipb3\ipb3.dproj"/>
+		</Target>
+		<Target Name="ipb3:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\ipb3\ipb3.dproj"/>
+		</Target>
+		<Target Name="joomla">
+			<MSBuild Projects="sdk\plugins\cms\Joomla\joomla.dproj"/>
+		</Target>
+		<Target Name="joomla:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\Joomla\joomla.dproj"/>
+		</Target>
+		<Target Name="joomla:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\Joomla\joomla.dproj"/>
+		</Target>
+		<Target Name="loadit">
+			<MSBuild Projects="sdk\plugins\cms\LoadIT\loadit.dproj"/>
+		</Target>
+		<Target Name="loadit:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\LoadIT\loadit.dproj"/>
+		</Target>
+		<Target Name="loadit:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\LoadIT\loadit.dproj"/>
+		</Target>
+		<Target Name="mybb">
+			<MSBuild Projects="sdk\plugins\cms\MyBB\mybb.dproj"/>
+		</Target>
+		<Target Name="mybb:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\MyBB\mybb.dproj"/>
+		</Target>
+		<Target Name="mybb:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\MyBB\mybb.dproj"/>
+		</Target>
+		<Target Name="n3m0cms">
+			<MSBuild Projects="sdk\plugins\cms\N3m0CMS\n3m0cms.dproj"/>
+		</Target>
+		<Target Name="n3m0cms:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\N3m0CMS\n3m0cms.dproj"/>
+		</Target>
+		<Target Name="n3m0cms:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\N3m0CMS\n3m0cms.dproj"/>
+		</Target>
+		<Target Name="phpbb2">
+			<MSBuild Projects="sdk\plugins\cms\phpbb2\phpbb2.dproj"/>
+		</Target>
+		<Target Name="phpbb2:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\phpbb2\phpbb2.dproj"/>
+		</Target>
+		<Target Name="phpbb2:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\phpbb2\phpbb2.dproj"/>
+		</Target>
+		<Target Name="phpbb3">
+			<MSBuild Projects="sdk\plugins\cms\phpbb3\phpbb3.dproj"/>
+		</Target>
+		<Target Name="phpbb3:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\phpbb3\phpbb3.dproj"/>
+		</Target>
+		<Target Name="phpbb3:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\phpbb3\phpbb3.dproj"/>
+		</Target>
+		<Target Name="smf">
+			<MSBuild Projects="sdk\plugins\cms\smf\smf.dproj"/>
+		</Target>
+		<Target Name="smf:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\smf\smf.dproj"/>
+		</Target>
+		<Target Name="smf:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\smf\smf.dproj"/>
+		</Target>
+		<Target Name="ucms">
+			<MSBuild Projects="sdk\plugins\cms\uCMS\ucms.dproj"/>
+		</Target>
+		<Target Name="ucms:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\uCMS\ucms.dproj"/>
+		</Target>
+		<Target Name="ucms:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\uCMS\ucms.dproj"/>
+		</Target>
+		<Target Name="vbulletin">
+			<MSBuild Projects="sdk\plugins\cms\vBulletin\vbulletin.dproj"/>
+		</Target>
+		<Target Name="vbulletin:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\vBulletin\vbulletin.dproj"/>
+		</Target>
+		<Target Name="vbulletin:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\vBulletin\vbulletin.dproj"/>
+		</Target>
+		<Target Name="wbb2">
+			<MSBuild Projects="sdk\plugins\cms\wbb2\wbb2.dproj"/>
+		</Target>
+		<Target Name="wbb2:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\wbb2\wbb2.dproj"/>
+		</Target>
+		<Target Name="wbb2:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\wbb2\wbb2.dproj"/>
+		</Target>
+		<Target Name="wbb3">
+			<MSBuild Projects="sdk\plugins\cms\wbb3\wbb3.dproj"/>
+		</Target>
+		<Target Name="wbb3:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\wbb3\wbb3.dproj"/>
+		</Target>
+		<Target Name="wbb3:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\wbb3\wbb3.dproj"/>
+		</Target>
+		<Target Name="wbb4">
+			<MSBuild Projects="sdk\plugins\cms\wbb4\wbb4.dproj"/>
+		</Target>
+		<Target Name="wbb4:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\wbb4\wbb4.dproj"/>
+		</Target>
+		<Target Name="wbb4:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\wbb4\wbb4.dproj"/>
+		</Target>
+		<Target Name="wfusion">
+			<MSBuild Projects="sdk\plugins\cms\wFusion\wfusion.dproj"/>
+		</Target>
+		<Target Name="wfusion:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\wFusion\wfusion.dproj"/>
+		</Target>
+		<Target Name="wfusion:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\wFusion\wfusion.dproj"/>
+		</Target>
+		<Target Name="wordpress">
+			<MSBuild Projects="sdk\plugins\cms\WordPress\wordpress.dproj"/>
+		</Target>
+		<Target Name="wordpress:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\WordPress\wordpress.dproj"/>
+		</Target>
+		<Target Name="wordpress:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\WordPress\wordpress.dproj"/>
+		</Target>
+		<Target Name="xenforo">
+			<MSBuild Projects="sdk\plugins\cms\XenForo\xenforo.dproj"/>
+		</Target>
+		<Target Name="xenforo:Clean">
+			<MSBuild Targets="Clean" Projects="sdk\plugins\cms\XenForo\xenforo.dproj"/>
+		</Target>
+		<Target Name="xenforo:Make">
+			<MSBuild Targets="Make" Projects="sdk\plugins\cms\XenForo\xenforo.dproj"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="IntelligeN;blogger;cherrycms;discuz;discuzx;dle;fluxbb;htw;icms;ipb2;ipb3;joomla;loadit;mybb;n3m0cms;phpbb2;phpbb3;smf;ucms;vbulletin;wbb2;wbb3;wbb4;wfusion;wordpress;xenforo"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="IntelligeN:Clean;blogger:Clean;cherrycms:Clean;discuz:Clean;discuzx:Clean;dle:Clean;fluxbb:Clean;htw:Clean;icms:Clean;ipb2:Clean;ipb3:Clean;joomla:Clean;loadit:Clean;mybb:Clean;n3m0cms:Clean;phpbb2:Clean;phpbb3:Clean;smf:Clean;ucms:Clean;vbulletin:Clean;wbb2:Clean;wbb3:Clean;wbb4:Clean;wfusion:Clean;wordpress:Clean;xenforo:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="IntelligeN:Make;blogger:Make;cherrycms:Make;discuz:Make;discuzx:Make;dle:Make;fluxbb:Make;htw:Make;icms:Make;ipb2:Make;ipb3:Make;joomla:Make;loadit:Make;mybb:Make;n3m0cms:Make;phpbb2:Make;phpbb3:Make;smf:Make;ucms:Make;vbulletin:Make;wbb2:Make;wbb3:Make;wbb4:Make;wfusion:Make;wordpress:Make;xenforo:Make"/>
+		</Target>
+		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+	</Project>
