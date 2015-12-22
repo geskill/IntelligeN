@@ -65,7 +65,7 @@ function TCdLexikonDe.InternalExecute;
 
   procedure deep_search(AWebsiteSourceCode: string);
   var
-    _Tracklist: string;
+    LTracklist: string;
   begin
     if ACanUse(cPicture) then
       with TRegExpr.Create do
@@ -74,13 +74,12 @@ function TCdLexikonDe.InternalExecute;
           Expression := '<tr><td valign=top><img src=''(.*?)''';
 
           if Exec(InputString) then
-            AControlController.FindControl(cPicture).AddProposedValue(GetName, website + Match[1]);
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, WEBSITE + Match[1]);
         finally
           Free;
         end;
 
     if ACanUse(cCreator) then
-    begin
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
@@ -91,11 +90,21 @@ function TCdLexikonDe.InternalExecute;
         finally
           Free;
         end;
-    end;
+
+    if ACanUse(cPublisher) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'Label: <td><td><font size=''2'' face=''Arial''>(.*?)<tr>';
+
+          if Exec(InputString) then
+            AControlController.FindControl(cPublisher).AddProposedValue(GetName, Match[1]);
+        finally
+          Free;
+        end;
 
     if ACanUse(cDescription) then
     begin
-      _Tracklist := '';
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
@@ -103,10 +112,11 @@ function TCdLexikonDe.InternalExecute;
 
           if Exec(InputString) then
           begin
+            LTracklist := '';
             repeat
-              _Tracklist := _Tracklist + Match[2] + '. ' + Match[3] + sLineBreak;
+              LTracklist := LTracklist + Match[2] + '. ' + Match[3] + sLineBreak;
             until not ExecNext;
-            AControlController.FindControl(cDescription).AddProposedValue(GetName, _Tracklist);
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(LTracklist));
           end;
         finally
           Free;
@@ -115,7 +125,7 @@ function TCdLexikonDe.InternalExecute;
   end;
 
 var
-  LTitle: string;
+  LTitle, LSearchQuery: string;
   LCount: Integer;
 
   LRequestID1, LRequestID2: Double;
@@ -125,40 +135,33 @@ begin
   LTitle := AControlController.FindControl(cTitle).Value;
   LCount := 0;
 
-  // _Title := TrimLeft(Copy(AControlController.FindControl(cTitle).Value, Pos('-', AControlController.FindControl(cTitle).Value) + 1));
+  LSearchQuery := TrimLeft(copy(LTitle, Pos('-', LTitle) + 1));
 
-  RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + '/suchen/albumsuche.php?r=0&q=' + HTTPEncode(_Title)), TPlugInHTTPOptions.Create(Self));
+  LResponeStr := GETRequest(WEBSITE + 'suchen/albumsuche.php?r=0&q=' + HTTPEncode(LSearchQuery), LRequestID1);
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID1);
+  if not(Pos('<hr><br>', LResponeStr) = 0) then
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := LResponeStr;
+        Expression := '<\/a><td><a href=''\.\.\/(.*?)'' title=';
 
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID1).HTTPResult.SourceCode;
-
-  with TRegExpr.Create do
-    try
-      InputString := ResponseStrSearchResult;
-      Expression := '<\/a><td><a href=''\.\.\/(.*?)'' title=''.*?''>.*?<\/a><td>';
-
-      if Exec(InputString) then
-      begin
-        repeat
-
-          RequestID2 := HTTPManager.Get(website + Match[1], RequestID1, TPlugInHTTPOptions.Create(Self));
-
+        if Exec(InputString) then
+        begin
           repeat
-            sleep(50);
-          until HTTPManager.HasResult(RequestID2);
+            LResponeStr := GETFollowUpRequest(WEBSITE + Match[1], LRequestID1, LRequestID2);
 
-          deep_search(HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode);
+            deep_search(LResponeStr);
 
-          Inc(_Count);
-        until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
+        end;
+      finally
+        Free;
       end;
-    finally
-      Free;
-    end;
+  end;
 
+  Result := True;
 end;
 
 function TCdLexikonDe.GetResultsLimitDefaultValue;

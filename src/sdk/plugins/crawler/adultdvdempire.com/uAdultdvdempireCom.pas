@@ -127,8 +127,6 @@ var
 
   LSearchString: string;
 
-  LHTTPRequest: IHTTPRequest;
-  LHTTPParams: IHTTPParams;
   LRequestID1, LRequestID2: Double;
 
   LResponeStr: string;

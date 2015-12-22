@@ -8,7 +8,7 @@ uses
   // RegEx
   RegExpr,
   // Utils
-  uHTMLUtils,
+  uHTMLUtils, uStringUtils,
   // Common
   uBaseConst, uBaseInterface,
   // HTTPManager
@@ -21,6 +21,7 @@ type
   protected { . }
   const
     WEBSITE = 'http://www.cduniverse.com/';
+    function GetSearchType(const ATypeID: TTypeID): string;
   public
     function GetName: WideString; override; safecall;
 
@@ -38,6 +39,42 @@ implementation
 
 { TCduniverseCom }
 
+function TCduniverseCom.GetSearchType(const ATypeID: TTypeID): string;
+begin
+  case ATypeID of
+    cAudio:
+      Result := 'music';
+    cEBook:
+      Result := 'books';
+    cMovie:
+      Result := 'movie';
+    cNintendoDS:
+      Result := 'games&setpref=3DS';
+    cPCGames:
+      Result := 'games&setpref=PCG';
+    cPlayStation3:
+      Result := 'games&setpref=PS3';
+    cPlayStation4:
+      Result := 'games&setpref=PS4';
+    cPlayStationVita:
+      Result := 'games&setpref=PSV';
+    cSoftware:
+      Result := 'games';
+    cWii:
+      Result := 'games&setpref=WII';
+    cWiiU:
+      Result := 'games&setpref=WIIU';
+    cXbox360:
+      Result := 'XB360';
+    cXboxOne:
+      Result := 'XB1';
+    cXXX:
+      Result := 'ice';
+    cOther:
+      Result := 'all';
+  end;
+end;
+
 function TCduniverseCom.GetName;
 begin
   Result := 'cduniverse.com';
@@ -45,12 +82,12 @@ end;
 
 function TCduniverseCom.InternalGetAvailableTypeIDs;
 begin
-  Result := [low(TTypeID) .. high(TTypeID)];
+  Result := [ low(TTypeID) .. high(TTypeID)];
 end;
 
 function TCduniverseCom.InternalGetAvailableControlIDs;
 begin
-  Result := [cPicture, cGenre, cDescription];
+  Result := [cCreator, cPublisher, cPicture, cGenre, cDescription];
 
   if (ATypeID in [cAudio, cMovie]) then
     Result := Result + [cRuntime];
@@ -67,10 +104,6 @@ begin
 end;
 
 function TCduniverseCom.InternalExecute;
-var
-  _style, _Title, _tracklist: string;
-
-  RequestID1, RequestID2, RequestID3: Double;
 
   procedure deep_image_search(aWebsitecode: string);
   begin
@@ -87,30 +120,18 @@ var
   end;
 
   procedure deep_search(AWebsiteSourceCode: string);
+  var
+    LTracklist: string;
   begin
     if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := '<table id="igcovera1" cellPadding="0" cellSpacing="0" border="0">\s+<tr>\s+<td><a  href="\/(.*?)"';
+          Expression := 'UpdateLinkForJS\(this, ''(.*?)''';
 
           if Exec(InputString) then
           begin
-
-            RequestID3 := HTTPManager.Get(WEBSITE + Match[1], RequestID2, TPlugInHTTPOptions.Create(Self));
-
-            repeat
-              sleep(50);
-            until HTTPManager.HasResult(RequestID3);
-
-            deep_image_search(HTTPManager.GetResult(RequestID3).HTTPResult.SourceCode);
-
-          end
-          else
-          begin
-            Expression := '<table id="igcovera1" cellPadding="0" cellSpacing="0" border="0">\s+<tr>\s+<td><img src="(.*?)"';
-
-            if Exec(InputString) and not SameText(Match[1], '/images/default_coverart.gif') then
+            if Exec(InputString) then
               AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
           end;
         finally
@@ -134,15 +155,39 @@ var
     if ACanUse(cGenre) then
       with TRegExpr.Create do
         try
-          InputString := AWebsiteSourceCode;
-          Expression := '"categorylink" href="(.*?)">(.*?)<\/a>';
+          InputString := ExtractTextBetween(AWebsiteSourceCode, 'Category</td>', '</table>');
+          Expression := '"standardhyperlink".*?>(.*?)<\/a>';
 
           if Exec(InputString) then
           begin
             repeat
-              AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[2]);
+              AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[1]);
             until not ExecNext;
           end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cCreator) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'Developer<\/td><td>(.*?)<\/td>';
+
+          if Exec(InputString) then
+            AControlController.FindControl(cCreator).AddProposedValue(GetName, Trim(Match[1]));
+        finally
+          Free;
+        end;
+
+    if ACanUse(cPublisher) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'Publisher<\/td><td>(.*?)<\/td>';
+
+          if Exec(InputString) then
+            AControlController.FindControl(cPublisher).AddProposedValue(GetName, Trim(Match[1]));
         finally
           Free;
         end;
@@ -152,15 +197,15 @@ var
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := 'class="mp3gridfont">(.*?)\s?<';
+          Expression := 'class="mp3gridfont".*?>(\d+)<\/td>.*?class="mp3gridfont".*?>(.*?)&';
 
           if Exec(InputString) then
           begin
-            _tracklist := '';
+            LTracklist := '';
             repeat
-              _tracklist := _tracklist + Trim(Match[1]) + sLineBreak;
+              LTracklist := LTracklist + Match[2] + '. ' + Match[3] + sLineBreak;
             until not ExecNext;
-            AControlController.FindControl(cDescription).AddProposedValue(GetName, copy(_tracklist, 1, length(_tracklist) - 2));
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(LTracklist));
           end;
         finally
           Free;
@@ -168,7 +213,7 @@ var
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := '<div style="margin-top:10px;"><!---- trimable --->(.*?)&nbsp;&nbsp;';
+          Expression := '"description">(.*?)<\/div>';
 
           if Exec(InputString) then
           begin
@@ -186,6 +231,7 @@ var
   LTitle: string;
   LCount: Integer;
 
+  LHTTPRequest: IHTTPRequest;
   LRequestID1, LRequestID2: Double;
 
   LResponeStr: string;
@@ -193,65 +239,44 @@ begin
   LTitle := AControlController.FindControl(cTitle).Value;
   LCount := 0;
 
-  case _TemplateTypeID of
-    cAudio:
-      _style := 'music';
-    cGameCube:
-      _style := 'games';
-    cMovie:
-      _style := 'movie';
-    cNintendoDS:
-      _style := 'games&setpref=NDS';
-    cPCGames, cSoftware:
-      _style := 'games&setpref=PCG';
-    cPlayStation2, cPlayStation3:
-      _style := 'games&setpref=PS3';
-    cPlayStationPortable:
-      _style := 'games&setpref=PSP';
-    cWii:
-      _style := 'games&setpref=WII';
-    cXbox, cXbox360:
-      _style := 'games&setpref=XB360';
-    cXXX:
-      _style := 'ice';
+  LHTTPRequest := THTTPRequest.Create(WEBSITE + 'sresult.asp?style=' + GetSearchType(ATypeID) + '&HT_Search_Info=' + HTTPEncode(LTitle));
+  with LHTTPRequest do
+  begin
+    Referer := WEBSITE;
+    Cookies.Add('IAmAnAdult=yes');
   end;
 
-  HTTPRequest := THTTPRequest.Create(WEBSITE + 'sresult.asp?style=' + _style + '&HT_Search_Info=' + HTTPEncode(_Title));
-  HTTPRequest.Referer := WEBSITE;
-  HTTPRequest.Cookies.Add('IAmAnAdult=yes');
-
-  RequestID1 := HTTPManager.Get(HTTPRequest, TPlugInHTTPOptions.Create(Self));
+  LRequestID1 := HTTPManager.Get(LHTTPRequest, TPlugInHTTPOptions.Create(Self));
 
   repeat
     sleep(50);
-  until HTTPManager.HasResult(RequestID1);
+  until HTTPManager.HasResult(LRequestID1);
 
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID1).HTTPResult.SourceCode;
+  LResponeStr := HTTPManager.GetResult(LRequestID1).HTTPResult.SourceCode;
 
-  with TRegExpr.Create do
-    try
-      InputString := ResponseStrSearchResult;
-      Expression := '(2|4)px;"><a\s+href="\/(.*?)"';
+  if not(Pos('id="efef1"', LResponeStr) = 0) then
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := LResponeStr;
+        Expression := '(2|4)px;"><a\s+href="\/(.*?)"';
 
-      if Exec(InputString) then
-      begin
-        repeat
-
-          RequestID2 := HTTPManager.Get(WEBSITE + Match[2], RequestID1, TPlugInHTTPOptions.Create(Self));
-
+        if Exec(InputString) then
+        begin
           repeat
-            sleep(50);
-          until HTTPManager.HasResult(RequestID2);
+            LResponeStr := GETFollowUpRequest(WEBSITE + HTMLDecode(Match[2]), LRequestID1, LRequestID2);
 
-          deep_search(HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode);
+            deep_search(LResponeStr);
 
-          Inc(_Count);
-        until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
+        end;
+      finally
+        Free;
       end;
-    finally
-      Free;
-    end;
+  end;
 
+  Result := True;
 end;
 
 function TCduniverseCom.GetResultsLimitDefaultValue;
