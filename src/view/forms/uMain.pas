@@ -736,7 +736,7 @@ end;
 
 procedure TMain.aHelpFileExecute(Sender: TObject);
 begin
-  ShellExecute(Handle, 'open', PChar(ExtractFilePath(ParamStr(0)) + 'IntelligeN.chm'), nil, nil, SW_SHOW);
+  ShellExecute(Handle, 'open', Homepage + 'help/', nil, nil, SW_SHOW);
 end;
 
 procedure TMain.aCheckforUpdatesExecute(Sender: TObject);
@@ -746,18 +746,17 @@ end;
 
 procedure TMain.aSupportBoardExecute(Sender: TObject);
 begin
-  // ShellExecute(Handle, 'open', 'http://www.the-lounge.org/viewforum.php?f=504', nil, nil, SW_SHOW);
-  ShellExecute(Handle, 'open', 'http://intelligen2009.com/', nil, nil, SW_SHOW);
+  ShellExecute(Handle, 'open', Homepage + 'forum/', nil, nil, SW_SHOW);
 end;
 
 procedure TMain.aVisitBlogExecute(Sender: TObject);
 begin
-  // ShellExecute(Handle, 'open', 'http://intelligen2009.info/', nil, nil, SW_SHOW);
+  ShellExecute(Handle, 'open', Homepage + 'blog/', nil, nil, SW_SHOW);
 end;
 
 procedure TMain.aReportIssueExecute(Sender: TObject);
 begin
-  ShellExecute(Handle, 'open', 'https://www.syncom.org/projects/intelligen/newticket', nil, nil, SW_SHOW);
+  ShellExecute(Handle, 'open', Homepage + 'report-issue/', nil, nil, SW_SHOW);
 end;
 
 procedure TMain.aAboutExecute(Sender: TObject);

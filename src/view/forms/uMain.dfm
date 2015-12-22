@@ -334,6 +334,14 @@ object Main: TMain
                 ExplicitWidth = 196
                 ExplicitHeight = 256
               end
+              inherited cxEditRepo: TcxEditRepository
+                inherited cxERCancelButtonActive: TcxEditRepositoryButtonItem
+                  Properties.Images = nil
+                end
+                inherited cxERCancelButtonDisabled: TcxEditRepositoryButtonItem
+                  Properties.Images = nil
+                end
+              end
             end
           end
         end

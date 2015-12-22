@@ -170,7 +170,6 @@ begin
     UseLatestCommonDialogs := False;
     ReportMemoryLeaksOnShutdown := True;
 {$ENDIF}
-    Application.HelpFile := ExtractFilePath(ParamStr(0)) + 'IntelligeN.chm';
     if GenerateFolderSystem then
     begin
       Application.CreateForm(TMain, Main);
