@@ -19,14 +19,14 @@ type
     function Get(Index: Integer): WideString; safecall;
     function GetCount: Integer; safecall;
     procedure Put(Index: Integer; const S: WideString); safecall;
-    function Add(const S: string): Integer; safecall;
+    function Add(const S: WideString): Integer; safecall;
     procedure Clear; safecall;
     procedure Delete(Index: Integer); safecall;
     function GetText: WideString; safecall;
     function IndexOf(const S: WideString): Integer; safecall;
     function IndexOfName(const Name: WideString): Integer; safecall;
     procedure Insert(Index: Integer; const S: WideString); safecall;
-    procedure SetText(Text: WideString); safecall;
+    procedure SetText(const Text: WideString); safecall;
 
     property Count: Integer read GetCount;
     property Names[Index: Integer]: WideString read GetName;
@@ -46,7 +46,7 @@ type
     function GetAccountName: WideString; safecall;
     function GetAccountPassword: WideString; safecall;
 
-    procedure Activate(AType: TProxyType; AServer: WideString; APort: Integer; ARequireAuthentication: WordBool; AAccountName, AAccountPassword: WideString); safecall;
+    procedure Activate(AType: TProxyType; const AServer: WideString; APort: Integer; ARequireAuthentication: WordBool; const AAccountName, AAccountPassword: WideString); safecall;
     property Active: WordBool read GetActive;
     property ServerType: TProxyType read GetType;
     property Server: WideString read GetServer;
@@ -69,7 +69,7 @@ type
     procedure SetFileNameFromIndex(Index: Integer; const AFileName: WideString); safecall;
 
     function GetRawData: WideString; safecall;
-    procedure SetRawData(ARawData: WideString); safecall;
+    procedure SetRawData(const ARawData: WideString); safecall;
     function GetParamType: TParamType; safecall;
     procedure SetParamType(AParamType: TParamType); safecall;
     function GetCount: Integer; safecall;
@@ -97,26 +97,26 @@ type
   IHTTPHeader = interface
     ['{D55CB024-D568-41A2-880E-F7CF0A1EEE9C}']
     function GetCookies: ICOMList; safecall;
-    procedure SetCookies(ACookies: ICOMList); safecall;
+    procedure SetCookies(const ACookies: ICOMList); safecall;
 
     function GetCacheControl: WideString; safecall;
-    procedure SetCacheControl(ACacheControl: WideString); safecall;
+    procedure SetCacheControl(const ACacheControl: WideString); safecall;
     function GetCharSet: WideString; safecall;
-    procedure SetCharSet(ACharSet: WideString); safecall;
+    procedure SetCharSet(const ACharSet: WideString); safecall;
     function GetConnection: WideString; safecall;
-    procedure SetConnection(AConnection: WideString); safecall;
+    procedure SetConnection(const AConnection: WideString); safecall;
     function GetContentDisposition: WideString; safecall;
-    procedure SetContentDisposition(AContentDisposition: WideString); safecall;
+    procedure SetContentDisposition(const AContentDisposition: WideString); safecall;
     function GetContentEncoding: WideString; safecall;
-    procedure SetContentEncoding(AContentEncoding: WideString); safecall;
+    procedure SetContentEncoding(const AContentEncoding: WideString); safecall;
     function GetContentLanguage: WideString; safecall;
-    procedure SetContentLanguage(AContentLanguage: WideString); safecall;
+    procedure SetContentLanguage(const AContentLanguage: WideString); safecall;
 
     function GetContentType: WideString; safecall;
-    procedure SetContentType(AContentType: WideString); safecall;
+    procedure SetContentType(const AContentType: WideString); safecall;
 
     function GetCustomHeaders: ICOMList; safecall;
-    procedure SetCustomHeaders(ACustomHeaders: ICOMList); safecall;
+    procedure SetCustomHeaders(const ACustomHeaders: ICOMList); safecall;
 
     property Cookies: ICOMList read GetCookies write SetCookies;
 
@@ -143,24 +143,24 @@ type
   IHTTPRequest = interface(IHTTPHeader)
     ['{4D6DCF40-E18D-4CB5-87AC-572C0686AA21}']
     function GetURL: WideString; safecall;
-    procedure SetURL(AURL: WideString); safecall;
+    procedure SetURL(const AURL: WideString); safecall;
     function GetMethod: THTTPMethod; safecall;
     procedure SetMethod(AMethod: THTTPMethod); safecall;
 
     function GetAccept: WideString; safecall;
-    procedure SetAccept(AAccept: WideString); safecall;
+    procedure SetAccept(const AAccept: WideString); safecall;
     function GetAcceptCharSet: WideString; safecall;
-    procedure SetAcceptCharSet(AAcceptCharSet: WideString); safecall;
+    procedure SetAcceptCharSet(const AAcceptCharSet: WideString); safecall;
     function GetAcceptEncoding: WideString; safecall;
-    procedure SetAcceptEncoding(AAcceptEncoding: WideString); safecall;
+    procedure SetAcceptEncoding(const AAcceptEncoding: WideString); safecall;
     function GetAcceptLanguage: WideString; safecall;
-    procedure SetAcceptLanguage(AAcceptLanguage: WideString); safecall;
+    procedure SetAcceptLanguage(const AAcceptLanguage: WideString); safecall;
     function GetHost: WideString; safecall;
-    procedure SetHost(AHost: WideString); safecall;
+    procedure SetHost(const AHost: WideString); safecall;
     function GetReferer: WideString; safecall;
-    procedure SetReferer(AReferer: WideString); safecall;
+    procedure SetReferer(const AReferer: WideString); safecall;
     function GetUserAgent: WideString; safecall;
-    procedure SetUserAgent(AUserAgent: WideString); safecall;
+    procedure SetUserAgent(const AUserAgent: WideString); safecall;
 
     property URL: WideString read GetURL write SetURL;
     property Method: THTTPMethod read GetMethod write SetMethod;
@@ -222,21 +222,21 @@ type
   IHTTPResponse = interface(IHTTPHeader)
     ['{44B6F40F-0E1E-48B7-B8AE-BD7B5ABECBC9}']
     function GetLocation: WideString; safecall;
-    procedure SetLocation(ALocation: WideString); safecall;
+    procedure SetLocation(const ALocation: WideString); safecall;
     function GetRefresh: WideString; safecall;
-    procedure SetRefresh(ARefresh: WideString); safecall;
+    procedure SetRefresh(const ARefresh: WideString); safecall;
 
     function GetText: WideString; safecall;
-    procedure SetText(AText: WideString); safecall;
+    procedure SetText(const AText: WideString); safecall;
     function GetCode: Integer; safecall;
     procedure SetCode(ACode: Integer); safecall;
 
     function GetServer: WideString; safecall;
-    procedure SetServer(AServer: WideString); safecall;
+    procedure SetServer(const AServer: WideString); safecall;
     function GetContent: WideString; safecall;
-    procedure SetContent(AContent: WideString); safecall;
+    procedure SetContent(const AContent: WideString); safecall;
     function GetContentStream: IStream; safecall;
-    procedure SetContentStream(AContentStream: IStream); safecall;
+    procedure SetContentStream(const AContentStream: IStream); safecall;
 
     // property AcceptRanges
     property Location: WideString read GetLocation write SetLocation;
@@ -253,13 +253,13 @@ type
   IHTTPResponseInfo = interface
     ['{85F3C295-2132-487A-ACE1-931FD9FDFCC2}']
     function GetLastRedirect: WideString; safecall;
-    procedure SetLastRedirect(ALastRedirect: WideString); safecall;
+    procedure SetLastRedirect(const ALastRedirect: WideString); safecall;
     function GetRedirectCount: Integer; safecall;
     procedure SetRedirectCount(ARedirectCount: Integer); safecall;
     function GetErrorClassName: WideString; safecall;
-    procedure SetErrorClassName(AErrorClassName: WideString); safecall;
+    procedure SetErrorClassName(const AErrorClassName: WideString); safecall;
     function GetErrorMessage: WideString; safecall;
-    procedure SetErrorMessage(AErrorMessage: WideString); safecall;
+    procedure SetErrorMessage(const AErrorMessage: WideString); safecall;
 
     property LastRedirect: WideString read GetLastRedirect write SetLastRedirect;
     property RedirectCount: Integer read GetRedirectCount write SetRedirectCount;
@@ -351,10 +351,10 @@ type
 
     property ConnectionMaximum: Integer read GetConnectionMaximum write SetConnectionMaximum;
 
-    function Get(AURL: WideString; AFollowUp: Double; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
-    function Get(AHTTPRequest: IHTTPRequest; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
-    function Post(AURL: WideString; AFollowUp: Double; AHTTPParams: IHTTPParams; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
-    function Post(AHTTPRequest: IHTTPRequest; AHTTPParams: IHTTPParams; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
+    function Get(const AURL: WideString; AFollowUp: Double; const AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
+    function Get(const AHTTPRequest: IHTTPRequest; const AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
+    function Post(const AURL: WideString; AFollowUp: Double; const AHTTPParams: IHTTPParams; const AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
+    function Post(const AHTTPRequest: IHTTPRequest; const AHTTPParams: IHTTPParams; const AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
 
     function HasResult(AUniqueID: Double): WordBool; safecall;
     function GetResult(AUniqueID: Double): IHTTPProcess; safecall;

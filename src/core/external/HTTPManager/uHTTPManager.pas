@@ -1,3 +1,4 @@
+{.$DEFINE DEBUG_HTTPMANAGER }
 {$REGION 'Documentation'}
 /// <summary>
 ///   <para>
@@ -142,7 +143,7 @@ type
     ///   Double;
     /// </seealso>
     {$ENDREGION}
-    function Get(AURL: WideString; AFollowUp: Double; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
+    function Get(const AURL: WideString; AFollowUp: Double; const AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
     {$REGION 'Documentation'}
     /// <summary>
     ///   Adds a new GET-request to the internal queue and returns immediately.
@@ -152,7 +153,7 @@ type
     ///   nil): Double;
     /// </seealso>
     {$ENDREGION}
-    function Get(AHTTPRequest: IHTTPRequest; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
+    function Get(const AHTTPRequest: IHTTPRequest; const AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
     {$REGION 'Documentation'}
     /// <summary>
     ///   <para>
@@ -173,7 +174,7 @@ type
     ///   AHTTPOptions: IHTTPOptions = nil): Double;
     /// </seealso>
     {$ENDREGION}
-    function Post(AURL: WideString; AFollowUp: Double; AHTTPParams: IHTTPParams; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
+    function Post(const AURL: WideString; AFollowUp: Double; const AHTTPParams: IHTTPParams; const AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
     {$REGION 'Documentation'}
     /// <summary>
     ///   Adds a new HTTP-request to the internal queue and returns
@@ -184,7 +185,7 @@ type
     ///   AHTTPOptions: IHTTPOptions = nil): Double;
     /// </seealso>
     {$ENDREGION}
-    function Post(AHTTPRequest: IHTTPRequest; AHTTPParams: IHTTPParams; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
+    function Post(const AHTTPRequest: IHTTPRequest; const AHTTPParams: IHTTPParams; const AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
     {$REGION 'Documentation'}
     /// <summary>
     ///   The function returns True if the given request is processed and False
@@ -305,10 +306,15 @@ var
   Index, Threshold, NewLowerBound: Integer;
 begin
   Threshold := FConnectionMaximum.Value * 100;
-  if not FRequestArrayLowerBoundUpdate and ((ARequestArrayLength - FRequestArrayLowerBound.Value) > Threshold) then
+  if not FRequestArrayLowerBoundUpdate and ((ARequestArrayLength - FRequestArrayLowerBound.Value) > (Threshold + Threshold)) then
   begin
     FRequestArrayLowerBoundUpdate := True;
     NewLowerBound := FRequestArrayLowerBound.Value + Threshold;
+{$IFDEF DEBUG_HTTPMANAGER}
+    OutputDebugString(PChar('ARequestArrayLength: ' + IntToStr(ARequestArrayLength)));
+    OutputDebugString(PChar('FRequestArrayLowerBound: ' + IntToStr(FRequestArrayLowerBound.Value)));
+    OutputDebugString(PChar('NewLowerBound: ' + IntToStr(NewLowerBound)));
+{$ENDIF}
     FRequestArrayLock.EnterWriteLock;
     try
       for Index := FRequestArrayLowerBound.Value + 1 to NewLowerBound do
@@ -446,6 +452,9 @@ begin
     { . } try
     { ... } NewArrayLength := Max(workItem.UniqueID, length(FRequestArray));
     { ... } SetLength(FRequestArray, NewArrayLength + 1);
+{$IFDEF DEBUG_HTTPMANAGER}
+    { ... } OutputDebugString(PChar('NewArrayLength: ' + IntToStr(NewArrayLength) + ' [' + IntToStr(FRequestArrayLowerBound.Value) + ', ' + IntToStr(length(FRequestArray)) + ']'));
+{$ENDIF}
     { ... } FRequestArray[workItem.UniqueID] := HTTPProcess;
     { . } finally
     { ... } FRequestArrayLock.ExitWriteLock;
@@ -533,23 +542,23 @@ begin
   end;
 end;
 
-function THTTPManager.Get(AURL: WideString; AFollowUp: Double; AHTTPOptions: IHTTPOptions = nil): Double;
+function THTTPManager.Get(const AURL: WideString; AFollowUp: Double; const AHTTPOptions: IHTTPOptions = nil): Double;
 begin
   Result := DoRequest(mGET, AURL, AFollowUp, AHTTPOptions);
 end;
 
-function THTTPManager.Get(AHTTPRequest: IHTTPRequest; AHTTPOptions: IHTTPOptions = nil): Double;
+function THTTPManager.Get(const AHTTPRequest: IHTTPRequest; const AHTTPOptions: IHTTPOptions = nil): Double;
 begin
   AHTTPRequest.Method := mGET;
   Result := DoRequest(THTTPRequest.Clone(AHTTPRequest), AHTTPOptions);
 end;
 
-function THTTPManager.Post(AURL: WideString; AFollowUp: Double; AHTTPParams: IHTTPParams; AHTTPOptions: IHTTPOptions = nil): Double;
+function THTTPManager.Post(const AURL: WideString; AFollowUp: Double; const AHTTPParams: IHTTPParams; const AHTTPOptions: IHTTPOptions = nil): Double;
 begin
   Result := DoRequest(mPOST, AURL, AFollowUp, AHTTPOptions, AHTTPParams);
 end;
 
-function THTTPManager.Post(AHTTPRequest: IHTTPRequest; AHTTPParams: IHTTPParams; AHTTPOptions: IHTTPOptions = nil): Double;
+function THTTPManager.Post(const AHTTPRequest: IHTTPRequest; const AHTTPParams: IHTTPParams; const AHTTPOptions: IHTTPOptions = nil): Double;
 begin
   AHTTPRequest.Method := mPOST;
   Result := DoRequest(THTTPRequest.Clone(AHTTPRequest), AHTTPOptions, AHTTPParams);
@@ -567,7 +576,9 @@ begin
   Result := nil;
 
   Index := Trunc(AUniqueID);
-
+{$IFDEF DEBUG_HTTPMANAGER}
+  OutputDebugString(PChar('GetResult: ' + IntToStr(Index) + ' [' + IntToStr(FRequestArrayLowerBound.Value) + ', ' + IntToStr(length(FRequestArray)) + ']'));
+{$ENDIF}
   FRequestArrayLock.EnterReadLock;
   try
     if (Index > FRequestArrayLowerBound.Value) and (Index < length(FRequestArray)) then

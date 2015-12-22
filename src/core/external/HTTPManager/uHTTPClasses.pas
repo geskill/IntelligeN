@@ -23,12 +23,12 @@ type
     function Get(Index: Integer): WideString; safecall;
     function GetCount: Integer; safecall;
     function GetText: WideString; safecall;
-    procedure SetText(Text: WideString); safecall;
+    procedure SetText(const Text: WideString); safecall;
   public
     constructor Create;
 
     procedure Put(Index: Integer; const S: WideString); safecall;
-    function Add(const S: string): Integer; safecall;
+    function Add(const S: WideString): Integer; safecall;
     procedure Clear; safecall;
     procedure Delete(Index: Integer); safecall;
     function IndexOf(const S: WideString): Integer; safecall;
@@ -62,7 +62,7 @@ type
   public
     constructor Create;
     constructor Clone(const AProxy: IProxy);
-    procedure Activate(AType: TProxyType; AServer: WideString; APort: Integer; ARequireAuthentication: WordBool; AAccountName, AAccountPassword: WideString); safecall;
+    procedure Activate(AType: TProxyType; const AServer: WideString; APort: Integer; ARequireAuthentication: WordBool; const AAccountName, AAccountPassword: WideString); safecall;
     property Active: WordBool read GetActive;
     property ServerType: TProxyType read GetType;
     property Server: WideString read GetServer;
@@ -104,7 +104,7 @@ type
     function GetFileNameFromIndex(Index: Integer): WideString; safecall;
     procedure SetFileNameFromIndex(Index: Integer; const AFileName: WideString); safecall;
     function GetRawData: WideString; safecall;
-    procedure SetRawData(ARawData: WideString); safecall;
+    procedure SetRawData(const ARawData: WideString); safecall;
     function GetParamType: TParamType; safecall;
     procedure SetParamType(AParamType: TParamType); safecall;
     function GetCount: Integer; safecall;
@@ -143,25 +143,25 @@ type
     FCookies, FCustomHeaders: ICOMList;
   protected
     function GetCookies: ICOMList; safecall;
-    procedure SetCookies(ACookies: ICOMList); safecall;
+    procedure SetCookies(const ACookies: ICOMList); safecall;
 
     function GetCacheControl: WideString; safecall;
-    procedure SetCacheControl(ACacheControl: WideString); safecall;
+    procedure SetCacheControl(const ACacheControl: WideString); safecall;
     function GetCharSet: WideString; safecall;
-    procedure SetCharSet(ACharSet: WideString); safecall;
+    procedure SetCharSet(const ACharSet: WideString); safecall;
     function GetConnection: WideString; safecall;
-    procedure SetConnection(AConnection: WideString); safecall;
+    procedure SetConnection(const AConnection: WideString); safecall;
     function GetContentDisposition: WideString; safecall;
-    procedure SetContentDisposition(AContentDisposition: WideString); safecall;
+    procedure SetContentDisposition(const AContentDisposition: WideString); safecall;
     function GetContentEncoding: WideString; safecall;
-    procedure SetContentEncoding(AContentEncoding: WideString); safecall;
+    procedure SetContentEncoding(const AContentEncoding: WideString); safecall;
     function GetContentLanguage: WideString; safecall;
-    procedure SetContentLanguage(AContentLanguage: WideString); safecall;
+    procedure SetContentLanguage(const AContentLanguage: WideString); safecall;
     function GetContentType: WideString; safecall;
-    procedure SetContentType(AContentType: WideString); safecall;
+    procedure SetContentType(const AContentType: WideString); safecall;
 
     function GetCustomHeaders: ICOMList; safecall;
-    procedure SetCustomHeaders(ACustomHeaders: ICOMList); safecall;
+    procedure SetCustomHeaders(const ACustomHeaders: ICOMList); safecall;
   public
     constructor Create;
 
@@ -188,26 +188,26 @@ type
     FMethodDefined: Boolean;
   protected
     function GetURL: WideString; safecall;
-    procedure SetURL(AURL: WideString); safecall;
+    procedure SetURL(const AURL: WideString); safecall;
     function GetMethod: THTTPMethod; safecall;
     procedure SetMethod(AMethod: THTTPMethod); safecall;
 
     function GetAccept: WideString; safecall;
-    procedure SetAccept(AAccept: WideString); safecall;
+    procedure SetAccept(const AAccept: WideString); safecall;
     function GetAcceptCharSet: WideString; safecall;
-    procedure SetAcceptCharSet(AAcceptCharSet: WideString); safecall;
+    procedure SetAcceptCharSet(const AAcceptCharSet: WideString); safecall;
     function GetAcceptEncoding: WideString; safecall;
-    procedure SetAcceptEncoding(AAcceptEncoding: WideString); safecall;
+    procedure SetAcceptEncoding(const AAcceptEncoding: WideString); safecall;
     function GetAcceptLanguage: WideString; safecall;
-    procedure SetAcceptLanguage(AAcceptLanguage: WideString); safecall;
+    procedure SetAcceptLanguage(const AAcceptLanguage: WideString); safecall;
     function GetHost: WideString; safecall;
-    procedure SetHost(AHost: WideString); safecall;
+    procedure SetHost(const AHost: WideString); safecall;
     function GetReferer: WideString; safecall;
-    procedure SetReferer(AReferer: WideString); safecall;
+    procedure SetReferer(const AReferer: WideString); safecall;
     function GetUserAgent: WideString; safecall;
-    procedure SetUserAgent(AUserAgent: WideString); safecall;
+    procedure SetUserAgent(const AUserAgent: WideString); safecall;
   public
-    constructor Create(AURL: WideString);
+    constructor Create(const AURL: string);
     constructor Clone(const AHTTPRequest: IHTTPRequest);
     constructor FollowUpClone(const AHTTPProcess: IHTTPProcess; const ANewHTTPProcess: IHTTPRequest); overload;
     constructor FollowUpClone(const AHTTPProcess: IHTTPProcess; AHTTPMethod: THTTPMethod; AURL: string); overload;
@@ -231,21 +231,21 @@ type
     FContentStream: IStream;
   protected
     function GetLocation: WideString; safecall;
-    procedure SetLocation(ALocation: WideString); safecall;
+    procedure SetLocation(const ALocation: WideString); safecall;
     function GetRefresh: WideString; safecall;
-    procedure SetRefresh(ARefresh: WideString); safecall;
+    procedure SetRefresh(const ARefresh: WideString); safecall;
 
     function GetText: WideString; safecall;
-    procedure SetText(AText: WideString); safecall;
+    procedure SetText(const AText: WideString); safecall;
     function GetCode: Integer; safecall;
     procedure SetCode(ACode: Integer); safecall;
 
     function GetServer: WideString; safecall;
-    procedure SetServer(AServer: WideString); safecall;
+    procedure SetServer(const AServer: WideString); safecall;
     function GetContent: WideString; safecall;
-    procedure SetContent(AContent: WideString); safecall;
+    procedure SetContent(const AContent: WideString); safecall;
     function GetContentStream: IStream; safecall;
-    procedure SetContentStream(AContentStream: IStream); safecall;
+    procedure SetContentStream(const AContentStream: IStream); safecall;
   public
     constructor Create(const AContentStream: TMemoryStream);
 
@@ -306,13 +306,13 @@ type
     FRedirectCount: Integer;
   protected
     function GetLastRedirect: WideString; safecall;
-    procedure SetLastRedirect(ALastRedirect: WideString); safecall;
+    procedure SetLastRedirect(const ALastRedirect: WideString); safecall;
     function GetRedirectCount: Integer; safecall;
     procedure SetRedirectCount(ARedirectCount: Integer); safecall;
     function GetErrorClassName: WideString; safecall;
-    procedure SetErrorClassName(AErrorClassName: WideString); safecall;
+    procedure SetErrorClassName(const AErrorClassName: WideString); safecall;
     function GetErrorMessage: WideString; safecall;
-    procedure SetErrorMessage(AErrorMessage: WideString); safecall;
+    procedure SetErrorMessage(const AErrorMessage: WideString); safecall;
   public
     property LastRedirect: WideString read GetLastRedirect write SetLastRedirect;
     property RedirectCount: Integer read GetRedirectCount write SetRedirectCount;
@@ -370,7 +370,7 @@ begin
   Result := FStringList.Text;
 end;
 
-procedure TCOMList.SetText(Text: WideString);
+procedure TCOMList.SetText(const Text: WideString);
 begin
   FStringList.Text := Text;
 end;
@@ -380,7 +380,7 @@ begin
   FStringList.Strings[Index] := S;
 end;
 
-function TCOMList.Add(const S: string): Integer;
+function TCOMList.Add(const S: WideString): Integer;
 begin
   Result := FStringList.Add(S);
 end;
@@ -573,7 +573,7 @@ begin
   Result := FRawData;
 end;
 
-procedure THTTPParams.SetRawData(ARawData: WideString);
+procedure THTTPParams.SetRawData(const ARawData: WideString);
 begin
   FRawData := ARawData;
 end;
@@ -692,7 +692,7 @@ begin
   Result := FCookies;
 end;
 
-procedure THTTPHeader.SetCookies(ACookies: ICOMList);
+procedure THTTPHeader.SetCookies(const ACookies: ICOMList);
 begin
   FCookies := ACookies;
 end;
@@ -702,7 +702,7 @@ begin
   Result := FCacheControl;
 end;
 
-procedure THTTPHeader.SetCacheControl(ACacheControl: WideString);
+procedure THTTPHeader.SetCacheControl(const ACacheControl: WideString);
 begin
   FCacheControl := ACacheControl;
 end;
@@ -712,7 +712,7 @@ begin
   Result := FCharSet;
 end;
 
-procedure THTTPHeader.SetCharSet(ACharSet: WideString);
+procedure THTTPHeader.SetCharSet(const ACharSet: WideString);
 begin
   FCharSet := ACharSet;
 end;
@@ -722,7 +722,7 @@ begin
   Result := FConnection;
 end;
 
-procedure THTTPHeader.SetConnection(AConnection: WideString);
+procedure THTTPHeader.SetConnection(const AConnection: WideString);
 begin
   FConnection := AConnection;
 end;
@@ -732,7 +732,7 @@ begin
   Result := FContentDisposition;
 end;
 
-procedure THTTPHeader.SetContentDisposition(AContentDisposition: WideString);
+procedure THTTPHeader.SetContentDisposition(const AContentDisposition: WideString);
 begin
   FContentDisposition := AContentDisposition;
 end;
@@ -742,7 +742,7 @@ begin
   Result := FContentEncoding;
 end;
 
-procedure THTTPHeader.SetContentEncoding(AContentEncoding: WideString);
+procedure THTTPHeader.SetContentEncoding(const AContentEncoding: WideString);
 begin
   FContentEncoding := AContentEncoding;
 end;
@@ -752,7 +752,7 @@ begin
   Result := FContentLanguage;
 end;
 
-procedure THTTPHeader.SetContentLanguage(AContentLanguage: WideString);
+procedure THTTPHeader.SetContentLanguage(const AContentLanguage: WideString);
 begin
   FContentLanguage := AContentLanguage;
 end;
@@ -762,7 +762,7 @@ begin
   Result := FContentType;
 end;
 
-procedure THTTPHeader.SetContentType(AContentType: WideString);
+procedure THTTPHeader.SetContentType(const AContentType: WideString);
 begin
   FContentType := AContentType;
 end;
@@ -772,7 +772,7 @@ begin
   Result := FCustomHeaders;
 end;
 
-procedure THTTPHeader.SetCustomHeaders(ACustomHeaders: ICOMList);
+procedure THTTPHeader.SetCustomHeaders(const ACustomHeaders: ICOMList);
 begin
   FCustomHeaders := ACustomHeaders;
 end;
@@ -786,7 +786,7 @@ end;
 
 { THTTPRequest }
 
-constructor THTTPRequest.Create(AURL: WideString);
+constructor THTTPRequest.Create(const AURL: string);
 begin
   inherited Create;
   FURL := AURL;
@@ -865,7 +865,7 @@ begin
   Result := FURL;
 end;
 
-procedure THTTPRequest.SetURL(AURL: WideString);
+procedure THTTPRequest.SetURL(const AURL: WideString);
 begin
   FURL := AURL;
 end;
@@ -888,7 +888,7 @@ begin
   Result := FAccept;
 end;
 
-procedure THTTPRequest.SetAccept(AAccept: WideString);
+procedure THTTPRequest.SetAccept(const AAccept: WideString);
 begin
   FAccept := AAccept;
 end;
@@ -898,7 +898,7 @@ begin
   Result := FAcceptCharSet;
 end;
 
-procedure THTTPRequest.SetAcceptCharSet(AAcceptCharSet: WideString);
+procedure THTTPRequest.SetAcceptCharSet(const AAcceptCharSet: WideString);
 begin
   FAcceptCharSet := AAcceptCharSet;
 end;
@@ -908,7 +908,7 @@ begin
   Result := FAcceptEncoding;
 end;
 
-procedure THTTPRequest.SetAcceptEncoding(AAcceptEncoding: WideString);
+procedure THTTPRequest.SetAcceptEncoding(const AAcceptEncoding: WideString);
 begin
   FAcceptEncoding := AAcceptEncoding;
 end;
@@ -918,7 +918,7 @@ begin
   Result := FAcceptLanguage;
 end;
 
-procedure THTTPRequest.SetAcceptLanguage(AAcceptLanguage: WideString);
+procedure THTTPRequest.SetAcceptLanguage(const AAcceptLanguage: WideString);
 begin
   FAcceptLanguage := AAcceptLanguage;
 end;
@@ -928,7 +928,7 @@ begin
   Result := FHost;
 end;
 
-procedure THTTPRequest.SetHost(AHost: WideString);
+procedure THTTPRequest.SetHost(const AHost: WideString);
 begin
   FHost := AHost;
 end;
@@ -938,7 +938,7 @@ begin
   Result := FReferer;
 end;
 
-procedure THTTPRequest.SetReferer(AReferer: WideString);
+procedure THTTPRequest.SetReferer(const AReferer: WideString);
 begin
   FReferer := AReferer;
 end;
@@ -948,7 +948,7 @@ begin
   Result := FUserAgent;
 end;
 
-procedure THTTPRequest.SetUserAgent(AUserAgent: WideString);
+procedure THTTPRequest.SetUserAgent(const AUserAgent: WideString);
 begin
   FUserAgent := AUserAgent;
 end;
@@ -960,7 +960,7 @@ begin
   Result := FLocation;
 end;
 
-procedure THTTPResponse.SetLocation(ALocation: WideString);
+procedure THTTPResponse.SetLocation(const ALocation: WideString);
 begin
   FLocation := ALocation;
 end;
@@ -970,7 +970,7 @@ begin
   Result := FRefresh;
 end;
 
-procedure THTTPResponse.SetRefresh(ARefresh: WideString);
+procedure THTTPResponse.SetRefresh(const ARefresh: WideString);
 begin
   FRefresh := ARefresh;
 end;
@@ -980,7 +980,7 @@ begin
   Result := FText;
 end;
 
-procedure THTTPResponse.SetText(AText: WideString);
+procedure THTTPResponse.SetText(const AText: WideString);
 begin
   FText := AText;
 end;
@@ -1000,7 +1000,7 @@ begin
   Result := FServer;
 end;
 
-procedure THTTPResponse.SetServer(AServer: WideString);
+procedure THTTPResponse.SetServer(const AServer: WideString);
 begin
   FServer := AServer;
 end;
@@ -1010,7 +1010,7 @@ begin
   Result := FContent;
 end;
 
-procedure THTTPResponse.SetContent(AContent: WideString);
+procedure THTTPResponse.SetContent(const AContent: WideString);
 begin
   FContent := AContent;
 end;
@@ -1020,7 +1020,7 @@ begin
   Result := FContentStream;
 end;
 
-procedure THTTPResponse.SetContentStream(AContentStream: IStream);
+procedure THTTPResponse.SetContentStream(const AContentStream: IStream);
 begin
   FContentStream := AContentStream;
 end;
@@ -1161,7 +1161,7 @@ begin
   Result := FLastRedirect;
 end;
 
-procedure THTTPResponseInfo.SetLastRedirect(ALastRedirect: WideString);
+procedure THTTPResponseInfo.SetLastRedirect(const ALastRedirect: WideString);
 begin
   FLastRedirect := ALastRedirect;
 end;
@@ -1181,7 +1181,7 @@ begin
   Result := FErrorClassName;
 end;
 
-procedure THTTPResponseInfo.SetErrorClassName(AErrorClassName: WideString);
+procedure THTTPResponseInfo.SetErrorClassName(const AErrorClassName: WideString);
 begin
   FErrorClassName := AErrorClassName;
 end;
@@ -1191,7 +1191,7 @@ begin
   Result := FErrorMessage;
 end;
 
-procedure THTTPResponseInfo.SetErrorMessage(AErrorMessage: WideString);
+procedure THTTPResponseInfo.SetErrorMessage(const AErrorMessage: WideString);
 begin
   FErrorMessage := AErrorMessage;
 end;
