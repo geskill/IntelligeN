@@ -623,7 +623,7 @@ type
     property Active: Boolean read GetActive;
 
     function CheckIScript(const AIScript: WideString): RIScriptResult;
-    function ParseIScript(const AIScript: WideString): RIScriptResult;
+    function ParseIScript(const AIScript: WideString; AIScriptType: TIScriptType = itMessage): RIScriptResult;
     function GenerateData: ITabSheetData;
 
     function GeneratePublishItem: IPublishItem;
@@ -723,7 +723,7 @@ type
     function GeneratePublishJob: IPublishJob;
 
     function CheckIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData :ITabSheetData): RIScriptResult;
-    function ParseIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData :ITabSheetData): RIScriptResult;
+    function ParseIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData :ITabSheetData; ADataChanged: WordBool = True): RIScriptResult;
 
     property OnUpdateCMSList: IUpdateCMSListEvent read GetUpdateCMSList;
     property OnUpdateCMSWebsiteList: IUpdateCMSWebsiteListEvent read GetUpdateCMSWebsiteList;

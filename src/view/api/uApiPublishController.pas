@@ -121,14 +121,15 @@ type
     FICMSWebsiteContainerActiveController: TICMSWebsiteContainerActiveController;
 
   type
-    TIScriptType = (itSubject, itMessage);
-    TIScriptFunc = reference to function(const AIScript: WideString): RIScriptResult;
+    TIScriptCheckFunc = reference to function(const AIScript: WideString): RIScriptResult;
+    TIScriptParseFunc = reference to function(const AIScript: WideString; AIScriptType: TIScriptType = itMessage): RIScriptResult;
 
     TICMSWebsiteIScriptData = class(TInterfacedObject, ICMSWebsiteIScriptData)
     private
       FIScriptType: TIScriptType;
       FCMSWebsiteCollectionItem: TCMSWebsitesCollectionItem;
-      FCheckFunc, FParseFunc: TIScriptFunc;
+      FCheckFunc: TIScriptCheckFunc;
+      FParseFunc: TIScriptParseFunc;
       FCodeChanged: Boolean;
       FCode: WideString;
       FResult: RIScriptResult;
@@ -145,7 +146,7 @@ type
       function GetCheckedResult: RIScriptResult;
       function GetParsedResult: RIScriptResult;
     public
-      constructor Create(const AIScriptType: TIScriptType; const ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; const ACheckFunc, AParseFunc: TIScriptFunc);
+      constructor Create(const AIScriptType: TIScriptType; const ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; const ACheckFunc: TIScriptCheckFunc; const AParseFunc: TIScriptParseFunc);
       destructor Destroy; override;
 
       property FileName: WideString read GetFileName write SetFileName;
@@ -183,7 +184,7 @@ type
     FCMSWebsiteCollectionItem: TCMSWebsitesCollectionItem;
     FActiveChanged: Boolean;
     FActiveBuffer: Boolean;
-    FDataChanged: Boolean;
+    FDataChanged, FParsedDataSubjectChanged, FParsedDataMessageChanged: Boolean;
     FDataBuffer: ITabSheetData;
     FControlsPreviousValue, FMirrorPreviousValue: Boolean;
     FIWebsiteChange: TICMSItemChangeEventHandler;
@@ -242,7 +243,7 @@ type
     property AccountPassword: WideString read GetAccountPassword write SetAccountPassword;
 
     function CheckIScript(const AIScript: WideString): RIScriptResult;
-    function ParseIScript(const AIScript: WideString): RIScriptResult;
+    function ParseIScript(const AIScript: WideString; AIScriptType: TIScriptType = itMessage): RIScriptResult;
 
     function GenerateData: ITabSheetData;
 
@@ -334,8 +335,8 @@ type
     function GeneratePublishTab: IPublishTab;
     function GeneratePublishJob: IPublishJob;
 
-    function CheckIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData :ITabSheetData): RIScriptResult;
-    function ParseIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData :ITabSheetData): RIScriptResult;
+    function CheckIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData: ITabSheetData): RIScriptResult;
+    function ParseIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData: ITabSheetData; ADataChanged: WordBool = True): RIScriptResult;
 
     property OnUpdateCMSList: IUpdateCMSListEvent read GetUpdateCMSList;
     property OnUpdateCMSWebsiteList: IUpdateCMSWebsiteListEvent read GetUpdateCMSWebsiteList;
@@ -735,13 +736,13 @@ function TICMSWebsiteContainer.TICMSWebsiteIScriptData.GetParsedResult: RIScript
 begin
   if FCodeChanged then
   begin
-    FResult := FParseFunc(FCode);
+    FResult := FParseFunc(FCode, FIScriptType);
   end;
 
   Result := FResult;
 end;
 
-constructor TICMSWebsiteContainer.TICMSWebsiteIScriptData.Create(const AIScriptType: TIScriptType; const ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; const ACheckFunc, AParseFunc: TIScriptFunc);
+constructor TICMSWebsiteContainer.TICMSWebsiteIScriptData.Create(const AIScriptType: TIScriptType; const ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; const ACheckFunc: TIScriptCheckFunc; const AParseFunc: TIScriptParseFunc);
 begin
   inherited Create;
   FIScriptType := AIScriptType;
@@ -1025,6 +1026,8 @@ var
 begin
   FActiveChanged := True;
   FDataChanged := True;
+  FParsedDataSubjectChanged := True;
+  FParsedDataMessageChanged := True;
 
   with FICMSWebsiteContainerActiveController do
     if CanUpdatePartly then
@@ -1044,6 +1047,8 @@ var
 begin
   FActiveChanged := True;
   FDataChanged := True;
+  FParsedDataSubjectChanged := True;
+  FParsedDataMessageChanged := True;
 
   with FICMSWebsiteContainerActiveController do
     if CanUpdatePartly then
@@ -1203,6 +1208,8 @@ begin
   FActiveBuffer := False;
 
   FDataChanged := True; // Need to be true to make first update.
+  FParsedDataSubjectChanged := True;
+  FParsedDataMessageChanged := True;
   FDataBuffer := nil;
 
   FControlsPreviousValue := False;
@@ -1223,9 +1230,23 @@ begin
   Result := TabSheetController.PublishController.CheckIScript(CMS, Website, AIScript, GenerateData);
 end;
 
-function TICMSWebsiteContainer.ParseIScript(const AIScript: WideString): RIScriptResult;
+function TICMSWebsiteContainer.ParseIScript(const AIScript: WideString; AIScriptType: TIScriptType = itMessage): RIScriptResult;
+var
+  LChanged: Boolean;
 begin
-  Result := TabSheetController.PublishController.ParseIScript(CMS, Website, AIScript, GenerateData);
+  case AIScriptType of
+    itSubject:
+      LChanged := FParsedDataSubjectChanged;
+    itMessage:
+      LChanged := FParsedDataMessageChanged;
+  end;
+  Result := TabSheetController.PublishController.ParseIScript(CMS, Website, AIScript, GenerateData, LChanged);
+  case AIScriptType of
+    itSubject:
+      FParsedDataSubjectChanged := False;
+    itMessage:
+      FParsedDataMessageChanged := False;
+  end;
 end;
 
 function TICMSWebsiteContainer.GenerateData: ITabSheetData;
@@ -1741,23 +1762,30 @@ begin
     end;
 end;
 
-function TIPublishController.ParseIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData: ITabSheetData): RIScriptResult;
+function TIPublishController.ParseIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData: ITabSheetData; ADataChanged: WordBool = True): RIScriptResult;
 var
   LHash: string;
+  LContainsKey: Boolean;
+  LIScriptResult: RIScriptResult;
 begin
   LHash := CreateMD5.ComputeHash(Trim(AIScript)).ToHexString;
   if (FIScriptBuffer.Count > 20) then
   begin
     FIScriptBuffer.Clear;
   end;
-  if not FIScriptBuffer.ContainsKey(LHash) then
+  LContainsKey := FIScriptBuffer.ContainsKey(LHash);
+  if ADataChanged or not LContainsKey then
   begin
     with TIScirptParser.Create(ACMS, AWebsite, ATabSheetData) do
       try
-        FIScriptBuffer.Add(LHash, Execute(AIScript));
+        LIScriptResult := Execute(AIScript);
       finally
         Free;
       end;
+    if LContainsKey then
+      FIScriptBuffer.Items[LHash] := LIScriptResult
+    else
+      FIScriptBuffer.Add(LHash, LIScriptResult);
   end;
 
   Result := FIScriptBuffer[LHash];

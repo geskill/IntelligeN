@@ -29,6 +29,8 @@ type
     Checksum: WideString;
   end;
 
+  TIScriptType = (itSubject, itMessage);
+
   RIScriptResult = packed record
     CompiledText: WideString;
     HasError: Boolean;
@@ -46,26 +48,27 @@ type
   end;
   { ****************************************************************************** }
 {$REGION 'Documentation'}
-  /// <remarks>
-  /// Expects AStringTypeID in format "Audio" not "cAudio"
-  /// </remarks>
+/// <remarks>
+///   Expects AStringTypeID in format "Audio" not "cAudio"
+/// </remarks>
 {$ENDREGION}
+
 function StringInTypeID(AStringTypeID: string): Boolean;
 {$REGION 'Documentation'}
 /// <remarks>
-/// Expects AStringTypeID in format "Audio" not "cAudio"
+///   Expects AStringTypeID in format "Audio" not "cAudio"
 /// </remarks>
 {$ENDREGION}
 function StringToTypeID(AStringTypeID: string): TTypeID;
 {$REGION 'Documentation'}
 /// <remarks>
-/// Returns TTypeID in format "Audio" not "cAudio"
+///   Returns TTypeID in format "Audio" not "cAudio"
 /// </remarks>
 {$ENDREGION}
 function TypeIDToString(ATypeID: TTypeID): string;
 {$REGION 'Documentation'}
 /// <remarks>
-/// Expects AStringContentStatus in format "NotChecked" not "csNotChecked"
+///   Expects AStringContentStatus in format "NotChecked" not "csNotChecked"
 /// </remarks>
 {$ENDREGION}
 function StringToContentStatus(AStringContentStatus: string): TContentStatus;
@@ -77,25 +80,26 @@ function StringToContentStatus(AStringContentStatus: string): TContentStatus;
 function ContentStatusToString(AContentStatus: TContentStatus): string;
 {$REGION 'Documentation'}
 /// <remarks>
-/// Expects AStringControlID in format "IReleaseName" not "cReleaseName"
+///   Expects AStringControlID in format "IReleaseName" not "cReleaseName"
 /// </remarks>
 {$ENDREGION}
 function StringInControlID(AStringControlID: string): Boolean;
 {$REGION 'Documentation'}
 /// <remarks>
-/// Expects AStringControlID in format "IReleaseName" not "cReleaseName"
+///   Expects AStringControlID in format "IReleaseName" not "cReleaseName"
 /// </remarks>
 {$ENDREGION}
 function StringToControlID(AStringControlID: string): TControlID;
 {$REGION 'Documentation'}
 /// <remarks>
-/// Returns TControlID in format "IReleaseName" not "cReleaseName"
+///   Returns TControlID in format "IReleaseName" not "cReleaseName"
 /// </remarks>
 {$ENDREGION}
 function ControlIDToString(AControlID: TControlID): string;
 {$REGION 'Documentation'}
 /// <remarks>
-/// Returns TControlID in format "ReleaseName" not "IReleaseName" or "cReleaseName"
+///   Returns TControlID in format "ReleaseName" not "IReleaseName" or
+///   "cReleaseName"
 /// </remarks>
 {$ENDREGION}
 function ControlIDToReadableString(AControlID: TControlID): string;
