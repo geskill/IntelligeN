@@ -21,22 +21,16 @@ type
   strict private
     fhtmlon, fallowimgcode, fparseurloff, fsmileyoff, fbbcodeoff, ftagoff, fusesig, faddtoblog: Boolean;
     ficon: Variant;
+  public
+    constructor Create; override;
   published
-    [AttrDefaultValue(False)]
     property htmlon: Boolean read fhtmlon write fhtmlon;
-    [AttrDefaultValue(True)]
     property allowimgcode: Boolean read fallowimgcode write fallowimgcode;
-    [AttrDefaultValue(False)]
     property parseurloff: Boolean read fparseurloff write fparseurloff;
-    [AttrDefaultValue(False)]
     property smileyoff: Boolean read fsmileyoff write fsmileyoff;
-    [AttrDefaultValue(False)]
     property bbcodeoff: Boolean read fbbcodeoff write fbbcodeoff;
-    [AttrDefaultValue(False)]
     property tagoff: Boolean read ftagoff write ftagoff;
-    [AttrDefaultValue(False)]
     property usesig: Boolean read fusesig write fusesig;
-    [AttrDefaultValue(False)]
     property addtoblog: Boolean read faddtoblog write faddtoblog;
 
     property forums;
@@ -70,6 +64,23 @@ type
   end;
 
 implementation
+
+{ TDiscuzSettings }
+
+constructor TDiscuzSettings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  htmlon := False;
+  allowimgcode := True;
+  parseurloff := False;
+  smileyoff := False;
+  bbcodeoff := False;
+  tagoff := False;
+  usesig := False;
+  addtoblog := False;
+end;
 
 { TDiscuz }
 

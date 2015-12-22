@@ -20,12 +20,11 @@ type
   Tphpbb2Settings = class(TCMSBoardPlugInSettings)
   strict private
     fdisable_bbcode, fdisable_smilies, fnotify: Boolean;
+  public
+    constructor Create; override;
   published
-    [AttrDefaultValue(False)]
     property disable_bbcode: Boolean read fdisable_bbcode write fdisable_bbcode;
-    [AttrDefaultValue(False)]
     property disable_smilies: Boolean read fdisable_smilies write fdisable_smilies;
-    [AttrDefaultValue(False)]
     property notify: Boolean read fnotify write fnotify;
 
     property forums;
@@ -58,6 +57,20 @@ type
   end;
 
 implementation
+
+{ Tphpbb2Settings }
+
+constructor Tphpbb2Settings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  disable_bbcode := False;
+  disable_smilies := False;
+  notify := False;
+end;
+
+{ Tphpbb2 }
 
 function Tphpbb2.SettingsClass;
 begin

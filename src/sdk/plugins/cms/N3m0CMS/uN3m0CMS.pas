@@ -21,18 +21,15 @@ type
   strict private
     fround_size: Boolean;
     fcustom_login_url, fcustom_upload_url: string;
+  public
+    constructor Create; override;
   published
-    [AttrDefaultValue('index.php')]
     property custom_login_url: string read fcustom_login_url write fcustom_login_url;
-    [AttrDefaultValue('index.php?a=Hinzufuegen')]
     property custom_upload_url: string read fcustom_upload_url write fcustom_upload_url;
 
-    [AttrDefaultValue(False)]
     property use_plainlinks;
-    [AttrDefaultValue(False)]
     property use_textasdescription;
 
-    [AttrDefaultValue(False)]
     property round_size: Boolean read fround_size write fround_size;
 
     property categorys;
@@ -61,6 +58,18 @@ type
   end;
 
 implementation
+
+{ TN3m0CMSSettings }
+
+constructor TN3m0CMSSettings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  custom_login_url := 'index.php';
+  custom_upload_url := 'index.php?a=Hinzufuegen';
+  round_size := False;
+end;
 
 { TN3m0CMS }
 

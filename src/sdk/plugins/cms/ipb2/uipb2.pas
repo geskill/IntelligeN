@@ -22,10 +22,10 @@ type
     fenableemo, fenablesig: Boolean;
 
     ficon: Variant;
+  public
+    constructor Create; override;
   published
-    [AttrDefaultValue(False)]
     property enableemo: Boolean read fenableemo write fenableemo;
-    [AttrDefaultValue(True)]
     property enablesig: Boolean read fenablesig write fenablesig;
 
     property forums;
@@ -60,6 +60,19 @@ type
   end;
 
 implementation
+
+{ Tipb2Settings }
+
+constructor Tipb2Settings.Create;
+begin
+  inherited Create;
+
+  // default setup
+    enableemo := False;
+    enablesig := True;
+end;
+
+{ Tipb2 }
 
 function Tipb2.SettingsClass;
 begin

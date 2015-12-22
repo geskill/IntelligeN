@@ -23,18 +23,14 @@ type
     fuse_coverlink, fsignature, fdisablesmilies: Boolean;
   protected
     xthreads: array of array of Variant;
+  public
+    constructor Create; override;
   published
-    [AttrDefaultValue('threadprefix')]
     property prefix_field: string read fprefix_field write fprefix_field;
-    [AttrDefaultValue(False)]
     property use_coverlink: Boolean read fuse_coverlink write fuse_coverlink;
-    [AttrDefaultValue(True)]
     property signature: Boolean read fsignature write fsignature;
-    [AttrDefaultValue(False)]
     property disablesmilies: Boolean read fdisablesmilies write fdisablesmilies;
-    [AttrDefaultValue(False)]
     property intelligent_posting;
-    [AttrDefaultValue(False)]
     property intelligent_posting_helper;
 
     property forums;
@@ -71,6 +67,21 @@ type
   end;
 
 implementation
+
+{ TMyBBSettings }
+
+constructor TMyBBSettings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  prefix_field := 'threadprefix';
+  use_coverlink := False;
+  signature := True;
+  disablesmilies := False;
+end;
+
+{ TMyBB }
 
 function TMyBB.SettingsClass;
 begin

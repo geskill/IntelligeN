@@ -14,7 +14,8 @@ uses
 
 type
   TICMSSettings = class(TCMSPlugInSettings)
-
+  public
+    constructor Create; override;
   end;
 
   TICMS = class(TCMSPlugIn)
@@ -40,6 +41,17 @@ type
   end;
 
 implementation
+
+{ TICMSSettings }
+
+constructor TICMSSettings.Create;
+begin
+  inherited Create;
+
+  // default setup
+end;
+
+{ TICMS }
 
 function TICMS.SettingsClass;
 begin

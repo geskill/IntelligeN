@@ -26,30 +26,19 @@ type
     fdisable_bbcode, fdisable_smilies, fdisable_magic_url, fattach_sig, fnotify, flock_topic, fintelligent_posting_boundedsearch: Boolean;
   public
     intelligent_posting_bounds: TIntegerArray;
-
+    constructor Create; override;
   published
-    [AttrDefaultValue('attr_id')]
     property prefix_field: string read fprefix_field write fprefix_field;
-    [AttrDefaultValue(3)]
     property sleeptime: Integer read fsleeptime write fsleeptime;
-    [AttrDefaultValue(False)]
     property disable_bbcode: Boolean read fdisable_bbcode write fdisable_bbcode;
-    [AttrDefaultValue(False)]
     property disable_smilies: Boolean read fdisable_smilies write fdisable_smilies;
-    [AttrDefaultValue(False)]
     property disable_magic_url: Boolean read fdisable_magic_url write fdisable_magic_url;
-    [AttrDefaultValue(True)]
     property attach_sig: Boolean read fattach_sig write fattach_sig;
-    [AttrDefaultValue(False)]
     property notify: Boolean read fnotify write fnotify;
-    [AttrDefaultValue(False)]
     property lock_topic: Boolean read flock_topic write flock_topic;
 
-    [AttrDefaultValue(False)]
     property intelligent_posting;
-    [AttrDefaultValue(False)]
     property intelligent_posting_helper;
-    [AttrDefaultValue(False)]
     property intelligent_posting_boundedsearch: Boolean read fintelligent_posting_boundedsearch write fintelligent_posting_boundedsearch;
 
     property forums;
@@ -88,6 +77,26 @@ type
   end;
 
 implementation
+
+{ Tphpbb3Settings }
+
+constructor Tphpbb3Settings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  prefix_field := 'attr_id';
+  sleeptime := 3;
+  disable_bbcode := False;
+  disable_smilies := False;
+  disable_magic_url := False;
+  attach_sig := True;
+  notify := False;
+  lock_topic := False;
+  intelligent_posting_boundedsearch := False;
+end;
+
+{ Tphpbb3 }
 
 function Tphpbb3.SettingsClass;
 begin

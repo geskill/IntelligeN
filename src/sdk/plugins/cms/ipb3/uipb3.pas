@@ -24,20 +24,15 @@ type
     fenableemo, fenablesig, fintelligent_posting_boundedsearch: Boolean;
   public
     intelligent_posting_bounds: TIntegerArray;
+    constructor Create; override;
   published
-    [AttrDefaultValue('topic_prefix')]
     property prefix_field: string read fprefix_field write fprefix_field;
 
-    [AttrDefaultValue(False)]
     property enableemo: Boolean read fenableemo write fenableemo;
-    [AttrDefaultValue(True)]
     property enablesig: Boolean read fenablesig write fenablesig;
 
-    [AttrDefaultValue(False)]
     property intelligent_posting;
-    [AttrDefaultValue(False)]
     property intelligent_posting_helper;
-    [AttrDefaultValue(False)]
     property intelligent_posting_boundedsearch: Boolean read fintelligent_posting_boundedsearch write fintelligent_posting_boundedsearch;
 
     property forums;
@@ -79,6 +74,21 @@ type
   end;
 
 implementation
+
+{ Tipb3Settings }
+
+constructor Tipb3Settings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  prefix_field := 'topic_prefix';
+  enableemo := False;
+  enablesig := True;
+  intelligent_posting_boundedsearch := False;
+end;
+
+{ Tipb3 }
 
 function Tipb3.SettingsClass;
 begin

@@ -23,35 +23,22 @@ type
     fuse_coverlink, fattach_sig, fparseurl, fdisablesmilies, fopenclose, fstickunstick, fintelligent_posting_mask_search, fintelligent_posting_keepshortwords, fintelligent_posting_alternativesearch, fintelligent_posting_boundedsearch: Boolean;
   public
     intelligent_posting_bounds: TIntegerArray;
+    constructor Create; override;
   published
-    [AttrDefaultValue('prefixid')]
     property prefix_field: string read fprefix_field write fprefix_field;
-    [AttrDefaultValue('iconid')]
     property icon_field: string read ficon_field write ficon_field;
-    [AttrDefaultValue(False)]
     property use_coverlink: Boolean read fuse_coverlink write fuse_coverlink;
-    [AttrDefaultValue(True)]
     property attach_sig: Boolean read fattach_sig write fattach_sig;
-    [AttrDefaultValue(True)]
     property parseurl: Boolean read fparseurl write fparseurl;
-    [AttrDefaultValue(False)]
     property disablesmilies: Boolean read fdisablesmilies write fdisablesmilies;
-    [AttrDefaultValue(False)]
     property openclose: Boolean read fopenclose write fopenclose;
-    [AttrDefaultValue(False)]
     property stickunstick: Boolean read fstickunstick write fstickunstick;
 
-    [AttrDefaultValue(False)]
     property intelligent_posting;
-    [AttrDefaultValue(False)]
     property intelligent_posting_helper;
-    [AttrDefaultValue(False)]
     property intelligent_posting_mask_search: Boolean read fintelligent_posting_mask_search write fintelligent_posting_mask_search;
-    [AttrDefaultValue(False)]
     property intelligent_posting_keepshortwords: Boolean read fintelligent_posting_keepshortwords write fintelligent_posting_keepshortwords;
-    [AttrDefaultValue(False)]
     property intelligent_posting_alternativesearch: Boolean read fintelligent_posting_alternativesearch write fintelligent_posting_alternativesearch;
-    [AttrDefaultValue(False)]
     property intelligent_posting_boundedsearch: Boolean read fintelligent_posting_boundedsearch write fintelligent_posting_boundedsearch;
 
     property forums;
@@ -94,6 +81,30 @@ type
   end;
 
 implementation
+
+{ TvBulletinSettings }
+
+constructor TvBulletinSettings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  prefix_field := 'prefixid';
+  icon_field := 'iconid';
+  use_coverlink := False;
+  attach_sig := True;
+  parseurl := True;
+  disablesmilies := False;
+  openclose := False;
+  stickunstick := False;
+
+  intelligent_posting_mask_search := False;
+  intelligent_posting_keepshortwords := False;
+  intelligent_posting_alternativesearch := False;
+  intelligent_posting_boundedsearch := False;
+end;
+
+{ TvBulletin }
 
 function TvBulletin.SettingsClass;
 begin

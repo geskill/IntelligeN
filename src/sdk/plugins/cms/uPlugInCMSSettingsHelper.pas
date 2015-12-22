@@ -83,16 +83,6 @@ end;
 
 class function TPlugInCMSSettingsHelper.LoadSettingsToClass(const AFileName: TFileName; const ASettings: TCMSPlugInSettings; const AData: ITabSheetData = nil; AXMLAccess: TXMLAccess = nil): TIntegerArray;
 
-  function VariantFix(const AVariant: Variant; const ATypeKind: TTypeKind): Variant;
-  begin
-    if ATypeKind = tkEnumeration then
-      Result := VarAsType(AVariant, varBoolean)
-    else if ATypeKind = tkInteger then
-      Result := VarAsType(AVariant, varInteger)
-    else
-      Result := VarToStr(AVariant);
-  end;
-
   procedure SubAllSearch(const ANode: IXMLNode; var AArray: TIntegerArray);
   var
     z: Integer;
@@ -217,7 +207,7 @@ begin
                 with ChildNodes.Nodes['settings'] do
                 begin
                   if Assigned(ChildNodes.FindNode(LPropInfo.Name)) then
-                    SetPropValue(ASettings, LPropInfo, VariantFix(ChildNodes.Nodes[LPropInfo.Name].NodeValue, LPropInfo.PropType^.Kind));
+                    SetPropValue(ASettings, LPropInfo, ChildNodes.Nodes[LPropInfo.Name].NodeValue);
                 end;
           end;
         end;

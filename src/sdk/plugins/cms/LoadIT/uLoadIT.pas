@@ -18,10 +18,10 @@ uses
 
 type
   TLoadITSettings = class(TCMSFormbasedPlugInSettings)
+  public
+    constructor Create; override;
   published
-    [AttrDefaultValue(False)]
     property use_plainlinks;
-    [AttrDefaultValue(False)]
     property use_textasdescription;
 
     property categorys;
@@ -52,6 +52,17 @@ type
   end;
 
 implementation
+
+{ TLoadITSettings }
+
+constructor TLoadITSettings.Create;
+begin
+  inherited Create;
+
+  // default setup
+end;
+
+{ TLoadIT }
 
 function TLoadIT.SettingsClass;
 begin

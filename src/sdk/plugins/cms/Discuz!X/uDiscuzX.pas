@@ -20,24 +20,17 @@ type
   TDiscuzXSettings = class(TCMSBoardPlugInSettings)
   strict private
     fhtmlon, fallowimgcode, fallowimgurl, fparseurloff, fsmileyoff, fbbcodeoff, fusesig, fordertype, fallownoticeauthor: Boolean;
+  public
+    constructor Create; override;
   published
-    [AttrDefaultValue(False)]
     property htmlon: Boolean read fhtmlon write fhtmlon;
-    [AttrDefaultValue(True)]
     property allowimgcode: Boolean read fallowimgcode write fallowimgcode;
-    [AttrDefaultValue(True)]
     property allowimgurl: Boolean read fallowimgurl write fallowimgurl;
-    [AttrDefaultValue(False)]
     property parseurloff: Boolean read fparseurloff write fparseurloff;
-    [AttrDefaultValue(False)]
     property smileyoff: Boolean read fsmileyoff write fsmileyoff;
-    [AttrDefaultValue(False)]
     property bbcodeoff: Boolean read fbbcodeoff write fbbcodeoff;
-    [AttrDefaultValue(False)]
     property usesig: Boolean read fusesig write fusesig;
-    [AttrDefaultValue(False)]
     property ordertype: Boolean read fordertype write fordertype;
-    [AttrDefaultValue(False)]
     property allownoticeauthor: Boolean read fallownoticeauthor write fallownoticeauthor;
 
     property forums;
@@ -75,6 +68,24 @@ type
   end;
 
 implementation
+
+{ TDiscuzXSettings }
+
+constructor TDiscuzXSettings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  htmlon := False;
+  allowimgcode := True;
+  allowimgurl := True;
+  parseurloff := False;
+  smileyoff := False;
+  bbcodeoff := False;
+  usesig := False;
+  ordertype := False;
+  allownoticeauthor := False;
+end;
 
 { TDiscuzX }
 

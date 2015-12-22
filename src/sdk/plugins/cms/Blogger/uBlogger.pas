@@ -22,10 +22,10 @@ type
   TBloggerSettings = class(TCMSBlogPlugInSettings)
   strict private
     fid, fcode: string;
+  public
+    constructor Create; override;
   published
-    [AttrDefaultValue('')]
     property id: string read fid write fid;
-    [AttrDefaultValue('')]
     property code: string read fcode write fcode;
 
     property categorys;
@@ -66,6 +66,17 @@ type
   end;
 
 implementation
+
+{ TBloggerSettings }
+
+constructor TBloggerSettings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  id := '';
+  code := '';
+end;
 
 { TBlogger }
 

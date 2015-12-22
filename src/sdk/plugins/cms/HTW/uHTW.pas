@@ -22,18 +22,15 @@ type
     fcategory_field, fsubcategory_field, fcustom_upload_url: string;
 
     fsubcategorys: Variant;
+  public
+    constructor Create; override;
   published
-    [AttrDefaultValue('')]
     property category_field: string read fcategory_field write fcategory_field;
-    [AttrDefaultValue('')]
     property subcategory_field: string read fsubcategory_field write fsubcategory_field;
 
-    [AttrDefaultValue('index.php?do=add')]
     property custom_upload_url: string read fcustom_upload_url write fcustom_upload_url;
 
-    [AttrDefaultValue(False)]
     property use_plainlinks;
-    [AttrDefaultValue(False)]
     property use_textasdescription;
 
     property categorys;
@@ -61,6 +58,20 @@ type
   end;
 
 implementation
+
+{ THTWSettings }
+
+constructor THTWSettings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  category_field := '';
+  subcategory_field := '';
+  custom_upload_url := 'index.php?do=add';
+end;
+
+{ THTW }
 
 function THTW.SettingsClass;
 begin

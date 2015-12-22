@@ -22,28 +22,20 @@ type
     fcategory_field, fstop_mark, fcustom_upload_url: string;
 
     fnoshort, fapprove, fallow_main, fallow_comm, fallow_rating, fdbase_ws_special, fuse_plainlinks: Boolean;
+  public
+    constructor Create; override;
   published
-    [AttrDefaultValue('catlist[]')]
     property category_field: string read fcategory_field write fcategory_field;
 
-    [AttrDefaultValue('#readmore#')]
     property stop_mark: string read fstop_mark write fstop_mark;
-    [AttrDefaultValue('addnews.html')]
     property custom_upload_url: string read fcustom_upload_url write fcustom_upload_url;
 
-    [AttrDefaultValue(False)]
     property noshort: Boolean read fnoshort write fnoshort;
-    [AttrDefaultValue(False)]
     property approve: Boolean read fapprove write fapprove;
-    [AttrDefaultValue(True)]
     property allow_main: Boolean read fallow_main write fallow_main;
-    [AttrDefaultValue(True)]
     property allow_comm: Boolean read fallow_comm write fallow_comm;
-    [AttrDefaultValue(True)]
     property allow_rating: Boolean read fallow_rating write fallow_rating;
-    [AttrDefaultValue(False)]
     property dbase_ws_special: Boolean read fdbase_ws_special write fdbase_ws_special;
-    [AttrDefaultValue(False)]
     property use_plainlinks: Boolean read fuse_plainlinks write fuse_plainlinks;
 
     property categorys;
@@ -76,6 +68,27 @@ type
   end;
 
 implementation
+
+{ TDLESettings }
+
+constructor TDLESettings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  category_field := 'catlist[]';
+  stop_mark := '#readmore#';
+  custom_upload_url := 'addnews.html';
+  noshort := False;
+  approve := False;
+  allow_main := True;
+  allow_comm := True;
+  allow_rating := True;
+  dbase_ws_special := False;
+  use_plainlinks := False;
+end;
+
+{ TDLE }
 
 function TDLE.SettingsClass;
 begin

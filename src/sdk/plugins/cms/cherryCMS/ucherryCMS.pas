@@ -20,15 +20,13 @@ type
   TcherryCMSSettings = class(TCMSFormbasedPlugInSettings)
   strict private
     fcustom_login_url, fcustom_upload_url: string;
+  public
+    constructor Create; override;
   published
-    [AttrDefaultValue('?surf=login')]
     property custom_login_url: string read fcustom_login_url write fcustom_login_url;
-    [AttrDefaultValue('?surf=addupload')]
     property custom_upload_url: string read fcustom_upload_url write fcustom_upload_url;
 
-    [AttrDefaultValue(False)]
     property use_plainlinks;
-    [AttrDefaultValue(False)]
     property use_textasdescription;
 
     property categorys;
@@ -58,6 +56,17 @@ type
   end;
 
 implementation
+
+{ TcherryCMSSettings }
+
+constructor TcherryCMSSettings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  custom_login_url := '?surf=login';
+  custom_upload_url := '?surf=addupload';
+end;
 
 { TcherryCMS }
 

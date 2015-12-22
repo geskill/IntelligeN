@@ -20,8 +20,9 @@ type
   TfluxbbSettings = class(TCMSBoardPlugInSettings)
   strict private
     fhide_smilies: Boolean;
+  public
+    constructor Create; override;
   published
-    [AttrDefaultValue(False)]
     property hide_smilies: Boolean read fhide_smilies write fhide_smilies;
 
     property forums;
@@ -53,6 +54,18 @@ type
   end;
 
 implementation
+
+{ TfluxbbSettings }
+
+constructor TfluxbbSettings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  hide_smilies := False;
+end;
+
+{ Tfluxbb }
 
 function Tfluxbb.SettingsClass;
 begin

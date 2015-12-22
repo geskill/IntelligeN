@@ -21,32 +21,21 @@ type
   strict private
     fextra_login, fneed_captcha, fhidden, funchecked, ferror_report, fprotected, foxygen_scene_com_special: Boolean;
     fcustom_login_url, fcustom_upload_url, fdescription_format: string;
-
+  public
+    constructor Create; override;
   published
-    [AttrDefaultValue(False)]
     property extra_login: Boolean read fextra_login write fextra_login;
-    [AttrDefaultValue(False)]
     property need_captcha: Boolean read fneed_captcha write fneed_captcha;
-    [AttrDefaultValue('?p=userarea&location=login')]
     property custom_login_url: string read fcustom_login_url write fcustom_login_url;
-    [AttrDefaultValue('')] // special rule with extra_login
-    property custom_upload_url: string read fcustom_upload_url write fcustom_upload_url;
-    [AttrDefaultValue('1')]
+    property custom_upload_url: string read fcustom_upload_url write fcustom_upload_url; // special rule with extra_login
     property description_format: string read fdescription_format write fdescription_format;
 
-    [AttrDefaultValue(False)]
     property use_plainlinks;
-    [AttrDefaultValue(False)]
     property use_textasdescription;
-    [AttrDefaultValue(False)]
     property hidden: Boolean read fhidden write fhidden;
-    [AttrDefaultValue(False)]
     property unchecked: Boolean read funchecked write funchecked;
-    [AttrDefaultValue(False)]
     property error_report: Boolean read ferror_report write ferror_report;
-    [AttrDefaultValue(True)]
     property protected: Boolean read fprotected write fprotected;
-    [AttrDefaultValue(False)]
     property oxygen_scene_com_special: Boolean read foxygen_scene_com_special write foxygen_scene_com_special;
 
     property categorys;
@@ -79,6 +68,28 @@ type
   end;
 
 implementation
+
+{ TuCMSSettings }
+
+constructor TuCMSSettings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  extra_login := False;
+  need_captcha := False;
+  custom_login_url := '?p=userarea&location=login';
+  custom_upload_url := '';
+  description_format := '1';
+
+  hidden := False;
+  unchecked := False;
+  error_report := False;
+  fprotected := True;
+  oxygen_scene_com_special := False;
+end;
+
+{ TuCMS }
 
 function TuCMS.SettingsClass;
 begin
@@ -123,6 +134,7 @@ begin
 end;
 
 function TuCMS.DoBuildLoginRequest;
+
 var
   _captcha_id_c, _captcha_id_t: string;
   _captcha, _cookies: WideString;

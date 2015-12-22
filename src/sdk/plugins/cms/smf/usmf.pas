@@ -25,14 +25,12 @@ type
     fshowsig, fns: Boolean;
 
     fprefix, ficon: Variant;
+  public
+    constructor Create; override;
   published
-    [AttrDefaultValue('post_prefix')]
     property prefix_field: string read fprefix_field write fprefix_field;
-    [AttrDefaultValue(0)]
     property sleeptime: Integer read fsleeptime write fsleeptime;
-    [AttrDefaultValue(True)]
     property showsig: Boolean read fshowsig write fshowsig;
-    [AttrDefaultValue(False)]
     property ns: Boolean read fns write fns;
 
     property forums;
@@ -69,6 +67,21 @@ type
   end;
 
 implementation
+
+{ TSMFSettings }
+
+constructor TSMFSettings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  prefix_field := 'post_prefix';
+  sleeptime := 0;
+  showsig := True;
+  ns := False;
+end;
+
+{ TSMF }
 
 function TSMF.SettingsClass;
 begin
