@@ -50,8 +50,9 @@ type
   public
     constructor Create; virtual;
     destructor Destroy; override;
-  published
+
     property Charset: string read FCharset write FCharset;
+  published
   end;
 
   TCMSPlugInSettingsMeta = class of TCMSPlugInSettings;
@@ -611,7 +612,7 @@ function TCMSPlugIn.ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEdit
   end;
 
 begin
-  TPlugInCMSSettingsHelper.LoadSettingsToWebsiteEditor(SettingsFileName, SettingsClass, AWebsiteEditor);
+  TPlugInCMSSettingsHelper.LoadSettingsToWebsiteEditor(SettingsFileName, Settings, AWebsiteEditor);
   Result := IsPositiveResult(AWebsiteEditor.ShowModal);
 end;
 

@@ -24,27 +24,18 @@ type
     fparseURL, fenableSmilies, fenableBBCodes, fshowSignature, fhasThank, fcloseThread, fintelligent_posting_boundedsearch: Boolean;
   public
     intelligent_posting_bounds: TIntegerArray;
+    constructor Create; override;
   published
-    [AttrDefaultValue('threadIconID')]
     property icon_field: string read ficon_field write ficon_field;
-    [AttrDefaultValue(True)]
     property parseURL: Boolean read fparseURL write fparseURL;
-    [AttrDefaultValue(True)]
     property enableSmilies: Boolean read fenableSmilies write fenableSmilies;
-    [AttrDefaultValue(True)]
     property enableBBCodes: Boolean read fenableBBCodes write fenableBBCodes;
-    [AttrDefaultValue(True)]
     property showSignature: Boolean read fshowSignature write fshowSignature;
-    [AttrDefaultValue(True)]
     property hasThank: Boolean read fhasThank write fhasThank;
-    [AttrDefaultValue(False)]
     property closeThread: Boolean read fcloseThread write fcloseThread;
 
-    [AttrDefaultValue(False)]
     property intelligent_posting;
-    [AttrDefaultValue(False)]
     property intelligent_posting_helper;
-    [AttrDefaultValue(False)]
     property intelligent_posting_boundedsearch: Boolean read fintelligent_posting_boundedsearch write fintelligent_posting_boundedsearch;
 
     property forums;
@@ -85,6 +76,25 @@ type
   end;
 
 implementation
+
+{ TwBB3Settings }
+
+constructor TwBB3Settings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  icon_field := 'threadIconID';
+  parseURL := True;
+  enableSmilies := True;
+  enableBBCodes := True;
+  showSignature := True;
+  hasThank := True;
+  closeThread := False;
+  intelligent_posting_boundedsearch := False;
+end;
+
+{ TwBB3 }
 
 function TwBB3.SettingsClass;
 begin

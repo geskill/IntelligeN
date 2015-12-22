@@ -22,22 +22,16 @@ type
     fthxbot, fparseurl, femailnotify, fdisablesmilies, fdisablehtml, fdisablebbcode, fdisableimages, fshowsignature: Boolean;
 
     fprefix, ficon: Variant;
+  public
+    constructor Create; override;
   published
-    [AttrDefaultValue(True)]
     property thxbot: Boolean read fthxbot write fthxbot;
-    [AttrDefaultValue(True)]
     property parseurl: Boolean read fparseurl write fparseurl;
-    [AttrDefaultValue(False)]
     property emailnotify: Boolean read femailnotify write femailnotify;
-    [AttrDefaultValue(False)]
     property disablesmilies: Boolean read fdisablesmilies write fdisablesmilies;
-    [AttrDefaultValue(False)]
     property disablehtml: Boolean read fdisablehtml write fdisablehtml;
-    [AttrDefaultValue(False)]
     property disablebbcode: Boolean read fdisablebbcode write fdisablebbcode;
-    [AttrDefaultValue(False)]
     property disableimages: Boolean read fdisableimages write fdisableimages;
-    [AttrDefaultValue(True)]
     property showsignature: Boolean read fshowsignature write fshowsignature;
 
     property forums;
@@ -73,6 +67,25 @@ type
   end;
 
 implementation
+
+{ TwBB2Settings }
+
+constructor TwBB2Settings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  thxbot := True;
+  parseurl := True;
+  emailnotify := False;
+  disablesmilies := False;
+  disablehtml := False;
+  disablebbcode := False;
+  disableimages := False;
+  showsignature := True;
+end;
+
+{ TwBB2 }
 
 function TwBB2.SettingsClass;
 begin

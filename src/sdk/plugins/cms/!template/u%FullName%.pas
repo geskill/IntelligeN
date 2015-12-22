@@ -60,6 +60,8 @@ constructor T%FullName%Settings.Create;
 begin
   inherited Create;
 
+  // default setup
+  { TODO : define here custom settings default values }
 end;
 
 destructor T%FullName%Settings.Destroy;

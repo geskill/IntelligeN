@@ -24,18 +24,14 @@ type
     fprefix: Variant;
   public
     intelligent_posting_bounds: TIntegerArray;
+    constructor Create; override;
   published
-    [AttrDefaultValue('prefix_id')]
     property prefix_field: string read fprefix_field write fprefix_field;
 
-    [AttrDefaultValue('/')]
     property redirect: string read fredirect write fredirect;
 
-    [AttrDefaultValue(False)]
     property intelligent_posting;
-    [AttrDefaultValue(False)]
     property intelligent_posting_helper;
-    [AttrDefaultValue(False)]
     property intelligent_posting_boundedsearch: Boolean read fintelligent_posting_boundedsearch write fintelligent_posting_boundedsearch;
 
     property forums;
@@ -74,6 +70,18 @@ type
   end;
 
 implementation
+
+{ TXenForoSettings }
+
+constructor TXenForoSettings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  prefix_field := 'prefix_id';
+  redirect := '/';
+  intelligent_posting_boundedsearch := False;
+end;
 
 { TXenForo }
 

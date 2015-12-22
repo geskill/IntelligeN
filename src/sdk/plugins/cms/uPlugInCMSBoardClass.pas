@@ -47,10 +47,10 @@ type
     fintelligent_posting, fintelligent_posting_helper: Boolean;
 
     fprefix, ficon: Variant;
+  public
+    constructor Create; override;
   published
-    [AttrDefaultValue(False)]
     property intelligent_posting: Boolean read fintelligent_posting write fintelligent_posting;
-    [AttrDefaultValue(False)]
     property intelligent_posting_helper: Boolean read fintelligent_posting_helper write fintelligent_posting_helper;
 
     property prefix: Variant read fprefix write fprefix;
@@ -104,6 +104,17 @@ end;
 function TCMSBoardPlugIn.CMSType;
 begin
   Result := cmsBoard;
+end;
+
+{ TCMSBoardIPPlugInSettings }
+
+constructor TCMSBoardIPPlugInSettings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  intelligent_posting := False;
+  intelligent_posting_helper := False;
 end;
 
 { TCMSBoardIPPlugIn }

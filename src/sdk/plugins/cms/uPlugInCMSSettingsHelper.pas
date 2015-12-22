@@ -22,20 +22,11 @@ type
 
   TPlugInCMSSettingsHelper = class
   private { . }
-  type
-    // from: JclRTTI.pas // Project JEDI Code Library (JCL)
-    TAddr = Cardinal;
-    TPropSpecKind = (pskNone, pskStaticMethod, pskVirtualMethod, pskField, pskConstant);
-
-  class function GetSpecKind(const Value: TAddr): TPropSpecKind;
-  class function GetSpecValue(const Value: TAddr): TAddr;
-
-  class function InheritedProperty(const AClassInfo: PTypeInfo; const AProperty: string): Boolean;
   public
     class function GetID(const ANode: IXMLNode): string;
     class procedure SubSearch(const ANode: IXMLNode; const AData: ITabSheetData; var AID: Variant);
-    class function LoadSettingsToClass(const AFileName: TFileName; ASettings: TCMSPlugInSettings; const AData: ITabSheetData = nil; AXMLAccess: TXMLAccess = nil): TIntegerArray;
-    class procedure LoadSettingsToWebsiteEditor(const AFileName: TFileName; const AClass: TClass; const AWebsiteEditor: IWebsiteEditor);
+    class function LoadSettingsToClass(const AFileName: TFileName; const ASettings: TCMSPlugInSettings; const AData: ITabSheetData = nil; AXMLAccess: TXMLAccess = nil): TIntegerArray;
+    class procedure LoadSettingsToWebsiteEditor(const AFileName: TFileName; const ASettings: TCMSPlugInSettings; const AWebsiteEditor: IWebsiteEditor);
   end;
 
 implementation
@@ -51,63 +42,6 @@ begin
 end;
 
 { TPlugInCMSSettings }
-
-class function TPlugInCMSSettingsHelper.GetSpecKind(const Value: TAddr): TPropSpecKind;
-var
-  P: Integer;
-begin
-  P := Value shr 24;
-  case P of
-    $00:
-      if Value < 2 then
-        Result := pskConstant
-      else
-        Result := pskStaticMethod;
-    $FE:
-      Result := pskVirtualMethod;
-    $FF:
-      Result := pskField;
-  else
-    Result := pskStaticMethod;
-  end;
-end;
-
-class function TPlugInCMSSettingsHelper.GetSpecValue(const Value: TAddr): TAddr;
-begin
-  case GetSpecKind(Value) of
-    pskStaticMethod, pskConstant:
-      Result := Value;
-    pskVirtualMethod:
-      Result := Value and $0000FFFF;
-    pskField:
-      Result := Value and $00FFFFFF;
-  else
-    Result := 0;
-  end;
-end;
-
-class function TPlugInCMSSettingsHelper.InheritedProperty(const AClassInfo: PTypeInfo; const AProperty: string): Boolean;
-var
-  LPropIndex: Integer;
-  LPropCount: Integer;
-  LPropList: PPropList;
-  LPropInfo: PPropInfo;
-begin
-  Result := False;
-  if not Assigned(AClassInfo) then
-    Exit(False);
-  LPropCount := GetPropList(AClassInfo, LPropList);
-  try
-    for LPropIndex := 0 to LPropCount - 1 do
-    begin
-      LPropInfo := LPropList^[LPropIndex];
-      if LPropInfo^.Name = AProperty then
-        Exit(True);
-    end;
-  finally
-    FreeMem(LPropList);
-  end;
-end;
 
 class function TPlugInCMSSettingsHelper.GetID(const ANode: IXMLNode): string;
 const
@@ -147,7 +81,7 @@ begin
       end;
 end;
 
-class function TPlugInCMSSettingsHelper.LoadSettingsToClass(const AFileName: TFileName; ASettings: TCMSPlugInSettings; const AData: ITabSheetData = nil; AXMLAccess: TXMLAccess = nil): TIntegerArray;
+class function TPlugInCMSSettingsHelper.LoadSettingsToClass(const AFileName: TFileName; const ASettings: TCMSPlugInSettings; const AData: ITabSheetData = nil; AXMLAccess: TXMLAccess = nil): TIntegerArray;
 
   function VariantFix(const AVariant: Variant; const ATypeKind: TTypeKind): Variant;
   begin
@@ -193,7 +127,7 @@ var
 
   LCMSCustomField: TCMSCustomField;
 
-  LIDValue, LDefaultValue: Variant;
+  LIDValue: Variant;
 begin
   SetLength(Result, 0);
   CoInitializeEx(nil, COINIT_MULTITHREADED);
@@ -278,22 +212,12 @@ begin
           end
           else
           begin
-            if InheritedProperty(GetTypeData(PTypeInfo(ASettings.ClassInfo)).ParentInfo^, LPropInfo.Name) then
-              Continue;
-
-            if Assigned(LPropInfo^.StoredProc) then
-              LDefaultValue := GetSpecValue(TAddr(LPropInfo^.StoredProc));
-
             with LXMLDoc.DocumentElement do
               if HasChildNodes then
                 with ChildNodes.Nodes['settings'] do
                 begin
-                  if not Assigned(ChildNodes.FindNode(LPropInfo.Name)) then
-                    SetPropValue(ASettings, LPropInfo, LDefaultValue)
-                  else
-                  begin
+                  if Assigned(ChildNodes.FindNode(LPropInfo.Name)) then
                     SetPropValue(ASettings, LPropInfo, VariantFix(ChildNodes.Nodes[LPropInfo.Name].NodeValue, LPropInfo.PropType^.Kind));
-                  end;
                 end;
           end;
         end;
@@ -310,7 +234,7 @@ end;
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)
 
-class procedure TPlugInCMSSettingsHelper.LoadSettingsToWebsiteEditor(const AFileName: TFileName; const AClass: TClass; const AWebsiteEditor: IWebsiteEditor);
+class procedure TPlugInCMSSettingsHelper.LoadSettingsToWebsiteEditor(const AFileName: TFileName; const ASettings: TCMSPlugInSettings; const AWebsiteEditor: IWebsiteEditor);
 
   procedure AddWebsiteEditorComponent(AName: string; ATypeKind: TTypeKind; ADefaultValue: Variant);
   begin
@@ -333,34 +257,30 @@ var
   LDefaultValue: Variant;
 begin
   // see: http://stackoverflow.com/questions/10188459/how-to-loop-all-properties-in-a-class
-  LPropCount := GetPropList(AClass.ClassInfo, LPropList);
-  try
-    for LPropIndex := 0 to LPropCount - 1 do
-    begin
-      LPropInfo := LPropList^[LPropIndex];
-
-      if (LPropInfo.PropType^.Kind = tkVariant) then
+    LPropCount := GetPropList(ASettings.ClassInfo, LPropList);
+    try
+      for LPropIndex := 0 to LPropCount - 1 do
       begin
-        AWebsiteEditor.AddCategoryTab(LPropInfo.Name);
-      end
-      else if SameStr(LPropInfo.PropType^.Name, TCMSCustomFields.ClassName) then
-      begin
-        AWebsiteEditor.CustomFields := True;
-      end
-      else
-      begin
-        if InheritedProperty(GetTypeData(PTypeInfo(AClass.ClassInfo)).ParentInfo^, LPropInfo.Name) then
-          Continue;
+        LPropInfo := LPropList^[LPropIndex];
 
-        if Assigned(LPropInfo^.StoredProc) then
-          LDefaultValue := GetSpecValue(TAddr(LPropInfo^.StoredProc));
+        if (LPropInfo.PropType^.Kind = tkVariant) then
+        begin
+          AWebsiteEditor.AddCategoryTab(LPropInfo.Name);
+        end
+        else if SameStr(LPropInfo.PropType^.Name, TCMSCustomFields.ClassName) then
+        begin
+          AWebsiteEditor.CustomFields := True;
+        end
+        else
+        begin
+          LDefaultValue := GetPropValue(ASettings, LPropInfo);
 
-        AddWebsiteEditorComponent(LPropInfo.Name, LPropInfo.PropType^.Kind, LDefaultValue);
+          AddWebsiteEditorComponent(LPropInfo.Name, LPropInfo.PropType^.Kind, LDefaultValue);
+        end;
       end;
+    finally
+      FreeMem(LPropList);
     end;
-  finally
-    FreeMem(LPropList);
-  end;
 end;
 
 end.

@@ -14,10 +14,10 @@ type
   TCMSFormbasedPlugInSettings = class(TCMSBlogPlugInSettings)
   strict private
     fuse_plainlinks, fuse_textasdescription: Boolean;
+  public
+    constructor Create; override;
   published
-    [AttrDefaultValue(False)]
     property use_plainlinks: Boolean read fuse_plainlinks write fuse_plainlinks;
-    [AttrDefaultValue(False)]
     property use_textasdescription: Boolean read fuse_textasdescription write fuse_textasdescription;
   end;
 
@@ -37,6 +37,17 @@ type
   end;
 
 implementation
+
+{ TCMSFormbasedPlugInSettings }
+
+constructor TCMSFormbasedPlugInSettings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  use_plainlinks := False;
+  use_textasdescription := False;
+end;
 
 { TCMSFormbasedPlugIn }
 

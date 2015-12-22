@@ -19,9 +19,7 @@ uses
 type
   TwFusionSettings = class(TCMSFormbasedPlugInSettings)
   published
-    [AttrDefaultValue(False)]
     property use_plainlinks;
-    [AttrDefaultValue(False)]
     property use_textasdescription;
 
     property categorys;

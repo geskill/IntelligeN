@@ -26,31 +26,20 @@ type
     fprefix, ficon: Variant;
   public
     intelligent_posting_bounds: TIntegerArray;
+    constructor Create; override;
   published
-    [AttrDefaultValue('threadIconID')]
     property icon_field: string read ficon_field write ficon_field;
-    [AttrDefaultValue(True)]
     property preParse: Boolean read fpreParse write fpreParse;
-    [AttrDefaultValue(True)]
     property enableSmilies: Boolean read fenableSmilies write fenableSmilies;
-    [AttrDefaultValue(True)]
     property enableBBCodes: Boolean read fenableBBCodes write fenableBBCodes;
-    [AttrDefaultValue(False)]
     property enableHtml: Boolean read fenableHtml write fenableHtml;
-    [AttrDefaultValue(True)]
     property showSignature: Boolean read fshowSignature write fshowSignature;
-    [AttrDefaultValue(True)]
     property hasThank: Boolean read fhasThank write fhasThank;
-    [AttrDefaultValue(False)]
     property closeThread: Boolean read fcloseThread write fcloseThread;
-    [AttrDefaultValue(False)]
     property disableThread: Boolean read fdisableThread write fdisableThread;
 
-    [AttrDefaultValue(False)]
     property intelligent_posting;
-    [AttrDefaultValue(False)]
     property intelligent_posting_helper;
-    [AttrDefaultValue(False)]
     property intelligent_posting_boundedsearch: Boolean read fintelligent_posting_boundedsearch write fintelligent_posting_boundedsearch;
 
     property forums;
@@ -92,6 +81,25 @@ type
   end;
 
 implementation
+
+{ TwBB4Settings }
+
+constructor TwBB4Settings.Create;
+begin
+  inherited Create;
+
+  // default setup
+  icon_field := 'threadIconID';
+  preParse := True;
+  enableSmilies := True;
+  enableBBCodes := True;
+  enableHtml := False;
+  showSignature := True;
+  hasThank := True;
+  closeThread := False;
+  disableThread := False;
+  intelligent_posting_boundedsearch := False;
+end;
 
 { TwBB4 }
 
