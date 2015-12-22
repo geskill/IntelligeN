@@ -18,15 +18,20 @@ uses
 
 type
   TErodvdNl = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'http://www.erodvd.nl/';
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
@@ -36,50 +41,34 @@ begin
   result := 'erodvd.nl';
 end;
 
-function TErodvdNl.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TErodvdNl.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [cXXX];
-  result := LongWord(_TemplateTypeIDs);
+  Result := [cXXX];
 end;
 
-function TErodvdNl.GetAvailableControlIDs;
-var
-  // _TemplateTypeID: TTypeID;
-  _ComponentIDs: TControlIDs;
+function TErodvdNl.InternalGetAvailableControlIDs;
 begin
-  // _TemplateTypeID := TTypeID(ATypeID);
-
-  _ComponentIDs := [cPicture, cDescription];
-
-  result := LongWord(_ComponentIDs);
+  Result := [cPicture, cDescription];
 end;
 
-function TErodvdNl.GetControlIDDefaultValue;
+function TErodvdNl.InternalGetControlIDDefaultValue;
 begin
   result := True;
 end;
 
-function TErodvdNl.GetResultsLimitDefaultValue;
+function TErodvdNl.InternalGetDependentControlIDs;
 begin
-  result := 5;
+  Result := [cTitle];
 end;
 
-function TErodvdNl.Exec;
-const
-  website = 'http://www.erodvd.nl/';
-var
-  _ComponentIDs: TControlIDs;
-  _Title: string;
-  _Count: Integer;
+function TErodvdNl.InternalExecute;
 
-  procedure deep_search(aWebsitecode: string);
+  procedure deep_search(AWebsiteSourceCode: string);
   begin
-    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
+    if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '<a href="javascript:change_preview_image\(''(.*?)''';
 
           if Exec(InputString) then
@@ -89,10 +78,11 @@ var
         finally
           Free;
         end;
-    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+
+    if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '255\);">(.*?)<\/span>';
 
           if Exec(InputString) then
@@ -107,13 +97,15 @@ var
   end;
 
 var
-  RequestID1, RequestID2: Double;
+  LTitle: string;
+  LCount: Integer;
 
-  ResponseStrSearchResult: string;
+  LRequestID1, LRequestID2: Double;
+
+  LResponeStr: string;
 begin
-  LongWord(_ComponentIDs) := AControlIDs;
-  _Title := AControlController.FindControl(cTitle).Value;
-  _Count := 0;
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
 
   RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + 'ssl/index.php?searchStr=' + HTTPEncode(_Title) + '&act=viewCat&Submit=Go'),
     TPlugInHTTPOptions.Create(Self));
@@ -147,6 +139,11 @@ begin
     finally
       Free;
     end;
+end;
+
+function TErodvdNl.GetResultsLimitDefaultValue;
+begin
+  result := 5;
 end;
 
 end.

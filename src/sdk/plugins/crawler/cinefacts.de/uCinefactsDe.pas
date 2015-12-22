@@ -20,34 +20,25 @@ type
   TCinefactsDe = class(TCrawlerPlugIn)
   private
     FCount: Integer;
-  protected
-    function SimpleGETRequest(AURL: string; AFollowUp: Double): string;
+  protected { . }
+  const
+    WEBSITE = 'http://www.cduniverse.com/';
+
     function ThumbToLargeImage(AImageURL: string): string;
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
-
-function TCinefactsDe.SimpleGETRequest;
-var
-  LRequestID: Double;
-begin
-  LRequestID := HTTPManager.Get(AURL, AFollowUp, TPlugInHTTPOptions.Create(Self));
-
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID);
-
-  Result := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
-end;
 
 function TCinefactsDe.ThumbToLargeImage;
 begin
@@ -59,38 +50,27 @@ begin
   Result := 'Cinefacts.de';
 end;
 
-function TCinefactsDe.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TCinefactsDe.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [cMovie];
-  Result := LongWord(_TemplateTypeIDs);
+  Result := [cMovie];
 end;
 
-function TCinefactsDe.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
+function TCinefactsDe.InternalGetAvailableControlIDs;
 begin
-  _ComponentIDs := [cPicture, cGenre, cRuntime, cDescription];
-  Result := LongWord(_ComponentIDs);
+  Result := [cPicture, cGenre, cRuntime, cDescription];
 end;
 
-function TCinefactsDe.GetControlIDDefaultValue;
+function TCinefactsDe.InternalGetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TCinefactsDe.GetResultsLimitDefaultValue;
+function TCinefactsDe.InternalGetDependentControlIDs;
 begin
-  Result := 5;
+  Result := [cTitle];
 end;
 
-function TCinefactsDe.Exec;
-const
-  curl = 'http://www.cinefacts.de';
-var
-  _ComponentIDs: TControlIDs;
-  _Title: WideString;
+function TCinefactsDe.InternalExecute;
 
   procedure MainMoviePage(AWebsitecode: string);
   var
@@ -200,13 +180,15 @@ var
   end;
 
 var
-  RequestID: Double;
+  LTitle: string;
+  LCount: Integer;
 
-  ResponseStrSearchResult: string;
+  LRequestID1, LRequestID2: Double;
+
+  LResponeStr: string;
 begin
-  LongWord(_ComponentIDs) := AControlIDs;
-  _Title := AControlController.FindControl(cTitle).Value;
-  FCount := 0;
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
 
   RequestID := HTTPManager.Get(THTTPRequest.Create(curl + '/search/site/q/' + HTTPEncode(_Title)), TPlugInHTTPOptions.Create(Self));
 
@@ -241,6 +223,11 @@ begin
     finally
       Free;
     end;
+end;
+
+function TCinefactsDe.GetResultsLimitDefaultValue;
+begin
+  Result := 5;
 end;
 
 end.

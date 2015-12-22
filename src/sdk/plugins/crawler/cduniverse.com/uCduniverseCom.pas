@@ -18,16 +18,22 @@ uses
 
 type
   TCduniverseCom = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'http://www.cduniverse.com/';
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
+
 implementation
 
 { TCduniverseCom }
@@ -37,46 +43,31 @@ begin
   Result := 'cduniverse.com';
 end;
 
-function TCduniverseCom.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TCduniverseCom.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)] - [cOther];
-  Result := LongWord(_TemplateTypeIDs);
+  Result := [low(TTypeID) .. high(TTypeID)];
 end;
 
-function TCduniverseCom.GetAvailableControlIDs;
-var
-  _TemplateTypeID: TTypeID;
-  _ComponentIDs: TControlIDs;
+function TCduniverseCom.InternalGetAvailableControlIDs;
 begin
-  _TemplateTypeID := TTypeID(ATypeID);
+  Result := [cPicture, cGenre, cDescription];
 
-  _ComponentIDs := [cPicture, cGenre, cDescription];
-
-  if (_TemplateTypeID in [cAudio, cMovie]) then
-    _ComponentIDs := _ComponentIDs + [cRuntime];
-
-  Result := LongWord(_ComponentIDs);
+  if (ATypeID in [cAudio, cMovie]) then
+    Result := Result + [cRuntime];
 end;
 
-function TCduniverseCom.GetControlIDDefaultValue;
+function TCduniverseCom.InternalGetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TCduniverseCom.GetResultsLimitDefaultValue;
+function TCduniverseCom.InternalGetDependentControlIDs;
 begin
-  Result := 5;
+  Result := [cTitle];
 end;
 
-function TCduniverseCom.Exec;
-const
-  website = 'http://www.cduniverse.com/';
+function TCduniverseCom.InternalExecute;
 var
-  _TemplateTypeID: TTypeID;
-  _ComponentIDs: TControlIDs;
-  _Count: Integer;
   _style, _Title, _tracklist: string;
 
   RequestID1, RequestID2, RequestID3: Double;
@@ -95,79 +86,18 @@ var
       end;
   end;
 
-  procedure deep_search(aWebsitecode: string);
+  procedure deep_search(AWebsiteSourceCode: string);
   begin
-    if (AControlController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
+    if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
-          InputString := aWebsitecode;
-          Expression := '<nobr>(Recording|Running) Time <\/nobr><\/td><td>(\d+)';
-
-          if Exec(InputString) then
-          begin
-            AControlController.FindControl(cRuntime).AddProposedValue(GetName, Match[2], GetName)
-          end;
-        finally
-          Free;
-        end;
-    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
-      with TRegExpr.Create do
-        try
-          InputString := aWebsitecode;
-          Expression := '"categorylink" href="(.*?)">(.*?)<\/a>';
-
-          if Exec(InputString) then
-          begin
-            repeat
-              AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[2]);
-            until not ExecNext;
-          end;
-        finally
-          Free;
-        end;
-    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
-    begin
-      with TRegExpr.Create do
-        try
-          InputString := aWebsitecode;
-          Expression := 'class="mp3gridfont">(.*?)\s?<';
-
-          if Exec(InputString) then
-          begin
-            _tracklist := '';
-            repeat
-              _tracklist := _tracklist + Trim(Match[1]) + sLineBreak;
-            until not ExecNext;
-            AControlController.FindControl(cDescription).AddProposedValue(GetName, copy(_tracklist, 1, length(_tracklist) - 2));
-          end;
-        finally
-          Free;
-        end;
-      with TRegExpr.Create do
-        try
-          InputString := aWebsitecode;
-          Expression := '<div style="margin-top:10px;"><!---- trimable --->(.*?)&nbsp;&nbsp;';
-
-          if Exec(InputString) then
-          begin
-            repeat
-              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
-            until not ExecNext;
-          end;
-        finally
-          Free;
-        end;
-    end;
-    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
-      with TRegExpr.Create do
-        try
-          InputString := aWebsitecode;
+          InputString := AWebsiteSourceCode;
           Expression := '<table id="igcovera1" cellPadding="0" cellSpacing="0" border="0">\s+<tr>\s+<td><a  href="\/(.*?)"';
 
           if Exec(InputString) then
           begin
 
-            RequestID3 := HTTPManager.Get(website + Match[1], RequestID2, TPlugInHTTPOptions.Create(Self));
+            RequestID3 := HTTPManager.Get(WEBSITE + Match[1], RequestID2, TPlugInHTTPOptions.Create(Self));
 
             repeat
               sleep(50);
@@ -186,17 +116,82 @@ var
         finally
           Free;
         end;
+
+    if ACanUse(cRuntime) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := '<nobr>(Recording|Running) Time <\/nobr><\/td><td>(\d+)';
+
+          if Exec(InputString) then
+          begin
+            AControlController.FindControl(cRuntime).AddProposedValue(GetName, Match[2], GetName)
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cGenre) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := '"categorylink" href="(.*?)">(.*?)<\/a>';
+
+          if Exec(InputString) then
+          begin
+            repeat
+              AControlController.FindControl(cGenre).AddProposedValue(GetName, Match[2]);
+            until not ExecNext;
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cDescription) then
+    begin
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'class="mp3gridfont">(.*?)\s?<';
+
+          if Exec(InputString) then
+          begin
+            _tracklist := '';
+            repeat
+              _tracklist := _tracklist + Trim(Match[1]) + sLineBreak;
+            until not ExecNext;
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, copy(_tracklist, 1, length(_tracklist) - 2));
+          end;
+        finally
+          Free;
+        end;
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := '<div style="margin-top:10px;"><!---- trimable --->(.*?)&nbsp;&nbsp;';
+
+          if Exec(InputString) then
+          begin
+            repeat
+              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
+            until not ExecNext;
+          end;
+        finally
+          Free;
+        end;
+    end;
   end;
 
 var
-  HTTPRequest: IHTTPRequest;
+  LTitle: string;
+  LCount: Integer;
 
-  ResponseStrSearchResult: string;
+  LRequestID1, LRequestID2: Double;
+
+  LResponeStr: string;
 begin
-  _TemplateTypeID := TTypeID(ATypeID);
-  LongWord(_ComponentIDs) := AControlIDs;
-  _Count := 0;
-  _Title := AControlController.FindControl(cTitle).Value;
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
 
   case _TemplateTypeID of
     cAudio:
@@ -221,8 +216,8 @@ begin
       _style := 'ice';
   end;
 
-  HTTPRequest := THTTPRequest.Create(website + 'sresult.asp?style=' + _style + '&HT_Search_Info=' + HTTPEncode(_Title));
-  HTTPRequest.Referer := website;
+  HTTPRequest := THTTPRequest.Create(WEBSITE + 'sresult.asp?style=' + _style + '&HT_Search_Info=' + HTTPEncode(_Title));
+  HTTPRequest.Referer := WEBSITE;
   HTTPRequest.Cookies.Add('IAmAnAdult=yes');
 
   RequestID1 := HTTPManager.Get(HTTPRequest, TPlugInHTTPOptions.Create(Self));
@@ -242,7 +237,7 @@ begin
       begin
         repeat
 
-          RequestID2 := HTTPManager.Get(website + Match[2], RequestID1, TPlugInHTTPOptions.Create(Self));
+          RequestID2 := HTTPManager.Get(WEBSITE + Match[2], RequestID1, TPlugInHTTPOptions.Create(Self));
 
           repeat
             sleep(50);
@@ -257,6 +252,11 @@ begin
       Free;
     end;
 
+end;
+
+function TCduniverseCom.GetResultsLimitDefaultValue;
+begin
+  Result := 5;
 end;
 
 end.

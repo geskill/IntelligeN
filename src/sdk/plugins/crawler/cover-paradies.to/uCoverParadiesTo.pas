@@ -16,15 +16,22 @@ uses
 
 type
   TCoverParadiesTo = class(TCrawlerPlugIn)
+  protected { . }
+  const
+    WEBSITE = 'http://cover-paradies.to/';
+
+    function ThumbToLargeImage(AImageURL: string): string;
   public
     function GetName: WideString; override; safecall;
 
-    function GetAvailableTypeIDs: Integer; override; safecall;
-    function GetAvailableControlIDs(const ATypeID: Integer): Integer; override; safecall;
-    function GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool; override; safecall;
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
+    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
 
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; override; safecall;
+    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+
+    function GetResultsLimitDefaultValue: Integer; override; safecall;
   end;
 
 implementation
@@ -36,47 +43,35 @@ begin
   Result := 'cover-paradies.to';
 end;
 
-function TCoverParadiesTo.GetAvailableTypeIDs;
-var
-  _TemplateTypeIDs: TTypeIDs;
+function TCoverParadiesTo.InternalGetAvailableTypeIDs;
 begin
-  _TemplateTypeIDs := [ low(TTypeID) .. high(TTypeID)];
-  Result := LongWord(_TemplateTypeIDs);
+  Result := [low(TTypeID) .. high(TTypeID)];
 end;
 
-function TCoverParadiesTo.GetAvailableControlIDs;
-var
-  _ComponentIDs: TControlIDs;
+function TCoverParadiesTo.InternalGetAvailableControlIDs;
 begin
-  _ComponentIDs := [cPicture];
-  Result := LongWord(_ComponentIDs);
+  Result := [cPicture];
 end;
 
-function TCoverParadiesTo.GetControlIDDefaultValue;
+function TCoverParadiesTo.InternalGetControlIDDefaultValue;
 begin
   Result := True;
 end;
 
-function TCoverParadiesTo.GetResultsLimitDefaultValue;
+function TCoverParadiesTo.InternalGetDependentControlIDs;
 begin
-  Result := 5;
+  Result := [cTitle];
 end;
 
-function TCoverParadiesTo.Exec;
-const
-  website: string = 'http://cover-paradies.to/';
-var
-  _ComponentIDs: TControlIDs;
-  _Title: string;
-  _Count: Integer;
+function TCoverParadiesTo.InternalExecute;
 
-  procedure deep_search(AWebsitecode: string);
+  procedure deep_search(AWebsiteSourceCode: string);
   begin
     with TRegExpr.Create do
     begin
       try
         ModifierS := False;
-        InputString := AWebsitecode;
+        InputString := AWebsiteSourceCode;
         Expression := '<a class="ElementThumb" href="\.\/(.*?)"><img';
 
         if Exec(InputString) then
@@ -126,16 +121,15 @@ var
   end;
 
 var
-  HTTPParams: IHTTPParams;
+  LTitle: string;
+  LCount: Integer;
 
-  RequestID1, RequestID2: Double;
+  LRequestID1, LRequestID2: Double;
 
-  ResponseStrSearchResult: string;
+  LResponeStr: string;
 begin
-  LongWord(_ComponentIDs) := AControlIDs;
-
-  _Title := AControlController.FindControl(cTitle).Value;
-  _Count := 0;
+  LTitle := AControlController.FindControl(cTitle).Value;
+  LCount := 0;
 
   if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
   begin
@@ -186,6 +180,11 @@ begin
     else
       deep_search(ResponseStrSearchResult);
   end;
+end;
+
+function TCoverParadiesTo.GetResultsLimitDefaultValue;
+begin
+  Result := 5;
 end;
 
 end.
