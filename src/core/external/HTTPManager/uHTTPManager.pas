@@ -143,7 +143,7 @@ type
     ///   Double;
     /// </seealso>
     {$ENDREGION}
-    function Get(const AURL: WideString; AFollowUp: Double; const AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
+    function Get(const AURL: WideString; AFollowUp: Double; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
     {$REGION 'Documentation'}
     /// <summary>
     ///   Adds a new GET-request to the internal queue and returns immediately.
@@ -153,7 +153,7 @@ type
     ///   nil): Double;
     /// </seealso>
     {$ENDREGION}
-    function Get(const AHTTPRequest: IHTTPRequest; const AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
+    function Get(AHTTPRequest: IHTTPRequest; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
     {$REGION 'Documentation'}
     /// <summary>
     ///   <para>
@@ -174,7 +174,7 @@ type
     ///   AHTTPOptions: IHTTPOptions = nil): Double;
     /// </seealso>
     {$ENDREGION}
-    function Post(const AURL: WideString; AFollowUp: Double; const AHTTPParams: IHTTPParams; const AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
+    function Post(const AURL: WideString; AFollowUp: Double; AHTTPParams: IHTTPParams; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
     {$REGION 'Documentation'}
     /// <summary>
     ///   Adds a new HTTP-request to the internal queue and returns
@@ -185,7 +185,7 @@ type
     ///   AHTTPOptions: IHTTPOptions = nil): Double;
     /// </seealso>
     {$ENDREGION}
-    function Post(const AHTTPRequest: IHTTPRequest; const AHTTPParams: IHTTPParams; const AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
+    function Post(AHTTPRequest: IHTTPRequest; AHTTPParams: IHTTPParams; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
     {$REGION 'Documentation'}
     /// <summary>
     ///   The function returns True if the given request is processed and False
@@ -542,23 +542,23 @@ begin
   end;
 end;
 
-function THTTPManager.Get(const AURL: WideString; AFollowUp: Double; const AHTTPOptions: IHTTPOptions = nil): Double;
+function THTTPManager.Get(const AURL: WideString; AFollowUp: Double; AHTTPOptions: IHTTPOptions = nil): Double;
 begin
   Result := DoRequest(mGET, AURL, AFollowUp, AHTTPOptions);
 end;
 
-function THTTPManager.Get(const AHTTPRequest: IHTTPRequest; const AHTTPOptions: IHTTPOptions = nil): Double;
+function THTTPManager.Get(AHTTPRequest: IHTTPRequest; AHTTPOptions: IHTTPOptions = nil): Double;
 begin
   AHTTPRequest.Method := mGET;
   Result := DoRequest(THTTPRequest.Clone(AHTTPRequest), AHTTPOptions);
 end;
 
-function THTTPManager.Post(const AURL: WideString; AFollowUp: Double; const AHTTPParams: IHTTPParams; const AHTTPOptions: IHTTPOptions = nil): Double;
+function THTTPManager.Post(const AURL: WideString; AFollowUp: Double; AHTTPParams: IHTTPParams; AHTTPOptions: IHTTPOptions = nil): Double;
 begin
   Result := DoRequest(mPOST, AURL, AFollowUp, AHTTPOptions, AHTTPParams);
 end;
 
-function THTTPManager.Post(const AHTTPRequest: IHTTPRequest; const AHTTPParams: IHTTPParams; const AHTTPOptions: IHTTPOptions = nil): Double;
+function THTTPManager.Post(AHTTPRequest: IHTTPRequest; AHTTPParams: IHTTPParams; AHTTPOptions: IHTTPOptions = nil): Double;
 begin
   AHTTPRequest.Method := mPOST;
   Result := DoRequest(THTTPRequest.Clone(AHTTPRequest), AHTTPOptions, AHTTPParams);

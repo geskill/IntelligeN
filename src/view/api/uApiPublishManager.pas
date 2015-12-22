@@ -184,7 +184,6 @@ var
 begin
   LOmniValue := TOmniValue.CastFrom<TPublishInnerData>(Data);
   task.Comm.Send(MSG_PUBLISH_ITEM_TASK_CREATED, [task.UniqueID, LOmniValue.AsObject]);
-  OutputDebugString('MSG_PUBLISH_ITEM_TASK_CREATED');
 
   if not task.Terminated then
   begin
@@ -201,7 +200,6 @@ begin
             finally
               Free;
             end;
-          OutputDebugString('Publish finished');
 
           if FHasError then
           begin
@@ -216,14 +214,12 @@ begin
 
       finally
         task.Comm.Send(MSG_PUBLISH_ITEM_TASK_COMPLETED, [task.UniqueID, LOmniValue.AsObject]);
-        OutputDebugString('MSG_PUBLISH_ITEM_TASK_COMPLETED');
       end;
 
     finally
       Finish;
     end;
   end;
-  OutputDebugString('TPublishInnerThread.Execute END');
 end;
 
 { TPublishInnerManager }

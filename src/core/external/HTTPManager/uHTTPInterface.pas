@@ -351,10 +351,10 @@ type
 
     property ConnectionMaximum: Integer read GetConnectionMaximum write SetConnectionMaximum;
 
-    function Get(const AURL: WideString; AFollowUp: Double; const AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
-    function Get(const AHTTPRequest: IHTTPRequest; const AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
-    function Post(const AURL: WideString; AFollowUp: Double; const AHTTPParams: IHTTPParams; const AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
-    function Post(const AHTTPRequest: IHTTPRequest; const AHTTPParams: IHTTPParams; const AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
+    function Get(const AURL: WideString; AFollowUp: Double; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
+    function Get(AHTTPRequest: IHTTPRequest; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
+    function Post(const AURL: WideString; AFollowUp: Double; AHTTPParams: IHTTPParams; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
+    function Post(AHTTPRequest: IHTTPRequest; AHTTPParams: IHTTPParams; AHTTPOptions: IHTTPOptions = nil): Double; overload; safecall;
 
     function HasResult(AUniqueID: Double): WordBool; safecall;
     function GetResult(AUniqueID: Double): IHTTPProcess; safecall;

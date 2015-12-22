@@ -532,6 +532,8 @@
 
 * Improved PublishJob caption
 
+* Implemented SettingsHelper with old RTTI
+
 * Improved WebsiteEditor using DevExpress LayoutControl
 
 * Improved loading app plug-ins
@@ -545,5 +547,7 @@
 * Fixed logger multithreading issue
 
 * Fixed XenForo DoAnalyzePost
+
+* Updated HTTPManager (fixed UpdateCapacity function)
 
 * Updated hoster.xml removed deleted hosters

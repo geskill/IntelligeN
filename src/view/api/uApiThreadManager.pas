@@ -1,3 +1,4 @@
+{.$DEFINE DEBUG_THREADWORKER}
 unit uApiThreadManager;
 
 interface
@@ -162,7 +163,9 @@ var
 begin
   LOmniValue := TOmniValue.CastFrom<T>(Data);
   task.Comm.Send(IfThen(AByItSelf, MSG_TASK_QUIT_BY_ITSELF, MSG_TASK_QUIT), [task.UniqueID, LOmniValue.AsObject]);
+{$IFDEF DEBUG_THREADWORKER}
   OutputDebugString(PChar(ClassName + ' Send: MSG_TASK_QUIT'));
+{$ENDIF}
 end;
 
 { TThreadManager<T> }
@@ -240,19 +243,27 @@ begin
       end;
     MSG_TASK_QUIT, MSG_TASK_QUIT_BY_ITSELF:
       begin
+{$IFDEF DEBUG_THREADWORKER}
         OutputDebugString(PChar(ClassName + ' Retrieve: MSG_TASK_QUIT'));
+{$ENDIF}
         FInList.Remove(LJobWorkData);
+{$IFDEF DEBUG_THREADWORKER}
         OutputDebugString(PChar(ClassName + ' Removed from worklist:' + IntToStr(FInList.Count)));
+{$ENDIF}
         if FBlackList.Contains(LJobWorkData) then
         begin
           FBlackList.Remove(LJobWorkData);
+{$IFDEF DEBUG_THREADWORKER}
           OutputDebugString('Removed from blacklist');
+{$ENDIF}
         end;
 
         if (msg.MsgID = MSG_TASK_QUIT) then
         begin
           task.Terminate;
-          OutputDebugString('task.Terminate;');
+{$IFDEF DEBUG_THREADWORKER}
+          OutputDebugString('task.Terminate');
+{$ENDIF}
         end;
       end;
   end;
@@ -268,7 +279,9 @@ begin
   if CanAddJob(AJobWorkData) then
   begin
     FInList.Add(AJobWorkData);
+{$IFDEF DEBUG_THREADWORKER}
     OutputDebugString(PChar(ClassName + 'Added to worklist'));
+{$ENDIF}
     Result := True;
   end
   else
@@ -290,7 +303,9 @@ begin
     if not InBlackList(AJobWorkData) then
     begin
       FBlackList.Add(AJobWorkData);
+{$IFDEF DEBUG_THREADWORKER}
       OutputDebugString(PChar(ClassName + 'Added to blacklist'));
+{$ENDIF}
     end;
   end
   else
