@@ -24,6 +24,13 @@ type
     procedure Invoke(const NewViewType: TTabViewType); safecall;
   end;
 
+  TITabSheetMethod = procedure(const Sender: ITabSheetController) of object;
+
+  TITabSheetEventHandler = class(TGenericEventHandler<TITabSheetMethod>, ITabSheetEventHandler)
+  public
+    procedure Invoke(const Sender: ITabSheetController); safecall;
+  end;
+
   TControlMethod = procedure(const Sender: IControlBasic) of object;
 
   TIControlEventHandler = class(TGenericEventHandler<TControlMethod>, IControlEventHandler)
@@ -60,6 +67,14 @@ procedure TIViewChangeEventHandler.Invoke(const NewViewType: TTabViewType);
 begin
   if (@FHandler <> nil) then
     FHandler(NewViewType);
+end;
+
+{ TITabSheetEventHandler }
+
+procedure TITabSheetEventHandler.Invoke(const Sender: ITabSheetController);
+begin
+  if (@FHandler <> nil) then
+    FHandler(Sender);
 end;
 
 { TIControlEvent }

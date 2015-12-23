@@ -119,6 +119,7 @@ object fMain: TfMain
     OnGetTabHint = pcMainGetTabHint
     OnMouseDown = pcMainMouseDown
     OnNewTabButtonClick = pcMainNewTabButtonClick
+    OnNewTabCreate = pcMainNewTabCreate
     ClientRectBottom = 486
     ClientRectLeft = 4
     ClientRectRight = 614

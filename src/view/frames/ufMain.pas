@@ -38,6 +38,7 @@ type
     procedure pcMainGetTabHint(Sender: TObject; ATabIndex: Integer; var AHint: string; var ACanShow: Boolean);
     procedure pcMainMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure pcMainNewTabButtonClick(Sender: TObject; var AHandled: Boolean);
+    procedure pcMainNewTabCreate(Sender: TObject; AIndex: Integer);
     procedure cxTCViewChange(Sender: TObject);
   private
     FLockCount: Integer;
@@ -50,6 +51,7 @@ type
     FImageHosterManager: IImageHosterManager;
     FChange: INotifyEvent;
     FViewChange: IViewChangeEvent;
+    FAddTab, FRemoveTab: ITabSheetEvent;
     function LockPageControl: Boolean;
     function UnlockPageControl: Boolean;
     procedure CrawlerGUIInteraction(const AControlController: IControlController; AStatus: TCrawlerTaskStatus; AProgressPosition: Extended; AMessage: string);
@@ -68,6 +70,8 @@ type
     function GetTabSheetController(index: Integer): ITabSheetController;
     function GetChange: INotifyEvent;
     function GetViewChange: IViewChangeEvent;
+    function GetAddTab: ITabSheetEvent;
+    function GetRemoveTab: ITabSheetEvent;
   public
     constructor Create(AOwner: TComponent); override;
     procedure PostCreate; // called after all frames are created
@@ -119,6 +123,8 @@ type
 
     property OnChange: INotifyEvent read GetChange;
     property OnViewChange: IViewChangeEvent read GetViewChange;
+    property OnAddTab: ITabSheetEvent read GetAddTab;
+    property OnRemoveTab: ITabSheetEvent read GetRemoveTab;
 
     destructor Destroy; override;
   end;
@@ -152,6 +158,8 @@ end;
 
 procedure TfMain.pcMainCanCloseEx(Sender: TObject; ATabIndex: Integer; var ACanClose: Boolean);
 begin
+  FRemoveTab.Invoke(TabSheetController[ATabIndex]);
+
   ACanClose := CanClose(ATabIndex);
 
   // TODO: If app is closed, this message will appear in a loop. Another problem exists for two tabs crawling
@@ -203,6 +211,11 @@ end;
 procedure TfMain.pcMainNewTabButtonClick(Sender: TObject; var AHandled: Boolean);
 begin
   //
+end;
+
+procedure TfMain.pcMainNewTabCreate(Sender: TObject; AIndex: Integer);
+begin
+  FAddTab.Invoke(TabSheetController[AIndex]);
 end;
 
 procedure TfMain.cxTCViewChange(Sender: TObject);
@@ -375,6 +388,16 @@ begin
   Result := FViewChange;
 end;
 
+function TfMain.GetAddTab: ITabSheetEvent;
+begin
+  Result := FAddTab;
+end;
+
+function TfMain.GetRemoveTab: ITabSheetEvent;
+begin
+  Result := FRemoveTab;
+end;
+
 procedure TfMain.PostCreate;
 var
   LPublishManager: TPublishManager;
@@ -402,6 +425,8 @@ begin
 
   FChange := TINotifyEvent.Create;
   FViewChange := TIViewChangeEvent.Create;
+  FAddTab := TITabSheetEvent.Create;
+  FRemoveTab := TITabSheetEvent.Create;
 end;
 
 procedure TfMain.CallBackupManager;
@@ -890,6 +915,8 @@ end;
 
 destructor TfMain.Destroy;
 begin
+  FRemoveTab  := nil;
+  FAddTab  := nil;
   FViewChange := nil;
   FChange := nil;
 

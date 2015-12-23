@@ -15,6 +15,11 @@ type
     procedure Invoke(const ANewViewType: TTabViewType); safecall;
   end;
 
+  TITabSheetEvent = class(TGenericEvent<ITabSheetEventHandler>, ITabSheetEvent)
+  public
+    procedure Invoke(const ASender: ITabSheetController); safecall;
+  end;
+
   TIControlChangeEvent = class(TGenericEvent<IControlEventHandler>, IControlChangeEvent)
   public
     procedure Invoke(const ASender: IControlBasic); safecall;
@@ -99,6 +104,16 @@ var
 begin
   for LViewChangeEvent in Methods do
     LViewChangeEvent.Invoke(ANewViewType);
+end;
+
+{ TITabSheetEvent }
+
+procedure TITabSheetEvent.Invoke(const ASender: ITabSheetController);
+var
+  LTabSheetEvent: ITabSheetEventHandler;
+begin
+  for LTabSheetEvent in Methods do
+    LTabSheetEvent.Invoke(ASender);
 end;
 
 { TIControlChangeEvent }

@@ -724,8 +724,8 @@ type
     function GeneratePublishTab: IPublishTab;
     function GeneratePublishJob: IPublishJob;
 
-    function CheckIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData :ITabSheetData): RIScriptResult;
-    function ParseIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData :ITabSheetData; ADataChanged: WordBool = True): RIScriptResult;
+    function CheckIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData: ITabSheetData): RIScriptResult;
+    function ParseIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData: ITabSheetData; ADataChanged: WordBool = True): RIScriptResult;
 
     property OnUpdateCMSList: IUpdateCMSListEvent read GetUpdateCMSList;
     property OnUpdateCMSWebsiteList: IUpdateCMSWebsiteListEvent read GetUpdateCMSWebsiteList;
@@ -874,6 +874,18 @@ type
 
   // // // Page Controller // // //
 
+  ITabSheetEventHandler = interface(IUnknown)
+    ['{DC6D5168-9BE3-4985-B1CB-BBEB335FB8E0}']
+    procedure Invoke(const ASender: ITabSheetController); safecall;
+  end;
+
+  ITabSheetEvent = interface(IUnknown)
+    ['{16ED53C2-A7E6-4651-B5C8-157E5415BEE3}']
+    procedure Add(const AHandler: ITabSheetEventHandler); safecall;
+    procedure Remove(const AHandler: ITabSheetEventHandler); safecall;
+    procedure Invoke(const ASender: ITabSheetController); safecall;
+  end;
+
   IPageController = interface
     ['{735F0449-3C70-4701-BBC3-9FE3F229DD96}']
     function GetPublishManager: IPublishManager;
@@ -886,6 +898,8 @@ type
     function GetTabSheetController(index: Integer): ITabSheetController;
     function GetChange: INotifyEvent;
     function GetViewChange: IViewChangeEvent;
+    function GetAddTab: ITabSheetEvent;
+    function GetRemoveTab: ITabSheetEvent;
 
     procedure CallControlAligner;
 
@@ -913,6 +927,8 @@ type
 
     property OnChange: INotifyEvent read GetChange;
     property OnViewChange: IViewChangeEvent read GetViewChange;
+    property OnAddTab: ITabSheetEvent read GetAddTab;
+    property OnRemoveTab: ITabSheetEvent read GetRemoveTab;
   end;
 
   // // // Log Manager // // //
