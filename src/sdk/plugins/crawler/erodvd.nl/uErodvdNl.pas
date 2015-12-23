@@ -38,7 +38,7 @@ implementation
 
 function TErodvdNl.GetName;
 begin
-  result := 'erodvd.nl';
+  Result := 'erodvd.nl';
 end;
 
 function TErodvdNl.InternalGetAvailableTypeIDs;
@@ -53,7 +53,7 @@ end;
 
 function TErodvdNl.InternalGetControlIDDefaultValue;
 begin
-  result := True;
+  Result := True;
 end;
 
 function TErodvdNl.InternalGetDependentControlIDs;
@@ -69,17 +69,17 @@ function TErodvdNl.InternalExecute;
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := '<a href="javascript:change_preview_image\(''(.*?)''';
+          Expression := '<a href="javascript:change_preview_image\(''\/(.*?)''';
 
           if Exec(InputString) then
           begin
-            AControlController.FindControl(cPicture).AddProposedValue(GetName, website + Match[1]);
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, WEBSITE + Match[1]);
           end;
         finally
           Free;
         end;
 
-    if ACanUse(cPicture) then
+    if ACanUse(cDescription) then
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
@@ -107,43 +107,36 @@ begin
   LTitle := AControlController.FindControl(cTitle).Value;
   LCount := 0;
 
-  RequestID1 := HTTPManager.Get(THTTPRequest.Create(website + 'ssl/index.php?searchStr=' + HTTPEncode(_Title) + '&act=viewCat&Submit=Go'),
-    TPlugInHTTPOptions.Create(Self));
+  LResponeStr := GETRequest(WEBSITE + 'ssl/index.php?searchStr=' + HTTPEncode(LTitle) + '&act=viewCat&Submit=Go', LRequestID1);
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID1);
+  if not(Pos('class="tdEven"', LResponeStr) = 0) then
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := LResponeStr;
+        Expression := 'center" class="(tdOdd|tdEven)"><a href="(.*?)"';
 
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID1).HTTPResult.SourceCode;
-
-  with TRegExpr.Create do
-    try
-      InputString := ResponseStrSearchResult;
-      Expression := 'center" class="(tdOdd|tdEven)"><a href="(.*?)"';
-
-      if Exec(InputString) then
-      begin
-        repeat
-
-          RequestID2 := HTTPManager.Get(HTMLDecode(website + 'ssl/' + Match[2]), RequestID1, TPlugInHTTPOptions.Create(Self));
-
+        if Exec(InputString) then
+        begin
           repeat
-            sleep(50);
-          until HTTPManager.HasResult(RequestID2);
+            LResponeStr := GETFollowUpRequest(WEBSITE + 'ssl/' + Match[2], LRequestID1, LRequestID2);
 
-          deep_search(HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode);
+            deep_search(LResponeStr);
 
-          Inc(_Count);
-        until not(ExecNext and ((_Count < ALimit) or (ALimit = 0)));
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
+        end;
+      finally
+        Free;
       end;
-    finally
-      Free;
-    end;
+  end;
+
+  Result := True;
 end;
 
 function TErodvdNl.GetResultsLimitDefaultValue;
 begin
-  result := 5;
+  Result := 5;
 end;
 
 end.

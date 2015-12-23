@@ -327,6 +327,8 @@ begin
         Free;
       end;
   end;
+
+  Result := True;
 end;
 
 function TAmazonCom.GetResultsLimitDefaultValue;

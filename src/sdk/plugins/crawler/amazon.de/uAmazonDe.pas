@@ -178,6 +178,8 @@ begin
         Free;
       end;
   end;
+
+  Result := True;
 end;
 
 end.

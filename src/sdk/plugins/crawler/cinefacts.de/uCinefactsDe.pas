@@ -22,7 +22,7 @@ type
     FCount: Integer;
   protected { . }
   const
-    WEBSITE = 'http://www.cduniverse.com/';
+    WEBSITE = 'http://www.cinefacts.de/';
 
     function ThumbToLargeImage(AImageURL: string): string;
   public
@@ -77,16 +77,16 @@ function TCinefactsDe.InternalExecute;
     LGenreList: TStrings;
     LFilmkritik, LGenre: string;
   begin
-    if (AControlController.FindControl(cDescription) <> nil) and (cDescription in _ComponentIDs) then
+    if ACanUse(cDescription) then
       with TRegExpr.Create do
         try
           InputString := AWebsitecode;
-          Expression := 'Inhalt:<\/strong>(.*?)<\/';
+          Expression := 'Inhalt: <\/strong>(.*?)<\/';
 
           if Exec(InputString) then
             AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(Match[1])));
 
-          InputString := ExtractTextBetween(AWebsitecode, '<article>', '</article>');
+          InputString := ExtractTextBetween(AWebsitecode, '<h3>Filmkritik', '</article>');
           Expression := '(class="item_text">|class="thisReview">)(.*?)(<span class="review|<\/span>)';
 
           if Exec(InputString) then
@@ -104,7 +104,7 @@ function TCinefactsDe.InternalExecute;
           Free;
         end;
 
-    if (AControlController.FindControl(cGenre) <> nil) and (cGenre in _ComponentIDs) then
+    if ACanUse(cGenre) then
       with TRegExpr.Create do
         try
           InputString := AWebsitecode;
@@ -124,11 +124,11 @@ function TCinefactsDe.InternalExecute;
           Free;
         end;
 
-    if (AControlController.FindControl(cRuntime) <> nil) and (cRuntime in _ComponentIDs) then
+    if ACanUse(cRuntime) then
       with TRegExpr.Create do
         try
           InputString := AWebsitecode;
-          Expression := 'Laufzeit: (\d+) ';
+          Expression := 'itemprop="duration" datetime="PT(\d+)M';
 
           if Exec(InputString) then
             AControlController.FindControl(cRuntime).AddProposedValue(GetName, Match[1]);
@@ -139,90 +139,90 @@ function TCinefactsDe.InternalExecute;
 
   procedure MainImagesPage(AWebsitecode: string);
   begin
-    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
-    begin
-      with TRegExpr.Create do
-        try
-          InputString := ExtractTextBetween(AWebsitecode, '<h3>Poster', '<h3>Szenenbilder');
-          Expression := 'src="(.*?)"';
+    with TRegExpr.Create do
+      try
+        InputString := ExtractTextBetween(AWebsitecode, '<h3>Poster', '<h3>Szenenbilder');
+        Expression := 'src="(.*?)"';
 
-          if Exec(InputString) then
-          begin
-            repeat
-              AControlController.FindControl(cPicture).AddProposedValue(GetName, ThumbToLargeImage(Match[1]));
-            until not ExecNext;
-          end;
-        finally
-          Free;
+        if Exec(InputString) then
+        begin
+          repeat
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, ThumbToLargeImage(Match[1]));
+          until not ExecNext;
         end;
-    end;
+      finally
+        Free;
+      end;
   end;
 
   procedure MainDVDBlurayPage(AWebsitecode: string);
   begin
-    if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
-    begin
-      with TRegExpr.Create do
-        try
-          InputString := ExtractTextBetween(AWebsitecode, '<article>', '</section>');
-          Expression := 'src="(.*?)"';
+    with TRegExpr.Create do
+      try
+        InputString := ExtractTextBetween(AWebsitecode, '<article>', '</section>');
+        Expression := 'src="(.*?)"';
 
-          if Exec(InputString) then
-          begin
-            repeat
-              AControlController.FindControl(cPicture).AddProposedValue(GetName, ThumbToLargeImage(Match[1]));
-            until not ExecNext;
-          end;
-        finally
-          Free;
+        if Exec(InputString) then
+        begin
+          repeat
+            AControlController.FindControl(cPicture).AddProposedValue(GetName, ThumbToLargeImage(Match[1]));
+          until not ExecNext;
         end;
-    end;
+      finally
+        Free;
+      end;
   end;
 
 var
   LTitle: string;
   LCount: Integer;
 
-  LRequestID1, LRequestID2: Double;
+  LRequestID1, LRequestID2, LRequestID3, LRequestID4: Double;
 
-  LResponeStr: string;
+  LResponeStr, LFilteredContent: string;
 begin
   LTitle := AControlController.FindControl(cTitle).Value;
   LCount := 0;
 
-  RequestID := HTTPManager.Get(THTTPRequest.Create(curl + '/search/site/q/' + HTTPEncode(_Title)), TPlugInHTTPOptions.Create(Self));
+  LResponeStr := GETRequest(WEBSITE + 'search/site/q/' + HTTPEncode(LTitle), LRequestID1);
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  LFilteredContent := ExtractTextBetween(LResponeStr, '<h3>Filme', '<h3>Stars');
 
-  ResponseStrSearchResult := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
+  if not(Pos('class="s_link"', LFilteredContent) = 0) then
+  begin
+    with TRegExpr.Create do
+      try
+        InputString := LFilteredContent;
+        Expression := 'class="s_link" href="\/(.*?)">';
 
-  with TRegExpr.Create do
-    try
-      InputString := ExtractTextBetween(ResponseStrSearchResult, '<h3>Filme', '<h3>Stars');
-      Expression := 'class="s_link" href="(.*?)">';
+        if Exec(InputString) then
+        begin
+          repeat
+            LResponeStr := GETFollowUpRequest(WEBSITE + Match[1], LRequestID1, LRequestID2);
 
-      if Exec(InputString) then
-      begin
-        repeat
+            MainMoviePage(LResponeStr);
 
-          MainMoviePage(SimpleGETRequest(curl + Match[1], RequestID));
+            if ACanUse(cPicture) then
+            begin
+              LResponeStr := GETFollowUpRequest(WEBSITE + Match[1] + '/Bildergalerie', LRequestID2, LRequestID3);
 
-          if (AControlController.FindControl(cPicture) <> nil) and (cPicture in _ComponentIDs) then
-          begin
-            MainImagesPage(SimpleGETRequest(curl + Match[1] + '/Bildergalerie', RequestID));
+              MainImagesPage(LResponeStr);
 
-            MainDVDBlurayPage(SimpleGETRequest(curl + Match[1] + '/DVD-Blu-ray', RequestID));
-          end;
+              LResponeStr := GETFollowUpRequest(WEBSITE + Match[1] + '/DVD-Blu-ray', LRequestID3, LRequestID4);
 
-          Inc(FCount);
+              MainDVDBlurayPage(LResponeStr);
+            end;
 
-        until not(ExecNext and ((FCount < ALimit) or (ALimit = 0)));
+            Inc(LCount);
+          until not(ExecNext and ((LCount < ALimit) or (ALimit = 0)));
+        end;
+      finally
+        Free;
       end;
-    finally
-      Free;
-    end;
+
+  end;
+
+  Result := True;
 end;
 
 function TCinefactsDe.GetResultsLimitDefaultValue;
