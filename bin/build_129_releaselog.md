@@ -378,6 +378,8 @@
 
 * Added new base categories EBook, PlayStation4, PlayStationVita, WiiU and XboxOne
 
+* Added new controls ICreator (before IArtist), IDirector and IPublisher
+
 * Improved Plugin Error handling
 
 * Removed DirectoryMonitor (need re-work, planned for next BUILD)
@@ -520,6 +522,10 @@
 
 ######minor enhancements
 
+* Added AddTab and RemoveTab events in the PageController
+
+* Added OnCrawlingFinished event
+
 * Added "short_title" subjects
 
 * Added redirect in XenForo settings
@@ -537,6 +543,8 @@
 * Improved WebsiteEditor using DevExpress LayoutControl
 
 * Improved loading app plug-ins
+
+* Fixed issue not clearing the publish view after closing last tab
 
 * Fixed IScriptEditor issue with active edit reference
 

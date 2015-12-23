@@ -22,6 +22,10 @@ Checked items are planned for next release.
 
 ###SDK
 
+###### APP
+
+- [ ] Implement a CustomScript crawler, which crawls in already crawled content
+
 ######Content-Management-Systems
 
 - [ ] Add output link/id of created threads and/or posts
@@ -32,9 +36,7 @@ Checked items are planned for next release.
 
 ######Crawler
 
-- [ ] Implement a CustomScript crawler, which crawls in already crawled content
 
-- [x] Update missing plugins to match new interface (incl. full update of Amazon.com/.de)
 
 ######Crypter
 
