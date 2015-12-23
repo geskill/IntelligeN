@@ -310,7 +310,7 @@ type
     procedure CMSUpdate(ACMSChangeType: TPluginChangeType; AIndex: Integer; AParam: Integer);
     procedure TabChange(const Sender: IUnknown);
     procedure UpdateInternalListItemIndex;
-    procedure UpdateCMSList;
+    procedure UpdateCMSList(AClose: Boolean = False);
     function FindCMSContainer(AName: WideString): Integer;
   protected
     function GetTabSheetController: ITabSheetController;
@@ -1605,10 +1605,15 @@ begin
     CMS[I].Index := I;
 end;
 
-procedure TIPublishController.UpdateCMSList;
+procedure TIPublishController.UpdateCMSList(AClose: Boolean = False);
 begin
   if TabSheetController.IsTabActive then
-    OnUpdateCMSList.Invoke(Self);
+  begin
+    if AClose then
+      OnUpdateCMSList.Invoke(nil)
+    else
+      OnUpdateCMSList.Invoke(Self);
+  end;
 end;
 
 function TIPublishController.FindCMSContainer(AName: WideString): Integer;
@@ -1793,8 +1798,7 @@ end;
 
 destructor TIPublishController.Destroy;
 begin
-  // TODO: test this
-  UpdateCMSList;
+  UpdateCMSList(True);
 
   FPluginChangeEventHandler := nil;
   FIChange := nil;
