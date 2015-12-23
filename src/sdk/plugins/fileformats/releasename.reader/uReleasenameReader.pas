@@ -85,9 +85,7 @@ begin
           with APageController.TabSheetController[APageController.Add(ATemplateDirectory + _TemplateFileName, TemplateType)] do
           begin
             ControlController.FindControl(cReleaseName).Value := Strings[I];
-            PublishController.Active := True;
-            ResetDataChanged('', '');
-            result := TabSheetIndex;
+            Result := TabSheetIndex;
           end;
         end;
     finally

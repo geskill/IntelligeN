@@ -18,7 +18,7 @@ type
 
   Tintelligenxml1 = class(TFileFormatPlugIn)
   private const
-    TStringComponentIDEx: array [0 .. 20] of string = ('eReleaseName', '', 'ePostTitle', '', 'cobPicture', 'eTrailer', 'cobSample', 'cobNotes', 'ePassword', 'cobBitrate', 'cobEncoder', 'cobQuality', 'cobAudioSource', 'cobGenre', 'cobLanguage', '',
+    TStringComponentIDEx: array [0 .. 24] of string = ('eReleaseName', '', '', 'ePostTitle', '', '', '', 'cobPicture', 'eTrailer', 'cobSample', 'cobNotes', 'ePassword', 'cobBitrate', '', 'cobEncoder', 'cobQuality', 'cobAudioSource', 'cobGenre', 'cobLanguage', '',
       'cobVideoFormat', 'cobVideoSource', 'cobSystem', 'mNfo', 'mDescription');
     eDownloadLink = 'eDownloadLink';
   public
@@ -239,11 +239,8 @@ begin
                             end;
                         end;
                     end;
-                  ResetDataChanged(AFileName, GetName);
                   Result := TabSheetIndex;
                 end;
-
-                APageController.CallControlAligner;
               end;
           end
           else

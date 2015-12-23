@@ -783,7 +783,8 @@ type
     property ReleaseNameShort: WideString read GetReleaseNameShort;
 
     procedure Save(AFileName, AFileType: WideString);
-    procedure ResetDataChanged(AFileName, AFileType: WideString);
+    procedure Initialized(); overload;
+    procedure Initialized(AFileName, AFileType: WideString); overload;
     procedure ResetControlFocused();
 
     property TypeID: TTypeID read GetTypeID;

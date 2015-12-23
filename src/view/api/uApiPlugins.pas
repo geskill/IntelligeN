@@ -731,9 +731,7 @@ begin
               { ....... } with APageController.TabSheetController[TabIndex] do
               { ....... } begin
               { ......... } Application.ProcessMessages;
-              { ......... } ResetDataChanged(AFileName, AFileFormatPlugin.GetName);
-              { ......... } ResetControlFocused();
-              { ......... } PublishController.Active := True;
+              { ......... } Initialized(AFileName, AFileFormatPlugin.GetName);
               { ....... } end;
               { ... } except
 

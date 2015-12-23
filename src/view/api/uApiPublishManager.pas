@@ -435,7 +435,6 @@ begin
     // this musst be done here (instead of in Cleanup) because when user calls cancel, this call is not allowed
     task.Comm.Send(MSG_PUBLISH_TASK_FINISHED, [task.UniqueID, LOmniValue.AsObject]);
   finally
-
     Finish;
   end;
 end;

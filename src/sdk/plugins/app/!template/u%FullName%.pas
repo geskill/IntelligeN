@@ -16,7 +16,7 @@ uses
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Plugin system
-  uPlugInAppClass, uPlugInHTTPClasses,
+  uPlugInAppClass, uPlugInEvent, uPlugInHTTPClasses,
   // Utils,
   uPathUtils, uStringUtils, uURLUtils;
 

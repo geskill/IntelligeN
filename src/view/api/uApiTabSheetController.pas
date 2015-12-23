@@ -96,7 +96,8 @@ type
     property ReleaseNameShort: WideString read GetReleaseNameShort;
 
     procedure Save(AFileName, AFileType: WideString);
-    procedure ResetDataChanged(AFileName, AFileType: WideString);
+    procedure Initialized(); overload;
+    procedure Initialized(AFileName, AFileType: WideString); overload;
     procedure ResetControlFocused();
 
     property DataChanged: Boolean read GetDataChanged write SetDataChanged;
@@ -336,11 +337,20 @@ begin
   DataChanged := False;
 end;
 
-procedure TTabSheetController.ResetDataChanged(AFileName, AFileType: WideString);
+procedure TTabSheetController.Initialized;
+begin
+  Initialized('', '');
+end;
+
+procedure TTabSheetController.Initialized(AFileName, AFileType: WideString);
 begin
   FileName := AFileName;
   FileType := AFileType;
   DataChanged := False;
+  ResetControlFocused();
+  PublishController.Active := True;
+
+  PageController.OnAddTab.Invoke(Self);
 end;
 
 procedure TTabSheetController.ResetControlFocused;

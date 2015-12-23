@@ -215,7 +215,7 @@ end;
 
 procedure TfMain.pcMainNewTabCreate(Sender: TObject; AIndex: Integer);
 begin
-  FAddTab.Invoke(TabSheetController[AIndex]);
+  // FAddTab.Invoke(TabSheetController[AIndex]); see: TTabSheetController.Initialized
 end;
 
 procedure TfMain.cxTCViewChange(Sender: TObject);
@@ -591,7 +591,6 @@ begin
 
         Color := clWhite;
 
-        // FileName := AFileName;
         ImageIndex := Integer(ATypeID);
 
         TemplateFileName := ExtractFileName(ChangeFileExt(AFileName, ''));
@@ -630,20 +629,17 @@ begin
 
   with LNewTabSheetController do
   begin
-    DataChanged := False;
-    ResetControlFocused();
-
     with PublishController do
     begin
       OnUpdateCMSList.Add(Main.fPublish.GetUpdateCMSListEvent);
       OnUpdateCMSWebsiteList.Add(Main.fPublish.GetUpdateCMSWebsiteListEvent);
       OnUpdateCMSWebsite.Add(Main.fPublish.GetUpdateCMSWebsiteEvent);
+    end;
 
-      if not AEmpty then
-      begin
-        Active := True;
-        pcMain.OnChange(pcMain);
-      end;
+    if not AEmpty then
+    begin
+      Initialized;
+      pcMain.OnChange(pcMain);
     end;
   end;
 
