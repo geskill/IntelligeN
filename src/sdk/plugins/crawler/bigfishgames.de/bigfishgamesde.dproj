@@ -1,6 +1,6 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
-			<ProjectGuid>{9C2735D9-A6C1-4C58-AEB9-D842F86F1AC6}</ProjectGuid>
+			<ProjectGuid>{6EA97BEA-CAB6-499B-ABAF-AF8C2FC3C405}</ProjectGuid>
 			<ProjectVersion>12.0</ProjectVersion>
 			<MainSource>bigfishgamesde.dpr</MainSource>
 			<Config Condition="'$(Config)'==''">Debug</Config>
