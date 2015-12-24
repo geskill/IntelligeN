@@ -8,6 +8,8 @@ Checked items are planned for next release.
 
 - [ ] Allow to change HTTPManager implementor for a single request (settings record)
 
+- [ ] Implement BackupManager to store edited and published articles with website thread ids for later article editing
+
 - [ ] Implement non-visual "default" control that holds title of current tab (i.e. delegation for releasename or whatever)
 
 - [ ] Add custom fields in ITabSheetData that hold compiled IScript (required for WordPress custom files powered by IScript)
@@ -16,9 +18,19 @@ Checked items are planned for next release.
 
 - [ ] Add direct index based filename access (i.e. Mirror[\<Index\>].Directlink[\<Index\>].FileName[\<Index\>])
 
+- [ ] Add a website project file format to store website XML, subject+message TXT and optional credentials
+
 - [ ] Implement access for APP-plugins to add function to the IScript
 
-- [ ] Implement image resizing instead of depending on image hosts resize
+- [ ] Implement local image resizing instead of depending on image hosts resize
+
+- [ ] Implement a default path for saved XML files
+
+- [ ] Implement a priority index for websites to publish articles first on specific websites
+
+- [ ] Improve saving and loading files using default path
+
+- [ ] Improve update system to only close required IntelligeN.exe instance
 
 ###SDK
 
@@ -27,6 +39,8 @@ Checked items are planned for next release.
 - [ ] Implement a CustomScript crawler, which crawls in already crawled content
 
 ######Content-Management-Systems
+
+- [ ] Add interface in order to edit articles
 
 - [ ] Add output link/id of created threads and/or posts
 
