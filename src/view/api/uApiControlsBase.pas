@@ -14,9 +14,9 @@ type
     FValue: WideString;
   protected
     function GetValue: WideString; virtual; safecall;
-    procedure SetValue(AValue: WideString); virtual; safecall;
+    procedure SetValue(const AValue: WideString); virtual; safecall;
   public
-    constructor Create(AValue: WideString); virtual;
+    constructor Create(const AValue: WideString); virtual;
     constructor Clone(const AValueItem: IValueItem);
     destructor Destroy; override;
 
@@ -30,7 +30,7 @@ type
     function GetControlID: TControlID; safecall;
     procedure SetControlID(AControlID: TControlID); safecall;
   public
-    constructor Create(AControlID: TControlID; AValue: WideString = '');
+    constructor Create(AControlID: TControlID; const AValue: WideString = '');
     constructor Clone(const AControlData: IControlData);
     destructor Destroy; override;
 
@@ -45,11 +45,11 @@ type
 
     function GetProposedValuesCount: Integer; safecall;
   public
-    constructor Create(AControlID: TControlID; AValue: WideString = '');
+    constructor Create(AControlID: TControlID; const AValue: WideString = '');
     constructor Clone(const AControlBase: IControlBase);
     destructor Destroy; override;
 
-    procedure AddProposedValue(const ASender: WideString; AValue: WideString; ATitle: WideString); virtual; safecall;
+    procedure AddProposedValue(const ASender: WideString; const AValue: WideString; const ATitle: WideString = ''); virtual; safecall;
     function GetProposedValue(const AIndex: Integer): WideString; safecall;
     function GetProposedValueSender(const AIndex: Integer): WideString; safecall;
     function GetProposedValueTitle(const AIndex: Integer): WideString; safecall;
@@ -67,12 +67,12 @@ begin
   Result := FValue;
 end;
 
-procedure TIValueItem.SetValue(AValue: WideString);
+procedure TIValueItem.SetValue(const AValue: WideString);
 begin
   FValue := AValue;
 end;
 
-constructor TIValueItem.Create(AValue: WideString);
+constructor TIValueItem.Create(const AValue: WideString);
 begin
   inherited Create;
   FValue := AValue;
@@ -100,7 +100,7 @@ begin
   FControlID := AControlID;
 end;
 
-constructor TIControlData.Create(AControlID: TControlID; AValue: WideString = '');
+constructor TIControlData.Create(AControlID: TControlID; const AValue: WideString = '');
 begin
   inherited Create(AValue);
   FControlID := AControlID;
@@ -132,7 +132,7 @@ begin
   Result := length(FValueArray);
 end;
 
-procedure TIControlBase.AddProposedValue(const ASender: WideString; AValue, ATitle: WideString);
+procedure TIControlBase.AddProposedValue(const ASender: WideString; const AValue: WideString; const ATitle: WideString = '');
 var
   LNewIndex: Integer;
 begin
@@ -178,7 +178,7 @@ begin
   end;
 end;
 
-constructor TIControlBase.Create(AControlID: TControlID; AValue: WideString);
+constructor TIControlBase.Create(AControlID: TControlID; const AValue: WideString);
 begin
   inherited Create(AControlID, AValue);
   SetLength(FValueArray, 0);

@@ -11,14 +11,14 @@ uses
 type
   TReleasenameUtils = class
   public
-    class function IsSeries(AReleaseName: string): Boolean;
+    class function IsSeries(const AReleaseName: string): Boolean;
   end;
 
 implementation
 
 { TReleasenameUtils }
 
-class function TReleasenameUtils.IsSeries(AReleaseName: string): Boolean;
+class function TReleasenameUtils.IsSeries(const AReleaseName: string): Boolean;
 const
   expr: array [0 .. 6] of string = ('\.S(\d+)\.', '\.S(\d+)E(\d+)\.', '\.E(\d+)\.', '\.season', '\.episode', '\.serie', '\.staffel');
 var

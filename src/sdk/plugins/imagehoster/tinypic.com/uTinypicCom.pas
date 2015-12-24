@@ -20,8 +20,8 @@ type
     function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
     function GetName: WideString; override;
-    function LocalUpload(ALocalPath: WideString; out AUrl: WideString): WordBool; override;
-    function RemoteUpload(ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
+    function LocalUpload(const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
+    function RemoteUpload(const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
   end;
 
 implementation

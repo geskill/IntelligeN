@@ -30,7 +30,7 @@ type
   TThreadWorker<T: TThreadWorkData, constructor> = class(TOmniWorker)
   protected
     FData: T;
-    procedure DefaultErrorHandler(AErrorMsg: string); virtual;
+    procedure DefaultErrorHandler(const AErrorMsg: string); virtual;
     function InBlackList: Boolean;
     function Initialize: Boolean; override;
   public
@@ -96,7 +96,7 @@ end;
 
 { TThreadWorker<T> }
 
-procedure TThreadWorker<T>.DefaultErrorHandler(AErrorMsg: string);
+procedure TThreadWorker<T>.DefaultErrorHandler(const AErrorMsg: string);
 begin
   task.Invoke(
     { } procedure

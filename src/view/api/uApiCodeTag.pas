@@ -40,9 +40,9 @@ type
     property WasSelected: Boolean read FWasSelected write FWasSelected;
 
     function HasDefaultValues: Boolean;
-    procedure SetDefaultValues(ADefaultValues, ADefaultValuesDescription: string);
+    procedure SetDefaultValues(const ADefaultValues, ADefaultValuesDescription: string);
     property DefaultValues: TStringList read FDefaultValues;
-    function NameFromValue(AValue: string): string;
+    function NameFromValue(const AValue: string): string;
     function GetDefaultTextValues: TStrings;
   end;
 
@@ -69,7 +69,7 @@ begin
   Result := not(FDefaultValues.Count = 0);
 end;
 
-procedure TCodeParam.SetDefaultValues(ADefaultValues, ADefaultValuesDescription: string);
+procedure TCodeParam.SetDefaultValues(const ADefaultValues, ADefaultValuesDescription: string);
 var
   I: Integer;
 begin
@@ -90,7 +90,7 @@ begin
     end;
 end;
 
-function TCodeParam.NameFromValue(AValue: string): string;
+function TCodeParam.NameFromValue(const AValue: string): string;
 var
   I: Integer;
 begin

@@ -26,9 +26,9 @@ type
     function GetUseAccount: WordBool; safecall;
     procedure SetUseAccount(AUseAccount: WordBool); safecall;
     function GetAccountName: WideString; safecall;
-    procedure SetAccountName(AAccountName: WideString); safecall;
+    procedure SetAccountName(const AAccountName: WideString); safecall;
     function GetAccountPassword: WideString; safecall;
-    procedure SetAccountPassword(AAccountPassword: WideString); safecall;
+    procedure SetAccountPassword(const AAccountPassword: WideString); safecall;
     function GetImageHostResize: TImageHostResize; safecall;
     procedure SetImageHostResize(AImageHostResize: TImageHostResize); safecall;
   public
@@ -38,8 +38,8 @@ type
     property AccountName: WideString read GetAccountName write SetAccountName;
     property AccountPassword: WideString read GetAccountPassword write SetAccountPassword;
 
-    function LocalUpload(ALocalPath: WideString; out AUrl: WideString): WordBool; virtual; safecall; abstract;
-    function RemoteUpload(ARemoteUrl: WideString; out AUrl: WideString): WordBool; virtual; safecall; abstract;
+    function LocalUpload(const ALocalPath: WideString; out AUrl: WideString): WordBool; virtual; safecall; abstract;
+    function RemoteUpload(const ARemoteUrl: WideString; out AUrl: WideString): WordBool; virtual; safecall; abstract;
 
     property ImageHostResize: TImageHostResize read GetImageHostResize write SetImageHostResize;
   end;
@@ -63,7 +63,7 @@ begin
   Result := FAccountName;
 end;
 
-procedure TImageHosterPlugIn.SetAccountName(AAccountName: WideString);
+procedure TImageHosterPlugIn.SetAccountName(const AAccountName: WideString);
 begin
   FAccountName := AAccountName;
 end;
@@ -73,7 +73,7 @@ begin
   Result := FAccountPassword;
 end;
 
-procedure TImageHosterPlugIn.SetAccountPassword(AAccountPassword: WideString);
+procedure TImageHosterPlugIn.SetAccountPassword(const AAccountPassword: WideString);
 begin
   FAccountPassword := AAccountPassword;
 end;

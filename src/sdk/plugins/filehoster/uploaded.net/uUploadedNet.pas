@@ -27,8 +27,8 @@ type
   TUploadedNet = class(TFileHosterPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function CheckLink(AFile: WideString): TLinkInfo; override; safecall;
-    function CheckLinks(AFiles: WideString): Integer; override; safecall;
+    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
+    function CheckLinks(const AFiles: WideString): Integer; override; safecall;
   end;
 
 implementation
@@ -59,7 +59,7 @@ begin
   Result := 'Uploaded.net';
 end;
 
-function TUploadedNet.CheckLink(AFile: WideString): TLinkInfo;
+function TUploadedNet.CheckLink(const AFile: WideString): TLinkInfo;
 var
   LinkInfo: TLinkInfo;
 
@@ -104,7 +104,7 @@ begin
   Result := LinkInfo;
 end;
 
-function TUploadedNet.CheckLinks(AFiles: WideString): Integer;
+function TUploadedNet.CheckLinks(const AFiles: WideString): Integer;
 
   function APIResultToStatus(AValue: string): TLinkStatus;
   begin

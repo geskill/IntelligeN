@@ -55,13 +55,13 @@ type
 
     class procedure LoadPlugin(const ARelativPluginPath: string; APluginProc: TPluginProc; AErrorProc: TPluginErrorProc = nil);
 
-    class procedure LoadCAPTCHAPlugin(ARelativPluginPath: string; ACAPTCHAPluginProc: TCAPTCHAPluginProc; AErrorProc: TPluginErrorProc = nil);
-    class procedure LoadCMSPlugin(ARelativPluginPath: string; ACMSPluginProc: TCMSPluginProc; AErrorProc: TPluginErrorProc = nil);
-    class procedure LoadCrawlerPlugin(ARelativPluginPath: string; ACrawlerPluginProc: TCrawlerPluginProc; AErrorProc: TPluginErrorProc = nil);
-    class procedure LoadCrypterPlugin(ARelativPluginPath: string; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TPluginErrorProc = nil);
-    class procedure LoadFileHosterPlugin(ARelativPluginPath: string; AFileHosterPluginProc: TFileHosterPluginProc; AErrorProc: TPluginErrorProc = nil);
-    class procedure LoadFileFormatsPlugin(ARelativPluginPath: string; AFileFormatPluginProc: TFileFormatPluginProc; AErrorProc: TPluginErrorProc = nil);
-    class procedure LoadImageHosterPlugin(ARelativPluginPath: string; AImageHosterPluginProc: TImageHosterPluginProc; AErrorProc: TPluginErrorProc = nil);
+    class procedure LoadCAPTCHAPlugin(const ARelativPluginPath: string; ACAPTCHAPluginProc: TCAPTCHAPluginProc; AErrorProc: TPluginErrorProc = nil);
+    class procedure LoadCMSPlugin(const ARelativPluginPath: string; ACMSPluginProc: TCMSPluginProc; AErrorProc: TPluginErrorProc = nil);
+    class procedure LoadCrawlerPlugin(const ARelativPluginPath: string; ACrawlerPluginProc: TCrawlerPluginProc; AErrorProc: TPluginErrorProc = nil);
+    class procedure LoadCrypterPlugin(const ARelativPluginPath: string; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TPluginErrorProc = nil);
+    class procedure LoadFileHosterPlugin(const ARelativPluginPath: string; AFileHosterPluginProc: TFileHosterPluginProc; AErrorProc: TPluginErrorProc = nil);
+    class procedure LoadFileFormatsPlugin(const ARelativPluginPath: string; AFileFormatPluginProc: TFileFormatPluginProc; AErrorProc: TPluginErrorProc = nil);
+    class procedure LoadImageHosterPlugin(const ARelativPluginPath: string; AImageHosterPluginProc: TImageHosterPluginProc; AErrorProc: TPluginErrorProc = nil);
   public
     class function AppLoad(App: TAppCollectionItem; const AAppController: IAppController): Boolean;
     class function AppUnLoad(App: TAppCollectionItem): Boolean;
@@ -69,14 +69,14 @@ type
     class function CAPTCHAExec(const ACAPTCHAPluginPath: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString;
       AErrorProc: TPluginErrorProc = nil): WordBool;
 
-    class function CMSDefaultCharset(ARelativPluginPath: string): string;
-    class function CMSBelongsTo(ARelativPluginPath, AWebsiteSourceCode: string): Boolean;
-    class function CMSShowWebsiteSettingsEditor(ARelativPluginPath: string; ACMSWebsite: TCMSWebsitesCollectionItem; const AAppController: IAppController): Boolean;
+    class function CMSDefaultCharset(const ARelativPluginPath: string): string;
+    class function CMSBelongsTo(const ARelativPluginPath, AWebsiteSourceCode: string): Boolean;
+    class function CMSShowWebsiteSettingsEditor(const ARelativPluginPath: string; ACMSWebsite: TCMSWebsitesCollectionItem; const AAppController: IAppController): Boolean;
 
     class function GetSaveFileFormats: TStrings;
     class function GetLoadFileFormats: TStrings;
-    class procedure SaveFile(AFileFormats: TPlugInCollectionItem; AFileName, ATemplateFileName: string; const ATabSheetController: ITabSheetController);
-    class procedure LoadFile(AFileName: string; const APageController: IPageController);
+    class procedure SaveFile(AFileFormats: TPlugInCollectionItem; const AFileName, ATemplateFileName: string; const ATabSheetController: ITabSheetController);
+    class procedure LoadFile(const AFileName: string; const APageController: IPageController);
   end;
 
   TApiThreadedPlugin = class(TPluginBasic)
@@ -84,7 +84,7 @@ type
     FTask: IOmniTask;
     FErrorHandler: TPluginErrorProc;
   protected
-    procedure DefaultInternalErrorHandler(AErrorMsg: string);
+    procedure DefaultInternalErrorHandler(const AErrorMsg: string);
 
     function DefaultCAPTCHAInputHandler(const AWebsite: WideString; const ASubject: WideString; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString): WordBool; safecall;
     function DefaultIntelligentPostingHelperHandler(const AWebsite: WideString; const ASubject: WideString; var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool; safecall;
@@ -95,14 +95,14 @@ type
     constructor Create(const ATask: IOmniTask; AErrorHandler: TPluginErrorProc = nil);
     destructor Destroy(); override;
 
-    function CMSExec(const APublishItem: IPublishItem; ACAPTCHAInput: TCAPTCHAInput = nil; AIntelligentPostingHandler: TIntelligentPostingHelper = nil): Boolean;
+    function AddArticle(const APublishItem: IPublishItem; ACAPTCHAInput: TCAPTCHAInput = nil; AIntelligentPostingHandler: TIntelligentPostingHelper = nil): Boolean;
 
     function CrawlerExec(ACrawler: TCrawlerCollectionItem; ATypeID: TTypeID; const AControlController: IControlControllerBase): Boolean;
 
     function CrypterAddFolder(ACrypter: TCrypterCollectionItem; const AMirrorContainer: IDirectlinkContainer; const AControlController: IControlControllerBase; out AFolderInfo: TCrypterFolderInfo): Boolean;
     function CrypterGetFolder(ACrypter: TCrypterCollectionItem; AFolderIdentifier: string; out AFolderInfo: TCrypterFolderInfo): Boolean;
 
-    function FileHosterCheckFiles(AFileHoster: TPlugInCollectionItem; ALinks: string; out ALinksInfo: TLinksInfo): Boolean;
+    function FileHosterCheckFiles(AFileHoster: TPlugInCollectionItem; const ALinks: string; out ALinksInfo: TLinksInfo): Boolean;
 
     function ImageHosterLocalUpload(AImageHoster: TImageHosterCollectionItem; ALocalPath: string; out AUrl: WideString; ACAPTCHAInput: TCAPTCHAInput = nil): Boolean;
     function ImageHosterRemoteUpload(AImageHoster: TImageHosterCollectionItem; ARemoteUrl: string; out AUrl: WideString; ACAPTCHAInput: TCAPTCHAInput = nil): Boolean;
@@ -297,7 +297,7 @@ begin
     { } end, True, AErrorProc);
 end;
 
-class procedure TPluginBasic.LoadCAPTCHAPlugin(ARelativPluginPath: string; ACAPTCHAPluginProc: TCAPTCHAPluginProc; AErrorProc: TPluginErrorProc = nil);
+class procedure TPluginBasic.LoadCAPTCHAPlugin(const ARelativPluginPath: string; ACAPTCHAPluginProc: TCAPTCHAPluginProc; AErrorProc: TPluginErrorProc = nil);
 begin
   TPluginBasic.LoadPlugin(ARelativPluginPath,
     { } procedure(var APlugin: IPlugIn)
@@ -319,7 +319,7 @@ begin
     { } end, AErrorProc);
 end;
 
-class procedure TPluginBasic.LoadCMSPlugin(ARelativPluginPath: string; ACMSPluginProc: TCMSPluginProc; AErrorProc: TPluginErrorProc = nil);
+class procedure TPluginBasic.LoadCMSPlugin(const ARelativPluginPath: string; ACMSPluginProc: TCMSPluginProc; AErrorProc: TPluginErrorProc = nil);
 begin
   TPluginBasic.LoadPlugin(ARelativPluginPath,
     { } procedure(var APlugin: IPlugIn)
@@ -341,7 +341,7 @@ begin
     { } end, AErrorProc);
 end;
 
-class procedure TPluginBasic.LoadCrawlerPlugin(ARelativPluginPath: string; ACrawlerPluginProc: TCrawlerPluginProc; AErrorProc: TPluginErrorProc = nil);
+class procedure TPluginBasic.LoadCrawlerPlugin(const ARelativPluginPath: string; ACrawlerPluginProc: TCrawlerPluginProc; AErrorProc: TPluginErrorProc = nil);
 begin
   TPluginBasic.LoadPlugin(ARelativPluginPath,
     { } procedure(var APlugin: IPlugIn)
@@ -363,7 +363,7 @@ begin
     { } end, AErrorProc);
 end;
 
-class procedure TPluginBasic.LoadCrypterPlugin(ARelativPluginPath: string; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TPluginErrorProc = nil);
+class procedure TPluginBasic.LoadCrypterPlugin(const ARelativPluginPath: string; ACrypterPluginProc: TCrypterPluginProc; AErrorProc: TPluginErrorProc = nil);
 begin
   TPluginBasic.LoadPlugin(ARelativPluginPath,
     { } procedure(var APlugin: IPlugIn)
@@ -385,7 +385,7 @@ begin
     { } end, AErrorProc);
 end;
 
-class procedure TPluginBasic.LoadFileHosterPlugin(ARelativPluginPath: string; AFileHosterPluginProc: TFileHosterPluginProc; AErrorProc: TPluginErrorProc = nil);
+class procedure TPluginBasic.LoadFileHosterPlugin(const ARelativPluginPath: string; AFileHosterPluginProc: TFileHosterPluginProc; AErrorProc: TPluginErrorProc = nil);
 begin
   TPluginBasic.LoadPlugin(ARelativPluginPath,
     { } procedure(var APlugin: IPlugIn)
@@ -407,7 +407,7 @@ begin
     { } end, AErrorProc);
 end;
 
-class procedure TPluginBasic.LoadFileFormatsPlugin(ARelativPluginPath: string; AFileFormatPluginProc: TFileFormatPluginProc; AErrorProc: TPluginErrorProc = nil);
+class procedure TPluginBasic.LoadFileFormatsPlugin(const ARelativPluginPath: string; AFileFormatPluginProc: TFileFormatPluginProc; AErrorProc: TPluginErrorProc = nil);
 begin
   TPluginBasic.LoadPlugin(ARelativPluginPath,
     { } procedure(var APlugin: IPlugIn)
@@ -429,7 +429,7 @@ begin
     { } end, AErrorProc);
 end;
 
-class procedure TPluginBasic.LoadImageHosterPlugin(ARelativPluginPath: string; AImageHosterPluginProc: TImageHosterPluginProc; AErrorProc: TPluginErrorProc = nil);
+class procedure TPluginBasic.LoadImageHosterPlugin(const ARelativPluginPath: string; AImageHosterPluginProc: TImageHosterPluginProc; AErrorProc: TPluginErrorProc = nil);
 begin
   TPluginBasic.LoadPlugin(ARelativPluginPath,
     { } procedure(var APlugin: IPlugIn)
@@ -591,7 +591,7 @@ begin
   Result := LResult;
 end;
 
-class function TPluginBasic.CMSDefaultCharset(ARelativPluginPath: string): string;
+class function TPluginBasic.CMSDefaultCharset(const ARelativPluginPath: string): string;
 var
   LResult: string;
 begin
@@ -604,7 +604,7 @@ begin
   Result := LResult;
 end;
 
-class function TPluginBasic.CMSBelongsTo(ARelativPluginPath, AWebsiteSourceCode: string): Boolean;
+class function TPluginBasic.CMSBelongsTo(const ARelativPluginPath, AWebsiteSourceCode: string): Boolean;
 var
   LResult: Boolean;
 begin
@@ -617,7 +617,7 @@ begin
   Result := LResult;
 end;
 
-class function TPluginBasic.CMSShowWebsiteSettingsEditor(ARelativPluginPath: string; ACMSWebsite: TCMSWebsitesCollectionItem; const AAppController: IAppController): Boolean;
+class function TPluginBasic.CMSShowWebsiteSettingsEditor(const ARelativPluginPath: string; ACMSWebsite: TCMSWebsitesCollectionItem; const AAppController: IAppController): Boolean;
 var
   LResult: Boolean;
 begin
@@ -695,7 +695,7 @@ begin
   Result := LResult;
 end;
 
-class procedure TPluginBasic.SaveFile(AFileFormats: TPlugInCollectionItem; AFileName, ATemplateFileName: string; const ATabSheetController: ITabSheetController);
+class procedure TPluginBasic.SaveFile(AFileFormats: TPlugInCollectionItem; const AFileName, ATemplateFileName: string; const ATabSheetController: ITabSheetController);
 begin
   TPluginBasic.LoadFileFormatsPlugin(AFileFormats.Path,
     { } procedure(var AFileFormatPlugin: IFileFormatPlugIn)
@@ -705,7 +705,7 @@ begin
     { } end);
 end;
 
-class procedure TPluginBasic.LoadFile(AFileName: string; const APageController: IPageController);
+class procedure TPluginBasic.LoadFile(const AFileName: string; const APageController: IPageController);
 var
   LFileFormatCollectionIndex, TabIndex: Integer;
   Stop: Boolean;
@@ -740,7 +740,7 @@ begin
               { } end);
 end;
 
-procedure TApiThreadedPlugin.DefaultInternalErrorHandler(AErrorMsg: string);
+procedure TApiThreadedPlugin.DefaultInternalErrorHandler(const AErrorMsg: string);
 begin
   FTask.Invoke(
     { } procedure
@@ -917,7 +917,7 @@ begin
   inherited Destroy;
 end;
 
-function TApiThreadedPlugin.CMSExec(const APublishItem: IPublishItem; ACAPTCHAInput: TCAPTCHAInput = nil; AIntelligentPostingHandler: TIntelligentPostingHelper = nil): Boolean;
+function TApiThreadedPlugin.AddArticle(const APublishItem: IPublishItem; ACAPTCHAInput: TCAPTCHAInput = nil; AIntelligentPostingHandler: TIntelligentPostingHelper = nil): Boolean;
 var
   LResult, LHighException: WordBool;
 begin
@@ -957,7 +957,7 @@ begin
     { ... } Data := APublishItem.Data;
 
     { ... } try
-    { ..... } LResult := Exec;
+    { ..... } LResult := AddArticle;
     { ... } except
     { ..... } LHighException := True;
     { ... } end;
@@ -1140,7 +1140,7 @@ begin
   Result := LResult;
 end;
 
-function TApiThreadedPlugin.FileHosterCheckFiles(AFileHoster: TPlugInCollectionItem; ALinks: string; out ALinksInfo: TLinksInfo): Boolean;
+function TApiThreadedPlugin.FileHosterCheckFiles(AFileHoster: TPlugInCollectionItem; const ALinks: string; out ALinksInfo: TLinksInfo): Boolean;
 var
   LResult, LHighException: WordBool;
   LLinksInfo: TLinksInfo;

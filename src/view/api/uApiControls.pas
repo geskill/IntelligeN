@@ -52,23 +52,23 @@ type
     // Internal
     function GetControl: TcxCustomTextEdit; virtual; abstract;
     function GetControlValue: WideString; virtual; abstract;
-    procedure SetControlValue(AValue: WideString); virtual; abstract;
+    procedure SetControlValue(const AValue: WideString); virtual; abstract;
     function GetControlName: WideString;
-    procedure SetControlName(AName: WideString); virtual;
+    procedure SetControlName(const AName: WideString); virtual;
     function GetControlTitle: WideString;
-    procedure SetControlTitle(ATitle: WideString); virtual;
+    procedure SetControlTitle(const ATitle: WideString); virtual;
     function GetControlLeft: Integer;
-    procedure SetControlLeft(ALeft: Integer);
+    procedure SetControlLeft(const ALeft: Integer);
     function GetControlTop: Integer;
-    procedure SetControlTop(ATop: Integer);
+    procedure SetControlTop(const ATop: Integer);
     function GetControlWidth: Integer;
-    procedure SetControlWidth(AWidth: Integer);
+    procedure SetControlWidth(const AWidth: Integer);
     function GetControlHeight: Integer;
-    procedure SetControlHeight(AHeight: Integer);
+    procedure SetControlHeight(const AHeight: Integer);
     function GetControlHint: WideString;
-    procedure SetControlHint(AHint: WideString);
+    procedure SetControlHint(const AHint: WideString);
     function GetControlFocus: Boolean; virtual;
-    procedure SetControlFocus(AFocus: Boolean); virtual;
+    procedure SetControlFocus(const AFocus: Boolean); virtual;
     procedure ControlOnDrop(AText: PWideChar);
     procedure ControlOnChange(ASender: TObject); virtual;
     procedure ControlOnEnter(ASender: TObject); virtual;
@@ -122,7 +122,7 @@ type
     // Internal
     function GetControl: TcxCustomTextEdit; override;
     function GetControlValue: WideString; override;
-    procedure SetControlValue(AValue: WideString); override;
+    procedure SetControlValue(const AValue: WideString); override;
   public
     constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
     destructor Destroy; override;
@@ -137,10 +137,10 @@ type
     // Internal
     function GetDropDownRows: Integer;
     procedure SetDropDownRows(ADropDownRows: Integer);
-    procedure SetList(AList: WideString); virtual;
+    procedure SetList(const AList: WideString); virtual;
     function GetControl: TcxCustomTextEdit; override;
     function GetControlValue: WideString; override;
-    procedure SetControlValue(AValue: WideString); override;
+    procedure SetControlValue(const AValue: WideString); override;
     procedure LoadDefaultConfiguration; override;
   public
     constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
@@ -152,14 +152,14 @@ type
   TIControlComboBoxList = class(TIControlComboBox, IControlComboBoxList)
   protected
     // Internal
-    procedure SetControlValue(AValue: WideString); override;
+    procedure SetControlValue(const AValue: WideString); override;
   public
     constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIControlCheckComboBox = class(TIControlBasic, IControlCheckComboBox)
   private
-    function InternalIndexOf(AStr: string): Integer;
+    function InternalIndexOf(const AStr: string): Integer;
   protected
     // GUI
     FCheckComboBox: TcxCheckComboBox;
@@ -167,10 +167,10 @@ type
     function GetDropDownRows: Integer;
     procedure SetDropDownRows(ADropDownRows: Integer);
     function GetList: WideString;
-    procedure SetList(AList: WideString); virtual;
+    procedure SetList(const AList: WideString); virtual;
     function GetControl: TcxCustomTextEdit; override;
     function GetControlValue: WideString; override;
-    procedure SetControlValue(AValue: WideString); override;
+    procedure SetControlValue(const AValue: WideString); override;
     procedure LoadDefaultConfiguration; override;
   public
     constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
@@ -186,7 +186,7 @@ type
     // Internal
     function GetControl: TcxCustomTextEdit; override;
     function GetControlValue: WideString; override;
-    procedure SetControlValue(AValue: WideString); override;
+    procedure SetControlValue(const AValue: WideString); override;
   public
     constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
     destructor Destroy; override;
@@ -199,7 +199,7 @@ type
     // Internal
     function GetControl: TcxCustomTextEdit; override;
     function GetControlValue: WideString; override;
-    procedure SetControlValue(AValue: WideString); override;
+    procedure SetControlValue(const AValue: WideString); override;
   public
     constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
     destructor Destroy; override;
@@ -259,9 +259,9 @@ type
     function GetName: WideString; virtual; safecall;
     function GetOriginalValue: WideString; virtual; safecall;
     function GetErrorMsg: WideString; virtual; safecall;
-    procedure SetErrorMsg(AErrorMsg: WideString); virtual; safecall;
+    procedure SetErrorMsg(const AErrorMsg: WideString); virtual; safecall;
   public
-    constructor Create(AName, AOriginalValue: WideString; AValue: WideString = ''); reintroduce;
+    constructor Create(const AName, AOriginalValue: WideString; const AValue: WideString = ''); reintroduce;
     constructor Clone(const APictureMirrorData: IPictureMirrorData);
     destructor Destroy; override;
 
@@ -283,14 +283,14 @@ type
     function GetPicture: IPicture;
     procedure SetPicture(APicture: IPicture);
     function GetOriginalValue: WideString; override; safecall;
-    procedure SetValue(AValue: WideString); override; safecall;
-    procedure SetErrorMsg(AErrorMsg: WideString); override; safecall;
+    procedure SetValue(const AValue: WideString); override; safecall;
+    procedure SetErrorMsg(const AErrorMsg: WideString); override; safecall;
     procedure SetHint;
     procedure ResetErrorMsgAndValue();
     procedure DrawIconRectangle();
     procedure DrawStatusRectangle();
   public
-    constructor Create(const AOwner: TWinControl; APicture: IPicture; AImageHosterName: WideString); reintroduce;
+    constructor Create(const AOwner: TWinControl; APicture: IPicture; const AImageHosterName: WideString); reintroduce;
     destructor Destroy; override;
 
     property Picture: IPicture read GetPicture write SetPicture;
@@ -299,7 +299,7 @@ type
     property Value: WideString read GetValue write SetValue;
     property ErrorMsg: WideString read GetErrorMsg write SetErrorMsg;
 
-    procedure LocalUpload(ALocalPath: WideString);
+    procedure LocalUpload(const ALocalPath: WideString);
     procedure RemoteUpload;
   end;
 
@@ -322,7 +322,7 @@ type
     // GUI
     procedure FPopupMenuPopup(Sender: TObject); override;
     // Internal
-    procedure SetControlTitle(ATitle: WideString); override;
+    procedure SetControlTitle(const ATitle: WideString); override;
   private
     // Logic
     FPictureArrayLock: TOmniMREW;
@@ -334,7 +334,7 @@ type
     procedure SaveImage; overload;
     procedure SaveImage(AMemoryStream: TMemoryStream); overload;
 
-    procedure HandleProposedValue(AIndex: Integer; AValue: WideString);
+    procedure HandleProposedValue(AIndex: Integer; const AValue: WideString);
     procedure SetValuePictureFromDownload(AIndex: Integer; AMemoryStream: TMemoryStream); overload;
   protected
     function GetValuePicture(AIndex: Integer): TPictureInfo; safecall;
@@ -343,14 +343,14 @@ type
     function GetMirror(const IndexOrName: OleVariant): IPictureMirror; safecall;
     function GetMirrorCount: Integer; safecall;
 
-    function AddMirror(AName: WideString): Integer; safecall;
+    function AddMirror(const AName: WideString): Integer; safecall;
     function RemoveMirror(AIndex: Integer): WordBool; safecall;
   public
     constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
     destructor Destroy; override;
 
     // Base
-    procedure AddProposedValue(const ASender: WideString; AValue: WideString; ATitle: WideString); override; safecall;
+    procedure AddProposedValue(const ASender: WideString; const AValue: WideString; const ATitle: WideString = ''); override; safecall;
 
     // Additional
     procedure RemoteUpload(const AAfterCrawling: WordBool = False); safecall;
@@ -533,7 +533,7 @@ begin
   Result := copy(FPanel.Name, 2);
 end;
 
-procedure TIControlBasic.SetControlName(AName: WideString);
+procedure TIControlBasic.SetControlName(const AName: WideString);
 begin
   with FPanel do
   begin
@@ -548,7 +548,7 @@ begin
   Result := copy(FTitleLabel.Caption, 1, length(FTitleLabel.Caption) - 1);
 end;
 
-procedure TIControlBasic.SetControlTitle(ATitle: WideString);
+procedure TIControlBasic.SetControlTitle(const ATitle: WideString);
 begin
   with FTitleLabel do
   begin
@@ -563,7 +563,7 @@ begin
   Result := FPanel.Left;
 end;
 
-procedure TIControlBasic.SetControlLeft(ALeft: Integer);
+procedure TIControlBasic.SetControlLeft(const ALeft: Integer);
 begin
   FPanel.Left := ALeft;
 end;
@@ -573,7 +573,7 @@ begin
   Result := FPanel.Top;
 end;
 
-procedure TIControlBasic.SetControlTop(ATop: Integer);
+procedure TIControlBasic.SetControlTop(const ATop: Integer);
 begin
   FPanel.Top := ATop;
 end;
@@ -583,7 +583,7 @@ begin
   Result := FPanel.Width;
 end;
 
-procedure TIControlBasic.SetControlWidth(AWidth: Integer);
+procedure TIControlBasic.SetControlWidth(const AWidth: Integer);
 begin
   FPanel.Width := AWidth;
 end;
@@ -593,7 +593,7 @@ begin
   Result := FPanel.Height;
 end;
 
-procedure TIControlBasic.SetControlHeight(AHeight: Integer);
+procedure TIControlBasic.SetControlHeight(const AHeight: Integer);
 begin
   FPanel.Height := AHeight;
 end;
@@ -603,7 +603,7 @@ begin
   Result := FTitleLabel.Hint;
 end;
 
-procedure TIControlBasic.SetControlHint(AHint: WideString);
+procedure TIControlBasic.SetControlHint(const AHint: WideString);
 begin
   FTitleLabel.Hint := AHint;
 end;
@@ -613,7 +613,7 @@ begin
   Result := GetControl.Focused;
 end;
 
-procedure TIControlBasic.SetControlFocus(AFocus: Boolean);
+procedure TIControlBasic.SetControlFocus(const AFocus: Boolean);
 begin
   if AFocus and GetControl.CanFocusEx then
     GetControl.SetFocus;
@@ -795,7 +795,7 @@ begin
   Result := FEdit.Text;
 end;
 
-procedure TIControlEdit.SetControlValue(AValue: WideString);
+procedure TIControlEdit.SetControlValue(const AValue: WideString);
 begin
   FEdit.Text := AValue;
 end;
@@ -859,7 +859,7 @@ begin
   FComboBox.Properties.DropDownRows := ADropDownRows;
 end;
 
-procedure TIControlComboBox.SetList(AList: WideString);
+procedure TIControlComboBox.SetList(const AList: WideString);
 begin
   FComboBox.Properties.Items.Text := AList;
 end;
@@ -874,7 +874,7 @@ begin
   Result := FComboBox.Text;
 end;
 
-procedure TIControlComboBox.SetControlValue(AValue: WideString);
+procedure TIControlComboBox.SetControlValue(const AValue: WideString);
 begin
   FComboBox.Text := AValue;
 end;
@@ -935,7 +935,7 @@ end;
 { ****************************************************************************** }
 {$REGION 'TIControlComboBoxList'}
 
-procedure TIControlComboBoxList.SetControlValue(AValue: WideString);
+procedure TIControlComboBoxList.SetControlValue(const AValue: WideString);
 begin
   inherited SetControlValue(SettingsManager.Settings.Controls.GetCustomisedComponentValue(ControlID, TypeID, AValue));
 end;
@@ -966,7 +966,7 @@ end;
 { ****************************************************************************** }
 {$REGION 'TIControlCheckComboBox'}
 
-function TIControlCheckComboBox.InternalIndexOf(AStr: string): Integer;
+function TIControlCheckComboBox.InternalIndexOf(const AStr: string): Integer;
 var
   _Index, _Count: Integer;
   _Found: Boolean;
@@ -1012,7 +1012,7 @@ begin
     end;
 end;
 
-procedure TIControlCheckComboBox.SetList(AList: WideString);
+procedure TIControlCheckComboBox.SetList(const AList: WideString);
 var
   I: Integer;
 begin
@@ -1042,7 +1042,7 @@ begin
   Result := FCheckComboBox.Text;
 end;
 
-procedure TIControlCheckComboBox.SetControlValue(AValue: WideString);
+procedure TIControlCheckComboBox.SetControlValue(const AValue: WideString);
 var
   I, findex: Integer;
 begin
@@ -1129,7 +1129,7 @@ begin
   Result := FDateEdit.Text;
 end;
 
-procedure TIControlDateEdit.SetControlValue(AValue: WideString);
+procedure TIControlDateEdit.SetControlValue(const AValue: WideString);
 var
   FormatSettings: TFormatSettings;
 begin
@@ -1195,7 +1195,7 @@ begin
     Result := FMycxRichEdit.Text;
 end;
 
-procedure TIControlRichEdit.SetControlValue(AValue: WideString);
+procedure TIControlRichEdit.SetControlValue(const AValue: WideString);
 begin
   FMycxRichEdit.Lines.Text := AValue;
 end;
@@ -1374,12 +1374,12 @@ begin
   Result := FErrorMsg;
 end;
 
-procedure TPictureMirrorData.SetErrorMsg(AErrorMsg: WideString);
+procedure TPictureMirrorData.SetErrorMsg(const AErrorMsg: WideString);
 begin
   FErrorMsg := AErrorMsg;
 end;
 
-constructor TPictureMirrorData.Create(AName, AOriginalValue: WideString; AValue: WideString = '');
+constructor TPictureMirrorData.Create(const AName, AOriginalValue: WideString; const AValue: WideString = '');
 begin
   inherited Create(cPicture, AValue);
   FName := AName;
@@ -1427,7 +1427,7 @@ begin
   Result := FPicture.Value;
 end;
 
-procedure TPictureMirror.SetValue(AValue: WideString);
+procedure TPictureMirror.SetValue(const AValue: WideString);
 begin
   inherited SetValue(AValue);
 
@@ -1438,7 +1438,7 @@ begin
   SetHint;
 end;
 
-procedure TPictureMirror.SetErrorMsg(AErrorMsg: WideString);
+procedure TPictureMirror.SetErrorMsg(const AErrorMsg: WideString);
 begin
   inherited SetErrorMsg(AErrorMsg);
   SetHint;
@@ -1486,7 +1486,7 @@ begin
   end;
 end;
 
-constructor TPictureMirror.Create(const AOwner: TWinControl; APicture: IPicture; AImageHosterName: WideString);
+constructor TPictureMirror.Create(const AOwner: TWinControl; APicture: IPicture; const AImageHosterName: WideString);
 begin
   inherited Create(AImageHosterName, APicture.Value);
 
@@ -1517,7 +1517,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TPictureMirror.LocalUpload(ALocalPath: WideString);
+procedure TPictureMirror.LocalUpload(const ALocalPath: WideString);
 begin
   FPicture.ControlController.TabSheetController.PageController.ImageHosterManager.AddLocalUploadJob(Self, ALocalPath);
 end;
@@ -1580,7 +1580,7 @@ begin
   FmiVisitImage.Enabled := not IsEmpty;
 end;
 
-procedure TIPicture.SetControlTitle(ATitle: WideString);
+procedure TIPicture.SetControlTitle(const ATitle: WideString);
 begin
   inherited SetControlTitle(ATitle);
 
@@ -1701,7 +1701,7 @@ begin
     end;
 end;
 
-procedure TIPicture.HandleProposedValue(AIndex: Integer; AValue: WideString);
+procedure TIPicture.HandleProposedValue(AIndex: Integer; const AValue: WideString);
 var
   LMemoryStream: TMemoryStream;
   LCookies: WideString;
@@ -1796,7 +1796,7 @@ begin
   Result := FMirrorList.Count;
 end;
 
-function TIPicture.AddMirror(AName: WideString): Integer;
+function TIPicture.AddMirror(const AName: WideString): Integer;
 var
   LPictureMirror: IPictureMirror;
   LNewMenuItem: TdxBarButton;
@@ -1981,7 +1981,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TIPicture.AddProposedValue(const ASender: WideString; AValue: WideString; ATitle: WideString);
+procedure TIPicture.AddProposedValue(const ASender: WideString; const AValue: WideString; const ATitle: WideString = '');
 var
   LProposedValueCount: Integer;
 begin

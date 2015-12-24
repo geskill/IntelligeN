@@ -31,7 +31,7 @@ type
     function GetReadTimeout: Integer; safecall;
     procedure SetReadTimeout(AReadTimeout: Integer); safecall;
     function GetErrorMsg: WideString; safecall;
-    procedure SetErrorMsg(AErrorMsg: WideString); safecall;
+    procedure SetErrorMsg(const AErrorMsg: WideString); safecall;
 
     function GetName: WideString; safecall;
     function GetType: TPlugInType; safecall;
@@ -47,15 +47,15 @@ type
   ICAPTCHAPlugIn = interface(IPlugIn)
     ['{02A910AE-7312-4D09-8194-61000E6F63D0}']
     function GetCAPTCHA: WideString; safecall;
-    procedure SetCAPTCHA(ACAPTCHA: WideString); safecall;
+    procedure SetCAPTCHA(const ACAPTCHA: WideString); safecall;
     function GetCAPTCHAType: TCAPTCHAType; safecall;
     procedure SetCAPTCHAType(ACAPTCHAType: TCAPTCHAType); safecall;
     function GetCAPTCHAName: WideString; safecall;
-    procedure SetCAPTCHAName(ACAPTCHAName: WideString); safecall;
+    procedure SetCAPTCHAName(const ACAPTCHAName: WideString); safecall;
     function GetCAPTCHAResult: WideString; safecall;
-    procedure SetCAPTCHAResult(ACAPTCHAResult: WideString); safecall;
+    procedure SetCAPTCHAResult(const ACAPTCHAResult: WideString); safecall;
     function GetCookies: WideString; safecall;
-    procedure SetCookies(ACookies: WideString); safecall;
+    procedure SetCookies(const ACookies: WideString); safecall;
 
     property CAPTCHA: WideString read GetCAPTCHA write SetCAPTCHA;
     property CAPTCHAType: TCAPTCHAType read GetCAPTCHAType write SetCAPTCHAType;
@@ -69,19 +69,19 @@ type
   ICMSPlugIn = interface(IPlugIn)
     ['{7ABEB7A9-89E9-4BDB-B81A-CAE6FAE42C16}']
     function GetAccountName: WideString; safecall;
-    procedure SetAccountName(AAccountName: WideString); safecall;
+    procedure SetAccountName(const AAccountName: WideString); safecall;
     function GetAccountPassword: WideString; safecall;
-    procedure SetAccountPassword(AAccountPassword: WideString); safecall;
+    procedure SetAccountPassword(const AAccountPassword: WideString); safecall;
     function GetSettingsFileName: WideString; safecall;
-    procedure SetSettingsFileName(ASettingsFileName: WideString); safecall;
+    procedure SetSettingsFileName(const ASettingsFileName: WideString); safecall;
     function GetSubject: WideString; safecall;
-    procedure SetSubject(ASubject: WideString); safecall;
+    procedure SetSubject(const ASubject: WideString); safecall;
     function GetTags: WideString; safecall;
-    procedure SetTags(ATags: WideString); safecall;
+    procedure SetTags(const ATags: WideString); safecall;
     function GetMessage: WideString; safecall;
-    procedure SetMessage(AMessage: WideString); safecall;
+    procedure SetMessage(const AMessage: WideString); safecall;
     function GetWebsite: WideString; safecall;
-    procedure SetWebsite(AWebsite: WideString); safecall;
+    procedure SetWebsite(const AWebsite: WideString); safecall;
     function GetData: ITabSheetData; safecall;
     procedure SetData(const AData: ITabSheetData); safecall;
 
@@ -106,11 +106,15 @@ type
 
     function CMSType: TCMSType; safecall;
     function DefaultCharset: WideString; safecall;
-    function BelongsTo(AWebsiteSourceCode: WideString): WordBool; safecall;
+    function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; safecall;
     function GetIDs: Integer; safecall;
     function ReadID(AIndex: Integer): TIDInfo; safecall;
     function Login(out ARequestID: Double): Boolean; safecall;
-    function Exec: WordBool; safecall;
+
+    function AddArticle(): WordBool; safecall;
+    function EditArticle(): WordBool; safecall;
+    function GetArticle(out AArticle: WideString): WordBool; safecall;
+
     function ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEditor): WordBool; safecall;
   end;
 
@@ -119,9 +123,9 @@ type
     function GetUseAccount: WordBool; safecall;
     procedure SetUseAccount(AUseAccount: WordBool); safecall;
     function GetAccountName: WideString; safecall;
-    procedure SetAccountName(AAccountName: WideString); safecall;
+    procedure SetAccountName(const AAccountName: WideString); safecall;
     function GetAccountPassword: WideString; safecall;
-    procedure SetAccountPassword(AAccountPassword: WideString); safecall;
+    procedure SetAccountPassword(const AAccountPassword: WideString); safecall;
 
     function GetAvailableTypeIDs: Integer; safecall;
     function GetAvailableControlIDs(const ATypeID: Integer): Integer; safecall;
@@ -141,24 +145,24 @@ type
     function GetUseAccount: WordBool; safecall;
     procedure SetUseAccount(AUseAccount: WordBool); safecall;
     function GetAccountName: WideString; safecall;
-    procedure SetAccountName(AAccountName: WideString); safecall;
+    procedure SetAccountName(const AAccountName: WideString); safecall;
     function GetAccountPassword: WideString; safecall;
-    procedure SetAccountPassword(AAccountPassword: WideString); safecall;
+    procedure SetAccountPassword(const AAccountPassword: WideString); safecall;
 
     function GetUseCoverLink: WordBool; safecall;
     procedure SetUseCoverLink(AUseCoverLink: WordBool); safecall;
     function GetCoverLink: WideString; safecall;
-    procedure SetCoverLink(ACoverLink: WideString); safecall;
+    procedure SetCoverLink(const ACoverLink: WideString); safecall;
     function GetUseDescription: WordBool; safecall;
     procedure SetUseDescription(AUseDescription: WordBool); safecall;
     function GetDescription: WideString; safecall;
-    procedure SetDescription(ADescription: WideString); safecall;
+    procedure SetDescription(const ADescription: WideString); safecall;
     function GetUseCNL: WordBool; safecall;
     procedure SetUseCNL(AUseCNL: WordBool); safecall;
     function GetUseWebseiteLink: WordBool; safecall;
     procedure SetUseWebseiteLink(AUseWebseiteLink: WordBool); safecall;
     function GetWebseiteLink: WideString; safecall;
-    procedure SetWebseiteLink(AWebseiteLink: WideString); safecall;
+    procedure SetWebseiteLink(const AWebseiteLink: WideString); safecall;
 
     function GetFoldertypes: Integer; safecall;
     procedure SetFoldertypes(AFoldertypes: Integer); safecall;
@@ -167,39 +171,39 @@ type
     function GetUseCaptcha: WordBool; safecall;
     procedure SetUseCaptcha(AUseCaptcha: WordBool); safecall;
     function GetFolderName: WideString; safecall;
-    procedure SetFolderName(AFolderName: WideString); safecall;
+    procedure SetFolderName(const AFolderName: WideString); safecall;
 
     function GetAdvertismentType: Integer; safecall;
     procedure SetAdvertismentType(AAdvertismentType: Integer); safecall;
     function GetAdvertismentLayerName: WideString; safecall;
-    procedure SetAdvertismentLayerName(AAdvertismentLayerName: WideString); safecall;
+    procedure SetAdvertismentLayerName(const AAdvertismentLayerName: WideString); safecall;
     function GetAdvertismentLayerValue: WideString; safecall;
-    procedure SetAdvertismentLayerValue(AAdvertismentLayerValue: WideString); safecall;
+    procedure SetAdvertismentLayerValue(const AAdvertismentLayerValue: WideString); safecall;
     function GetUseAdvertismentLink: WordBool; safecall;
     procedure SetUseAdvertismentLink(AUseAdvertismentLink: WordBool); safecall;
     function GetAdvertismentLink: WideString; safecall;
-    procedure SetAdvertismentLink(AAdvertismentLink: WideString); safecall;
+    procedure SetAdvertismentLink(const AAdvertismentLink: WideString); safecall;
     function GetUseAdvertismentPicture: WordBool; safecall;
     procedure SetUseAdvertismentPicture(AUseAdvertismentPicture: WordBool); safecall;
     function GetAdvertismentPicture: WideString; safecall;
-    procedure SetAdvertismentPicture(AAdvertismentPicture: WideString); safecall;
+    procedure SetAdvertismentPicture(const AAdvertismentPicture: WideString); safecall;
 
     function GetUseEMailforStatusNotice: WordBool; safecall;
     procedure SetUseEMailforStatusNotice(AUseEMailforStatusNotice: WordBool); safecall;
     function GetEMailforStatusNotice: WideString; safecall;
-    procedure SetEMailforStatusNotice(AEMailforStatusNotice: WideString); safecall;
+    procedure SetEMailforStatusNotice(const AEMailforStatusNotice: WideString); safecall;
     function GetUseFilePassword: WordBool; safecall;
     procedure SetUseFilePassword(AUseFilePassword: WordBool); safecall;
     function GetFilePassword: WideString; safecall;
-    procedure SetFilePassword(AFilePassword: WideString); safecall;
+    procedure SetFilePassword(const AFilePassword: WideString); safecall;
     function GetUseAdminPassword: WordBool; safecall;
     procedure SetUseAdminPassword(AUseAdminPassword: WordBool); safecall;
     function GetAdminPassword: WideString; safecall;
-    procedure SetAdminPassword(AAdminPassword: WideString); safecall;
+    procedure SetAdminPassword(const AAdminPassword: WideString); safecall;
     function GetUseVisitorPassword: WordBool; safecall;
     procedure SetUseVisitorPassword(AUseVisitorPassword: WordBool); safecall;
     function GetVisitorPassword: WideString; safecall;
-    procedure SetVisitorPassword(AVisitorPassword: WideString); safecall;
+    procedure SetVisitorPassword(const AVisitorPassword: WideString); safecall;
 
     property UseAccount: WordBool read GetUseAccount write SetUseAccount;
     property AccountName: WideString read GetAccountName write SetAccountName;
@@ -243,8 +247,8 @@ type
 
   IFileHosterPlugIn = interface(IPlugIn)
     ['{609803F1-9479-4F92-A359-CAE8168104D5}']
-    function CheckLink(AFile: WideString): TLinkInfo; safecall;
-    function CheckLinks(AFiles: WideString): Integer; safecall;
+    function CheckLink(const AFile: WideString): TLinkInfo; safecall;
+    function CheckLinks(const AFiles: WideString): Integer; safecall;
     function CheckedLink(AIndex: Integer): TLinkInfo; safecall;
   end;
 
@@ -253,9 +257,9 @@ type
     function GetUseAccount: WordBool; safecall;
     procedure SetUseAccount(AUseAccount: WordBool); safecall;
     function GetAccountName: WideString; safecall;
-    procedure SetAccountName(AAccountName: WideString); safecall;
+    procedure SetAccountName(const AAccountName: WideString); safecall;
     function GetAccountPassword: WideString; safecall;
-    procedure SetAccountPassword(AAccountPassword: WideString); safecall;
+    procedure SetAccountPassword(const AAccountPassword: WideString); safecall;
     function GetImageHostResize: TImageHostResize; safecall;
     procedure SetImageHostResize(AImageHostResize: TImageHostResize); safecall;
 
@@ -263,8 +267,8 @@ type
     property AccountName: WideString read GetAccountName write SetAccountName;
     property AccountPassword: WideString read GetAccountPassword write SetAccountPassword;
 
-    function LocalUpload(ALocalPath: WideString; out AUrl: WideString): WordBool; safecall;
-    function RemoteUpload(ARemoteUrl: WideString; out AUrl: WideString): WordBool; safecall;
+    function LocalUpload(const ALocalPath: WideString; out AUrl: WideString): WordBool; safecall;
+    function RemoteUpload(const ARemoteUrl: WideString; out AUrl: WideString): WordBool; safecall;
 
     property ImageHostResize: TImageHostResize read GetImageHostResize write SetImageHostResize;
   end;

@@ -27,8 +27,8 @@ type
   TUploadspacePl = class(TFileHosterPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function CheckLink(AFile: WideString): TLinkInfo; override; safecall;
-    // function CheckLinks(AFiles: WideString): Integer; override; safecall;
+    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
+    // function CheckLinks(const AFiles: WideString): Integer; override; safecall;
   end;
 
 implementation
@@ -40,7 +40,7 @@ begin
   Result := 'Uploadspace.pl';
 end;
 
-function TUploadspacePl.CheckLink(AFile: WideString): TLinkInfo;
+function TUploadspacePl.CheckLink(const AFile: WideString): TLinkInfo;
 
   function GetDownloadlinkID(ALink: string): string;
   begin

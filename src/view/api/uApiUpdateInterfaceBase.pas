@@ -10,7 +10,7 @@ type
   IFile = interface(IUnknown)
     ['{F17455CD-E1F1-430C-9EAD-97F8DA6E3409}']
     function GetFileName: WideString;
-    procedure SetFileName(AFileName: WideString);
+    procedure SetFileName(const AFileName: WideString);
 
     property FileName: WideString read GetFileName write SetFileName;
   end;
@@ -42,7 +42,7 @@ type
     procedure SetFileSystem(AFileSystem: TFileSystem);
 
     function GetFilePathAppendix: WideString;
-    procedure SetFilePathAppendix(AFilePathAppendix: WideString);
+    procedure SetFilePathAppendix(const AFilePathAppendix: WideString);
 
     function Equals(AValue: IUpdateSystemFileBase): Boolean;
 
@@ -62,7 +62,7 @@ type
     procedure SetFileSizeCompressed(AFileSizeCompressed: Integer);
 
     function GetFileChecksum: WideString;
-    procedure SetFileChecksum(AFileChecksum: WideString);
+    procedure SetFileChecksum(const AFileChecksum: WideString);
 
     property FileBase: IUpdateSystemFileBase read GetFileBase write SetFileBase;
     property FileVersion: IFileVersion read GetFileVersion write SetFileVersion;

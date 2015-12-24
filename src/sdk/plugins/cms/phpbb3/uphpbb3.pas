@@ -58,22 +58,22 @@ type
     function LoadSettings(const AData: ITabSheetData = nil): Boolean; override;
 
     function DoBuildLoginRequest(out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; ACAPTCHALogin: Boolean = False): Boolean; override;
-    function DoAnalyzeLogin(AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; override;
+    function DoAnalyzeLogin(const AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; override;
     procedure DoHandleSessionID(AHTTPProcess: IHTTPProcess); override;
 
     function IntelligentPosting(var ARequestID: Double): Boolean; override;
 
     function NeedPrePost(out ARequestURL: string): Boolean; override;
-    function DoAnalyzePrePost(AResponseStr: string): Boolean; override;
+    function DoAnalyzePrePost(const AResponseStr: string): Boolean; override;
 
     function DoBuildPostRequest(const AData: ITabSheetData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
-    function DoAnalyzePost(AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; override;
+    function DoAnalyzePost(const AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; override;
 
-    function DoAnalyzeIDsRequest(AResponseStr: string): Integer; override;
+    function DoAnalyzeIDsRequest(const AResponseStr: string): Integer; override;
   public
     function GetName: WideString; override; safecall;
     function DefaultCharset: WideString; override; safecall;
-    function BelongsTo(AWebsiteSourceCode: WideString): WordBool; override; safecall;
+    function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
   end;
 
 implementation

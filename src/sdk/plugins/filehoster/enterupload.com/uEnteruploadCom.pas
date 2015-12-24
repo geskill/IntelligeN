@@ -29,8 +29,8 @@ type
   TEnteruploadCom = class(TFileHosterPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function CheckLink(AFile: WideString): TLinkInfo; override; safecall;
-    // function CheckLinks(AFiles: WideString): Integer; override;
+    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
+    // function CheckLinks(const AFiles: WideString): Integer; override;
   end;
 
 implementation
@@ -42,7 +42,7 @@ begin
   Result := 'Enterupload.com';
 end;
 
-function TEnteruploadCom.CheckLink(AFile: WideString): TLinkInfo;
+function TEnteruploadCom.CheckLink(const AFile: WideString): TLinkInfo;
 var
   LinkInfo: TLinkInfo;
   _postreply: TStringStream;

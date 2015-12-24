@@ -13,7 +13,7 @@ uses
 type
   TMycxCheckComboBox = class(TcxCheckComboBox)
   protected
-    function InternalIndexOf(AStr: string): Integer;
+    function InternalIndexOf(const AStr: string): Integer;
     function GetTextValue: string;
     procedure SetTextValue(const TextValue: string);
   public
@@ -26,26 +26,26 @@ implementation
 
 { TMycxCheckComboBox }
 
-function TMycxCheckComboBox.InternalIndexOf(AStr: string): Integer;
+function TMycxCheckComboBox.InternalIndexOf(const AStr: string): Integer;
 var
-  _Index, _Count: Integer;
-  _Found: Boolean;
+  LIndex, LCount: Integer;
+  LFound: Boolean;
 begin
   Result := -1;
 
-  _Index := 0;
-  _Found := False;
-  _Count := Properties.Items.Count;
+  LIndex := 0;
+  LFound := False;
+  LCount := Properties.Items.Count;
 
-  while (_Index < _Count) and not _Found do
+  while (LIndex < LCount) and not LFound do
   begin
-    _Found := SameStr(Properties.Items.Items[_Index].Description, AStr);
-    if not _Found then
-      Inc(_Index);
+    LFound := SameStr(Properties.Items.Items[LIndex].Description, AStr);
+    if not LFound then
+      Inc(LIndex);
   end;
 
-  if _Found then
-    Result := _Index;
+  if LFound then
+    Result := LIndex;
 end;
 
 function TMycxCheckComboBox.GetTextValue: string;

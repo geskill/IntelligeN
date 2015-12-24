@@ -88,7 +88,7 @@ type
     function GetWebsite(AIndex: Integer): TCMSWebsitesCollectionItem;
     procedure UpdateWebsite(AIndex: Integer);
     procedure UpdateWebsites;
-    function FindCMSWebsite(ACMSWebsiteName: string): TCMSWebsitesCollectionItem;
+    function FindCMSWebsite(const ACMSWebsiteName: string): TCMSWebsitesCollectionItem;
     property OnSettingsChange: TICMSItemChangeEvent read FOnSettingsChange write FOnSettingsChange;
     property OnWebsitesChange: TICMSItemChangeEvent read FOnWebsitesChange write FOnWebsitesChange;
     property OnSubjectsChange: TICMSItemChangeEvent read FOnSubjectsChange write FOnSubjectsChange;
@@ -216,7 +216,7 @@ type
     FOnCMSChange: TIPluginChangeEvent;
   public
     constructor Create;
-    function FindPlugInCollectionItemFromCollection(APlugInCollectionItemName: string; ACollection: TCollection): TPlugInCollectionItem;
+    function FindPlugInCollectionItemFromCollection(const APlugInCollectionItemName: string; ACollection: TCollection): TPlugInCollectionItem;
     property AppImageList: TImageList read FAppImageList;
     property CMSImageList: TImageList read FCMSImageList;
     property CAPTCHAImageList: TImageList read FCAPTCHAImageList;
@@ -441,11 +441,11 @@ type
     FOnLayoutChanged: TNotifyEvent;
     function GetActiveLayout: TLayoutCollectionItem;
     procedure SetActiveLayout(ALayoutCollectionItem: TLayoutCollectionItem);
-    procedure SetActiveLayoutName(AActiveLayoutName: string);
+    procedure SetActiveLayoutName(const AActiveLayoutName: string);
   public
     constructor Create;
     function GetLayoutItemList: TStrings;
-    function FindLayout(ALayoutName: string): TLayoutCollectionItem;
+    function FindLayout(const ALayoutName: string): TLayoutCollectionItem;
     property ActiveLayout: TLayoutCollectionItem read GetActiveLayout write SetActiveLayout;
     property OnLayoutChanged: TNotifyEvent read FOnLayoutChanged write FOnLayoutChanged;
     destructor Destroy; override;
@@ -722,7 +722,7 @@ begin
     UpdateWebsite(I);
 end;
 
-function TCMSCollectionItem.FindCMSWebsite(ACMSWebsiteName: string): TCMSWebsitesCollectionItem;
+function TCMSCollectionItem.FindCMSWebsite(const ACMSWebsiteName: string): TCMSWebsitesCollectionItem;
 var
   I: Integer;
 begin
@@ -860,7 +860,7 @@ begin
   FOnCMSChange := TIPluginChangeEvent.Create;
 end;
 
-function TSettings_Plugins.FindPlugInCollectionItemFromCollection(APlugInCollectionItemName: string; ACollection: TCollection): TPlugInCollectionItem;
+function TSettings_Plugins.FindPlugInCollectionItemFromCollection(const APlugInCollectionItemName: string; ACollection: TCollection): TPlugInCollectionItem;
 var
   I: Integer;
 begin
@@ -1201,6 +1201,7 @@ end;
 
 constructor TSettings_Proxy.Create;
 begin
+  inherited Create;
   FProxyTypeLock := TMultiReadExclusiveWriteSynchronizer.Create;
   FServerLock := TMultiReadExclusiveWriteSynchronizer.Create;
   FPortLock := TMultiReadExclusiveWriteSynchronizer.Create;
@@ -1286,6 +1287,7 @@ end;
 
 constructor TSettings_HTTP.Create;
 begin
+  inherited Create;
   FMaxSimultaneousConnectionsLock := TMultiReadExclusiveWriteSynchronizer.Create;
   FConnectTimeoutLock := TMultiReadExclusiveWriteSynchronizer.Create;
   FReadTimeoutLock := TMultiReadExclusiveWriteSynchronizer.Create;
@@ -1382,7 +1384,7 @@ begin
     end;
 end;
 
-procedure TSettings_Layout.SetActiveLayoutName(AActiveLayoutName: string);
+procedure TSettings_Layout.SetActiveLayoutName(const AActiveLayoutName: string);
 begin
   FActiveLayoutName := AActiveLayoutName;
 
@@ -1409,7 +1411,7 @@ begin
     Result.Add(TLayoutCollectionItem(Layout.Items[I]).name);
 end;
 
-function TSettings_Layout.FindLayout(ALayoutName: string): TLayoutCollectionItem;
+function TSettings_Layout.FindLayout(const ALayoutName: string): TLayoutCollectionItem;
 var
   I: Integer;
 begin
@@ -1450,6 +1452,7 @@ end;
 
 constructor TSettings_.Create;
 begin
+  inherited Create;
   Plugins := TSettings_Plugins.Create;
   Database := TSettings_Database.Create;
   Controls := TSettings_Controls.Create;
@@ -1474,6 +1477,7 @@ begin
   ControlAligner.Free;
   Mody.Free;
   Login.Free;
+  inherited Destroy;
 end;
 
 { ****************************************************************************** }
@@ -1674,17 +1678,17 @@ begin
   with SettingsManager.Settings.Plugins do
   begin
     if FileExists(GetPluginFolder + 'xrelto.dll') then
-      TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptCrawler, GetPluginFolder + 'xrelto.dll', False, { make the error message silent } procedure(AErrorMsg: string)begin end);
+      TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptCrawler, GetPluginFolder + 'xrelto.dll', False, { make the error message silent } procedure(const AErrorMsg: string)begin end);
 
     if FileExists(GetPluginFolder + 'releasename.dll') then
-      TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptCrawler, GetPluginFolder + 'releasename.dll', False, { make the error message silent } procedure(AErrorMsg: string)begin end);
+      TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptCrawler, GetPluginFolder + 'releasename.dll', False, { make the error message silent } procedure(const AErrorMsg: string)begin end);
 
     LPlugInCollectionItem := FindPlugInCollectionItemFromCollection('Releasename', Crawler);
     if Assigned(LPlugInCollectionItem) then
       LPlugInCollectionItem.Enabled := True;
 
     if FileExists(GetPluginFolder + 'intelligenxml2.dll') then
-      TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptFileFormats, GetPluginFolder + 'intelligenxml2.dll', False, { make the error message silent } procedure(AErrorMsg: string)begin end);
+      TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptFileFormats, GetPluginFolder + 'intelligenxml2.dll', False, { make the error message silent } procedure(const AErrorMsg: string)begin end);
 
     LPlugInCollectionItem := FindPlugInCollectionItemFromCollection('intelligen.xml.2', FileFormats);
     if Assigned(LPlugInCollectionItem) then

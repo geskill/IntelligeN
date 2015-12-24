@@ -131,12 +131,12 @@ type
     function GetLinksInfo: TLinksInfo;
     procedure SetLinksInfo(ALinksInfo: TLinksInfo);
     function GetTitle: WideString;
-    procedure SetTitle(ATitle: WideString);
-    procedure SetValue(AValue: WideString);
+    procedure SetTitle(const ATitle: WideString);
+    procedure SetValue(const AValue: WideString);
     function GetFocus: Boolean;
     procedure SetFocus(AFocus: Boolean);
     function GetErrorMsg: WideString;
-    procedure SetErrorMsg(AErrorMsg: WideString);
+    procedure SetErrorMsg(const AErrorMsg: WideString);
     procedure ResetErrorMsg();
   public
     constructor Create(AOwner: TComponent); override;
@@ -169,7 +169,7 @@ type
     procedure Mody;
     function CheckStatus: WordBool;
 
-    function GetPartName(AFileName: WideString): WideString;
+    function GetPartName(const AFileName: WideString): WideString;
 
     // Cloning
     function CloneInstance(): IDirectlink;
@@ -210,12 +210,12 @@ type
     function GetMirrorControl: IMirrorControl;
     procedure SetMirrorControl(AMirrorControl: IMirrorControl);
 
-    procedure SetValue(AValue: WideString);
+    procedure SetValue(const AValue: WideString);
 
     procedure SetSize(ASize: Double);
     procedure SetPartSize(APartSize: Double);
-    procedure SetStatusImage(AStatusImage: WideString);
-    procedure SetStatusImageText(AStatusImageText: WideString);
+    procedure SetStatusImage(const AStatusImage: WideString);
+    procedure SetStatusImageText(const AStatusImageText: WideString);
 
     function GetCrypterFolderInfo: TCrypterFolderInfo;
     procedure SetCrypterFolderInfo(ACrypterFolderInfo: TCrypterFolderInfo);
@@ -227,7 +227,7 @@ type
     procedure SetFocus(AFocus: Boolean);
 
     function GetErrorMsg: WideString;
-    procedure SetErrorMsg(AErrorMsg: WideString);
+    procedure SetErrorMsg(const AErrorMsg: WideString);
 
     procedure ResetErrorMsg();
   public
@@ -339,7 +339,7 @@ type
     property Focus: Boolean read GetFocus write SetFocus;
     property ErrorMsg: WideString read GetErrorMsg;
 
-    function Add(ALinks: WideString = ''): Integer;
+    function Add(const ALinks: WideString = ''): Integer;
     procedure Remove(ATabIndex: Integer);
 
     // Cloning
@@ -461,10 +461,10 @@ type
     property Width: Integer read GetWidth write SetWidth;
     property Height: Integer read GetHeight write SetHeight;
 
-    function AddCrypter(AName: WideString): Integer;
+    function AddCrypter(const AName: WideString): Integer;
     function RemoveCrypter(AIndex: Integer): Boolean;
 
-    procedure UpdateErrorMsg(AName, AErrorMsg: WideString);
+    procedure UpdateErrorMsg(const AName, AErrorMsg: WideString);
 
     // Cloning
     function CloneInstance(): IMirrorContainer;
@@ -783,23 +783,23 @@ end;
 
 procedure TMycxTabSheet.FmDirectlinksDropFiles(var message: TMessage);
 var
-  FileCount, Size: Integer;
-  FileName: PChar;
+  LFileCount, LSize: Integer;
+  LFileName: PChar;
 begin
-  FileCount := DragQueryFile(message.WParam, $FFFFFFFF, nil, 255);
+  LFileCount := DragQueryFile(message.WParam, $FFFFFFFF, nil, 255);
 
-  if (FileCount = 1) then
+  if (LFileCount = 1) then
   begin
-    Size := DragQueryFile(message.WParam, 0, nil, 0) + 1;
-    FileName := StrAlloc(Size);
+    LSize := DragQueryFile(message.WParam, 0, nil, 0) + 1;
+    LFileName := StrAlloc(LSize);
 
-    if DragQueryFile(message.WParam, 0, FileName, Size) = 1 then
+    if DragQueryFile(message.WParam, 0, LFileName, LSize) = 1 then
       { nothing } ;
 
-    if FileExists(FileName) then
-      FilterContainerFile(FileName, FMycxRichEdit);
+    if FileExists(LFileName) then
+      FilterContainerFile(LFileName, FMycxRichEdit);
 
-    StrDispose(FileName);
+    StrDispose(LFileName);
   end;
 
   DragFinish(message.WParam);
@@ -1066,12 +1066,12 @@ begin
   Result := Caption;
 end;
 
-procedure TMycxTabSheet.SetTitle(ATitle: WideString);
+procedure TMycxTabSheet.SetTitle(const ATitle: WideString);
 begin
   Caption := ATitle;
 end;
 
-procedure TMycxTabSheet.SetValue(AValue: WideString);
+procedure TMycxTabSheet.SetValue(const AValue: WideString);
 begin
   FMycxRichEdit.Lines.Text := AValue;
 end;
@@ -1092,7 +1092,7 @@ begin
   Result := FErrorMsg;
 end;
 
-procedure TMycxTabSheet.SetErrorMsg(AErrorMsg: WideString);
+procedure TMycxTabSheet.SetErrorMsg(const AErrorMsg: WideString);
 begin
   FErrorMsg := AErrorMsg;
   DirectlinksPanel.MirrorControl.UpdateErrorMsg(StrDirectlinks, AErrorMsg);
@@ -1514,7 +1514,7 @@ begin
     end;
 end;
 
-function TMycxTabSheet.GetPartName(AFileName: WideString): WideString;
+function TMycxTabSheet.GetPartName(const AFileName: WideString): WideString;
 var
   LIndex, LCount: Integer;
   LFound: Boolean;
@@ -1669,7 +1669,7 @@ begin
   FMirrorControl := AMirrorControl;
 end;
 
-procedure TCrypterPanel.SetValue(AValue: WideString);
+procedure TCrypterPanel.SetValue(const AValue: WideString);
 begin
   FcxTextEditLink.Text := AValue;
 end;
@@ -1694,7 +1694,7 @@ begin
   end;
 end;
 
-procedure TCrypterPanel.SetStatusImage(AStatusImage: WideString);
+procedure TCrypterPanel.SetStatusImage(const AStatusImage: WideString);
 begin
   FCrypterFolderInfoLock.EnterWriteLock;
   try
@@ -1704,7 +1704,7 @@ begin
   end;
 end;
 
-procedure TCrypterPanel.SetStatusImageText(AStatusImageText: WideString);
+procedure TCrypterPanel.SetStatusImageText(const AStatusImageText: WideString);
 begin
   FCrypterFolderInfoLock.EnterWriteLock;
   try
@@ -1760,7 +1760,7 @@ begin
   Result := FErrorMsg;
 end;
 
-procedure TCrypterPanel.SetErrorMsg(AErrorMsg: WideString);
+procedure TCrypterPanel.SetErrorMsg(const AErrorMsg: WideString);
 begin
   FErrorMsg := AErrorMsg;
   MirrorControl.UpdateErrorMsg(Name, AErrorMsg);
@@ -2186,7 +2186,7 @@ begin
   OutputDebugString('TDirectlinksPanel.Destroy END');
 end;
 
-function TDirectlinksPanel.Add;
+function TDirectlinksPanel.Add(const ALinks: WideString = ''): Integer;
 var
   FcxTabSheet: TMycxTabSheet;
 begin
@@ -2981,7 +2981,7 @@ begin
       Width := GetTabControlTabWidth - Left - 1;
 end;
 
-procedure TMirrorControl.UpdateErrorMsg(AName, AErrorMsg: WideString);
+procedure TMirrorControl.UpdateErrorMsg(const AName, AErrorMsg: WideString);
 var
   LTabIndex: Integer;
   LHasError: Boolean;

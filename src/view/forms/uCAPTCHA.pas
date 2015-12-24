@@ -27,7 +27,7 @@ type
     constructor Create(AOwner: TComponent; AMaxWaitMs: Cardinal = INFINITE);
 
     procedure DisplayCAPTCHAImage(ACAPTCHAMemoryStream: TMemoryStream);
-    procedure DisplayCAPTCHAText(ACAPTCHAText: string);
+    procedure DisplayCAPTCHAText(const ACAPTCHAText: string);
 
     function ShowModal: Integer; override;
 
@@ -155,7 +155,7 @@ begin
   Display;
 end;
 
-procedure TCAPTCHA.DisplayCAPTCHAText(ACAPTCHAText: string);
+procedure TCAPTCHA.DisplayCAPTCHAText(const ACAPTCHAText: string);
 begin
   mCAPTCHA.Text := ACAPTCHAText;
   mCAPTCHA.Visible := True;

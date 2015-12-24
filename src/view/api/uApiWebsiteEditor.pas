@@ -49,7 +49,7 @@ type
 
   TBasisWebsiteEditor = class;
 
-  TAcceptEvent = procedure(TextValue: string) of object;
+  TAcceptEvent = procedure(const TextValue: string) of object;
 
   TIDEditPanel = class(TPanel)
   protected
@@ -106,7 +106,7 @@ type
     procedure FcxBAcceptClick(Sender: TObject); override;
     procedure FcxCOBControlValueInitPopup(Sender: TObject);
   public
-    constructor Create(AOwner: TComponent; AAppController: IAppController; AStringTemplateTypeID: string); reintroduce; virtual;
+    constructor Create(AOwner: TComponent; AAppController: IAppController; const AStringTemplateTypeID: string); reintroduce; virtual;
     destructor Destroy; override;
   end;
 
@@ -136,8 +136,8 @@ type
     procedure FcxTreeViewClick(Sender: TObject);
     procedure FcxTreeViewDragDrop(Sender, Source: TObject; X, Y: Integer);
     procedure FcxTreeViewDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
-    procedure AddID(TextValue: string);
-    procedure EditID(TextValue: string);
+    procedure AddID(const ATextValue: string);
+    procedure EditID(const ATextValue: string);
     procedure EditIDClose(Sender: TObject);
     procedure AddClick(Sender: TObject);
     procedure EditClick(Sender: TObject);
@@ -238,7 +238,7 @@ type
       var AHintTextRect: TRect);
     procedure FcxGridCustomFieldsTableViewColumn3PropertiesButtonClick(Sender: TObject; AButtonIndex: Integer);
     function GetCustomFields: WordBool; safecall;
-    procedure SetCustomFields(ACustomFields: WordBool); safecall;
+    procedure SetCustomFields(const ACustomFields: WordBool); safecall;
   public
     constructor Create(ACMSPlugIn: ICMSPlugIn; AAppController: IAppController; AWebsiteSettingsFileName: TFileName); reintroduce; virtual;
     procedure AddEdit(const AName: WideString; const ADefaultValue: WideString = ''); safecall;
@@ -648,7 +648,7 @@ begin
     FcxCOBControlValue.Properties.Items.Text := FAppController.GetControlValues(StringToTypeID(FStringTypeID), StringToControlID(FcxCOBControlName.Text));
 end;
 
-constructor TIDEditBPanel.Create(AOwner: TComponent; AAppController: IAppController; AStringTemplateTypeID: string);
+constructor TIDEditBPanel.Create(AOwner: TComponent; AAppController: IAppController; const AStringTemplateTypeID: string);
 var
   LControlID: TControlID;
 begin
@@ -848,14 +848,14 @@ begin
   Accept := (Sender = FcxTreeView);
 end;
 
-procedure TIDPanel.AddID(TextValue: string);
+procedure TIDPanel.AddID(const ATextValue: string);
 begin
-  FcxTreeView.Items.AddChild(FcxTreeView.Selected, TextValue);
+  FcxTreeView.Items.AddChild(FcxTreeView.Selected, ATextValue);
 end;
 
-procedure TIDPanel.EditID(TextValue: string);
+procedure TIDPanel.EditID(const ATextValue: string);
 begin
-  FcxTreeView.Selected.Text := TextValue;
+  FcxTreeView.Selected.Text := ATextValue;
 end;
 
 procedure TIDPanel.EditIDClose(Sender: TObject);
@@ -1861,7 +1861,7 @@ begin
   result := FcxTSCustomFields.TabVisible;
 end;
 
-procedure TBasisWebsiteEditor.SetCustomFields(ACustomFields: WordBool);
+procedure TBasisWebsiteEditor.SetCustomFields(const ACustomFields: WordBool);
 begin
   FcxTSCustomFields.TabVisible := ACustomFields;
 end;

@@ -136,7 +136,7 @@ type
     FIViewChangeEvent: IViewChangeEventHandler;
 
     function GetActiveWebsite: WideString;
-    procedure SetActiveWebsite(AWebsite: WideString);
+    procedure SetActiveWebsite(const AWebsite: WideString);
     function GetActiveWebsiteData: ICMSWebsiteContainer;
     procedure SetActiveWebsiteData(AData: ICMSWebsiteContainer);
     procedure RegisterWebsite;
@@ -553,7 +553,7 @@ begin
   Result := IfThen(Assigned(ActiveWebsiteData), ActiveWebsiteData.Website);
 end;
 
-procedure TDesignTabSheetItem.SetActiveWebsite(AWebsite: WideString);
+procedure TDesignTabSheetItem.SetActiveWebsite(const AWebsite: WideString);
 var
   LWebsiteListIndex: Integer;
 begin

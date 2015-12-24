@@ -29,9 +29,9 @@ type
 
     function GetFileFormatName: WideString; virtual; safecall; abstract;
     function CanSaveControls: WordBool; virtual; safecall; abstract;
-    procedure SaveControls(AFileName, ATemplateFileName: WideString; const ATabSheetController: ITabSheetController); virtual; safecall; abstract;
+    procedure SaveControls(const AFileName, ATemplateFileName: WideString; const ATabSheetController: ITabSheetController); virtual; safecall; abstract;
     function CanLoadControls: WordBool; virtual; safecall; abstract;
-    function LoadControls(AFileName, ATemplateDirectory: WideString; const APageController: IPageController): Integer; virtual; safecall; abstract;
+    function LoadControls(const AFileName, ATemplateDirectory: WideString; const APageController: IPageController): Integer; virtual; safecall; abstract;
     property ForceAddCrypter: WordBool read GetForceAddCrypter write SetForceAddCrypter;
     property ForceAddImageMirror: WordBool read GetForceAddImageMirror write SetForceAddImageMirror;
   end;

@@ -31,7 +31,7 @@ type
   protected
     FLinks: string;
     FLinksInfo: TLinksInfo;
-    procedure DefaultErrorHandler(AErrorMsg: string); override;
+    procedure DefaultErrorHandler(const AErrorMsg: string); override;
   public
     constructor Create(const ADirectlink: IDirectlinksMirror); reintroduce;
     destructor Destroy; override;
@@ -66,7 +66,7 @@ end;
 
 { THosterCheckThread }
 
-procedure TFileHosterCheckThread.DefaultErrorHandler(AErrorMsg: string);
+procedure TFileHosterCheckThread.DefaultErrorHandler(const AErrorMsg: string);
 begin
   task.Invoke(
     { } procedure

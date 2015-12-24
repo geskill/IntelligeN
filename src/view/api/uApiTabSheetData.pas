@@ -27,6 +27,9 @@ type
     function GetControlCount: Integer; safecall;
     function GetMirror(const IndexOrName: OleVariant): IMirrorContainer; safecall;
     function GetMirrorCount: Integer; safecall;
+
+    function GetCustomField(const IndexOrName: OleVariant): INameValueItem; safecall;
+    function GetCustomFieldCount: Integer; safecall;
   public
     constructor Create(ATypeID: TTypeID); overload;
     constructor Create(ATypeID: TTypeID; AControlList: TControlDataList; AMirrorList: TMirrorContainerList); overload;
@@ -42,6 +45,9 @@ type
     property ControlCount: Integer read GetControlCount;
     property Mirror[const IndexOrName: OleVariant]: IMirrorContainer read GetMirror;
     property MirrorCount: Integer read GetMirrorCount;
+
+    property CustomField[const IndexOrName: OleVariant]: INameValueItem read GetCustomField;
+    property CustomFieldCount: Integer read GetCustomFieldCount;
   end;
 
 implementation
@@ -87,6 +93,18 @@ end;
 function TITabSheetData.GetMirrorCount: Integer;
 begin
   Result := FMirrorList.Count;
+end;
+
+function TITabSheetData.GetCustomField(const IndexOrName: OleVariant): INameValueItem;
+begin
+  // TODO: Implement this
+  Result := nil;
+end;
+
+function TITabSheetData.GetCustomFieldCount: Integer;
+begin
+  // TODO: Implement this
+  Result := 0;
 end;
 
 constructor TITabSheetData.Create(ATypeID: TTypeID);

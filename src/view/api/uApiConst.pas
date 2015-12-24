@@ -13,6 +13,7 @@ resourcestring
   StrClose = 'Close';
   StrContainerFiles = 'Container files';
   StrDefault = '<default>';
+  StrDeleteDesktop = 'Delete Desktop';
   StrDirectlinks = 'Directlinks';
   StrDocument = 'document';
   StrEditItem = 'Edit item';
@@ -23,16 +24,30 @@ resourcestring
   StrNewDatabaseConnect = 'New database connection';
   StrNewItem = 'New item';
   StrNewItemValue = 'New item value:';
-  StrNotifyMissing = 'Notify missing';
   StrNotChecked = 'Not checked';
+  StrNotifyMissing = 'Notify missing';
   StrOffline = 'Offline';
   StrOnline = 'Online';
+  StrOpen = 'Open';
   StrParts = 'Parts';
+  StrPluginCanNotUnLoad = 'The %s app plugin is still in use ~ %s ~';
+  StrPluginCouldNotLoad = 'The %s app plugin could not be loaded ~ %s ~';
+  StrPluginDefect = 'DDL file of %s plugin defect [%s]';
+  StrPluginFileNotFound = 'Plugin file not found ~ %s ~';
+  StrPluginIncompatible = 'Plugin version (%s) by definition incompatible for this version (%s) ~ %s ~';
+  StrPluginIncorrectType = 'Plugin interface (%s) expected, but another interface (%s) found ~ %s ~';
+  StrPluginInternalError = 'Internal plugin error (%s) ~ %s ~';
+  StrPluginOverrideSettings = 'Do you want to override %s plugin? The plugin settings will be reseted';
+  StrPluginStartupError = 'Startup error for %s plugin ~ %s ~';
+  StrPluginUnknown = 'Unknown %s plugin [%s]';
+  StrReleaseNameEmpty = '<ReleaseName>';
   StrRemove = 'Remove';
-  StrRemovedLinks = 'Removed links:';
   StrRemoveDouble = 'Remove double';
   StrRemoveItem = 'Remove item';
   StrRemoveSelectedItem = 'Remove selected item?';
+  StrRemovedLinks = 'Removed links:';
+  StrSaveCurentDesktop = 'Save curent desktop as:';
+  StrSaveDesktop = 'Save Desktop';
   StrSettings = 'Settings';
   StrSize = 'Size';
   StrSort = 'Sort';
@@ -40,17 +55,6 @@ resourcestring
   StrTextFiles = 'Text files';
   StrTop = 'Top';
   StrUnknown = 'Unknown';
-  StrPluginOverrideSettings = 'Do you want to override %s plugin? The plugin settings will be reseted';
-  StrPluginInternalError = 'Internal plugin error (%s) ~ %s ~';
-  StrPluginIncorrectType = 'Plugin interface (%s) expected, but another interface (%s) found ~ %s ~';
-  StrPluginStartupError = 'Startup error for %s plugin ~ %s ~';
-  StrPluginUnknown = 'Unknown %s plugin [%s]';
-  StrPluginDefect = 'DDL file of %s plugin defect [%s]';
-  StrPluginIncompatible = 'Plugin version (%s) by definition incompatible for this version (%s) ~ %s ~';
-  StrPluginFileNotFound = 'Plugin file not found ~ %s ~';
-  StrPluginCouldNotLoad = 'The %s app plugin could not be loaded ~ %s ~';
-  StrPluginCanNotUnLoad = 'The %s app plugin is still in use ~ %s ~';
-  StrReleaseNameEmpty = '<ReleaseName>';
 
 implementation
 

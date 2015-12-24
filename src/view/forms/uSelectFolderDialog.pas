@@ -24,11 +24,11 @@ type
   private
     FFilter: string;
     function GetDescription: string;
-    procedure SetDescription(ADescription: string);
-    procedure SetFilter(AFilter: string);
+    procedure SetDescription(const ADescription: string);
+    procedure SetFilter(const AFilter: string);
     function GetFilterIndex: Integer;
     function GetPath: string;
-    procedure SetPath(APath: string);
+    procedure SetPath(const APath: string);
   public
     property Description: string read GetDescription write SetDescription;
     property Filter: string read FFilter write SetFilter;
@@ -59,12 +59,12 @@ begin
   Result := cxLDescription.Caption;
 end;
 
-procedure TSelectFolderDialog.SetDescription(ADescription: string);
+procedure TSelectFolderDialog.SetDescription(const ADescription: string);
 begin
   cxLDescription.Caption := ADescription;
 end;
 
-procedure TSelectFolderDialog.SetFilter(AFilter: string);
+procedure TSelectFolderDialog.SetFilter(const AFilter: string);
 begin
   FFilter := AFilter;
 
@@ -96,7 +96,7 @@ begin
   Result := IncludeTrailingPathDelimiter(cxShellTreeView.Path);
 end;
 
-procedure TSelectFolderDialog.SetPath(APath: string);
+procedure TSelectFolderDialog.SetPath(const APath: string);
 begin
   cxShellTreeView.Path := APath;
 end;

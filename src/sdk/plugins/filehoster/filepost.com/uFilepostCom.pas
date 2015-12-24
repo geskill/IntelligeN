@@ -29,8 +29,8 @@ type
   TFilepostCom = class(TFileHosterPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function CheckLink(AFile: WideString): TLinkInfo; override; safecall;
-    function CheckLinks(AFiles: WideString): Integer; override; safecall;
+    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
+    function CheckLinks(const AFiles: WideString): Integer; override; safecall;
   end;
 
 implementation
@@ -42,7 +42,7 @@ begin
   Result := 'Filepost.com';
 end;
 
-function TFilepostCom.CheckLink(AFile: WideString): TLinkInfo;
+function TFilepostCom.CheckLink(const AFile: WideString): TLinkInfo;
 var
   LinkInfo: TLinkInfo;
 begin
@@ -57,7 +57,7 @@ begin
   Result := LinkInfo;
 end;
 
-function TFilepostCom.CheckLinks(AFiles: WideString): Integer;
+function TFilepostCom.CheckLinks(const AFiles: WideString): Integer;
 
   function GetDownloadlinkID(ALink: string): string;
   begin

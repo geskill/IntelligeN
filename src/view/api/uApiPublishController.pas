@@ -55,7 +55,7 @@ type
     function GetReleaseName: WideString;
     function GetItem(const IndexOrName: OleVariant): IPublishItem;
   public
-    constructor Create(AReleaseName: WideString);
+    constructor Create(const AReleaseName: WideString);
     procedure Add(const APublishItem: IPublishItem);
     property ReleaseName: WideString read GetReleaseName;
     property Item[const IndexOrName: OleVariant]: IPublishItem read GetItem;
@@ -82,6 +82,9 @@ type
     function Count: Integer;
     destructor Destroy; override;
   end;
+
+  TIScriptCheckFunc = reference to function(const AIScript: WideString): RIScriptResult;
+  TIScriptParseFunc = reference to function(const AIScript: WideString; AIScriptType: TIScriptType): RIScriptResult;
 
   TICMSWebsiteContainer = class(TInterfacedObject, ICMSWebsiteContainer)
   strict private
@@ -121,9 +124,6 @@ type
     FICMSWebsiteContainerActiveController: TICMSWebsiteContainerActiveController;
 
   type
-    TIScriptCheckFunc = reference to function(const AIScript: WideString): RIScriptResult;
-    TIScriptParseFunc = reference to function(const AIScript: WideString; AIScriptType: TIScriptType): RIScriptResult;
-
     TICMSWebsiteIScriptData = class(TInterfacedObject, ICMSWebsiteIScriptData)
     private
       FIScriptType: TIScriptType;
@@ -191,7 +191,7 @@ type
     FIControlChange: TIControlEventHandler;
     FIMirrorChange: TINotifyEventHandler;
 
-    procedure ValidateFile(ARelativeFileName, AFileName, AFileType: string);
+    procedure ValidateFile(const ARelativeFileName, AFileName, AFileType: string);
     function ValidateFiles: Boolean;
 
     procedure HandleBlackWhitelist(ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; out AControlList: TControlDataList; out AMirrorList: TMirrorContainerList);
@@ -213,9 +213,9 @@ type
     function GetActive: Boolean;
     function GetEnabled: Boolean;
     function GetAccountName: WideString;
-    procedure SetAccountName(AAccountName: WideString);
+    procedure SetAccountName(const AAccountName: WideString);
     function GetAccountPassword: WideString;
-    procedure SetAccountPassword(AAccountPassword: WideString);
+    procedure SetAccountPassword(const AAccountPassword: WideString);
 
     function GetSettingsFileName: WideString;
 
@@ -311,7 +311,7 @@ type
     procedure TabChange(const Sender: IUnknown);
     procedure UpdateInternalListItemIndex;
     procedure UpdateCMSList(AClose: Boolean = False);
-    function FindCMSContainer(AName: WideString): Integer;
+    function FindCMSContainer(const AName: WideString): Integer;
   protected
     function GetTabSheetController: ITabSheetController;
     procedure SetTabSheetController(const ATabSheetController: ITabSheetController);
@@ -443,7 +443,7 @@ begin
   end;
 end;
 
-constructor TIPublishTab.Create(AReleaseName: WideString);
+constructor TIPublishTab.Create(const AReleaseName: WideString);
 begin
   inherited Create;
   FReleaseName := AReleaseName;
@@ -791,7 +791,7 @@ end;
 
 { TICMSWebsiteContainer }
 
-procedure TICMSWebsiteContainer.ValidateFile(ARelativeFileName, AFileName, AFileType: string);
+procedure TICMSWebsiteContainer.ValidateFile(const ARelativeFileName, AFileName, AFileType: string);
 begin
   if SameStr('', ARelativeFileName) then
     raise Exception.Create('You have to define a ' + AFileType + ' file for ' + Name + ' [' + CMS + '] inside CMS/website settings');
@@ -1134,7 +1134,7 @@ begin
   Result := FCMSWebsiteCollectionItem.AccountName;
 end;
 
-procedure TICMSWebsiteContainer.SetAccountName(AAccountName: WideString);
+procedure TICMSWebsiteContainer.SetAccountName(const AAccountName: WideString);
 begin
   FCMSWebsiteCollectionItem.AccountName := AAccountName;
 end;
@@ -1144,7 +1144,7 @@ begin
   Result := FCMSWebsiteCollectionItem.AccountPassword;
 end;
 
-procedure TICMSWebsiteContainer.SetAccountPassword(AAccountPassword: WideString);
+procedure TICMSWebsiteContainer.SetAccountPassword(const AAccountPassword: WideString);
 begin
   FCMSWebsiteCollectionItem.AccountPassword := AAccountPassword;
 end;
@@ -1358,13 +1358,13 @@ procedure TICMSContainer.SettingsUpdate(ACMSItemChangeType: TCMSItemChangeType; 
   end;
 
 var
-  Index, CMSWebsiteIndex: Integer;
-  CMSWebsiteName: string;
+  LIndex, LCMSWebsiteIndex: Integer;
+  LCMSWebsiteName: string;
 begin
   with TCMSWebsitesCollectionItem(FCMSCollectionItem.Websites.Items[AIndex]) do
   begin
-    CMSWebsiteIndex := Index;
-    CMSWebsiteName := Name;
+    LCMSWebsiteIndex := Index;
+    LCMSWebsiteName := Name;
   end;
 
   case ACMSItemChangeType of
@@ -1372,28 +1372,28 @@ begin
       ;
     cctDelete:
       begin
-        Index := FindCMSWebsiteItem(CMSWebsiteName);
-        if not(Index = -1) then
-          FWebsiteList.Delete(Index);
+        LIndex := FindCMSWebsiteItem(LCMSWebsiteName);
+        if not(LIndex = -1) then
+          FWebsiteList.Delete(LIndex);
       end;
     cctEnabled:
       begin
         if AParam = 0 then
         begin
-          Index := FindCMSWebsiteItem(CMSWebsiteName);
-          if not(Index = -1) then
-            FWebsiteList.Delete(Index);
+          LIndex := FindCMSWebsiteItem(LCMSWebsiteName);
+          if not(LIndex = -1) then
+            FWebsiteList.Delete(LIndex);
         end
         else
         begin
-          Index := FindCMSWebsiteItem(CMSWebsiteName);
-          if (Index = -1) then
+          LIndex := FindCMSWebsiteItem(LCMSWebsiteName);
+          if (LIndex = -1) then
           begin
-            Index := CMSWebsiteItemToInternalIndex(FindNextEnabledCMSWebsiteItem(CMSWebsiteIndex + 1));
-            if (Index = -1) then
-              FWebsiteList.Add(CreateNewWebsiteContainer(CMSWebsiteIndex))
+            LIndex := CMSWebsiteItemToInternalIndex(FindNextEnabledCMSWebsiteItem(LCMSWebsiteIndex + 1));
+            if (LIndex = -1) then
+              FWebsiteList.Add(CreateNewWebsiteContainer(LCMSWebsiteIndex))
             else
-              FWebsiteList.Insert(Index, CreateNewWebsiteContainer(CMSWebsiteIndex));
+              FWebsiteList.Insert(LIndex, CreateNewWebsiteContainer(LCMSWebsiteIndex));
           end;
         end;
       end;
@@ -1616,7 +1616,7 @@ begin
   end;
 end;
 
-function TIPublishController.FindCMSContainer(AName: WideString): Integer;
+function TIPublishController.FindCMSContainer(const AName: WideString): Integer;
 var
   I: Integer;
 begin

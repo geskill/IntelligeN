@@ -22,11 +22,11 @@ type
     FStartSelectedItem: string;
 
     function GetDescription: string;
-    procedure SetDescription(ADescription: string);
+    procedure SetDescription(const ADescription: string);
     function GetItems: TStrings;
     procedure SetItems(AItems: TStrings);
     function GetSelectedItem: string;
-    procedure SetSelectedItem(ASelectedItem: string);
+    procedure SetSelectedItem(const ASelectedItem: string);
   public
     property Description: string read GetDescription write SetDescription;
     property Items: TStrings read GetItems write SetItems;
@@ -61,7 +61,7 @@ begin
   Result := Label1.Caption;
 end;
 
-procedure TSelectDialog.SetDescription(ADescription: string);
+procedure TSelectDialog.SetDescription(const ADescription: string);
 begin
   Label1.Caption := ADescription;
 end;
@@ -81,7 +81,7 @@ begin
   Result := cxCOBSelect.Text;
 end;
 
-procedure TSelectDialog.SetSelectedItem(ASelectedItem: string);
+procedure TSelectDialog.SetSelectedItem(const ASelectedItem: string);
 begin
   FStartSelectedItem := ASelectedItem;
   cxCOBSelect.Text := ASelectedItem;
