@@ -69,8 +69,6 @@ object fPublish: TfPublish
           end>
         Properties.ReadOnly = True
         Properties.OnButtonClick = tvValuesColumn2PropertiesButtonClick
-        SortIndex = 0
-        SortOrder = soDescending
         Width = 647
       end
     end
