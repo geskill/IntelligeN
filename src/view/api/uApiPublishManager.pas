@@ -210,6 +210,11 @@ begin
           Inc(LRepeatIndex);
           // LRepeatIndex = 1, 2, 3
 
+          if InBlackList then
+          begin
+            Exit;
+          end;
+
         until (LSuccess or (LRepeatIndex > Data.PublishRetry));
 
       finally

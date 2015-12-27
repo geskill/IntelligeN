@@ -570,3 +570,5 @@
 ######minor enhancements
 
 * Improved default crawled values
+
+* Fixed issue doing PublishRetry if job canceled
