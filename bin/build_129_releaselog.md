@@ -572,3 +572,6 @@
 * Improved default crawled values
 
 * Fixed issue doing PublishRetry if job canceled
+
+* Fixed UpdateSystem FilePathAppendix
+
