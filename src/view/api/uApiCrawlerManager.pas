@@ -99,30 +99,72 @@ end;
 procedure TCrawlerThread.UpdateControlValues;
 var
   LControlIndex: Integer;
+  LControl: IControlBasic;
 
   LControlBase: IControlBase;
   LCrawledControlProposedValueIndex: Integer;
+
+  LHasValue: Boolean;
 begin
   for LControlIndex := 0 to Data.ControlController.ControlCount - 1 do
-    with Data.ControlController.Control[LControlIndex] do
-    begin
-      LControlBase := FControlControllerBase.FindControl(ControlID);
-      try
-        if Assigned(LControlBase) then
+  begin
+    LControl := Data.ControlController.Control[LControlIndex];
+    LControlBase := FControlControllerBase.FindControl(LControl.ControlID);
+    try
+      if Assigned(LControlBase) then
+      begin
+        // Store all data from the crawler plugins stored in the virtual controls, in the "real" controls
+        for LCrawledControlProposedValueIndex := 0 to LControlBase.ProposedValuesCount - 1 do
         begin
-          // Store all data from the crawler plugins stored in the virtual controls, in the "real" controls
-          for LCrawledControlProposedValueIndex := 0 to LControlBase.ProposedValuesCount - 1 do
-          begin
-            AddProposedValue(LControlBase.GetProposedValueSender(LCrawledControlProposedValueIndex), LControlBase.GetProposedValue(LCrawledControlProposedValueIndex), LControlBase.GetProposedValueTitle(LCrawledControlProposedValueIndex));
-          end;
-
-          // Set "real" control value
-          Value := LControlBase.Value;
+          LControl.AddProposedValue(LControlBase.GetProposedValueSender(LCrawledControlProposedValueIndex), LControlBase.GetProposedValue(LCrawledControlProposedValueIndex), LControlBase.GetProposedValueTitle(LCrawledControlProposedValueIndex));
         end;
-      finally
-        LControlBase := nil;
+
+        // Set "real" control value
+        if Supports(LControl, IControlComboBoxList) then
+        begin
+          LHasValue := (LControl as IControlComboBoxList).HasControlValue(LControlBase.Value);
+          if LHasValue then
+            LControl.Value := LControlBase.Value
+          else
+          begin
+            for LCrawledControlProposedValueIndex := 0 to LControlBase.ProposedValuesCount - 1 do
+            begin
+              LHasValue := (LControl as IControlComboBoxList).HasControlValue(LControlBase.GetProposedValue(LCrawledControlProposedValueIndex));
+              if LHasValue then
+              begin
+                LControl.Value := LControlBase.GetProposedValue(LCrawledControlProposedValueIndex);
+                break;
+              end;
+            end;
+          end;
+        end
+        else if Supports(LControl, IControlCheckComboBox) then
+        begin
+          LHasValue := (LControl as IControlCheckComboBox).HasControlValue(LControlBase.Value);
+          if LHasValue then
+            LControl.Value := LControlBase.Value
+          else
+          begin
+            for LCrawledControlProposedValueIndex := 0 to LControlBase.ProposedValuesCount - 1 do
+            begin
+              LHasValue := (LControl as IControlCheckComboBox).HasControlValue(LControlBase.GetProposedValue(LCrawledControlProposedValueIndex));
+              if LHasValue then
+              begin
+                LControl.Value := LControlBase.GetProposedValue(LCrawledControlProposedValueIndex);
+                break;
+              end;
+            end;
+          end;
+        end
+        else
+        begin
+          LControl.Value := LControlBase.Value;
+        end;
       end;
+    finally
+      LControlBase := nil;
     end;
+  end;
 end;
 
 procedure TCrawlerThread.CallCrawlingFinished;

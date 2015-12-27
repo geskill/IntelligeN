@@ -127,14 +127,14 @@ type
     procedure SetDirectlinksPanel(ADirectlinksPanel: IDirectlinksPanel);
     procedure SetSize(ASize: Double);
     procedure SetPartSize(APartSize: Double);
-    function GetHoster(AShortName: Boolean): WideString; overload;
+    function GetHoster(AShortName: WordBool): WideString; overload;
     function GetLinksInfo: TLinksInfo;
     procedure SetLinksInfo(ALinksInfo: TLinksInfo);
     function GetTitle: WideString;
     procedure SetTitle(const ATitle: WideString);
     procedure SetValue(const AValue: WideString);
-    function GetFocus: Boolean;
-    procedure SetFocus(AFocus: Boolean);
+    function GetFocus: WordBool;
+    procedure SetFocus(AFocus: WordBool);
     function GetErrorMsg: WideString;
     procedure SetErrorMsg(const AErrorMsg: WideString);
     procedure ResetErrorMsg();
@@ -163,7 +163,7 @@ type
     property LinksInfo: TLinksInfo read GetLinksInfo write SetLinksInfo;
 
     property Title: WideString read GetTitle write SetTitle;
-    property Focus: Boolean read GetFocus write SetFocus;
+    property Focus: WordBool read GetFocus write SetFocus;
     property ErrorMsg: WideString read GetErrorMsg write SetErrorMsg;
 
     procedure Mody;
@@ -220,11 +220,11 @@ type
     function GetCrypterFolderInfo: TCrypterFolderInfo;
     procedure SetCrypterFolderInfo(ACrypterFolderInfo: TCrypterFolderInfo);
 
-    function GetVisible: Boolean;
-    procedure SetVisible(AVisible: Boolean);
+    function GetVisible: WordBool;
+    procedure SetVisible(AVisible: WordBool);
 
-    function GetFocus: Boolean;
-    procedure SetFocus(AFocus: Boolean);
+    function GetFocus: WordBool;
+    procedure SetFocus(AFocus: WordBool);
 
     function GetErrorMsg: WideString;
     procedure SetErrorMsg(const AErrorMsg: WideString);
@@ -254,12 +254,12 @@ type
 
     property CrypterFolderInfo: TCrypterFolderInfo read GetCrypterFolderInfo write SetCrypterFolderInfo;
 
-    property Visible: Boolean read GetVisible write SetVisible;
-    property Focus: Boolean read GetFocus write SetFocus;
+    property Visible: WordBool read GetVisible write SetVisible;
+    property Focus: WordBool read GetFocus write SetFocus;
     property ErrorMsg: WideString read GetErrorMsg write SetErrorMsg;
 
     procedure CreateFolder;
-    procedure CheckFolder(const AUseCheckDelay: Boolean = False);
+    procedure CheckFolder(const AUseCheckDelay: WordBool = False);
 
     // Cloning
     function CloneInstance(): ICrypter;
@@ -307,10 +307,10 @@ type
     function GetActiveDirectlinkIndex: Integer;
     function GetActiveDirectlink: IDirectlinksMirror;
 
-    function GetVisible: Boolean;
-    procedure SetVisible(AVisible: Boolean);
-    function GetFocus: Boolean;
-    procedure SetFocus(AFocus: Boolean);
+    function GetVisible: WordBool;
+    procedure SetVisible(AVisible: WordBool);
+    function GetFocus: WordBool;
+    procedure SetFocus(AFocus: WordBool);
     function GetErrorMsg: WideString;
   public
     constructor Create(AOwner: TComponent; AMirrorControl: IMirrorControl);
@@ -335,8 +335,8 @@ type
     property ActiveMirrorIndex: Integer read GetActiveDirectlinkIndex;
     property ActiveMirror: IDirectlinksMirror read GetActiveDirectlink;
 
-    property Visible: Boolean read GetVisible write SetVisible;
-    property Focus: Boolean read GetFocus write SetFocus;
+    property Visible: WordBool read GetVisible write SetVisible;
+    property Focus: WordBool read GetFocus write SetFocus;
     property ErrorMsg: WideString read GetErrorMsg;
 
     function Add(const ALinks: WideString = ''): Integer;
@@ -425,8 +425,8 @@ type
     procedure SetWidth(AWidth: Integer);
     function GetHeight: Integer;
     procedure SetHeight(AHeight: Integer);
-    function GetFocus: Boolean;
-    procedure SetFocus(AFocus: Boolean);
+    function GetFocus: WordBool;
+    procedure SetFocus(AFocus: WordBool);
   public
     constructor Create(const AOwner: TWinControl; ALeft: Integer = 0; ATop: Integer = 0);
     destructor Destroy; override;
@@ -460,9 +460,10 @@ type
     property Top: Integer read GetTop write SetTop;
     property Width: Integer read GetWidth write SetWidth;
     property Height: Integer read GetHeight write SetHeight;
+    property Focus: WordBool read GetFocus write SetFocus;
 
     function AddCrypter(const AName: WideString): Integer;
-    function RemoveCrypter(AIndex: Integer): Boolean;
+    function RemoveCrypter(AIndex: Integer): WordBool;
 
     procedure UpdateErrorMsg(const AName, AErrorMsg: WideString);
 
@@ -1005,7 +1006,7 @@ begin
   end;
 end;
 
-function TMycxTabSheet.GetHoster(AShortName: Boolean): WideString;
+function TMycxTabSheet.GetHoster(AShortName: WordBool): WideString;
 var
   LFileIndex: Integer;
   LHost, LNormalizedHost: string;
@@ -1081,7 +1082,7 @@ begin
   Result := FMycxRichEdit.Focused;
 end;
 
-procedure TMycxTabSheet.SetFocus(AFocus: Boolean);
+procedure TMycxTabSheet.SetFocus(AFocus: WordBool);
 begin
   if AFocus and FMycxRichEdit.CanFocusEx then
     FMycxRichEdit.SetFocus;
@@ -1734,22 +1735,22 @@ begin
   end;
 end;
 
-function TCrypterPanel.GetVisible;
+function TCrypterPanel.GetVisible: WordBool;
 begin
   Result := FPanel.Visible;
 end;
 
-procedure TCrypterPanel.SetVisible(AVisible: Boolean);
+procedure TCrypterPanel.SetVisible(AVisible: WordBool);
 begin
   FPanel.Visible := AVisible;
 end;
 
-function TCrypterPanel.GetFocus: Boolean;
+function TCrypterPanel.GetFocus: WordBool;
 begin
   Result := FcxTextEditLink.Focused;
 end;
 
-procedure TCrypterPanel.SetFocus(AFocus: Boolean);
+procedure TCrypterPanel.SetFocus(AFocus: WordBool);
 begin
   if AFocus and FcxTextEditLink.CanFocusEx then
     FcxTextEditLink.SetFocus;
@@ -1867,7 +1868,7 @@ begin
   MirrorControl.MirrorController.TabSheetController.PageController.CrypterManager.AddCrypterJob(Self);
 end;
 
-procedure TCrypterPanel.CheckFolder(const AUseCheckDelay: Boolean = False);
+procedure TCrypterPanel.CheckFolder(const AUseCheckDelay: WordBool = False);
 begin
   MirrorControl.MirrorController.TabSheetController.PageController.CrypterManager.AddCrypterCheckJob(Self, AUseCheckDelay);
 end;
@@ -2051,22 +2052,22 @@ begin
   Result := Directlink[ActiveMirrorIndex];
 end;
 
-function TDirectlinksPanel.GetVisible;
+function TDirectlinksPanel.GetVisible: WordBool;
 begin
   Result := FcxPageControl.Visible;
 end;
 
-procedure TDirectlinksPanel.SetVisible(AVisible: Boolean);
+procedure TDirectlinksPanel.SetVisible(AVisible: WordBool);
 begin
   FcxPageControl.Visible := AVisible;
 end;
 
-function TDirectlinksPanel.GetFocus: Boolean;
+function TDirectlinksPanel.GetFocus: WordBool;
 begin
   Result := Directlink[ActiveMirrorIndex].Focus;
 end;
 
-procedure TDirectlinksPanel.SetFocus(AFocus: Boolean);
+procedure TDirectlinksPanel.SetFocus(AFocus: WordBool);
 begin
   Directlink[ActiveMirrorIndex].Focus := AFocus;
 end;
@@ -2605,7 +2606,7 @@ begin
     FcxButtonCrypt.Top := AHeight - 26;
 end;
 
-function TMirrorControl.GetFocus: Boolean;
+function TMirrorControl.GetFocus: WordBool;
 begin
   if TabIndex = 0 then
     Result := GetDirectlink.Focus
@@ -2613,7 +2614,7 @@ begin
     Result := Crypter[TabIndex - 1].Focus;
 end;
 
-procedure TMirrorControl.SetFocus(AFocus: Boolean);
+procedure TMirrorControl.SetFocus(AFocus: WordBool);
 begin
   if AFocus then
     if TabIndex = 0 then

@@ -148,7 +148,7 @@ function TThaliaDe.InternalExecute;
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := 'data-image="(.*?)"';
+          Expression := 'data-zoom-image="(.*?)"';
 
           if Exec(InputString) then
           begin
@@ -162,7 +162,7 @@ function TThaliaDe.InternalExecute;
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := '<dt>\s+Sprache.*?d>(.*?)<\/';
+          Expression := '<td>Sprache.*?<td>(.*?)<\/';
 
           if Exec(InputString) then
           begin
@@ -204,7 +204,7 @@ function TThaliaDe.InternalExecute;
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := '<dt>\s+Genre.*?d>(.*?)<\/';
+          Expression := '<td>Genre.*?<td>(.*?)<\/';
 
           if Exec(InputString) then
           begin
@@ -231,7 +231,7 @@ function TThaliaDe.InternalExecute;
             end
             else
             begin
-              AControlController.FindControl(cGenre).AddProposedValue(GetName, s);
+              AControlController.FindControl(cGenre).AddProposedValue(GetName, Trim(s));
             end;
           end;
         finally
@@ -242,7 +242,7 @@ function TThaliaDe.InternalExecute;
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := '<dt>\s+Spieldauer.*?d>(.*?) Minuten';
+          Expression := '<td>Spieldauer.*?<td>(.*?) Minuten';
 
           if Exec(InputString) then
             AControlController.FindControl(cRuntime).AddProposedValue(GetName, Trim(Match[1]));

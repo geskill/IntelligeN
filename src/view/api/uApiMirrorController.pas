@@ -62,7 +62,7 @@ type
     procedure Insert(Index: Integer; const Item: IMirrorControl); overload;
     function Insert(Index: Integer): IMirrorControl; overload;
     procedure Move(CurIndex, NewIndex: Integer);
-    function Remove(Index: Integer): Boolean;
+    function Remove(Index: Integer): WordBool;
 
     // Cloning
     function CloneInstance(): IMirrorControllerBase;
@@ -232,7 +232,7 @@ begin
   FMirrorList.Move(CurIndex, NewIndex);
 end;
 
-function TMirrorController.Remove(Index: Integer): Boolean;
+function TMirrorController.Remove(Index: Integer): WordBool;
 var
   I: Integer;
 begin

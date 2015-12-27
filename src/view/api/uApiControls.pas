@@ -67,8 +67,8 @@ type
     procedure SetControlHeight(const AHeight: Integer);
     function GetControlHint: WideString;
     procedure SetControlHint(const AHint: WideString);
-    function GetControlFocus: Boolean; virtual;
-    procedure SetControlFocus(const AFocus: Boolean); virtual;
+    function GetControlFocus: WordBool; virtual;
+    procedure SetControlFocus(const AFocus: WordBool); virtual;
     procedure ControlOnDrop(AText: PWideChar);
     procedure ControlOnChange(ASender: TObject); virtual;
     procedure ControlOnEnter(ASender: TObject); virtual;
@@ -101,7 +101,7 @@ type
     property Width: Integer read GetControlWidth write SetControlWidth;
     property Height: Integer read GetControlHeight write SetControlHeight;
     property Hint: WideString read GetControlHint write SetControlHint;
-    property Focus: Boolean read GetControlFocus write SetControlFocus;
+    property Focus: WordBool read GetControlFocus write SetControlFocus;
 
     // Base
     property Value: WideString read GetValue { . } write SetValue;
@@ -150,15 +150,19 @@ type
   end;
 
   TIControlComboBoxList = class(TIControlComboBox, IControlComboBoxList)
+  private
+    function GetCustomisedComponentValue(const AValue: string): string;
   protected
     // Internal
     procedure SetControlValue(const AValue: WideString); override;
+    function HasControlValue(const AValue: WideString): WordBool;
   public
     constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
   TIControlCheckComboBox = class(TIControlBasic, IControlCheckComboBox)
   private
+    function GetCustomisedComponentValue(const AValue: string): string;
     function InternalIndexOf(const AStr: string): Integer;
   protected
     // GUI
@@ -171,6 +175,7 @@ type
     function GetControl: TcxCustomTextEdit; override;
     function GetControlValue: WideString; override;
     procedure SetControlValue(const AValue: WideString); override;
+    function HasControlValue(const AValue: WideString): WordBool;
     procedure LoadDefaultConfiguration; override;
   public
     constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
@@ -613,7 +618,7 @@ begin
   Result := GetControl.Focused;
 end;
 
-procedure TIControlBasic.SetControlFocus(const AFocus: Boolean);
+procedure TIControlBasic.SetControlFocus(const AFocus: WordBool);
 begin
   if AFocus and GetControl.CanFocusEx then
     GetControl.SetFocus;
@@ -935,9 +940,19 @@ end;
 { ****************************************************************************** }
 {$REGION 'TIControlComboBoxList'}
 
+function TIControlComboBoxList.GetCustomisedComponentValue(const AValue: string): string;
+begin
+  Result := SettingsManager.Settings.Controls.GetCustomisedComponentValue(ControlID, TypeID, AValue);
+end;
+
 procedure TIControlComboBoxList.SetControlValue(const AValue: WideString);
 begin
-  inherited SetControlValue(SettingsManager.Settings.Controls.GetCustomisedComponentValue(ControlID, TypeID, AValue));
+  inherited SetControlValue(GetCustomisedComponentValue(AValue));
+end;
+
+function TIControlComboBoxList.HasControlValue(const AValue: WideString): WordBool;
+begin
+  Result := not SameStr('', GetCustomisedComponentValue(AValue));
 end;
 
 constructor TIControlComboBoxList.Create;
@@ -966,26 +981,31 @@ end;
 { ****************************************************************************** }
 {$REGION 'TIControlCheckComboBox'}
 
+function TIControlCheckComboBox.GetCustomisedComponentValue(const AValue: string): string;
+begin
+  Result := SettingsManager.Settings.Controls.GetCustomisedComponentValue(ControlID, TypeID, AValue);
+end;
+
 function TIControlCheckComboBox.InternalIndexOf(const AStr: string): Integer;
 var
-  _Index, _Count: Integer;
-  _Found: Boolean;
+  LIndex, LCount: Integer;
+  LFound: Boolean;
 begin
   Result := -1;
 
-  _Index := 0;
-  _Found := False;
-  _Count := FCheckComboBox.Properties.Items.Count;
+  LIndex := 0;
+  LFound := False;
+  LCount := FCheckComboBox.Properties.Items.Count;
 
-  while (_Index < _Count) and not _Found do
+  while (LIndex < LCount) and not LFound do
   begin
-    _Found := SameStr(FCheckComboBox.Properties.Items.Items[_Index].Description, AStr);
-    if not _Found then
-      Inc(_Index);
+    LFound := SameStr(FCheckComboBox.Properties.Items.Items[LIndex].Description, AStr);
+    if not LFound then
+      Inc(LIndex);
   end;
 
-  if _Found then
-    Result := _Index;
+  if LFound then
+    Result := LIndex;
 end;
 
 function TIControlCheckComboBox.GetDropDownRows;
@@ -1044,16 +1064,36 @@ end;
 
 procedure TIControlCheckComboBox.SetControlValue(const AValue: WideString);
 var
-  I, findex: Integer;
+  LIndex, LValueIndex: Integer;
 begin
   with SplittString(';', AValue) do
     try
-      for I := 0 to Count - 1 do
+      for LIndex := 0 to Count - 1 do
       begin
-        findex := InternalIndexOf(SettingsManager.Settings.Controls.GetCustomisedComponentValue(ControlID, TypeID, PChar(Strings[I])));
+        LValueIndex := InternalIndexOf(GetCustomisedComponentValue(Strings[LIndex]));
 
-        if findex <> -1 then
-          FCheckComboBox.States[findex] := cbsChecked;
+        if LValueIndex <> -1 then
+          FCheckComboBox.States[LValueIndex] := cbsChecked;
+      end;
+    finally
+      Free;
+    end;
+end;
+
+function TIControlCheckComboBox.HasControlValue(const AValue: WideString): WordBool;
+var
+  LIndex, LValueIndex: Integer;
+begin
+  Result := False;
+
+  with SplittString(';', AValue) do
+    try
+      for LIndex := 0 to Count - 1 do
+      begin
+        LValueIndex := InternalIndexOf(GetCustomisedComponentValue(Strings[LIndex]));
+
+        if LValueIndex <> -1 then
+          Exit(True);
       end;
     finally
       Free;

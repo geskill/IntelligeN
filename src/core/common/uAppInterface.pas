@@ -105,8 +105,8 @@ type
     procedure SetControlHeight(const AHeight: Integer);
     function GetControlHint: WideString;
     procedure SetControlHint(const AHint: WideString);
-    function GetControlFocus: Boolean;
-    procedure SetControlFocus(const AFocus: Boolean);
+    function GetControlFocus: WordBool;
+    procedure SetControlFocus(const AFocus: WordBool);
 
     // Additional
     function GetControlController: IControlController;
@@ -124,7 +124,7 @@ type
     property Width: Integer read GetControlWidth write SetControlWidth;
     property Height: Integer read GetControlHeight write SetControlHeight;
     property Hint: WideString read GetControlHint write SetControlHint;
-    property Focus: Boolean read GetControlFocus write SetControlFocus;
+    property Focus: WordBool read GetControlFocus write SetControlFocus;
 
     // Base
     property Value: WideString read GetValue { . } write SetValue;
@@ -157,10 +157,13 @@ type
 
   IControlComboBoxList = interface(IControlComboBox)
     ['{06F8C809-6FF0-4CC8-B057-F42802759581}']
+    function HasControlValue(const AValue: WideString): WordBool;
   end;
 
   IControlCheckComboBox = interface(IControlBasic)
     ['{5F2E9174-0AB9-4936-94E1-7021F79EB4BC}']
+    function HasControlValue(const AValue: WideString): WordBool;
+
     function GetDropDownRows: Integer;
     procedure SetDropDownRows(ADropDownRows: Integer);
     function GetList: WideString;
@@ -312,7 +315,7 @@ type
     procedure SetSize(ASize: Double);
     procedure SetPartSize(APartSize: Double);
 
-    function GetHoster(AShortName: Boolean): WideString; overload;
+    function GetHoster(AShortName: WordBool): WideString; overload;
 
     function GetLinksInfo: TLinksInfo;
     procedure SetLinksInfo(ALinksInfo: TLinksInfo);
@@ -322,8 +325,8 @@ type
 
     procedure SetValue(const AValue: WideString);
 
-    function GetFocus: Boolean;
-    procedure SetFocus(AFocus: Boolean);
+    function GetFocus: WordBool;
+    procedure SetFocus(AFocus: WordBool);
 
     function GetErrorMsg: WideString;
     procedure SetErrorMsg(const AErrorMsg: WideString);
@@ -347,7 +350,7 @@ type
     property LinksInfo: TLinksInfo read GetLinksInfo write SetLinksInfo;
 
     property Title: WideString read GetTitle write SetTitle;
-    property Focus: Boolean read GetFocus write SetFocus;
+    property Focus: WordBool read GetFocus write SetFocus;
     property ErrorMsg: WideString read GetErrorMsg write SetErrorMsg;
 
     // Cloning
@@ -366,11 +369,11 @@ type
     function GetActiveDirectlinkIndex: Integer;
     function GetActiveDirectlink: IDirectlinksMirror;
 
-    function GetVisible: Boolean;
-    procedure SetVisible(AVisible: Boolean);
+    function GetVisible: WordBool;
+    procedure SetVisible(AVisible: WordBool);
 
-    function GetFocus: Boolean;
-    procedure SetFocus(AFocus: Boolean);
+    function GetFocus: WordBool;
+    procedure SetFocus(AFocus: WordBool);
 
     function GetErrorMsg: WideString;
 
@@ -388,8 +391,8 @@ type
 
     property FileName: WideString read GetFileName;
 
-    property Visible: Boolean read GetVisible write SetVisible;
-    property Focus: Boolean read GetFocus write SetFocus;
+    property Visible: WordBool read GetVisible write SetVisible;
+    property Focus: WordBool read GetFocus write SetFocus;
     property ErrorMsg: WideString read GetErrorMsg;
 
     // Cloning
@@ -412,11 +415,11 @@ type
     function GetCrypterFolderInfo: TCrypterFolderInfo;
     procedure SetCrypterFolderInfo(ACrypterFolderInfo: TCrypterFolderInfo);
 
-    function GetVisible: Boolean;
-    procedure SetVisible(AVisible: Boolean);
+    function GetVisible: WordBool;
+    procedure SetVisible(AVisible: WordBool);
 
-    function GetFocus: Boolean;
-    procedure SetFocus(AFocus: Boolean);
+    function GetFocus: WordBool;
+    procedure SetFocus(AFocus: WordBool);
 
     function GetErrorMsg: WideString;
     procedure SetErrorMsg(const AErrorMsg: WideString);
@@ -438,10 +441,10 @@ type
     property CrypterFolderInfo: TCrypterFolderInfo read GetCrypterFolderInfo write SetCrypterFolderInfo;
 
     procedure CreateFolder;
-    procedure CheckFolder(const AUseCheckDelay: Boolean = False);
+    procedure CheckFolder(const AUseCheckDelay: WordBool = False);
 
-    property Visible: Boolean read GetVisible write SetVisible;
-    property Focus: Boolean read GetFocus write SetFocus;
+    property Visible: WordBool read GetVisible write SetVisible;
+    property Focus: WordBool read GetFocus write SetFocus;
     property ErrorMsg: WideString read GetErrorMsg write SetErrorMsg;
 
     // Cloning
@@ -475,8 +478,8 @@ type
     procedure SetWidth(AWidth: Integer);
     function GetHeight: Integer;
     procedure SetHeight(AHeight: Integer);
-    function GetFocus: Boolean;
-    procedure SetFocus(AFocus: Boolean);
+    function GetFocus: WordBool;
+    procedure SetFocus(AFocus: WordBool);
 
     // Base
     property Directlink[const Index: Integer]: IDirectlinksMirror read GetDirectlink;
@@ -494,10 +497,10 @@ type
     property Top: Integer read GetTop write SetTop;
     property Width: Integer read GetWidth write SetWidth;
     property Height: Integer read GetHeight write SetHeight;
-    property Focus: Boolean read GetFocus write SetFocus;
+    property Focus: WordBool read GetFocus write SetFocus;
 
     function AddCrypter(const AName: WideString): Integer;
-    function RemoveCrypter(AIndex: Integer): Boolean;
+    function RemoveCrypter(AIndex: Integer): WordBool;
 
     procedure UpdateErrorMsg(const AName, AErrorMsg: WideString);
 
@@ -534,7 +537,7 @@ type
     procedure Insert(Index: Integer; const Item: IMirrorControl); overload;
     function Insert(Index: Integer): IMirrorControl; overload;
     procedure Move(CurIndex, NewIndex: Integer);
-    function Remove(Index: Integer): Boolean;
+    function Remove(Index: Integer): WordBool;
 
     // Cloning
     function CloneInstance(): IMirrorControllerBase;
@@ -604,7 +607,7 @@ type
     procedure SetTopIndex(ATopIndex: Integer);
     function GetIndex: Integer;
     procedure SetIndex(AIndex: Integer);
-    function GetActive: Boolean;
+    function GetActive: WordBool;
 
     function GetWebsite: WideString;
 
@@ -622,7 +625,7 @@ type
     property Name: WideString read GetName;
     property TopIndex: Integer read GetTopIndex write SetTopIndex;
     property Index: Integer read GetIndex write SetIndex;
-    property Active: Boolean read GetActive;
+    property Active: WordBool read GetActive;
 
     function CheckIScript(const AIScript: WideString): RIScriptResult;
     function ParseIScript(const AIScript: WideString; AIScriptType: TIScriptType = itMessage): RIScriptResult;

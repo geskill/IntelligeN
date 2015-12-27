@@ -210,7 +210,7 @@ type
     procedure SetTopIndex(ATopIndex: Integer);
     function GetIndex: Integer;
     procedure SetIndex(AIndex: Integer);
-    function GetActive: Boolean;
+    function GetActive: WordBool;
     function GetEnabled: Boolean;
     function GetAccountName: WideString;
     procedure SetAccountName(const AAccountName: WideString);
@@ -237,7 +237,7 @@ type
     property Name: WideString read GetName;
     property TopIndex: Integer read GetTopIndex write SetTopIndex;
     property Index: Integer read GetIndex write SetIndex;
-    property Active: Boolean read GetActive;
+    property Active: WordBool read GetActive;
     property Enabled: Boolean read GetEnabled;
     property AccountName: WideString read GetAccountName write SetAccountName;
     property AccountPassword: WideString read GetAccountPassword write SetAccountPassword;
@@ -1113,7 +1113,7 @@ begin
   FIndex := AIndex;
 end;
 
-function TICMSWebsiteContainer.GetActive: Boolean;
+function TICMSWebsiteContainer.GetActive: WordBool;
 begin
   if FActiveChanged then
   begin
