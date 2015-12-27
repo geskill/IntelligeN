@@ -52,17 +52,17 @@ type
     function GetViewType: TTabViewType;
     procedure SetViewType(AViewType: TTabViewType);
     function GetFileName: WideString;
-    procedure SetFileName(AFileName: WideString);
+    procedure SetFileName(const AFileName: WideString);
     function GetFileType: WideString;
-    procedure SetFileType(AFileType: WideString);
+    procedure SetFileType(const AFileType: WideString);
     function GetReleaseName: WideString;
-    procedure SetReleaseName(AReleaseName: WideString);
+    procedure SetReleaseName(const AReleaseName: WideString);
     function GetReleaseNameShort: WideString;
     function GetDataChanged: Boolean;
     procedure SetDataChanged(ADataChanged: Boolean);
     function GetTypeID: TTypeID;
     function GetActiveWebsite: WideString;
-    procedure SetActiveWebsite(AWebsite: WideString);
+    procedure SetActiveWebsite(const AWebsite: WideString);
 
     procedure UpdateCaption;
 
@@ -95,9 +95,9 @@ type
     property ReleaseName: WideString read GetReleaseName write SetReleaseName;
     property ReleaseNameShort: WideString read GetReleaseNameShort;
 
-    procedure Save(AFileName, AFileType: WideString);
+    procedure Save(const AFileName, AFileType: WideString);
     procedure Initialized(); overload;
-    procedure Initialized(AFileName, AFileType: WideString); overload;
+    procedure Initialized(const AFileName, AFileType: WideString); overload;
     procedure ResetControlFocused();
 
     property DataChanged: Boolean read GetDataChanged write SetDataChanged;
@@ -129,7 +129,7 @@ begin
     FHandler(AReleaseName);
 end;
 
-function MinimizeReleaseName(AReleaseName: string; AMaxLength: Integer): string;
+function MinimizeReleaseName(const AReleaseName: string; AMaxLength: Integer): string;
 begin
   if length(AReleaseName) > AMaxLength then
     Result := copy(AReleaseName, 1, AMaxLength) + '...'
@@ -193,7 +193,7 @@ begin
   Result := FFileName;
 end;
 
-procedure TTabSheetController.SetFileName(AFileName: WideString);
+procedure TTabSheetController.SetFileName(const AFileName: WideString);
 begin
   FFileName := AFileName;
 end;
@@ -203,7 +203,7 @@ begin
   Result := FFileType;
 end;
 
-procedure TTabSheetController.SetFileType(AFileType: WideString);
+procedure TTabSheetController.SetFileType(const AFileType: WideString);
 begin
   FFileType := AFileType;
 end;
@@ -213,7 +213,7 @@ begin
   Result := FReleaseName;
 end;
 
-procedure TTabSheetController.SetReleaseName(AReleaseName: WideString);
+procedure TTabSheetController.SetReleaseName(const AReleaseName: WideString);
 begin
   FReleaseName := AReleaseName;
   UpdateCaption;
@@ -249,7 +249,7 @@ begin
   Result := FDesignTabSheetItem.ActiveWebsite;
 end;
 
-procedure TTabSheetController.SetActiveWebsite(AWebsite: WideString);
+procedure TTabSheetController.SetActiveWebsite(const AWebsite: WideString);
 begin
   FDesignTabSheetItem.ActiveWebsite := AWebsite;
 end;
@@ -328,7 +328,7 @@ begin
   PublishController.OnUpdateCMSWebsiteList.Add(FIUpdateCMSWebsiteListEvent);
 end;
 
-procedure TTabSheetController.Save(AFileName: WideString; AFileType: WideString);
+procedure TTabSheetController.Save(const AFileName, AFileType: WideString);
 begin
   with SettingsManager.Settings.Plugins do
     TPluginBasic.SaveFile(FindPlugInCollectionItemFromCollection(AFileType, FileFormats), AFileName, GetTemplatesTypeFolder + TemplateFileName + '.xml', Self);
@@ -342,7 +342,7 @@ begin
   Initialized('', '');
 end;
 
-procedure TTabSheetController.Initialized(AFileName, AFileType: WideString);
+procedure TTabSheetController.Initialized(const AFileName, AFileType: WideString);
 begin
   FileName := AFileName;
   FileType := AFileType;

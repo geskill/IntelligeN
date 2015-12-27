@@ -75,8 +75,8 @@ type
     property TabSheetController: ITabSheetController read GetTabSheetController write SetTabSheetController;
     property TypeID: TTypeID read GetTypeID write SetTypeID;
 
-    procedure NewControl(AType: TControlID; ATitle, AValue, AHint, AList: WideString; ALeft, ATop, AWidth, AHeight: Integer); overload;
-    procedure NewControl(AClass: TIControlBasicMeta; AType: TControlID; ATitle, AValue, AHint, AList: WideString; ALeft, ATop, AWidth, AHeight: Integer); overload;
+    procedure NewControl(AType: TControlID; const ATitle, AValue, AHint, AList: WideString; ALeft, ATop, AWidth, AHeight: Integer); overload;
+    procedure NewControl(AClass: TIControlBasicMeta; AType: TControlID; const ATitle, AValue, AHint, AList: WideString; ALeft, ATop, AWidth, AHeight: Integer); overload;
 
     // Cloning
     function CloneInstance(): IControlControllerBase;
@@ -309,12 +309,12 @@ begin
   end;
 end;
 
-procedure TControlController.NewControl(AType: TControlID; ATitle, AValue, AHint, AList: WideString; ALeft: Integer; ATop: Integer; AWidth: Integer; AHeight: Integer);
+procedure TControlController.NewControl(AType: TControlID; const ATitle, AValue, AHint, AList: WideString; ALeft: Integer; ATop: Integer; AWidth: Integer; AHeight: Integer);
 begin
   NewControl(GetClassType(AType), AType, ATitle, AValue, AHint, AList, ALeft, ATop, AWidth, AHeight);
 end;
 
-procedure TControlController.NewControl(AClass: TIControlBasicMeta; AType: TControlID; ATitle, AValue, AHint, AList: WideString; ALeft: Integer; ATop: Integer; AWidth: Integer; AHeight: Integer);
+procedure TControlController.NewControl(AClass: TIControlBasicMeta; AType: TControlID; const ATitle, AValue, AHint, AList: WideString; ALeft: Integer; ATop: Integer; AWidth: Integer; AHeight: Integer);
 var
   LBasicControl: TIControlBasic;
   LBasicControlInterface: IControlBasic;

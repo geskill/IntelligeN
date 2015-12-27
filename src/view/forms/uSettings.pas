@@ -391,7 +391,7 @@ type
     FOnCrawlerContingentChange: Boolean;
     FAppPluginsCheckListBox, FCAPTCHAPluginsCheckListBox, FCMSPluginsCheckListBox, FCrawlerPluginsCheckListBox, FCrypterPluginsCheckListBox, FFileFormatsPluginsCheckListBox, FFileHosterPluginsCheckListBox,
       FImageHosterPluginsCheckListBox: TPluginsCheckListBox;
-    cxLBControlsItemsIndex: Integer;
+    FcxLBControlsItemsIndex: Integer;
 
     procedure AppClickCheck(Sender: TObject; AIndex: Integer; APrevState, ANewState: TcxCheckBoxState);
     procedure AddAppClick(Sender: TObject);
@@ -454,7 +454,6 @@ type
     procedure SetCMSCheckAllStatus;
     procedure RefreshAccountlist;
     procedure cxcobDefaultMirrorTabIndexItemsRefresh(ALoadFormSettings: Boolean = False);
-    function NewName(preName: string; Items: TcxCheckListBoxItems): string;
     procedure RefreshControlsValues;
     procedure ControlsValues(AControlsValues: TControlsValues);
     procedure ControlsItemsEdit;
@@ -465,7 +464,7 @@ type
   public
     procedure SetComponentStatusFromSettings;
     property CMSPluginsCheckListBox: TPluginsCheckListBox read FCMSPluginsCheckListBox write FCMSPluginsCheckListBox;
-    procedure AddCMSWebsite(AFileName, AWebsiteName, AWebsiteType: string);
+    procedure AddCMSWebsite(const AFileName, AWebsiteName, AWebsiteType: string);
   end;
 
 var
@@ -1242,7 +1241,7 @@ begin
   DatabaseCollectionItem := TDatabaseCollectionItem(SettingsManager.Settings.Database.Database.Add);
   with DatabaseCollectionItem do
   begin
-    name := NewName(StrNewDatabaseConnect, cxCLBDatabase.Items);
+    // Name := GenerateNewName(StrNewDatabaseConnect, cxCLBDatabase.Items);
   end;
   with cxCLBDatabase.Items.Add do
   begin
@@ -1309,7 +1308,7 @@ var
 begin
   with cxLVControlsTemplateType.Items do
     for I := 0 to Count - 1 do
-      Item[I].Selected := (Item[I].Selected = False);
+      Item[I].Selected := not(Item[I].Selected);
 end;
 
 procedure TSettings.lControlsTemplateTypeSwitchMouseEnter(Sender: TObject);
@@ -1479,31 +1478,31 @@ end;
 procedure TSettings.cxLBControlsItemsDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState; var Accept: Boolean);
 begin
   Accept := False;
-  cxLBControlsItemsIndex := cxLBControlsItems.ItemAtPos(Point(X, Y), True);
-  if (cxLBControlsItemsIndex <> -1) and (cxLBControlsItemsIndex <> cxLBControlsItems.ItemIndex) and (cxLBControlsItems.ItemIndex <> -1) then
+  FcxLBControlsItemsIndex := cxLBControlsItems.ItemAtPos(Point(X, Y), True);
+  if (FcxLBControlsItemsIndex <> -1) and (FcxLBControlsItemsIndex <> cxLBControlsItems.ItemIndex) and (cxLBControlsItems.ItemIndex <> -1) then
   begin
     Accept := True;
   end
   else
-    cxLBControlsItemsIndex := -1;
+    FcxLBControlsItemsIndex := -1;
 end;
 
 procedure TSettings.cxLBControlsItemsEndDrag(Sender, Target: TObject; X, Y: Integer);
 begin
-  if cxLBControlsItemsIndex <> -1 then
+  if FcxLBControlsItemsIndex <> -1 then
     with cxLBControlsItems do
     begin
       {
         SettingsManager.Settings.Controls.Controls[GetSelectedTemplateTypes(cxLVControlsTemplateType), TControlID(cxTCControls.TabIndex)].Items.Items[ItemIndex]
         .index := cxLBControlsItemsIndex;
         }
-      Items.Move(ItemIndex, cxLBControlsItemsIndex);
+      Items.Move(ItemIndex, FcxLBControlsItemsIndex);
       // Items[ItemIndex].Index := cxLBControlsItemsIndex;
 
-      Selected[cxLBControlsItemsIndex] := True;
+      Selected[FcxLBControlsItemsIndex] := True;
       // added: retain selection on dragged item
 
-      cxLBControlsItemsIndex := -1; // added: prevent further unwanted moves
+      FcxLBControlsItemsIndex := -1; // added: prevent further unwanted moves
     end;
 end;
 
@@ -1677,7 +1676,7 @@ begin
   cxPCControls.ActivePageIndex := 0;
   cxTCControls.TabIndex := -1;
 
-  cxLBControlsItemsIndex := -1;
+  FcxLBControlsItemsIndex := -1;
 
   pControlTemplateType.Left := internalGetTabControlTabWidth + 6;
   pControlTemplateType.Width := cxTCControls.Width - pControlTemplateType.Left - 6;
@@ -2860,7 +2859,7 @@ begin
   cxSEMaxHTTPLogEntries.Value := SettingsManager.Settings.Log.MaxHTTPLogEntries;
 end;
 
-procedure TSettings.AddCMSWebsite(AFileName, AWebsiteName, AWebsiteType: string);
+procedure TSettings.AddCMSWebsite(const AFileName, AWebsiteName, AWebsiteType: string);
 
   function FindRecordIndexByText(const AText: string): Integer;
   var
@@ -2903,7 +2902,6 @@ begin
     end;
   except
     raise Exception.Create('Failed to allocate cms');
-    Exit;
   end;
 
   with LCMSWebsitesCollectionItem do
@@ -2986,24 +2984,6 @@ begin
     else
       ItemIndex := Max(0, Properties.Items.IndexOf(_Text));
   end;
-end;
-
-function TSettings.NewName(preName: string; Items: TcxCheckListBoxItems): string;
-var
-  I, X: Integer;
-  found: Boolean;
-begin
-  X := 0;
-
-  repeat
-    found := False;
-    Inc(X);
-    for I := 0 to Items.Count - 1 do
-      if Items[I].Text = preName + IntToStr(X) then
-        found := True;
-  until found = False;
-
-  Result := preName + IntToStr(X);
 end;
 
 procedure TSettings.RefreshControlsValues;

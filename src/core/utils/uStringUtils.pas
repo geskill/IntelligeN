@@ -16,7 +16,7 @@ function MatchTextMask(const Mask, S: WideString; CaseSensitive: Boolean = False
 
 function StringListSplit(const AStrings: TStrings; ADelimiter: string): string;
 
-function SplittString(splitt: Char; S: string; AExact: Boolean = False): TStrings;
+function SplittString(splitt: Char; const S: string; AExact: Boolean = False): TStrings;
 
 function StringReplaceMultiple(const Source: string; const OldPatterns, NewPatterns: array of string; CaseSensitive: Boolean = True): string;
 
@@ -34,7 +34,7 @@ function ReduceCapitals(const Str: string): string;
 
 function ReduceWhitespace(const Str: string; AComplete: Boolean = False): string;
 
-function RemoveW(AHost: string): string;
+function RemoveW(const AHost: string): string;
 
 function Trim(const S: string; const C: Char): string; overload;
 
@@ -42,9 +42,9 @@ function TrimLeft(const S: string; const C: Char): string; overload;
 
 function TrimRight(const S: string; const C: Char): string; overload;
 
-function PadLeft(S: string; Ch: Char; Len: Integer): string;
+function PadLeft(const S: string; Ch: Char; Len: Integer): string;
 
-function PadRight(S: string; Ch: Char; Len: Integer): string;
+function PadRight(const S: string; Ch: Char; Len: Integer): string;
 
 implementation
 
@@ -152,7 +152,7 @@ begin
     Delete(Result, LEndPos, Length(ADelimiter));
 end;
 
-function SplittString(splitt: Char; S: string; AExact: Boolean = False): TStrings;
+function SplittString(splitt: Char; const S: string; AExact: Boolean = False): TStrings;
 var
   I: Integer;
 begin
@@ -405,7 +405,7 @@ begin
     end;
 end;
 
-function RemoveW(AHost: string): string;
+function RemoveW(const AHost: string): string;
 begin
   with TRegExpr.Create do
     try
@@ -460,7 +460,7 @@ begin
   Result := copy(S, 1, I);
 end;
 
-function PadLeft(S: string; Ch: Char; Len: Integer): string;
+function PadLeft(const S: string; Ch: Char; Len: Integer): string;
 var
   RestLen: Integer;
 begin
@@ -471,7 +471,7 @@ begin
   Result := StringOfChar(Ch, RestLen) + S;
 end;
 
-function PadRight(S: string; Ch: Char; Len: Integer): string;
+function PadRight(const S: string; Ch: Char; Len: Integer): string;
 var
   RestLen: Integer;
 begin

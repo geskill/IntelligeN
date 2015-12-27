@@ -39,7 +39,7 @@ type
   protected
     FHasError: Boolean;
     FErrorMsg: string;
-    procedure DefaultErrorHandler(AErrorMsg: string); override;
+    procedure DefaultErrorHandler(const AErrorMsg: string); override;
   public
     constructor Create(const APublishItem: IPublishItem; const APublishRetry: Integer); reintroduce;
     destructor Destroy; override;
@@ -151,7 +151,7 @@ end;
 
 { TPublishThread }
 
-procedure TPublishInnerThread.DefaultErrorHandler(AErrorMsg: string);
+procedure TPublishInnerThread.DefaultErrorHandler(const AErrorMsg: string);
 begin
   FHasError := True;
   FErrorMsg := AErrorMsg;
@@ -196,7 +196,7 @@ begin
         repeat
           with TApiThreadedPlugin.Create(task, DefaultErrorHandler) do
             try
-              LSuccess := CMSExec(Data.PublishItem);
+              LSuccess := AddArticle(Data.PublishItem);
             finally
               Free;
             end;

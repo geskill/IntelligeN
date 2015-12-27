@@ -411,6 +411,7 @@ begin
   FIMirror.Free;
   FfsScript.Free;
   FCMSWebsiteData := nil;
+  inherited Destroy;
 end;
 
 end.

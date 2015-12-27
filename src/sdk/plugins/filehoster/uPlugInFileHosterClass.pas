@@ -19,15 +19,15 @@ type
   TFileHosterPlugIn = class(TPlugIn, IFileHosterPlugIn)
   protected
     FCheckedLinksList: TList<TLinkInfo>;
-    procedure AddLink(ALink, AFileName: string; AStatus: TLinkStatus; ASize: Int64; AChecksum: string = ''; AChecksumType: TChecksumType = ctMD5);
+    procedure AddLink(const ALink, AFileName: string; AStatus: TLinkStatus; ASize: Int64; const AChecksum: string = ''; AChecksumType: TChecksumType = ctMD5);
   public
     constructor Create; override;
     destructor Destroy; override;
 
     function GetType: TPlugInType; override; safecall;
 
-    function CheckLink(AFile: WideString): TLinkInfo; virtual; safecall; abstract;
-    function CheckLinks(AFiles: WideString): Integer; virtual; safecall;
+    function CheckLink(const AFile: WideString): TLinkInfo; virtual; safecall; abstract;
+    function CheckLinks(const AFiles: WideString): Integer; virtual; safecall;
     function CheckedLink(AIndex: Integer): TLinkInfo; safecall;
   end;
 
@@ -35,7 +35,7 @@ implementation
 
 { TFileHosterPlugIn }
 
-procedure TFileHosterPlugIn.AddLink(ALink, AFileName: string; AStatus: TLinkStatus; ASize: Int64; AChecksum: string = ''; AChecksumType: TChecksumType = ctMD5);
+procedure TFileHosterPlugIn.AddLink(const ALink, AFileName: string; AStatus: TLinkStatus; ASize: Int64; const AChecksum: string = ''; AChecksumType: TChecksumType = ctMD5);
 var
   LinkInfo: TLinkInfo;
 begin
@@ -69,7 +69,7 @@ begin
   Result := ptFileHoster;
 end;
 
-function TFileHosterPlugIn.CheckLinks(AFiles: WideString): Integer;
+function TFileHosterPlugIn.CheckLinks(const AFiles: WideString): Integer;
 var
   _FileIndex: Integer;
 begin

@@ -19,7 +19,7 @@ uses
 type
   TIScriptFormatter = class
   public
-    class function Format(AInputStr: AnsiString): string;
+    class function Format(const AInputStr: AnsiString): string;
   end;
 
 implementation
@@ -47,7 +47,7 @@ end;
 
 { TIScriptFormatter }
 
-class function TIScriptFormatter.Format(AInputStr: AnsiString): string;
+class function TIScriptFormatter.Format(const AInputStr: AnsiString): string;
 var
   hLib: Cardinal;
   MStyleMain: TStyleMain;

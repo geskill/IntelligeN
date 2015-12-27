@@ -53,13 +53,13 @@ type
 /// </remarks>
 {$ENDREGION}
 
-function StringInTypeID(AStringTypeID: string): Boolean;
+function StringInTypeID(const AStringTypeID: string): Boolean;
 {$REGION 'Documentation'}
 /// <remarks>
 ///   Expects AStringTypeID in format "Audio" not "cAudio"
 /// </remarks>
 {$ENDREGION}
-function StringToTypeID(AStringTypeID: string): TTypeID;
+function StringToTypeID(const AStringTypeID: string): TTypeID;
 {$REGION 'Documentation'}
 /// <remarks>
 ///   Returns TTypeID in format "Audio" not "cAudio"
@@ -71,7 +71,7 @@ function TypeIDToString(ATypeID: TTypeID): string;
 ///   Expects AStringContentStatus in format "NotChecked" not "csNotChecked"
 /// </remarks>
 {$ENDREGION}
-function StringToContentStatus(AStringContentStatus: string): TContentStatus;
+function StringToContentStatus(const AStringContentStatus: string): TContentStatus;
 {$REGION 'Documentation'}
 /// <remarks>
 ///   Returns TContentStatus in format "NotChecked" not "csNotChecked" <br />
@@ -83,13 +83,13 @@ function ContentStatusToString(AContentStatus: TContentStatus): string;
 ///   Expects AStringControlID in format "IReleaseName" not "cReleaseName"
 /// </remarks>
 {$ENDREGION}
-function StringInControlID(AStringControlID: string): Boolean;
+function StringInControlID(const AStringControlID: string): Boolean;
 {$REGION 'Documentation'}
 /// <remarks>
 ///   Expects AStringControlID in format "IReleaseName" not "cReleaseName"
 /// </remarks>
 {$ENDREGION}
-function StringToControlID(AStringControlID: string): TControlID;
+function StringToControlID(const AStringControlID: string): TControlID;
 {$REGION 'Documentation'}
 /// <remarks>
 ///   Returns TControlID in format "IReleaseName" not "cReleaseName"
@@ -106,14 +106,14 @@ function ControlIDToReadableString(AControlID: TControlID): string;
 
 implementation
 
-function StringInTypeID(AStringTypeID: string): Boolean;
+function StringInTypeID(const AStringTypeID: string): Boolean;
 var
   LTypeID: TTypeID;
 begin
   Result := TEnum.TryParse<TTypeID>('c' + AStringTypeID, LTypeID);
 end;
 
-function StringToTypeID(AStringTypeID: string): TTypeID;
+function StringToTypeID(const AStringTypeID: string): TTypeID;
 begin
   if not TEnum.TryParse<TTypeID>('c' + AStringTypeID, Result) then
     raise Exception.Create('Unknown type id');
@@ -124,7 +124,7 @@ begin
   Result := copy(TEnum.GetName<TTypeID>(ATypeID), 2, MaxInt);
 end;
 
-function StringToContentStatus(AStringContentStatus: string): TContentStatus;
+function StringToContentStatus(const AStringContentStatus: string): TContentStatus;
 begin
   if not TEnum.TryParse<TContentStatus>('cs' + AStringContentStatus, Result) then
     raise Exception.Create('Unknown content status id');
@@ -135,14 +135,14 @@ begin
   Result := copy(TEnum.GetName<TContentStatus>(AContentStatus), 3, MaxInt);
 end;
 
-function StringInControlID(AStringControlID: string): Boolean;
+function StringInControlID(const AStringControlID: string): Boolean;
 var
   LControlID: TControlID;
 begin
   Result := TEnum.TryParse<TControlID>('c' + copy(AStringControlID, 2, MaxInt), LControlID);
 end;
 
-function StringToControlID(AStringControlID: string): TControlID;
+function StringToControlID(const AStringControlID: string): TControlID;
 begin
   if not TEnum.TryParse<TControlID>('c' + copy(AStringControlID, 2, MaxInt), Result) then
     raise Exception.Create('Unknown control id');

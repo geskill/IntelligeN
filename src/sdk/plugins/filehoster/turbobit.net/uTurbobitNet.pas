@@ -27,8 +27,8 @@ type
   TTurbobitNet = class(TFileHosterPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function CheckLink(AFile: WideString): TLinkInfo; override; safecall;
-    // function CheckLinks(AFiles: WideString): Integer; override; safecall;
+    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
+    // function CheckLinks(const AFiles: WideString): Integer; override; safecall;
   end;
 
 implementation
@@ -40,7 +40,7 @@ begin
   Result := 'Turbobit.net';
 end;
 
-function TTurbobitNet.CheckLink(AFile: WideString): TLinkInfo;
+function TTurbobitNet.CheckLink(const AFile: WideString): TLinkInfo;
 var
   LinkInfo: TLinkInfo;
 

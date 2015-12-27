@@ -27,8 +27,8 @@ type
   TX7To = class(TFileHosterPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function CheckLink(AFile: WideString): TLinkInfo; override; safecall;
-    // function CheckLinks(AFiles: WideString): Integer; override; safecall;
+    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
+    // function CheckLinks(const AFiles: WideString): Integer; override; safecall;
   end;
 
 implementation
@@ -40,7 +40,7 @@ begin
   Result := 'X7.to';
 end;
 
-function TX7To.CheckLink(AFile: WideString): TLinkInfo;
+function TX7To.CheckLink(const AFile: WideString): TLinkInfo;
 var
   LinkInfo: TLinkInfo;
   _postreply: TStringStream;
@@ -93,7 +93,7 @@ end;
 
 {
 
-  function TX7To.CheckLinks(AFiles: WideString): Integer;
+  function TX7To.CheckLinks(const AFiles: WideString): Integer;
 
   function GetDownloadlinkID(ALink: string): string;
   begin

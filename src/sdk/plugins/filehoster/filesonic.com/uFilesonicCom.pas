@@ -29,8 +29,8 @@ type
   TFilesonicCom = class(TFileHosterPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function CheckLink(AFile: WideString): TLinkInfo; override; safecall;
-    function CheckLinks(AFiles: WideString): Integer; override; safecall;
+    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
+    function CheckLinks(const AFiles: WideString): Integer; override; safecall;
   end;
 
 implementation
@@ -42,7 +42,7 @@ begin
   result := 'Filesonic.com';
 end;
 
-function TFilesonicCom.CheckLink(AFile: WideString): TLinkInfo;
+function TFilesonicCom.CheckLink(const AFile: WideString): TLinkInfo;
 var
   LinkInfo: TLinkInfo;
 begin
@@ -57,7 +57,7 @@ begin
   result := LinkInfo;
 end;
 
-function TFilesonicCom.CheckLinks(AFiles: WideString): Integer;
+function TFilesonicCom.CheckLinks(const AFiles: WideString): Integer;
 var
   _params, _postreply: TStringStream;
   _lkJSONobject: TlkJSONobject;

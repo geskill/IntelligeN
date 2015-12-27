@@ -27,8 +27,8 @@ type
   TMegauploadCom = class(TFileHosterPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function CheckLink(AFile: WideString): TLinkInfo; override; safecall;
-    function CheckLinks(AFiles: WideString): Integer; override; safecall;
+    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
+    function CheckLinks(const AFiles: WideString): Integer; override; safecall;
   end;
 
 implementation
@@ -40,7 +40,7 @@ begin
   result := 'Megaupload.com';
 end;
 
-function TMegauploadCom.CheckLink(AFile: WideString): TLinkInfo;
+function TMegauploadCom.CheckLink(const AFile: WideString): TLinkInfo;
 var
   LinkInfo: TLinkInfo;
 begin
@@ -55,7 +55,7 @@ begin
   result := LinkInfo;
 end;
 
-function TMegauploadCom.CheckLinks(AFiles: WideString): Integer;
+function TMegauploadCom.CheckLinks(const AFiles: WideString): Integer;
 
   function GetDownloadlinkID(ALink: string): string;
   begin

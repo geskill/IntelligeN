@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, StrUtils, Classes, Forms, Controls, TypInfo, Variants, XMLDoc, XMLIntf, ActiveX, SyncObjs, Generics.Collections,
+  Windows, SysUtils, StrUtils, Classes, Forms, Controls, TypInfo, Variants, XMLDoc, XMLIntf, ActiveX, Generics.Collections,
   // RegEx
   RegExpr,
   // Common
@@ -25,7 +25,7 @@ type
 
   TApiXml = class
   public
-    class function GetControlsTemplateInfo(AFileName: string): TTemplateInfo;
+    class function GetControlsTemplateInfo(const AFileName: string): TTemplateInfo;
   end;
 
   TWebsiteTemplateHelper = class
@@ -45,8 +45,6 @@ type
   TXMLProc = reference to procedure(AXMLNode: IXMLNode);
 
   THosterConfiguration = class
-  class var
-    // FCS: TCriticalSection;
   private const
     HosterXML: string = 'hoster.xml';
 
@@ -55,9 +53,6 @@ type
   public
     class function GetHosters: string;
     class function GetCustomisedHoster(const AHoster: string; AShortName: Boolean = False): string;
-
-    class constructor Create;
-    class destructor Destroy;
   end;
 
   TCodeDefinition = record
@@ -71,14 +66,14 @@ type
     class procedure LoadXML(AXMLProc: TXMLProc);
   public
     class function GetCodeDefinitions: TStrings;
-    class function GetCodeDefinition(ACodeDefinition: string): TCodeDefinition;
+    class function GetCodeDefinition(const ACodeDefinition: string): TCodeDefinition;
   end;
 
-procedure GetControls(AFileName: string; const AControlController: IControlController; const APageController: IPageController);
+procedure GetControls(const AFileName: string; const AControlController: IControlController; const APageController: IPageController);
 
 implementation
 
-class function TApiXml.GetControlsTemplateInfo(AFileName: string): TTemplateInfo;
+class function TApiXml.GetControlsTemplateInfo(const AFileName: string): TTemplateInfo;
 var
   LXMLDoc: IXMLDocument;
   LTemplateInfo: TTemplateInfo;
@@ -578,29 +573,24 @@ begin
     raise Exception.Create(HosterXML + ' not found located at configuration\' + HosterXML)
   else
   begin
-    // FCS.Enter;
+    CoInitializeEx(nil, COINIT_MULTITHREADED);
     try
-      CoInitializeEx(nil, COINIT_MULTITHREADED);
+      XMLDoc := NewXMLDocument;
       try
-        XMLDoc := NewXMLDocument;
-        try
-          with XMLDoc do
-          begin
-            LoadFromFile(GetConfigurationFolder + HosterXML);
-            Active := True;
-          end;
-
-          Found := False;
-
-          AXMLProc(XMLDoc.DocumentElement);
-        finally
-          XMLDoc := nil;
+        with XMLDoc do
+        begin
+          LoadFromFile(GetConfigurationFolder + HosterXML);
+          Active := True;
         end;
+
+        Found := False;
+
+        AXMLProc(XMLDoc.DocumentElement);
       finally
-        CoUninitialize;
+        XMLDoc := nil;
       end;
     finally
-      // FCS.Leave;
+      CoUninitialize;
     end;
   end;
 end;
@@ -678,17 +668,7 @@ begin
     Result := GetHoster(AHoster, 'name');
 end;
 
-class constructor THosterConfiguration.Create;
-begin
-  // FCS := TCriticalSection.Create;
-end;
-
-class destructor THosterConfiguration.Destroy;
-begin
-  // FCS.Free;
-end;
-
-procedure GetControls(AFileName: string; const AControlController: IControlController; const APageController: IPageController);
+procedure GetControls(const AFileName: string; const AControlController: IControlController; const APageController: IPageController);
 var
   XMLDoc: IXMLDocument;
   I: Integer;
@@ -772,7 +752,7 @@ begin
   Result := _Result;
 end;
 
-class function TCodeDefinitions.GetCodeDefinition(ACodeDefinition: string): TCodeDefinition;
+class function TCodeDefinitions.GetCodeDefinition(const ACodeDefinition: string): TCodeDefinition;
 var
   _Result: TCodeDefinition;
 begin

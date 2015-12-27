@@ -16,9 +16,9 @@ type
     FFileName: WideString;
   protected
     function GetFileName: WideString;
-    procedure SetFileName(AFileName: WideString);
+    procedure SetFileName(const AFileName: WideString);
   public
-    constructor Create(AFileName: WideString); virtual;
+    constructor Create(const AFileName: WideString); virtual;
 
     property FileName: WideString read GetFileName write SetFileName;
   end;
@@ -58,9 +58,9 @@ type
     procedure SetFileSystem(AFileSystem: TFileSystem);
 
     function GetFilePathAppendix: WideString;
-    procedure SetFilePathAppendix(AFilePathAppendix: WideString);
+    procedure SetFilePathAppendix(const AFilePathAppendix: WideString);
   public
-    constructor Create(AFileName: WideString); override;
+    constructor Create(const AFileName: WideString); override;
     constructor Clone(const AUpdateSystemFileBase: IUpdateSystemFileBase);
 
     function Equals(AValue: IUpdateSystemFileBase): Boolean;
@@ -86,10 +86,10 @@ type
     procedure SetFileSizeCompressed(AFileSizeCompressed: Integer);
 
     function GetFileChecksum: WideString;
-    procedure SetFileChecksum(AFileChecksum: WideString);
+    procedure SetFileChecksum(const AFileChecksum: WideString);
   public
     constructor Create(const AUpdateSystemFileBase: IUpdateSystemFileBase; const AFileVersion: IFileVersion); overload;
-    constructor Create(AFileName: WideString); overload;
+    constructor Create(const AFileName: WideString); overload;
 
     constructor Clone(const AUpdateSystemFile: IUpdateSystemFile);
 
@@ -110,12 +110,12 @@ begin
   Result := FFileName;
 end;
 
-procedure TIFile.SetFileName(AFileName: WideString);
+procedure TIFile.SetFileName(const AFileName: WideString);
 begin
   FFileName := AFileName;
 end;
 
-constructor TIFile.Create(AFileName: WideString);
+constructor TIFile.Create(const AFileName: WideString);
 begin
   FFileName := AFileName;
 end;
@@ -207,12 +207,12 @@ begin
   Result := FFilePathAppendix;
 end;
 
-procedure TIUpdateSystemFileBase.SetFilePathAppendix(AFilePathAppendix: WideString);
+procedure TIUpdateSystemFileBase.SetFilePathAppendix(const AFilePathAppendix: WideString);
 begin
   FFilePathAppendix := AFilePathAppendix;
 end;
 
-constructor TIUpdateSystemFileBase.Create(AFileName: WideString);
+constructor TIUpdateSystemFileBase.Create(const AFileName: WideString);
 begin
   inherited Create(AFileName);
 
@@ -269,7 +269,7 @@ begin
   Result := FFileChecksum;
 end;
 
-procedure TIUpdateSystemFile.SetFileChecksum(AFileChecksum: WideString);
+procedure TIUpdateSystemFile.SetFileChecksum(const AFileChecksum: WideString);
 begin
   FFileChecksum := AFileChecksum;
 end;
@@ -284,7 +284,7 @@ begin
   FFileChecksum := '';
 end;
 
-constructor TIUpdateSystemFile.Create(AFileName: WideString);
+constructor TIUpdateSystemFile.Create(const AFileName: WideString);
 var
   LUpdateSystemFileBase: IUpdateSystemFileBase;
   LFileVersion: IFileVersion;

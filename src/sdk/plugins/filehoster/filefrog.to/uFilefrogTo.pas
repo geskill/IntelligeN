@@ -27,7 +27,7 @@ type
   TFilefrogTo = class(TFileHosterPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function CheckLink(AFile: WideString): TLinkInfo; override; safecall;
+    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
   end;
 
 implementation
@@ -39,7 +39,7 @@ begin
   Result := 'Filefrog.to';
 end;
 
-function TFilefrogTo.CheckLink(AFile: WideString): TLinkInfo;
+function TFilefrogTo.CheckLink(const AFile: WideString): TLinkInfo;
 
   function APIResultToStatus(AValue: string): TLinkStatus;
   begin

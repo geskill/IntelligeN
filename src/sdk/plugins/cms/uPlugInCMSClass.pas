@@ -65,7 +65,7 @@ type
     FIntelligentPostingHelper: TIntelligentPostingHelper;
   protected
     FCheckedIDsList: TList<TIDInfo>;
-    procedure AddID(AID, APath: string);
+    procedure AddID(const AID, APath: string);
     function SettingsClass: TCMSPlugInSettingsMeta; virtual; abstract;
     function GetSettings: TCMSPlugInSettings; virtual; abstract;
     procedure SetSettings(ACMSPlugInSettings: TCMSPlugInSettings); virtual; abstract;
@@ -75,36 +75,36 @@ type
     function NeedLogin: Boolean; virtual;
     function DoBuildLoginRequest(out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; ACAPTCHALogin: Boolean = False): Boolean; virtual; abstract;
     function NeedPostLogin(out ARequestURL: string): Boolean; virtual;
-    function DoAnalyzeLogin(AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; virtual; abstract;
+    function DoAnalyzeLogin(const AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; virtual; abstract;
     procedure DoHandleSessionID(AHTTPProcess: IHTTPProcess); virtual;
 
     function NeedPrePost(out ARequestURL: string): Boolean; virtual;
-    function DoAnalyzePrePost(AResponseStr: string): Boolean; virtual;
+    function DoAnalyzePrePost(const AResponseStr: string): Boolean; virtual;
 
     function DoBuildPostRequest(const AData: ITabSheetData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; virtual; abstract;
-    function DoAnalyzePost(AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; virtual; abstract;
+    function DoAnalyzePost(const AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; virtual; abstract;
 
     function GetIDsRequestURL: string; virtual;
-    function DoAnalyzeIDsRequest(AResponseStr: string): Integer; virtual;
+    function DoAnalyzeIDsRequest(const AResponseStr: string): Integer; virtual;
 
     function _AfterLogin(var ARequestID: Double; out AResponseStr: string): Boolean; virtual;
 
     property Settings: TCMSPlugInSettings read GetSettings write SetSettings;
 
     function GetAccountName: WideString; safecall;
-    procedure SetAccountName(AAccountName: WideString); safecall;
+    procedure SetAccountName(const AAccountName: WideString); safecall;
     function GetAccountPassword: WideString; safecall;
-    procedure SetAccountPassword(AAccountPassword: WideString); safecall;
+    procedure SetAccountPassword(const AAccountPassword: WideString); safecall;
     function GetSettingsFileName: WideString; safecall;
-    procedure SetSettingsFileName(ASettingsFileName: WideString); safecall;
+    procedure SetSettingsFileName(const ASettingsFileName: WideString); safecall;
     function GetSubject: WideString; safecall;
-    procedure SetSubject(ASubject: WideString); safecall;
+    procedure SetSubject(const ASubject: WideString); safecall;
     function GetTags: WideString; safecall;
-    procedure SetTags(ATags: WideString); safecall;
+    procedure SetTags(const ATags: WideString); safecall;
     function GetMessage: WideString; safecall;
-    procedure SetMessage(AMessage: WideString); safecall;
+    procedure SetMessage(const AMessage: WideString); safecall;
     function GetWebsite: WideString; safecall;
-    procedure SetWebsite(AWebsite: WideString); safecall;
+    procedure SetWebsite(const AWebsite: WideString); safecall;
     function GetData: ITabSheetData; safecall;
     procedure SetData(const AData: ITabSheetData); safecall;
 
@@ -134,11 +134,13 @@ type
 
     function CMSType: TCMSType; virtual; safecall; abstract;
     function DefaultCharset: WideString; virtual; safecall; abstract;
-    function BelongsTo(AWebsiteSourceCode: WideString): WordBool; virtual; safecall; abstract;
+    function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; virtual; safecall; abstract;
     function GetIDs: Integer; virtual; safecall;
     function ReadID(AIndex: Integer): TIDInfo; safecall;
     function Login(out ARequestID: Double): Boolean; virtual; safecall;
-    function Exec: WordBool; virtual; safecall;
+    function AddArticle(): WordBool; virtual; safecall;
+    function EditArticle(): WordBool; virtual; safecall;
+    function GetArticle(out AArticle: WideString): WordBool; virtual; safecall;
     function ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEditor): WordBool; safecall;
   end;
 
@@ -180,6 +182,7 @@ end;
 
 constructor TCMSCustomFields.Create(const AOwnsObjects: Boolean = True);
 begin
+  inherited Create;
   FOwnsObjects := AOwnsObjects;
   FCustomFieldsList := TList<TCMSCustomField>.Create;
 end;
@@ -196,7 +199,7 @@ end;
 
 constructor TCMSPlugInSettings.Create;
 begin
-  //
+  inherited Create;
 end;
 
 destructor TCMSPlugInSettings.Destroy;
@@ -207,7 +210,7 @@ end;
 
 { TCMSPlugIn }
 
-procedure TCMSPlugIn.AddID(AID, APath: string);
+procedure TCMSPlugIn.AddID(const AID, APath: string);
 var
   IDInfo: TIDInfo;
 begin
@@ -254,7 +257,7 @@ begin
   Result := False;
 end;
 
-function TCMSPlugIn.DoAnalyzePrePost(AResponseStr: string): Boolean;
+function TCMSPlugIn.DoAnalyzePrePost(const AResponseStr: string): Boolean;
 begin
   Result := True;
 end;
@@ -264,7 +267,7 @@ begin
   Result := Website + 'search.php';
 end;
 
-function TCMSPlugIn.DoAnalyzeIDsRequest(AResponseStr: string): Integer;
+function TCMSPlugIn.DoAnalyzeIDsRequest(const AResponseStr: string): Integer;
 begin
   Result := FCheckedIDsList.Count;
 end;
@@ -279,7 +282,7 @@ begin
   Result := FAccountname;
 end;
 
-procedure TCMSPlugIn.SetAccountName(AAccountName: WideString);
+procedure TCMSPlugIn.SetAccountName(const AAccountName: WideString);
 begin
   FAccountname := AAccountName;
 end;
@@ -289,7 +292,7 @@ begin
   Result := FAccountpassword;
 end;
 
-procedure TCMSPlugIn.SetAccountPassword(AAccountPassword: WideString);
+procedure TCMSPlugIn.SetAccountPassword(const AAccountPassword: WideString);
 begin
   FAccountpassword := AAccountPassword;
 end;
@@ -299,7 +302,7 @@ begin
   Result := FSettingsFileName;
 end;
 
-procedure TCMSPlugIn.SetSettingsFileName(ASettingsFileName: WideString);
+procedure TCMSPlugIn.SetSettingsFileName(const ASettingsFileName: WideString);
 begin
   FSettingsFileName := ASettingsFileName;
 end;
@@ -309,7 +312,7 @@ begin
   Result := FSubject;
 end;
 
-procedure TCMSPlugIn.SetSubject(ASubject: WideString);
+procedure TCMSPlugIn.SetSubject(const ASubject: WideString);
 begin
   FSubject := ASubject;
 end;
@@ -319,7 +322,7 @@ begin
   Result := FTags;
 end;
 
-procedure TCMSPlugIn.SetTags(ATags: WideString);
+procedure TCMSPlugIn.SetTags(const ATags: WideString);
 begin
   FTags := ATags;
 end;
@@ -329,7 +332,7 @@ begin
   Result := FMessage;
 end;
 
-procedure TCMSPlugIn.SetMessage(AMessage: WideString);
+procedure TCMSPlugIn.SetMessage(const AMessage: WideString);
 begin
   FMessage := AMessage;
 end;
@@ -339,7 +342,7 @@ begin
   Result := FWebsite;
 end;
 
-procedure TCMSPlugIn.SetWebsite(AWebsite: WideString);
+procedure TCMSPlugIn.SetWebsite(const AWebsite: WideString);
 begin
   FWebsite := AWebsite;
 end;
@@ -536,7 +539,7 @@ begin
   end;
 end;
 
-function TCMSPlugIn.Exec: WordBool;
+function TCMSPlugIn.AddArticle(): WordBool;
 var
   PrePostURL: string;
   RequestID: Double;
@@ -601,6 +604,19 @@ begin
         Result := DoAnalyzePost(HTTPProcess.HTTPResult.SourceCode, HTTPProcess) and not HTTPError;
       end;
     end;
+end;
+
+function TCMSPlugIn.EditArticle(): WordBool;
+begin
+  // TODO: Implement this
+  Result := False;
+end;
+
+function TCMSPlugIn.GetArticle(out AArticle: WideString): WordBool;
+begin
+  // TODO: Implement this
+  AArticle := '';
+  Result := False;
 end;
 
 function TCMSPlugIn.ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEditor): WordBool;

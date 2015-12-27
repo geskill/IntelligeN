@@ -28,7 +28,7 @@ type
   TImageHosterUploadThread = class(TThreadWorker<TImageHosterData>)
   protected
     FPictureURL: string;
-    procedure DefaultErrorHandler(AErrorMsg: string); override;
+    procedure DefaultErrorHandler(const AErrorMsg: string); override;
   public
     constructor Create(const APictureMirror: IPictureMirror); reintroduce;
     destructor Destroy; override;
@@ -76,7 +76,7 @@ end;
 
 { TImageHosterUploadThread }
 
-procedure TImageHosterUploadThread.DefaultErrorHandler(AErrorMsg: string);
+procedure TImageHosterUploadThread.DefaultErrorHandler(const AErrorMsg: string);
 begin
   task.Invoke(
     { } procedure

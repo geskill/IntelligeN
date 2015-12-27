@@ -15,7 +15,7 @@ uses
   uPlugInConst, uPlugInInterface;
 
 type
-  TPluginErrorProc = reference to procedure(AErrorMsg: string);
+  TPluginErrorProc = reference to procedure(const AErrorMsg: string);
   TPluginProc = reference to procedure(var APlugin: IPlugIn);
 
   EIntelligeNPluginException = class(Exception)

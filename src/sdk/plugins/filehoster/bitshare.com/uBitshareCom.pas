@@ -29,8 +29,8 @@ type
   TBitshareCom = class(TFileHosterPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function CheckLink(AFile: WideString): TLinkInfo; override; safecall;
-    // function CheckLinks(AFiles: WideString): Integer; override; safecall;
+    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
+    // function CheckLinks(const AFiles: WideString): Integer; override; safecall;
   end;
 
 implementation
@@ -42,7 +42,7 @@ begin
   Result := 'Bitshare.com';
 end;
 
-function TBitshareCom.CheckLink(AFile: WideString): TLinkInfo;
+function TBitshareCom.CheckLink(const AFile: WideString): TLinkInfo;
 var
   LinkInfo: TLinkInfo;
 

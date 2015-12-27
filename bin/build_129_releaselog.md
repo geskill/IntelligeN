@@ -559,3 +559,14 @@
 * Updated HTTPManager (fixed UpdateCapacity function)
 
 * Updated hoster.xml removed deleted hosters
+
+
+###RTM
+
+######major enhancements
+
+
+
+######minor enhancements
+
+* Improved default crawled values

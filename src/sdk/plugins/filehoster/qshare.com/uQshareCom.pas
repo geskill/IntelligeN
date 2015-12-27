@@ -27,8 +27,8 @@ type
   TQshareCom = class(TFileHosterPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function CheckLink(AFile: WideString): TLinkInfo; override; safecall;
-    // function CheckLinks(AFiles: WideString): Integer; override; safecall;
+    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
+    // function CheckLinks(const AFiles: WideString): Integer; override; safecall;
   end;
 
 implementation
@@ -40,7 +40,7 @@ begin
   Result := 'Qshare.com';
 end;
 
-function TQshareCom.CheckLink(AFile: WideString): TLinkInfo;
+function TQshareCom.CheckLink(const AFile: WideString): TLinkInfo;
 
   function GetDownloadlinkID(ALink: string): string;
   begin

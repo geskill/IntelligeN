@@ -21,6 +21,13 @@ type
     property Value: WideString read GetValue;
   end;
 
+  INameValueItem = interface(IValueItem)
+    ['{F7EDF630-5CE4-4250-9193-D2759E13D6A1}']
+    function GetName: WideString; safecall;
+
+    property Name: WideString read GetName;
+  end;
+
   IControlData = interface(IValueItem)
     ['{CE74BD5F-80B2-4D4F-AB2D-F29AA0773F58}']
     function GetControlID: TControlID; safecall;
@@ -30,7 +37,7 @@ type
 
   IControlBase = interface(IControlData)
     ['{06C360E4-BBFB-462E-A2AD-54BE875635AE}']
-    procedure AddProposedValue(const ASender: WideString; AValue: WideString; ATitle: WideString = ''); safecall;
+    procedure AddProposedValue(const ASender: WideString; const AValue: WideString; const ATitle: WideString = ''); safecall;
     function GetProposedValue(const AIndex: Integer): WideString; safecall;
     function GetProposedValueSender(const AIndex: Integer): WideString; safecall;
     function GetProposedValueTitle(const AIndex: Integer): WideString; safecall;
@@ -126,6 +133,9 @@ type
     function GetMirror(const IndexOrName: OleVariant): IMirrorContainer; safecall;
     function GetMirrorCount: Integer; safecall;
 
+    function GetCustomField(const IndexOrName: OleVariant): INameValueItem; safecall;
+    function GetCustomFieldCount: Integer; safecall;
+
     property TypeID: TTypeID read GetTypeID;
 
     function FindControl(const AControlID: TControlID): IControlData; safecall;
@@ -136,14 +146,14 @@ type
     property Mirror[const IndexOrName: OleVariant]: IMirrorContainer read GetMirror;
     property MirrorCount: Integer read GetMirrorCount;
 
-    // TODO: Add custom fields that hold compiled IScript
-    // ~ Handle this like filters ~
+    property CustomField[const IndexOrName: OleVariant]: INameValueItem read GetCustomField;
+    property CustomFieldCount: Integer read GetCustomFieldCount;
   end;
 
   IWebsiteEditor = interface
     ['{75F63C46-C88E-48C5-BDC1-C7D81BEFEC1A}']
     function GetCustomFields: WordBool; safecall;
-    procedure SetCustomFields(ACustomFields: WordBool); safecall;
+    procedure SetCustomFields(const ACustomFields: WordBool); safecall;
 
     procedure AddEdit(const AName: WideString; const ADefaultValue: WideString = ''); safecall;
     procedure AddCheckbox(const AName: WideString; const ADefaultValue: WordBool = False); safecall;

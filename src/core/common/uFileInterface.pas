@@ -29,12 +29,12 @@ type
   ISubType = interface(IChangeable)
     ['{4F712A84-D730-450E-9DF0-3DB206B2ADE9}']
     function GetControlName: WideString;
-    procedure SetGetControlName(AGetControlName: WideString); overload;
+    procedure SetGetControlName(const AGetControlName: WideString); overload;
     procedure SetGetControlName(AComponentID: TControlID); overload;
     function GetControlValue: WideString;
-    procedure SetGetControlValue(AGetControlValue: WideString);
+    procedure SetGetControlValue(const AGetControlValue: WideString);
     function GetID: WideString;
-    procedure SetID(AID: WideString);
+    procedure SetID(const AID: WideString);
     function GetSubTypes: TList<ISubType>;
 
     property ControlName: WideString read GetControlName write SetGetControlName;
@@ -46,10 +46,10 @@ type
   IType = interface(IChangeable)
     ['{8B2D299F-C826-4B05-B8AE-CE512DF322E2}']
     function GetName: WideString;
-    procedure SetName(AName: WideString); overload;
+    procedure SetName(const AName: WideString); overload;
     procedure SetName(ATypeID: TTypeID); overload;
     function GetID: WideString;
-    procedure SetID(AID: WideString);
+    procedure SetID(const AID: WideString);
     function GetSubTypes: TList<ISubType>;
 
     property Name: WideString read GetName write SetName;
@@ -60,7 +60,7 @@ type
   IID = interface(IChangeable)
     ['{3DBB07DE-D75F-4EFA-926A-EF5BF8690010}']
     function GetName: WideString;
-    procedure SetName(AName: WideString);
+    procedure SetName(const AName: WideString);
     function GetTypes: TList<IType>;
 
     property Name: WideString read GetName write SetName;
@@ -70,11 +70,11 @@ type
   IWebsiteConfigurationFile = interface(IChangeable)
     ['{C86CF3AA-62CC-4FD0-BF13-9D62EA43A221}']
     function GetWebsiteURL: WideString;
-    procedure SetWebsiteURL(AWebsiteURL: WideString);
+    procedure SetWebsiteURL(const AWebsiteURL: WideString);
     function GetWebsiteType: WideString;
-    procedure SetWebsiteType(AWebsiteType: WideString);
+    procedure SetWebsiteType(const AWebsiteType: WideString);
     function GetWebsiteCharset: WideString;
-    procedure SetWebsiteCharset(AWebsiteCharset: WideString);
+    procedure SetWebsiteCharset(const AWebsiteCharset: WideString);
     function GetIDs: TList<IID>;
 
     property WebsiteURL: WideString read GetWebsiteURL write SetWebsiteURL;
@@ -86,13 +86,13 @@ type
   IControl = interface(IChangeable)
     ['{491D7F7E-82EC-4EC5-8982-E2B9CFE5BBCD}']
     function GetCategory: WideString;
-    procedure SetCategory(ACategory: WideString);
+    procedure SetCategory(const ACategory: WideString);
     function GetName: WideString;
-    procedure SetName(AName: WideString);
+    procedure SetName(const AName: WideString);
     function GetRelation: WideString;
-    procedure SetRelation(ARelation: WideString);
+    procedure SetRelation(const ARelation: WideString);
     function GetValue: WideString;
-    procedure SetValue(AValue: WideString);
+    procedure SetValue(const AValue: WideString);
 
     property Category: WideString read GetCategory write SetCategory;
     property Name: WideString read GetName write SetName;
@@ -103,7 +103,7 @@ type
   IHoster = interface(IChangeable)
     ['{276A9292-86DD-415A-A110-BCF4687CA2BC}']
     function GetName: WideString;
-    procedure SetName(AName: WideString);
+    procedure SetName(const AName: WideString);
     function GetRanked: WordBool;
     procedure SetRanked(ARanked: WordBool);
     function GetBlacklist: TStringList;
@@ -121,7 +121,7 @@ type
     procedure SetActive(AActive: WordBool);
     function GetCategories: WideString;
     function GetCategoriesAsTTypeIDs: TTypeIDs;
-    procedure SetCategories(ACategories: WideString);
+    procedure SetCategories(const ACategories: WideString);
     function GetControls: TList<IControl>;
     function GetHoster: TList<IHoster>;
 

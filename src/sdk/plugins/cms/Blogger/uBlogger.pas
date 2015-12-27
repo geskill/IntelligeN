@@ -50,18 +50,18 @@ type
     function LoadSettings(const AData: ITabSheetData = nil): Boolean; override;
 
     function DoBuildLoginRequest(out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; ACAPTCHALogin: Boolean = False): Boolean; override;
-    function DoAnalyzeLogin(AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; override;
+    function DoAnalyzeLogin(const AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; override;
     procedure DoHandleSessionID(AHTTPProcess: IHTTPProcess); override;
 
     function DoBuildPostRequest(const AData: ITabSheetData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; override;
-    function DoAnalyzePost(AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; override;
+    function DoAnalyzePost(const AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; override;
 
     function GetIDsRequestURL: string; override;
-    function DoAnalyzeIDsRequest(AResponseStr: string): Integer; override;
+    function DoAnalyzeIDsRequest(const AResponseStr: string): Integer; override;
   public
     function GetName: WideString; override;
     function DefaultCharset: WideString; override;
-    function BelongsTo(AWebsiteSourceCode: WideString): WordBool; override;
+    function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override;
     function GetIDs: Integer; override;
   end;
 

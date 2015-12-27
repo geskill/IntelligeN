@@ -21,6 +21,12 @@ uses
   // Plugin system
   uPlugInEvent;
 
+  // TODO: Fix memory leak TcxDetailObject and TdxFastList
+  // Related to sorting in the second level (tvValues)
+  // and clicking the drop-dowm menu, but not related to
+  // grids events. Happens only with data, possible with
+  // wrong UpdateCMSWebsiteList() calls.
+
 type
   TfPublish = class(TFrame)
     cxGrid: TcxGrid;
@@ -81,20 +87,16 @@ end;
 
 procedure TfPublish.tvValuesMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
-  Site: TcxGridSite;
-  HitTest: TcxCustomGridHitTest;
-  Item: TcxCustomGridTableItem;
-  // Rec: TcxCustomGridRecord;
+  LSite: TcxGridSite;
+  LHitTest: TcxCustomGridHitTest;
+  LItem: TcxCustomGridTableItem;
 begin
-  Site := Sender as TcxGridSite;
-  HitTest := Site.GridView.ViewInfo.GetHitTest(X, Y);
-
-  if HitTest is TcxGridRecordCellHitTest then
+  LSite := Sender as TcxGridSite;
+  LHitTest := LSite.GridView.ViewInfo.GetHitTest(X, Y);
+  if LHitTest is TcxGridRecordCellHitTest then
   begin
-    Item := TcxGridRecordCellHitTest(HitTest).Item;
-    // Rec := TcxGridRecordCellHitTest(HitTest).GridRecord;
-
-    FtvDataController := Item.GridView.DataController;
+    LItem := TcxGridRecordCellHitTest(LHitTest).Item;
+    FtvDataController := LItem.GridView.DataController;
   end;
 end;
 
@@ -123,7 +125,7 @@ begin
   end;
 
   with SettingsManager.Settings.Plugins do
-    result := TCMSCollectionItem(FindPlugInCollectionItemFromCollection(LCMSType, CMS)).FindCMSWebsite(LCMSPluginName);
+    Result := TCMSCollectionItem(FindPlugInCollectionItemFromCollection(LCMSType, CMS)).FindCMSWebsite(LCMSPluginName);
 end;
 
 procedure TfPublish.UpdateCMSList(const Sender: IPublishController);
@@ -162,11 +164,10 @@ begin
       try
         for LSenderIndex := 0 to Sender.Count - 1 do
           UpdateCMSWebsiteList(Sender.CMS[LSenderIndex], LSenderIndex);
-
-        ViewData.Expand(True);
       finally
         EndUpdate;
       end;
+      ViewData.Expand(True);
     end;
   end;
 end;
@@ -275,17 +276,17 @@ end;
 
 function TfPublish.GetUpdateCMSListEvent: IUpdateCMSListEventHandler;
 begin
-  result := FIUpdateCMSListEvent;
+  Result := FIUpdateCMSListEvent;
 end;
 
 function TfPublish.GetUpdateCMSWebsiteListEvent: IUpdateCMSWebsiteListEventHandler;
 begin
-  result := FIUpdateCMSWebsiteListEvent;
+  Result := FIUpdateCMSWebsiteListEvent;
 end;
 
 function TfPublish.GetUpdateCMSWebsiteEvent: IUpdateCMSWebsiteEventHandler;
 begin
-  result := FIUpdateCMSWebsiteEvent;
+  Result := FIUpdateCMSWebsiteEvent;
 end;
 
 destructor TfPublish.Destroy;
@@ -293,8 +294,6 @@ begin
   FIUpdateCMSWebsiteEvent := nil;
   FIUpdateCMSWebsiteListEvent := nil;
   FIUpdateCMSListEvent := nil;
-
-  FtvDataController := nil;
 
   inherited Destroy;
 end;

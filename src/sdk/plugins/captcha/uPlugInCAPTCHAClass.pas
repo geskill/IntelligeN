@@ -20,15 +20,15 @@ type
     FCAPTCHAType: TCAPTCHAType;
   protected
     function GetCAPTCHA: WideString; safecall;
-    procedure SetCAPTCHA(ACAPTCHA: WideString); safecall;
+    procedure SetCAPTCHA(const ACAPTCHA: WideString); safecall;
     function GetCAPTCHAType: TCAPTCHAType; safecall;
     procedure SetCAPTCHAType(ACAPTCHAType: TCAPTCHAType); safecall;
     function GetCAPTCHAName: WideString; safecall;
-    procedure SetCAPTCHAName(ACAPTCHAName: WideString); safecall;
+    procedure SetCAPTCHAName(const ACAPTCHAName: WideString); safecall;
     function GetCAPTCHAResult: WideString; safecall;
-    procedure SetCAPTCHAResult(ACAPTCHAResult: WideString); safecall;
+    procedure SetCAPTCHAResult(const ACAPTCHAResult: WideString); safecall;
     function GetCookies: WideString; safecall;
-    procedure SetCookies(ACookies: WideString); safecall;
+    procedure SetCookies(const ACookies: WideString); safecall;
   public
     function GetType: TPlugInType; override; safecall;
 
@@ -50,7 +50,7 @@ begin
   Result := FCAPTCHA;
 end;
 
-procedure TCAPTCHAPlugIn.SetCAPTCHA(ACAPTCHA: WideString);
+procedure TCAPTCHAPlugIn.SetCAPTCHA(const ACAPTCHA: WideString);
 begin
   FCAPTCHA := ACAPTCHA;
 end;
@@ -70,7 +70,7 @@ begin
   Result := FGetCAPTCHAName;
 end;
 
-procedure TCAPTCHAPlugIn.SetCAPTCHAName(ACAPTCHAName: WideString);
+procedure TCAPTCHAPlugIn.SetCAPTCHAName(const ACAPTCHAName: WideString);
 begin
   FGetCAPTCHAName := ACAPTCHAName;
 end;
@@ -80,7 +80,7 @@ begin
   Result := FCAPTCHAResult;
 end;
 
-procedure TCAPTCHAPlugIn.SetCAPTCHAResult(ACAPTCHAResult: WideString);
+procedure TCAPTCHAPlugIn.SetCAPTCHAResult(const ACAPTCHAResult: WideString);
 begin
   FCAPTCHAResult := ACAPTCHAResult;
 end;
@@ -90,7 +90,7 @@ begin
   Result := FCookies;
 end;
 
-procedure TCAPTCHAPlugIn.SetCookies(ACookies: WideString);
+procedure TCAPTCHAPlugIn.SetCookies(const ACookies: WideString);
 begin
   FCookies := ACookies;
 end;

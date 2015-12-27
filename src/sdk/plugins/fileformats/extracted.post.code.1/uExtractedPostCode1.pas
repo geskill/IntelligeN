@@ -18,9 +18,9 @@ type
     function GetName: WideString; override; safecall;
     function GetFileFormatName: WideString; override; safecall;
     function CanSaveControls: WordBool; override; safecall;
-    procedure SaveControls(AFileName, ATemplateFileName: WideString; const ATabSheetController: ITabSheetController); override; safecall;
+    procedure SaveControls(const AFileName, ATemplateFileName: WideString; const ATabSheetController: ITabSheetController); override; safecall;
     function CanLoadControls: WordBool; override; safecall;
-    function LoadControls(AFileName, ATemplateDirectory: WideString; const APageController: IPageController): Integer; override; safecall;
+    function LoadControls(const AFileName, ATemplateDirectory: WideString; const APageController: IPageController): Integer; override; safecall;
   end;
 
 implementation

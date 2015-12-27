@@ -29,8 +29,8 @@ type
   TDepositfilesCom = class(TFileHosterPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function CheckLink(AFile: WideString): TLinkInfo; override; safecall;
-    // function CheckLinks(AFiles: WideString): Integer; override; safecall;
+    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
+    // function CheckLinks(const AFiles: WideString): Integer; override; safecall;
   end;
 
 implementation
@@ -42,7 +42,7 @@ begin
   Result := 'Depositfiles.com';
 end;
 
-function TDepositfilesCom.CheckLink(AFile: WideString): TLinkInfo;
+function TDepositfilesCom.CheckLink(const AFile: WideString): TLinkInfo;
 var
   LinkInfo: TLinkInfo;
 
@@ -100,7 +100,7 @@ end;
 
   {"links_existed":[],"links_deleted":{"ve4w82ro7":{"id_str":"ve4w82ro7","filename":"DFManagerSetup.exe","size":"1063760","download_url":"http://depositfiles.com/files/ve4w82ro7"}}}
 
-  function TDepositfilesCom.CheckLinks(AFiles: WideString): Integer;
+  function TDepositfilesCom.CheckLinks(const AFiles: WideString): Integer;
   var
   I: Integer;
   _params, _postreply: TStringStream;

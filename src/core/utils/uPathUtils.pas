@@ -15,7 +15,7 @@ function GetPersonalAppDataFolder: string;
 function GetPersonalLocalAppDataFolder: string;
 function GetPersonalLocalTempPath: string;
 
-function PathCombineEx(BaseName, RelativePath: string): string;
+function PathCombineEx(const ABaseName, ARelativePath: string): string;
 
 function IsDirectory(const FileName: string): Boolean;
 
@@ -98,10 +98,10 @@ begin
   Result := IncludeTrailingPathDelimiter(GetEnvironmentVariable('TEMP'));
 end;
 
-function PathCombineEx(BaseName, RelativePath: string): string;
+function PathCombineEx(const ABaseName, ARelativePath: string): string;
 begin
   SetLength(Result, MAX_PATH);
-  PathCombine(@Result[1], PChar(ExtractFilePath(BaseName)), PChar(RelativePath));
+  PathCombine(@Result[1], PChar(ExtractFilePath(ABaseName)), PChar(ARelativePath));
   SetLength(Result, length(PChar(@Result[1])));
 end;
 

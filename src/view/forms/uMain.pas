@@ -307,10 +307,9 @@ type
     // FdwJumpLists: TdwJumpLists;
     procedure WMSysCommand(var Msg: TWMSysCommand); message WM_SYSCOMMAND;
     procedure WMDropFiles(var Msg: TWMDropFiles); message WM_DROPFILES;
-    procedure OneInstanceGetParams(Sender: TObject; const Args: array of string);
     procedure LayoutClick(Sender: TObject);
     procedure LayoutChanged(Sender: TObject);
-    procedure InsertTextBetweenSelected(TagName: string);
+    procedure InsertTextBetweenSelected(const TagName: string);
     function GetLogManager: ILogManager;
     function GetMainMenu: IMainMenu;
     function GetPageController: IPageController;
@@ -320,7 +319,7 @@ type
     function GetControlValues(const ATypeID: TTypeID; const AComponentID: TControlID): WideString;
   public
     procedure LoadLayout(ALayoutCollectionItem: TLayoutCollectionItem);
-    procedure SaveLayout(ALayoutName: string);
+    procedure SaveLayout(const ALayoutName: string);
     procedure SetEditMenu(AMenuItems: TdxBarItemLinks);
   end;
 
@@ -334,12 +333,6 @@ implementation
 type
   TcxComboBoxAccess = class(TcxComboBox)
   end;
-
-resourcestring
-  StrOpen = 'Open';
-  StrSaveDesktop = 'Save Desktop';
-  StrSaveCurentDesktop = 'Save curent desktop as:';
-  StrDeleteDesktop = 'Delete Desktop';
 
 procedure TMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
@@ -858,11 +851,6 @@ begin
   DragFinish(Msg.Drop);
 end;
 
-procedure TMain.OneInstanceGetParams(Sender: TObject; const Args: array of string);
-begin
-  // AnalyzeStartupParams(Args);
-end;
-
 procedure TMain.LayoutClick(Sender: TObject);
 begin
   LoadLayout(SettingsManager.Settings.Layout.FindLayout((Sender as TdxBarButton).Caption));
@@ -911,15 +899,15 @@ begin
   end;
 end;
 
-procedure TMain.InsertTextBetweenSelected(TagName: string);
+procedure TMain.InsertTextBetweenSelected(const TagName: string);
 
   function GetCodeTag(ATagName: string): TCodeTag;
   var
-    I: Integer;
+    LIndex: Integer;
   begin
-    for I := 0 to length(FCodeDefinition.CodeTags) - 1 do
-      if SameText(ATagName, FCodeDefinition.CodeTags[I].Name) then
-        Exit(FCodeDefinition.CodeTags[I]);
+    for LIndex := 0 to length(FCodeDefinition.CodeTags) - 1 do
+      if SameText(ATagName, FCodeDefinition.CodeTags[LIndex].Name) then
+        Exit(FCodeDefinition.CodeTags[LIndex]);
   end;
 
 begin
@@ -997,7 +985,7 @@ begin
   SettingsManager.Settings.Layout.ActiveLayoutName := ALayoutCollectionItem.name;
 end;
 
-procedure TMain.SaveLayout(ALayoutName: string);
+procedure TMain.SaveLayout(const ALayoutName: string);
 
 var
   LayoutCollectionItem: TLayoutCollectionItem;

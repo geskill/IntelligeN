@@ -29,8 +29,8 @@ type
   protected
     class function ExecuteBase(const APluginFile: string; APluginOnLoadedFunc: TPluginOnLoadedFunc; AHandleOverride: Boolean = True; const ARestrictToType: TPlugInType = ptNone; AErrorProc: TPluginErrorProc = nil): Boolean;
   public
-    class function Execute(APluginOnLoadedFunc: TPluginOnLoadedFunc; const ARestrictToType: TPlugInType; APluginFile: string = ''; AHandleOverride: Boolean = True; AErrorProc: TPluginErrorProc = nil): Boolean;
-    class function ExecuteFolder(APluginOnLoadedFunc: TPluginOnLoadedFunc; AFolderPath: string; const ARestrictToType: TPlugInType = ptNone): Boolean;
+    class function Execute(APluginOnLoadedFunc: TPluginOnLoadedFunc; const ARestrictToType: TPlugInType; const APluginFile: string = ''; AHandleOverride: Boolean = True; AErrorProc: TPluginErrorProc = nil): Boolean;
+    class function ExecuteFolder(APluginOnLoadedFunc: TPluginOnLoadedFunc; const AFolderPath: string; const ARestrictToType: TPlugInType = ptNone): Boolean;
   end;
 
 implementation
@@ -174,7 +174,7 @@ begin
   Result := LResult;
 end;
 
-class function TAddPlugin.Execute(APluginOnLoadedFunc: TPluginOnLoadedFunc; const ARestrictToType: TPlugInType; APluginFile: string = ''; AHandleOverride: Boolean = True; AErrorProc: TPluginErrorProc = nil): Boolean;
+class function TAddPlugin.Execute(APluginOnLoadedFunc: TPluginOnLoadedFunc; const ARestrictToType: TPlugInType; const APluginFile: string = ''; AHandleOverride: Boolean = True; AErrorProc: TPluginErrorProc = nil): Boolean;
 var
   LFileIndex: Integer;
 begin
@@ -205,7 +205,7 @@ begin
   end;
 end;
 
-class function TAddPlugin.ExecuteFolder(APluginOnLoadedFunc: TPluginOnLoadedFunc; AFolderPath: string; const ARestrictToType: TPlugInType = ptNone): Boolean;
+class function TAddPlugin.ExecuteFolder(APluginOnLoadedFunc: TPluginOnLoadedFunc; const AFolderPath: string; const ARestrictToType: TPlugInType = ptNone): Boolean;
 var
   LStringList: TStringList;
   LFileIndex: Integer;
@@ -217,7 +217,7 @@ begin
     GetFilesInDirectory(AFolderPath, '*.dll', LStringList, True, True, True, True);
 
     for LFileIndex := 0 to LStringList.Count - 1 do
-      if not TAddPlugin.ExecuteBase(LStringList.Strings[LFileIndex], APluginOnLoadedFunc, False, ARestrictToType, {make the error message silent} procedure(AErrorMsg: string)begin end) then
+      if not TAddPlugin.ExecuteBase(LStringList.Strings[LFileIndex], APluginOnLoadedFunc, False, ARestrictToType, {make the error message silent} procedure(const AErrorMsg: string)begin end) then
       begin
         Result := False;
       end;

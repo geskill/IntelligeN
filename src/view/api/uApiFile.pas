@@ -39,17 +39,17 @@ type
     procedure SetChanged(AChanged: WordBool); override;
 
     function GetControlName: WideString;
-    procedure SetGetControlName(AGetControlName: WideString); overload;
+    procedure SetGetControlName(const AGetControlName: WideString); overload;
     procedure SetGetControlName(AControlID: TControlID); overload;
 
     function GetControlValue: WideString;
-    procedure SetGetControlValue(AGetControlValue: WideString);
+    procedure SetGetControlValue(const AGetControlValue: WideString);
     function GetID: WideString;
-    procedure SetID(AID: WideString);
+    procedure SetID(const AID: WideString);
     function GetSubTypes: TList<ISubType>;
   public
     constructor Create; overload; override;
-    constructor Create(AControlID: TControlID; AControlValue: WideString = ''; AID: WideString = ''); reintroduce; overload;
+    constructor Create(AControlID: TControlID; const AControlValue: WideString = ''; const AID: WideString = ''); reintroduce; overload;
     property ControlName: WideString read GetControlName write SetGetControlName;
     property ControlValue: WideString read GetControlValue write SetGetControlValue;
     property ID: WideString read GetID write SetID;
@@ -67,14 +67,14 @@ type
     procedure SetChanged(AChanged: WordBool); override;
 
     function GetName: WideString;
-    procedure SetName(AName: WideString); overload;
+    procedure SetName(const AName: WideString); overload;
     procedure SetName(ATypeID: TTypeID); overload;
     function GetID: WideString;
-    procedure SetID(AID: WideString);
+    procedure SetID(const AID: WideString);
     function GetSubTypes: TList<ISubType>;
   public
     constructor Create; overload; override;
-    constructor Create(ATypeID: TTypeID; AID: WideString = ''); reintroduce; overload;
+    constructor Create(ATypeID: TTypeID; const AID: WideString = ''); reintroduce; overload;
     property Name: WideString read GetName write SetName;
     property ID: WideString read GetID write SetID;
     property SubTypes: TList<ISubType>read GetSubTypes;
@@ -91,7 +91,7 @@ type
     procedure SetChanged(AChanged: WordBool); override;
 
     function GetName: WideString;
-    procedure SetName(AName: WideString);
+    procedure SetName(const AName: WideString);
     function GetTypes: TList<IType>;
   public
     constructor Create; override;
@@ -110,11 +110,11 @@ type
     procedure SetChanged(AChanged: WordBool); override;
 
     function GetWebsiteURL: WideString;
-    procedure SetWebsiteURL(AWebsiteURL: WideString);
+    procedure SetWebsiteURL(const AWebsiteURL: WideString);
     function GetWebsiteType: WideString;
-    procedure SetWebsiteType(AWebsiteType: WideString);
+    procedure SetWebsiteType(const AWebsiteType: WideString);
     function GetWebsiteCharset: WideString;
-    procedure SetWebsiteCharset(AWebsiteCharset: WideString);
+    procedure SetWebsiteCharset(const AWebsiteCharset: WideString);
     function GetIDs: TList<IID>;
   public
     constructor Create; override;
@@ -130,13 +130,13 @@ type
     FCategory, FName, FRelation, FValue: string;
   protected
     function GetCategory: WideString;
-    procedure SetCategory(ACategory: WideString);
+    procedure SetCategory(const ACategory: WideString);
     function GetName: WideString;
-    procedure SetName(AName: WideString);
+    procedure SetName(const AName: WideString);
     function GetRelation: WideString;
-    procedure SetRelation(ARelation: WideString);
+    procedure SetRelation(const ARelation: WideString);
     function GetValue: WideString;
-    procedure SetValue(AValue: WideString);
+    procedure SetValue(const AValue: WideString);
   public
     property Category: WideString read GetCategory write SetCategory;
     property Name: WideString read GetName write SetName;
@@ -155,7 +155,7 @@ type
     procedure StringListChange(Sender: TObject);
   protected
     function GetName: WideString;
-    procedure SetName(AName: WideString);
+    procedure SetName(const AName: WideString);
     function GetRanked: WordBool;
     procedure SetRanked(ARanked: WordBool);
     function GetBlacklist: TStringList;
@@ -185,7 +185,7 @@ type
     procedure SetActive(AActive: WordBool);
     function GetCategories: WideString;
     function GetCategoriesAsTTypeIDs: TTypeIDs;
-    procedure SetCategories(ACategories: WideString);
+    procedure SetCategories(const ACategories: WideString);
     function GetControls: TList<IControl>;
     function GetHoster: TList<IHoster>;
   public
@@ -214,8 +214,8 @@ type
     destructor Destroy; override;
   end;
 
-function GetHosterTypeName(AHosterType: THosterType): string;
-function GetHosterNameType(AHosterName: string): THosterType;
+function GetHosterTypeName(const AHosterType: THosterType): string;
+function GetHosterNameType(const AHosterName: string): THosterType;
 
 implementation
 
@@ -285,7 +285,7 @@ begin
   Result := FControlName;
 end;
 
-procedure TSubType.SetGetControlName(AGetControlName: WideString);
+procedure TSubType.SetGetControlName(const AGetControlName: WideString);
 begin
   FControlName := AGetControlName;
   Change;
@@ -296,7 +296,7 @@ begin
   Result := FControlValue;
 end;
 
-procedure TSubType.SetGetControlValue(AGetControlValue: WideString);
+procedure TSubType.SetGetControlValue(const AGetControlValue: WideString);
 begin
   FControlValue := AGetControlValue;
   Change;
@@ -313,7 +313,7 @@ begin
   Result := FID;
 end;
 
-procedure TSubType.SetID(AID: WideString);
+procedure TSubType.SetID(const AID: WideString);
 begin
   FID := AID;
   Change;
@@ -331,7 +331,7 @@ begin
   FSubTypes.OnNotify := SubTypesNotify;
 end;
 
-constructor TSubType.Create(AControlID: TControlID; AControlValue: WideString = ''; AID: WideString = '');
+constructor TSubType.Create(AControlID: TControlID; const AControlValue: WideString = ''; const AID: WideString = '');
 begin
   Create;
   SetGetControlName(AControlID);
@@ -371,7 +371,7 @@ begin
   Result := FName;
 end;
 
-procedure TType.SetName(AName: WideString);
+procedure TType.SetName(const AName: WideString);
 begin
   FName := AName;
   Change;
@@ -388,7 +388,7 @@ begin
   Result := FID;
 end;
 
-procedure TType.SetID(AID: WideString);
+procedure TType.SetID(const AID: WideString);
 begin
   FID := AID;
   Change;
@@ -406,7 +406,7 @@ begin
   FSubTypes.OnNotify := SubTypesNotify;
 end;
 
-constructor TType.Create(ATypeID: TTypeID; AID: WideString = '');
+constructor TType.Create(ATypeID: TTypeID; const AID: WideString = '');
 begin
   Create;
   SetName(ATypeID);
@@ -445,7 +445,7 @@ begin
   Result := FName;
 end;
 
-procedure TID.SetName(AName: WideString);
+procedure TID.SetName(const AName: WideString);
 begin
   FName := AName;
   Change;
@@ -495,7 +495,7 @@ begin
   Result := FWebsiteURL;
 end;
 
-procedure TWebsiteConfigurationFile.SetWebsiteURL(AWebsiteURL: WideString);
+procedure TWebsiteConfigurationFile.SetWebsiteURL(const AWebsiteURL: WideString);
 begin
   FWebsiteURL := AWebsiteURL;
   Change;
@@ -506,7 +506,7 @@ begin
   Result := FWebsiteType;
 end;
 
-procedure TWebsiteConfigurationFile.SetWebsiteType(AWebsiteType: WideString);
+procedure TWebsiteConfigurationFile.SetWebsiteType(const AWebsiteType: WideString);
 begin
   FWebsiteType := AWebsiteType;
   Change;
@@ -517,7 +517,7 @@ begin
   Result := FWebsiteCharset;
 end;
 
-procedure TWebsiteConfigurationFile.SetWebsiteCharset(AWebsiteCharset: WideString);
+procedure TWebsiteConfigurationFile.SetWebsiteCharset(const AWebsiteCharset: WideString);
 begin
   FWebsiteCharset := AWebsiteCharset;
   Change;
@@ -550,7 +550,7 @@ begin
   Result := FCategory;
 end;
 
-procedure TControl.SetCategory(ACategory: WideString);
+procedure TControl.SetCategory(const ACategory: WideString);
 begin
   FCategory := ACategory;
   Change;
@@ -561,7 +561,7 @@ begin
   Result := FName;
 end;
 
-procedure TControl.SetName(AName: WideString);
+procedure TControl.SetName(const AName: WideString);
 begin
   FName := AName;
   Change;
@@ -572,7 +572,7 @@ begin
   Result := FRelation;
 end;
 
-procedure TControl.SetRelation(ARelation: WideString);
+procedure TControl.SetRelation(const ARelation: WideString);
 begin
   FRelation := ARelation;
   Change;
@@ -583,7 +583,7 @@ begin
   Result := FValue;
 end;
 
-procedure TControl.SetValue(AValue: WideString);
+procedure TControl.SetValue(const AValue: WideString);
 begin
   FValue := AValue;
   Change;
@@ -602,7 +602,7 @@ begin
   Result := FName;
 end;
 
-procedure THoster.SetName(AName: WideString);
+procedure THoster.SetName(const AName: WideString);
 begin
   FName := AName;
   Change;
@@ -710,7 +710,7 @@ begin
     end;
 end;
 
-procedure TFilter.SetCategories(ACategories: WideString);
+procedure TFilter.SetCategories(const ACategories: WideString);
 begin
   FCategories := ACategories;
   Change;
@@ -780,12 +780,12 @@ end;
 const
   TStringHosterType: array [0 .. 1] of string = ('filehoster', 'imagehoster');
 
-function GetHosterTypeName(AHosterType: THosterType): string;
+function GetHosterTypeName(const AHosterType: THosterType): string;
 begin
   Result := TStringHosterType[Integer(AHosterType)];
 end;
 
-function GetHosterNameType(AHosterName: string): THosterType;
+function GetHosterNameType(const AHosterName: string): THosterType;
 var
   I: Integer;
 begin

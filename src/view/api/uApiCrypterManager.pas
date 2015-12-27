@@ -30,7 +30,7 @@ type
   TCrypterThread = class(TThreadWorker<TCrypterData>)
   protected
     FFolderInfo: TCrypterFolderInfo;
-    procedure DefaultErrorHandler(AErrorMsg: string); override;
+    procedure DefaultErrorHandler(const AErrorMsg: string); override;
   public
     constructor Create(const ACrypterPanel: ICrypterPanel); reintroduce;
     destructor Destroy; override;
@@ -85,7 +85,7 @@ end;
 
 { TCrypterThread }
 
-procedure TCrypterThread.DefaultErrorHandler(AErrorMsg: string);
+procedure TCrypterThread.DefaultErrorHandler(const AErrorMsg: string);
 begin
   task.Invoke(
     { } procedure

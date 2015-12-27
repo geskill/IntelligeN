@@ -32,9 +32,9 @@ type
     function GetUseAccount: WordBool; safecall;
     procedure SetUseAccount(AUseAccount: WordBool); safecall;
     function GetAccountName: WideString; safecall;
-    procedure SetAccountName(AAccountName: WideString); safecall;
+    procedure SetAccountName(const AAccountName: WideString); safecall;
     function GetAccountPassword: WideString; safecall;
-    procedure SetAccountPassword(AAccountPassword: WideString); safecall;
+    procedure SetAccountPassword(const AAccountPassword: WideString); safecall;
 
     function InternalGetAvailableTypeIDs: TTypeIDs; virtual; safecall;
     function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; virtual; safecall;
@@ -79,7 +79,7 @@ begin
   Result := FAccountname;
 end;
 
-procedure TCrawlerPlugIn.SetAccountName(AAccountName: WideString);
+procedure TCrawlerPlugIn.SetAccountName(const AAccountName: WideString);
 begin
   FAccountname := AAccountName;
 end;
@@ -89,7 +89,7 @@ begin
   Result := FAccountpassword;
 end;
 
-procedure TCrawlerPlugIn.SetAccountPassword(AAccountPassword: WideString);
+procedure TCrawlerPlugIn.SetAccountPassword(const AAccountPassword: WideString);
 begin
   FAccountpassword := AAccountPassword;
 end;

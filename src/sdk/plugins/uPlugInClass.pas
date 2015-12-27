@@ -35,7 +35,7 @@ type
     function GetReadTimeout: Integer; safecall;
     procedure SetReadTimeout(AReadTimeout: Integer); safecall;
     function GetErrorMsg: WideString; safecall;
-    procedure SetErrorMsg(AErrorMsg: WideString); safecall;
+    procedure SetErrorMsg(const AErrorMsg: WideString); safecall;
   public
     constructor Create; virtual;
     destructor Destroy; override;
@@ -110,7 +110,7 @@ begin
   Result := FErrorMsg;
 end;
 
-procedure TPlugIn.SetErrorMsg(AErrorMsg: WideString);
+procedure TPlugIn.SetErrorMsg(const AErrorMsg: WideString);
 begin
   FErrorMsg := AErrorMsg;
 end;

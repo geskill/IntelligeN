@@ -29,24 +29,24 @@ type
     function GetUseAccount: WordBool; safecall;
     procedure SetUseAccount(AUseAccount: WordBool); safecall;
     function GetAccountName: WideString; safecall;
-    procedure SetAccountName(AAccountName: WideString); safecall;
+    procedure SetAccountName(const AAccountName: WideString); safecall;
     function GetAccountPassword: WideString; safecall;
-    procedure SetAccountPassword(AAccountPassword: WideString); safecall;
+    procedure SetAccountPassword(const AAccountPassword: WideString); safecall;
 
     function GetUseCoverLink: WordBool; safecall;
     procedure SetUseCoverLink(AUseCoverLink: WordBool); safecall;
     function GetCoverLink: WideString; safecall;
-    procedure SetCoverLink(ACoverLink: WideString); safecall;
+    procedure SetCoverLink(const ACoverLink: WideString); safecall;
     function GetUseDescription: WordBool; safecall;
     procedure SetUseDescription(AUseDescription: WordBool); safecall;
     function GetDescription: WideString; safecall;
-    procedure SetDescription(ADescription: WideString); safecall;
+    procedure SetDescription(const ADescription: WideString); safecall;
     function GetUseCNL: WordBool; safecall;
     procedure SetUseCNL(AUseCNL: WordBool); safecall;
     function GetUseWebseiteLink: WordBool; safecall;
     procedure SetUseWebseiteLink(AUseWebseiteLink: WordBool); safecall;
     function GetWebseiteLink: WideString; safecall; safecall;
-    procedure SetWebseiteLink(AWebseiteLink: WideString); safecall;
+    procedure SetWebseiteLink(const AWebseiteLink: WideString); safecall;
 
     function GetFoldertypes: Integer; safecall;
     procedure SetFoldertypes(AFoldertypes: Integer); safecall;
@@ -55,39 +55,39 @@ type
     function GetUseCaptcha: WordBool; safecall;
     procedure SetUseCaptcha(AUseCaptcha: WordBool); safecall;
     function GetFolderName: WideString; safecall;
-    procedure SetFolderName(AFolderName: WideString); safecall;
+    procedure SetFolderName(const AFolderName: WideString); safecall;
 
     function GetAdvertismentType: Integer; safecall;
     procedure SetAdvertismentType(AAdvertismentType: Integer); safecall;
     function GetAdvertismentLayerName: WideString; safecall;
-    procedure SetAdvertismentLayerName(AAdvertismentLayerName: WideString); safecall;
+    procedure SetAdvertismentLayerName(const AAdvertismentLayerName: WideString); safecall;
     function GetAdvertismentLayerValue: WideString; safecall;
-    procedure SetAdvertismentLayerValue(AAdvertismentLayerValue: WideString); safecall;
+    procedure SetAdvertismentLayerValue(const AAdvertismentLayerValue: WideString); safecall;
     function GetUseAdvertismentLink: WordBool; safecall;
     procedure SetUseAdvertismentLink(AUseAdvertismentLink: WordBool); safecall;
     function GetAdvertismentLink: WideString; safecall;
-    procedure SetAdvertismentLink(AAdvertismentLink: WideString); safecall;
+    procedure SetAdvertismentLink(const AAdvertismentLink: WideString); safecall;
     function GetUseAdvertismentPicture: WordBool; safecall;
     procedure SetUseAdvertismentPicture(AUseAdvertismentPicture: WordBool); safecall;
     function GetAdvertismentPicture: WideString; safecall;
-    procedure SetAdvertismentPicture(AAdvertismentPicture: WideString); safecall;
+    procedure SetAdvertismentPicture(const AAdvertismentPicture: WideString); safecall;
 
     function GetUseEMailforStatusNotice: WordBool; safecall;
     procedure SetUseEMailforStatusNotice(AUseEMailforStatusNotice: WordBool); safecall;
     function GetEMailforStatusNotice: WideString; safecall;
-    procedure SetEMailforStatusNotice(AEMailforStatusNotice: WideString); safecall;
+    procedure SetEMailforStatusNotice(const AEMailforStatusNotice: WideString); safecall;
     function GetUseFilePassword: WordBool; safecall;
     procedure SetUseFilePassword(AUseFilePassword: WordBool); safecall;
     function GetFilePassword: WideString; safecall;
-    procedure SetFilePassword(AFilePassword: WideString); safecall;
+    procedure SetFilePassword(const AFilePassword: WideString); safecall;
     function GetUseAdminPassword: WordBool; safecall;
     procedure SetUseAdminPassword(AUseAdminPassword: WordBool); safecall;
     function GetAdminPassword: WideString; safecall;
-    procedure SetAdminPassword(AAdminPassword: WideString); safecall;
+    procedure SetAdminPassword(const AAdminPassword: WideString); safecall;
     function GetUseVisitorPassword: WordBool; safecall;
     procedure SetUseVisitorPassword(AUseVisitorPassword: WordBool); safecall;
     function GetVisitorPassword: WideString; safecall;
-    procedure SetVisitorPassword(AVisitorPassword: WideString); safecall;
+    procedure SetVisitorPassword(const AVisitorPassword: WideString); safecall;
   public
     function GetType: TPlugInType; override; safecall;
 
@@ -151,7 +151,7 @@ begin
   Result := FAccountName;
 end;
 
-procedure TCrypterPlugIn.SetAccountName(AAccountName: WideString);
+procedure TCrypterPlugIn.SetAccountName(const AAccountName: WideString);
 begin
   FAccountName := AAccountName;
 end;
@@ -161,7 +161,7 @@ begin
   Result := FAccountPassword;
 end;
 
-procedure TCrypterPlugIn.SetAccountPassword(AAccountPassword: WideString);
+procedure TCrypterPlugIn.SetAccountPassword(const AAccountPassword: WideString);
 begin
   FAccountPassword := AAccountPassword;
 end;
@@ -181,7 +181,7 @@ begin
   Result := FCoverLink;
 end;
 
-procedure TCrypterPlugIn.SetCoverLink(ACoverLink: WideString);
+procedure TCrypterPlugIn.SetCoverLink(const ACoverLink: WideString);
 begin
   FCoverLink := ACoverLink;
 end;
@@ -201,7 +201,7 @@ begin
   Result := FDescription;
 end;
 
-procedure TCrypterPlugIn.SetDescription(ADescription: WideString);
+procedure TCrypterPlugIn.SetDescription(const ADescription: WideString);
 begin
   FDescription := ADescription;
 end;
@@ -231,7 +231,7 @@ begin
   Result := FWebseiteLink;
 end;
 
-procedure TCrypterPlugIn.SetWebseiteLink(AWebseiteLink: WideString);
+procedure TCrypterPlugIn.SetWebseiteLink(const AWebseiteLink: WideString);
 begin
   FWebseiteLink := AWebseiteLink;
 end;
@@ -271,7 +271,7 @@ begin
   Result := FFoldername;
 end;
 
-procedure TCrypterPlugIn.SetFolderName(AFolderName: WideString);
+procedure TCrypterPlugIn.SetFolderName(const AFolderName: WideString);
 begin
   FFoldername := AFolderName;
 end;
@@ -291,7 +291,7 @@ begin
   Result := FAdvertismentLayerName;
 end;
 
-procedure TCrypterPlugIn.SetAdvertismentLayerName(AAdvertismentLayerName: WideString);
+procedure TCrypterPlugIn.SetAdvertismentLayerName(const AAdvertismentLayerName: WideString);
 begin
   FAdvertismentLayerName := AAdvertismentLayerName;
 end;
@@ -301,7 +301,7 @@ begin
   Result := FAdvertismentLayerValue;
 end;
 
-procedure TCrypterPlugIn.SetAdvertismentLayerValue(AAdvertismentLayerValue: WideString);
+procedure TCrypterPlugIn.SetAdvertismentLayerValue(const AAdvertismentLayerValue: WideString);
 begin
   FAdvertismentLayerValue := AAdvertismentLayerValue;
 end;
@@ -321,7 +321,7 @@ begin
   Result := FAdvertismentLink;
 end;
 
-procedure TCrypterPlugIn.SetAdvertismentLink(AAdvertismentLink: WideString);
+procedure TCrypterPlugIn.SetAdvertismentLink(const AAdvertismentLink: WideString);
 begin
   FAdvertismentLink := AAdvertismentLink;
 end;
@@ -341,7 +341,7 @@ begin
   Result := FAdvertismentPicture;
 end;
 
-procedure TCrypterPlugIn.SetAdvertismentPicture(AAdvertismentPicture: WideString);
+procedure TCrypterPlugIn.SetAdvertismentPicture(const AAdvertismentPicture: WideString);
 begin
   FAdvertismentPicture := AAdvertismentPicture;
 end;
@@ -361,7 +361,7 @@ begin
   Result := FEMailforStatusNotice;
 end;
 
-procedure TCrypterPlugIn.SetEMailforStatusNotice(AEMailforStatusNotice: WideString);
+procedure TCrypterPlugIn.SetEMailforStatusNotice(const AEMailforStatusNotice: WideString);
 begin
   FEMailforStatusNotice := AEMailforStatusNotice;
 end;
@@ -381,7 +381,7 @@ begin
   Result := FFilePassword;
 end;
 
-procedure TCrypterPlugIn.SetFilePassword(AFilePassword: WideString);
+procedure TCrypterPlugIn.SetFilePassword(const AFilePassword: WideString);
 begin
   FFilePassword := AFilePassword;
 end;
@@ -401,7 +401,7 @@ begin
   Result := FAdminPassword;
 end;
 
-procedure TCrypterPlugIn.SetAdminPassword(AAdminPassword: WideString);
+procedure TCrypterPlugIn.SetAdminPassword(const AAdminPassword: WideString);
 begin
   FAdminPassword := AAdminPassword;
 end;
@@ -421,7 +421,7 @@ begin
   Result := FVisitorPassword;
 end;
 
-procedure TCrypterPlugIn.SetVisitorPassword(AVisitorPassword: WideString);
+procedure TCrypterPlugIn.SetVisitorPassword(const AVisitorPassword: WideString);
 begin
   FVisitorPassword := AVisitorPassword;
 end;
