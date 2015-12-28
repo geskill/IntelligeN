@@ -877,9 +877,7 @@ procedure TMycxTabSheet.VerifyCheckLinks;
 begin
   if not(FLinksChecked) then
   begin
-    if FCustomHoster then
-      FLinksChecked := True
-    else if CheckStatus then
+    if FCustomHoster or CheckStatus then
       FLinksChecked := True;
   end;
 end;

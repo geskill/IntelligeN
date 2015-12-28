@@ -299,7 +299,7 @@ type
     procedure cxBEILayoutPropertiesCloseUp(Sender: TObject);
     procedure cxBEILayoutPropertiesInitPopup(Sender: TObject);
   private
-    FOnStartup: INotifyEvent;
+    // FOnStartup: INotifyEvent;
     FMainMenu: IMainMenu;
     FCodeDefinition: TCodeDefinition;
     // FMonitorManager: TMonitorManager;
@@ -409,7 +409,7 @@ begin
 
   // FMonitorManager.Free;
 
-  FOnStartup := nil;
+  // FOnStartup := nil;
   FMainMenu := nil;
 
   SettingsManager.Settings.Layout.Main.SaveLayout(Self);
@@ -936,16 +936,14 @@ end;
 
 function TMain.GetImageHosters: WideString;
 var
-  StringList: TStringList;
-  I: Integer;
+  LIndex: Integer;
 begin
-  StringList := TStringList.Create;
-  with StringList do
+  with TStringList.Create do
     try
       Add('OriginalValue');
-      for I := 0 to SettingsManager.Settings.Plugins.ImageHoster.Count - 1 do
-        Add(TPlugInCollectionItem(SettingsManager.Settings.Plugins.ImageHoster.Items[I]).name);
-      Result := StringList.Text;
+      for LIndex := 0 to SettingsManager.Settings.Plugins.ImageHoster.Count - 1 do
+        Add(TPlugInCollectionItem(SettingsManager.Settings.Plugins.ImageHoster.Items[LIndex]).name);
+      Result := Text;
     finally
       Free;
     end;
