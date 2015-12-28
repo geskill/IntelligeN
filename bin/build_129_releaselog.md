@@ -571,6 +571,8 @@
 
 * Improved default crawled values
 
+* Fixed IScriptEditor reading code from changed file
+
 * Fixed issue doing PublishRetry if job canceled
 
 * Fixed UpdateSystem FilePathAppendix
