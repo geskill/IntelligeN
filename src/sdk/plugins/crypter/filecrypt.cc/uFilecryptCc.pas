@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, StrUtils, Classes, Variants, SyncObjs, XMLDoc, XMLIntf, ActiveX,
+  Windows, SysUtils, StrUtils, Math, Variants, XMLDoc, XMLIntf, ActiveX,
   // RegEx
   RegExpr,
   // Common
@@ -139,19 +139,40 @@ begin
             Active := True;
           end;
           with LXMLDoc.ChildNodes.Nodes['filecrypt'].ChildNodes do
-            if (Nodes['state'].NodeValue = '1') then
+            if (VarToStr(Nodes['state'].NodeValue) = '1') then
             begin
               with Nodes['container'].ChildNodes do
               begin
-                ACrypterFolderInfo.Link := Nodes['link'].NodeValue;
-                ACrypterFolderInfo.StatusImage := Nodes['smallimg'].NodeValue + '.png';
-                ACrypterFolderInfo.StatusImageText := Nodes['bigimg'].NodeValue + '.png';
+                ACrypterFolderInfo.Link := VarToStr(Nodes['link'].NodeValue);
+                case IndexText(VarToStr(Nodes['status'].NodeValue), ['0', '1', '2', '3', '4', '5', '6']) of
+                  0:
+                    ACrypterFolderInfo.Status := csUnknown;
+                  1:
+                    ACrypterFolderInfo.Status := csOnline;
+                  2:
+                    ACrypterFolderInfo.Status := csUnknown;
+                  3:
+                    ACrypterFolderInfo.Status := csUnknown;
+                  4:
+                    ACrypterFolderInfo.Status := csOffline;
+                  5:
+                    ACrypterFolderInfo.Status := csMixedOnOffline;
+                  6:
+                    ACrypterFolderInfo.Status := csOnline;
+                else
+                  ACrypterFolderInfo.Status := csUnknown;
+                end;
+                ACrypterFolderInfo.Size := RoundTo((StrToInt64(VarToStr(Nodes['size'].NodeValue)) / 1048576), -2);
+                ACrypterFolderInfo.Hoster := VarToStr(Nodes['hoster'].NodeValue);
+                ACrypterFolderInfo.Parts := VarToIntDef(Nodes['links'].NodeValue, 0);
+                ACrypterFolderInfo.StatusImage := VarToStr(Nodes['smallimg'].NodeValue) + '.png';
+                ACrypterFolderInfo.StatusImageText := VarToStr(Nodes['bigimg'].NodeValue) + '.png';
               end;
               Result := True;
             end
             else
             begin
-              ErrorMsg := Nodes['error'].NodeValue;
+              ErrorMsg := VarToStr(Nodes['error'].NodeValue);
             end;
         except
           on E: Exception do
@@ -240,34 +261,40 @@ begin
             Active := True;
           end;
           with LXMLDoc.ChildNodes.Nodes['filecrypt'].ChildNodes do
-          begin
-            if not Assigned(FindNode('error')) then
+            if (VarToStr(Nodes['state'].NodeValue) = '1') then
             begin
-              case IndexText(VarToStr(Nodes['status'].NodeValue), ['0', '1', '2', '3', '4', '5', '6']) of
-                0:
+              with Nodes['container'].ChildNodes do
+              begin
+                case IndexText(VarToStr(Nodes['status'].NodeValue), ['0', '1', '2', '3', '4', '5', '6']) of
+                  0:
+                    ACrypterFolderInfo.Status := csUnknown;
+                  1:
+                    ACrypterFolderInfo.Status := csOnline;
+                  2:
+                    ACrypterFolderInfo.Status := csUnknown;
+                  3:
+                    ACrypterFolderInfo.Status := csUnknown;
+                  4:
+                    ACrypterFolderInfo.Status := csOffline;
+                  5:
+                    ACrypterFolderInfo.Status := csMixedOnOffline;
+                  6:
+                    ACrypterFolderInfo.Status := csOnline;
+                else
                   ACrypterFolderInfo.Status := csUnknown;
-                1:
-                  ACrypterFolderInfo.Status := csOnline;
-                2:
-                  ACrypterFolderInfo.Status := csUnknown;
-                3:
-                  ACrypterFolderInfo.Status := csUnknown;
-                4:
-                  ACrypterFolderInfo.Status := csOffline;
-                5:
-                  ACrypterFolderInfo.Status := csMixedOnOffline;
-                6:
-                  ACrypterFolderInfo.Status := csOnline;
-              else
-                ACrypterFolderInfo.Status := csUnknown;
+                end;
+                ACrypterFolderInfo.Size := RoundTo((StrToInt64(VarToStr(Nodes['size'].NodeValue)) / 1048576), -2);
+                ACrypterFolderInfo.Hoster := VarToStr(Nodes['hoster'].NodeValue);
+                ACrypterFolderInfo.Parts := VarToIntDef(Nodes['links'].NodeValue, 0);
+                ACrypterFolderInfo.StatusImage := VarToStr(Nodes['smallimg'].NodeValue) + '.png';
+                ACrypterFolderInfo.StatusImageText := VarToStr(Nodes['bigimg'].NodeValue) + '.png';
               end;
               Result := True;
             end
             else
             begin
-              ErrorMsg := Nodes['error'].NodeValue;
+              ErrorMsg := VarToStr(Nodes['error'].NodeValue);
             end;
-          end;
         except
           on E: Exception do
           begin

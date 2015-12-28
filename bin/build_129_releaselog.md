@@ -569,6 +569,8 @@
 
 ######minor enhancements
 
+* Added filecrypt.cc API improvements
+
 * Improved default crawled values
 
 * Fixed IScriptEditor reading code from changed file

@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, StrUtils, Classes,
+  Windows, SysUtils, StrUtils, Math,
   // RegEx
   RegExpr,
   // Common
