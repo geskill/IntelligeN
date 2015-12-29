@@ -10,6 +10,7 @@ function HasUsefulValue(AValue: Variant): Boolean;
 
 function VarToBoolDef(const V: Variant; const ADefault: Boolean): Boolean;
 function VarToIntDef(const V: Variant; const ADefault: Integer): Integer;
+function VarToInt64Def(const V: Variant; const ADefault: Int64): Int64;
 function VarToFloatDef(const V: Variant; const ADefault: Extended): Extended; overload;
 function VarToFloatDef(const V: Variant; const ADefault: Extended; const FormatSettings: TFormatSettings): Extended; overload;
 function VarToFloatDefault(const V: Variant; const ADefault: Extended; ADotAsDecimalSeparator: Boolean = True): Extended;
@@ -42,6 +43,14 @@ function VarToIntDef(const V: Variant; const ADefault: Integer): Integer;
 begin
   if not VarIsNull(V) then
     Result := StrToIntDef(V, ADefault)
+  else
+    Result := ADefault;
+end;
+
+function VarToInt64Def(const V: Variant; const ADefault: Int64): Int64;
+begin
+  if not VarIsNull(V) then
+    Result := StrToInt64Def(V, ADefault)
   else
     Result := ADefault;
 end;

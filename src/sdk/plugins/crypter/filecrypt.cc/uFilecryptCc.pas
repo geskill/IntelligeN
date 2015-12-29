@@ -162,7 +162,7 @@ begin
                 else
                   ACrypterFolderInfo.Status := csUnknown;
                 end;
-                ACrypterFolderInfo.Size := RoundTo((StrToInt64(VarToStr(Nodes['size'].NodeValue)) / 1048576), -2);
+                ACrypterFolderInfo.Size := RoundTo((VarToInt64Def(Nodes['size'].NodeValue, 0) / 1048576), -2);
                 ACrypterFolderInfo.Hoster := VarToStr(Nodes['hoster'].NodeValue);
                 ACrypterFolderInfo.Parts := VarToIntDef(Nodes['links'].NodeValue, 0);
                 ACrypterFolderInfo.StatusImage := VarToStr(Nodes['smallimg'].NodeValue) + '.png';
@@ -283,7 +283,7 @@ begin
                 else
                   ACrypterFolderInfo.Status := csUnknown;
                 end;
-                ACrypterFolderInfo.Size := RoundTo((StrToInt64(VarToStr(Nodes['size'].NodeValue)) / 1048576), -2);
+                ACrypterFolderInfo.Size := RoundTo((VarToInt64Def(Nodes['size'].NodeValue, 0) / 1048576), -2);
                 ACrypterFolderInfo.Hoster := VarToStr(Nodes['hoster'].NodeValue);
                 ACrypterFolderInfo.Parts := VarToIntDef(Nodes['links'].NodeValue, 0);
                 ACrypterFolderInfo.StatusImage := VarToStr(Nodes['smallimg'].NodeValue) + '.png';

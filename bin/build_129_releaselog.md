@@ -579,3 +579,5 @@
 
 * Fixed UpdateSystem FilePathAppendix
 
+* Fixed OLE registration
+
