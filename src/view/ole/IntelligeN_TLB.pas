@@ -12,7 +12,7 @@ unit IntelligeN_TLB;
 // ************************************************************************ //
 
 // $Rev: 17244 $
-// Datei am 16.12.2015 00:31:24 erzeugt aus der unten beschriebenen Typbibliothek.
+// Datei am 29.12.2015 11:58:29 erzeugt aus der unten beschriebenen Typbibliothek.
 
 // ************************************************************************  //
 // Typbib.: C:\Users\geskill\Documents\RAD Studio\Projekte\intelligen-2k9\src\view\ole\IntelligeN (1)

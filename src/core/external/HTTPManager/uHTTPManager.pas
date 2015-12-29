@@ -341,6 +341,10 @@ var
 begin
   HTTPData := IHTTPData(workItem.Data.AsInterface);
 
+{$IFDEF DEBUG_HTTPMANAGER}
+  OutputDebugString(PChar('NewRequest: ' + IntToStr(workItem.UniqueID)));
+{$ENDIF}
+
   try
     Implementor.Handle(HTTPData, HTTPResult);
   except
@@ -389,6 +393,10 @@ begin
         HTTPProcess.HTTPResult := HTTPResult;
     end;
   end;
+
+{$IFDEF DEBUG_HTTPMANAGER}
+  OutputDebugString(PChar('NewRequest Done: ' + IntToStr(workItem.UniqueID)));
+{$ENDIF}
 
   workItem.Result := TOmniValue.CastFrom(HTTPProcess);
 end;
@@ -447,6 +455,10 @@ begin
     { . } NewArrayLength: Integer;
     { } begin
     { . } HTTPProcess := IHTTPProcess(workItem.Result.AsInterface);
+
+{$IFDEF DEBUG_HTTPMANAGER}
+    { . } OutputDebugString(PChar('NewResponse: ' + IntToStr(workItem.UniqueID)));
+{$ENDIF}
 
     { . } FRequestArrayLock.EnterWriteLock;
     { . } try

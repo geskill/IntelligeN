@@ -144,14 +144,14 @@ type
 
 procedure TfMain.FrameResize(Sender: TObject);
 begin
-  //OutputDebugString('CALL');
-  //CallControlAligner;
+  // OutputDebugString('CALL');
+  // CallControlAligner;
   tResize.Enabled := True;
 end;
 
 procedure TfMain.tResizeTimer(Sender: TObject);
 begin
-  //OutputDebugString('CALL');
+  // OutputDebugString('CALL');
   CallControlAligner;
   tResize.Enabled := False;
 end;
@@ -787,7 +787,6 @@ var
   I, FileFormatsIndex: Integer;
   FileFilter: string;
 begin
-
   try
     if not FileExists(AFileName) then
     begin
@@ -911,8 +910,8 @@ end;
 
 destructor TfMain.Destroy;
 begin
-  FRemoveTab  := nil;
-  FAddTab  := nil;
+  FRemoveTab := nil;
+  FAddTab := nil;
   FViewChange := nil;
   FChange := nil;
 

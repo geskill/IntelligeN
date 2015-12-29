@@ -707,14 +707,14 @@ end;
 
 class procedure TPluginBasic.LoadFile(const AFileName: string; const APageController: IPageController);
 var
-  LFileFormatCollectionIndex, TabIndex: Integer;
-  Stop: Boolean;
+  LFileFormatCollectionIndex, LTabIndex: Integer;
+  LStop: Boolean;
 begin
-  Stop := False;
+  LStop := False;
 
   with SettingsManager.Settings.Plugins.FileFormats do
     for LFileFormatCollectionIndex := 0 to Count - 1 do
-      if not Stop then
+      if not LStop then
         with TFileFormatsCollectionItem(Items[LFileFormatCollectionIndex]) do
           if Enabled then
             TPluginBasic.LoadFileFormatsPlugin(Path,
@@ -725,10 +725,10 @@ begin
               { ... } try
               { ..... } AFileFormatPlugin.ForceAddCrypter := ForceAddCrypter;
               { ..... } AFileFormatPlugin.ForceAddImageMirror := ForceAddImageMirror;
-              { ..... } TabIndex := AFileFormatPlugin.LoadControls(AFileName, GetTemplatesTypeFolder, APageController);
-              { ..... } Stop := (TabIndex = -1);
-              { ..... } if not Stop then
-              { ....... } with APageController.TabSheetController[TabIndex] do
+              { ..... } LTabIndex := AFileFormatPlugin.LoadControls(AFileName, GetTemplatesTypeFolder, APageController);
+              { ..... } LStop := (LTabIndex = -1);
+              { ..... } if not LStop then
+              { ....... } with APageController.TabSheetController[LTabIndex] do
               { ....... } begin
               { ......... } Application.ProcessMessages;
               { ......... } Initialized(AFileName, AFileFormatPlugin.GetName);
