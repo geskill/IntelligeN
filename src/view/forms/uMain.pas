@@ -837,18 +837,25 @@ begin
 end;
 
 procedure TMain.WMDropFiles(var Msg: TWMDropFiles);
-
 var
-  s: array [0 .. 1023] of char;
-  I, FileCount: Integer;
+  LFiles: TStringList;
+  LFileIndex, LFileCount: Integer;
+  LFileName: array [0 .. 1023] of Char;
 begin
-  FileCount := DragQueryFile(Msg.Drop, $FFFFFFFF, nil, 0);
-  for I := 0 to FileCount - 1 do
-  begin
-    DragQueryFile(Msg.Drop, I, s, sizeof(s));
-    fMain.OpenToNewTab(s);
+  LFiles := TStringList.Create;
+  try
+    LFileCount := DragQueryFile(Msg.Drop, $FFFFFFFF, nil, 0);
+    for LFileIndex := 0 to LFileCount - 1 do
+    begin
+      DragQueryFile(Msg.Drop, LFileIndex, LFileName, sizeof(LFileName));
+      LFiles.Add(LFileName);
+    end;
+    DragFinish(Msg.Drop);
+
+    fMain.OpenFiles(LFiles);
+  finally
+    LFiles.Free;
   end;
-  DragFinish(Msg.Drop);
 end;
 
 procedure TMain.LayoutClick(Sender: TObject);

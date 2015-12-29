@@ -16,9 +16,9 @@ uses
   // DLLs
   uExport,
   // Api
-  uApiConst, uApiMain, uApiMultiCastEvent, uApiBackupManager, uApiControlAligner, uApiPlugins, uApiPublishController,
-  uApiPublishManager, uApiCrawlerManager, uApiCrypterManager, uApiFileHosterManager, uApiImageHosterManager,
-  uApiTabSheetController, uApiXml,
+  uApiConst, uApiLogManager, uApiMain, uApiMultiCastEvent, uApiBackupManager, uApiControlAligner, uApiPlugins,
+  uApiPublishController, uApiPublishManager, uApiCrawlerManager, uApiCrypterManager, uApiFileHosterManager,
+  uApiImageHosterManager, uApiTabSheetController, uApiXml,
   // Utils
   uFileUtils;
 
@@ -103,6 +103,8 @@ type
     procedure SaveAllTabs;
     procedure SaveAllToFolder;
     procedure OpenToNewTab(AFileName: WideString = '');
+    function OpenFile(const AFileName: string): Boolean;
+    function OpenFiles(const AFiles: TStrings): Boolean;
     function CanClose(ATabIndex: Integer): Boolean;
     function CanCloseCurrentTab: Boolean;
     function CanCloseAllTabs: Boolean;
@@ -585,13 +587,7 @@ begin
       LNewTabSheetController := TTabSheetController.Create(pcMain, Self, ATypeID);
       with LNewTabSheetController do
       begin
-        ParentColor := False;
-
         PageControl := pcMain;
-
-        Color := clWhite;
-
-        ImageIndex := Integer(ATypeID);
 
         TemplateFileName := ExtractFileName(ChangeFileExt(AFileName, ''));
 
@@ -782,41 +778,79 @@ end;
 
 procedure TfMain.OpenToNewTab;
 var
-  PluginAvailable: Boolean;
-  FileFormats: TStrings;
-  I, FileFormatsIndex: Integer;
-  FileFilter: string;
+  LPluginAvailable: Boolean;
+  LFileFormats: TStrings;
+  LFileFormatsIndex: Integer;
+  LFileFilter: string;
 begin
-  try
-    if not FileExists(AFileName) then
-    begin
-      FileFormats := TPluginBasic.GetLoadFileFormats;
-      try
-        PluginAvailable := FileFormats.Count > 0;
+  if not FileExists(AFileName) then
+  begin
+    LFileFormats := TPluginBasic.GetLoadFileFormats;
+    try
+      LPluginAvailable := LFileFormats.Count > 0;
 
-        for FileFormatsIndex := 0 to FileFormats.Count - 1 do
-          FileFilter := FileFilter + FileFormats.ValueFromIndex[FileFormatsIndex];
-      finally
-        FileFormats.Free;
-      end;
+      for LFileFormatsIndex := 0 to LFileFormats.Count - 1 do
+        LFileFilter := LFileFilter + LFileFormats.ValueFromIndex[LFileFormatsIndex];
+    finally
+      LFileFormats.Free;
+    end;
+    if LPluginAvailable then
+    begin
       with TOpenDialog.Create(nil) do
         try
           Options := Options + [ofAllowMultiSelect];
-          Filter := FileFilter;
+          Filter := LFileFilter;
 
-          if PluginAvailable and Execute then
-            for I := 0 to Files.Count - 1 do
-              TPluginBasic.LoadFile(Files.Strings[I], Self);
+          if Execute then
+            OpenFiles(Files);
         finally
           Free;
         end;
     end
     else
-      TPluginBasic.LoadFile(AFileName, Self);
+    begin
+      MessageDlg('None of the FileFormat plugins is active.', mtError, [mbOK], 0);
+    end;
+  end
+  else
+  begin
+    OpenFile(AFileName);
+  end;
+end;
+
+function TfMain.OpenFile(const AFileName: string): Boolean;
+begin
+  Result := False;
+  try
+    Result := TPluginBasic.LoadFile(AFileName, Self);
+
+    if not Result then
+      TLogManager.Instance().Add(Format('File %s could not be loaded.', [AFileName]));
 
     pcMain.OnChange(pcMain);
   except
+    TLogManager.Instance().Add(Format('Critical error loading file %s.', [AFileName]));
+  end;
+end;
 
+function TfMain.OpenFiles(const AFiles: TStrings): Boolean;
+var
+  LFileIndex: Integer;
+  LResult: Boolean;
+begin
+  Result := False;
+  LResult := True;
+
+  LockPageControl;
+  try
+    for LFileIndex := 0 to AFiles.Count - 1 do
+    begin
+      LResult := OpenFile(AFiles.Strings[LFileIndex]);
+      Result := Result and LResult;
+    end;
+
+  finally
+    UnlockPageControl;
   end;
 end;
 

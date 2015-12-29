@@ -76,7 +76,7 @@ type
     class function GetSaveFileFormats: TStrings;
     class function GetLoadFileFormats: TStrings;
     class procedure SaveFile(AFileFormats: TPlugInCollectionItem; const AFileName, ATemplateFileName: string; const ATabSheetController: ITabSheetController);
-    class procedure LoadFile(const AFileName: string; const APageController: IPageController);
+    class function LoadFile(const AFileName: string; const APageController: IPageController): Boolean;
   end;
 
   TApiThreadedPlugin = class(TPluginBasic)
@@ -705,16 +705,16 @@ begin
     { } end);
 end;
 
-class procedure TPluginBasic.LoadFile(const AFileName: string; const APageController: IPageController);
+class function TPluginBasic.LoadFile(const AFileName: string; const APageController: IPageController): Boolean;
 var
   LFileFormatCollectionIndex, LTabIndex: Integer;
-  LStop: Boolean;
+  LHandled: Boolean;
 begin
-  LStop := False;
+  LHandled := False;
 
   with SettingsManager.Settings.Plugins.FileFormats do
     for LFileFormatCollectionIndex := 0 to Count - 1 do
-      if not LStop then
+      if not LHandled then
         with TFileFormatsCollectionItem(Items[LFileFormatCollectionIndex]) do
           if Enabled then
             TPluginBasic.LoadFileFormatsPlugin(Path,
@@ -726,11 +726,11 @@ begin
               { ..... } AFileFormatPlugin.ForceAddCrypter := ForceAddCrypter;
               { ..... } AFileFormatPlugin.ForceAddImageMirror := ForceAddImageMirror;
               { ..... } LTabIndex := AFileFormatPlugin.LoadControls(AFileName, GetTemplatesTypeFolder, APageController);
-              { ..... } LStop := (LTabIndex = -1);
-              { ..... } if not LStop then
+              { ..... } LHandled := not (LTabIndex = -1);
+              { ..... } if LHandled then
               { ....... } with APageController.TabSheetController[LTabIndex] do
               { ....... } begin
-              { ......... } Application.ProcessMessages;
+              { ......... } Application.ProcessMessages; // TODO: remove this line
               { ......... } Initialized(AFileName, AFileFormatPlugin.GetName);
               { ....... } end;
               { ... } except
@@ -738,6 +738,8 @@ begin
               { ... } end;
               { . } end;
               { } end);
+
+  Result := LHandled;
 end;
 
 procedure TApiThreadedPlugin.DefaultInternalErrorHandler(const AErrorMsg: string);
