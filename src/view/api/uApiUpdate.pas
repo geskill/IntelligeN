@@ -362,6 +362,7 @@ var
 
   LUpdateFileIndex: Integer;
   LUpdateFile: IUpdateSystemFile;
+  LUpdateFilePath: string;
 
   LMemoryStream: TMemoryStream;
 begin
@@ -389,6 +390,7 @@ begin
     LCommandLine.Add('set intelligen_plugins=' + GetPluginFolder);
     LCommandLine.Add('set intelligen_settings=' + GetSettingsFolder);
     LCommandLine.Add('set intelligen_templates_cms=' + GetTemplatesCMSFolder);
+    LCommandLine.Add('set intelligen_templates_site=' + GetTemplatesSiteFolder);
     LCommandLine.Add('set intelligen_templates_type=' + GetTemplatesTypeFolder);
     LCommandLine.Add('"' + LUpdatePath + '%waitexe%" 5');
 
@@ -451,7 +453,11 @@ begin
 
             DeleteFile(LUpdateFilesPath + LUpdateFile.FileChecksum + '.zip');
 
-            LCommandLine.Add('copy "' + LUpdateFilesPath + LUpdateFile.FileBase.FileName + '" "' + LocalPathVariableFromFileSystem(LUpdateFile.FileBase.FileSystem) + '"');
+            LUpdateFilePath := GetPathFromFileSystemID(LUpdateFile.FileBase.FileSystem) + LUpdateFile.FileBase.FilePathAppendix;
+            if not ForceDirectories(LUpdateFilePath) then
+              LCommandLine.Add('mkdir "' + LocalPathVariableFromFileSystem(LUpdateFile.FileBase.FileSystem) + LUpdateFile.FileBase.FilePathAppendix + '"');
+
+            LCommandLine.Add('copy "' + LUpdateFilesPath + LUpdateFile.FileBase.FileName + '" "' + LocalPathVariableFromFileSystem(LUpdateFile.FileBase.FileSystem) + LUpdateFile.FileBase.FilePathAppendix + '"');
           finally
             LMemoryStream.Free;
           end;

@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, Forms, SysUtils, Classes, Controls, Math, Graphics,
+  Windows, SysUtils, Classes, Controls, Math, Graphics,
   // Spring Framework
   Spring.SystemUtils,
   // OmniThreadLibrary
@@ -76,7 +76,7 @@ type
     class function GetSaveFileFormats: TStrings;
     class function GetLoadFileFormats: TStrings;
     class procedure SaveFile(AFileFormats: TPlugInCollectionItem; const AFileName, ATemplateFileName: string; const ATabSheetController: ITabSheetController);
-    class procedure LoadFile(const AFileName: string; const APageController: IPageController);
+    class function LoadFile(const AFileName: string; const APageController: IPageController): Boolean;
   end;
 
   TApiThreadedPlugin = class(TPluginBasic)
@@ -705,16 +705,16 @@ begin
     { } end);
 end;
 
-class procedure TPluginBasic.LoadFile(const AFileName: string; const APageController: IPageController);
+class function TPluginBasic.LoadFile(const AFileName: string; const APageController: IPageController): Boolean;
 var
-  LFileFormatCollectionIndex, TabIndex: Integer;
-  Stop: Boolean;
+  LFileFormatCollectionIndex, LTabIndex: Integer;
+  LHandled: Boolean;
 begin
-  Stop := False;
+  LHandled := False;
 
   with SettingsManager.Settings.Plugins.FileFormats do
     for LFileFormatCollectionIndex := 0 to Count - 1 do
-      if not Stop then
+      if not LHandled then
         with TFileFormatsCollectionItem(Items[LFileFormatCollectionIndex]) do
           if Enabled then
             TPluginBasic.LoadFileFormatsPlugin(Path,
@@ -725,19 +725,18 @@ begin
               { ... } try
               { ..... } AFileFormatPlugin.ForceAddCrypter := ForceAddCrypter;
               { ..... } AFileFormatPlugin.ForceAddImageMirror := ForceAddImageMirror;
-              { ..... } TabIndex := AFileFormatPlugin.LoadControls(AFileName, GetTemplatesTypeFolder, APageController);
-              { ..... } Stop := (TabIndex = -1);
-              { ..... } if not Stop then
-              { ....... } with APageController.TabSheetController[TabIndex] do
-              { ....... } begin
-              { ......... } Application.ProcessMessages;
+              { ..... } LTabIndex := AFileFormatPlugin.LoadControls(AFileName, GetTemplatesTypeFolder, APageController);
+              { ..... } LHandled := not (LTabIndex = -1);
+              { ..... } if LHandled then
+              { ....... } with APageController.TabSheetController[LTabIndex] do
               { ......... } Initialized(AFileName, AFileFormatPlugin.GetName);
-              { ....... } end;
               { ... } except
 
               { ... } end;
               { . } end;
               { } end);
+
+  Result := LHandled;
 end;
 
 procedure TApiThreadedPlugin.DefaultInternalErrorHandler(const AErrorMsg: string);

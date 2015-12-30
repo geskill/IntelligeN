@@ -236,7 +236,7 @@ var
 begin
   LCrypterThread := TCrypterCryptThread.Create(ACrypterPanel);
   AddJob(LCrypterThread.Data);
-  CreateTask(LCrypterThread).MonitorWith(FOmniEM).Run(@TCrypterCryptThread.Execute);
+  FOmniEM.Monitor(CreateTask(LCrypterThread, 'TCrypterCryptThread')).Run(@TCrypterCryptThread.Execute);
 end;
 
 procedure TCrypterManager.AddCrypterCheckJob;
@@ -245,7 +245,7 @@ var
 begin
   LCrypterThread := TCrypterCheckThread.Create(ACrypterPanel, AUseCheckDelay);
   AddJob(LCrypterThread.Data);
-  CreateTask(LCrypterThread).MonitorWith(FOmniEM).Run(@TCrypterCheckThread.Execute);
+  FOmniEM.Monitor(CreateTask(LCrypterThread, 'TCrypterCheckThread')).Run(@TCrypterCheckThread.Execute);
 end;
 
 procedure TCrypterManager.RemoveCrypterJob(const ACrypterPanel: ICrypterPanel);

@@ -322,7 +322,7 @@ var
   LCheckComboBoxInterface: IControlCheckComboBox;
   // LPoint: TPoint;
 begin
-  LBasicControl := AClass.Create(TWinControl(FWorkPanel), Self, AType);
+  LBasicControl := AClass.Create(FWorkPanel, Self, AType);
 
   (*
   with TControlAligner.Create do

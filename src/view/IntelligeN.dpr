@@ -139,13 +139,14 @@ uses
   IntelligeN_TLB in 'ole\IntelligeN_TLB.pas',
   uOLE in 'ole\uOLE.pas' {IntelligeN2009: CoClass};
 
-{$R *.res}
-
 {$R *.TLB}
 
+{$R *.res}
+
 begin
+  Application.Initialize; // required by OLE as very first statement
   Randomize;
-  
+
   if DirectoryExists(GetHiddenDataDir + 'update') then
   begin
     if FileExists(GetHiddenDataDir + 'update\sleep32.exe') then
@@ -163,7 +164,6 @@ begin
     
     SettingsManager.LoadSettings;
 
-    Application.Initialize;
     Application.MainFormOnTaskbar := True;
     Application.Title := ProgrammName;
 {$IFDEF DEBUG}

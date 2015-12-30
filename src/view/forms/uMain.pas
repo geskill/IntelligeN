@@ -299,7 +299,7 @@ type
     procedure cxBEILayoutPropertiesCloseUp(Sender: TObject);
     procedure cxBEILayoutPropertiesInitPopup(Sender: TObject);
   private
-    FOnStartup: INotifyEvent;
+    // FOnStartup: INotifyEvent;
     FMainMenu: IMainMenu;
     FCodeDefinition: TCodeDefinition;
     // FMonitorManager: TMonitorManager;
@@ -409,7 +409,7 @@ begin
 
   // FMonitorManager.Free;
 
-  FOnStartup := nil;
+  // FOnStartup := nil;
   FMainMenu := nil;
 
   SettingsManager.Settings.Layout.Main.SaveLayout(Self);
@@ -837,18 +837,25 @@ begin
 end;
 
 procedure TMain.WMDropFiles(var Msg: TWMDropFiles);
-
 var
-  s: array [0 .. 1023] of char;
-  I, FileCount: Integer;
+  LFiles: TStringList;
+  LFileIndex, LFileCount: Integer;
+  LFileName: array [0 .. 1023] of Char;
 begin
-  FileCount := DragQueryFile(Msg.Drop, $FFFFFFFF, nil, 0);
-  for I := 0 to FileCount - 1 do
-  begin
-    DragQueryFile(Msg.Drop, I, s, sizeof(s));
-    fMain.OpenToNewTab(s);
+  LFiles := TStringList.Create;
+  try
+    LFileCount := DragQueryFile(Msg.Drop, $FFFFFFFF, nil, 0);
+    for LFileIndex := 0 to LFileCount - 1 do
+    begin
+      DragQueryFile(Msg.Drop, LFileIndex, LFileName, sizeof(LFileName));
+      LFiles.Add(LFileName);
+    end;
+    DragFinish(Msg.Drop);
+
+    fMain.OpenFiles(LFiles);
+  finally
+    LFiles.Free;
   end;
-  DragFinish(Msg.Drop);
 end;
 
 procedure TMain.LayoutClick(Sender: TObject);
@@ -936,16 +943,14 @@ end;
 
 function TMain.GetImageHosters: WideString;
 var
-  StringList: TStringList;
-  I: Integer;
+  LIndex: Integer;
 begin
-  StringList := TStringList.Create;
-  with StringList do
+  with TStringList.Create do
     try
       Add('OriginalValue');
-      for I := 0 to SettingsManager.Settings.Plugins.ImageHoster.Count - 1 do
-        Add(TPlugInCollectionItem(SettingsManager.Settings.Plugins.ImageHoster.Items[I]).name);
-      Result := StringList.Text;
+      for LIndex := 0 to SettingsManager.Settings.Plugins.ImageHoster.Count - 1 do
+        Add(TPlugInCollectionItem(SettingsManager.Settings.Plugins.ImageHoster.Items[LIndex]).name);
+      Result := Text;
     finally
       Free;
     end;

@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, StrUtils, Classes, Controls, Messages,
+  Windows, SysUtils, StrUtils, Classes, Graphics, Controls, Messages,
   // Dev Express
   cxPC,
   // Common
@@ -74,7 +74,7 @@ type
     function GetMirrorController: IMirrorController;
     function GetPublishController: IPublishController;
   public
-    constructor Create(AOwner: TComponent; APageController: IPageController; ATypeID: TTypeID); reintroduce;
+    constructor Create(const AOwner: TcxPageControl; APageController: IPageController; ATypeID: TTypeID); reintroduce;
 
     procedure Install;
     procedure AddEvents;
@@ -289,14 +289,17 @@ begin
   Result := DesignTabSheetItem.PublishController;
 end;
 
-constructor TTabSheetController.Create;
+constructor TTabSheetController.Create(const AOwner: TcxPageControl; APageController: IPageController; ATypeID: TTypeID);
 begin
   inherited Create(AOwner);
 
   FPageController := APageController;
-
-  ImageIndex := Integer(ATypeID);
   FTypeID := ATypeID;
+
+  ParentColor := False;
+  Color := clWhite;
+  Enabled := False;
+  ImageIndex := Integer(ATypeID);
 end;
 
 procedure TTabSheetController.Install;
@@ -349,6 +352,8 @@ begin
   DataChanged := False;
   ResetControlFocused();
   PublishController.Active := True;
+
+  Enabled := True;
 
   PageController.OnAddTab.Invoke(Self);
 end;

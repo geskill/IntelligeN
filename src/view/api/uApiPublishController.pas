@@ -34,7 +34,7 @@ type
     function GetTags: WideString;
     function GetMessage: WideString;
   public
-    constructor Create(AAccountName, AAccountPassword, ASettingsFileName, AHostWithPath, AWebsite, ASubject, ATags, AMessage: WideString);
+    constructor Create(const AAccountName, AAccountPassword, ASettingsFileName, AHostWithPath, AWebsite, ASubject, ATags, AMessage: WideString);
     property AccountName: WideString read GetAccountName;
     property AccountPassword: WideString read GetAccountPassword;
 
@@ -83,9 +83,6 @@ type
     destructor Destroy; override;
   end;
 
-  TIScriptCheckFunc = reference to function(const AIScript: WideString): RIScriptResult;
-  TIScriptParseFunc = reference to function(const AIScript: WideString; AIScriptType: TIScriptType): RIScriptResult;
-
   TICMSWebsiteContainer = class(TInterfacedObject, ICMSWebsiteContainer)
   strict private
   type
@@ -124,6 +121,9 @@ type
     FICMSWebsiteContainerActiveController: TICMSWebsiteContainerActiveController;
 
   type
+    TIScriptCheckFunc = reference to function(const AIScript: WideString): RIScriptResult;
+    TIScriptParseFunc = reference to function(const AIScript: WideString; AIScriptType: TIScriptType): RIScriptResult;
+
     TICMSWebsiteIScriptData = class(TInterfacedObject, ICMSWebsiteIScriptData)
     private
       FIScriptType: TIScriptType;
@@ -135,6 +135,7 @@ type
       FResult: RIScriptResult;
       function LoadFromFile(const AFileName: string): string;
       procedure ResetCode;
+      procedure CodeChange(ACMSItemChangeType: TCMSItemChangeType; AIndex, AParam: Integer);
     protected
       function GetFileName: WideString;
       procedure SetFileName(const AFileName: WideString);
@@ -146,7 +147,7 @@ type
       function GetCheckedResult: RIScriptResult;
       function GetParsedResult: RIScriptResult;
     public
-      constructor Create(const AIScriptType: TIScriptType; const ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; const ACheckFunc: TIScriptCheckFunc; const AParseFunc: TIScriptParseFunc);
+      constructor Create(const AIScriptType: TIScriptType; const ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; out ACodeChange: TCMSItemChangeMethod; const ACheckFunc: TIScriptCheckFunc; const AParseFunc: TIScriptParseFunc);
       destructor Destroy; override;
 
       property FileName: WideString read GetFileName write SetFileName;
@@ -188,6 +189,8 @@ type
     FDataBuffer: ITabSheetData;
     FControlsPreviousValue, FMirrorPreviousValue: Boolean;
     FIWebsiteChange: TICMSItemChangeEventHandler;
+    FISubjectChange: TICMSItemChangeEventHandler;
+    FIMessageChange: TICMSItemChangeEventHandler;
     FIControlChange: TIControlEventHandler;
     FIMirrorChange: TINotifyEventHandler;
 
@@ -391,7 +394,7 @@ begin
   Result := FMessage;
 end;
 
-constructor TICMSWebsite.Create;
+constructor TICMSWebsite.Create(const AAccountName, AAccountPassword, ASettingsFileName, AHostWithPath, AWebsite, ASubject, ATags, AMessage: WideString);
 begin
   inherited Create;
 
@@ -683,6 +686,14 @@ begin
     Code := '';
 end;
 
+procedure TICMSWebsiteContainer.TICMSWebsiteIScriptData.CodeChange(ACMSItemChangeType: TCMSItemChangeType; AIndex, AParam: Integer);
+begin
+  if (ACMSItemChangeType = cctChange) and (AIndex = FCMSWebsiteCollectionItem.Index) then
+  begin
+    ResetCode;
+  end;
+end;
+
 function TICMSWebsiteContainer.TICMSWebsiteIScriptData.GetFileName: WideString;
 begin
   case FIScriptType of
@@ -694,12 +705,22 @@ begin
 end;
 
 procedure TICMSWebsiteContainer.TICMSWebsiteIScriptData.SetFileName(const AFileName: WideString);
+var
+  LNewFileName: string;
 begin
-  case FIScriptType of
-    itSubject:
-      FCMSWebsiteCollectionItem.SubjectFileName := ExtractRelativePath(GetTemplatesCMSFolder, AFileName);
-    itMessage:
-      FCMSWebsiteCollectionItem.MessageFileName := ExtractRelativePath(GetTemplatesCMSFolder, AFileName);
+  // DO NOT USE THIS FUNCTION
+
+  LNewFileName := ExtractRelativePath(GetTemplatesCMSFolder, AFileName);
+
+  if not SameFileName(LNewFileName, FileName) then
+  begin
+    case FIScriptType of
+      itSubject:
+        FCMSWebsiteCollectionItem.SubjectFileName := LNewFileName;
+      itMessage:
+        FCMSWebsiteCollectionItem.MessageFileName := LNewFileName;
+    end;
+    ResetCode;
   end;
 end;
 
@@ -742,11 +763,12 @@ begin
   Result := FResult;
 end;
 
-constructor TICMSWebsiteContainer.TICMSWebsiteIScriptData.Create(const AIScriptType: TIScriptType; const ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; const ACheckFunc: TIScriptCheckFunc; const AParseFunc: TIScriptParseFunc);
+constructor TICMSWebsiteContainer.TICMSWebsiteIScriptData.Create(const AIScriptType: TIScriptType; const ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; out ACodeChange: TCMSItemChangeMethod; const ACheckFunc: TIScriptCheckFunc; const AParseFunc: TIScriptParseFunc);
 begin
   inherited Create;
   FIScriptType := AIScriptType;
   FCMSWebsiteCollectionItem := ACMSWebsiteCollectionItem;
+  ACodeChange := CodeChange;
   FCheckFunc := ACheckFunc;
   FParseFunc := AParseFunc;
   FCodeChanged := False;
@@ -1004,19 +1026,22 @@ procedure TICMSWebsiteContainer.WebsiteChange(ACMSItemChangeType: TCMSItemChange
 var
   LNewValue: Boolean;
 begin
-  FActiveChanged := True;
-  FDataChanged := True;
-
-  with FICMSWebsiteContainerActiveController do
+  if (AIndex = FCMSWebsiteCollectionItem.Index) then
   begin
-    FICMSWebsiteContainerActiveController.FCanUpdatePartly := False;
-    LNewValue := FICMSWebsiteContainerActiveController.Active;
-    if not(LNewValue = FActiveBuffer) then
+    FActiveChanged := True;
+    FDataChanged := True;
+
+    with FICMSWebsiteContainerActiveController do
     begin
-      FActiveBuffer := LNewValue;
-      FTabConnection.PublishController.OnUpdateCMSWebsite.Invoke(TopIndex, Index, LNewValue);
+      FICMSWebsiteContainerActiveController.FCanUpdatePartly := False;
+      LNewValue := FICMSWebsiteContainerActiveController.Active;
+      if not(LNewValue = FActiveBuffer) then
+      begin
+        FActiveBuffer := LNewValue;
+        FTabConnection.PublishController.OnUpdateCMSWebsite.Invoke(TopIndex, Index, LNewValue);
+      end;
+      FActiveChanged := False;
     end;
-    FActiveChanged := False;
   end;
 end;
 
@@ -1192,11 +1217,15 @@ begin
 end;
 
 constructor TICMSWebsiteContainer.Create;
+var
+  LSubjectChange, LMessageChange: TCMSItemChangeMethod;
 begin
+  inherited Create;
+
   FICMSWebsiteContainerActiveController := TICMSWebsiteContainerActiveController.Create(ATabConnection, ACMSWebsitesCollectionItem);
 
-  FICMSWebsiteSubjectIScriptData := TICMSWebsiteIScriptData.Create(itSubject, ACMSWebsitesCollectionItem, CheckIScript, ParseIScript);
-  FICMSWebsiteMessageIScriptData := TICMSWebsiteIScriptData.Create(itMessage, ACMSWebsitesCollectionItem, CheckIScript, ParseIScript);
+  FICMSWebsiteSubjectIScriptData := TICMSWebsiteIScriptData.Create(itSubject, ACMSWebsitesCollectionItem, LSubjectChange, CheckIScript, ParseIScript);
+  FICMSWebsiteMessageIScriptData := TICMSWebsiteIScriptData.Create(itMessage, ACMSWebsitesCollectionItem, LMessageChange, CheckIScript, ParseIScript);
 
   FTopIndex := -1;
   FIndex := -1;
@@ -1217,6 +1246,12 @@ begin
 
   FIWebsiteChange := TICMSItemChangeEventHandler.Create(WebsiteChange);
   FCMSCollectionItem.OnWebsitesChange.Add(FIWebsiteChange);
+
+  FISubjectChange := TICMSItemChangeEventHandler.Create(LSubjectChange);
+  FCMSCollectionItem.OnSubjectsChange.Add(FISubjectChange);
+
+  FIMessageChange := TICMSItemChangeEventHandler.Create(LMessageChange);
+  FCMSCollectionItem.OnMessagesChange.Add(FIMessageChange);
 
   FIControlChange := TIControlEventHandler.Create(ControlChange);
   FTabConnection.ControlController.OnControlChange.Add(FIControlChange);
@@ -1304,12 +1339,16 @@ end;
 
 destructor TICMSWebsiteContainer.Destroy;
 begin
+  FCMSCollectionItem.OnMessagesChange.Remove(FIMessageChange);
+  FCMSCollectionItem.OnSubjectsChange.Remove(FISubjectChange);
   FCMSCollectionItem.OnWebsitesChange.Remove(FIWebsiteChange);
   FTabConnection.MirrorController.OnChange.Remove(FIMirrorChange);
   FTabConnection.ControlController.OnControlChange.Remove(FIControlChange);
   FDataBuffer := nil;
   FIMirrorChange := nil;
   FIControlChange := nil;
+  FIMessageChange := nil;
+  FISubjectChange := nil;
   FIWebsiteChange := nil;
   FTabConnection := nil;
   FCMSCollectionItem := nil;
@@ -1454,8 +1493,10 @@ end;
 
 constructor TICMSContainer.Create(const ATabConnection: ITabSheetController; ACMSCollectionItem: TCMSCollectionItem);
 var
-  I: Integer;
+  LIndex: Integer;
 begin
+  inherited Create;
+
   FIndex := -1;
   FTabConnection := ATabConnection;
   FWebsiteList := TInterfaceList<ICMSWebsiteContainer>.Create;
@@ -1463,9 +1504,9 @@ begin
 
   with FCMSCollectionItem do
   begin
-    for I := 0 to Websites.Count - 1 do
-      if TCMSWebsitesCollectionItem(Websites.Items[I]).Enabled then
-        FWebsiteList.Add(CreateNewWebsiteContainer(I));
+    for LIndex := 0 to Websites.Count - 1 do
+      if TCMSWebsitesCollectionItem(Websites.Items[LIndex]).Enabled then
+        FWebsiteList.Add(CreateNewWebsiteContainer(LIndex));
     UpdateInternalListItemIndex;
     FSettingsChangeEventHandler := TICMSItemChangeEventHandler.Create(SettingsUpdate);
     OnSettingsChange.Add(FSettingsChangeEventHandler);
@@ -1628,6 +1669,8 @@ end;
 
 constructor TIPublishController.Create;
 begin
+  inherited Create;
+
   FTabSheetController := ATabConnection;
 
   FIScriptBuffer := TDictionary<string, RIScriptResult>.Create;

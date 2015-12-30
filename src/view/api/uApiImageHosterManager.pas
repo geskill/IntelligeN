@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, Messages, SysUtils, Classes,
+  Windows, SysUtils, Classes, Messages,
   // OmniThreadLibrary
   OtlTaskControl,
   // Common
@@ -183,7 +183,7 @@ var
 begin
   LImageHosterUploadThread := TImageHosterLocalUploadThread.Create(APictureMirror, ALocalPath);
   AddJob(LImageHosterUploadThread.Data);
-  CreateTask(LImageHosterUploadThread).MonitorWith(FOmniEM).Run(@TImageHosterLocalUploadThread.Execute);
+  FOmniEM.Monitor(CreateTask(LImageHosterUploadThread, 'TImageHosterLocalUploadThread')).Run(@TImageHosterLocalUploadThread.Execute);
 end;
 
 procedure TImageHosterManager.AddRemoteUploadJob(const APictureMirror: IPictureMirror; const ARemoteUrl: WideString);
@@ -192,7 +192,7 @@ var
 begin
   LImageHosterUploadThread := TImageHosterRemoteUploadThread.Create(APictureMirror, ARemoteUrl);
   AddJob(LImageHosterUploadThread.Data);
-  CreateTask(LImageHosterUploadThread).MonitorWith(FOmniEM).Run(@TImageHosterRemoteUploadThread.Execute);
+  FOmniEM.Monitor(CreateTask(LImageHosterUploadThread, 'TImageHosterRemoteUploadThread')).Run(@TImageHosterRemoteUploadThread.Execute);
 end;
 
 procedure TImageHosterManager.RemoveUploadJob(const APictureMirror: IPictureMirror);

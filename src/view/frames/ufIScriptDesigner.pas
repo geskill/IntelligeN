@@ -319,10 +319,8 @@ begin
 end;
 
 procedure TIScriptDesigner.SetIScriptData(const AIScriptData: ICMSWebsiteIScriptData);
-var
-  LFileExists: Boolean;
 begin
-  if not Assigned(AIScriptData) then
+  if not Assigned(AIScriptData) or not FileExists(AIScriptData.FileName) then
   begin
     FIScriptData := nil;
 
@@ -331,18 +329,13 @@ begin
 
     DataChanged := False;
   end
-  else if not Assigned(FIScriptData) or not SameFileName(AIScriptData.FileName, FIScriptData.FileName) then
+  else
   begin
     FIScriptData := AIScriptData;
 
-    LFileExists := FileExists(FIScriptData.FileName);
+    ToogleEnabledStatus(True);
 
-    ToogleEnabledStatus(LFileExists);
-
-    if LFileExists then
-      AdvMemo.Lines.Text := FIScriptData.Code
-    else
-      AdvMemo.Lines.Clear;
+    AdvMemo.Lines.Text := FIScriptData.Code;
 
     DataChanged := not CompareTextByMD5(FIScriptData.Code, FIScriptData.OriginalCode);
   end;

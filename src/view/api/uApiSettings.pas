@@ -55,7 +55,7 @@ type
     property Enabled;
   end;
 
-  TCMSWebsitesCollectionItem = class(TPlugInCollectionItem)
+  TCMSWebsitesCollectionItem = class(TPlugInCollectionItem) // TODO: Rename to: TCMSWebsiteCollectionItem
   private
     FAccountName, FAccountPassword, FSubjectFileName, FMessageFileName: string;
     FWebsite: string;

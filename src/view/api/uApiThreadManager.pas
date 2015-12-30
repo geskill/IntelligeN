@@ -124,6 +124,8 @@ begin
     if not LFound then
       task.Comm.OtherEndpoint.Send(LMessage);
 
+    sleep(75); // give the message queue some time to do some things
+
   until LFound;
 
   if (LMessage.MsgID = MSG_QUIT_TASK) then
@@ -135,6 +137,7 @@ end;
 
 function TThreadWorker<T>.Initialize: Boolean;
 begin
+  // This is already executed in a seperate thread/task
   Result := inherited Initialize;
   if not Result or InBlackList then
   begin

@@ -339,7 +339,7 @@ var
 begin
   LCrawlerThread := TCrawlerThread.Create(AControlController);
   AddJob(LCrawlerThread.Data);
-  CreateTask(LCrawlerThread).MonitorWith(FOmniEM).Run(@TCrawlerThread.Execute);
+  FOmniEM.Monitor(CreateTask(LCrawlerThread, 'TCrawlerThread')).Run(@TCrawlerThread.Execute);
 end;
 
 procedure TCrawlerManager.RemoveCrawlerJob;
