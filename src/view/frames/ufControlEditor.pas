@@ -21,15 +21,17 @@ type
     cxGridTableViewColumn2: TcxGridColumn;
     HintTimer: TTimer;
     cxHintStyleController: TcxHintStyleController;
-    procedure cxGridTableViewCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
-      AShift: TShiftState; var AHandled: Boolean);
+    procedure cxGridTableViewCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
+    procedure cxGridTableViewMouseLeave(Sender: TObject);
     procedure cxGridTableViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure HintTimerTimer(Sender: TObject);
   private
-    FControl: IControlBasic;
     FHintDisplayed: Boolean;
     FGridRecord: TcxCustomGridRecord;
     FItem: TcxCustomGridTableItem;
+    FControl: IControlBasic;
+    procedure HideHint;
+    procedure ShowHint(X, Y: Integer; const AHint: string);
     procedure SetControl(AControl: IControlBasic);
   public
     constructor Create(AOwner: TComponent); override;
@@ -40,13 +42,15 @@ implementation
 
 {$R *.dfm}
 
-procedure TfControlEditor.cxGridTableViewCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
-  AShift: TShiftState; var AHandled: Boolean);
+procedure TfControlEditor.cxGridTableViewCellDblClick(Sender: TcxCustomGridTableView; ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton; AShift: TShiftState; var AHandled: Boolean);
 begin
   with cxGridTableView.DataController do
     FControl.Value := FControl.GetProposedValue(FocusedRowIndex);
-  // if not Supports(FControl, IPicture) then
-  // FControl.Value := Values[FocusedRowIndex,1]
+end;
+
+procedure TfControlEditor.cxGridTableViewMouseLeave(Sender: TObject);
+begin
+  HideHint;
 end;
 
 procedure TfControlEditor.cxGridTableViewMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
@@ -60,7 +64,9 @@ procedure TfControlEditor.cxGridTableViewMouseMove(Sender: TObject; Shift: TShif
         Result := IntToStr(APictureInfo.Width) + ' x ' + IntToStr(APictureInfo.Height) + ' pixel - ' + FloatToStr(RoundTo(APictureInfo.Size / 1024, -1)) + ' KB'
     end
     else
+    begin
       Result := 'Download in progress';
+    end;
   end;
 
 var
@@ -72,8 +78,7 @@ begin
   // hide displayed hint if mouse is not over a grid cell
   if AHitTest.HitTestCode <> htCell then
   begin
-    HintTimer.Enabled := False;
-    cxHintStyleController.HideHint;
+    HideHint;
     Exit;
   end;
 
@@ -82,8 +87,7 @@ begin
     if (FGridRecord <> GridRecord) or (FItem <> Item) or not FHintDisplayed then
     begin
       // redisplay hint window is mouse has been moved to a new cell
-      cxHintStyleController.HideHint;
-      HintTimer.Enabled := False;
+      HideHint;
       // store the current record and column
       FItem := Item;
       FGridRecord := GridRecord;
@@ -91,26 +95,34 @@ begin
       if not Supports(FControl, IPicture) or not(Item.index = cxGridTableViewColumn2.index) then
         AHint := cxGridTableView.DataController.DisplayTexts[GridRecord.RecordIndex, Item.index]
       else
-        AHint := GetGraphicHint((FControl as IPicture).GetValuePicture(GridRecord.RecordIndex))
-        { + sLineBreak + ((FControl as IPicture).GetValuePicture(GridRecord.RecordIndex). '' } ;
+        AHint := GetGraphicHint((FControl as IPicture).GetValuePicture(GridRecord.RecordIndex));
       with cxGridTableView.Site.ClientToScreen(Point(X, Y)) do
       begin
-        FHintDisplayed := True;
         // show hint
-        cxHintStyleController.ShowHint(X, Y, '', AHint, 500);
+        ShowHint(X, Y, AHint);
       end;
-      // start the hide hint timer
-      HintTimer.Enabled := True;
     end;
+end;
 
+procedure TfControlEditor.HideHint;
+begin
+  // stop the hide hint timer
+  HintTimer.Enabled := False;
+  cxHintStyleController.HideHint;
+  FHintDisplayed := False;
+end;
+
+procedure TfControlEditor.ShowHint(X, Y: Integer; const AHint: string);
+begin
+  FHintDisplayed := True;
+  cxHintStyleController.ShowHint(X, Y, '', AHint, 500);
+  // start the hide hint timer
+  HintTimer.Enabled := True;
 end;
 
 procedure TfControlEditor.HintTimerTimer(Sender: TObject);
 begin
-  HintTimer.Enabled := False;
-  cxHintStyleController.HideHint;
-  Application.ProcessMessages;
-  FHintDisplayed := False;
+  HideHint;
 end;
 
 procedure TfControlEditor.SetControl(AControl: IControlBasic);
