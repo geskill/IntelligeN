@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, Forms, SysUtils, Classes, Controls, Math, Graphics,
+  Windows, SysUtils, Classes, Controls, Math, Graphics,
   // Spring Framework
   Spring.SystemUtils,
   // OmniThreadLibrary
@@ -729,10 +729,7 @@ begin
               { ..... } LHandled := not (LTabIndex = -1);
               { ..... } if LHandled then
               { ....... } with APageController.TabSheetController[LTabIndex] do
-              { ....... } begin
-              { ......... } Application.ProcessMessages; // TODO: remove this line
               { ......... } Initialized(AFileName, AFileFormatPlugin.GetName);
-              { ....... } end;
               { ... } except
 
               { ... } end;

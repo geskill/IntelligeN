@@ -139,7 +139,7 @@ var
 begin
   LFileHosterCheckThread := TFileHosterCheckThread.Create(ADirectlink);
   AddJob(LFileHosterCheckThread.Data);
-  CreateTask(LFileHosterCheckThread).MonitorWith(FOmniEM).Run(@TFileHosterCheckThread.Execute);
+  FOmniEM.Monitor(CreateTask(LFileHosterCheckThread, 'TFileHosterCheckThread')).Run(@TFileHosterCheckThread.Execute);
 end;
 
 procedure TFileHosterManager.RemoveHosterJob;

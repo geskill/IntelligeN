@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, Forms, SysUtils, Classes, Messages,
+  Windows, SysUtils, Classes, Messages,
   // OmniThreadLibrary
   OtlCollections, OtlComm, OtlCommon, OtlParallel, OtlTask, OtlTaskControl, OtlThreadPool,
   // Generic TThreadList
@@ -326,7 +326,7 @@ var
 begin
   LPublishInnerThread := TPublishInnerThread.Create(APublishItem, APublishRetry);
   AddJob(LPublishInnerThread.Data);
-  CreateTask(LPublishInnerThread).MonitorWith(FOmniEM).Schedule(FThreadPool).Invoke(@TPublishInnerThread.Execute);
+  FOmniEM.Monitor(CreateTask(LPublishInnerThread, 'TPublishInnerThread')).Schedule(FThreadPool).Invoke(@TPublishInnerThread.Execute);
 end;
 
 procedure TPublishInnerManager.RemovePublishItem(const APublishItem: IPublishItem);
@@ -547,7 +547,7 @@ begin
 
   LPublishThread := TPublishThread.Create(APublishJob, LPublishRate, LPublishDelay, LPublishRetry, FOnGUIInteractionItem);
   AddJob(LPublishThread.Data);
-  CreateTask(LPublishThread).MonitorWith(FOmniEM).Schedule(FThreadPool).Invoke(@TPublishThread.Execute);
+  FOmniEM.Monitor(CreateTask(LPublishThread, 'TPublishThread')).Schedule(FThreadPool).Invoke(@TPublishThread.Execute);
 
   if Assigned(FOnGUIInteractionItem) then
     FOnGUIInteractionItem(pmisCREATED, APublishJob, 0, '');
