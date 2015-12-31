@@ -13,6 +13,7 @@ object fControlEditor: TfControlEditor
     BorderStyle = cxcbsNone
     TabOrder = 0
     object cxGridTableView: TcxGridTableView
+      OnMouseLeave = cxGridTableViewMouseLeave
       OnMouseMove = cxGridTableViewMouseMove
       Navigator.Buttons.CustomButtons = <>
       OnCellDblClick = cxGridTableViewCellDblClick

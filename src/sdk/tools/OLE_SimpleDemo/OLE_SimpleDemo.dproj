@@ -19,13 +19,14 @@
 			<CfgParent>Base</CfgParent>
 			<Base>true</Base>
 		</PropertyGroup>
+		<Import Project="..\tools.optset" Condition="'$(Base)'!='' And Exists('..\tools.optset')"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<DCC_DcuOutput>dcu</DCC_DcuOutput>
-			<DCC_UnitSearchPath>../../../view\ole;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<DCC_DependencyCheckOutputName>OLE_SimpleDemo.exe</DCC_DependencyCheckOutputName>
 			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DCC_Platform>x86</DCC_Platform>
+			<CfgDependentOn>..\tools.optset</CfgDependentOn>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
 			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
@@ -45,6 +46,7 @@
 			</DCCReference>
 			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
+				<DependentOn>..\tools.optset</DependentOn>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_1</Key>
