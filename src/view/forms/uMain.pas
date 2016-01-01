@@ -968,22 +968,22 @@ end;
 
 procedure TMain.LoadLayout(ALayoutCollectionItem: TLayoutCollectionItem);
 var
-  _StringStream: TStringStream;
+  LStringStream: TStringStream;
 begin
   with ALayoutCollectionItem do
   begin
-    _StringStream := TStringStream.Create(TFormat_MIME64.Decode(DockControls));
+    LStringStream := TStringStream.Create(TFormat_MIME64.Decode(DockControls));
     try
-      dxDockingManager.LoadLayoutFromStream(_StringStream);
+      dxDockingManager.LoadLayoutFromStream(LStringStream);
     finally
-      _StringStream.Free;
+      LStringStream.Free;
     end;
 
-    _StringStream := TStringStream.Create(TFormat_MIME64.Decode(BarManager));
+    LStringStream := TStringStream.Create(TFormat_MIME64.Decode(BarManager));
     try
-      dxBarManager.LoadFromStream(_StringStream);
+      dxBarManager.LoadFromStream(LStringStream);
     finally
-      _StringStream.Free;
+      LStringStream.Free;
     end;
   end;
 
@@ -991,34 +991,33 @@ begin
 end;
 
 procedure TMain.SaveLayout(const ALayoutName: string);
-
 var
-  LayoutCollectionItem: TLayoutCollectionItem;
-  _StringStream: TStringStream;
+  LLayoutCollectionItem: TLayoutCollectionItem;
+  LStringStream: TStringStream;
 begin
-  LayoutCollectionItem := SettingsManager.Settings.Layout.FindLayout(ALayoutName);
+  LLayoutCollectionItem := SettingsManager.Settings.Layout.FindLayout(ALayoutName);
 
-  if not Assigned(LayoutCollectionItem) then
-    LayoutCollectionItem := TLayoutCollectionItem.Create(SettingsManager.Settings.Layout.Layout);
+  if not Assigned(LLayoutCollectionItem) then
+    LLayoutCollectionItem := TLayoutCollectionItem.Create(SettingsManager.Settings.Layout.Layout);
 
-  with LayoutCollectionItem do
+  with LLayoutCollectionItem do
   begin
-    name := ALayoutName;
+    Name := ALayoutName;
 
-    _StringStream := TStringStream.Create('');
+    LStringStream := TStringStream.Create('');
     try
-      dxDockingManager.SaveLayoutToStream(_StringStream);
-      DockControls := TFormat_MIME64.Encode(_StringStream.DataString);
+      dxDockingManager.SaveLayoutToStream(LStringStream);
+      DockControls := TFormat_MIME64.Encode(LStringStream.DataString);
     finally
-      _StringStream.Free;
+      LStringStream.Free;
     end;
 
-    _StringStream := TStringStream.Create('');
+    LStringStream := TStringStream.Create('');
     try
-      dxBarManager.SaveToStream(_StringStream);
-      BarManager := TFormat_MIME64.Encode(_StringStream.DataString);
+      dxBarManager.SaveToStream(LStringStream);
+      BarManager := TFormat_MIME64.Encode(LStringStream.DataString);
     finally
-      _StringStream.Free;
+      LStringStream.Free;
     end;
   end;
 

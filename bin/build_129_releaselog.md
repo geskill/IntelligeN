@@ -573,6 +573,8 @@
 
 * Improved default crawled values
 
+* Fixed issue starting the application minimized
+
 * Fixed IScriptEditor reading code from changed file
 
 * Fixed issue doing PublishRetry if job canceled

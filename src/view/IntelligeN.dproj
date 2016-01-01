@@ -2,7 +2,7 @@
 		<PropertyGroup>
 			<ProjectGuid>{1D2F73A9-4B63-415A-BA7F-8E22FA952849}</ProjectGuid>
 			<MainSource>IntelligeN.dpr</MainSource>
-			<Config Condition="'$(Config)'==''">Portable-D</Config>
+			<Config Condition="'$(Config)'==''">Release</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 			<ProjectVersion>12.0</ProjectVersion>
 		</PropertyGroup>

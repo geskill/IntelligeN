@@ -86,14 +86,24 @@ object About: TAbout
     WordWrap = True
     ExplicitHeight = 360
   end
-  object bDonate: TButton
+  object bDonatePP: TButton
     Left = 542
     Top = 20
     Width = 75
     Height = 25
     Anchors = [akTop, akRight]
-    Caption = 'Donate'
+    Caption = 'Donate PP'
+    TabOrder = 1
+    OnClick = bDonatePPClick
+  end
+  object bDonateBC: TButton
+    Left = 461
+    Top = 20
+    Width = 75
+    Height = 25
+    Anchors = [akTop, akRight]
+    Caption = 'Donate BC'
     TabOrder = 0
-    OnClick = bDonateClick
+    OnClick = bDonateBCClick
   end
 end
