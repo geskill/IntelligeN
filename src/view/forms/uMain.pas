@@ -734,7 +734,11 @@ end;
 
 procedure TMain.aCheckforUpdatesExecute(Sender: TObject);
 begin
-  uUpdate.Update.Show;
+  with uUpdate.Update do
+  begin
+    UpdateController.CheckForUpdates;
+    Show;
+  end;
 end;
 
 procedure TMain.aSupportBoardExecute(Sender: TObject);

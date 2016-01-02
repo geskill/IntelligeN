@@ -38,14 +38,15 @@ implementation
 
 procedure TAbout.FormCreate(Sender: TObject);
 var
-  s: string;
+  LVersionString: string;
 begin
-  s := ProgrammName + ' v' + TFileVersionInfo.GetVersionInfo(ParamStr(0)).FileVersion;
+  LVersionString := ProgrammName + ' v' + TFileVersionInfo.GetVersionInfo(ParamStr(0)).FileVersion;
 
   if IsPortable then
-    s := s + 'p';
+    LVersionString := LVersionString + 'p';
 
-  lVersionValue.Caption := s;
+  lVersionValue.Caption := LVersionString;
+  lCopyright.Caption := Format(lCopyright.Caption, [IntToStr(CurrentYear)]);
 end;
 
 procedure TAbout.FormKeyPress(Sender: TObject; var Key: Char);

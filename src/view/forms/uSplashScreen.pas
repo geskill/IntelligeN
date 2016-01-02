@@ -65,6 +65,7 @@ begin
   end;
 
   cxLProgrammName.Caption := ProgrammName;
+  cxLCopyright.Caption := Format(ProgrammCopyright, [IntToStr(CurrentYear)]) + '. All rights reserved.';
   cxLProgrammBuild.Caption := 'BUILD ' + IntToStr(MINOR_VERSION);
 
   ShowWindow(Application.Handle, SW_HIDE);

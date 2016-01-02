@@ -573,6 +573,8 @@
 
 * Improved default crawled values
 
+* Improved check for updates on startup
+
 * Fixed issue starting the application minimized
 
 * Fixed IScriptEditor reading code from changed file
