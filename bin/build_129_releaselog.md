@@ -585,3 +585,5 @@
 
 * Fixed OLE registration
 
+* Fixed share-links.biz folder check
+

@@ -31,7 +31,7 @@ implementation
 
 function TShareLinksBiz.GetFolderID(AFolderName: string): string;
 begin
-  Result := copy(AFolderName, Pos('/_', string(AFolderName)) + 1);
+  Result := copy(AFolderName, Pos('/_', string(AFolderName)) + 2);
 end;
 
 function TShareLinksBiz.GetName;
@@ -137,7 +137,7 @@ begin
   end
   else
   begin
-    ErrorMsg := LHTTPProcess.HTTPResult.SourceCode;
+    ErrorMsg := Trim(LHTTPProcess.HTTPResult.SourceCode);
   end;
 end;
 
@@ -177,7 +177,7 @@ begin
     if UseAccount then
       AddFormField('apikey', AccountName);
 
-    AddFormField('folderCodes', GetFolderID(AFolderIdentifier));
+    AddFormField('folderCode', GetFolderID(AFolderIdentifier));
   end;
 
   LRequestID := HTTPManager.Post(THTTPRequest.Create(website + 'api/content'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
@@ -232,7 +232,7 @@ begin
   end
   else
   begin
-    ErrorMsg := LHTTPProcess.HTTPResult.SourceCode;
+    ErrorMsg := Trim(LHTTPProcess.HTTPResult.SourceCode);
   end;
 end;
 
