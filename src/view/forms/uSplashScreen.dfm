@@ -43,15 +43,11 @@ object SplashScreen: TSplashScreen
   object cxLCopyright: TcxLabel
     Left = 30
     Top = 332
-    AutoSize = False
-    Caption = '(c) 2007 - 2015 Sebastian Klatte. All rights reserved.'
     ParentColor = False
     Style.Color = clBlack
     Style.TextColor = clWhite
     Style.TextStyle = [fsBold]
     Transparent = True
-    Height = 18
-    Width = 299
   end
   object cxLProgrammName: TcxLabel
     Left = 112

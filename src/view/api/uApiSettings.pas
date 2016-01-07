@@ -1337,10 +1337,18 @@ begin
   AForm.Top := Top;
   AForm.Width := Width;
 
-  if (WindowState = wsMaximized) then
+  if not (WindowState = wsNormal) then
   begin
     AForm.WindowState := wsNormal;
-    ShowWindowAsync(AForm.Handle, SW_MAXIMIZE);
+    if (WindowState = wsMinimized) then
+    begin
+      Application.Minimize; // required
+      ShowWindowAsync(AForm.Handle, SW_MINIMIZE);
+    end
+    else
+    begin
+      ShowWindowAsync(AForm.Handle, SW_MAXIMIZE);
+    end;
   end
   else
   begin
@@ -1350,9 +1358,9 @@ end;
 
 procedure TLayoutforForms.SaveLayout(const AForm: TForm);
 begin
-  if (AForm.WindowState = wsMaximized) then
+  if not (AForm.WindowState = wsNormal) then
   begin
-    WindowState := wsMaximized;
+    WindowState := AForm.WindowState;
   end
   else
   begin

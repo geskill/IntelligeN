@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, Classes, Graphics, Variants, XMLDoc, XMLIntf, ActiveX,
+  Windows, SysUtils, Classes, Forms, Graphics, Variants, XMLDoc, XMLIntf, ActiveX,
   // Indy
   IdComponent,
   // OmniThreadLibrary
@@ -75,6 +75,7 @@ type
     FSQLFormatSettings: TFormatSettings;
 
     FBusy: Boolean;
+    FTaskControl: IOmniTaskControl;
 
     FUpdateSize, FDownloadedSize: Int64;
     FErrorMsg: string;
@@ -84,7 +85,7 @@ type
     FOnUpdateError: TUpdateErrorNotifyEvent;
     FOnUpdateDownloading: TUpdateDownloadPositionNotifyEvent;
   protected
-
+    function GetBusy: Boolean;
     function ReadUpdate(): Boolean;
     procedure ReadFiles(const ANode: IXMLNode; AUpdateVersion: TUpdateVersion);
     function LocalPathVariableFromFileSystem(AFileSystem: TFileSystem): string;
@@ -101,7 +102,9 @@ type
     constructor Create(const AProxy: IProxy = nil; AConnectTimeout: Integer = 5000; AReadTimeout: Integer = 10000);
     destructor Destroy; override;
 
-    procedure CheckForUpdates;
+    property Busy: Boolean read GetBusy;
+
+    procedure CheckForUpdates(const AForm: TForm = nil);
     procedure Download(AUpdateVersion: TUpdateVersion);
     procedure DownloadUpgrade;
     procedure DownloadUpdate;
@@ -185,6 +188,11 @@ begin
 end;
 
 { TUpdateController }
+
+function TUpdateController.GetBusy: Boolean;
+begin
+  result := FBusy;
+end;
 
 function TUpdateController.ReadUpdate(): Boolean;
 const
@@ -553,12 +561,19 @@ end;
 
 destructor TUpdateController.Destroy;
 begin
+  if Assigned(FTaskControl) then
+  begin
+    FTaskControl.Terminate;
+    FTaskControl.WaitFor(INFINITE);
+  end;
+  FTaskControl := nil;
+
   FUpdateVersions.Free;
 
   inherited Destroy;
 end;
 
-procedure TUpdateController.CheckForUpdates;
+procedure TUpdateController.CheckForUpdates(const AForm: TForm = nil);
 var
   SearchResult: Boolean;
 begin
@@ -578,32 +593,34 @@ begin
       FUpdateVersions := TUpdateVersions.Create;
     end;
 
-    Parallel.Async(
+    FTaskControl := CreateTask(
       { } procedure(const task: IOmniTask)
       { } begin
       { . } SearchResult := ReadUpdate();
-      { } end,
-      { } Parallel.TaskConfig.OnTerminated(
-        { } procedure(const task: IOmniTaskControl)
-        { } begin
-        { . } if (SearchResult) then
-        { . } begin
-        { . } if not FUpdateVersions.HasUpdate then
-        { ... } begin
-        { ..... } DoUpdateNoChanges;
-        { ... } end
-        { ... } else
-        { ... } begin
-        { ..... } DoUpdateHasChanges;
-        { ... } end;
-        { . } end
-        { . } else
-        { . } begin
-        { ... } DoUpdateError;
-        { . } end;
-        { . } FBusy := False;
-        { } end
-        { } ));
+      { } end);
+    FTaskControl.OnTerminated(
+      { } procedure(const task: IOmniTaskControl)
+      { } begin
+      { . } if (SearchResult) then
+      { . } begin
+      { . } if not FUpdateVersions.HasUpdate then
+      { ... } begin
+      { ..... } DoUpdateNoChanges;
+      { ... } end
+      { ... } else
+      { ... } begin
+      { ..... } DoUpdateHasChanges;
+      { ..... } if Assigned(AForm) then
+      { ....... } AForm.Show;
+      { ... } end;
+      { . } end
+      { . } else
+      { . } begin
+      { ... } DoUpdateError;
+      { . } end;
+      { . } FBusy := False;
+      { } end);
+    FTaskControl.Run;
   end;
 end;
 

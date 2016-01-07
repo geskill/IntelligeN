@@ -12,6 +12,7 @@ interface
 const
   Programm = 'IntelligeN';
   ProgrammName = Programm + ' 2009';
+  ProgrammCopyright = '(c) 2007 - %s Sebastian Klatte';
 
 type
   TContentStatus = (

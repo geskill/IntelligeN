@@ -573,6 +573,10 @@
 
 * Improved default crawled values
 
+* Improved check for updates on startup
+
+* Fixed issue starting the application minimized
+
 * Fixed IScriptEditor reading code from changed file
 
 * Fixed issue doing PublishRetry if job canceled
@@ -580,4 +584,6 @@
 * Fixed UpdateSystem FilePathAppendix
 
 * Fixed OLE registration
+
+* Fixed share-links.biz folder check
 

@@ -9,7 +9,7 @@ uses
   // Spring Framework
   Spring.Collections.Lists,
   // OmniThreadLibrary
-  OtlComm, OtlCommon, OtlEventMonitor, OtlTaskControl,
+  OtlComm, OtlCommon, OtlEventMonitor, OtlTask, OtlTaskControl,
   // Generic TThreadList
   hThreadList,
   // Common

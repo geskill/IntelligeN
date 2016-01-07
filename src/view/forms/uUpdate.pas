@@ -68,7 +68,7 @@ begin
   FUpdateController.OnUpdateFinishedDownload := UpdateFinishedDownload;
 
   if SettingsManager.Settings.CheckForUpdates then
-    UpdateController.CheckForUpdates;
+    UpdateController.CheckForUpdates(Self);
 end;
 
 procedure TUpdate.FormDestroy(Sender: TObject);
@@ -78,7 +78,7 @@ end;
 
 procedure TUpdate.FormShow(Sender: TObject);
 begin
-  UpdateController.CheckForUpdates;
+  // UpdateController.CheckForUpdates; // check on menu item click
 end;
 
 procedure TUpdate.cxRBClick(Sender: TObject);

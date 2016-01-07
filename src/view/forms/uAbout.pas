@@ -17,10 +17,12 @@ type
     lVersion: TLabel;
     lVersionValue: TLabel;
     lCopyright: TLabel;
-    bDonate: TButton;
+    bDonatePP: TButton;
+    bDonateBC: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
-    procedure bDonateClick(Sender: TObject);
+    procedure bDonateBCClick(Sender: TObject);
+    procedure bDonatePPClick(Sender: TObject);
   private
     { Private-Deklarationen }
   public
@@ -36,14 +38,15 @@ implementation
 
 procedure TAbout.FormCreate(Sender: TObject);
 var
-  s: string;
+  LVersionString: string;
 begin
-  s := ProgrammName + ' v' + TFileVersionInfo.GetVersionInfo(ParamStr(0)).FileVersion;
+  LVersionString := ProgrammName + ' v' + TFileVersionInfo.GetVersionInfo(ParamStr(0)).FileVersion;
 
   if IsPortable then
-    s := s + 'p';
+    LVersionString := LVersionString + 'p';
 
-  lVersionValue.Caption := s;
+  lVersionValue.Caption := LVersionString;
+  lCopyright.Caption := Format(lCopyright.Caption, [IntToStr(CurrentYear)]);
 end;
 
 procedure TAbout.FormKeyPress(Sender: TObject; var Key: Char);
@@ -52,7 +55,12 @@ begin
     Close;
 end;
 
-procedure TAbout.bDonateClick(Sender: TObject);
+procedure TAbout.bDonateBCClick(Sender: TObject);
+begin
+  ShellExecute(Handle, 'open', 'https://greenaddress.it/pay/GA2JoY9tMuKBJJ8hWghcTectLSKgex/', nil, nil, SW_SHOW);
+end;
+
+procedure TAbout.bDonatePPClick(Sender: TObject);
 begin
   ShellExecute(Handle, 'open', 'https://www.paypal.me/IntelligeN', nil, nil, SW_SHOW);
 end;

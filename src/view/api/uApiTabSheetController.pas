@@ -298,7 +298,7 @@ begin
 
   ParentColor := False;
   Color := clWhite;
-  Enabled := False;
+  // Enabled := False; cause issue with focused controls
   ImageIndex := Integer(ATypeID);
 end;
 
@@ -353,7 +353,7 @@ begin
   ResetControlFocused();
   PublishController.Active := True;
 
-  Enabled := True;
+  // Enabled := True;
 
   PageController.OnAddTab.Invoke(Self);
 end;
