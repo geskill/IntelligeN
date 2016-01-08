@@ -25,7 +25,6 @@ uses
   uSettings in 'forms\uSettings.pas' {Settings},
   uAbout in 'forms\uAbout.pas' {About},
   uRegister in 'forms\uRegister.pas' {Register},
-  uLicenceInfo in 'forms\uLicenceInfo.pas' {LicenceInfo},
   uUpdate in 'forms\uUpdate.pas' {Update},
   uCAPTCHA in 'forms\uCAPTCHA.pas' {CAPTCHA},
   uIntelligentPosting in 'forms\uIntelligentPosting.pas' {IntelligentPosting},

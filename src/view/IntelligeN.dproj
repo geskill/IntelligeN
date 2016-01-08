@@ -2,7 +2,7 @@
 		<PropertyGroup>
 			<ProjectGuid>{1D2F73A9-4B63-415A-BA7F-8E22FA952849}</ProjectGuid>
 			<MainSource>IntelligeN.dpr</MainSource>
-			<Config Condition="'$(Config)'==''">Portable-D</Config>
+			<Config Condition="'$(Config)'==''">Release</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 			<ProjectVersion>12.0</ProjectVersion>
 		</PropertyGroup>
@@ -69,9 +69,6 @@
 			</DCCReference>
 			<DCCReference Include="forms\uRegister.pas">
 				<Form>Register</Form>
-			</DCCReference>
-			<DCCReference Include="forms\uLicenceInfo.pas">
-				<Form>LicenceInfo</Form>
 			</DCCReference>
 			<DCCReference Include="forms\uUpdate.pas">
 				<Form>Update</Form>
@@ -300,6 +297,7 @@
 				<ResourceType>RCData</ResourceType>
 				<ResourceId>JpgImage2</ResourceId>
 			</RcItem>
+			<None Include="ModelSupport_IntelligeN\ufLogin\default.txvpck"/>
 			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
 			</BuildConfiguration>
@@ -335,7 +333,7 @@
 						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
 						<VersionInfo Name="MajorVer">2</VersionInfo>
 						<VersionInfo Name="MinorVer">129</VersionInfo>
-						<VersionInfo Name="Release">0</VersionInfo>
+						<VersionInfo Name="Release">1</VersionInfo>
 						<VersionInfo Name="Build">0</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
@@ -348,9 +346,9 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName">Sebastian Klatte</VersionInfoKeys>
 						<VersionInfoKeys Name="FileDescription">IntelligeN 2009 Application</VersionInfoKeys>
-						<VersionInfoKeys Name="FileVersion">2.129.0.0</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">2.129.1.0</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
-						<VersionInfoKeys Name="LegalCopyright">(c) 2015 Sebastian Klatte</VersionInfoKeys>
+						<VersionInfoKeys Name="LegalCopyright">(c) 2016 Sebastian Klatte</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks"/>
 						<VersionInfoKeys Name="OriginalFilename">IntelligeN.exe</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductName">IntelligeN 2009</VersionInfoKeys>

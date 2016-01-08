@@ -4,6 +4,7 @@ A flexible content publishing application for nearly every content management sy
 ##for end-users
 Due to the amount of functionality the usage might be complex at first sight. The [Getting Started](https://github.com/geskill/IntelligeN/wiki/Getting-Started) page is the first step to get in touch with the fundamental concepts of IntelligeN.
 
+* [Basic Definitions](https://github.com/geskill/IntelligeN/wiki/Basic-Definitions)
 * [Getting Started](https://github.com/geskill/IntelligeN/wiki/Getting-Started)
 * Usage basics
 * to continue ...
