@@ -337,23 +337,39 @@ end;
 
 function TN3m0CMS.DoAnalyzePost;
 begin
-  Result := (Pos(N3m0CMSSettings.custom_upload_url, AResponseStr) = 0);
-  if Result then
-    ErrorMsg := 'You have no access rights to make a new entry!'
-  else
-    Result := (Pos('select name="kategorie"', LowerCase(AResponseStr)) = 0);
-  if not Result then
-    with TRegExpr.Create do
-      try
-        ModifierG := False;
-        InputString := AResponseStr;
-        Expression := '<td><b>(.*?)<\/b><\/td>';
+  with TRegExpr.Create do
+    try
+      InputString := AResponseStr;
+      Expression := 'action="(.*?)" method="post"';
 
-        if Exec(InputString) then
-          Self.ErrorMsg := Trim(HTML2Text(Match[1]));
-      finally
-        Free;
+      if Exec(InputString) then
+      begin
+        Result := False;
+
+        if (Pos(N3m0CMSSettings.custom_upload_url, LowerCase(Match[1]))) = 0 then
+        begin
+          Self.ErrorMsg := 'You have no access rights to make a new entry!'
+        end;
+
+        with TRegExpr.Create do
+          try
+            InputString := AResponseStr;
+            Expression := '<td><b>(.*?)<\/b><\/td>';
+
+            if Exec(InputString) then
+              Self.ErrorMsg := Trim(HTML2Text(Match[1]));
+          finally
+            Free;
+          end;
+
+      end
+      else
+      begin
+        Result := True;
       end;
+    finally
+      Free;
+    end;
 end;
 
 function TN3m0CMS.GetName;

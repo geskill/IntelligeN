@@ -583,6 +583,8 @@
 
 * Improved plugin exception handling
 
+* Improved N3m0CMS error detection
+
 * Fixed issue starting the application minimized
 
 * Fixed issue focusing a disabled or invisible window
