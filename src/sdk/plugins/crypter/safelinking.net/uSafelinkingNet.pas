@@ -47,6 +47,8 @@ var
   LHTTPParams: IHTTPParams;
   LRequestID: Double;
   LHTTPProcess: IHTTPProcess;
+
+  LXMLDoc: IXMLDocument;
 begin
   Result := False;
 
@@ -125,15 +127,43 @@ begin
   begin
     ErrorMsg := LHTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
   end
-  else if not(Pos('TODO_OK-VALUE', string(LHTTPProcess.HTTPResult.SourceCode)) = 0) then
-  begin
-    { TODO : implement the evaluation of the request result }
-    ACrypterFolderInfo.Link := '';
-    Result := True;
-  end
   else
   begin
-    ErrorMsg := LHTTPProcess.HTTPResult.SourceCode;
+    CoInitializeEx(nil, COINIT_MULTITHREADED);
+    try
+      LXMLDoc := NewXMLDocument;
+      try
+        try
+          with LXMLDoc do
+          begin
+            LoadFromXML(LHTTPProcess.HTTPResult.SourceCode);
+            Active := True;
+          end;
+          with LXMLDoc.ChildNodes.Nodes['response'].ChildNodes do
+
+            if Assigned(FindNode('p_links')) then
+            begin
+              // TODO: API will get changes in the future
+              ACrypterFolderInfo.Link := VarToStr(Nodes['p_links'].NodeValue);
+
+              Result := True;
+            end
+            else
+            begin
+              ErrorMsg := VarToStr(Nodes['api_error'].NodeValue);
+            end;
+        except
+          on E: Exception do
+          begin
+            ErrorMsg := 'The XML from ' + GetName + ' was invaild: ' + E.message;
+          end;
+        end;
+      finally
+        LXMLDoc := nil;
+      end;
+    finally
+      CoUninitialize;
+    end;
   end;
 end;
 
@@ -196,6 +226,7 @@ begin
 
             if Assigned(FindNode('link_status')) then
             begin
+              // TODO: API will get changes in the future
               case IndexText(VarToStr(Nodes['link_status'].NodeValue), ['Online', 'Not yet checked', 'Broken', 'Unknown', 'Offline']) of
                 0:
                   ACrypterFolderInfo.Status := csOnline;
