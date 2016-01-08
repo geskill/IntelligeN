@@ -1,4 +1,4 @@
-{.$DEFINE DEBUG_HTTPMANAGER }
+{.$DEFINE DEBUG_HTTPMANAGER}
 {$REGION 'Documentation'}
 /// <summary>
 ///   <para>
@@ -26,7 +26,7 @@ uses
   // Delphi
   Windows, SysUtils, Classes, Math, ActiveX,
   // OmniThreadLibrary
-  OtlCommon, OtlSync, OtlParallel;
+  OtlComm, OtlCommon, OtlEventMonitor, OtlSync, OtlTask, OtlTaskControl, OtlThreadPool;
 
 type
   THTTPImplementationManager = class(TInterfacedObject, IHTTPImplementationManager)
@@ -74,24 +74,36 @@ type
   strict private
     class var FLock: TOmniCS;
   private
-    FBackgroundWorker: IOmniBackgroundWorker;
+    FOmniEM: TOmniEventMonitor;
+    FNextUniqueID: TOmniAlignedInt64;
+    FTaskControlArray: array of IOmniTaskControl;
+    FTaskControlArrayLock: TOmniMREW;
     FRequestArray: array of IHTTPProcess;
     FRequestArrayLock: TOmniMREW;
     FRequestArrayLowerBoundUpdate: Boolean;
     FRequestArrayLowerBound: TOmniAlignedInt32;
-    FConnectionMaximum: TOmniAlignedInt32;
+    FThreadPool: IOmniThreadPool;
     FImplementor: IHTTPImplementation;
     FImplementationManager: IHTTPImplementationManager;
     FRequestScrape: IHTTPScrapeEvent;
     FRequestDoneEvent: IHTTPProcessEvent;
 
+  const
+    MSG_TASK_FINISHED = 0;
+
+    procedure OmniEMTaskMessage(const task: IOmniTaskControl; const msg: TOmniMessage); virtual;
+
     procedure UpdateCapacity(const ARequestArrayLength: Integer);
 
     class var FHTTPManager: IHTTPManager;
 
-    procedure Execute(const workItem: IOmniWorkItem);
+    procedure Execute(AUniqueID: Int64; AHTTPData: IHTTPData; out AHTTPProcess: IHTTPProcess);
+    procedure ExecuteFinished(AUniqueID: Int64; AHTTPProcess: IHTTPProcess);
+    procedure RunRequestTask(const ATask: IOmniTask);
 
-    function DoRequest(AHTTPMethod: THTTPMethod; AURL: string; AFollowUp: Double; AHTTPOptions: IHTTPOptions = nil; AHTTPParams: IHTTPParams = nil): Double; overload;
+    procedure CreateRequestTask(AUniqueID: Int64; AHTTPData: IHTTPData);
+
+    function DoRequest(AHTTPMethod: THTTPMethod; const AURL: string; AFollowUp: Double; AHTTPOptions: IHTTPOptions = nil; AHTTPParams: IHTTPParams = nil): Double; overload;
     function DoRequest(AHTTPRequest: IHTTPRequest; AHTTPOptions: IHTTPOptions = nil; AHTTPParams: IHTTPParams = nil): Double; overload;
 
     constructor Create;
@@ -301,11 +313,27 @@ end;
 
 { TIdHTTPManager }
 
+procedure THTTPManager.OmniEMTaskMessage(const task: IOmniTaskControl; const msg: TOmniMessage);
+var
+  UniqueID: Int64;
+begin
+  case msg.MsgID of
+    MSG_TASK_FINISHED:
+      begin
+        UniqueID := msg.MsgData[0].AsInt64;
+{$IFDEF DEBUG_HTTPMANAGER}
+        OutputDebugString(PChar('RequestDoneEvent.Invoke: ' + IntToStr(UniqueID)));
+{$ENDIF}
+        FRequestDoneEvent.Invoke(GetResult(UniqueID));
+      end;
+  end;
+end;
+
 procedure THTTPManager.UpdateCapacity(const ARequestArrayLength: Integer);
 var
   Index, Threshold, NewLowerBound: Integer;
 begin
-  Threshold := FConnectionMaximum.Value * 100;
+  Threshold := FThreadPool.MaxExecuting * 100;
   if not FRequestArrayLowerBoundUpdate and ((ARequestArrayLength - FRequestArrayLowerBound.Value) > (Threshold + Threshold)) then
   begin
     FRequestArrayLowerBoundUpdate := True;
@@ -315,6 +343,13 @@ begin
     OutputDebugString(PChar('FRequestArrayLowerBound: ' + IntToStr(FRequestArrayLowerBound.Value)));
     OutputDebugString(PChar('NewLowerBound: ' + IntToStr(NewLowerBound)));
 {$ENDIF}
+    FTaskControlArrayLock.EnterWriteLock;
+    try
+      for Index := FRequestArrayLowerBound.Value + 1 to NewLowerBound do
+        FTaskControlArray[Index] := nil;
+    finally
+      FTaskControlArrayLock.ExitWriteLock;
+    end;
     FRequestArrayLock.EnterWriteLock;
     try
       for Index := FRequestArrayLowerBound.Value + 1 to NewLowerBound do
@@ -327,81 +362,124 @@ begin
   end;
 end;
 
-procedure THTTPManager.Execute(const workItem: IOmniWorkItem);
+procedure THTTPManager.Execute(AUniqueID: Int64; AHTTPData: IHTTPData; out AHTTPProcess: IHTTPProcess);
 var
-  HTTPData: IHTTPData;
   HTTPResult: IHTTPResult;
-  HTTPProcess: IHTTPProcess;
 
   ScrapeData: IHTTPData;
   ScrapeHandled: WordBool;
   ScrapeResult: IHTTPResult;
+  ScrapeProcess: IHTTPProcess;
 
   ScrapedData: IHTTPData;
 begin
-  HTTPData := IHTTPData(workItem.Data.AsInterface);
-
 {$IFDEF DEBUG_HTTPMANAGER}
-  OutputDebugString(PChar('NewRequest: ' + IntToStr(workItem.UniqueID)));
+  OutputDebugString(PChar('NewRequest: ' + IntToStr(AUniqueID)));
 {$ENDIF}
-
   try
-    Implementor.Handle(HTTPData, HTTPResult);
+    Implementor.Handle(AHTTPData, HTTPResult);
   except
     OutputDebugString('HTTPManager execute error');
   end;
 
-  HTTPProcess := THTTPProcess.Create(workItem.UniqueID);
-  HTTPProcess.HTTPData := HTTPData;
-  if not workItem.IsExceptional then
+  AHTTPProcess := THTTPProcess.Create(AUniqueID);
+  AHTTPProcess.HTTPData := AHTTPData;
+  AHTTPProcess.HTTPResult := HTTPResult;
+
+  ScrapeHandled := False;
+  FRequestScrape.Invoke(AHTTPProcess, ScrapeData, ScrapeHandled);
+
+  if ScrapeHandled then
   begin
-    HTTPProcess.HTTPResult := HTTPResult;
+    AHTTPProcess := nil;
 
-    ScrapeHandled := False;
-    FRequestScrape.Invoke(HTTPProcess, ScrapeData, ScrapeHandled);
-
-    if ScrapeHandled then
-    begin
-      HTTPProcess := nil;
-
-      try
-        Implementor.Handle(ScrapeData, ScrapeResult);
-      except
-        OutputDebugString('HTTPManager execute error (handling scrape)');
-      end;
-
-      HTTPProcess := THTTPProcess.Create(workItem.UniqueID);
-      HTTPProcess.HTTPData := ScrapeData;
-      HTTPProcess.HTTPResult := ScrapeResult;
-
-      HTTPProcess.HTTPData.HTTPRequest.URL := HTTPData.HTTPRequest.URL;
-      HTTPProcess.HTTPData.HTTPRequest.Referer := HTTPData.HTTPRequest.Referer;
-
-      ScrapedData := THTTPData.Create(THTTPRequest.FollowUpClone(HTTPProcess, HTTPData.HTTPRequest), HTTPData.HTTPOptions, HTTPData.HTTPParams);
-      HTTPProcess := nil;
-      HTTPResult := nil;
-
-      try
-        Implementor.Handle(ScrapedData, HTTPResult);
-      except
-        OutputDebugString('HTTPManager execute error (after handling scrape)');
-      end;
-
-      HTTPProcess := THTTPProcess.Create(workItem.UniqueID);
-      HTTPProcess.HTTPData := ScrapedData;
-      if not workItem.IsExceptional then
-        HTTPProcess.HTTPResult := HTTPResult;
+    try
+      Implementor.Handle(ScrapeData, ScrapeResult);
+    except
+      OutputDebugString('HTTPManager execute error (handling scrape)');
     end;
+
+    ScrapeProcess := THTTPProcess.Create(AUniqueID);
+    ScrapeProcess.HTTPData := ScrapeData;
+    ScrapeProcess.HTTPResult := ScrapeResult;
+
+    ScrapeProcess.HTTPData.HTTPRequest.URL := AHTTPData.HTTPRequest.URL;
+    ScrapeProcess.HTTPData.HTTPRequest.Referer := AHTTPData.HTTPRequest.Referer;
+
+    ScrapedData := THTTPData.Create(THTTPRequest.FollowUpClone(ScrapeProcess, AHTTPData.HTTPRequest), AHTTPData.HTTPOptions, AHTTPData.HTTPParams);
+    ScrapeProcess := nil;
+    HTTPResult := nil;
+
+    try
+      Implementor.Handle(ScrapedData, HTTPResult);
+    except
+      OutputDebugString('HTTPManager execute error (after handling scrape)');
+    end;
+
+    AHTTPProcess := THTTPProcess.Create(AUniqueID);
+    AHTTPProcess.HTTPData := ScrapedData;
+    AHTTPProcess.HTTPResult := HTTPResult;
   end;
-
-{$IFDEF DEBUG_HTTPMANAGER}
-  OutputDebugString(PChar('NewRequest Done: ' + IntToStr(workItem.UniqueID)));
-{$ENDIF}
-
-  workItem.Result := TOmniValue.CastFrom(HTTPProcess);
 end;
 
-function THTTPManager.DoRequest(AHTTPMethod: THTTPMethod; AURL: string; AFollowUp: Double; AHTTPOptions: IHTTPOptions = nil; AHTTPParams: IHTTPParams = nil): Double;
+procedure THTTPManager.ExecuteFinished(AUniqueID: Int64; AHTTPProcess: IHTTPProcess);
+var
+  NewArrayLength: Integer;
+begin
+{$IFDEF DEBUG_HTTPMANAGER}
+  OutputDebugString(PChar('NewRequest Done: ' + IntToStr(AUniqueID)));
+{$ENDIF}
+  FRequestArrayLock.EnterWriteLock;
+  try
+    NewArrayLength := Max(AUniqueID, length(FRequestArray));
+    SetLength(FRequestArray, NewArrayLength + 1);
+{$IFDEF DEBUG_HTTPMANAGER}
+    OutputDebugString(PChar('NewArrayLength: ' + IntToStr(NewArrayLength) + ' [' + IntToStr(FRequestArrayLowerBound.Value) + ', ' + IntToStr(length(FRequestArray)) + ']'));
+{$ENDIF}
+    FRequestArray[AUniqueID] := AHTTPProcess;
+  finally
+    FRequestArrayLock.ExitWriteLock;
+  end;
+  UpdateCapacity(NewArrayLength);
+end;
+
+procedure THTTPManager.RunRequestTask(const ATask: IOmniTask);
+var
+  UniqueID: Int64;
+  HTTPData: IHTTPData;
+
+  HTTPProcess: IHTTPProcess;
+begin
+  UniqueID := ATask.Param.Item[0].AsInt64;
+  HTTPData := IHTTPData(ATask.Param.Item[1].AsInterface);
+  Execute(UniqueID, HTTPData, HTTPProcess);
+  ExecuteFinished(UniqueID, HTTPProcess);
+  ATask.Comm.Send(MSG_TASK_FINISHED, [UniqueID]);
+end;
+
+procedure THTTPManager.CreateRequestTask(AUniqueID: Int64; AHTTPData: IHTTPData);
+var
+  NewArrayLength: Integer;
+  TaskControl: IOmniTaskControl;
+begin
+  TaskControl := CreateTask(RunRequestTask, 'THTTPManager.DoRequest');
+  TaskControl.Param.Add(AUniqueID);
+  TaskControl.Param.Add(TOmniValue.CastFrom(AHTTPData));
+  TaskControl.MonitorWith(FOmniEM);
+
+  FTaskControlArrayLock.EnterWriteLock;
+  try
+    NewArrayLength := Max(AUniqueID, length(FTaskControlArray));
+    SetLength(FTaskControlArray, NewArrayLength + 1);
+    FTaskControlArray[AUniqueID] := TaskControl;
+  finally
+    FTaskControlArrayLock.ExitWriteLock;
+  end;
+
+  TaskControl.Schedule(FThreadPool);
+end;
+
+function THTTPManager.DoRequest(AHTTPMethod: THTTPMethod; const AURL: string; AFollowUp: Double; AHTTPOptions: IHTTPOptions = nil; AHTTPParams: IHTTPParams = nil): Double;
 begin
   Result := DoRequest(THTTPRequest.FollowUpClone(GetResult(AFollowUp), AHTTPMethod, AURL), AHTTPOptions, AHTTPParams);
 end;
@@ -412,7 +490,8 @@ var
   HTTPParams: IHTTPParams;
 
   HTTPData: IHTTPData;
-  OmniWorkItem: IOmniWorkItem;
+
+  UniqueID: Int64;
 begin
   if not Assigned(AHTTPOptions) then
     HTTPOptions := THTTPOptions.Create
@@ -424,60 +503,46 @@ begin
 
   HTTPData := THTTPData.Create(AHTTPRequest, HTTPOptions, HTTPParams);
 
-  OmniWorkItem := FBackgroundWorker.CreateWorkItem(TOmniValue.CastFrom(HTTPData));
+  UniqueID := FNextUniqueID.Value;
+  FNextUniqueID.Increment;
 
-  FBackgroundWorker.Schedule(OmniWorkItem);
+  CreateRequestTask(UniqueID, HTTPData);
 
-  Result := OmniWorkItem.UniqueID;
+  Result := UniqueID;
 end;
 
 constructor THTTPManager.Create;
 begin
+  inherited Create;
+
   CoInitializeEx(nil, COINIT_MULTITHREADED);
 
-  FBackgroundWorker := Parallel.BackgroundWorker;
+  FOmniEM := TOmniEventMonitor.Create(nil);
+  with FOmniEM do
+  begin
+    OnTaskMessage := OmniEMTaskMessage;
+  end;
+
+  FNextUniqueID.Value := 0;
+
+  SetLength(FTaskControlArray, 0);
 
   SetLength(FRequestArray, 0);
   FRequestArrayLowerBoundUpdate := False;
-  FRequestArrayLowerBound.Value := 0;
+  FRequestArrayLowerBound.Value := -1;
 
-  FConnectionMaximum.Value := 1;
+  FThreadPool := CreateThreadPool('THTTPManager');
+  with FThreadPool do
+  begin
+    MaxExecuting := 1;
+    MaxQueued := 0;
+  end;
+
   FImplementor := nil;
   FImplementationManager := THTTPImplementationManager.Create;
 
   FRequestScrape := TIHTTPScrapeEvent.Create;
   FRequestDoneEvent := TIHTTPProcessEvent.Create;
-
-  FBackgroundWorker.NumTasks(FConnectionMaximum.Value).Execute(Execute).OnRequestDone_Asy(
-    { } procedure(const Sender: IOmniBackgroundWorker; const workItem: IOmniWorkItem)
-    { } var
-    { . } HTTPProcess: IHTTPProcess;
-    { . } NewArrayLength: Integer;
-    { } begin
-    { . } HTTPProcess := IHTTPProcess(workItem.Result.AsInterface);
-
-{$IFDEF DEBUG_HTTPMANAGER}
-    { . } OutputDebugString(PChar('NewResponse: ' + IntToStr(workItem.UniqueID)));
-{$ENDIF}
-
-    { . } FRequestArrayLock.EnterWriteLock;
-    { . } try
-    { ... } NewArrayLength := Max(workItem.UniqueID, length(FRequestArray));
-    { ... } SetLength(FRequestArray, NewArrayLength + 1);
-{$IFDEF DEBUG_HTTPMANAGER}
-    { ... } OutputDebugString(PChar('NewArrayLength: ' + IntToStr(NewArrayLength) + ' [' + IntToStr(FRequestArrayLowerBound.Value) + ', ' + IntToStr(length(FRequestArray)) + ']'));
-{$ENDIF}
-    { ... } FRequestArray[workItem.UniqueID] := HTTPProcess;
-    { . } finally
-    { ... } FRequestArrayLock.ExitWriteLock;
-    { . } end;
-    { . } UpdateCapacity(NewArrayLength);
-
-    { } end).OnRequestDone(
-    { } procedure(const Sender: IOmniBackgroundWorker; const workItem: IOmniWorkItem)
-    { } begin
-    { . } FRequestDoneEvent.Invoke(GetResult(workItem.UniqueID));
-    { } end);
 end;
 
 function THTTPManager.GetImplementor: IHTTPImplementation;
@@ -542,15 +607,14 @@ end;
 
 function THTTPManager.GetConnectionMaximum: Integer;
 begin
-  Result := FConnectionMaximum.Value;
+  Result := FThreadPool.MaxExecuting;
 end;
 
 procedure THTTPManager.SetConnectionMaximum(const AConnectionMaximum: Integer);
 begin
-  if not(AConnectionMaximum = FConnectionMaximum.Value) then
+  if not(AConnectionMaximum = ConnectionMaximum) then
   begin
-    FConnectionMaximum.Value := AConnectionMaximum;
-    FBackgroundWorker.NumTasks(AConnectionMaximum);
+    FThreadPool.MaxExecuting := AConnectionMaximum;
   end;
 end;
 
@@ -607,10 +671,16 @@ begin
   FImplementationManager := nil;
   FImplementor := nil;
 
-  SetLength(FRequestArray, 0);
+  if Assigned(FThreadPool) then
+  begin
+    FThreadPool.CancelAll;
+    FThreadPool := nil;
+  end;
 
-  FBackgroundWorker.Terminate(INFINITE);
-  FBackgroundWorker := nil;
+  SetLength(FRequestArray, 0);
+  SetLength(FTaskControlArray, 0);
+
+  FOmniEM.Free;
 
   CoUninitialize;
 
