@@ -123,6 +123,9 @@ begin
       begin
         LControlID := VarToStr(ChildNodes.Nodes[z].Attributes['type']);
 
+        if not StringInControlID(LControlID) then
+          raise Exception.Create('Unknown control id in subtype definition');
+
         LControl := AData.Control[LControlID]; // AControlController.FindControl(StringToControlID(controltype));
         if Assigned(LControl) then
           if MatchTextMask(VarToStr(ChildNodes.Nodes[z].Attributes['value']), LControl.Value) then
@@ -143,6 +146,7 @@ class function TPlugInCMSSettingsHelper.LoadSettingsToClass(const AFileName: TFi
   var
     z: Integer;
   begin
+    // search all defined ids used for intelligent_posting_boundedsearch
     with ANode do
       if HasChildNodes then
         for z := 0 to ChildNodes.Count - 1 do
