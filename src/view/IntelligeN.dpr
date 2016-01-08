@@ -143,6 +143,8 @@ uses
 
 {$R *.res}
 
+{$SetPEFlags IMAGE_FILE_LARGE_ADDRESS_AWARE}
+
 begin
   Application.Initialize; // required by OLE as very first statement
   Randomize;

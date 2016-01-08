@@ -569,13 +569,21 @@
 
 ######minor enhancements
 
+* Added possibility to use more then 2GB RAM
+
+* Added safelinking.net crypter plugin
+
 * Added filecrypt.cc API improvements
 
 * Improved default crawled values
 
 * Improved check for updates on startup
 
+* Improved plugin exception handling
+
 * Fixed issue starting the application minimized
+
+* Fixed issue focusing a disabled or invisible window
 
 * Fixed IScriptEditor reading code from changed file
 
