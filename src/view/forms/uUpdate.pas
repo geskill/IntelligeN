@@ -97,7 +97,7 @@ end;
 procedure TUpdate.bRestartProgramClick(Sender: TObject);
 begin
   ShellExecute(0, 'open', PChar(GetHiddenDataDir + 'update\exec_update.bat'), nil, PChar(GetHiddenDataDir + 'update'), SW_SHOW);
-  Application.Terminate;
+  Application.MainForm.Close;
 end;
 
 procedure TUpdate.bCloseClick(Sender: TObject);

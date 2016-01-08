@@ -579,6 +579,8 @@
 
 * Improved check for updates on startup
 
+* Improved restart after update download
+
 * Improved plugin exception handling
 
 * Fixed issue starting the application minimized
