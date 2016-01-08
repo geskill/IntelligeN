@@ -455,10 +455,12 @@ class function TPluginBasic.AppLoad(App: TAppCollectionItem; const AAppControlle
 var
   LLibraryHandle: Cardinal;
   LPluginFile: string;
-  LResult, LHighException, LDoUnload: Boolean;
+  LResult, LDelphiException, LExternalException, LDoUnload: Boolean;
+  LDelphiErrorMsg: string;
 begin
   LResult := False;
-  LHighException := False;
+  LDelphiException := False;
+  LExternalException := False;
   LDoUnload := False;
   LPluginFile := TPluginBasic.RelativToAbsolutePath(App.Path);
 
@@ -475,11 +477,25 @@ begin
     { ..... } try
     { ....... } LResult := LAppPlugin.Start(AAppController);
     { ..... } except
-    { ....... } LHighException := True;
-    { ....... } LDoUnload := True;
-    { ....... } LAppPlugin.Stop;
-    { ....... } TPluginBasic.UninitializePlugin(LAppPlugin);
-    { ....... } LAppPlugin := nil;
+    { ....... } on E: Exception do
+    { ....... } begin
+    { ......... } LDelphiException := True;
+    { ......... } LDelphiErrorMsg := E.ClassName + ': ' + E.Message;
+
+    { ......... } LDoUnload := True;
+    { ......... } LAppPlugin.Stop;
+    { ......... } TPluginBasic.UninitializePlugin(LAppPlugin);
+    { ......... } LAppPlugin := nil;
+    { ....... } end
+    { ....... } else
+    { ....... } begin
+    { ......... } LExternalException := True;
+
+    { ......... } LDoUnload := True;
+    { ......... } LAppPlugin.Stop;
+    { ......... } TPluginBasic.UninitializePlugin(LAppPlugin);
+    { ......... } LAppPlugin := nil;
+    { ....... } end;
     { ..... } end;
     { ... } except
     { ..... } LAppPlugin := nil;
@@ -494,13 +510,19 @@ begin
     { ..... } App.Plugin := LAppPlugin;
     { ... } end
     { ... } else
-    { ... } if not LResult and not LHighException then
+    { ... } if not LResult and not(LDelphiException or LExternalException) then
     { ... } begin
     { ..... } TPluginBasic.UninitializePlugin(LAppPlugin);
     { ..... } LAppPlugin := nil;
     { ..... } TPluginBasic.ReturnError(Format(StrPluginCouldNotLoad, [App.Name, ExtractFileName(LPluginFile)]));
     { ... } end
     { ... } else
+    { ... } if LDelphiException then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [LDelphiErrorMsg, ExtractFileName(LPluginFile)]));
+    { ... } end
+    { ... } else
+    { ... } if LExternalException then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(LPluginFile)]));
     { ... } end;
@@ -533,24 +555,26 @@ begin
         TPluginBasic.ReturnError(Format(StrPluginCanNotUnLoad, [App.Name, ExtractFileName(App.Path)]));
     finally
       if LDoUnload then
-       App.Plugin := nil;
+        App.Plugin := nil;
     end;
   end;
   if LDoUnload then
   begin
     TPluginBasic.UnLoadPluginBase(LLibraryHandle);
-    result := True;
+    Result := True;
   end;
 end;
 
 class function TPluginBasic.CAPTCHAExec(const ACAPTCHAPluginPath: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString;
   AErrorProc: TPluginErrorProc = nil): WordBool;
 var
-  LResult, LHighException: WordBool;
+  LResult, LDelphiException, LExternalException: Boolean;
+  LDelphiErrorMsg: string;
   LCookies, LCAPTCHASolution: WideString;
 begin
   LResult := False;
-  LHighException := False;
+  LDelphiException := False;
+  LExternalException := False;
 
   LCAPTCHASolution := '';
   LCookies := ACookies;
@@ -566,7 +590,15 @@ begin
     { . } try
     { ... } LResult := ACAPTCHAPlugin.Exec;
     { . } except
-    { ... } LHighException := True;
+    { ... } on E: Exception do
+    { ... } begin
+    { ..... } LDelphiException := True;
+    { ..... } LDelphiErrorMsg := E.ClassName + ': ' + E.Message;
+    { ... } end
+    { ... } else
+    { ... } begin
+    { ..... } LExternalException := True;
+    { ... } end;
     { . } end;
 
     { . } if LResult then
@@ -575,12 +607,17 @@ begin
     { ... } LCAPTCHASolution := ACAPTCHAPlugin.CAPTCHAResult;
     { . } end
     { . } else
-    { . } if not LResult and not LHighException then
+    { . } if not LResult and not(LDelphiException or LExternalException) then
     { . } begin
     { ... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ACAPTCHAPlugin.ErrorMsg, ExtractFileName(ACAPTCHAPluginPath)]), AErrorProc);
     { . } end
     { . } else
-    { . } if LHighException then
+    { . } if LDelphiException then
+    { . } begin
+    { ... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [LDelphiErrorMsg, ExtractFileName(ACAPTCHAPluginPath)]), AErrorProc);
+    { . } end
+    { . } else
+    { . } if LExternalException then
     { . } begin
     { ... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(ACAPTCHAPluginPath)]), AErrorProc);
     { . } end;
@@ -726,7 +763,7 @@ begin
               { ..... } AFileFormatPlugin.ForceAddCrypter := ForceAddCrypter;
               { ..... } AFileFormatPlugin.ForceAddImageMirror := ForceAddImageMirror;
               { ..... } LTabIndex := AFileFormatPlugin.LoadControls(AFileName, GetTemplatesTypeFolder, APageController);
-              { ..... } LHandled := not (LTabIndex = -1);
+              { ..... } LHandled := not(LTabIndex = -1);
               { ..... } if LHandled then
               { ....... } with APageController.TabSheetController[LTabIndex] do
               { ......... } Initialized(AFileName, AFileFormatPlugin.GetName);
@@ -812,7 +849,8 @@ begin
   Result := LResult;
 end;
 
-function TApiThreadedPlugin.DefaultIntelligentPostingHelperHandler(const AWebsite: WideString; const ASubject: WideString; var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool;
+function TApiThreadedPlugin.DefaultIntelligentPostingHelperHandler(const AWebsite: WideString; const ASubject: WideString; var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer;
+  out ARedoSearch: WordBool): WordBool;
 var
   LResult: WordBool;
 
@@ -918,10 +956,12 @@ end;
 
 function TApiThreadedPlugin.AddArticle(const APublishItem: IPublishItem; ACAPTCHAInput: TCAPTCHAInput = nil; AIntelligentPostingHandler: TIntelligentPostingHelper = nil): Boolean;
 var
-  LResult, LHighException: WordBool;
+  LResult, LDelphiException, LExternalException: Boolean;
+  LDelphiErrorMsg: string;
 begin
   LResult := False;
-  LHighException := False;
+  LDelphiException := False;
+  LExternalException := False;
 
   TPluginBasic.LoadCMSPlugin(APublishItem.CMSPluginPath,
     { } procedure(var ACMSPlugin: ICMSPlugIn)
@@ -958,15 +998,28 @@ begin
     { ... } try
     { ..... } LResult := AddArticle;
     { ... } except
-    { ..... } LHighException := True;
+    { ..... } on E: Exception do
+    { ..... } begin
+    { ....... } LDelphiException := True;
+    { ....... } LDelphiErrorMsg := E.ClassName + ': ' + E.Message;
+    { ..... } end
+    { ..... } else
+    { ..... } begin
+    { ....... } LExternalException := True;
+    { ..... } end;
     { ... } end;
 
-    { ... } if not LResult and not LHighException then
+    { ... } if not LResult and not(LDelphiException or LExternalException) then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(APublishItem.CMSPluginPath)]), FErrorHandler);
     { ... } end
     { ... } else
-    { ... } if LHighException then
+    { ... } if LDelphiException then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [LDelphiErrorMsg, ExtractFileName(APublishItem.CMSPluginPath)]), FErrorHandler);
+    { ... } end
+    { ... } else
+    { ... } if LExternalException then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(APublishItem.CMSPluginPath)]), FErrorHandler);
     { ... } end;
@@ -978,10 +1031,12 @@ end;
 
 function TApiThreadedPlugin.CrawlerExec(ACrawler: TCrawlerCollectionItem; ATypeID: TTypeID; const AControlController: IControlControllerBase): Boolean;
 var
-  LResult, LHighException: WordBool;
+  LResult, LDelphiException, LExternalException: Boolean;
+  LDelphiErrorMsg: string;
 begin
   LResult := False;
-  LHighException := False;
+  LDelphiException := False;
+  LExternalException := False;
 
   TPluginBasic.LoadCrawlerPlugin(ACrawler.Path,
     { } procedure(var ACrawlerPlugin: ICrawlerPlugIn)
@@ -1000,15 +1055,28 @@ begin
     { ... } try
     { ..... } LResult := Exec(Integer(ATypeID), Longword(LComponentIDs), ACrawler.Limit, AControlController);
     { ... } except
-    { ..... } LHighException := True;
+    { ..... } on E: Exception do
+    { ..... } begin
+    { ....... } LDelphiException := True;
+    { ....... } LDelphiErrorMsg := E.ClassName + ': ' + E.Message;
+    { ..... } end
+    { ..... } else
+    { ..... } begin
+    { ....... } LExternalException := True;
+    { ..... } end;
     { ... } end;
 
-    { ... } if not LResult and not LHighException then
+    { ... } if not LResult and not(LDelphiException or LExternalException) then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(ACrawler.Path)]), FErrorHandler);
     { ... } end
     { ... } else
-    { ... } if LHighException then
+    { ... } if LDelphiException then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [LDelphiErrorMsg, ExtractFileName(ACrawler.Path)]), FErrorHandler);
+    { ... } end
+    { ... } else
+    { ... } if LExternalException then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(ACrawler.Path)]), FErrorHandler);
     { ... } end;
@@ -1020,11 +1088,13 @@ end;
 
 function TApiThreadedPlugin.CrypterAddFolder;
 var
-  LResult, LHighException: WordBool;
+  LResult, LDelphiException, LExternalException: WordBool;
+  LDelphiErrorMsg: string;
   LFolderInfo: TCrypterFolderInfo;
 begin
   LResult := False;
-  LHighException := False;
+  LDelphiException := False;
+  LExternalException := False;
 
   LoadCrypterPlugin(ACrypter,
     { } procedure(var ACrypterPlugin: ICrypterPlugIn)
@@ -1078,15 +1148,28 @@ begin
     { ... } try
     { ..... } LResult := AddFolder(AMirrorContainer, LFolderInfo);
     { ... } except
-    { ..... } LHighException := True;
+    { ..... } on E: Exception do
+    { ..... } begin
+    { ....... } LDelphiException := True;
+    { ....... } LDelphiErrorMsg := E.ClassName + ': ' + E.Message;
+    { ..... } end
+    { ..... } else
+    { ..... } begin
+    { ....... } LExternalException := True;
+    { ..... } end;
     { ... } end;
 
-    { ... } if not LResult and not LHighException then
+    { ... } if not LResult and not(LDelphiException or LExternalException) then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(ACrypter.Path)]), FErrorHandler);
     { ... } end
     { ... } else
-    { ... } if LHighException then
+    { ... } if LDelphiException then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [LDelphiErrorMsg, ExtractFileName(ACrypter.Path)]), FErrorHandler);
+    { ... } end
+    { ... } else
+    { ... } if LExternalException then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(ACrypter.Path)]), FErrorHandler);
     { ... } end;
@@ -1099,11 +1182,13 @@ end;
 
 function TApiThreadedPlugin.CrypterGetFolder;
 var
-  LResult, LHighException: WordBool;
+  LResult, LDelphiException, LExternalException: Boolean;
+  LDelphiErrorMsg: string;
   LFolderInfo: TCrypterFolderInfo;
 begin
   LResult := False;
-  LHighException := False;
+  LDelphiException := False;
+  LExternalException := False;
 
   LoadCrypterPlugin(ACrypter,
     { } procedure(var ACrypterPlugin: ICrypterPlugIn)
@@ -1114,7 +1199,15 @@ begin
     { ... } try
     { ..... } LResult := GetFolder(AFolderIdentifier, LFolderInfo);
     { ... } except
-    { ..... } LHighException := True;
+    { ..... } on E: Exception do
+    { ..... } begin
+    { ....... } LDelphiException := True;
+    { ....... } LDelphiErrorMsg := E.ClassName + ': ' + E.Message;
+    { ..... } end
+    { ..... } else
+    { ..... } begin
+    { ....... } LExternalException := True;
+    { ..... } end;
     { ... } end;
 
     { ... } if LResult then
@@ -1123,12 +1216,17 @@ begin
     { ..... } LFolderInfo.HosterShort := THosterConfiguration.GetCustomisedHoster(LFolderInfo.Hoster, True);
     { ... } end
     { ... } else
-    { ... } if not LResult and not LHighException then
+    { ... } if not LResult and not(LDelphiException or LExternalException) then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(ACrypter.Path)]), FErrorHandler);
     { ... } end
     { ... } else
-    { ... } if LHighException then
+    { ... } if LDelphiException then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [LDelphiErrorMsg, ExtractFileName(ACrypter.Path)]), FErrorHandler);
+    { ... } end
+    { ... } else
+    { ... } if LExternalException then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(ACrypter.Path)]), FErrorHandler);
     { ... } end;
@@ -1141,7 +1239,8 @@ end;
 
 function TApiThreadedPlugin.FileHosterCheckFiles(AFileHoster: TPlugInCollectionItem; const ALinks: string; out ALinksInfo: TLinksInfo): Boolean;
 var
-  LResult, LHighException: WordBool;
+  LResult, LDelphiException, LExternalException: Boolean;
+  LDelphiErrorMsg: string;
   LLinksInfo: TLinksInfo;
   unknown, online, offline, temporaryoffline: Integer;
 begin
@@ -1167,7 +1266,15 @@ begin
     { ..... } LLinkCount := CheckLinks(ALinks);
     { ..... } LResult := True; // TODO: Improve interface with boolean result
     { ... } except
-    { ..... } LHighException := True;
+    { ..... } on E: Exception do
+    { ..... } begin
+    { ....... } LDelphiException := True;
+    { ....... } LDelphiErrorMsg := E.ClassName + ': ' + E.Message;
+    { ..... } end
+    { ..... } else
+    { ..... } begin
+    { ....... } LExternalException := True;
+    { ..... } end;
     { ... } end;
 
     { ... } if (LLinkCount > 0) then
@@ -1205,12 +1312,17 @@ begin
 
     { ... } end
     { ... } else
-    { ... } if not SameStr('', ErrorMsg) then
+    { ... } if not LResult and not(LDelphiException or LExternalException) then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(AFileHoster.Path)]), FErrorHandler);
     { ... } end
     { ... } else
-    { ... } if LHighException then
+    { ... } if LDelphiException then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [LDelphiErrorMsg, ExtractFileName(AFileHoster.Path)]), FErrorHandler);
+    { ... } end
+    { ... } else
+    { ... } if LExternalException then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(AFileHoster.Path)]), FErrorHandler);
     { ... } end;
@@ -1224,11 +1336,13 @@ end;
 
 function TApiThreadedPlugin.ImageHosterLocalUpload;
 var
-  LResult, LHighException: WordBool;
+  LResult, LDelphiException, LExternalException: Boolean;
+  LDelphiErrorMsg: string;
   LResultUrl: WideString;
 begin
   LResult := False;
-  LHighException := False;
+  LDelphiException := False;
+  LExternalException := False;
   LResultUrl := '';
 
   LoadImageHosterPlugin(AImageHoster,
@@ -1248,15 +1362,28 @@ begin
     { ... } try
     { ..... } LResult := LocalUpload(ALocalPath, LResultUrl);
     { ... } except
-    { ..... } LHighException := True;
+    { ..... } on E: Exception do
+    { ..... } begin
+    { ....... } LDelphiException := True;
+    { ....... } LDelphiErrorMsg := E.ClassName + ': ' + E.Message;
+    { ..... } end
+    { ..... } else
+    { ..... } begin
+    { ....... } LExternalException := True;
+    { ..... } end;
     { ... } end;
 
-    { ... } if not LResult and not LHighException then
+    { ... } if not LResult and not(LDelphiException or LExternalException) then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(AImageHoster.Path)]), FErrorHandler);
     { ... } end
     { ... } else
-    { ... } if LHighException then
+    { ... } if LDelphiException then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [LDelphiErrorMsg, ExtractFileName(AImageHoster.Path)]), FErrorHandler);
+    { ... } end
+    { ... } else
+    { ... } if LExternalException then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(AImageHoster.Path)]), FErrorHandler);
     { ... } end;
@@ -1270,11 +1397,13 @@ end;
 
 function TApiThreadedPlugin.ImageHosterRemoteUpload;
 var
-  LResult, LHighException: WordBool;
+  LResult, LDelphiException, LExternalException: Boolean;
+  LDelphiErrorMsg: string;
   LResultUrl: WideString;
 begin
   LResult := False;
-  LHighException := False;
+  LDelphiException := False;
+  LExternalException := False;
   LResultUrl := '';
 
   LoadImageHosterPlugin(AImageHoster,
@@ -1294,15 +1423,28 @@ begin
     { ... } try
     { ..... } LResult := RemoteUpload(ARemoteUrl, LResultUrl);
     { ... } except
-    { ..... } LHighException := True;
+    { ..... } on E: Exception do
+    { ..... } begin
+    { ....... } LDelphiException := True;
+    { ....... } LDelphiErrorMsg := E.ClassName + ': ' + E.Message;
+    { ..... } end
+    { ..... } else
+    { ..... } begin
+    { ....... } LExternalException := True;
+    { ..... } end;
     { ... } end;
 
-    { ... } if not LResult and not LHighException then
+    { ... } if not LResult and not(LDelphiException or LExternalException) then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [ErrorMsg, ExtractFileName(AImageHoster.Path)]), FErrorHandler);
     { ... } end
     { ... } else
-    { ... } if LHighException then
+    { ... } if LDelphiException then
+    { ... } begin
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [LDelphiErrorMsg, ExtractFileName(AImageHoster.Path)]), FErrorHandler);
+    { ... } end
+    { ... } else
+    { ... } if LExternalException then
     { ... } begin
     { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalError, [SysErrorMessage(GetLastError()), ExtractFileName(AImageHoster.Path)]), FErrorHandler);
     { ... } end;

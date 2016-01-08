@@ -10,6 +10,8 @@ unit uPlugInClass;
 interface
 
 uses
+  // Delphi
+  ComObj,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin
@@ -37,9 +39,11 @@ type
     function GetErrorMsg: WideString; safecall;
     procedure SetErrorMsg(const AErrorMsg: WideString); safecall;
   public
+    function SafeCallException(ExceptObject: TObject; ExceptAddr: Pointer): HResult; override;
+
     constructor Create; virtual;
     destructor Destroy; override;
-
+  public
     function GetName: WideString; virtual; safecall; abstract;
     function GetType: TPlugInType; virtual; safecall; abstract;
     property CAPTCHAInput: TCAPTCHAInput read GetCAPTCHAInput;
@@ -113,6 +117,11 @@ end;
 procedure TPlugIn.SetErrorMsg(const AErrorMsg: WideString);
 begin
   FErrorMsg := AErrorMsg;
+end;
+
+function TPlugIn.SafeCallException(ExceptObject: TObject; ExceptAddr: Pointer): HResult;
+begin
+  Result := ComObj.HandleSafeCallException(ExceptObject, ExceptAddr, IUnknown, '', '');
 end;
 
 constructor TPlugIn.Create;
