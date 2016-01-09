@@ -608,3 +608,5 @@
 
 ######minor enhancements
 
+* Added active tab article title to window caption
+

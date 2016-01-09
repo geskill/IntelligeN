@@ -118,6 +118,7 @@ type
 implementation
 
 uses
+  uMain,
   // Api
   uApiSettings;
 
@@ -257,6 +258,8 @@ end;
 procedure TTabSheetController.UpdateCaption;
 begin
   Self.Caption := ReleaseNameShort + IfThen(DataChanged, '*');
+  if IsTabActive then
+    Main.UpdateCaption(Self.Caption); // TODO: Impelment this better in 130
 end;
 
 procedure TTabSheetController.ReleaseNameChange(const AReleaseName: WideString);
