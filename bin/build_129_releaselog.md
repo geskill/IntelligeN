@@ -599,3 +599,12 @@
 
 * Fixed share-links.biz folder check
 
+
+###Service Pack 1
+
+######major enhancements
+
+* Improved HTTPManager performance
+
+######minor enhancements
+
