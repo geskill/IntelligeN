@@ -32,7 +32,7 @@ end;
 
 procedure AnalyzeStartupParams(const StartupParams: array of string);
 const
-  Params: array [0 .. 1] of string = ('openfile', 'close');
+  Params: array [0 .. 0] of string = ('openfile');
 var
   I, J: integer;
 begin
@@ -48,8 +48,6 @@ begin
               else
                 Main.fMain.OpenToNewTab();
             end;
-          1:
-            Application.Terminate;
         end;
 end;
 

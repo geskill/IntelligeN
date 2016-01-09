@@ -25,7 +25,8 @@ type
     function GetText: WideString; safecall;
     procedure SetText(const Text: WideString); safecall;
   public
-    constructor Create;
+    constructor Create; reintroduce; virtual;
+    destructor Destroy; override;
 
     procedure Put(Index: Integer; const S: WideString); safecall;
     function Add(const S: WideString): Integer; safecall;
@@ -41,8 +42,6 @@ type
     property ValueFromIndex[Index: Integer]: WideString read GetValueFromIndex write SetValueFromIndex;
     property Strings[Index: Integer]: WideString read Get write Put;
     property Text: WideString read GetText write SetText;
-
-    destructor Destroy; override;
   end;
 
   TProxy = class(TInterfacedObject, IProxy)
@@ -60,8 +59,10 @@ type
     function GetAccountName: WideString; safecall;
     function GetAccountPassword: WideString; safecall;
   public
-    constructor Create;
+    constructor Create; reintroduce; virtual;
     constructor Clone(const AProxy: IProxy);
+    destructor Destroy; override;
+
     procedure Activate(AType: TProxyType; const AServer: WideString; APort: Integer; ARequireAuthentication: WordBool; const AAccountName, AAccountPassword: WideString); safecall;
     property Active: WordBool read GetActive;
     property ServerType: TProxyType read GetType;
@@ -74,12 +75,14 @@ type
 
   TFieldType = (ftFormField, ftFile, ftFileStream);
 
-  THTTPParam = class
+  THTTPParam = class(TObject)
   private
     FFieldName, FFieldValue, FFieldFileName: string;
     FFieldType: TFieldType;
   public
-    constructor Create(const AFieldName, AFieldValue: string; AFieldType: TFieldType = ftFormField; AFileName: string = '');
+    constructor Create(const AFieldName, AFieldValue: string; AFieldType: TFieldType = ftFormField; AFileName: string = ''); reintroduce; virtual;
+    destructor Destroy; override;
+
     property FieldName: string read FFieldName write FFieldName;
     property FieldValue: string read FFieldValue write FFieldValue;
     property FieldType: TFieldType read FFieldType write FFieldType;
@@ -110,10 +113,11 @@ type
     function GetCount: Integer; safecall;
     function GetIsFile(Index: Integer): WordBool; safecall;
   public
-    constructor Create; overload;
-    constructor Create(AParamType: TParamType); overload;
-    constructor Create(ARawData: WideString); overload;
+    constructor Create; reintroduce; overload; virtual;
+    constructor Create(AParamType: TParamType); reintroduce; overload; virtual;
+    constructor Create(ARawData: WideString); reintroduce; overload; virtual;
     constructor Clone(const HTTPParams: IHTTPParams); overload;
+    destructor Destroy; override;
 
     procedure Clear; safecall;
     procedure Delete(Index: Integer); safecall;
@@ -133,8 +137,6 @@ type
     property RawData: WideString read GetRawData write SetRawData;
 
     property ParamType: TParamType read GetParamType write SetParamType;
-
-    destructor Destroy; override;
   end;
 
   THTTPHeader = class(TInterfacedObject, IHTTPHeader)
@@ -163,7 +165,8 @@ type
     function GetCustomHeaders: ICOMList; safecall;
     procedure SetCustomHeaders(const ACustomHeaders: ICOMList); safecall;
   public
-    constructor Create;
+    constructor Create; reintroduce; virtual;
+    destructor Destroy; override;
 
     property Cookies: ICOMList read GetCookies write SetCookies;
 
@@ -177,8 +180,6 @@ type
     property ContentType: WideString read GetContentType write SetContentType;
 
     property CustomHeaders: ICOMList read GetCustomHeaders write SetCustomHeaders;
-
-    destructor Destroy; override;
   end;
 
   THTTPRequest = class(THTTPHeader, IHTTPRequest)
@@ -207,10 +208,11 @@ type
     function GetUserAgent: WideString; safecall;
     procedure SetUserAgent(const AUserAgent: WideString); safecall;
   public
-    constructor Create(const AURL: string);
+    constructor Create(const AURL: string); reintroduce; virtual;
     constructor Clone(const AHTTPRequest: IHTTPRequest);
     constructor FollowUpClone(const AHTTPProcess: IHTTPProcess; const ANewHTTPProcess: IHTTPRequest); overload;
     constructor FollowUpClone(const AHTTPProcess: IHTTPProcess; AHTTPMethod: THTTPMethod; AURL: string); overload;
+    destructor Destroy; override;
 
     property URL: WideString read GetURL write SetURL;
     property Method: THTTPMethod read GetMethod write SetMethod;
@@ -247,7 +249,8 @@ type
     function GetContentStream: IStream; safecall;
     procedure SetContentStream(const AContentStream: IStream); safecall;
   public
-    constructor Create(const AContentStream: TMemoryStream);
+    constructor Create(const AContentStream: TMemoryStream); reintroduce; virtual;
+    destructor Destroy; override;
 
     property Location: WideString read GetLocation write SetLocation;
     property Refresh: WideString read GetRefresh write SetRefresh;
@@ -258,8 +261,6 @@ type
     property Server: WideString read GetServer write SetServer;
     property Content: WideString read GetContent write SetContent;
     property ContentStream: IStream read GetContentStream write SetContentStream;
-
-    destructor Destroy; override;
   end;
 
   THTTPOptions = class(TInterfacedObject, IHTTPOptions)
@@ -283,8 +284,9 @@ type
     function GetRedirectMaximum: Integer; safecall;
     procedure SetRedirectMaximum(ARedirectMaximum: Integer); safecall;
   public
-    constructor Create(const AProxy: IProxy = nil);
+    constructor Create(const AProxy: IProxy = nil); reintroduce; virtual;
     constructor Clone(const AHTTPOptions: IHTTPOptions);
+    destructor Destroy; override;
 
     property UseCompressor: WordBool read GetUseCompressor write SetUseCompressor;
 
@@ -296,8 +298,6 @@ type
     property HandleRedirects: WordBool read GetHandleRedirects write SetHandleRedirects;
     property HandleSketchyRedirects: WordBool read GetHandleSketchyRedirects write SetHandleSketchyRedirects;
     property RedirectMaximum: Integer read GetRedirectMaximum write SetRedirectMaximum;
-
-    destructor Destroy; override;
   end;
 
   THTTPResponseInfo = class(TInterfacedObject, IHTTPResponseInfo)
@@ -314,6 +314,9 @@ type
     function GetErrorMessage: WideString; safecall;
     procedure SetErrorMessage(const AErrorMessage: WideString); safecall;
   public
+    constructor Create; reintroduce; virtual;
+    destructor Destroy; override;
+
     property LastRedirect: WideString read GetLastRedirect write SetLastRedirect;
     property RedirectCount: Integer read GetRedirectCount write SetRedirectCount;
     property ErrorClassName: WideString read GetErrorClassName write SetErrorClassName;
@@ -328,6 +331,12 @@ constructor TCOMList.Create;
 begin
   inherited Create;
   FStringList := TStringList.Create;
+end;
+
+destructor TCOMList.Destroy;
+begin
+  FStringList.Free;
+  inherited Destroy;
 end;
 
 function TCOMList.GetName(Index: Integer): WideString;
@@ -410,16 +419,11 @@ begin
   FStringList.Insert(Index, S);
 end;
 
-destructor TCOMList.Destroy;
-begin
-  FStringList.Free;
-  inherited Destroy;
-end;
-
 { TProxy }
 
 constructor TProxy.Create;
 begin
+  inherited Create;
   FActive := False;
   FServer := '';
   FPort := 0;
@@ -438,6 +442,11 @@ begin
   FRequireAuthentication := AProxy.RequireAuthentication;
   FAccountName := AProxy.AccountName;
   FAccountPassword := AProxy.AccountPassword;
+end;
+
+destructor TProxy.Destroy;
+begin
+  inherited Destroy;
 end;
 
 procedure TProxy.Activate;
@@ -490,10 +499,16 @@ end;
 
 constructor THTTPParam.Create(const AFieldName, AFieldValue: string; AFieldType: TFieldType = ftFormField; AFileName: string = '');
 begin
+  inherited Create;
   FFieldName := AFieldName;
   FFieldValue := AFieldValue;
   FFieldType := AFieldType;
   FFieldFileName := AFileName;
+end;
+
+destructor THTTPParam.Destroy;
+begin
+  inherited Destroy;
 end;
 
 { THTTPParams }
@@ -623,6 +638,16 @@ begin
   ParamType := HTTPParams.ParamType;
 end;
 
+destructor THTTPParams.Destroy;
+var
+  I: Integer;
+begin
+  for I := 0 to FHTTPParamList.Count - 1 do
+    FHTTPParamList.Items[I].Free;
+  FHTTPParamList.Free;
+  inherited Destroy;
+end;
+
 procedure THTTPParams.Clear;
 begin
   FHTTPParamList.Clear;
@@ -661,16 +686,6 @@ begin
   FHasFile := True;
 end;
 
-destructor THTTPParams.Destroy;
-var
-  I: Integer;
-begin
-  for I := 0 to FHTTPParamList.Count - 1 do
-    FHTTPParamList.Items[I].Free;
-  FHTTPParamList.Free;
-  inherited Destroy;
-end;
-
 { THTTPHeader }
 
 constructor THTTPHeader.Create;
@@ -685,6 +700,13 @@ begin
   FContentLanguage := '';
   FContentType := HTTPRequestContentTypeList;
   FCustomHeaders := TCOMList.Create;
+end;
+
+destructor THTTPHeader.Destroy;
+begin
+  FCustomHeaders := nil;
+  FCookies := nil;
+  inherited Destroy;
 end;
 
 function THTTPHeader.GetCookies: ICOMList;
@@ -777,13 +799,6 @@ begin
   FCustomHeaders := ACustomHeaders;
 end;
 
-destructor THTTPHeader.Destroy;
-begin
-  FCustomHeaders := nil;
-  FCookies := nil;
-  inherited Destroy;
-end;
-
 { THTTPRequest }
 
 constructor THTTPRequest.Create(const AURL: string);
@@ -835,8 +850,7 @@ begin
 
   Cookies.Text := AHTTPProcess.HTTPData.HTTPRequest.Cookies.Text + AHTTPProcess.HTTPResult.HTTPResponse.Cookies.Text + ANewHTTPProcess.Cookies.Text;
 
-  CustomHeaders.Text := AHTTPProcess.HTTPData.HTTPRequest.CustomHeaders.Text + AHTTPProcess.HTTPResult.HTTPResponse.CustomHeaders.Text +
-    ANewHTTPProcess.CustomHeaders.Text;
+  CustomHeaders.Text := AHTTPProcess.HTTPData.HTTPRequest.CustomHeaders.Text + AHTTPProcess.HTTPResult.HTTPResponse.CustomHeaders.Text + ANewHTTPProcess.CustomHeaders.Text;
 end;
 
 constructor THTTPRequest.FollowUpClone(const AHTTPProcess: IHTTPProcess; AHTTPMethod: THTTPMethod; AURL: string);
@@ -858,6 +872,11 @@ begin
   ContentType := AHTTPProcess.HTTPResult.HTTPResponse.ContentType;
 
   CustomHeaders.Text := AHTTPProcess.HTTPData.HTTPRequest.CustomHeaders.Text + AHTTPProcess.HTTPResult.HTTPResponse.CustomHeaders.Text;
+end;
+
+destructor THTTPRequest.Destroy;
+begin
+  inherited Destroy;
 end;
 
 function THTTPRequest.GetURL: WideString;
@@ -1047,6 +1066,7 @@ end;
 
 constructor THTTPOptions.Create(const AProxy: IProxy = nil);
 begin
+  inherited Create;
   FUseCompressor := True;
 
   if not Assigned(AProxy) then
@@ -1076,6 +1096,12 @@ begin
   HandleRedirects := AHTTPOptions.HandleRedirects;
   HandleSketchyRedirects := AHTTPOptions.HandleSketchyRedirects;
   RedirectMaximum := AHTTPOptions.RedirectMaximum;
+end;
+
+destructor THTTPOptions.Destroy;
+begin
+  FProxy := nil;
+  inherited Destroy;
 end;
 
 function THTTPOptions.GetUseCompressor: WordBool;
@@ -1148,12 +1174,6 @@ begin
   FRedirectMaximum := ARedirectMaximum;
 end;
 
-destructor THTTPOptions.Destroy;
-begin
-  FProxy := nil;
-  inherited Destroy;
-end;
-
 { THTTPResponseInfo }
 
 function THTTPResponseInfo.GetLastRedirect: WideString;
@@ -1194,6 +1214,16 @@ end;
 procedure THTTPResponseInfo.SetErrorMessage(const AErrorMessage: WideString);
 begin
   FErrorMessage := AErrorMessage;
+end;
+
+constructor THTTPResponseInfo.Create;
+begin
+  inherited Create;
+end;
+
+destructor THTTPResponseInfo.Destroy;
+begin
+  inherited Destroy;
 end;
 
 end.

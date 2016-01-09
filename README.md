@@ -4,12 +4,13 @@ A flexible content publishing application for nearly every content management sy
 ##for end-users
 Due to the amount of functionality the usage might be complex at first sight. The [Getting Started](https://github.com/geskill/IntelligeN/wiki/Getting-Started) page is the first step to get in touch with the fundamental concepts of IntelligeN.
 
+* [Basic Definitions](https://github.com/geskill/IntelligeN/wiki/Basic-Definitions)
 * [Getting Started](https://github.com/geskill/IntelligeN/wiki/Getting-Started)
 * Usage basics
 * to continue ...
 
 ##for developers
-IntelligeN is build using Embarcadero® Delphi® 2010 Professional. The source code is split up in three parts: The CORE, SDK and VIEW folders. The CORE folder contains constants, interfaces and functions used by the SDK and VIEW part. The SDK folder contains files required by the VIEW, the plugins and the toolchain. Finally, the VIEW folder contains the graphical user interface of IntelligeN 2009.
+IntelligeN is build using Embarcadero® Delphi® 2010 Professional. The source code is split up in three parts: The CORE, SDK and VIEW folders. The CORE folder contains constants, interfaces and functions used by the SDK and VIEW part. The SDK folder contains files required by the VIEW, the plugins and the toolchain. Finally, the VIEW folder contains the graphical user interface of IntelligeN 2009. The source code of the open source components is integrated into the repository (except the Indy components, which are bundled with the IDE).
 
 ###CORE
 The CORE uses the following open source components:
@@ -39,3 +40,8 @@ The VIEW uses the following open source components:
 - Directory Watch (http://www.cromis.net/blog/downloads/directory-watch/)
 - EZTexturePanel (http://ez-j.com/maindelphi4.htm)
 - DragonSoft XML Class Serializer (http://www.dragonsoft.us/delphi_vcl.php)
+
+##License
+Copyright (c) 2007 - 2016 Sebastian Klatte
+
+Published under [GNU General Public License, Version 3 (GPLv3)](http://www.gnu.org/licenses/gpl-3.0), see LICENSE

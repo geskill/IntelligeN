@@ -21,7 +21,7 @@ type
     function GetHTTPOptions: IHTTPOptions; safecall;
     procedure SetHTTPOptions(const AHTTPOptions: IHTTPOptions); safecall;
   public
-    constructor Create(const AHTTPRequest: IHTTPRequest; const AHTTPOptions: IHTTPOptions; const AHTTPParams: IHTTPParams);
+    constructor Create(const AHTTPRequest: IHTTPRequest; const AHTTPOptions: IHTTPOptions; const AHTTPParams: IHTTPParams); reintroduce; virtual;
     destructor Destroy; override;
 
     property Website: WideString read GetWebsite;
@@ -40,7 +40,7 @@ type
     function GetHTTPResponse: IHTTPResponse; safecall;
     function GetHTTPResponseInfo: IHTTPResponseInfo; safecall;
   public
-    constructor Create(const AHTTPResponse: IHTTPResponse; const AHTTPResponseInfo: IHTTPResponseInfo);
+    constructor Create(const AHTTPResponse: IHTTPResponse; const AHTTPResponseInfo: IHTTPResponseInfo); reintroduce; virtual;
     destructor Destroy; override;
 
     property SourceCode: WideString read GetSourceCode;
@@ -61,7 +61,7 @@ type
     function GetHTTPResult: IHTTPResult; safecall;
     procedure SetHTTPResult(const AHTTPResult: IHTTPResult); safecall;
   public
-    constructor Create(const AUniqueID: Double);
+    constructor Create(const AUniqueID: Double); reintroduce; virtual;
     destructor Destroy; override;
 
     property UniqueID: Double read GetUniqueID;
@@ -75,6 +75,7 @@ implementation
 
 constructor THTTPData.Create(const AHTTPRequest: IHTTPRequest; const AHTTPOptions: IHTTPOptions; const AHTTPParams: IHTTPParams);
 begin
+  inherited Create;
   FHTTPRequest := AHTTPRequest;
   FHTTPOptions := AHTTPOptions;
   FHTTPParams := AHTTPParams;
@@ -85,7 +86,7 @@ begin
   FHTTPParams := nil;
   FHTTPOptions := nil;
   FHTTPRequest := nil;
-  inherited;
+  inherited Destroy;
 end;
 
 function THTTPData.GetWebsite: WideString;
@@ -127,6 +128,7 @@ end;
 
 constructor THTTPResult.Create(const AHTTPResponse: IHTTPResponse; const AHTTPResponseInfo: IHTTPResponseInfo);
 begin
+  inherited Create;
   FHTTPResponse := AHTTPResponse;
   FHTTPResponseInfo := AHTTPResponseInfo;
 end;
@@ -187,6 +189,7 @@ end;
 
 constructor THTTPProcess.Create(const AUniqueID: Double);
 begin
+  inherited Create;
   FUniqueID := AUniqueID;
 end;
 
