@@ -240,10 +240,17 @@ function TMyBB.IntelligentPosting;
     Result := Trim(ReduceWhitespace(Result));
   end;
 
+const
+  REQUEST_LIMIT = 5;
 var
   HTTPParams: IHTTPParams;
   HTTPOptions: IHTTPOptions;
   ResponseStr: string;
+
+  I: Integer;
+
+  HTTPProcess: IHTTPProcess;
+  HasSearchResult: Boolean;
 
   SearchValue: WideString;
   SearchResults: TStringList;
@@ -279,93 +286,145 @@ begin
         RedirectMaximum := 1;
       end;
 
-      ARequestID := HTTPManager.Post(GetSearchRequestURL, ARequestID, HTTPParams, HTTPOptions);
-
+      HasSearchResult := False;
+      I := 0;
       repeat
-        sleep(50);
-      until HTTPManager.HasResult(ARequestID);
+        Inc(I);
 
-      ResponseStr := HTTPManager.GetResult(ARequestID).HTTPResult.SourceCode;
+        ARequestID := HTTPManager.Post(GetSearchRequestURL, ARequestID, HTTPParams, HTTPOptions);
 
-      HTTPOptions := TPlugInHTTPOptions.Create(Self);
-      with HTTPOptions do
-      begin
-        RedirectMaximum := 0;
-      end;
+        repeat
+          sleep(50);
+        until HTTPManager.HasResult(ARequestID);
 
-      with TRegExpr.Create do
-        try
-          InputString := ResponseStr;
-          Expression := '"2;URL=(.*?)"';
+        ResponseStr := HTTPManager.GetResult(ARequestID).HTTPResult.SourceCode;
 
-          if Exec(InputString) then
-          begin
-            ARequestID := HTTPManager.Get(Website + HTMLDecode(Match[1]), ARequestID, HTTPOptions);
+        repeat
+          sleep(50);
+        until HTTPManager.HasResult(ARequestID);
 
-            repeat
-              sleep(50);
-            until HTTPManager.HasResult(ARequestID);
+        HTTPProcess := HTTPManager.GetResult(ARequestID);
 
-            ResponseStr := HTTPManager.GetResult(ARequestID).HTTPResult.SourceCode;
-          end;
-        finally
-          Free;
+        if HTTPProcess.HTTPResult.HasError then
+        begin
+          ErrorMsg := HTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
+          Result := False;
+        end
+        else
+        begin
+          HasSearchResult := True;
+          Result := True;
         end;
 
-      SearchResults := TStringList.Create;
-      try
-        SearchResults.Add('0=Create new Thread');
+      until HasSearchResult or (I > REQUEST_LIMIT);
+
+      if HasSearchResult then
+      begin
+        ResponseStr := HTTPProcess.HTTPResult.SourceCode;
+
         with TRegExpr.Create do
           try
-            ModifierS := False;
             InputString := ResponseStr;
-            Expression := 'showthread\.php\?tid=(\d+).*?id="tid_\d+".*?>([^>]*?)<\/a>';
+            Expression := '"2;URL=(.*?)"';
 
             if Exec(InputString) then
             begin
+              HTTPOptions := TPlugInHTTPOptions.Create(Self);
+              with HTTPOptions do
+              begin
+                RedirectMaximum := 0;
+              end;
+
+              HasSearchResult := False;
+              I := 0;
               repeat
-                _found_thread_id := Match[1];
-                _found_thread_name := Match[2];
+                Inc(I);
 
-                SearchResults.Add(_found_thread_id + SearchResults.NameValueSeparator + _found_thread_name);
+                ARequestID := HTTPManager.Get(Website + HTMLDecode(Match[1]), ARequestID, HTTPOptions);
 
-                if not PostReply then
-                  with TRegExpr.Create do
-                    try
-                      ModifierI := True;
-                      InputString := _found_thread_name;
-                      Expression := StringReplace(' ' + GetSearchTitle(Subject) + ' ', ' ', '.*?', [rfReplaceAll, rfIgnoreCase]);
+                repeat
+                  sleep(50);
+                until HTTPManager.HasResult(ARequestID);
 
-                      if Exec(InputString) then
-                      begin
-                        PostReply := True;
-                        MyBBSettings.threads := _found_thread_id;
-                        SearchIndex := SearchResults.Count - 1;
-                      end;
-                    finally
-                      Free;
-                    end;
+                HTTPProcess := HTTPManager.GetResult(ARequestID);
 
-              until not ExecNext;
+                if HTTPProcess.HTTPResult.HasError then
+                begin
+                  Self.ErrorMsg := HTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
+                  Result := False;
+                end
+                else
+                begin
+                  HasSearchResult := True;
+                  Result := True;
+                end;
+
+              until HasSearchResult or (I > REQUEST_LIMIT);
             end;
           finally
             Free;
           end;
 
-        if MyBBSettings.intelligent_posting_helper then
+        if HasSearchResult then
         begin
-          if not IntelligentPostingHelper(Website, Subject, SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
-          begin
-            ErrorMsg := StrAbortedThrougthInt;
-            Result := False;
+
+          SearchResults := TStringList.Create;
+          try
+            SearchResults.Add('0=Create new Thread');
+            with TRegExpr.Create do
+              try
+                ModifierS := False;
+                InputString := ResponseStr;
+                Expression := 'showthread\.php\?tid=(\d+).*?id="tid_\d+".*?>([^>]*?)<\/a>';
+
+                if Exec(InputString) then
+                begin
+                  repeat
+                    _found_thread_id := Match[1];
+                    _found_thread_name := Match[2];
+
+                    SearchResults.Add(_found_thread_id + SearchResults.NameValueSeparator + _found_thread_name);
+
+                    if not PostReply then
+                      with TRegExpr.Create do
+                        try
+                          ModifierI := True;
+                          InputString := _found_thread_name;
+                          Expression := StringReplace(' ' + GetSearchTitle(Subject) + ' ', ' ', '.*?', [rfReplaceAll, rfIgnoreCase]);
+
+                          if Exec(InputString) then
+                          begin
+                            PostReply := True;
+                            MyBBSettings.threads := _found_thread_id;
+                            SearchIndex := SearchResults.Count - 1;
+                          end;
+                        finally
+                          Free;
+                        end;
+
+                  until not ExecNext;
+                end;
+              finally
+                Free;
+              end;
+
+            if MyBBSettings.intelligent_posting_helper then
+            begin
+              if not IntelligentPostingHelper(Website, Subject, SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
+              begin
+                ErrorMsg := StrAbortedThrougthInt;
+                Result := False;
+              end;
+              PostReply := (SearchIndex > 0);
+              if PostReply then
+                MyBBSettings.threads := SearchResults.Names[SearchIndex];
+            end;
+          finally
+            SearchResults.Free;
           end;
-          PostReply := (SearchIndex > 0);
-          if PostReply then
-            MyBBSettings.threads := SearchResults.Names[SearchIndex];
         end;
-      finally
-        SearchResults.Free;
       end;
+
     until not RedoSearch;
   end;
 end;

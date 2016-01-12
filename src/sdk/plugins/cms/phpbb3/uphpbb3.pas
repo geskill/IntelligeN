@@ -250,8 +250,15 @@ function Tphpbb3.IntelligentPosting;
       Delete(Result, 61, length(Result) - 60);
   end;
 
+const
+  REQUEST_LIMIT = 5;
 var
   ResponseStr: string;
+
+  I: Integer;
+
+  HTTPProcess: IHTTPProcess;
+  HasSearchResult: Boolean;
 
   SearchValue: WideString;
   SearchResults, SearchResultsForumID: TStringList;
@@ -268,79 +275,103 @@ begin
     repeat
       SearchIndex := 0;
 
-      ARequestID := HTTPManager.Get(GetSearchRequestURL + '?keywords=' + SearchValue + '&terms=all&author=&sc=1&sf=all&sk=t&sd=d&sr=topics&st=0&ch=300&t=0&submit=', ARequestID, TPlugInHTTPOptions.Create(Self));
-
+      HasSearchResult := False;
+      I := 0;
       repeat
-        sleep(50);
-      until HTTPManager.HasResult(ARequestID);
+        Inc(I);
 
-      ResponseStr := HTTPManager.GetResult(ARequestID).HTTPResult.SourceCode;
+        ARequestID := HTTPManager.Get(GetSearchRequestURL + '?keywords=' + SearchValue + '&terms=all&author=&sc=1&sf=all&sk=t&sd=d&sr=topics&st=0&ch=300&t=0&submit=', ARequestID, TPlugInHTTPOptions.Create(Self));
 
-      SearchResults := TStringList.Create;
-      SearchResultsForumID := TStringList.Create;
-      try
-        SearchResults.Add('0=Create new Thread');
-        with TRegExpr.Create do
-          try
-            ModifierS := False;
-            InputString := ResponseStr;
-            Expression := 'viewtopic\.php\?f=(\d+)&amp;t=(\d+).*?class="topictitle".*?>(.*?)<\/a>';
+        repeat
+          sleep(50);
+        until HTTPManager.HasResult(ARequestID);
 
-            if Exec(InputString) then
-            begin
-              repeat
-                _found_forum_id := Match[1];
-                _found_thread_id := Match[2];
-                _found_thread_name := Match[3];
+        HTTPProcess := HTTPManager.GetResult(ARequestID);
 
-                if phpbb3Settings.intelligent_posting_boundedsearch and not InArray(_found_forum_id, phpbb3Settings.intelligent_posting_bounds) then
-                  Continue;
-
-                SearchResults.Add(_found_thread_id + SearchResults.NameValueSeparator + _found_thread_name);
-                SearchResultsForumID.Add(_found_forum_id);
-
-                if not PostReply then
-                  with TRegExpr.Create do
-                    try
-                      ModifierI := True;
-                      InputString := _found_thread_name;
-                      Expression := StringReplace(' ' + GetSearchTitle(Subject) + ' ', ' ', '.*?', [rfReplaceAll, rfIgnoreCase]);
-
-                      if Exec(InputString) then
-                      begin
-                        PostReply := True;
-                        phpbb3Settings.forums := _found_forum_id;
-                        phpbb3Settings.threads := _found_thread_id;
-                        SearchIndex := SearchResults.Count - 1;
-                      end;
-                    finally
-                      Free;
-                    end;
-
-              until not ExecNext;
-            end;
-          finally
-            Free;
-          end;
-
-        if phpbb3Settings.intelligent_posting_helper then
+        if HTTPProcess.HTTPResult.HasError then
         begin
-          if not IntelligentPostingHelper(Website, Subject, SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
-          begin
-            ErrorMsg := StrAbortedThrougthInt;
-            Result := False;
-          end;
-          PostReply := (SearchIndex > 0);
-          if PostReply then
-          begin
-            phpbb3Settings.forums := SearchResultsForumID.Strings[SearchIndex];
-            phpbb3Settings.threads := SearchResults.Names[SearchIndex];
-          end;
+          ErrorMsg := HTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
+          Result := False;
+        end
+        else
+        begin
+          HasSearchResult := True;
+          Result := True;
         end;
-      finally
-        SearchResultsForumID.Free;
-        SearchResults.Free;
+
+      until HasSearchResult or (I > REQUEST_LIMIT);
+
+      if HasSearchResult then
+      begin
+        ResponseStr := HTTPProcess.HTTPResult.SourceCode;
+
+        SearchResults := TStringList.Create;
+        SearchResultsForumID := TStringList.Create;
+        try
+          SearchResults.Add('0=Create new Thread');
+          with TRegExpr.Create do
+            try
+              ModifierS := False;
+              InputString := ResponseStr;
+              Expression := 'viewtopic\.php\?f=(\d+)&amp;t=(\d+).*?class="topictitle".*?>(.*?)<\/a>';
+
+              if Exec(InputString) then
+              begin
+                repeat
+                  _found_forum_id := Match[1];
+                  _found_thread_id := Match[2];
+                  _found_thread_name := Match[3];
+
+                  if phpbb3Settings.intelligent_posting_boundedsearch and not InArray(_found_forum_id, phpbb3Settings.intelligent_posting_bounds) then
+                    Continue;
+
+                  SearchResults.Add(_found_thread_id + SearchResults.NameValueSeparator + _found_thread_name);
+                  SearchResultsForumID.Add(_found_forum_id);
+
+                  if not PostReply then
+                    with TRegExpr.Create do
+                      try
+                        ModifierI := True;
+                        InputString := _found_thread_name;
+                        Expression := StringReplace(' ' + GetSearchTitle(Subject) + ' ', ' ', '.*?', [rfReplaceAll, rfIgnoreCase]);
+
+                        if Exec(InputString) then
+                        begin
+                          PostReply := True;
+                          phpbb3Settings.forums := _found_forum_id;
+                          phpbb3Settings.threads := _found_thread_id;
+                          SearchIndex := SearchResults.Count - 1;
+                        end;
+                      finally
+                        Free;
+                      end;
+
+                until not ExecNext;
+              end;
+            finally
+              Free;
+            end;
+
+          if phpbb3Settings.intelligent_posting_helper then
+          begin
+            if not IntelligentPostingHelper(Website, Subject, SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
+            begin
+              ErrorMsg := StrAbortedThrougthInt;
+              Result := False;
+            end;
+            PostReply := (SearchIndex > 0);
+            if PostReply then
+            begin
+              phpbb3Settings.forums := SearchResultsForumID.Strings[SearchIndex];
+              phpbb3Settings.threads := SearchResults.Names[SearchIndex];
+            end;
+          end;
+        finally
+          SearchResultsForumID.Free;
+          SearchResults.Free;
+        end;
       end;
+
     until not RedoSearch;
   end;
 end;

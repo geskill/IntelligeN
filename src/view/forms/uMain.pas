@@ -321,6 +321,7 @@ type
     procedure LoadLayout(ALayoutCollectionItem: TLayoutCollectionItem);
     procedure SaveLayout(const ALayoutName: string);
     procedure SetEditMenu(AMenuItems: TdxBarItemLinks);
+    procedure UpdateCaption(const ACaption: string = '');
   end;
 
 var
@@ -384,7 +385,7 @@ begin
 
   SettingsManager.Settings.Layout.Main.LoadLayout(Self);
 
-  Caption := ProgrammName;
+  UpdateCaption();
 
   FMainMenu := TIMainMenu.Create(dxBarManagerBarMainMenu);
 
@@ -1035,6 +1036,14 @@ begin
     nEdit.ItemLinks := AMenuItems
   else
     nEdit.ItemLinks.Clear;
+end;
+
+procedure TMain.UpdateCaption(const ACaption: string);
+begin
+  if SameStr('', ACaption) then
+    Caption := ProgrammName
+  else
+    Caption := ACaption + ' - ' + ProgrammName;
 end;
 
 end.

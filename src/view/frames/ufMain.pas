@@ -178,11 +178,15 @@ begin
 
   if (TabSheetCount > 0) then
   begin
+    Main.UpdateCaption(pcMain.ActivePage.Caption); // TODO: Impelment this better in 130
     with ActiveTabSheetController do
       ActiveViewType := ViewType;
   end
   else
+  begin
+    Main.UpdateCaption(); // TODO: Impelment this better in 130
     SwitchDesignView(False);
+  end;
 
   FChange.Invoke(pcMain);
 end;

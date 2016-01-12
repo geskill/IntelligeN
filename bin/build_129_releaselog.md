@@ -608,3 +608,7 @@
 
 ######minor enhancements
 
+* Added active tab article title to window caption
+
+* Improved IntelligentPosting search HTTP error handling
+

@@ -221,11 +221,16 @@ function TwBB4.IntelligentPosting;
     Result := Trim(Result);
   end;
 
+const
+  REQUEST_LIMIT = 5;
 var
   HTTPParams: IHTTPParams;
   ResponseStr: string;
 
   I: Integer;
+
+  HTTPProcess: IHTTPProcess;
+  HasSearchResult: Boolean;
 
   SearchValue: WideString;
   SearchResults: TStringList;
@@ -260,68 +265,92 @@ begin
         AddFormField('t', FSecurityToken);
       end;
 
-      ARequestID := HTTPManager.Post(GetSearchRequestURL, ARequestID, HTTPParams, TPlugInHTTPOptions.Create(Self));
-
+      HasSearchResult := False;
+      I := 0;
       repeat
-        sleep(50);
-      until HTTPManager.HasResult(ARequestID);
+        Inc(I);
 
-      ResponseStr := HTTPManager.GetResult(ARequestID).HTTPResult.SourceCode;
+        ARequestID := HTTPManager.Post(GetSearchRequestURL, ARequestID, HTTPParams, TPlugInHTTPOptions.Create(Self));
 
-      SearchResults := TStringList.Create;
-      try
-        SearchResults.Add('0=Create new Thread');
-        with TRegExpr.Create do
-          try
-            ModifierS := False;
-            InputString := ResponseStr;
-            Expression := 'data-thread-id="(\d+)">(.*?)<';
+        repeat
+          sleep(50);
+        until HTTPManager.HasResult(ARequestID);
 
-            if Exec(InputString) then
-            begin
-              repeat
-                _found_thread_id := Match[1];
-                _found_thread_name := HTML2Text(Match[2]);
+        HTTPProcess := HTTPManager.GetResult(ARequestID);
 
-                SearchResults.Add(_found_thread_id + SearchResults.NameValueSeparator + _found_thread_name);
-
-                if not PostReply then
-                  with TRegExpr.Create do
-                    try
-                      ModifierI := True;
-                      InputString := _found_thread_name;
-                      Expression := StringReplace(' ' + GetSearchTitle(Subject) + ' ', ' ', '.*?', [rfReplaceAll, rfIgnoreCase]);
-
-                      if Exec(InputString) then
-                      begin
-                        PostReply := True;
-                        wBB4Settings.threads := _found_thread_id;
-                        SearchIndex := SearchResults.Count - 1;
-                      end;
-                    finally
-                      Free;
-                    end;
-
-              until not ExecNext;
-            end;
-          finally
-            Free;
-          end;
-
-        if wBB4Settings.intelligent_posting_helper then
+        if HTTPProcess.HTTPResult.HasError then
         begin
-          if not IntelligentPostingHelper(Website, Subject, SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
-          begin
-            ErrorMsg := StrAbortedThrougthInt;
-            Result := False;
-          end;
-          PostReply := (SearchIndex > 0);
-          if PostReply then
-            wBB4Settings.threads := SearchResults.Names[SearchIndex];
+          ErrorMsg := HTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
+          Result := False;
+        end
+        else
+        begin
+          HasSearchResult := True;
+          Result := True;
         end;
-      finally
-        SearchResults.Free;
+
+      until HasSearchResult or (I > REQUEST_LIMIT);
+
+      if HasSearchResult then
+      begin
+        ResponseStr := HTTPProcess.HTTPResult.SourceCode;
+
+        SearchResults := TStringList.Create;
+        try
+          SearchResults.Add('0=Create new Thread');
+          with TRegExpr.Create do
+            try
+              ModifierS := False;
+              InputString := ResponseStr;
+              Expression := 'data-thread-id="(\d+)">(.*?)<';
+
+              if Exec(InputString) then
+              begin
+                repeat
+                  _found_thread_id := Match[1];
+                  _found_thread_name := HTML2Text(Match[2]);
+
+                  SearchResults.Add(_found_thread_id + SearchResults.NameValueSeparator + _found_thread_name);
+
+                  if not PostReply then
+                    with TRegExpr.Create do
+                      try
+                        ModifierI := True;
+                        InputString := _found_thread_name;
+                        Expression := StringReplace(' ' + GetSearchTitle(Subject) + ' ', ' ', '.*?', [rfReplaceAll, rfIgnoreCase]);
+
+                        if Exec(InputString) then
+                        begin
+                          PostReply := True;
+                          wBB4Settings.threads := _found_thread_id;
+                          SearchIndex := SearchResults.Count - 1;
+                        end;
+                      finally
+                        Free;
+                      end;
+
+                until not ExecNext;
+              end;
+            finally
+              Free;
+            end;
+
+          if wBB4Settings.intelligent_posting_helper then
+          begin
+            if not IntelligentPostingHelper(Website, Subject, SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
+            begin
+              ErrorMsg := StrAbortedThrougthInt;
+              Result := False;
+            end;
+            PostReply := (SearchIndex > 0);
+            if PostReply then
+              wBB4Settings.threads := SearchResults.Names[SearchIndex];
+          end;
+        finally
+          SearchResults.Free;
+        end;
       end;
+
     until not RedoSearch;
   end;
 end;

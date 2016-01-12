@@ -251,11 +251,17 @@ function TvBulletin.IntelligentPosting;
       Result := '"' + Result + '"';
   end;
 
+const
+  REQUEST_LIMIT = 5;
 var
   HTTPOptions: IHTTPOptions;
   ResponseStr: string;
   HTTPParams: IHTTPParams;
+
   I: Integer;
+
+  HTTPProcess: IHTTPProcess;
+  HasSearchResult: Boolean;
 
   SearchValue: WideString;
   SearchResults: TStringList;
@@ -329,67 +335,91 @@ begin
         AddFormField('s', FSessionID);
       end;
 
-      ARequestID := HTTPManager.Post(Website + 'search.php?do=process', ARequestID, HTTPParams, HTTPOptions);
-
+      HasSearchResult := False;
+      I := 0;
       repeat
-        sleep(50);
-      until HTTPManager.HasResult(ARequestID);
+        Inc(I);
 
-      ResponseStr := HTTPManager.GetResult(ARequestID).HTTPResult.SourceCode;
+        ARequestID := HTTPManager.Post(Website + 'search.php?do=process', ARequestID, HTTPParams, HTTPOptions);
 
-      SearchResults := TStringList.Create;
-      try
-        SearchResults.Add('0=Create new Thread');
-        with TRegExpr.Create do
-          try
-            InputString := ResponseStr;
-            Expression := 'id="thread_title_(\d+)"(.*?)>(.*?)<\/a>';
+        repeat
+          sleep(50);
+        until HTTPManager.HasResult(ARequestID);
 
-            if Exec(InputString) then
-            begin
-              repeat
-                _found_thread_id := Match[1];
-                _found_thread_name := Match[3];
+        HTTPProcess := HTTPManager.GetResult(ARequestID);
 
-                SearchResults.Add(_found_thread_id + SearchResults.NameValueSeparator + _found_thread_name);
-
-                if not PostReply then
-                  with TRegExpr.Create do
-                    try
-                      ModifierI := True;
-                      InputString := _found_thread_name;
-                      Expression := StringReplace(GetSearchTitle(Subject, True), ' ', '.*?', [rfReplaceAll, rfIgnoreCase]);
-
-                      if Exec(InputString) then
-                      begin
-                        PostReply := True;
-                        vBulletinSettings.threads := _found_thread_id;
-                        SearchIndex := SearchResults.Count - 1;
-                      end;
-                    finally
-                      Free;
-                    end;
-
-              until not ExecNext;
-            end;
-          finally
-            Free;
-          end;
-
-        if vBulletinSettings.intelligent_posting_helper then
+        if HTTPProcess.HTTPResult.HasError then
         begin
-          if not IntelligentPostingHelper(Website, Subject, SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
-          begin
-            ErrorMsg := StrAbortedThrougthInt;
-            Result := False;
-          end;
-          PostReply := (SearchIndex > 0);
-          if PostReply then
-            vBulletinSettings.threads := SearchResults.Names[SearchIndex];
+          ErrorMsg := HTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
+          Result := False;
+        end
+        else
+        begin
+          HasSearchResult := True;
+          Result := True;
         end;
-      finally
-        SearchResults.Free;
+
+      until HasSearchResult or (I > REQUEST_LIMIT);
+
+      if HasSearchResult then
+      begin
+        ResponseStr := HTTPProcess.HTTPResult.SourceCode;
+
+        SearchResults := TStringList.Create;
+        try
+          SearchResults.Add('0=Create new Thread');
+          with TRegExpr.Create do
+            try
+              InputString := ResponseStr;
+              Expression := 'id="thread_title_(\d+)"(.*?)>(.*?)<\/a>';
+
+              if Exec(InputString) then
+              begin
+                repeat
+                  _found_thread_id := Match[1];
+                  _found_thread_name := Match[3];
+
+                  SearchResults.Add(_found_thread_id + SearchResults.NameValueSeparator + _found_thread_name);
+
+                  if not PostReply then
+                    with TRegExpr.Create do
+                      try
+                        ModifierI := True;
+                        InputString := _found_thread_name;
+                        Expression := StringReplace(GetSearchTitle(Subject, True), ' ', '.*?', [rfReplaceAll, rfIgnoreCase]);
+
+                        if Exec(InputString) then
+                        begin
+                          PostReply := True;
+                          vBulletinSettings.threads := _found_thread_id;
+                          SearchIndex := SearchResults.Count - 1;
+                        end;
+                      finally
+                        Free;
+                      end;
+
+                until not ExecNext;
+              end;
+            finally
+              Free;
+            end;
+
+          if vBulletinSettings.intelligent_posting_helper then
+          begin
+            if not IntelligentPostingHelper(Website, Subject, SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
+            begin
+              ErrorMsg := StrAbortedThrougthInt;
+              Result := False;
+            end;
+            PostReply := (SearchIndex > 0);
+            if PostReply then
+              vBulletinSettings.threads := SearchResults.Names[SearchIndex];
+          end;
+        finally
+          SearchResults.Free;
+        end;
       end;
+
     until not RedoSearch;
   end;
 end;
