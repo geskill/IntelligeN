@@ -32,7 +32,7 @@ type
     FTypeID: TTypeID;
 
     FFileName, FFileType, FReleaseName, FTemplateFileName: string;
-    FDataChanged: Boolean;
+    FInitialized, FDataChanged: Boolean;
 
     FDataTabSheetItem: TDataTabSheetItem;
     FDesignTabSheetItem: TDesignTabSheetItem;
@@ -257,9 +257,12 @@ end;
 
 procedure TTabSheetController.UpdateCaption;
 begin
-  Self.Caption := ReleaseNameShort + IfThen(DataChanged, '*');
-  if IsTabActive then
-    Main.UpdateCaption(Self.Caption); // TODO: Impelment this better in 130
+  if FInitialized then
+  begin
+    Self.Caption := ReleaseNameShort + IfThen(DataChanged, '*');
+    if IsTabActive then
+      Main.UpdateCaption(Self.Caption); // TODO: Impelment this better in 130
+  end;
 end;
 
 procedure TTabSheetController.ReleaseNameChange(const AReleaseName: WideString);
@@ -303,6 +306,9 @@ begin
   Color := clWhite;
   // Enabled := False; cause issue with focused controls
   ImageIndex := Integer(ATypeID);
+
+  FInitialized := False;
+  FDataChanged := False;
 end;
 
 procedure TTabSheetController.Install;
@@ -310,8 +316,6 @@ begin
   FDataTabSheetItem := TDataTabSheetItem.Create(Self, Self);
 
   FDesignTabSheetItem := TDesignTabSheetItem.Create(Self, Self);
-
-  UpdateCaption;
 
   AddEvents;
 end;
@@ -352,6 +356,7 @@ procedure TTabSheetController.Initialized(const AFileName, AFileType: WideString
 begin
   FileName := AFileName;
   FileType := AFileType;
+  FInitialized := True;
   DataChanged := False;
   ResetControlFocused();
   PublishController.Active := True;
