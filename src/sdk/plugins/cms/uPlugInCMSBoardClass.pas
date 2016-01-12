@@ -26,8 +26,6 @@ type
     FPostReply: Boolean;
   protected
     property PostReply: Boolean read FPostReply write FPostReply;
-
-    function _AfterLogin(var ARequestID: Double; out AResponseStr: string): Boolean; override;
   public
     property AccountName;
     property AccountPassword;
@@ -59,7 +57,11 @@ type
 
   TCMSBoardIPPlugIn = class(TCMSBoardPlugIn)
   protected
+    function NeedBeforePostAction: Boolean; override;
+    function DoBeforePostAction(var ARequestID: Double): Boolean; override;
+
     property PostReply;
+
     function GetSearchRequestURL: string; virtual;
     function IntelligentPosting(var ARequestID: Double): Boolean; virtual; abstract;
   public
@@ -82,25 +84,6 @@ implementation
 
 { TCMSBoardPlugIn }
 
-function TCMSBoardPlugIn._AfterLogin(var ARequestID: Double; out AResponseStr: string): Boolean;
-const
-  INTELLIGEN_POSTING_MISSING_LOGIN = 'intelligent_posting without login is not supported';
-begin
-  Result := True;
-  if Self is TCMSBoardIPPlugIn then
-    with Self as TCMSBoardIPPlugIn do
-    begin
-      if (ARequestID = -1) then
-      begin
-        ErrorMsg := INTELLIGEN_POSTING_MISSING_LOGIN;
-        Result := False;
-      end;
-
-      if (Settings as TCMSBoardIPPlugInSettings).intelligent_posting and not IntelligentPosting(ARequestID) then
-        Result := False;
-    end;
-end;
-
 function TCMSBoardPlugIn.CMSType;
 begin
   Result := cmsBoard;
@@ -118,6 +101,16 @@ begin
 end;
 
 { TCMSBoardIPPlugIn }
+
+function TCMSBoardIPPlugIn.NeedBeforePostAction: Boolean;
+begin
+  Result := (Settings as TCMSBoardIPPlugInSettings).intelligent_posting;
+end;
+
+function TCMSBoardIPPlugIn.DoBeforePostAction(var ARequestID: Double): Boolean;
+begin
+  Result := IntelligentPosting(ARequestID);
+end;
 
 function TCMSBoardIPPlugIn.GetSearchRequestURL: string;
 begin

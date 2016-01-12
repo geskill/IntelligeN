@@ -78,6 +78,9 @@ type
     function DoAnalyzeLogin(const AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; virtual; abstract;
     procedure DoHandleSessionID(AHTTPProcess: IHTTPProcess); virtual;
 
+    function NeedBeforePostAction: Boolean; virtual;
+    function DoBeforePostAction(var ARequestID: Double): Boolean; virtual;
+
     function NeedPrePost(out ARequestURL: string): Boolean; virtual;
     function DoAnalyzePrePost(const AResponseStr: string): Boolean; virtual;
 
@@ -86,8 +89,6 @@ type
 
     function GetIDsRequestURL: string; virtual;
     function DoAnalyzeIDsRequest(const AResponseStr: string): Integer; virtual;
-
-    function _AfterLogin(var ARequestID: Double; out AResponseStr: string): Boolean; virtual;
 
     property Settings: TCMSPlugInSettings read GetSettings write SetSettings;
 
@@ -252,6 +253,16 @@ begin
   /// by default do nothing
 end;
 
+function TCMSPlugIn.NeedBeforePostAction: Boolean;
+begin
+  Result := False;
+end;
+
+function TCMSPlugIn.DoBeforePostAction(var ARequestID: Double): Boolean;
+begin
+  Result := False;
+end;
+
 function TCMSPlugIn.NeedPrePost(out ARequestURL: string): Boolean;
 begin
   Result := False;
@@ -270,11 +281,6 @@ end;
 function TCMSPlugIn.DoAnalyzeIDsRequest(const AResponseStr: string): Integer;
 begin
   Result := FCheckedIDsList.Count;
-end;
-
-function TCMSPlugIn._AfterLogin(var ARequestID: Double; out AResponseStr: string): Boolean;
-begin
-  Result := True;
 end;
 
 function TCMSPlugIn.GetAccountName: WideString;
@@ -561,8 +567,11 @@ begin
   if LoadSettings(Data) then
     if (not NeedLogin) xor (not SameStr('', AccountName) and NeedLogin and Login(RequestID)) xor SameStr('', AccountName) then
     begin
-      if not _AfterLogin(RequestID, ResponseStr) then
-        Exit;
+      if NeedBeforePostAction then
+      begin
+        if not DoBeforePostAction(RequestID) then
+          Exit;
+      end;
 
       if NeedPrePost(PrePostURL) then
       begin

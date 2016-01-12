@@ -196,12 +196,16 @@ function Tipb3.IntelligentPosting;
     Result := Trim(ReduceWhitespace(Result));
   end;
 
+const
+  REQUEST_LIMIT = 5;
 var
   HTTPParams: IHTTPParams;
-  HTTPProcess: IHTTPProcess;
   ResponseStr: string;
 
   I: Integer;
+
+  HTTPProcess: IHTTPProcess;
+  HasSearchResult: Boolean;
 
   SearchValue: WideString;
   SearchResults, SearchResultsForumID: TStringList;
@@ -249,73 +253,51 @@ begin
         AddFormField('submit', '');
       end;
 
-      ARequestID := HTTPManager.Post(GetSearchRequestURL, ARequestID, HTTPParams, TPlugInHTTPOptions.Create(Self));
-
+      HasSearchResult := False;
+      I := 0;
       repeat
-        sleep(50);
-      until HTTPManager.HasResult(ARequestID);
+        Inc(I);
 
-      HTTPProcess := HTTPManager.GetResult(ARequestID);
+        ARequestID := HTTPManager.Post(GetSearchRequestURL, ARequestID, HTTPParams, TPlugInHTTPOptions.Create(Self));
 
-      if HTTPProcess.HTTPResult.HasError then
+        repeat
+          sleep(50);
+        until HTTPManager.HasResult(ARequestID);
+
+        HTTPProcess := HTTPManager.GetResult(ARequestID);
+
+        if HTTPProcess.HTTPResult.HasError then
+        begin
+          ErrorMsg := HTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
+          Result := False;
+        end
+        else
+        begin
+          HasSearchResult := True;
+          Result := True;
+        end;
+
+      until HasSearchResult or (I > REQUEST_LIMIT);
+
+      if HasSearchResult then
       begin
-        ErrorMsg := HTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
-        Exit;
-      end;
+        ResponseStr := HTTPProcess.HTTPResult.SourceCode;
 
-      ResponseStr := HTTPProcess.HTTPResult.SourceCode;
-
-      SearchResults := TStringList.Create;
-      SearchResultsForumID := TStringList.Create;
-      try
-        SearchResults.Add('0=Create new Thread');
-        with TRegExpr.Create do
-          try
-            InputString := ResponseStr;
-            Expression := 'id=''tidPop_(\d+)''(.|\s)*?result''>(.*?)<\/a>(.|\s)*?showforum=(\d+)''>';
-
-            if Exec(InputString) then
-            begin
-              repeat
-                _found_forum_id := Match[5];
-                _found_thread_id := Match[1];
-                _found_thread_name := Match[3];
-
-                SearchResults.Add(_found_thread_id + SearchResults.NameValueSeparator + _found_thread_name);
-                SearchResultsForumID.Add(_found_forum_id);
-
-                if not PostReply then
-                  with TRegExpr.Create do
-                  begin
-                    try
-                      ModifierI := True;
-                      InputString := _found_thread_name;
-                      Expression := StringReplace(' ' + GetSearchTitle(Subject) + ' ', ' ', '.*?', [rfReplaceAll, rfIgnoreCase]);
-
-                      if Exec(InputString) then
-                      begin
-                        PostReply := True;
-                        ipb3Settings.forums := _found_forum_id;
-                        ipb3Settings.threads := _found_thread_id;
-                        SearchIndex := SearchResults.Count - 1;
-                      end;
-                    finally
-                      Free;
-                    end;
-                  end;
-
-              until not ExecNext;
-            end
-            else
-            begin
-              Expression := 'data-tid="(\d+)".*?result''>(.*?)<\/a>.*?forum\/(\d+)-';
+        SearchResults := TStringList.Create;
+        SearchResultsForumID := TStringList.Create;
+        try
+          SearchResults.Add('0=Create new Thread');
+          with TRegExpr.Create do
+            try
+              InputString := ResponseStr;
+              Expression := 'id=''tidPop_(\d+)''(.|\s)*?result''>(.*?)<\/a>(.|\s)*?showforum=(\d+)''>';
 
               if Exec(InputString) then
               begin
                 repeat
-                  _found_forum_id := Match[3];
+                  _found_forum_id := Match[5];
                   _found_thread_id := Match[1];
-                  _found_thread_name := Match[2];
+                  _found_thread_name := Match[3];
 
                   SearchResults.Add(_found_thread_id + SearchResults.NameValueSeparator + _found_thread_name);
                   SearchResultsForumID.Add(_found_forum_id);
@@ -341,30 +323,68 @@ begin
                     end;
 
                 until not ExecNext;
-              end;
-            end;
-          finally
-            Free;
-          end;
+              end
+              else
+              begin
+                Expression := 'data-tid="(\d+)".*?result''>(.*?)<\/a>.*?forum\/(\d+)-';
 
-        if ipb3Settings.intelligent_posting_helper then
-        begin
-          if not IntelligentPostingHelper(Website, Subject, SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
+                if Exec(InputString) then
+                begin
+                  repeat
+                    _found_forum_id := Match[3];
+                    _found_thread_id := Match[1];
+                    _found_thread_name := Match[2];
+
+                    SearchResults.Add(_found_thread_id + SearchResults.NameValueSeparator + _found_thread_name);
+                    SearchResultsForumID.Add(_found_forum_id);
+
+                    if not PostReply then
+                      with TRegExpr.Create do
+                      begin
+                        try
+                          ModifierI := True;
+                          InputString := _found_thread_name;
+                          Expression := StringReplace(' ' + GetSearchTitle(Subject) + ' ', ' ', '.*?', [rfReplaceAll, rfIgnoreCase]);
+
+                          if Exec(InputString) then
+                          begin
+                            PostReply := True;
+                            ipb3Settings.forums := _found_forum_id;
+                            ipb3Settings.threads := _found_thread_id;
+                            SearchIndex := SearchResults.Count - 1;
+                          end;
+                        finally
+                          Free;
+                        end;
+                      end;
+
+                  until not ExecNext;
+                end;
+              end;
+            finally
+              Free;
+            end;
+
+          if ipb3Settings.intelligent_posting_helper then
           begin
-            ErrorMsg := StrAbortedThrougthInt;
-            Result := False;
+            if not IntelligentPostingHelper(Website, Subject, SearchValue, SearchResults.Text, SearchIndex, RedoSearch) then
+            begin
+              ErrorMsg := StrAbortedThrougthInt;
+              Result := False;
+            end;
+            PostReply := (SearchIndex > 0);
+            if PostReply then
+            begin
+              ipb3Settings.forums := SearchResultsForumID.Strings[SearchIndex];
+              ipb3Settings.threads := SearchResults.Names[SearchIndex];
+            end;
           end;
-          PostReply := (SearchIndex > 0);
-          if PostReply then
-          begin
-            ipb3Settings.forums := SearchResultsForumID.Strings[SearchIndex];
-            ipb3Settings.threads := SearchResults.Names[SearchIndex];
-          end;
+        finally
+          SearchResultsForumID.Free;
+          SearchResults.Free;
         end;
-      finally
-        SearchResultsForumID.Free;
-        SearchResults.Free;
       end;
+
     until not RedoSearch;
   end;
 end;
