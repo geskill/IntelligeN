@@ -67,6 +67,7 @@ type
     function GetName: WideString; override; safecall;
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -557,6 +558,11 @@ end;
 function TXenForo.BelongsTo;
 begin
   Result := (Pos('login/login', string(AWebsiteSourceCode)) > 0) and (Pos('_xfToken', string(AWebsiteSourceCode)) > 0);
+end;
+
+function TXenForo.GetArticleLink;
+begin
+  Result := Format('%sindex.php?threads/.19%d/', [AURL, AArticleID]);
 end;
 
 end.

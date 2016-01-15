@@ -64,6 +64,7 @@ type
     function GetName: WideString; override; safecall;
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -347,6 +348,11 @@ end;
 function TwBB2.BelongsTo;
 begin
   Result := (Pos('name="l_username"', string(AWebsiteSourceCode)) > 0);
+end;
+
+function TwBB2.GetArticleLink;
+begin
+  Result := Format('%sthread.php?postid=%d#post%1:d', [AURL, AArticleID]);
 end;
 
 end.

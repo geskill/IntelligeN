@@ -50,6 +50,7 @@ type
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
     function GetIDs: Integer; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -208,6 +209,12 @@ function T%FullName%.BelongsTo;
 begin
   Result := False;
   { TODO : evaluate the AWebsiteSourceCode for matching webpage }
+end;
+
+function T%FullName%.GetArticleLink;
+begin
+  Result := Format('%s?id=%d', [AURL, AArticleID]);
+  { TODO : return the permalink for the specified article ID }
 end;
 
 end.

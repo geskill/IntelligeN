@@ -60,11 +60,13 @@ type
     function GetIDsRequestURL: string; override;
     function DoAnalyzeIDsRequest(const AResponseStr: string): Integer; override;
 
-    function _AfterLogin(var ARequestID: Double; out AResponseStr: string): Boolean; override;
+    function NeedBeforePostAction: Boolean; override;
+    function DoBeforePostAction(var ARequestID: Double): Boolean; override;
   public
     function GetName: WideString; override; safecall;
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -533,7 +535,12 @@ begin
   Result := FCheckedIDsList.Count;
 end;
 
-function TuCMS._AfterLogin(var ARequestID: Double; out AResponseStr: string): Boolean;
+function TuCMS.NeedBeforePostAction: Boolean;
+begin
+  Result := True
+end;
+
+function TuCMS.DoBeforePostAction(var ARequestID: Double): Boolean;
 var
   HTTPParams: IHTTPParams;
 
@@ -563,8 +570,6 @@ begin
       ErrorMsg := HTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
       Result := False;
     end;
-
-    AResponseStr := HTTPProcess.HTTPResult.SourceCode;
   end
   else if ((not uCMSSettings.extra_login) and uCMSSettings.need_captcha) then
   begin
@@ -583,8 +588,6 @@ begin
       ErrorMsg := HTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
       Result := False;
     end;
-
-    AResponseStr := HTTPProcess.HTTPResult.SourceCode;
   end;
 end;
 
@@ -601,6 +604,12 @@ end;
 function TuCMS.BelongsTo;
 begin
   Result := (Pos('onSubmit="window.setTimeout(''DisableForm(\''''+this.name+''\'');'', 1); return(true);"', string(AWebsiteSourceCode)) > 0);
+end;
+
+function TuCMS.GetArticleLink;
+begin
+  // TODO:
+  Result := Format('%s?id=%d', [AURL, AArticleID]);
 end;
 
 end.

@@ -51,6 +51,7 @@ type
     function GetName: WideString; override; safecall;
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -321,6 +322,11 @@ end;
 function Tfluxbb.BelongsTo;
 begin
   Result := (Pos('misc.php?action=rules', string(AWebsiteSourceCode)) > 0) or (Pos('extern.php?action=feed', string(AWebsiteSourceCode)) > 0);
+end;
+
+function Tfluxbb.GetArticleLink;
+begin
+  Result := Format('%sviewtopic.php?p=%d#p%1:d', [AURL, AArticleID]);
 end;
 
 end.

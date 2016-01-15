@@ -38,6 +38,7 @@ type
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
     function GetIDs: Integer; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -221,6 +222,12 @@ end;
 function TICMS.GetIDs;
 begin
   Result := 0;
+end;
+
+function TICMS.GetArticleLink;
+begin
+  // TODO:
+  Result := Format('%s?id=%d', [AURL, AArticleID]);
 end;
 
 end.

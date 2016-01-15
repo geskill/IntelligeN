@@ -63,6 +63,7 @@ type
     function DefaultCharset: WideString; override;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override;
     function GetIDs: Integer; override;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -317,6 +318,12 @@ begin
     }
 
   Result := DoAnalyzeIDsRequest(HTTPManager.GetResult(RequestID).HTTPResult.SourceCode);
+end;
+
+function TBlogger.GetArticleLink;
+begin
+  // TODO:
+  Result := Format('%s?id=%d', [AURL, AArticleID]);
 end;
 
 end.

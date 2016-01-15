@@ -64,6 +64,7 @@ type
     function GetName: WideString; override; safecall;
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -434,6 +435,12 @@ function TSMF.BelongsTo;
 begin
   // (Pos('type="hidden" name="hash_passwrd"', string(AWebsiteSourceCode)) > 0) or (Pos('action=login2', string(AWebsiteSourceCode)) > 0) or
   Result := (Pos('var smf_scripturl', string(AWebsiteSourceCode)) > 0);
+end;
+
+function TSMF.GetArticleLink;
+begin
+  // TODO: SMF requires threadID, too
+  Result := Format('%sindex.php?topic=<THREAD-ID>.msg%d#msg%1:d', [AURL, AArticleID]);
 end;
 
 end.

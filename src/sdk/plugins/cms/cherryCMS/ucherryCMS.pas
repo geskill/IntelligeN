@@ -53,6 +53,7 @@ type
     function GetName: WideString; override; safecall;
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -384,6 +385,12 @@ end;
 function TcherryCMS.BelongsTo;
 begin
   Result := (Pos('name="str" value="Suche..." class="inputtext"', string(AWebsiteSourceCode)) > 0);
+end;
+
+function TcherryCMS.GetArticleLink;
+begin
+  // TODO:
+  Result := Format('%s?id=%d', [AURL, AArticleID]);
 end;
 
 end.

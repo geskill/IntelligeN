@@ -64,6 +64,7 @@ type
     function GetName: WideString; override; safecall;
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -640,6 +641,11 @@ end;
 function TMyBB.BelongsTo;
 begin
   Result := (Pos('member.php?action=register', string(AWebsiteSourceCode)) > 0) or (Pos('MyBB.quickLogin()', string(AWebsiteSourceCode)) > 0);
+end;
+
+function TMyBB.GetArticleLink;
+begin
+  Result := Format('%sshowthread.php?pid=p%d#pidp%1:d', [AURL, AArticleID]);
 end;
 
 end.

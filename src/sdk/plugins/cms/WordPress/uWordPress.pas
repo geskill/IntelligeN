@@ -59,6 +59,7 @@ type
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
     function GetIDs: Integer; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -527,6 +528,11 @@ begin
     }
 
   Result := DoAnalyzeIDsRequest(HTTPManager.GetResult(RequestID).HTTPResult.SourceCode);
+end;
+
+function TWordPress.GetArticleLink;
+begin
+  Result := Format('%s?p=%d', [AURL, AArticleID]);
 end;
 
 end.

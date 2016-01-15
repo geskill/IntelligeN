@@ -48,7 +48,6 @@ type
     property icon: Variant read ficon write ficon;
   end;
 
-  { TODO : use blog/forum/formbased class }
   TwBB4 = class(TCMSBoardIPPlugIn)
   private
     wBB4Settings: TwBB4Settings;
@@ -78,6 +77,7 @@ type
     function GetName: WideString; override; safecall;
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -575,5 +575,11 @@ function TwBB4.BelongsTo;
 begin
   Result := (Pos('com.woltlab.wbb.post', string(AWebsiteSourceCode)) > 0);
 end;
+
+function TwBB4.GetArticleLink;
+begin
+  Result := Format('%sindex.php?thread&postID=%d#post%1:d', [AURL, AArticleID]);
+end;
+
 
 end.
