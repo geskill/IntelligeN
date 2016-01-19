@@ -105,22 +105,9 @@ end;
 
 function TCduniverseCom.InternalExecute;
 
-  procedure deep_image_search(aWebsitecode: string);
-  begin
-    with TRegExpr.Create do
-      try
-        InputString := aWebsitecode;
-        Expression := '<center><p><img src="(.*?)"';
-
-        if Exec(InputString) then
-          AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
-      finally
-        Free;
-      end;
-  end;
-
   procedure deep_search(AWebsiteSourceCode: string);
   var
+    s: string;
     LTracklist: string;
   begin
     if ACanUse(cPicture) then
@@ -131,6 +118,13 @@ function TCduniverseCom.InternalExecute;
 
           if Exec(InputString) then
           begin
+            if Exec(InputString) then
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
+          end
+          else
+          begin
+            Expression := 'itemprop="image" src="(.*?)"';
+
             if Exec(InputString) then
               AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
           end;
@@ -187,7 +181,35 @@ function TCduniverseCom.InternalExecute;
           Expression := 'Publisher<\/td><td>(.*?)<\/td>';
 
           if Exec(InputString) then
-            AControlController.FindControl(cPublisher).AddProposedValue(GetName, Trim(Match[1]));
+          begin
+            AControlController.FindControl(cPublisher).AddProposedValue(GetName, Trim(Match[1]))
+          end
+          else
+          begin
+            Expression := 'Label<\/td><td>(.*?)<\/td>';
+            if Exec(InputString) then
+            begin
+              s := Match[1];
+
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  // proper: ([\w-]+)|<a .*?">(.*?)</a>
+                  Expression := '<a.*?>(.*?)<\/a>';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      AControlController.FindControl(cPublisher).AddProposedValue(GetName, Trim(Match[1]));
+                    until not ExecNext;
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            end;
+          end;
         finally
           Free;
         end;
