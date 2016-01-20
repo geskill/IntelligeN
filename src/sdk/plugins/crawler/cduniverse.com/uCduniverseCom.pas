@@ -82,12 +82,12 @@ end;
 
 function TCduniverseCom.InternalGetAvailableTypeIDs;
 begin
-  Result := [ low(TTypeID) .. high(TTypeID)];
+  Result := [low(TTypeID) .. high(TTypeID)];
 end;
 
 function TCduniverseCom.InternalGetAvailableControlIDs;
 begin
-  Result := [cCreator, cPublisher, cPicture, cGenre, cDescription];
+  Result := [cTags, cCreator, cPublisher, cPicture, cGenre, cDescription];
 
   if (ATypeID in [cAudio, cMovie]) then
     Result := Result + [cRuntime];
@@ -96,6 +96,9 @@ end;
 function TCduniverseCom.InternalGetControlIDDefaultValue;
 begin
   Result := True;
+
+  if (AControlID in [cTags]) then
+    Result := False;
 end;
 
 function TCduniverseCom.InternalGetDependentControlIDs;
@@ -108,8 +111,47 @@ function TCduniverseCom.InternalExecute;
   procedure deep_search(AWebsiteSourceCode: string);
   var
     s: string;
+    LStringList: TStringList;
     LTracklist: string;
   begin
+    if ACanUse(cTags) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'Starring.*?td>(.*?)<\/td>';
+
+          if Exec(InputString) then
+          begin
+            s := Match[1];
+
+            LStringList := TStringList.Create;
+            try
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := '">(.*?)<\/a>';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      LStringList.Add(Match[1]);
+                    until not ExecNext;
+
+                    AControlController.FindControl(cTags).AddProposedValue(GetName, StringListSplit(LStringList, ','));
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            finally
+              LStringList.Free;
+            end;
+          end;
+        finally
+          Free;
+        end;
+
     if ACanUse(cPicture) then
       with TRegExpr.Create do
         try

@@ -610,5 +610,9 @@
 
 * Added active tab article title to window caption
 
+* Added html_spoiler()-IScript function
+
 * Improved IntelligentPosting search HTTP error handling
+
+* Fixed WordPress IDGrabber
 

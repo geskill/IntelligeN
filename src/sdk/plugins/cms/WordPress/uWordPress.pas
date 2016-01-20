@@ -368,12 +368,27 @@ var
       with AXMLNode.ChildNodes.Nodes[I].ChildNodes.Nodes['struct'] do
       begin
         for J := 0 to ChildNodes.Count - 1 do
-          if SameText('categoryId', VarToStr(ChildNodes.Nodes[J].ChildNodes.Nodes['name'].NodeValue)) then
-            categoryId := VarToStr(ChildNodes.Nodes[J].ChildNodes.Nodes['value'].ChildNodes.Nodes['string'].NodeValue)
-          else if SameText('parentId', VarToStr(ChildNodes.Nodes[J].ChildNodes.Nodes['name'].NodeValue)) then
-            parentId := VarToStr(ChildNodes.Nodes[J].ChildNodes.Nodes['value'].ChildNodes.Nodes['string'].NodeValue)
-          else if SameText('categoryName', VarToStr(ChildNodes.Nodes[J].ChildNodes.Nodes['name'].NodeValue)) then
-            categoryName := VarToStr(ChildNodes.Nodes[J].ChildNodes.Nodes['value'].ChildNodes.Nodes['string'].NodeValue);
+          with ChildNodes.Nodes[J] do // member's
+          begin
+            if SameText('categoryId', VarToStr(ChildNodes.Nodes['name'].NodeValue)) then
+            begin
+              if Assigned(ChildNodes.Nodes['value'].ChildNodes.FindNode('string')) then
+                categoryId := VarToStr(ChildNodes.Nodes['value'].ChildNodes.Nodes['string'].NodeValue)
+              else
+                categoryId := VarToStr(ChildNodes.Nodes['value'].ChildNodes.Nodes['int'].NodeValue)
+            end
+            else if SameText('parentId', VarToStr(ChildNodes.Nodes['name'].NodeValue)) then
+            begin
+              if Assigned(ChildNodes.Nodes['value'].ChildNodes.FindNode('string')) then
+                parentId := VarToStr(ChildNodes.Nodes['value'].ChildNodes.Nodes['string'].NodeValue)
+              else
+                parentId := VarToStr(ChildNodes.Nodes['value'].ChildNodes.Nodes['int'].NodeValue)
+            end
+            else if SameText('categoryName', VarToStr(ChildNodes.Nodes['name'].NodeValue)) then
+            begin
+              categoryName := VarToStr(ChildNodes.Nodes['value'].ChildNodes.Nodes['string'].NodeValue);
+            end;
+          end;
 
         if SameText(AParentID, parentId) then
         begin
