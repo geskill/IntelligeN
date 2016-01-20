@@ -49,6 +49,7 @@ type
     function GetName: WideString; override; safecall;
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -329,6 +330,12 @@ end;
 function TLoadIT.BelongsTo;
 begin
   Result := (Pos('index.php?p=load&amp;type=', string(AWebsiteSourceCode)) > 0);
+end;
+
+function TLoadIT.GetArticleLink;
+begin
+  // TODO:
+  Result := Format('%s?id=%d', [AURL, AArticleID]);
 end;
 
 end.

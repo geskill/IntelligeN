@@ -55,6 +55,7 @@ type
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
     function GetIDs: Integer; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -391,6 +392,12 @@ function TN3m0CMS.GetIDs;
 begin
   /// not necessary - categories will be set by default
   Result := FCheckedIDsList.Count;
+end;
+
+function TN3m0CMS.GetArticleLink;
+begin
+  // TODO:
+  Result := Format('%s?id=%d', [AURL, AArticleID]);
 end;
 
 end.

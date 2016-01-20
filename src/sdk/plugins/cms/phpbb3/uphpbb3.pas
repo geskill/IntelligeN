@@ -74,6 +74,7 @@ type
     function GetName: WideString; override; safecall;
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -616,6 +617,11 @@ end;
 function Tphpbb3.BelongsTo;
 begin
   Result := (Pos('ucp.php?mode=login', string(AWebsiteSourceCode)) > 0);
+end;
+
+function Tphpbb3.GetArticleLink;
+begin
+  Result := Format('%sviewtopic.php?p=%d#p%1:d', [AURL, AArticleID]);
 end;
 
 end.

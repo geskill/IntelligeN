@@ -4,9 +4,11 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils,
+  Windows, SysUtils, HTTPApp,
   // RegEx
   RegExpr,
+  // JSON
+  uLkJSON,
   // Common
   uBaseConst, uBaseInterface,
   // Plugin system
@@ -17,6 +19,8 @@ type
   protected { . }
   const
     WEBSITE = 'http://www.amazon.de/';
+
+    function GetBaseSearchType(const ATypeID: TTypeID): string; override;
   public
     function GetName: WideString; override; safecall;
 
@@ -27,6 +31,27 @@ implementation
 
 { TAmazonDe }
 
+function TAmazonDe.GetBaseSearchType(const ATypeID: TTypeID): string;
+begin
+  if ATypeID in cGames then
+    Result := 'videogames'
+  else
+  begin
+    case ATypeID of
+      cAudio:
+        Result := 'popular'; // digital-music
+      cEBook:
+        Result := 'stripbooks';
+      cMovie:
+        Result := 'dvd';
+      cSoftware:
+        Result := 'software';
+      cOther:
+        Result := 'aps';
+    end;
+  end;
+end;
+
 function TAmazonDe.GetName: WideString;
 begin
   Result := 'Amazon.de';
@@ -36,7 +61,8 @@ function TAmazonDe.InternalExecute;
 
   procedure deep_search(AWebsiteSourceCode: string);
   var
-    LTrackList: string;
+    LTrackList, s, img: string;
+    LJSONobject: TlkJSONobject;
   begin
     if ACanUse(cPicture) then
       with TRegExpr.Create do
@@ -46,8 +72,28 @@ function TAmazonDe.InternalExecute;
 
           if Exec(InputString) then
           begin
-            if not(Pos('no-img', string(Match[1])) > 0) then
-              AControlController.FindControl(cPicture).AddProposedValue(GetName, AmazonOriginalSize(Match[1]));
+            if AmazonCanAddImage(Match[1]) then
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, AmazonOriginalImageSize(Match[1]))
+            else
+            begin
+              Expression := 'data-a-dynamic-image="(.*?)"';
+
+              if Exec(InputString) then
+              begin
+                if not SameStr('', Match[1]) then
+                begin
+                  try
+                    LJSONobject := TlkJSON.ParseText(HTMLDecode(Match[1])) as TlkJSONobject;
+                    img := LJSONobject.NameOf[0];
+                    if AmazonCanAddImage(img) then
+                      AControlController.FindControl(cPicture).AddProposedValue(GetName, AmazonOriginalImageSize(img));
+                  finally
+                    LJSONobject.Free;
+                  end;
+                end;
+              end;
+
+            end;
           end;
         finally
           Free;
@@ -157,9 +203,9 @@ begin
                 begin
                   repeat
 
-                    if (not(ATypeID in cGames)) or ((ATypeID in cGames) and IsSystem(ATypeID, Match[2])) then
+                    if (not(ATypeID in cGames)) or ((ATypeID in cGames) and IsSystem(ATypeID, Match[1])) then
                     begin
-                      LResponeStr := GETFollowUpRequest(Match[1], LRequestID1, LRequestID2);
+                      LResponeStr := GETFollowUpRequest(Match[2], LRequestID1, LRequestID2);
 
                       deep_search(LResponeStr);
                     end;

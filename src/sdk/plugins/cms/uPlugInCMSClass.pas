@@ -142,6 +142,7 @@ type
     function AddArticle(): WordBool; virtual; safecall;
     function EditArticle(): WordBool; virtual; safecall;
     function GetArticle(out AArticle: WideString): WordBool; virtual; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; virtual; safecall; abstract;
     function ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEditor): WordBool; safecall;
   end;
 
@@ -569,8 +570,15 @@ begin
     begin
       if NeedBeforePostAction then
       begin
-        if not DoBeforePostAction(RequestID) then
+        if DoBeforePostAction(RequestID) then
+        begin
+          if not (RequestID = -1) then // no previous request actions
+            ResponseStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
+        end
+        else
+        begin
           Exit;
+        end;
       end;
 
       if NeedPrePost(PrePostURL) then

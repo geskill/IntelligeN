@@ -284,7 +284,7 @@ type
     function GetRedirectMaximum: Integer; safecall;
     procedure SetRedirectMaximum(ARedirectMaximum: Integer); safecall;
   public
-    constructor Create(const AProxy: IProxy = nil); reintroduce; virtual;
+    constructor Create(const AProxy: IProxy = nil); reintroduce; overload; virtual;
     constructor Clone(const AHTTPOptions: IHTTPOptions);
     destructor Destroy; override;
 

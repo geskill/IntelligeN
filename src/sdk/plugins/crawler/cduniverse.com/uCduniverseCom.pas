@@ -82,12 +82,12 @@ end;
 
 function TCduniverseCom.InternalGetAvailableTypeIDs;
 begin
-  Result := [ low(TTypeID) .. high(TTypeID)];
+  Result := [low(TTypeID) .. high(TTypeID)];
 end;
 
 function TCduniverseCom.InternalGetAvailableControlIDs;
 begin
-  Result := [cCreator, cPublisher, cPicture, cGenre, cDescription];
+  Result := [cTags, cCreator, cPublisher, cPicture, cGenre, cDescription];
 
   if (ATypeID in [cAudio, cMovie]) then
     Result := Result + [cRuntime];
@@ -96,6 +96,9 @@ end;
 function TCduniverseCom.InternalGetControlIDDefaultValue;
 begin
   Result := True;
+
+  if (AControlID in [cTags]) then
+    Result := False;
 end;
 
 function TCduniverseCom.InternalGetDependentControlIDs;
@@ -105,24 +108,50 @@ end;
 
 function TCduniverseCom.InternalExecute;
 
-  procedure deep_image_search(aWebsitecode: string);
-  begin
-    with TRegExpr.Create do
-      try
-        InputString := aWebsitecode;
-        Expression := '<center><p><img src="(.*?)"';
-
-        if Exec(InputString) then
-          AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
-      finally
-        Free;
-      end;
-  end;
-
   procedure deep_search(AWebsiteSourceCode: string);
   var
+    s: string;
+    LStringList: TStringList;
     LTracklist: string;
   begin
+    if ACanUse(cTags) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'Starring.*?td>(.*?)<\/td>';
+
+          if Exec(InputString) then
+          begin
+            s := Match[1];
+
+            LStringList := TStringList.Create;
+            try
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := '">(.*?)<\/a>';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      LStringList.Add(Match[1]);
+                    until not ExecNext;
+
+                    AControlController.FindControl(cTags).AddProposedValue(GetName, StringListSplit(LStringList, ','));
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            finally
+              LStringList.Free;
+            end;
+          end;
+        finally
+          Free;
+        end;
+
     if ACanUse(cPicture) then
       with TRegExpr.Create do
         try
@@ -131,6 +160,13 @@ function TCduniverseCom.InternalExecute;
 
           if Exec(InputString) then
           begin
+            if Exec(InputString) then
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
+          end
+          else
+          begin
+            Expression := 'itemprop="image" src="(.*?)"';
+
             if Exec(InputString) then
               AControlController.FindControl(cPicture).AddProposedValue(GetName, Match[1]);
           end;
@@ -187,7 +223,35 @@ function TCduniverseCom.InternalExecute;
           Expression := 'Publisher<\/td><td>(.*?)<\/td>';
 
           if Exec(InputString) then
-            AControlController.FindControl(cPublisher).AddProposedValue(GetName, Trim(Match[1]));
+          begin
+            AControlController.FindControl(cPublisher).AddProposedValue(GetName, Trim(Match[1]))
+          end
+          else
+          begin
+            Expression := 'Label<\/td><td>(.*?)<\/td>';
+            if Exec(InputString) then
+            begin
+              s := Match[1];
+
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  // proper: ([\w-]+)|<a .*?">(.*?)</a>
+                  Expression := '<a.*?>(.*?)<\/a>';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      AControlController.FindControl(cPublisher).AddProposedValue(GetName, Trim(Match[1]));
+                    until not ExecNext;
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            end;
+          end;
         finally
           Free;
         end;

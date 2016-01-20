@@ -37,6 +37,7 @@ type
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
     function GetIDs: Integer; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -167,6 +168,12 @@ function TJoomla.GetIDs;
 begin
   { TODO : implement for you own needs }
   Result := FCheckedIDsList.Count;
+end;
+
+function TJoomla.GetArticleLink;
+begin
+  { TODO : implement for you own needs }
+  Result := Format('%s?id=%d', [AURL, AArticleID]);
 end;
 
 end.

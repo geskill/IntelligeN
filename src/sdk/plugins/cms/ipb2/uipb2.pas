@@ -57,6 +57,7 @@ type
     function GetName: WideString; override; safecall;
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -366,6 +367,12 @@ begin
   // for not escaped &amp; bug
   { . } (Pos('act=Login&CODE=00', string(AWebsiteSourceCode)) > 0) or
   { . } (Pos('act=Reg&CODE=00', string(AWebsiteSourceCode)) > 0);
+end;
+
+function Tipb2.GetArticleLink;
+begin
+  // TODO: ipb2 requires threadID, too
+  Result := Format('%index.php?showtopic=<THREAD-ID>&view=findpost&p=%d', [AURL, AArticleID]);
 end;
 
 end.
