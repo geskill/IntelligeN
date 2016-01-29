@@ -1011,17 +1011,17 @@ begin
 
     { ... } if not LResult and not(LDelphiException or LExternalException) then
     { ... } begin
-    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalWebsiteError, [APublishItem.HostWithPath, ErrorMsg, ExtractFileName(APublishItem.CMSPluginPath)]), FErrorHandler);
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalWebsiteError, [APublishItem.HostWithPath, APublishItem.Subject, ErrorMsg, ExtractFileName(APublishItem.CMSPluginPath)]), FErrorHandler);
     { ... } end
     { ... } else
     { ... } if LDelphiException then
     { ... } begin
-    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalWebsiteError, [APublishItem.HostWithPath, LDelphiErrorMsg, ExtractFileName(APublishItem.CMSPluginPath)]), FErrorHandler);
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalWebsiteError, [APublishItem.HostWithPath, APublishItem.Subject, LDelphiErrorMsg, ExtractFileName(APublishItem.CMSPluginPath)]), FErrorHandler);
     { ... } end
     { ... } else
     { ... } if LExternalException then
     { ... } begin
-    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalWebsiteError, [APublishItem.HostWithPath, SysErrorMessage(GetLastError()), ExtractFileName(APublishItem.CMSPluginPath)]), FErrorHandler);
+    { ..... } TPluginBasic.ReturnError(Format(StrPluginInternalWebsiteError, [APublishItem.HostWithPath, APublishItem.Subject, SysErrorMessage(GetLastError()), ExtractFileName(APublishItem.CMSPluginPath)]), FErrorHandler);
     { ... } end;
     { . } end;
     { } end, FErrorHandler);
