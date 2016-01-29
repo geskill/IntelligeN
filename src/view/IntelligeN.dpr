@@ -176,7 +176,6 @@ begin
       Application.CreateForm(TMain, Main);
       Application.CreateForm(TSettings, Settings);
       Application.CreateForm(TUpdate, Update);
-      AnalyzeStartupParams;
 
       if SettingsManager.Settings.Login.AutoLogin then
         Main.fLogin.cxbLoginClick(nil);
@@ -194,5 +193,6 @@ begin
   finally
     SplashScreen.Close;
   end;
+  AnalyzeStartupParams;
   Application.Run;
 end.

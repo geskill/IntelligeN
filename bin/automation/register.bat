@@ -1,4 +1,4 @@
 cd..
-start "/RegServerPerUser" "IntelligeN.exe"
+start "" "IntelligeN.exe" /RegServerPerUser
 
 pause
