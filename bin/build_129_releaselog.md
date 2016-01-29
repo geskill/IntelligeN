@@ -618,6 +618,8 @@
 
 * Improved IntelligentPosting search HTTP error handling
 
+* Fixed possible issue closing tab from menu
+
 * Fixed OLE automation issue
 
 * Fixed WordPress IDGrabber

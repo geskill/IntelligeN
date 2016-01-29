@@ -107,6 +107,7 @@ type
     function OpenFiles(const AFiles: TStrings): Boolean;
     function CanClose(ATabIndex: Integer): Boolean;
     function CanCloseCurrentTab: Boolean;
+    function CanCloseAllOtherTabs: Boolean;
     function CanCloseAllTabs: Boolean;
     function RemoveTab(ATabIndex: Integer): Boolean;
     function RemoveCurrentTab: Boolean;
@@ -875,6 +876,24 @@ end;
 function TfMain.CanCloseCurrentTab: Boolean;
 begin
   Result := CanClose(ActiveTabSheetIndex);
+end;
+
+function TfMain.CanCloseAllOtherTabs: Boolean;
+var
+  LTabSheetIndex: Integer;
+  LResult: Boolean;
+begin
+  LResult := True;
+
+  for LTabSheetIndex := 0 to TabSheetCount - 1 do
+    if not(LTabSheetIndex = ActiveTabSheetIndex) then
+    begin
+      LResult := CanClose(LTabSheetIndex);
+      if not LResult then
+        break;
+    end;
+
+  Result := LResult;
 end;
 
 function TfMain.CanCloseAllTabs: Boolean;

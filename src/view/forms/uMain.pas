@@ -558,17 +558,20 @@ end;
 
 procedure TMain.aCloseExecute(Sender: TObject);
 begin
-  fMain.RemoveCurrentTab;
+  if fMain.CanCloseCurrentTab then
+    fMain.RemoveCurrentTab;
 end;
 
 procedure TMain.aCloseAllOtherExecute(Sender: TObject);
 begin
-  fMain.RemoveAllOtherTabs;
+  if fMain.CanCloseAllOtherTabs then
+    fMain.RemoveAllOtherTabs;
 end;
 
 procedure TMain.aCloseAllExecute(Sender: TObject);
 begin
-  fMain.RemoveAllTabs;
+  if fMain.CanCloseAllTabs then
+    fMain.RemoveAllTabs;
 end;
 
 procedure TMain.aExitExecute(Sender: TObject);
