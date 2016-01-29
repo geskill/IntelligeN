@@ -63,15 +63,15 @@ object Main: TMain
     TabOrder = 0
     OnClick = bStartIntelligeNClick
   end
-  object bCloseIntelligeN: TButton
+  object bCloseTab: TButton
     Left = 530
     Top = 8
     Width = 97
     Height = 25
     Anchors = [akTop, akRight]
-    Caption = 'Close IntelligeN'
+    Caption = 'Close active tab'
     TabOrder = 1
-    OnClick = bCloseIntelligeNClick
+    OnClick = bCloseTabClick
   end
   object bLoadFromFile: TButton
     Left = 30

@@ -17,6 +17,7 @@ type
     procedure openfile(const AFileName: WideString); safecall;
     procedure savefile(const AFileName: WideString); safecall;
     procedure close; safecall;
+    function canclose: SYSINT; stdcall;
     procedure callcrawler; safecall;
     procedure callremoteupload; safecall;
     procedure callcheckdirectlinks; safecall;
@@ -48,6 +49,14 @@ end;
 procedure TIntelligeN2009.close;
 begin
   Main.fMain.RemoveCurrentTab;
+end;
+
+function TIntelligeN2009.canclose: SYSINT;
+begin
+  if not Main.fMain.CanCloseCurrentTab then
+    Result := 0
+  else
+    Result := 1;
 end;
 
 procedure TIntelligeN2009.callcrawler;

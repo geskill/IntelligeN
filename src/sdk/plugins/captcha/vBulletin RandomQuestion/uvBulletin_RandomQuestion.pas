@@ -63,12 +63,13 @@ end;
 
 class function TCAPTCHAXmlReader.GetCAPTCHAValue(AFileName, ACAPTCHA: string): string;
 var
+  LNeedToUninitialize: Boolean;
   XMLDoc: IXMLDocument;
   CAPTCHACount: Integer;
 begin
   Result := '';
 
-  CoInitializeEx(nil, COINIT_MULTITHREADED);
+  LNeedToUninitialize := Succeeded(CoInitializeEx(nil, COINIT_MULTITHREADED));
   try
     XMLDoc := NewXMLDocument;
     try
@@ -93,7 +94,8 @@ begin
       XMLDoc := nil;
     end;
   finally
-    CoUninitialize;
+    if LNeedToUninitialize then
+      CoUninitialize;
   end;
 end;
 

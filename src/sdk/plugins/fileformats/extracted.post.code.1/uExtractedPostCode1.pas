@@ -44,11 +44,12 @@ end;
 
 procedure TExtractedPostCode.SaveControls;
 var
+  LNeedToUninitialize: Boolean;
   XMLDoc: IXMLDocument;
   I: Integer;
   _hoster: string;
 begin
-  CoInitialize(nil);
+  LNeedToUninitialize := Succeeded(CoInitialize(nil));
   try
     XMLDoc := NewXMLDocument;
     try
@@ -168,7 +169,8 @@ begin
       XMLDoc := nil;
     end;
   finally
-    CoUninitialize;
+    if LNeedToUninitialize then
+      CoUninitialize;
   end;
 end;
 

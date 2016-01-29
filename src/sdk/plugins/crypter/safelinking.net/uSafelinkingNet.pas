@@ -39,6 +39,7 @@ end;
 
 function Tsafelinkingnet.AddFolder;
 var
+  LNeedToUninitialize: Boolean;
   LFoldertypes: TFoldertypes;
   LContainertypes: TContainertypes;
 
@@ -129,7 +130,7 @@ begin
   end
   else
   begin
-    CoInitializeEx(nil, COINIT_MULTITHREADED);
+    LNeedToUninitialize := Succeeded(CoInitializeEx(nil, COINIT_MULTITHREADED));
     try
       LXMLDoc := NewXMLDocument;
       try
@@ -162,7 +163,8 @@ begin
         LXMLDoc := nil;
       end;
     finally
-      CoUninitialize;
+      if LNeedToUninitialize then
+        CoUninitialize;
     end;
   end;
 end;
@@ -179,6 +181,7 @@ end;
 
 function Tsafelinkingnet.GetFolder;
 var
+  LNeedToUninitialize: Boolean;
   LRequestID: Double;
   LHTTPProcess: IHTTPProcess;
 
@@ -212,7 +215,7 @@ begin
   end
   else
   begin
-    CoInitializeEx(nil, COINIT_MULTITHREADED);
+    LNeedToUninitialize := Succeeded(CoInitializeEx(nil, COINIT_MULTITHREADED));
     try
       LXMLDoc := NewXMLDocument;
       try
@@ -257,7 +260,8 @@ begin
         LXMLDoc := nil;
       end;
     finally
-      CoUninitialize;
+      if LNeedToUninitialize then
+        CoUninitialize;
     end;
   end;
 end;

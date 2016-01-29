@@ -51,6 +51,7 @@ end;
 
 procedure TIntelligeNXML2.SaveControls;
 var
+  LNeedToUninitialize: Boolean;
   XMLDoc: IXMLDocument;
   Picture: IPicture;
   I, X: Integer;
@@ -62,7 +63,7 @@ var
   end;
 
 begin
-  CoInitialize(nil);
+  LNeedToUninitialize := Succeeded(CoInitialize(nil));
   try
     XMLDoc := NewXMLDocument;
     try
@@ -151,7 +152,8 @@ begin
       XMLDoc := nil;
     end;
   finally
-    CoUninitialize;
+    if LNeedToUninitialize then
+      CoUninitialize;
   end;
 end;
 
@@ -162,6 +164,7 @@ end;
 
 function TIntelligeNXML2.LoadControls;
 var
+  LNeedToUninitialize: Boolean;
   LXMLDoc: IXMLDocument;
   LBasicControl: IControlBasic;
   I, X, Y: Integer;
@@ -173,7 +176,7 @@ var
 begin
   result := -1;
   try
-    CoInitialize(nil);
+    LNeedToUninitialize := Succeeded(CoInitialize(nil));
     try
       LXMLDoc := NewXMLDocument;
       try
@@ -322,7 +325,8 @@ begin
         LXMLDoc := nil;
       end;
     finally
-      CoUninitialize;
+      if LNeedToUninitialize then
+        CoUninitialize;
     end;
   except
     result := -1;

@@ -342,6 +342,7 @@ end;
 
 function TWordPress.DoAnalyzeIDsRequest;
 var
+  LNeedToUninitialize: Boolean;
   XMLDoc: IXMLDocument;
 
   BoardLevel: TStringList;
@@ -411,7 +412,7 @@ var
   end;
 
 begin
-  CoInitializeEx(nil, COINIT_MULTITHREADED);
+  LNeedToUninitialize := Succeeded(CoInitializeEx(nil, COINIT_MULTITHREADED));
   try
     XMLDoc := NewXMLDocument;
     try
@@ -436,7 +437,8 @@ begin
       XMLDoc := nil;
     end;
   finally
-    CoUninitialize;
+    if LNeedToUninitialize then
+      CoUninitialize;
   end;
   Result := FCheckedIDsList.Count;
 end;
@@ -460,10 +462,11 @@ function TWordPress.GetIDs;
 
   function newPageXMLDoc: string;
   var
+    LNeedToUninitialize: Boolean;
     XMLDoc: IXMLDocument;
     StringStream: TStringStream;
   begin
-    CoInitializeEx(nil, COINIT_MULTITHREADED);
+    LNeedToUninitialize := Succeeded(CoInitializeEx(nil, COINIT_MULTITHREADED));
     try
       XMLDoc := NewXMLDocument;
       try
@@ -500,7 +503,8 @@ function TWordPress.GetIDs;
       end;
 
     finally
-      CoUninitialize;
+      if LNeedToUninitialize then
+        CoUninitialize;
     end;
   end;
 

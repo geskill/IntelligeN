@@ -20,6 +20,7 @@ implementation
 
 class procedure TApiHTTP.DownloadData(const AURL: WideString; out AMemoryStream: TMemoryStream; var ACookies: WideString; const AProxy: IProxy; AConnectTimeout, AReadTimeout: Integer);
 var
+  LNeedToUninitialize: Boolean;
   LHTTPManager: IHTTPManager;
   LHTTPRequest: IHTTPRequest;
   LHTTPOptions: IHTTPOptions;
@@ -30,7 +31,7 @@ var
 begin
   AMemoryStream := TMemoryStream.Create;
 
-  CoInitializeEx(nil, COINIT_MULTITHREADED);
+  LNeedToUninitialize := Succeeded(CoInitializeEx(nil, COINIT_MULTITHREADED));
   try
     LHTTPManager := THTTPManager.Instance();
 
@@ -65,7 +66,8 @@ begin
       LOleStream.Free;
     end;
   finally
-    CoUninitialize;
+    if LNeedToUninitialize then
+      CoUninitialize;
   end;
 
   AMemoryStream.Position := 0;

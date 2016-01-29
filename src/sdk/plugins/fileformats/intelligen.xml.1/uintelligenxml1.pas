@@ -62,10 +62,11 @@ end;
 
 procedure Tintelligenxml1.SaveControls;
 var
+  LNeedToUninitialize: Boolean;
   XMLDoc: IXMLDocument;
   I, X: Integer;
 begin
-  CoInitialize(nil);
+  LNeedToUninitialize := Succeeded(CoInitialize(nil));
   try
     XMLDoc := NewXMLDocument;
     try
@@ -152,7 +153,8 @@ begin
       XMLDoc := nil;
     end;
   finally
-    CoUninitialize;
+    if LNeedToUninitialize then
+      CoUninitialize;
   end;
 end;
 
@@ -163,6 +165,7 @@ end;
 
 function Tintelligenxml1.LoadControls;
 var
+  LNeedToUninitialize: Boolean;
   XMLDoc: IXMLDocument;
   I, J, K, CompPos: Integer;
   TemplateType: TTypeID;
@@ -173,7 +176,7 @@ begin
 
   Result := -1;
   try
-    CoInitialize(nil);
+    LNeedToUninitialize := Succeeded(CoInitialize(nil));
     try
       XMLDoc := NewXMLDocument;
       try
@@ -251,6 +254,7 @@ begin
         XMLDoc := nil;
       end;
     finally
+    if LNeedToUninitialize then
       CoUninitialize;
     end;
   except

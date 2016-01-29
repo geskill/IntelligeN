@@ -199,6 +199,7 @@ function TUpdateController.ReadUpdate(): Boolean;
 const
   u = 'upd/';
 var
+  LNeedToUninitialize: Boolean;
   LHTTPManager: IHTTPManager;
   LHTTPRequest: IHTTPRequest;
   LHTTPParams: IHTTPParams;
@@ -248,7 +249,7 @@ begin
     Exit(False);
   end;
 
-  CoInitializeEx(nil, COINIT_MULTITHREADED);
+  LNeedToUninitialize := Succeeded(CoInitializeEx(nil, COINIT_MULTITHREADED));
   try
     LXMLDoc := NewXMLDocument;
     try
@@ -270,7 +271,8 @@ begin
       LXMLDoc := nil;
     end;
   finally
-    CoUninitialize;
+    if LNeedToUninitialize then
+      CoUninitialize;
   end;
 
   result := True;
