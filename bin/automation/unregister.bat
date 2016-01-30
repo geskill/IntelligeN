@@ -1,4 +1,4 @@
 cd..
-start "/UnregServerPerUser" "IntelligeN.exe"
+start "" "IntelligeN.exe" /UnregServerPerUser
 
 pause

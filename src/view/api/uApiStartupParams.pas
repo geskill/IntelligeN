@@ -38,6 +38,7 @@ var
 begin
 
   for I := 0 to Length(StartupParams) - 1 do
+  begin
     for J := 0 to Length(Params) - 1 do
       if (StartupParams[I] = '/' + Params[J]) or (StartupParams[I] = '-' + Params[J]) or (StartupParams[I] = Params[J]) then
         case J of
@@ -49,6 +50,9 @@ begin
                 Main.fMain.OpenToNewTab();
             end;
         end;
+    if FileExists(StartupParams[0]) then
+      Main.fMain.OpenToNewTab(StartupParams[0]);
+  end;
 end;
 
 end.

@@ -52,6 +52,7 @@ procedure LoadDefaultControlValues(AControlsTT: TCollection);
   end;
 
 var
+  LNeedToUninitialize: Boolean;
   LXMLDoc: IXMLDocument;
   LTypeID: TTypeID;
   LControlID: TControlID;
@@ -65,7 +66,7 @@ begin
     raise Exception.Create('controls.xml not found located at configuration\controls.xml')
   else
   begin
-    CoInitialize(nil);
+    LNeedToUninitialize := Succeeded(CoInitialize(nil));
     try
       LXMLDoc := NewXMLDocument;
       try
@@ -125,6 +126,7 @@ begin
         LXMLDoc := nil;
       end;
     finally
+    if LNeedToUninitialize then
       CoUninitialize;
     end;
   end;

@@ -167,11 +167,12 @@ end;
 
 function TICMS.DoAnalyzePost;
 var
+  LNeedToUninitialize: Boolean;
   XMLDoc: IXMLDocument;
 begin
   Result := False;
   try
-    CoInitializeEx(nil, COINIT_MULTITHREADED);
+    LNeedToUninitialize := Succeeded(CoInitializeEx(nil, COINIT_MULTITHREADED));
     try
       XMLDoc := NewXMLDocument;
       try
@@ -192,7 +193,8 @@ begin
         XMLDoc := nil;
       end;
     finally
-      CoUninitialize;
+      if LNeedToUninitialize then
+        CoUninitialize;
     end;
   except
     ErrorMsg := 'error parsing ICMS-RESULT-XML (' + SysErrorMessage(GetLastError()) + ')';

@@ -75,10 +75,11 @@ implementation
 
 class function TApiXml.GetControlsTemplateInfo(const AFileName: string): TTemplateInfo;
 var
+  LNeedToUninitialize: Boolean;
   LXMLDoc: IXMLDocument;
   LTemplateInfo: TTemplateInfo;
 begin
-  CoInitialize(nil);
+  LNeedToUninitialize := Succeeded(CoInitialize(nil));
   try
     LXMLDoc := NewXMLDocument;
     try
@@ -105,7 +106,8 @@ begin
       LXMLDoc := nil;
     end;
   finally
-    CoUninitialize;
+    if LNeedToUninitialize then
+      CoUninitialize;
   end;
 end;
 
@@ -176,6 +178,7 @@ type
   end;
 
 var
+  LNeedToUninitialize: Boolean;
   MultiPosterVersion: TMultiPosterVersion;
   XMLDoc: IXMLDocument;
 
@@ -186,7 +189,7 @@ begin
   Result := TWebsiteConfigurationFile.Create;
 
   MultiPosterVersion := TMultiPosterVersion(IndexText(ExtractFileExt(AFileName), ['.mpu', '.ep4']));
-  CoInitialize(nil);
+  LNeedToUninitialize := Succeeded(CoInitialize(nil));
   try
     XMLDoc := NewXMLDocument;
     try
@@ -295,12 +298,14 @@ begin
       XMLDoc := nil;
     end;
   finally
-    CoUninitialize;
+    if LNeedToUninitialize then
+      CoUninitialize;
   end;
 end;
 
 class function TWebsiteTemplateHelper.Load;
 var
+  LNeedToUninitialize: Boolean;
   XMLDoc: IXMLDocument;
   I: Integer;
 
@@ -312,7 +317,7 @@ begin
 
   if FileExists(AFileName) then
   begin
-    CoInitialize(nil);
+    LNeedToUninitialize := Succeeded(CoInitialize(nil));
     try
       XMLDoc := NewXMLDocument;
       try
@@ -393,6 +398,7 @@ begin
         XMLDoc := nil;
       end;
     finally
+    if LNeedToUninitialize then
       CoUninitialize;
     end;
   end;
@@ -421,6 +427,7 @@ class procedure TWebsiteTemplateHelper.Save;
   end;
 
 var
+  LNeedToUninitialize: Boolean;
   XMLDoc: IXMLDocument;
   XMLNode: IXMLNode;
 
@@ -431,7 +438,7 @@ var
   Control: IControl;
   Hoster: IHoster;
 begin
-  CoInitialize(nil);
+  LNeedToUninitialize := Succeeded(CoInitialize(nil));
   try
     XMLDoc := NewXMLDocument;
     try
@@ -557,7 +564,8 @@ begin
       XMLDoc := nil;
     end;
   finally
-    CoUninitialize;
+    if LNeedToUninitialize then
+      CoUninitialize;
   end;
 end;
 
@@ -566,14 +574,14 @@ end;
 class procedure THosterConfiguration.LoadXML(AXMLProc: TXMLProc);
 var
   HosterIndex, HosterAlsoKnownAsIndex: Integer;
-  Found: Boolean;
+  LNeedToUninitialize, Found: Boolean;
   XMLDoc: IXMLDocument;
 begin
   if not FileExists(GetConfigurationFolder + HosterXML) then
     raise Exception.Create(HosterXML + ' not found located at configuration\' + HosterXML)
   else
   begin
-    CoInitializeEx(nil, COINIT_MULTITHREADED);
+    LNeedToUninitialize := Succeeded(CoInitializeEx(nil, COINIT_MULTITHREADED));
     try
       XMLDoc := NewXMLDocument;
       try
@@ -590,7 +598,8 @@ begin
         XMLDoc := nil;
       end;
     finally
-      CoUninitialize;
+      if LNeedToUninitialize then
+        CoUninitialize;
     end;
   end;
 end;
@@ -670,12 +679,13 @@ end;
 
 procedure GetControls(const AFileName: string; const AControlController: IControlController; const APageController: IPageController);
 var
+  LNeedToUninitialize: Boolean;
   XMLDoc: IXMLDocument;
   I: Integer;
 begin
   // Wenn man hier den ComponentCreator erstellt braucht man wegen dem WorkPanel ein Verweis auf uMain
 
-  CoInitialize(nil);
+  LNeedToUninitialize := Succeeded(CoInitialize(nil));
   try
     XMLDoc := NewXMLDocument;
     try
@@ -702,7 +712,8 @@ begin
       XMLDoc := nil;
     end;
   finally
-    CoUninitialize;
+    if LNeedToUninitialize then
+      CoUninitialize;
   end;
 end;
 
@@ -710,13 +721,14 @@ end;
 
 class procedure TCodeDefinitions.LoadXML(AXMLProc: TXMLProc);
 var
+  LNeedToUninitialize: Boolean;
   XMLDoc: IXMLDocument;
 begin
   if not FileExists(GetConfigurationFolder + CodeDefinitionsXML) then
     raise Exception.Create(CodeDefinitionsXML + ' not found located at configuration\bbcodedefinitions.xml')
   else
   begin
-    CoInitialize(nil);
+    LNeedToUninitialize := Succeeded(CoInitialize(nil));
     try
       XMLDoc := NewXMLDocument;
       try
@@ -731,6 +743,7 @@ begin
         XMLDoc := nil;
       end;
     finally
+    if LNeedToUninitialize then
       CoUninitialize;
     end;
   end;

@@ -1561,13 +1561,14 @@ procedure TBasisWebsiteEditor.FcxBAcceptClick(Sender: TObject);
   end;
 
 var
+  LNeedToUninitialize: Boolean;
   XMLDoc: IXMLDocument;
 
   I, Y: Integer;
 
   _tempnode: IXMLNode;
 begin
-  CoInitialize(nil);
+  LNeedToUninitialize := Succeeded(CoInitialize(nil));
   try
     XMLDoc := NewXMLDocument;
     try
@@ -1731,7 +1732,8 @@ begin
       XMLDoc := nil;
     end;
   finally
-    CoUninitialize;
+    if LNeedToUninitialize then
+      CoUninitialize;
   end;
 end;
 
@@ -2565,11 +2567,12 @@ function TBasisWebsiteEditor.ShowModal: Integer;
   end;
 
 var
+  LNeedToUninitialize: Boolean;
   XMLDoc: IXMLDocument;
 
   I, Y: Integer;
 begin
-  CoInitialize(nil);
+  LNeedToUninitialize := Succeeded(CoInitialize(nil));
   try
     XMLDoc := NewXMLDocument;
     try
@@ -2718,7 +2721,8 @@ begin
       XMLDoc := nil;
     end;
   finally
-    CoUninitialize;
+    if LNeedToUninitialize then
+      CoUninitialize;
   end;
 
   if FIDPanelList.Count > 0 then

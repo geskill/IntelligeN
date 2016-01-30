@@ -67,6 +67,7 @@ end;
 
 function TLinkcryptWs.AddFolder;
 var
+  LNeedToUninitialize: Boolean;
   LFoldertypes: TFoldertypes;
   LContainertypes: TContainertypes;
 
@@ -150,7 +151,7 @@ begin
   end
   else if not SameStr('', LHTTPProcess.HTTPResult.SourceCode) then
   begin
-    CoInitializeEx(nil, COINIT_MULTITHREADED);
+    LNeedToUninitialize := Succeeded(CoInitializeEx(nil, COINIT_MULTITHREADED));
     try
       LXMLDoc := NewXMLDocument;
       try
@@ -182,7 +183,8 @@ begin
         LXMLDoc := nil;
       end;
     finally
-      CoUninitialize;
+      if LNeedToUninitialize then
+        CoUninitialize;
     end;
   end
   else
@@ -203,6 +205,7 @@ end;
 
 function TLinkcryptWs.GetFolder;
 var
+  LNeedToUninitialize: Boolean;
   LHTTPParams: IHTTPParams;
   LRequestID: Double;
   LHTTPProcess: IHTTPProcess;
@@ -246,7 +249,7 @@ begin
   end
   else if not SameStr('', LHTTPProcess.HTTPResult.SourceCode) then
   begin
-    CoInitializeEx(nil, COINIT_MULTITHREADED);
+    LNeedToUninitialize := Succeeded(CoInitializeEx(nil, COINIT_MULTITHREADED));
     try
       LXMLDoc := NewXMLDocument;
       try
@@ -297,7 +300,8 @@ begin
         LXMLDoc := nil;
       end;
     finally
-      CoUninitialize;
+      if LNeedToUninitialize then
+        CoUninitialize;
     end;
   end
   else

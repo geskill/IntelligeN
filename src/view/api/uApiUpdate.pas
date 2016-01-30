@@ -8,7 +8,7 @@ uses
   // Indy
   IdComponent,
   // OmniThreadLibrary
-  OtlParallel, OtlTaskControl, OtlSync, OtlTask,
+  OtlCommon, OtlParallel, OtlTaskControl, OtlSync, OtlTask,
   // Spring Framework
   Spring.SystemUtils, Spring.Collections.Lists, Spring.Utils,
   // AB
@@ -77,7 +77,8 @@ type
     FBusy: Boolean;
     FTaskControl: IOmniTaskControl;
 
-    FUpdateSize, FDownloadedSize: Int64;
+    FUpdateTotalBytes: Int64;
+    FDownloadedBytes: TOmniAlignedInt64;
     FErrorMsg: string;
 
     FOnSearchingUpdate, FOnUpdateNoChanges, FOnUpdateStartDownload, FOnUpdateFinishedDownload: TNotifyEvent;
@@ -198,6 +199,7 @@ function TUpdateController.ReadUpdate(): Boolean;
 const
   u = 'upd/';
 var
+  LNeedToUninitialize: Boolean;
   LHTTPManager: IHTTPManager;
   LHTTPRequest: IHTTPRequest;
   LHTTPParams: IHTTPParams;
@@ -247,7 +249,7 @@ begin
     Exit(False);
   end;
 
-  CoInitializeEx(nil, COINIT_MULTITHREADED);
+  LNeedToUninitialize := Succeeded(CoInitializeEx(nil, COINIT_MULTITHREADED));
   try
     LXMLDoc := NewXMLDocument;
     try
@@ -269,7 +271,8 @@ begin
       LXMLDoc := nil;
     end;
   finally
-    CoUninitialize;
+    if LNeedToUninitialize then
+      CoUninitialize;
   end;
 
   result := True;
@@ -378,7 +381,8 @@ begin
   LUpdateFilesPath := LUpdatePath + 'files\';
   ForceDirectories(LUpdateFilesPath);
 
-  FDownloadedSize := 0;
+  FUpdateTotalBytes := AUpdateVersion.UpdateSize;
+  FDownloadedBytes.Value := 0;
 
   LCommandLine := TStringList.Create;
   try
@@ -426,7 +430,7 @@ begin
                 Exit;
               end;
             end;
-            Inc(FDownloadedSize, LUpdateFile.FileSizeCompressed);
+            FDownloadedBytes.Increment(LUpdateFile.FileSizeCompressed);
             task.Invoke(
               { } procedure
               { } begin
@@ -539,7 +543,7 @@ end;
 procedure TUpdateController.DoUpdateDownloading;
 begin
   if Assigned(FOnUpdateDownloading) then
-    FOnUpdateDownloading(Self, (round((FUpdateSize / FDownloadedSize) * 100)));
+    FOnUpdateDownloading(Self, (Round((FDownloadedBytes.Value / FUpdateTotalBytes) * 100)));
 end;
 
 procedure TUpdateController.DoUpdateFinishedDownload;

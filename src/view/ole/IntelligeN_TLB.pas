@@ -12,11 +12,11 @@ unit IntelligeN_TLB;
 // ************************************************************************ //
 
 // $Rev: 17244 $
-// Datei am 29.12.2015 11:58:29 erzeugt aus der unten beschriebenen Typbibliothek.
+// Datei am 29.01.2016 21:21:25 erzeugt aus der unten beschriebenen Typbibliothek.
 
 // ************************************************************************  //
 // Typbib.: C:\Users\geskill\Documents\RAD Studio\Projekte\intelligen-2k9\src\view\ole\IntelligeN (1)
-// LIBID: {9A4A475B-F7FF-40CD-876B-3C22B88BC8DF}
+// LIBID: {5C1F0CC8-EF0C-4A6E-8F5D-65C91A0B30B3}
 // LCID: 0
 // Hilfedatei:
 // Hilfe-String:
@@ -41,13 +41,13 @@ uses Windows, ActiveX, Classes, Graphics, OleServer, StdVCL, Variants;
 // *********************************************************************//
 const
   // Haupt- und Nebenversionen der Typbibliothek
-  IntelligeNMajorVersion = 1;
+  IntelligeNMajorVersion = 2;
   IntelligeNMinorVersion = 0;
 
-  LIBID_IntelligeN: TGUID = '{9A4A475B-F7FF-40CD-876B-3C22B88BC8DF}';
+  LIBID_IntelligeN: TGUID = '{5C1F0CC8-EF0C-4A6E-8F5D-65C91A0B30B3}';
 
   IID_IIntelligeN2009: TGUID = '{9A66CF41-F8C1-4B09-A8B6-3CB436BFFB50}';
-  CLASS_IntelligeN2009: TGUID = '{24FDCC6F-9031-484C-92D2-6999265FF263}';
+  CLASS_IntelligeN2009: TGUID = '{DF174C84-0BD9-4DE4-B5F0-A0D8FCFA7EBF}';
 type
 
 // *********************************************************************//
@@ -73,6 +73,7 @@ type
     procedure openfile(const AFileName: WideString); safecall;
     procedure savefile(const AFileName: WideString); safecall;
     procedure close; safecall;
+    function canclose: SYSINT; stdcall;
     procedure callcrawler; safecall;
     procedure callremoteupload; safecall;
     procedure callcheckdirectlinks; safecall;
@@ -93,6 +94,7 @@ type
     procedure openfile(const AFileName: WideString); dispid 1;
     procedure savefile(const AFileName: WideString); dispid 2;
     procedure close; dispid 3;
+    function canclose: SYSINT; dispid 4;
     procedure callcrawler; dispid 5;
     procedure callremoteupload; dispid 6;
     procedure callcheckdirectlinks; dispid 7;

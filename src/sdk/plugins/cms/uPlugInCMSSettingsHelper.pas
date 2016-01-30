@@ -96,7 +96,7 @@ begin
   Result := GetPropData(GetTypeData(TypeInfo))^.PropCount;
   if Result > 0 then
   begin
-    GetMem(PropList, Result * SizeOf(Pointer));
+    GetMem(PropList, Result * Sizeof(Pointer));
     GetDeclaredPropInfos(TypeInfo, PropList);
   end;
 end;
@@ -174,6 +174,8 @@ class function TPlugInCMSSettingsHelper.LoadSettingsToClass(const AFileName: TFi
   end;
 
 var
+  LNeedToUninitialize: Boolean;
+
   LXMLDoc: IXMLDocument;
   LXMLIndex: Integer;
 
@@ -187,7 +189,7 @@ var
   LIDValue: Variant;
 begin
   SetLength(Result, 0);
-  CoInitializeEx(nil, COINIT_MULTITHREADED);
+  LNeedToUninitialize := Succeeded(CoInitializeEx(nil, COINIT_MULTITHREADED));
   try
     LXMLDoc := NewXMLDocument;
     try
@@ -285,7 +287,8 @@ begin
       LXMLDoc := nil;
     end;
   finally
-    CoUninitialize;
+    if LNeedToUninitialize then
+      CoUninitialize;
   end;
 end;
 
@@ -314,30 +317,30 @@ var
   LDefaultValue: Variant;
 begin
   // see: http://stackoverflow.com/questions/10188459/how-to-loop-all-properties-in-a-class
-    LPropCount := GetDeclaredPropList(ASettings.ClassInfo, LPropList);
-    try
-      for LPropIndex := 0 to LPropCount - 1 do
+  LPropCount := GetDeclaredPropList(ASettings.ClassInfo, LPropList);
+  try
+    for LPropIndex := 0 to LPropCount - 1 do
+    begin
+      LPropInfo := LPropList^[LPropIndex];
+
+      if (LPropInfo.PropType^.Kind = tkVariant) then
       begin
-        LPropInfo := LPropList^[LPropIndex];
+        AWebsiteEditor.AddCategoryTab(LPropInfo.Name);
+      end
+      else if SameStr(LPropInfo.PropType^.Name, TCMSCustomFields.ClassName) then
+      begin
+        AWebsiteEditor.CustomFields := True;
+      end
+      else
+      begin
+        LDefaultValue := GetPropValue(ASettings, LPropInfo);
 
-        if (LPropInfo.PropType^.Kind = tkVariant) then
-        begin
-          AWebsiteEditor.AddCategoryTab(LPropInfo.Name);
-        end
-        else if SameStr(LPropInfo.PropType^.Name, TCMSCustomFields.ClassName) then
-        begin
-          AWebsiteEditor.CustomFields := True;
-        end
-        else
-        begin
-          LDefaultValue := GetPropValue(ASettings, LPropInfo);
-
-          AddWebsiteEditorComponent(LPropInfo.Name, LPropInfo.PropType^.Kind, LDefaultValue);
-        end;
+        AddWebsiteEditorComponent(LPropInfo.Name, LPropInfo.PropType^.Kind, LDefaultValue);
       end;
-    finally
-      FreeMem(LPropList);
     end;
+  finally
+    FreeMem(LPropList);
+  end;
 end;
 
 end.

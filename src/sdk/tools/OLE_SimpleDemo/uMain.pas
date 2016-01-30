@@ -14,7 +14,7 @@ uses
 type
   TMain = class(TForm)
     bStartIntelligeN: TButton;
-    bCloseIntelligeN: TButton;
+    bCloseTab: TButton;
     bLoadFromFile: TButton;
     eFileName: TEdit;
     lFileName: TLabel;
@@ -33,7 +33,7 @@ type
     bStartCrypter: TButton;
     bStartPublish: TButton;
     bSave: TButton;   procedure bStartIntelligeNClick(Sender: TObject);
-    procedure bCloseIntelligeNClick(Sender: TObject);
+    procedure bCloseTabClick(Sender: TObject);
     procedure bLoadFromFileClick(Sender: TObject);
     procedure spSearchFileClick(Sender: TObject);
     procedure bUpdateStatusClick(Sender: TObject);
@@ -61,12 +61,11 @@ begin
   IntelligeNInstance := CreateOleObject('IntelligeN.IntelligeN2009') as IIntelligeN2009;
 end;
 
-procedure TMain.bCloseIntelligeNClick(Sender: TObject);
+procedure TMain.bCloseTabClick(Sender: TObject);
 begin
   if Assigned(IntelligeNInstance) then
-    IntelligeNInstance.close;
-
-  IntelligeNInstance := nil;
+    if (IntelligeNInstance.canclose = 1) then
+      IntelligeNInstance.close;
 end;
 
 procedure TMain.bLoadFromFileClick(Sender: TObject);

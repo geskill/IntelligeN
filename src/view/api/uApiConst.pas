@@ -37,7 +37,7 @@ resourcestring
   StrPluginIncompatible = 'Plugin version (%s) by definition incompatible for this version (%s) ~ %s ~';
   StrPluginIncorrectType = 'Plugin interface (%s) expected, but another interface (%s) found ~ %s ~';
   StrPluginInternalError = 'Internal plugin error (%s) ~ %s ~';
-  StrPluginInternalWebsiteError = 'Internal plugin error (%s: %s) ~ %s ~';
+  StrPluginInternalWebsiteError = 'Internal plugin error (%s: %s: %s) ~ %s ~';
   StrPluginOverrideSettings = 'Do you want to override %s plugin? The plugin settings will be reseted';
   StrPluginStartupError = 'Startup error for %s plugin ~ %s ~';
   StrPluginUnknown = 'Unknown %s plugin [%s]';

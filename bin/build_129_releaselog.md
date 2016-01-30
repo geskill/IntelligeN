@@ -612,7 +612,15 @@
 
 * Added html_spoiler()-IScript function
 
+* Improved start-up parameter handling
+
+* Improved update progress bar
+
 * Improved IntelligentPosting search HTTP error handling
+
+* Fixed possible issue closing tab from menu
+
+* Fixed OLE automation issue
 
 * Fixed WordPress IDGrabber
 

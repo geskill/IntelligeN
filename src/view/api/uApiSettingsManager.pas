@@ -20,9 +20,12 @@ type
 
   type
     TXMLSerializer = class(uXMLSerializer.TXMLSerializer)
+    private
+    var
+      FNeedToUninitialize: Boolean;
     public
-    constructor Create(AOwner: TComponent); override;
-    destructor Destroy; override;
+      constructor Create(AOwner: TComponent); override;
+      destructor Destroy; override;
 
       procedure LoadObject(const aInstance: TObject);
       procedure SaveObject(const aInstance: TObject);
@@ -59,14 +62,15 @@ implementation
 
 constructor TSettingsManager<T>.TXMLSerializer.Create(AOwner: TComponent);
 begin
-  CoInitialize(nil);
+  FNeedToUninitialize := Succeeded(CoInitialize(nil));
   inherited Create(AOwner);
 end;
 
 destructor TSettingsManager<T>.TXMLSerializer.Destroy;
 begin
   inherited Destroy;
-  CoUninitialize;
+  if FNeedToUninitialize then
+    CoUninitialize;
 end;
 
 procedure TSettingsManager<T>.TXMLSerializer.LoadObject(const aInstance: TObject);
