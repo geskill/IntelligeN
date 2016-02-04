@@ -301,7 +301,7 @@ type
     property OnControlExit: IControlEventHandler read GetControlExit write SetControlExit; { only for internal usage }
     property OnReleaseNameChange: IReleaseNameChange read GetReleaseNameChange write SetReleaseNameChange; { only for internal usage }
     property OnPopupMenuChange: IPopupMenuChange read GetPopupMenuChange write SetPopupMenuChange; { only for internal usage }
-    property OnCrawlingFinished: INotifyEvent read GetCrawlingFinished;
+    property OnCrawlingFinished: INotifyEvent read GetCrawlingFinished; // TODO: remove this event instead for IPageController OnAfterAutoCompletion
   end;
 
   // // // Mirror Controls // // //
