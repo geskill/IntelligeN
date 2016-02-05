@@ -2,7 +2,7 @@
 		<PropertyGroup>
 			<DCC_ExeOutput>../../../../../bin\plugins</DCC_ExeOutput>
 			<DCC_DcuOutput>../../../../../dcu</DCC_DcuOutput>
-			<DCC_UnitSearchPath>../;../../;../../../../core\common;../../../../core\external\BESEN\src;../../../../core\external\DEC\Part_I;../../../../core\external\HTTPManager;../../../../core\external\MultiEvent;../../../../core\external\TRegExpr\Source;../../../../core\external\Spring4D\Base;../../../../core\external\Spring4D\Base\Collections;../../../../core\external\Spring4D\Base\Reflection;../../../../core\external\Spring4D\Core\Container;../../../../core\external\Spring4D\Core\Services;../../../../core\external\Spring4D\Extensions\Cryptography;../../../../core\external\Spring4D\Extensions\Utils;../../../../core\external\TRegExpr\Source;../../../../core\external;../../../../core\utils;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_UnitSearchPath>../;../../;../../../dlls;../../../../core\common;../../../../core\external\BESEN\src;../../../../core\external\DEC\Part_I;../../../../core\external\HTTPManager;../../../../core\external\MultiEvent;../../../../core\external\TRegExpr\Source;../../../../core\external\Spring4D\Base;../../../../core\external\Spring4D\Base\Collections;../../../../core\external\Spring4D\Base\Reflection;../../../../core\external\Spring4D\Core\Container;../../../../core\external\Spring4D\Core\Services;../../../../core\external\Spring4D\Extensions\Cryptography;../../../../core\external\Spring4D\Extensions\Utils;../../../../core\external\TRegExpr\Source;../../../../core\external;../../../../core\utils;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 		</PropertyGroup>
 		<ProjectExtensions>
 			<Borland.Personality>Delphi.Personality.12</Borland.Personality>

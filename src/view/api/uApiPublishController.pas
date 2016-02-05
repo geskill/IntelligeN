@@ -1802,9 +1802,9 @@ end;
 
 function TIPublishController.CheckIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData: ITabSheetData): RIScriptResult;
 begin
-  with TIScirptParser.Create(ACMS, AWebsite, ATabSheetData) do
+  with TIScirptParser.Create(ACMS, AWebsite, ATabSheetData, AIScript) do
     try
-      Result := ErrorAnalysis(AIScript);
+      Result := ErrorAnalysis();
     finally
       Free;
     end;
@@ -1824,9 +1824,9 @@ begin
   LContainsKey := FIScriptBuffer.ContainsKey(LHash);
   if ADataChanged or not LContainsKey then
   begin
-    with TIScirptParser.Create(ACMS, AWebsite, ATabSheetData) do
+    with TIScirptParser.Create(ACMS, AWebsite, ATabSheetData, AIScript) do
       try
-        LIScriptResult := Execute(AIScript);
+        LIScriptResult := Execute();
       finally
         Free;
       end;

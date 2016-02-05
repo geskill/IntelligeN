@@ -22,9 +22,7 @@ uses
 
 type
   TIScirptParser = class
-  private
-
-    type
+  private type
     IMirror = interface
       ['{C95BF878-CC2E-4DC1-8EE6-2A0CAE81A5D8}']
       function GetMirror(const IndexOrName: OleVariant): IMirrorContainer;
@@ -37,11 +35,13 @@ type
     TIMirror = class(TInterfacedObject, IMirror)
     private
       FCMSWebsiteData: ITabSheetData;
+      FMirrorControllerBase: IMirrorControllerBase;
     protected
       function GetMirror(const IndexOrName: OleVariant): IMirrorContainer;
       function GetCount: Integer;
     public
-      constructor Create(const ACMSWebsiteData: ITabSheetData);
+      constructor Create(const ACMSWebsiteData: ITabSheetData); overload;
+      constructor Create(const AMirrorControllerBase: IMirrorControllerBase); overload;
 
       property Mirror[const IndexOrName: OleVariant]: IMirrorContainer read GetMirror; default;
       property Count: Integer read GetCount;
@@ -52,10 +52,10 @@ type
   var
 
     FfsScript: TfsScript;
+    FIScript: string;
+    FIScriptResult : RIScriptResult;
     FResult: string;
 
-    FWebsiteCMS, FWebsite: string;
-    FCMSWebsiteData: ITabSheetData;
     FIMirror: TIMirror;
 
     function CallMethod(Instance: TObject; ClassType: TClass; const MethodName: string; var Params: Variant): Variant;
@@ -67,11 +67,18 @@ type
     function CallDirectlinkMethod(Instance: TObject; ClassType: TClass; const MethodName: string; var Params: Variant): Variant;
     function CallMirrorMethod(Instance: TObject; ClassType: TClass; const MethodName: string; var Params: Variant): Variant;
 
+    procedure PrepareSimple();
+    procedure PrepareExtended(const AWebsiteCMS, AWebsite: string; const ACMSWebsiteData: ITabSheetData); overload;
+    procedure PrepareExtended(const ATabSheetController: ITabSheetController); overload;
     function Compile(const AIScript: string): Boolean;
+    function RunErrorAnalysis(): RIScriptResult;
   public
-    constructor Create(const AWebsiteCMS, AWebsite: string; const ACMSWebsiteData: ITabSheetData);
-    function Execute(const AIScript: string): RIScriptResult;
-    function ErrorAnalysis(const AIScript: string): RIScriptResult;
+    constructor Create(const AIScript: string); overload;
+    constructor Create(const AWebsiteCMS, AWebsite: string; const ACMSWebsiteData: ITabSheetData; const AIScript: string); overload;
+    constructor Create(const ATabSheetController: ITabSheetController; const AIScript: string); overload;
+    function CallFunction(const AName: string; AParams: Variant; out AResult: Variant): RIScriptResult;
+    function Execute(): RIScriptResult;
+    function ErrorAnalysis(): RIScriptResult;
     destructor Destroy; override;
   end;
 
@@ -85,18 +92,31 @@ begin
   FCMSWebsiteData := ACMSWebsiteData;
 end;
 
+constructor TIScirptParser.TIMirror.Create(const AMirrorControllerBase: IMirrorControllerBase);
+begin
+  inherited Create;
+  FMirrorControllerBase := AMirrorControllerBase;
+end;
+
 function TIScirptParser.TIMirror.GetMirror(const IndexOrName: OleVariant): IMirrorContainer;
 begin
-  Result := FCMSWebsiteData.Mirror[IndexOrName];
+  if Assigned(FCMSWebsiteData) then
+    Result := FCMSWebsiteData.Mirror[IndexOrName]
+  else if Assigned(FMirrorControllerBase) then
+    Result := FMirrorControllerBase.Mirror[IndexOrName]
 end;
 
 function TIScirptParser.TIMirror.GetCount: Integer;
 begin
-  Result := FCMSWebsiteData.MirrorCount;
+  if Assigned(FCMSWebsiteData) then
+    Result := FCMSWebsiteData.MirrorCount
+  else if Assigned(FMirrorControllerBase) then
+    Result := FMirrorControllerBase.MirrorCount
 end;
 
 destructor TIScirptParser.TIMirror.Destroy;
 begin
+  FMirrorControllerBase := nil;
   FCMSWebsiteData := nil;
   inherited Destroy;
 end;
@@ -256,9 +276,7 @@ begin
     Result := Integer(IMirrorContainer(Instance as TIMirrorContainer).Directlink[Params[0]] as TIDirectlink)
 end;
 
-function TIScirptParser.Compile(const AIScript: string): Boolean;
-var
-  I: Integer;
+procedure TIScirptParser.PrepareSimple;
 begin
   with FfsScript do
   begin
@@ -290,14 +308,6 @@ begin
 
     AddMethod('function IncludeTrailingUrlDelimiter(const AUrl: string): string', CallMethod);
     AddMethod('function ExcludeTrailingUrlDelimiter(const AUrl: string): string', CallMethod);
-
-    AddConst('IType', 'string', TypeIDToString(FCMSWebsiteData.TypeID));
-    AddConst('ICMS', 'string', FWebsiteCMS);
-    AddConst('IWebsite', 'string', FWebsite);
-
-    with FCMSWebsiteData do
-      for I := 0 to ControlCount - 1 do
-        AddConst(ControlIDToString(Control[I].ControlID), 'string', Control[I].Value);
 
     with AddClass(TICrypter, 'TICrypter') do
     begin
@@ -347,7 +357,43 @@ begin
 
     AddObject('IMirror', FIMirror);
     AddConst('IMirrorCount', 'Integer', FIMirror.Count);
+  end;
+end;
 
+procedure TIScirptParser.PrepareExtended(const AWebsiteCMS, AWebsite: string; const ACMSWebsiteData: ITabSheetData);
+var
+  I: Integer;
+begin
+  with FfsScript do
+  begin
+    AddConst('IType', 'string', TypeIDToString(ACMSWebsiteData.TypeID));
+    AddConst('ICMS', 'string', AWebsiteCMS);
+    AddConst('IWebsite', 'string', AWebsite);
+
+    with ACMSWebsiteData do
+      for I := 0 to ControlCount - 1 do
+        AddConst(ControlIDToString(Control[I].ControlID), 'string', Control[I].Value);
+  end;
+end;
+
+procedure TIScirptParser.PrepareExtended(const ATabSheetController: ITabSheetController);
+var
+  I: Integer;
+begin
+  with FfsScript do
+  begin
+    AddConst('IType', 'string', TypeIDToString(ATabSheetController.TypeID));
+
+    with ATabSheetController.ControlController do
+      for I := 0 to ControlCount - 1 do
+        AddConst(ControlIDToString(Control[I].ControlID), 'string', Control[I].Value);
+  end;
+end;
+
+function TIScirptParser.Compile(const AIScript: string): Boolean;
+begin
+  with FfsScript do
+  begin
     ClearItems(Self);
 
     FResult := '';
@@ -357,20 +403,78 @@ begin
   end;
 end;
 
-constructor TIScirptParser.Create;
+function TIScirptParser.RunErrorAnalysis(): RIScriptResult;
+begin
+  Result.Init;
+  Result.HasError := not Compile(FIScript);
+  if Result.HasError then
+  begin
+    with fsPosToPoint(FfsScript.ErrorPos) do
+    begin
+      Result.X := X;
+      Result.Y := Y;
+    end;
+    with Result do
+    begin
+      ErrorMessage := FfsScript.ErrorMsg;
+      ErrorUnit := FfsScript.ErrorUnit;
+    end;
+  end;
+end;
+
+constructor TIScirptParser.Create(const AIScript: string);
 begin
   FfsScript := TfsScript.Create(nil);
   FfsScript.SyntaxType := 'JScript';
-
-  FWebsiteCMS := AWebsiteCMS;
-  FWebsite := AWebsite;
-  FCMSWebsiteData := ACMSWebsiteData;
-  FIMirror := TIMirror.Create(FCMSWebsiteData);
+  FIScript := AIScript;
 end;
 
-function TIScirptParser.Execute(const AIScript: string): RIScriptResult;
+constructor TIScirptParser.Create(const AWebsiteCMS, AWebsite: string; const ACMSWebsiteData: ITabSheetData; const AIScript: string);
 begin
-  Result := ErrorAnalysis(AIScript);
+  Create(AIScript);
+
+  FIMirror := TIMirror.Create(ACMSWebsiteData);
+
+  PrepareSimple;
+  PrepareExtended(AWebsiteCMS, AWebsite, ACMSWebsiteData);
+
+  FIScriptResult := RunErrorAnalysis();
+end;
+
+constructor TIScirptParser.Create(const ATabSheetController: ITabSheetController; const AIScript: string);
+begin
+  Create(AIScript);
+
+  FIMirror := TIMirror.Create(ATabSheetController.MirrorController);
+
+  PrepareSimple;
+  PrepareExtended(ATabSheetController);
+
+  FIScriptResult := RunErrorAnalysis();
+end;
+
+function TIScirptParser.CallFunction(const AName: string; AParams: Variant; out AResult: Variant): RIScriptResult;
+begin
+  Result := FIScriptResult;
+  if not Result.HasError then
+  begin
+    Result.Init;
+    try
+      AResult := FfsScript.CallFunction(AName, AParams, False);
+    except
+      on E: Exception do
+      begin
+        Result.HasError := True;
+        Result.ErrorMessage := E.ClassName + ': ' + E.Message;
+      end;
+    end;
+    Result.CompiledText := FResult;
+  end;
+end;
+
+function TIScirptParser.Execute(): RIScriptResult;
+begin
+  Result := FIScriptResult;
   if not Result.HasError then
   begin
     Result.Init;
@@ -387,30 +491,15 @@ begin
   end;
 end;
 
-function TIScirptParser.ErrorAnalysis(const AIScript: string): RIScriptResult;
+function TIScirptParser.ErrorAnalysis: RIScriptResult;
 begin
-  Result.Init;
-  Result.HasError := not Compile(AIScript);
-  if Result.HasError then
-  begin
-    with fsPosToPoint(FfsScript.ErrorPos) do
-    begin
-      Result.X := X;
-      Result.Y := Y;
-    end;
-    with Result do
-    begin
-      ErrorMessage := FfsScript.ErrorMsg;
-      ErrorUnit := FfsScript.ErrorUnit;
-    end;
-  end;
+  Result := FIScriptResult;
 end;
 
 destructor TIScirptParser.Destroy;
 begin
   FIMirror.Free;
   FfsScript.Free;
-  FCMSWebsiteData := nil;
   inherited Destroy;
 end;
 
