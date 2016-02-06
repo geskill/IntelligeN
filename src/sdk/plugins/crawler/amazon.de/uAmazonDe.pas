@@ -150,7 +150,7 @@ function TAmazonDe.InternalExecute;
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := 'productDescription" class="a-section a-spacing-small">(.*?)(<a class="a-link-normal"|<\/div>)';
+          Expression := 'productDescription" class="a-section a-spacing-small.*?">(.*?)(<a class="a-link-normal"|<\/div>)';
 
           if Exec(InputString) then
           begin
