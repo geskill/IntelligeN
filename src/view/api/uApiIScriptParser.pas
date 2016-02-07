@@ -11,6 +11,8 @@ uses
   RegExpr,
   // FastScript
   fs_iInterpreter, fs_iclassesrtti, fs_ijs, fs_itools,
+  // FastScript Mod
+  uMyfsScript,
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Api
@@ -51,7 +53,7 @@ type
 
   var
 
-    FfsScript: TfsScript;
+    FfsScript: TMyfsScript;
     FIScript: string;
     FIScriptResult : RIScriptResult;
     FResult: string;
@@ -424,7 +426,7 @@ end;
 
 constructor TIScirptParser.Create(const AIScript: string);
 begin
-  FfsScript := TfsScript.Create(nil);
+  FfsScript := TMyfsScript.Create(nil);
   FfsScript.SyntaxType := 'JScript';
   FIScript := AIScript;
 end;
@@ -460,7 +462,7 @@ begin
   begin
     Result.Init;
     try
-      AResult := FfsScript.CallFunction(AName, AParams, False);
+      AResult := FfsScript.CallFunction3(AName, AParams, False);
     except
       on E: Exception do
       begin
