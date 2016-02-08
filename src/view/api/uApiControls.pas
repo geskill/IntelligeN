@@ -13,7 +13,7 @@ uses
   // Dev Express
   cxLookAndFeelPainters, cxLabel, cxEdit, cxTextEdit, cxDropDownEdit, cxCheckComboBox, cxCalendar, dxBar,
   // Dev Express Mod
-  uMycxRichEdit, uMyTMonospaceHint,
+  uMycxRichEdit, uMyMonospaceHint,
   // OmniThreadLibrary
   OtlParallel, OtlTaskControl, OtlSync, OtlTask,
   // OLEDrop

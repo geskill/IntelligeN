@@ -2,7 +2,7 @@
 		<PropertyGroup>
 			<ProjectGuid>{1D2F73A9-4B63-415A-BA7F-8E22FA952849}</ProjectGuid>
 			<MainSource>IntelligeN.dpr</MainSource>
-			<Config Condition="'$(Config)'==''">Release</Config>
+			<Config Condition="'$(Config)'==''">Portable-D</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 			<ProjectVersion>12.0</ProjectVersion>
 		</PropertyGroup>
@@ -202,7 +202,8 @@
 			<DCCReference Include="mods\uMycxRichEdit.pas"/>
 			<DCCReference Include="mods\uMyPopupMenu.pas"/>
 			<DCCReference Include="mods\uMydxBarPopupMenu.pas"/>
-			<DCCReference Include="mods\uMyTMonospaceHint.pas"/>
+			<DCCReference Include="mods\uMyfsScript.pas"/>
+			<DCCReference Include="mods\uMyMonospaceHint.pas"/>
 			<DCCReference Include="..\sdk\dlls\uExport.pas"/>
 			<DCCReference Include="..\sdk\plugins\uPlugInInterface.pas"/>
 			<DCCReference Include="..\sdk\plugins\uPlugInInterfaceAdv.pas"/>

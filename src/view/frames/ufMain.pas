@@ -51,7 +51,7 @@ type
     FImageHosterManager: IImageHosterManager;
     FChange: INotifyEvent;
     FViewChange: IViewChangeEvent;
-    FAddTab, FRemoveTab: ITabSheetEvent;
+    FAddTab, FRemoveTab, FBeforeAutoCompletion, FAfterAutoCompletion: ITabSheetEvent;
     function LockPageControl: Boolean;
     function UnlockPageControl: Boolean;
     procedure CrawlerGUIInteraction(const AControlController: IControlController; AStatus: TCrawlerTaskStatus; AProgressPosition: Extended; AMessage: string);
@@ -72,6 +72,8 @@ type
     function GetViewChange: IViewChangeEvent;
     function GetAddTab: ITabSheetEvent;
     function GetRemoveTab: ITabSheetEvent;
+    function GetBeforeAutoCompletion: ITabSheetEvent;
+    function GetAfterAutoCompletion: ITabSheetEvent;
   public
     constructor Create(AOwner: TComponent); override;
     procedure PostCreate; // called after all frames are created
@@ -128,6 +130,8 @@ type
     property OnViewChange: IViewChangeEvent read GetViewChange;
     property OnAddTab: ITabSheetEvent read GetAddTab;
     property OnRemoveTab: ITabSheetEvent read GetRemoveTab;
+    property OnBeforeAutoCompletion: ITabSheetEvent read GetBeforeAutoCompletion; // TODO: Implement
+    property OnAfterAutoCompletion: ITabSheetEvent read GetAfterAutoCompletion; // TODO: Implement
 
     destructor Destroy; override;
   end;
@@ -405,6 +409,16 @@ begin
   Result := FRemoveTab;
 end;
 
+function TfMain.GetBeforeAutoCompletion: ITabSheetEvent;
+begin
+  Result := FBeforeAutoCompletion;
+end;
+
+function TfMain.GetAfterAutoCompletion: ITabSheetEvent;
+begin
+  Result := FAfterAutoCompletion;
+end;
+
 procedure TfMain.PostCreate;
 var
   LPublishManager: TPublishManager;
@@ -434,6 +448,8 @@ begin
   FViewChange := TIViewChangeEvent.Create;
   FAddTab := TITabSheetEvent.Create;
   FRemoveTab := TITabSheetEvent.Create;
+  FBeforeAutoCompletion := TITabSheetEvent.Create;
+  FAfterAutoCompletion := TITabSheetEvent.Create;
 end;
 
 procedure TfMain.CallBackupManager;
@@ -967,6 +983,8 @@ end;
 
 destructor TfMain.Destroy;
 begin
+  FAfterAutoCompletion := nil;
+  FBeforeAutoCompletion := nil;
   FRemoveTab := nil;
   FAddTab := nil;
   FViewChange := nil;

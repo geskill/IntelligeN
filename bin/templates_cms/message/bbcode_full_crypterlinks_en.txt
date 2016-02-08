@@ -156,7 +156,7 @@ for(i = 0; i < IMirror.Count; i++)
 for(i = 0; i < IMirror.Count; i++)
   if(IMirror[i].Parts > 0)
   {
-    print("\r\n[b]Parts:[/b] " + IntToStr(IMirror[i].Parts));
+    print("\r\n[b]Parts:[/b] " + IntToStr(IMirror[i].Parts) + " files");
     break;
   }
 
