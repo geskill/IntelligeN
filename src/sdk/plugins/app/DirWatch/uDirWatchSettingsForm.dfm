@@ -55,13 +55,118 @@ object fDirWatchSettingsForm: TfDirWatchSettingsForm
     Height = 166
     Caption = 'Settings'
     TabOrder = 1
+    object sbSearchCustomCheckScriptFile: TSpeedButton
+      Left = 581
+      Top = 139
+      Width = 21
+      Height = 21
+      Caption = '...'
+      Enabled = False
+      Flat = True
+      OnClick = sbSearchCustomCheckScriptFileClick
+    end
+    object sbCreateEmptyCustomCheckScriptFile: TSpeedButton
+      Left = 465
+      Top = 114
+      Width = 137
+      Height = 21
+      Caption = 'Create empty script file ...'
+      Enabled = False
+      Flat = True
+      OnClick = sbCreateEmptyCustomCheckScriptFileClick
+    end
     object cbWatchSubdirectories: TCheckBox
       Left = 21
-      Top = 24
-      Width = 164
+      Top = 70
+      Width = 234
       Height = 17
       Caption = 'Watch subdirectories'
+      TabOrder = 2
+    end
+    object cbLoadOnlyIntelligeNXML2Files: TCheckBox
+      Left = 40
+      Top = 116
+      Width = 215
+      Height = 17
+      Caption = 'Load only intelligen.xml.2 files'
+      Enabled = False
+      TabOrder = 4
+    end
+    object cbLoadOnyXMLFiles: TCheckBox
+      Left = 21
+      Top = 93
+      Width = 234
+      Height = 17
+      Caption = 'Load only xml files'
+      TabOrder = 3
+      OnClick = cbLoadOnyXMLFilesClick
+    end
+    object cbLoadAlreadyExistingFiles: TCheckBox
+      Left = 21
+      Top = 47
+      Width = 234
+      Height = 17
+      Caption = 'Load already existing files'
+      TabOrder = 1
+    end
+    object cbLoadFilesOnlyOnce: TCheckBox
+      Left = 21
+      Top = 24
+      Width = 234
+      Height = 17
+      Caption = 'Load files only once'
       TabOrder = 0
+    end
+    object cbRunCrawlers: TCheckBox
+      Left = 261
+      Top = 24
+      Width = 234
+      Height = 17
+      Caption = 'Run crawlers'
+      TabOrder = 5
+    end
+    object cbRunCrypters: TCheckBox
+      Left = 261
+      Top = 47
+      Width = 234
+      Height = 17
+      Caption = 'Run crypters'
+      TabOrder = 6
+    end
+    object cbRunSave: TCheckBox
+      Left = 261
+      Top = 70
+      Width = 234
+      Height = 17
+      Caption = 'Run save under same file name'
+      TabOrder = 7
+    end
+    object cbRunPublish: TCheckBox
+      Left = 261
+      Top = 93
+      Width = 234
+      Height = 17
+      Caption = 'Run publish'
+      TabOrder = 8
+      OnClick = cbRunPublishClick
+    end
+    object cbRunPublishOnlyWithCustomCheck: TCheckBox
+      Left = 280
+      Top = 116
+      Width = 179
+      Height = 17
+      Caption = 'Only with custom check'
+      Enabled = False
+      TabOrder = 9
+      OnClick = cbRunPublishOnlyWithCustomCheckClick
+    end
+    object ePublishCustomCheckScriptFile: TEdit
+      Left = 280
+      Top = 139
+      Width = 295
+      Height = 21
+      Enabled = False
+      TabOrder = 10
     end
   end
   object bSave: TButton
@@ -70,7 +175,7 @@ object fDirWatchSettingsForm: TfDirWatchSettingsForm
     Width = 75
     Height = 25
     Caption = 'Save'
-    TabOrder = 2
+    TabOrder = 3
     OnClick = bSaveClick
   end
   object bClose: TButton
@@ -81,7 +186,16 @@ object fDirWatchSettingsForm: TfDirWatchSettingsForm
     Cancel = True
     Caption = 'Close'
     Default = True
-    TabOrder = 3
+    TabOrder = 4
     OnClick = bCloseClick
+  end
+  object bReset: TButton
+    Left = 390
+    Top = 267
+    Width = 75
+    Height = 25
+    Caption = 'Reset'
+    TabOrder = 2
+    OnClick = bResetClick
   end
 end

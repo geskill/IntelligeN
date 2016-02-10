@@ -7,8 +7,6 @@ uses
   Windows, SysUtils, Classes, Variants,
   // RegEx
   RegExpr,
-  // LkJSON
-  uLkJSON,
   // MultiEvent
   Generics.MultiEvents.NotifyHandler,
   // HTTPManager
@@ -85,7 +83,7 @@ function TDirWatch.Start(const AAppController: IAppController): WordBool;
 begin
   FAppController := AAppController;
 
-  FDirWatchSettings := TDirWatchSettings.Create(ExtractFilePath(GetModulePath) + ChangeFileExt(ExtractFileName(GetModulePath), '.ini'));
+  FDirWatchSettings := TDirWatchSettings.Create(ExtractFilePath(GetModulePath) + ChangeFileExt(ExtractFileName(GetModulePath), '.json'));
   FDirWatchEngine := TDirWatchEngine.Create(AAppController.PageController, FDirWatchSettings);
 
   FNotifyEventHandler := TINotifyEventHandler.Create(OnClick);
