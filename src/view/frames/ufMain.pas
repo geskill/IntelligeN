@@ -104,7 +104,7 @@ type
     procedure SaveCurrentTabAs;
     procedure SaveAllTabs;
     procedure SaveAllToFolder;
-    procedure OpenToNewTab(AFileName: WideString = '');
+    procedure OpenToNewTab(AFileName: WideString = ''); // TODO: Implement index return value
     function OpenFile(const AFileName: string): Boolean;
     function OpenFiles(const AFiles: TStrings): Boolean;
     function CanClose(ATabIndex: Integer): Boolean;
