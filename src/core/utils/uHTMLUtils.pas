@@ -4,37 +4,44 @@ interface
 
 uses
   // Delphi
-  SysUtils,
+  SysUtils, HTTPApp,
   // RegEx
   RegExpr,
   // Utils
   uStringUtils;
 
-function HTML2Text(const AHTML: string; AWithURLLink: Boolean = True; AUseHTMLDecode: Boolean = False): string;
+function SimpleHTMLDecode(const AHTML: string): string;
+function HTML2Text(const AHTML: string; AWithURLLink: Boolean = True; AUseExternalHTMLDecode: Boolean = False): string;
+function HTML2TextAndDecode(const AHTML: string; AWithURLLink: Boolean = True): string;
 
 implementation
 
-function HTML2Text(const AHTML: string; AWithURLLink: Boolean = True; AUseHTMLDecode: Boolean = False): string;
+function SimpleHTMLDecode(const AHTML: string): string;
+begin
+  Result := StringReplaceMultiple(AHTML, ['&quot;', '&amp;', '&lt;', '&gt;'], ['"', '&', '<', '>'], True);
+end;
+
+function HTML2Text(const AHTML: string; AWithURLLink: Boolean = True; AUseExternalHTMLDecode: Boolean = False): string;
 var
-  _HTML: string;
+  LHTML: string;
 begin
   with TRegExpr.Create do
     try
-      _HTML := ReplaceRegExpr('<style(.*?)/style>', AHTML, '', False);
+      LHTML := ReplaceRegExpr('<style(.*?)/style>', AHTML, '', False);
 
       if AWithURLLink then
-        _HTML := ReplaceRegExpr('<a href="([^:\/].*?)".*?>(.*?)<\/a>', _HTML, '$2 ($1)', True);
+        LHTML := ReplaceRegExpr('<a href="([^:\/].*?)".*?>(.*?)<\/a>', LHTML, '$2 ($1)', True);
 
-      _HTML := ReplaceRegExpr('<a href="(.*?)".*?>(.*?)<\/a>', _HTML, '$2', True);
+      LHTML := ReplaceRegExpr('<a href="(.*?)".*?>(.*?)<\/a>', LHTML, '$2', True);
 
-      _HTML := ReplaceRegExpr('<(.*?)>', _HTML, '', False);
+      LHTML := ReplaceRegExpr('<(.*?)>', LHTML, '', False);
     finally
       Free;
     end;
-  if not AUseHTMLDecode then
-    _HTML := StringReplaceMultiple(_HTML, ['&quot;', '&amp;', '&lt;', '&gt;'], ['"', '&', '<', '>'], True);
+  if not AUseExternalHTMLDecode then
+    LHTML := SimpleHTMLDecode(LHTML);
 
-  _HTML := StringReplaceMultiple(_HTML, { }
+  LHTML := StringReplaceMultiple(LHTML, { }
     ['&nbsp;', '&lsquo;', '&rsquo;', '&sbquo;', '&ldquo;', '&rdquo;', '&bdquo;', '&iexcl;', '&cent;', '&pound;', '&curren;', '&yen;', '&brvbar;', '&sect;',
     '&uml;', '&copy;', '&ordf;', '&laquo;', '&not;', '&shy;', '&reg;', '&macr;', '&deg;', '&plusmn;', '&sup2;', '&sup3;', '&acute;', '&micro;', '&para;',
     '&middot;', '&cedil;', '&sup1;', '&ordm;', '&raquo;', '&frac14;', '&frac12;', '&frac34;', '&iquest;', '&Agrave;', '&Aacute;', '&Acirc;', '&Atilde;',
@@ -48,7 +55,20 @@ begin
     '×', 'Ø', 'Ù', 'Ú', 'Û', 'Ü', 'Ý', 'Þ', 'ß', 'à', 'á', 'â', 'ã', 'ä', 'å', 'æ', 'ç', 'è', 'é', 'ê', 'ë', 'ì', 'í', 'î', 'ï', 'ð', 'ñ', 'ò', 'ó', 'ô', 'õ',
     'ö', '÷', 'ø', 'ù', 'ú', 'û', 'ü', 'ý', 'þ', 'ÿ', '…', '–', '—', '™', '€'], True);
 
-  Result := _HTML;
+  Result := LHTML;
+end;
+
+function HTML2TextAndDecode(const AHTML: string; AWithURLLink: Boolean = True): string;
+var
+  LHTML: string;
+begin
+  LHTML := HTML2Text(AHTML, AWithURLLink, True);
+  try
+    LHTML := HTMLDecode(LHTML);
+  except
+    LHTML := SimpleHTMLDecode(LHTML);
+  end;
+  Result := LHTML;
 end;
 
 end.
