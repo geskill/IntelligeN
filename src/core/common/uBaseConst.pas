@@ -53,33 +53,33 @@ type
     /// </summary>
     {$ENDREGION}
     csMixedOnOffline);
-{$REGION 'Documentation'}
+  {$REGION 'Documentation'}
   /// <summary>
-  /// Control type definition of all controls in IntelligeN. This is required
-  /// to identify the exact control type along the IntelligeN eco-system.
+  ///   Control type definition of all controls in IntelligeN. This is required
+  ///   to identify the exact control type along the IntelligeN eco-system.
   /// </summary>
-{$ENDREGION}
-  TControlID = (cReleaseName, cReleaseDate, cTags, cTitle, cCreator, cDirector, cPublisher, cPicture, cTrailer, cSample, cNotes, cPassword, cAudioBitrate, cAudioBitrateType, cAudioEncoder, cAudioSamplingRate, cAudioStream, cGenre, cLanguage, cRuntime,
-    cVideoCodec, cVideoStream, cVideoSystem, cNFO, cDescription);
+  {$ENDREGION}
+  TControlID = (cReleaseName, cReleaseDate, cTags, cTitle, cCreator, cDirector, cPublisher, cPicture, cTrailer, cSample, cNotes, cPassword, cAudioBitrate, cAudioBitrateType, cAudioEncoder, cAudioSamplingRate, cAudioStream, cGenre, cLanguage, { cLanguageSubtitle, }
+    cRuntime, { cVersion, } cVideoCodec, cVideoStream, cVideoSystem, cNFO, cDescription);
 
   TControlIDs = set of TControlID;
-{$REGION 'Documentation'}
+  {$REGION 'Documentation'}
   /// <summary>
-  /// File system definition of the IntelligeN folders and sub-folders.
+  ///   File system definition of the IntelligeN folders and sub-folders.
   /// </summary>
-{$ENDREGION}
+  {$ENDREGION}
   TFileSystem = (fsNull, fsRoot, fsConfig, fsPlugins, fsSettings, fsCMS, fsCMSSubject, fsCMSMessage, fsSite, fsType);
-{$REGION 'Documentation'}
+  {$REGION 'Documentation'}
   /// <summary>
-  /// Tab type definition of the different views.
+  ///   Tab type definition of the different views.
   /// </summary>
-{$ENDREGION}
+  {$ENDREGION}
   TTabViewType = (vtNull, vtData, vtCode, vtPreview);
-{$REGION 'Documentation'}
+  {$REGION 'Documentation'}
   /// <summary>
-  /// Type definition of the different release categories.
+  ///   Type definition of the different release categories.
   /// </summary>
-{$ENDREGION}
+  {$ENDREGION}
   TTypeID = (cAudio, cEBook, cMovie, cNintendoDS, cPCGames, cPlayStation3, cPlayStation4, cPlayStationVita, cSoftware, cWii, cWiiU, cXbox360, cXboxOne, cXXX, cOther);
 
   TTypeIDs = set of TTypeID;
