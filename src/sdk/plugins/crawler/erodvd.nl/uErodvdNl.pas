@@ -88,7 +88,7 @@ function TErodvdNl.InternalExecute;
           if Exec(InputString) then
           begin
             repeat
-              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(HTMLDecode(Match[1]))));
+              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2TextAndDecode(Match[1])));
             until not ExecNext;
           end;
         finally

@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  SysUtils, StrUtils, HTTPApp,
+  SysUtils, StrUtils, Classes, HTTPApp,
   // RegEx
   RegExpr,
   // Utils
@@ -140,6 +140,7 @@ function T1advdCh.InternalExecute;
   procedure deep_search(AWebsiteSourceCode: string);
   var
     s: string;
+    LStringList: TStringList;
   begin
     if ACanUse(cPicture) then
       with TRegExpr.Create do
@@ -192,9 +193,16 @@ function T1advdCh.InternalExecute;
 
           if Exec(InputString) then
           begin
-            repeat
-              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2Text(HTMLDecode(SpecialL(Match[1])))));
-            until not ExecNext;
+            LStringList := TStringList.Create;
+            try
+              repeat
+                LStringList.Add(Trim(HTML2TextAndDecode(SpecialL(Match[1]))));
+                LStringList.Add('');
+              until not ExecNext;
+              AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(LStringList.Text));
+            finally
+              LStringList.Free;
+            end;
           end;
         finally
           Free;
