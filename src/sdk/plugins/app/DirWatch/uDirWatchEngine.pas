@@ -13,7 +13,7 @@ uses
   uApiIScriptParser,
   // Utils
   uPathUtils,
-  //
+  // DirWatch
   uDirWatchSettings;
 
 type
@@ -25,8 +25,16 @@ type
     FDirWatchSettings: TDirWatchSettings;
     FCurrentPath: string;
   protected
-    procedure OnError(const Sender: TObject; const ErrorCode: Integer; const ErrorMessage: string);
-    procedure OnNotify(const Sender: TObject; const Action: TWatchAction; const FileName: string);
+    function GetPageController: IPageController;
+    function GetSettings: TDirWatchSettings;
+    function GetCurrentPath: string;
+
+    procedure OnBeforeStart(); virtual;
+    procedure OnBeforeStop(); virtual;
+
+    procedure OnError(const Sender: TObject; const ErrorCode: Integer; const ErrorMessage: string); virtual;
+    procedure OnNotify(const Sender: TObject; const Action: TWatchAction; const FileName: string); virtual;
+
     procedure SetActive(AActive: Boolean);
   public
     constructor Create(const APageController: IPageController; const ADirWatchSettings: TDirWatchSettings);
@@ -50,6 +58,31 @@ end;
 
 { TDirWatchEngine }
 
+function TDirWatchEngine.GetPageController: IPageController;
+begin
+  Result := FPageController;
+end;
+
+function TDirWatchEngine.GetSettings: TDirWatchSettings;
+begin
+  Result := FDirWatchSettings;
+end;
+
+function TDirWatchEngine.GetCurrentPath: string;
+begin
+  Result := FCurrentPath;
+end;
+
+procedure TDirWatchEngine.OnBeforeStart;
+begin
+  //
+end;
+
+procedure TDirWatchEngine.OnBeforeStop;
+begin
+  //
+end;
+
 procedure TDirWatchEngine.OnError(const Sender: TObject; const ErrorCode: Integer; const ErrorMessage: string);
 begin
   //
@@ -59,7 +92,7 @@ procedure TDirWatchEngine.OnNotify(const Sender: TObject; const Action: TWatchAc
 begin
   if Action in [waAdded] then
   begin
-    FPageController.OpenToNewTab(IncludeTrailingPathDelimiter(FCurrentPath) + FileName);
+    GetPageController.OpenToNewTab(IncludeTrailingPathDelimiter(GetCurrentPath) + FileName);
   end;
 end;
 
@@ -70,6 +103,8 @@ begin
 
     if not AActive then
     begin
+      OnBeforeStop();
+
       FDirectoryWatch.Stop;
     end
     else
@@ -78,6 +113,8 @@ begin
 
       if IsDirectory(FCurrentPath) then
       begin
+        OnBeforeStart();
+
         FDirectoryWatch.WatchSubTree := FDirWatchSettings.WatchSubdirectories;
         FDirectoryWatch.Directory := FCurrentPath;
         FDirectoryWatch.Start;

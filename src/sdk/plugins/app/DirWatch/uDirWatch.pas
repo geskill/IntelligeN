@@ -15,23 +15,34 @@ uses
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Plugin system
   uPlugInAppClass, uPlugInEvent, uPlugInHTTPClasses,
-  // Utils,
+  // Utils
   uPathUtils, uStringUtils, uURLUtils,
-  //
+  // DirWatch
   uDirWatchEngine, uDirWatchSettings;
 
 type
   TDirWatch = class(TAppPlugIn)
   private
     FAppController: IAppController;
-
     FDirWatchSettings: TDirWatchSettings;
+
     FDirWatchEngine: TDirWatchEngine;
 
     FNewMenuItem, FSettingsMenuItem: IMenuItem;
     FNotifyEventHandler, FSettingsNotifyEventHandler: TINotifyEventHandler;
     procedure OnClick(const Sender: IUnknown);
     procedure OnSettings(const Sender: IUnknown);
+  protected
+    function GetAppController: IAppController;
+    function GetSettings: TDirWatchSettings;
+
+    function GetEngine: TDirWatchEngine;
+    procedure SetEngine(const AEngine: TDirWatchEngine);
+
+    procedure InitializeEngine(); virtual;
+    procedure FinalizeEngine(); virtual;
+
+    property Engine: TDirWatchEngine read GetEngine write SetEngine;
   public
     function GetName: WideString; override;
     function Start(const AAppController: IAppController): WordBool; override;
@@ -41,6 +52,7 @@ type
 implementation
 
 uses
+  // DirWatch
   uDirWatchSettingsForm;
 
 function GetModulePath: string;
@@ -58,8 +70,8 @@ end;
 
 procedure TDirWatch.OnClick(const Sender: IInterface);
 begin
-  FDirWatchEngine.Active := not FDirWatchEngine.Active;
-  if FDirWatchEngine.Active then
+  Engine.Active := not Engine.Active;
+  if Engine.Active then
     FNewMenuItem.SetCaption('Disable DirWatch')
   else
     FNewMenuItem.SetCaption('Enable DirWatch');
@@ -74,6 +86,36 @@ begin
   fDirWatchSettingsForm.Show;
 end;
 
+function TDirWatch.GetAppController: IAppController;
+begin
+  Result := FAppController;
+end;
+
+function TDirWatch.GetSettings: TDirWatchSettings;
+begin
+  Result := FDirWatchSettings;
+end;
+
+function TDirWatch.GetEngine: TDirWatchEngine;
+begin
+  Result := FDirWatchEngine;
+end;
+
+procedure TDirWatch.SetEngine(const AEngine: TDirWatchEngine);
+begin
+  FDirWatchEngine := AEngine;
+end;
+
+procedure TDirWatch.InitializeEngine();
+begin
+  Engine := TDirWatchEngine.Create(GetAppController.PageController, GetSettings);
+end;
+
+procedure TDirWatch.FinalizeEngine();
+begin
+  Engine.Free;
+end;
+
 function TDirWatch.GetName: WideString;
 begin
   Result := 'DirWatch';
@@ -84,7 +126,7 @@ begin
   FAppController := AAppController;
 
   FDirWatchSettings := TDirWatchSettings.Create(ExtractFilePath(GetModulePath) + ChangeFileExt(ExtractFileName(GetModulePath), '.json'));
-  FDirWatchEngine := TDirWatchEngine.Create(AAppController.PageController, FDirWatchSettings);
+  InitializeEngine();
 
   FNotifyEventHandler := TINotifyEventHandler.Create(OnClick);
   with FAppController.MainMenu.GetMenuItems.GetItem(3) do
@@ -108,8 +150,9 @@ begin
   FAppController.MainMenu.GetMenuItems.GetItem(3).GetMenuItems.RemoveItem(FNewMenuItem);
   FNotifyEventHandler := nil;
 
-  FDirWatchEngine.Free;
+  FinalizeEngine();
   FDirWatchSettings.Free;
+  FAppController := nil;
 
   Result := True;
 end;
