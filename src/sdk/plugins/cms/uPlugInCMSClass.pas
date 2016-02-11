@@ -61,7 +61,7 @@ type
   private
     FAccountname, FAccountpassword, FSettingsFileName, FSubject, FTags, FMessage, FWebsite: WideString;
     FData: ITabSheetData;
-    FArticleID: Integer;
+    FArticleID, FArticlePathID: Integer;
     FIntelligentPostingHelper: TIntelligentPostingHelper;
   protected
     FCheckedIDsList: TList<TIDInfo>;
@@ -111,6 +111,8 @@ type
 
     function GetArticleID: Integer; safecall;
     procedure SetArticleID(AArticleID: Integer); safecall;
+    function GetArticlePathID: Integer; safecall;
+    procedure SetArticlePathID(AArticlePathID: Integer); safecall;
 
     function GetIntelligentPostingHelper: TIntelligentPostingHelper; safecall;
     procedure SetIntelligentPostingHelper(AIntelligentPostingHelper: TIntelligentPostingHelper); safecall;
@@ -130,6 +132,7 @@ type
     property Data: ITabSheetData read GetData write SetData;
 
     property ArticleID: Integer read GetArticleID write SetArticleID;
+    property ArticlePathID: Integer read GetArticlePathID write SetArticlePathID; // TODO: Implement
 
     property IntelligentPostingHelper: TIntelligentPostingHelper read GetIntelligentPostingHelper;
 
@@ -142,7 +145,7 @@ type
     function AddArticle(): WordBool; virtual; safecall;
     function EditArticle(): WordBool; virtual; safecall;
     function GetArticle(out AArticle: WideString): WordBool; virtual; safecall;
-    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; virtual; safecall; abstract;
+    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; virtual; safecall; abstract; // TODO: Add ArticlePathID
     function ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEditor): WordBool; safecall;
   end;
 
@@ -372,6 +375,16 @@ end;
 procedure TCMSPlugIn.SetArticleID(AArticleID: Integer);
 begin
   FArticleID := AArticleID;
+end;
+
+function TCMSPlugIn.GetArticlePathID: Integer;
+begin
+  Result := FArticlePathID;
+end;
+
+procedure TCMSPlugIn.SetArticlePathID(AArticlePathID: Integer);
+begin
+  FArticleID := AArticlePathID;
 end;
 
 function TCMSPlugIn.GetIntelligentPostingHelper;
