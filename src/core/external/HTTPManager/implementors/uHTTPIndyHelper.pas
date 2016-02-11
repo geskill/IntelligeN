@@ -156,7 +156,7 @@ end;
 
 procedure THTTPIndyHelper.WriteErrorMsgToStream(AMsg: string; AStream: TStream);
 begin
-  WriteStringToStream(AStream, AMsg, CharsetToEncoding(ResponseCharset));
+  WriteStringToStream(AStream, AMsg, CharsetToEncoding(Response.CharSet));
 end;
 
 procedure THTTPIndyHelper.Redirect(Sender: TObject; var dest: string; var NumRedirect: Integer; var Handled: Boolean; var VMethod: TIdHTTPMethod);
@@ -320,7 +320,7 @@ end;
 function THTTPIndyHelper.ResponseContentString: string;
 begin
   Response.ContentStream.Position := 0;
-  Result := ReadStringAsCharset(Response.ContentStream, ResponseCharset);
+  Result := ReadStringAsCharset(Response.ContentStream, Response.CharSet);
 end;
 
 class function THTTPIndyHelper.Charsets: string;
