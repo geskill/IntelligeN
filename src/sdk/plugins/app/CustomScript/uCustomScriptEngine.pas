@@ -66,7 +66,7 @@ begin
             begin
               LParamArray[LParamIndex] := LControl.GetProposedValue(LParamIndex);
             end;
-            LIScriptResult := CallFunction('Get' + ControlIDToString(LControlID), LParamArray, LResult);
+            LIScriptResult := CallFunction3('Get' + ControlIDToString(LControlID), LParamArray, LResult);
             if not LIScriptResult.HasError then
             begin
               if not VarIsNull(LResult) and not VarIsOrdinal(LResult) then
