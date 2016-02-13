@@ -9,6 +9,8 @@ uses
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
   // Export
   uExport,
+  // Utils
+  uSystemUtils,
   // DirWatch
   uDirWatchSettings;
 
@@ -62,17 +64,6 @@ var
 implementation
 
 {$R *.dfm}
-
-function GetModulePath: string;
-var
-  QueryRes: TMemoryBasicInformation;
-  LBuffer: string;
-begin
-  VirtualQuery(@GetModulePath, QueryRes, SizeOf(QueryRes));
-  SetLength(LBuffer, MAX_PATH);
-  SetLength(LBuffer, GetModuleFileName(Cardinal(QueryRes.AllocationBase), PChar(LBuffer), Length(LBuffer)));
-  Result := LBuffer;
-end;
 
 procedure TfDirWatchSettingsForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin

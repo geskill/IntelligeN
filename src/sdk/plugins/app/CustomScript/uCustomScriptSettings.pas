@@ -4,23 +4,19 @@ interface
 
 uses
   // Delphi
-  SysUtils, Classes, IniFiles;
+  SysUtils, Classes,
+  // JsonDataObjects
+  JsonDataObjects,
+  // Plugin system
+  uPlugInAppSettingsBase;
 
 type
-  TCustomScriptSettings = class(TPersistent)
-  private
-    FSettingsFileName: string;
-    FIniFile: TIniFile;
+  TCustomScriptSettings = class(TPlugInAppSettingsBase)
   protected
-
     FScriptFileName: string;
     FOverrideValue: Boolean;
   public
-    constructor Create(const ASettingsFileName: TFileName);
-    destructor Destroy; override;
-
-    procedure LoadSettings;
-    procedure SaveSettings;
+    procedure LoadDefaultSettings; override;
   published
     property ScriptFileName: string read FScriptFileName write FScriptFileName;
     property OverrideValue: Boolean read FOverrideValue write FOverrideValue;
@@ -30,33 +26,10 @@ implementation
 
 { TCustomScriptSettings }
 
-constructor TCustomScriptSettings.Create(const ASettingsFileName: TFileName);
+procedure TCustomScriptSettings.LoadDefaultSettings;
 begin
-  inherited Create;
-  FIniFile := TIniFile.Create(ASettingsFileName);
-  FSettingsFileName := ASettingsFileName;
   FScriptFileName := '';
   FOverrideValue := True;
-
-  LoadSettings;
-end;
-
-destructor TCustomScriptSettings.Destroy;
-begin
-  FIniFile.Free;
-  inherited Destroy;
-end;
-
-procedure TCustomScriptSettings.LoadSettings;
-begin
-  ScriptFileName := FIniFile.ReadString('SETTINGS', 'ScriptFileName', '');
-  OverrideValue := FIniFile.ReadBool('SETTINGS', 'OverrideValue', True);
-end;
-
-procedure TCustomScriptSettings.SaveSettings;
-begin
-  FIniFile.WriteString('SETTINGS', 'ScriptFileName', ScriptFileName);
-  FIniFile.WriteBool('SETTINGS', 'OverrideValue', OverrideValue);
 end;
 
 end.

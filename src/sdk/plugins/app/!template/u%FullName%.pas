@@ -7,8 +7,6 @@ uses
   Windows, SysUtils, Classes, Variants,
   // RegEx
   RegExpr,
-  // LkJSON
-  uLkJSON,
   // MultiEvent
   Generics.MultiEvents.NotifyHandler,
   // HTTPManager
@@ -18,7 +16,7 @@ uses
   // Plugin system
   uPlugInAppClass, uPlugInEvent, uPlugInHTTPClasses,
   // Utils,
-  uPathUtils, uStringUtils, uURLUtils;
+  uPathUtils, uStringUtils, uSystemUtils, uURLUtils;
 
 type
   T%FullName% = class(TAppPlugIn)
@@ -34,17 +32,6 @@ type
   end;
 
 implementation
-
-function GetModulePath: string;
-var
-  QueryRes: TMemoryBasicInformation;
-  LBuffer: string;
-begin
-  VirtualQuery(@GetModulePath, QueryRes, SizeOf(QueryRes));
-  SetLength(LBuffer, MAX_PATH);
-  SetLength(LBuffer, GetModuleFileName(Cardinal(QueryRes.AllocationBase), PChar(LBuffer), Length(LBuffer)));
-  Result := LBuffer;
-end;
 
 { T%FullName% }
 

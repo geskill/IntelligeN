@@ -232,6 +232,7 @@
 			<DCCReference Include="..\core\utils\uSetUtils.pas"/>
 			<DCCReference Include="..\core\utils\uSizeUtils.pas"/>
 			<DCCReference Include="..\core\utils\uStringUtils.pas"/>
+			<DCCReference Include="..\core\utils\uSystemUtils.pas"/>
 			<DCCReference Include="..\core\utils\uURLUtils.pas"/>
 			<DCCReference Include="..\core\utils\uVariantUtils.pas"/>
 			<DCCReference Include="ole\IntelligeN_TLB.pas"/>

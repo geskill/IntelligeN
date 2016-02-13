@@ -7,7 +7,9 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, Buttons,
   // Common
   uBaseConst, uBaseInterface, uAppConst, uAppInterface,
-  //
+  // Utils
+  uSystemUtils,
+  // CustomScript
   uCustomScriptSettings;
 
 type
@@ -40,17 +42,6 @@ var
 implementation
 
 {$R *.dfm}
-
-function GetModulePath: string;
-var
-  QueryRes: TMemoryBasicInformation;
-  LBuffer: string;
-begin
-  VirtualQuery(@GetModulePath, QueryRes, SizeOf(QueryRes));
-  SetLength(LBuffer, MAX_PATH);
-  SetLength(LBuffer, GetModuleFileName(Cardinal(QueryRes.AllocationBase), PChar(LBuffer), Length(LBuffer)));
-  Result := LBuffer;
-end;
 
 procedure TfCustomScriptSettingsForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin

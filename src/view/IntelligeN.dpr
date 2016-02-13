@@ -134,6 +134,7 @@ uses
   uSetUtils in '..\core\utils\uSetUtils.pas',
   uSizeUtils in '..\core\utils\uSizeUtils.pas',
   uStringUtils in '..\core\utils\uStringUtils.pas',
+  uSystemUtils in '..\core\utils\uSystemUtils.pas',
   uURLUtils in '..\core\utils\uURLUtils.pas',
   uVariantUtils in '..\core\utils\uVariantUtils.pas',
   IntelligeN_TLB in 'ole\IntelligeN_TLB.pas',
@@ -177,7 +178,7 @@ begin
       Application.CreateForm(TMain, Main);
       Application.CreateForm(TSettings, Settings);
       Application.CreateForm(TUpdate, Update);
-
+	  
       if SettingsManager.Settings.Login.AutoLogin then
         Main.fLogin.cxbLoginClick(nil);
 

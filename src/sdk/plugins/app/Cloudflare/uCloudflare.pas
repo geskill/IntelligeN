@@ -13,8 +13,6 @@ uses
   BESEN, BESENConstants, BESENErrors, BESENValue,
   // Indy
   IdURI,
-  // LkJSON
-  uLkJSON,
   // MultiEvent
   Generics.MultiEvents.NotifyHandler,
   // HTTPManager
@@ -43,17 +41,6 @@ type
   end;
 
 implementation
-
-function GetModulePath: string;
-var
-  QueryRes: TMemoryBasicInformation;
-  LBuffer: string;
-begin
-  VirtualQuery(@GetModulePath, QueryRes, SizeOf(QueryRes));
-  SetLength(LBuffer, MAX_PATH);
-  SetLength(LBuffer, GetModuleFileName(Cardinal(QueryRes.AllocationBase), PChar(LBuffer), Length(LBuffer)));
-  Result := LBuffer;
-end;
 
 { TCloudflare }
 
