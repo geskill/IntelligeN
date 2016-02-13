@@ -24,7 +24,7 @@ uses
   // Plugin system
   uPlugInAppClass, uPlugInHTTPClasses,
   // Utils
-  uPathUtils, uStringUtils, uURLUtils;
+  uPathUtils, uStringUtils, uSystemUtils, uURLUtils;
 
 type
   TLinkGrabber = class(TAppPlugIn)
@@ -42,17 +42,6 @@ type
   end;
 
 implementation
-
-function GetModulePath: string;
-var
-  QueryRes: TMemoryBasicInformation;
-  LBuffer: string;
-begin
-  VirtualQuery(@GetModulePath, QueryRes, SizeOf(QueryRes));
-  SetLength(LBuffer, MAX_PATH);
-  SetLength(LBuffer, GetModuleFileName(Cardinal(QueryRes.AllocationBase), PChar(LBuffer), Length(LBuffer)));
-  Result := LBuffer;
-end;
 
 { TLinkGrabber }
 

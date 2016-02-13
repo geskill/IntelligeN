@@ -10,8 +10,8 @@ uses
   // API
   uApiIScriptParser,
   // Utils
-  uPathUtils,
-  //
+  uPathUtils, uSystemUtils,
+  // CustomScript
   uCustomScriptSettings;
 
 type
@@ -21,17 +21,6 @@ type
   end;
 
 implementation
-
-function GetModulePath: string;
-var
-  QueryRes: TMemoryBasicInformation;
-  LBuffer: string;
-begin
-  VirtualQuery(@GetModulePath, QueryRes, SizeOf(QueryRes));
-  SetLength(LBuffer, MAX_PATH);
-  SetLength(LBuffer, GetModuleFileName(Cardinal(QueryRes.AllocationBase), PChar(LBuffer), Length(LBuffer)));
-  Result := LBuffer;
-end;
 
 { TCustomScriptEngine }
 
@@ -66,7 +55,7 @@ begin
             begin
               LParamArray[LParamIndex] := LControl.GetProposedValue(LParamIndex);
             end;
-            LIScriptResult := CallFunction('Get' + ControlIDToString(LControlID), LParamArray, LResult);
+            LIScriptResult := CallFunction3('Get' + ControlIDToString(LControlID), LParamArray, LResult);
             if not LIScriptResult.HasError then
             begin
               if not VarIsNull(LResult) and not VarIsOrdinal(LResult) then

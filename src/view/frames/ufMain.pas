@@ -83,7 +83,7 @@ type
     procedure CallPublish(ATabIndex: Integer); overload;
     procedure CallPublish; overload;
     procedure CallSeriesPublish;
-    procedure CallAutoCompletion;
+    procedure CallAutoCompletion; // TODO: rename, move to ITabSheetController
     procedure CallSeriesAutoCompletion;
     procedure CallCrypterCrypt(ATabIndex: Integer); overload;
     procedure CallCrypterCrypt; overload;

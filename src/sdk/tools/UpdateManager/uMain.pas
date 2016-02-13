@@ -6,12 +6,10 @@ uses
   // Delphi
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Buttons, StdCtrls, TypInfo, Generics.Collections,
   ShellAPI, ComCtrls,
-  // JEDI VCL
-  JvWizard, JvWizardRouteMapNodes, JvExControls, JvLED,
   // DevExpress
   cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit,
   cxNavigator, cxCheckBox, cxLabel, cxTextEdit, cxDropDownEdit, cxBlobEdit, cxGridCustomTableView, cxGridTableView, cxGridCustomView,
-  cxClasses, cxGridLevel, cxGrid, cxMemo, cxContainer, cxMaskEdit, cxSpinEdit,
+  cxClasses, cxGridLevel, cxGrid, cxMemo, cxContainer, cxMaskEdit, cxSpinEdit, dxCustomWizardControl, dxWizardControl,
   // Spring Framework
   Spring.Utils, Spring.SystemUtils,
   // Export
@@ -23,10 +21,9 @@ uses
 
 type
   TfMain = class(TForm)
-    JvWizard: TJvWizard;
-    JvWizardWelcomePage: TJvWizardWelcomePage;
-    JvWizardInteriorPageLocalFiles: TJvWizardInteriorPage;
-    JvWizardRouteMapNodes: TJvWizardRouteMapNodes;
+    WizardControl: TdxWizardControl;
+    wcpWelcomePage: TdxWizardControlPage;
+    wcpLocalFiles: TdxWizardControlPage;
     rbAddNewPath: TRadioButton;
     eRootDir: TEdit;
     sbSelectRootDir: TSpeedButton;
@@ -42,24 +39,21 @@ type
     cxGLocalFilesTableViewColumn5: TcxGridColumn;
     cxGLocalFilesTableViewColumn6: TcxGridColumn;
     lFileSystem: TLabel;
-    JvWizardInteriorPageServer: TJvWizardInteriorPage;
-    JvWizardInteriorPagePublish: TJvWizardInteriorPage;
-    JvWizardInteriorPageServerInfo: TJvWizardInteriorPage;
+    wcpPageServer: TdxWizardControlPage;
+
+    wcpPublish: TdxWizardControlPage;
+    wcpPageServerInfo: TdxWizardControlPage;
     rbAddNewServer: TRadioButton;
     eServerDir: TEdit;
     rbSelectExistingServer: TRadioButton;
     lbSelectServer: TListBox;
     eServerAccessToken: TEdit;
     lServerAccessToken: TLabel;
-    JvLEDConnectToServer: TJvLED;
     lConnectToServer: TLabel;
-    JvLEDRecivingUpdateVersions: TJvLED;
     lRecivingUpdateVersions: TLabel;
-    JvLEDRecivingFTPServer: TJvLED;
     lRecivingFTPServer: TLabel;
-    JvLEDRecivingUpdateFiles: TJvLED;
     lRecivingUpdateFiles: TLabel;
-    JvWizardInteriorPageUpdateFiles: TJvWizardInteriorPage;
+    wcpUpdateFiles: TdxWizardControlPage;
     lServerInfoError: TLabel;
     eServerInfoError: TEdit;
     cxGUpdateFiles: TcxGrid;
@@ -71,8 +65,8 @@ type
     cxGUpdateFilesTableViewColumn5: TcxGridColumn;
     cxGUpdateFilesTableViewColumn6: TcxGridColumn;
     cxGUpdateFilesLevel: TcxGridLevel;
-    JvWizardInteriorPageUpdateVersion: TJvWizardInteriorPage;
-    JvWizardInteriorPageUploadFiles: TJvWizardInteriorPage;
+    wcpUpdateVersion: TdxWizardControlPage;
+    wcpUploadFiles: TdxWizardControlPage;
     rbAddNewVersion: TRadioButton;
     rbSelectExistingVersion: TRadioButton;
     lbSelectVersion: TListBox;
@@ -82,45 +76,33 @@ type
     cxSEMinorBuild: TcxSpinEdit;
     lPreRelease: TLabel;
     cxCBLocalFilesEnableDisableAll: TcxCheckBox;
-    JvLEDCompressLocalFiles: TJvLED;
     lCompressingLocalFiles: TLabel;
-    JvLEDUploadLocalFiles: TJvLED;
     lUploadingLocalFiles: TLabel;
     pbUploadProgress: TProgressBar;
     lUploadInfoError: TLabel;
     eUploadInfoError: TEdit;
-    bShowHTTPLogger: TButton;
-    JvWizardInteriorPageUpdateServer: TJvWizardInteriorPage;
+    wcpUpdateServer: TdxWizardControlPage;
     lUpdateInfoError: TLabel;
     lAddingTheNewSystems: TLabel;
-    JvLEDAddSystems: TJvLED;
-    JvLEDAddVersion: TJvLED;
     lAddVersion: TLabel;
     eUpdateInfoError: TEdit;
     lRetrieveFilesFromServer: TLabel;
-    JvLEDRetrieveFiles: TJvLED;
+    bShowHTTPLogger: TButton;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure JvWizardCancelButtonClick(Sender: TObject);
+    procedure WizardControlButtonClick(Sender: TObject; AKind: TdxWizardControlButtonKind; var AHandled: Boolean);
+    procedure WizardControlPageChanging(Sender: TObject; ANewPage: TdxWizardControlCustomPage; var AAllow: Boolean);
     { *************************************** STEP - 1 *************************************** }
-    procedure JvWizardWelcomePagePage(Sender: TObject);
-    procedure JvWizardWelcomePageNextButtonClick(Sender: TObject; var Stop: Boolean);
     procedure rbSelectFileSystem(Sender: TObject);
     procedure eRootDirChange(Sender: TObject);
     procedure sbSelectRootDirClick(Sender: TObject);
     procedure lbSelectPathClick(Sender: TObject);
     { *************************************** STEP - 2 *************************************** }
-    procedure JvWizardInteriorPageServerPage(Sender: TObject);
-    procedure JvWizardInteriorPageServerNextButtonClick(Sender: TObject; var Stop: Boolean);
     procedure rbSelectServer(Sender: TObject);
     procedure eServerDirChange(Sender: TObject);
     procedure lbSelectServerClick(Sender: TObject);
     { *************************************** STEP - 3 *************************************** }
-    procedure JvWizardInteriorPageServerInfoPage(Sender: TObject);
     { *************************************** STEP - 4 *************************************** }
-    procedure JvWizardInteriorPageLocalFilesExitPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
-    procedure JvWizardInteriorPageLocalFilesPage(Sender: TObject);
-    procedure JvWizardInteriorPageLocalFilesNextButtonClick(Sender: TObject; var Stop: Boolean);
     procedure cxCBLocalFilesEnableDisableAllPropertiesChange(Sender: TObject);
     procedure cxGLocalFilesTableViewColumn2CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
     procedure cxGLocalFilesTableViewColumn5GetPropertiesForEdit(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AProperties: TcxCustomEditProperties);
@@ -128,11 +110,7 @@ type
     procedure cxGUpdateFilesTableViewColumn5CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
     procedure lFileSystemClick(Sender: TObject);
     { *************************************** STEP - 5 *************************************** }
-    procedure JvWizardInteriorPageUpdateFilesPage(Sender: TObject);
-    procedure JvWizardInteriorPageUpdateFilesNextButtonClick(Sender: TObject; var Stop: Boolean);
     procedure cxGUpdateFilesTableViewColumn6GetPropertiesForEdit(Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord; var AProperties: TcxCustomEditProperties);
-    { *************************************** STEP - 6 *************************************** }
-    procedure JvWizardInteriorPageUpdateVersionPage(Sender: TObject);
     procedure rbSelectVersion(Sender: TObject);
     procedure cxSEMajorVersionPropertiesChange(Sender: TObject);
     procedure cxSEMinorVersionPropertiesChange(Sender: TObject);
@@ -140,11 +118,8 @@ type
     procedure cxSEMinorBuildPropertiesChange(Sender: TObject);
     procedure lbSelectVersionClick(Sender: TObject);
     { *************************************** STEP - 6 *************************************** }
-    procedure JvWizardInteriorPageUpdateServerPage(Sender: TObject);
     { *************************************** STEP - 7 *************************************** }
-    procedure JvWizardInteriorPageUploadFilesPage(Sender: TObject);
     { *************************************** STEP - 8 *************************************** }
-    procedure JvWizardInteriorPagePublishFinishButtonClick(Sender: TObject; var Stop: Boolean);
     { **************************************************************************************** }
     procedure bShowHTTPLoggerClick(Sender: TObject);
   private
@@ -167,13 +142,13 @@ type
     procedure LoadSettings;
     procedure SaveSettings;
 
-    procedure CanContinue(AValue: Boolean; APage: TJvWizardCustomPage);
+    procedure CanContinue(AValue: Boolean);
     procedure CheckCanContinueToServer;
     procedure CheckCanContinueToServerInfo;
     procedure CheckCanContinueToUpdateFiles;
     procedure CheckCanContinueToUpdateServer;
   protected
-    procedure SetLEDStatus(AStatus: Boolean; ALED: TJvLED; AJump: Boolean = False);
+    // procedure SetLEDStatus(AStatus: Boolean; ALED: TJvLED; AJump: Boolean = False);
     function LoadServerInfos: Boolean;
     function LoadLocalFilesList: Boolean;
     function LoadUpdateFilesList: Boolean;
@@ -229,29 +204,159 @@ begin
   SaveSettings;
 end;
 
-procedure TfMain.JvWizardCancelButtonClick(Sender: TObject);
+procedure TfMain.WizardControlButtonClick(Sender: TObject; AKind: TdxWizardControlButtonKind; var AHandled: Boolean);
+var
+  LFileIndex: Integer;
 begin
-  Close;
+  case AKind of
+    wcbkCancel:
+      begin
+        Close;
+      end;
+    wcbkNext:
+      begin
+        if (WizardControl.ActivePage = wcpWelcomePage) then
+        begin
+          if rbAddNewPath.Checked then
+          begin
+            FActiveUpdateFileCollectionItem := TUpdateFileSystemCollectionItem(SettingsManager.Settings.FileSystems.Add);
+            FActiveUpdateFileCollectionItem.LibraryFile := eRootDir.Text;
+          end
+          else if rbSelectExisting.Checked then
+            FActiveUpdateFileCollectionItem := SettingsManager.Settings.FindFileSystem(lbSelectPath.Items[lbSelectPath.ItemIndex]);
+        end
+        else if (WizardControl.ActivePage = wcpPageServer) then
+        begin
+          if rbAddNewServer.Checked then
+          begin
+            FActiveUpdateServerCollectionItem := TUpdateServerCollectionItem(SettingsManager.Settings.UpdateServers.Add);
+            FActiveUpdateServerCollectionItem.Name := eServerDir.Text;
+            FActiveUpdateServerCollectionItem.AccessToken := eServerAccessToken.Text;
+          end
+          else if rbSelectExistingServer.Checked then
+            FActiveUpdateServerCollectionItem := SettingsManager.Settings.FindServer(lbSelectServer.Items[lbSelectServer.ItemIndex]);
+        end
+        else if (WizardControl.ActivePage = wcpPageServerInfo) then
+        begin
+          // DO NOTHING
+        end
+        else if (WizardControl.ActivePage = wcpLocalFiles) then
+        begin
+          for LFileIndex := 0 to FActiveLocalFiles.Count - 1 do
+            with cxGLocalFilesTableView.DataController, FActiveLocalFiles[LFileIndex].LocalFile do
+            begin
+              Status := Values[LFileIndex, cxGLocalFilesTableViewColumn1.Index];
+              // Action := TEnum.Parse<TUpdateAction>(VarToStr(Values[LFileIndex, cxGLocalFilesTableViewColumn5.Index]));
+            end;
+        end
+        else if (WizardControl.ActivePage = wcpUpdateFiles) then
+        begin
+          for LFileIndex := 0 to FActiveLocalFiles.Count - 1 do
+            with cxGUpdateFilesTableView.DataController, FActiveLocalFiles[LFileIndex].LocalFile do
+            begin
+              // Status := Values[LFileIndex, cxGLocalFilesTableViewColumn1.Index];
+              Action := TEnum.Parse<TUpdateAction>(VarToStr(Values[LFileIndex, cxGUpdateFilesTableViewColumn5.Index]));
+            end;
+        end
+        else if (WizardControl.ActivePage = wcpUpdateVersion) then
+        begin
+          //
+        end
+        else if (WizardControl.ActivePage = wcpUpdateServer) then
+        begin
+          //
+        end
+        else if (WizardControl.ActivePage = wcpUploadFiles) then
+        begin
+          //
+        end
+
+      end;
+    wcbkFinish:
+      begin
+        if (WizardControl.ActivePage = wcpPublish) then
+        begin
+          if ActivateVersion then
+          begin
+            ShowMessage('Update is now online and ready to use.');
+            Close;
+          end
+          else
+          begin
+            ShowMessage('The was an error. Start over again.');
+          end;
+        end;
+      end;
+  end;
+end;
+
+procedure TfMain.WizardControlPageChanging(Sender: TObject; ANewPage: TdxWizardControlCustomPage; var AAllow: Boolean);
+var
+  LCanContinue: Boolean;
+  LFileVersion: TFileVersionInfo;
+  LVersionIndex: Integer;
+begin
+  cxGLocalFilesTableView.DataController.OnDataChanged := nil;
+
+  if (ANewPage = wcpWelcomePage) then
+  begin
+    lbSelectPath.Items.Text := SettingsManager.Settings.GetLibraryFiles;
+    CheckCanContinueToServer;
+  end
+  else if (ANewPage = wcpPageServer) then
+  begin
+    lbSelectServer.Items.Text := SettingsManager.Settings.GetUpdateServers;
+    CheckCanContinueToServerInfo;
+  end
+  else if (ANewPage = wcpPageServerInfo) then
+  begin
+    CanContinue(LoadServerInfos);
+  end
+  else if (ANewPage = wcpLocalFiles) then
+  begin
+    LCanContinue := LoadLocalFilesList;
+    SetLocalFilesCheckAllStatus;
+    lFileSystem.Caption := ExtractFilePath(FActiveUpdateFileCollectionItem.LibraryFile);
+    cxGLocalFilesTableView.DataController.OnDataChanged := cxGLocalFilesTableViewDataControllerDataChanged;
+    CanContinue(LCanContinue);
+  end
+  else if (ANewPage = wcpUpdateFiles) then
+  begin
+    CanContinue(LoadUpdateFilesList);
+  end
+  else if (ANewPage = wcpUpdateVersion) then
+  begin
+    LFileVersion := TFileVersionInfo.GetVersionInfo(FActiveUpdateFileCollectionItem.LibraryFile);
+
+    with LFileVersion.FileVersionNumber do
+    begin
+      cxSEMajorVersion.Value := Major;
+      cxSEMinorVersion.Value := Minor;
+      cxSEMajorBuild.Value := Build;
+      cxSEMinorBuild.Value := Reversion;
+    end;
+
+    for LVersionIndex := 0 to FActiveVersionsList.Count - 1 do
+      lbSelectVersion.Items.Add(FActiveVersionsList[LVersionIndex].ToString);
+
+    CheckCanContinueToUpdateServer;
+  end
+  else if (ANewPage = wcpUpdateServer) then
+  begin
+    CanContinue(UpdateServer);
+  end
+  else if (ANewPage = wcpUploadFiles) then
+  begin
+    pbUploadProgress.Visible := False;
+    CanContinue(UploadFiles);
+  end
+
+
+  // ;
+
 end;
 
 { *************************************** STEP - 1 *************************************** }
-
-procedure TfMain.JvWizardWelcomePagePage(Sender: TObject);
-begin
-  lbSelectPath.Items.Text := SettingsManager.Settings.GetLibraryFiles;
-  CheckCanContinueToServer;
-end;
-
-procedure TfMain.JvWizardWelcomePageNextButtonClick(Sender: TObject; var Stop: Boolean);
-begin
-  if rbAddNewPath.Checked then
-  begin
-    FActiveUpdateFileCollectionItem := TUpdateFileSystemCollectionItem(SettingsManager.Settings.FileSystems.Add);
-    FActiveUpdateFileCollectionItem.LibraryFile := eRootDir.Text;
-  end
-  else if rbSelectExisting.Checked then
-    FActiveUpdateFileCollectionItem := SettingsManager.Settings.FindFileSystem(lbSelectPath.Items[lbSelectPath.ItemIndex]);
-end;
 
 procedure TfMain.rbSelectFileSystem(Sender: TObject);
 begin
@@ -291,24 +396,6 @@ end;
 
 { *************************************** STEP - 2 *************************************** }
 
-procedure TfMain.JvWizardInteriorPageServerPage(Sender: TObject);
-begin
-  lbSelectServer.Items.Text := SettingsManager.Settings.GetUpdateServers;
-  CheckCanContinueToServerInfo;
-end;
-
-procedure TfMain.JvWizardInteriorPageServerNextButtonClick(Sender: TObject; var Stop: Boolean);
-begin
-  if rbAddNewServer.Checked then
-  begin
-    FActiveUpdateServerCollectionItem := TUpdateServerCollectionItem(SettingsManager.Settings.UpdateServers.Add);
-    FActiveUpdateServerCollectionItem.Name := eServerDir.Text;
-    FActiveUpdateServerCollectionItem.AccessToken := eServerAccessToken.Text;
-  end
-  else if rbSelectExistingServer.Checked then
-    FActiveUpdateServerCollectionItem := SettingsManager.Settings.FindServer(lbSelectServer.Items[lbSelectServer.ItemIndex]);
-end;
-
 procedure TfMain.rbSelectServer(Sender: TObject);
 begin
   eServerDir.Enabled := rbAddNewServer.Checked;
@@ -331,43 +418,7 @@ end;
 
 { *************************************** STEP - 3 *************************************** }
 
-procedure TfMain.JvWizardInteriorPageServerInfoPage(Sender: TObject);
-var
-  LCanContinue: Boolean;
-begin
-  LCanContinue := LoadServerInfos;
-  CanContinue(LCanContinue, JvWizardInteriorPageServerInfo);
-end;
-
 { *************************************** STEP - 4 *************************************** }
-
-procedure TfMain.JvWizardInteriorPageLocalFilesExitPage(Sender: TObject; const FromPage: TJvWizardCustomPage);
-begin
-  cxGLocalFilesTableView.DataController.OnDataChanged := nil;
-end;
-
-procedure TfMain.JvWizardInteriorPageLocalFilesPage(Sender: TObject);
-var
-  LCanContinue: Boolean;
-begin
-  LCanContinue := LoadLocalFilesList;
-  SetLocalFilesCheckAllStatus;
-  lFileSystem.Caption := ExtractFilePath(FActiveUpdateFileCollectionItem.LibraryFile);
-  cxGLocalFilesTableView.DataController.OnDataChanged := cxGLocalFilesTableViewDataControllerDataChanged;
-  CanContinue(LCanContinue, JvWizardInteriorPageLocalFiles);
-end;
-
-procedure TfMain.JvWizardInteriorPageLocalFilesNextButtonClick(Sender: TObject; var Stop: Boolean);
-var
-  LFileIndex: Integer;
-begin
-  for LFileIndex := 0 to FActiveLocalFiles.Count - 1 do
-    with cxGLocalFilesTableView.DataController, FActiveLocalFiles[LFileIndex].LocalFile do
-    begin
-      Status := Values[LFileIndex, cxGLocalFilesTableViewColumn1.Index];
-      // Action := TEnum.Parse<TUpdateAction>(VarToStr(Values[LFileIndex, cxGLocalFilesTableViewColumn5.Index]));
-    end;
-end;
 
 procedure TfMain.cxCBLocalFilesEnableDisableAllPropertiesChange(Sender: TObject);
 
@@ -442,23 +493,6 @@ end;
 
 { *************************************** STEP - 5 *************************************** }
 
-procedure TfMain.JvWizardInteriorPageUpdateFilesPage(Sender: TObject);
-begin
-  LoadUpdateFilesList;
-end;
-
-procedure TfMain.JvWizardInteriorPageUpdateFilesNextButtonClick(Sender: TObject; var Stop: Boolean);
-var
-  LFileIndex: Integer;
-begin
-  for LFileIndex := 0 to FActiveLocalFiles.Count - 1 do
-    with cxGUpdateFilesTableView.DataController, FActiveLocalFiles[LFileIndex].LocalFile do
-    begin
-      // Status := Values[LFileIndex, cxGLocalFilesTableViewColumn1.Index];
-      Action := TEnum.Parse<TUpdateAction>(VarToStr(Values[LFileIndex, cxGUpdateFilesTableViewColumn5.Index]));
-    end;
-end;
-
 procedure TfMain.cxGUpdateFilesTableViewColumn5CustomDrawCell(Sender: TcxCustomGridTableView; ACanvas: TcxCanvas; AViewInfo: TcxGridTableDataCellViewInfo; var ADone: Boolean);
 var
   V: Variant;
@@ -488,27 +522,6 @@ begin
 end;
 
 { *************************************** STEP - 6 *************************************** }
-
-procedure TfMain.JvWizardInteriorPageUpdateVersionPage(Sender: TObject);
-var
-  LFileVersion: TFileVersionInfo;
-  LVersionIndex: Integer;
-begin
-  LFileVersion := TFileVersionInfo.GetVersionInfo(FActiveUpdateFileCollectionItem.LibraryFile);
-
-  with LFileVersion.FileVersionNumber do
-  begin
-    cxSEMajorVersion.Value := Major;
-    cxSEMinorVersion.Value := Minor;
-    cxSEMajorBuild.Value := Build;
-    cxSEMinorBuild.Value := Reversion;
-  end;
-
-  for LVersionIndex := 0 to FActiveVersionsList.Count - 1 do
-    lbSelectVersion.Items.Add(FActiveVersionsList[LVersionIndex].ToString);
-
-  CheckCanContinueToUpdateServer;
-end;
 
 procedure TfMain.rbSelectVersion(Sender: TObject);
 begin
@@ -550,37 +563,9 @@ end;
 
 { *************************************** STEP - 6 *************************************** }
 
-procedure TfMain.JvWizardInteriorPageUpdateServerPage(Sender: TObject);
-var
-  LCanContinue: Boolean;
-begin
-  LCanContinue := UpdateServer;
-  CanContinue(LCanContinue, JvWizardInteriorPageUpdateServer);
-end;
-
 { *************************************** STEP - 7 *************************************** }
 
-procedure TfMain.JvWizardInteriorPageUploadFilesPage(Sender: TObject);
-var
-  LCanContinue: Boolean;
-begin
-  pbUploadProgress.Visible := False;
-  LCanContinue := UploadFiles;
-  CanContinue(LCanContinue, JvWizardInteriorPageUploadFiles);
-end;
-
 { *************************************** STEP - 8 *************************************** }
-
-procedure TfMain.JvWizardInteriorPagePublishFinishButtonClick(Sender: TObject; var Stop: Boolean);
-begin
-  if ActivateVersion then
-  begin
-    ShowMessage('Update is now online and ready to use.');
-    Close;
-  end
-  else
-    ShowMessage('The was an error. Start over again.');
-end;
 
 { ****************************************************************************** }
 
@@ -647,33 +632,27 @@ end;
 
 { ****************************************************************************** }
 
-procedure TfMain.CanContinue(AValue: Boolean; APage: TJvWizardCustomPage);
+procedure TfMain.CanContinue(AValue: Boolean);
 begin
-  with APage do
-    case AValue of
-      True:
-        EnabledButtons := EnabledButtons + [bkNext];
-    else
-      EnabledButtons := EnabledButtons - [bkNext];
-    end;
+  WizardControl.Buttons.Next.Enabled := AValue;
 end;
 
 procedure TfMain.CheckCanContinueToServer;
 begin
   FActiveUpdateFileCollectionItem := nil;
   if rbAddNewPath.Checked then
-    CanContinue(FileExists(eRootDir.Text) and (Pos(INTELLIGEN_FILESYSTEM_LIB, eRootDir.Text) > 0) and (lbSelectPath.Items.IndexOf(eRootDir.Text) = -1), JvWizardWelcomePage)
+    CanContinue(FileExists(eRootDir.Text) and (Pos(INTELLIGEN_FILESYSTEM_LIB, eRootDir.Text) > 0) and (lbSelectPath.Items.IndexOf(eRootDir.Text) = -1))
   else if rbSelectExisting.Checked then
-    CanContinue((lbSelectPath.ItemIndex <> -1) and FileExists(lbSelectPath.Items[lbSelectPath.ItemIndex]), JvWizardWelcomePage);
+    CanContinue((lbSelectPath.ItemIndex <> -1) and FileExists(lbSelectPath.Items[lbSelectPath.ItemIndex]));
 end;
 
 procedure TfMain.CheckCanContinueToServerInfo;
 begin
   FActiveUpdateServerCollectionItem := nil;
   if rbAddNewServer.Checked then
-    CanContinue((length(eServerDir.Text) > 10) and (Pos('http://', eServerDir.Text) > 0) and (lbSelectServer.Items.IndexOf(eServerDir.Text) = -1), JvWizardInteriorPageServer)
+    CanContinue((length(eServerDir.Text) > 10) and (Pos('http://', eServerDir.Text) > 0) and (lbSelectServer.Items.IndexOf(eServerDir.Text) = -1))
   else if rbSelectExistingServer.Checked then
-    CanContinue((lbSelectServer.ItemIndex <> -1), JvWizardInteriorPageServer);
+    CanContinue((lbSelectServer.ItemIndex <> -1));
 end;
 
 procedure TfMain.CheckCanContinueToUpdateFiles;
@@ -691,7 +670,7 @@ begin
         break;
       end;
     end;
-  CanContinue(LCanContinue, JvWizardInteriorPageLocalFiles);
+  CanContinue(LCanContinue);
 end;
 
 procedure TfMain.CheckCanContinueToUpdateServer;
@@ -704,14 +683,15 @@ procedure TfMain.CheckCanContinueToUpdateServer;
 begin
   if rbAddNewVersion.Checked then
   begin
-    CanContinue((lbSelectVersion.Items.IndexOf(FileVersionToStr(cxSEMajorVersion.Value, cxSEMinorVersion.Value, cxSEMajorBuild.Value, cxSEMinorBuild.Value)) = -1), JvWizardInteriorPageUpdateVersion)
+    CanContinue((lbSelectVersion.Items.IndexOf(FileVersionToStr(cxSEMajorVersion.Value, cxSEMinorVersion.Value, cxSEMajorBuild.Value, cxSEMinorBuild.Value)) = -1))
   end
   else if rbSelectExistingVersion.Checked then
-    CanContinue((lbSelectVersion.ItemIndex <> -1), JvWizardInteriorPageUpdateVersion);
+    CanContinue((lbSelectVersion.ItemIndex <> -1));
 end;
 
 { ****************************************************************************** }
 
+{
 procedure TfMain.SetLEDStatus(AStatus: Boolean; ALED: TJvLED; AJump: Boolean = False);
 begin
   with ALED do
@@ -730,6 +710,7 @@ begin
     Status := True;
   end;
 end;
+}
 
 function TfMain.LoadServerInfos: Boolean;
 
@@ -771,8 +752,8 @@ begin
 
     LStatus := LLocalUploadController.GetVersions(FActiveVersionsList, LErrorMsg);
 
-    SetLEDStatus(LStatus, JvLEDConnectToServer);
-    SetLEDStatus(LStatus, JvLEDRecivingUpdateVersions);
+    // SetLEDStatus(LStatus, JvLEDConnectToServer);
+    // SetLEDStatus(LStatus, JvLEDRecivingUpdateVersions);
 
     if not LStatus then
     begin
@@ -783,7 +764,7 @@ begin
       LErrorMsg := '';
 
       LStatus := LLocalUploadController.GetFTPServer(FActiveUpdateFTPServer, LErrorMsg);
-      SetLEDStatus(LStatus, JvLEDRecivingFTPServer);
+      // SetLEDStatus(LStatus, JvLEDRecivingFTPServer);
 
       if not LStatus then
       begin
@@ -794,7 +775,7 @@ begin
         LErrorMsg := '';
 
         LStatus := LLocalUploadController.GetSystems(FActiveSystemsList, LErrorMsg);
-        SetLEDStatus(LStatus, JvLEDRecivingUpdateFiles);
+        // SetLEDStatus(LStatus, JvLEDRecivingUpdateFiles);
       end;
     end;
   finally
@@ -951,7 +932,7 @@ begin
     if (rbAddNewVersion.Checked) then
     begin
       LStatus := LLocalUploadController.AddVersion(cxSEMajorVersion.Value, cxSEMinorVersion.Value, cxSEMajorBuild.Value, cxSEMinorBuild.Value, FVersionID, LErrorMsg);
-      SetLEDStatus(LStatus, JvLEDAddVersion);
+      // SetLEDStatus(LStatus, JvLEDAddVersion);
     end
     else
     begin
@@ -959,7 +940,7 @@ begin
       LStatus := (FVersionID > 0);
       if not LStatus then
         LErrorMsg := 'Failed to retrieve the version id in the previous step. Start over again.';
-      SetLEDStatus(LStatus, JvLEDAddVersion, True);
+      // SetLEDStatus(LStatus, JvLEDAddVersion, True);
     end;
 
     if not LStatus then
@@ -1011,11 +992,11 @@ begin
             end;
           end;
 
-          SetLEDStatus(LStatus, JvLEDAddSystems);
+          // SetLEDStatus(LStatus, JvLEDAddSystems);
         end
         else
         begin
-          SetLEDStatus(True, JvLEDAddSystems, True);
+          // SetLEDStatus(True, JvLEDAddSystems, True);
         end;
 
       finally
@@ -1068,10 +1049,10 @@ begin
         end
         else
         begin
-          SetLEDStatus(True, JvLEDRetrieveFiles, True);
+          // SetLEDStatus(True, JvLEDRetrieveFiles, True);
         end;
 
-        SetLEDStatus(LStatus, JvLEDRetrieveFiles);
+        // SetLEDStatus(LStatus, JvLEDRetrieveFiles);
 
         if not LStatus then
         begin
@@ -1144,7 +1125,7 @@ begin
       finally
         LLocalUpdateController.Free;
       end;
-      SetLEDStatus(LStatus, JvLEDCompressLocalFiles);
+      // SetLEDStatus(LStatus, JvLEDCompressLocalFiles);
 
       LErrorMsg := '';
       // Add all selected files into the DB.
@@ -1166,15 +1147,15 @@ begin
           LLocalUpdateController.OnUpdateUploading :=
           { } procedure(Sender: TObject; Position: Integer)
           { } begin
-          { . } pbUploadProgress.Position := Position * 100;
-          { } end;
+            { . } pbUploadProgress.Position := Position * 100;
+            { } end;
 
           LStatus := LLocalUpdateController.UploadLocalFiles(LUploadFiles, FActiveUpdateFTPServer, FStoreUpdateFilesPath);
         finally
           LLocalUpdateController.Free;
         end;
 
-        SetLEDStatus(LStatus, JvLEDUploadLocalFiles);
+        // SetLEDStatus(LStatus, JvLEDUploadLocalFiles);
       end;
 
     finally

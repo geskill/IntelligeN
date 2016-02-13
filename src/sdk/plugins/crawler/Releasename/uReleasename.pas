@@ -216,7 +216,7 @@ begin
     AControlController.FindControl(cTitle).AddProposedValue(GetName, LTitle);
   end;
 
-  if (ATypeID = cAudio) and ACanUse(cTitle) then
+  if (ATypeID = cAudio) and ACanUse(cCreator) then
   begin
     AControlController.FindControl(cCreator).AddProposedValue(GetName, Trim(copy(LTitle, 1, Pos('-', LTitle) - 1)));
   end;

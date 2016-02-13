@@ -16,7 +16,7 @@ uses
   // Plugin system
   uPlugInAppClass, uPlugInEvent, uPlugInHTTPClasses,
   // Utils
-  uPathUtils, uStringUtils, uURLUtils,
+  uPathUtils, uStringUtils, uSystemUtils, uURLUtils,
   // DirWatch
   uDirWatchEngine, uDirWatchSettings;
 
@@ -54,17 +54,6 @@ implementation
 uses
   // DirWatch
   uDirWatchSettingsForm;
-
-function GetModulePath: string;
-var
-  QueryRes: TMemoryBasicInformation;
-  LBuffer: string;
-begin
-  VirtualQuery(@GetModulePath, QueryRes, SizeOf(QueryRes));
-  SetLength(LBuffer, MAX_PATH);
-  SetLength(LBuffer, GetModuleFileName(Cardinal(QueryRes.AllocationBase), PChar(LBuffer), Length(LBuffer)));
-  Result := LBuffer;
-end;
 
 { TDirWatch }
 

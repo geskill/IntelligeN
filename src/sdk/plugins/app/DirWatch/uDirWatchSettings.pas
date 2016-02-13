@@ -6,24 +6,19 @@ uses
   // Delphi
   SysUtils, Classes,
   // JsonDataObjects
-  JsonDataObjects;
+  JsonDataObjects,
+  // Plugin system
+  uPlugInAppSettingsBase;
 
 type
-  TDirWatchSettings = class(TPersistent)
-  private
-    FSettingsFileName: string;
+  TDirWatchSettings = class(TPlugInAppSettingsBase)
   protected
     FDirWatchPath, FPublishCustomCheckScriptFile: string;
     FLoadFilesOnlyOnce, FLoadAlreadyExistingFiles, FWatchSubdirectories, { . }
     FLoadOnyXMLFiles, FLoadOnlyIntelligeNXML2Files, { . }
     FRunCrawlers, FRunCrypters, FRunSave, FRunPublish, FRunPublishOnlyWithCustomCheck: Boolean;
   public
-    constructor Create(const ASettingsFileName: TFileName);
-    destructor Destroy; override;
-
-    procedure LoadSettings;
-    procedure LoadDefaultSettings;
-    procedure SaveSettings;
+    procedure LoadDefaultSettings; override;
   published
     property DirWatchPath: string read FDirWatchPath write FDirWatchPath;
     property LoadFilesOnlyOnce: Boolean read FLoadFilesOnlyOnce write FLoadFilesOnlyOnce;
@@ -43,39 +38,6 @@ implementation
 
 { TDirWatchSettings }
 
-constructor TDirWatchSettings.Create(const ASettingsFileName: TFileName);
-begin
-  inherited Create;
-  FSettingsFileName := ASettingsFileName;
-
-  LoadSettings;
-end;
-
-destructor TDirWatchSettings.Destroy;
-begin
-  inherited Destroy;
-end;
-
-procedure TDirWatchSettings.LoadSettings;
-var
-  LJsonObject: TJsonObject;
-begin
-  if FileExists(FSettingsFileName) then
-  begin
-    LJsonObject := TJsonObject.Create;
-    try
-      LJsonObject.LoadFromFile(FSettingsFileName);
-      LJsonObject.ToSimpleObject(Self);
-    finally
-      LJsonObject.Free;
-    end;
-  end
-  else
-  begin
-    LoadDefaultSettings;
-  end;
-end;
-
 procedure TDirWatchSettings.LoadDefaultSettings;
 begin
   FDirWatchPath := '';
@@ -90,19 +52,6 @@ begin
   FRunPublish := True;
   FRunPublishOnlyWithCustomCheck := False;
   FPublishCustomCheckScriptFile := '';
-end;
-
-procedure TDirWatchSettings.SaveSettings;
-var
-  LJsonObject: TJsonObject;
-begin
-  LJsonObject := TJsonObject.Create;
-  try
-    LJsonObject.FromSimpleObject(Self);
-    LJsonObject.SaveToFile(FSettingsFileName, False);
-  finally
-    LJsonObject.Free;
-  end;
 end;
 
 end.

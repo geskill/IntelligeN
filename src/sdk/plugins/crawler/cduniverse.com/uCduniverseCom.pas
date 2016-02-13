@@ -89,6 +89,9 @@ function TCduniverseCom.InternalGetAvailableControlIDs;
 begin
   Result := [cTags, cCreator, cPublisher, cPicture, cGenre, cDescription];
 
+  if (ATypeID in [cMovie, cXXX]) then
+    Result := Result + [cDirector];
+
   if (ATypeID in [cAudio, cMovie]) then
     Result := Result + [cRuntime];
 end;
@@ -118,7 +121,7 @@ function TCduniverseCom.InternalExecute;
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := 'Starring.*?td>(.*?)<\/td>';
+          Expression := 'Starring<\/td><td>(.*?)<\/td>';
 
           if Exec(InputString) then
           begin
@@ -135,10 +138,10 @@ function TCduniverseCom.InternalExecute;
                   if Exec(InputString) then
                   begin
                     repeat
-                      LStringList.Add(Match[1]);
+                      LStringList.Add(HTML2TextAndDecode(Match[1]));
                     until not ExecNext;
 
-                    AControlController.FindControl(cTags).AddProposedValue(GetName, StringListSplit(LStringList, ','));
+                    AControlController.FindControl(cTags).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
                   end;
                 finally
                   Free;
@@ -211,7 +214,79 @@ function TCduniverseCom.InternalExecute;
           Expression := 'Developer<\/td><td>(.*?)<\/td>';
 
           if Exec(InputString) then
-            AControlController.FindControl(cCreator).AddProposedValue(GetName, Trim(Match[1]));
+          begin
+            s := Match[1];
+
+            LStringList := TStringList.Create;
+            try
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := '<a.*?>(.*?)<\/a>';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      LStringList.Add(HTML2TextAndDecode(Match[1]));
+                    until not ExecNext;
+
+                    AControlController.FindControl(cCreator).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
+                  end
+                  else
+                  begin
+                    AControlController.FindControl(cCreator).AddProposedValue(GetName, Trim(HTML2TextAndDecode(s)));
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            finally
+              LStringList.Free;
+            end;
+          end;
+        finally
+          Free;
+        end;
+
+    if ACanUse(cDirector) then
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'Director<\/td><td>(.*?)<\/td>';
+
+          if Exec(InputString) then
+          begin
+            s := Match[1];
+
+            LStringList := TStringList.Create;
+            try
+              with TRegExpr.Create do
+              begin
+                try
+                  InputString := s;
+                  Expression := '<a.*?>(.*?)<\/a>';
+
+                  if Exec(InputString) then
+                  begin
+                    repeat
+                      LStringList.Add(HTML2TextAndDecode(Match[1]));
+                    until not ExecNext;
+
+                    AControlController.FindControl(cDirector).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
+                  end
+                  else
+                  begin
+                    AControlController.FindControl(cDirector).AddProposedValue(GetName, Trim(HTML2TextAndDecode(s)));
+                  end;
+                finally
+                  Free;
+                end;
+              end;
+            finally
+              LStringList.Free;
+            end;
+          end;
         finally
           Free;
         end;
@@ -220,36 +295,38 @@ function TCduniverseCom.InternalExecute;
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
-          Expression := 'Publisher<\/td><td>(.*?)<\/td>';
+          Expression := '(Label|Studio|Publisher)<\/td><td>(.*?)<\/td>';
 
           if Exec(InputString) then
           begin
-            AControlController.FindControl(cPublisher).AddProposedValue(GetName, Trim(Match[1]))
-          end
-          else
-          begin
-            Expression := 'Label<\/td><td>(.*?)<\/td>';
-            if Exec(InputString) then
-            begin
-              s := Match[1];
+            s := Match[2];
 
+            LStringList := TStringList.Create;
+            try
               with TRegExpr.Create do
               begin
                 try
                   InputString := s;
-                  // proper: ([\w-]+)|<a .*?">(.*?)</a>
                   Expression := '<a.*?>(.*?)<\/a>';
 
                   if Exec(InputString) then
                   begin
                     repeat
-                      AControlController.FindControl(cPublisher).AddProposedValue(GetName, Trim(Match[1]));
+                      LStringList.Add(HTML2TextAndDecode(Match[1]));
                     until not ExecNext;
+
+                    AControlController.FindControl(cPublisher).AddProposedValue(GetName, StringListSplit(LStringList, ';'));
+                  end
+                  else
+                  begin
+                    AControlController.FindControl(cPublisher).AddProposedValue(GetName, Trim(HTML2TextAndDecode(s)));
                   end;
                 finally
                   Free;
                 end;
               end;
+            finally
+              LStringList.Free;
             end;
           end;
         finally

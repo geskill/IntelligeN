@@ -23,7 +23,7 @@
 		<Import Project="..\app.optset" Condition="'$(Base)'!='' And Exists('..\app.optset')"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
 			<UsePackages>true</UsePackages>
-			<DCC_UsePackage>framework;frameworkX</DCC_UsePackage>
+			<DCC_UsePackage>framework;frameworkX;frameworkUI</DCC_UsePackage>
 			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\customscript.dll</DCC_DependencyCheckOutputName>
 			<GenDll>true</GenDll>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
