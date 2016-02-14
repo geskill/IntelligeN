@@ -221,8 +221,22 @@ function TvBulletin.IntelligentPosting;
     begin
       if CharInSet(Result[X], ['+', '_', '.', ':', '(', ')', '[', ']', '/', '\']) then
         Result[X] := ' ';
-      if (Result[X] = '-') and not AAlternativeSearch then
-        Result[X] := ' ';
+
+      if (Result[X] = '-') then
+      begin
+        if AAlternativeSearch and (X > 1) and (X < length(Result)) then
+        begin
+          if (Result[X - 1] = ' ') or (Result[X + 1] = ' ') then
+          begin
+            Result[X] := ' '; // always remove if before or after minus a space character appears
+          end;
+          // do not remove if minus is within a block of words
+        end
+        else
+        begin
+          Result[X] := ' '; // always remove at start and end of title
+        end;
+      end;
     end;
     _current_length := 0;
     if not AKeepShortWords and not AMaskSearch then
