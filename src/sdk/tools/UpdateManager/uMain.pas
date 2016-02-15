@@ -5,7 +5,7 @@ interface
 uses
   // Delphi
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Buttons, StdCtrls, TypInfo, Generics.Collections,
-  ShellAPI, ComCtrls,
+  ShellAPI, ComCtrls, ExtCtrls,
   // DevExpress
   cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage, cxEdit,
   cxNavigator, cxCheckBox, cxLabel, cxTextEdit, cxDropDownEdit, cxBlobEdit, cxGridCustomTableView, cxGridTableView, cxGridCustomView,
@@ -88,6 +88,15 @@ type
     eUpdateInfoError: TEdit;
     lRetrieveFilesFromServer: TLabel;
     bShowHTTPLogger: TButton;
+    pbConnectToServer: TPaintBox;
+    pbRecivingUpdateVersions: TPaintBox;
+    pbRecivingFTPServer: TPaintBox;
+    pbRecivingUpdateFiles: TPaintBox;
+    pbAddVersion: TPaintBox;
+    pbAddingTheNewSystems: TPaintBox;
+    pbRetrieveFilesFromServer: TPaintBox;
+    pbCompressingLocalFiles: TPaintBox;
+    pbUploadingLocalFiles: TPaintBox;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure WizardControlButtonClick(Sender: TObject; AKind: TdxWizardControlButtonKind; var AHandled: Boolean);
@@ -121,6 +130,7 @@ type
     { *************************************** STEP - 7 *************************************** }
     { *************************************** STEP - 8 *************************************** }
     { **************************************************************************************** }
+    procedure StatusDefaultPaint(Sender: TObject);
     procedure bShowHTTPLoggerClick(Sender: TObject);
   private
   var
@@ -136,6 +146,11 @@ type
     FActiveLocalFiles: TUpdateManagerLocalFileList;
     FActiveOnlineFiles: TUpdateManagerOnlineFileList;
 
+    procedure DrawCircle(const ACanvas: TCanvas; AColor: TColor; AWidth, AHeight: Integer);
+    procedure StatusSuccessPaint(Sender: TObject);
+    procedure StatusSkippingPaint(Sender: TObject);
+    procedure StatusWarningPaint(Sender: TObject);
+
     function GetLocalFilesCheckAllStatus: Byte;
     procedure SetLocalFilesCheckAllStatus;
 
@@ -148,7 +163,7 @@ type
     procedure CheckCanContinueToUpdateFiles;
     procedure CheckCanContinueToUpdateServer;
   protected
-    // procedure SetLEDStatus(AStatus: Boolean; ALED: TJvLED; AJump: Boolean = False);
+    procedure SetPaintBoxOnPaint(const APaintBox: TPaintBox; AStatus: Boolean; AJump: Boolean = False);
     function LoadServerInfos: Boolean;
     function LoadLocalFilesList: Boolean;
     function LoadUpdateFilesList: Boolean;
@@ -301,11 +316,21 @@ begin
   if (ANewPage = wcpWelcomePage) then
   begin
     lbSelectPath.Items.Text := SettingsManager.Settings.GetLibraryFiles;
+    if (lbSelectPath.Count > 0) and (FileExists(lbSelectPath.Items[0])) then
+    begin
+      rbSelectExisting.Checked := True;
+      lbSelectPath.ItemIndex := 0;
+    end;
     CheckCanContinueToServer;
   end
   else if (ANewPage = wcpPageServer) then
   begin
     lbSelectServer.Items.Text := SettingsManager.Settings.GetUpdateServers;
+    if (lbSelectServer.Count > 0) then
+    begin
+      rbSelectExistingServer.Checked := True;
+      lbSelectServer.ItemIndex := 0;
+    end;
     CheckCanContinueToServerInfo;
   end
   else if (ANewPage = wcpPageServerInfo) then
@@ -569,6 +594,45 @@ end;
 
 { ****************************************************************************** }
 
+procedure TfMain.StatusDefaultPaint(Sender: TObject);
+begin
+  DrawCircle((Sender as TPaintBox).Canvas, clGray, 16, 16);
+end;
+
+procedure TfMain.bShowHTTPLoggerClick(Sender: TObject);
+begin
+{$IFDEF DEBUG}
+  HTTPLogger.Show;
+{$ENDIF}
+end;
+
+{ ****************************************************************************** }
+
+procedure TfMain.DrawCircle(const ACanvas: TCanvas; AColor: TColor; AWidth, AHeight: Integer);
+begin
+  with ACanvas do
+  begin
+    Brush.Style := bsSolid;
+    Brush.Color := AColor;
+    Ellipse(0, 0, AWidth, AHeight);
+  end;
+end;
+
+procedure TfMain.StatusSuccessPaint(Sender: TObject);
+begin
+  DrawCircle((Sender as TPaintBox).Canvas, clLime, 16, 16);
+end;
+
+procedure TfMain.StatusSkippingPaint(Sender: TObject);
+begin
+  DrawCircle((Sender as TPaintBox).Canvas, clHighlight, 16, 16);
+end;
+
+procedure TfMain.StatusWarningPaint(Sender: TObject);
+begin
+  DrawCircle((Sender as TPaintBox).Canvas, clRed, 16, 16);
+end;
+
 function TfMain.GetLocalFilesCheckAllStatus: Byte;
 var
   LRecordCount: Integer;
@@ -691,26 +755,23 @@ end;
 
 { ****************************************************************************** }
 
-{
-procedure TfMain.SetLEDStatus(AStatus: Boolean; ALED: TJvLED; AJump: Boolean = False);
+procedure TfMain.SetPaintBoxOnPaint(const APaintBox: TPaintBox; AStatus: Boolean; AJump: Boolean = False);
 begin
-  with ALED do
+  with APaintBox do
   begin
     case AStatus of
       True:
         case AJump of
           True:
-            ColorOn := clBlue;
+            OnPaint := StatusSkippingPaint;
         else
-          ColorOn := clLime;
+          OnPaint := StatusSuccessPaint;
         end;
     else
-      ColorOn := clRed;
+      OnPaint := StatusWarningPaint;
     end;
-    Status := True;
   end;
 end;
-}
 
 function TfMain.LoadServerInfos: Boolean;
 
@@ -752,8 +813,8 @@ begin
 
     LStatus := LLocalUploadController.GetVersions(FActiveVersionsList, LErrorMsg);
 
-    // SetLEDStatus(LStatus, JvLEDConnectToServer);
-    // SetLEDStatus(LStatus, JvLEDRecivingUpdateVersions);
+    SetPaintBoxOnPaint(pbConnectToServer, LStatus);
+    SetPaintBoxOnPaint(pbRecivingUpdateVersions, LStatus);
 
     if not LStatus then
     begin
@@ -764,7 +825,7 @@ begin
       LErrorMsg := '';
 
       LStatus := LLocalUploadController.GetFTPServer(FActiveUpdateFTPServer, LErrorMsg);
-      // SetLEDStatus(LStatus, JvLEDRecivingFTPServer);
+      SetPaintBoxOnPaint(pbRecivingFTPServer, LStatus);
 
       if not LStatus then
       begin
@@ -775,7 +836,7 @@ begin
         LErrorMsg := '';
 
         LStatus := LLocalUploadController.GetSystems(FActiveSystemsList, LErrorMsg);
-        // SetLEDStatus(LStatus, JvLEDRecivingUpdateFiles);
+        SetPaintBoxOnPaint(pbRecivingUpdateFiles, LStatus);
       end;
     end;
   finally
@@ -932,7 +993,7 @@ begin
     if (rbAddNewVersion.Checked) then
     begin
       LStatus := LLocalUploadController.AddVersion(cxSEMajorVersion.Value, cxSEMinorVersion.Value, cxSEMajorBuild.Value, cxSEMinorBuild.Value, FVersionID, LErrorMsg);
-      // SetLEDStatus(LStatus, JvLEDAddVersion);
+      SetPaintBoxOnPaint(pbAddVersion, LStatus);
     end
     else
     begin
@@ -940,7 +1001,7 @@ begin
       LStatus := (FVersionID > 0);
       if not LStatus then
         LErrorMsg := 'Failed to retrieve the version id in the previous step. Start over again.';
-      // SetLEDStatus(LStatus, JvLEDAddVersion, True);
+      SetPaintBoxOnPaint(pbAddVersion, LStatus, True);
     end;
 
     if not LStatus then
@@ -992,11 +1053,11 @@ begin
             end;
           end;
 
-          // SetLEDStatus(LStatus, JvLEDAddSystems);
+          SetPaintBoxOnPaint(pbAddingTheNewSystems, LStatus);
         end
         else
         begin
-          // SetLEDStatus(True, JvLEDAddSystems, True);
+          SetPaintBoxOnPaint(pbAddingTheNewSystems, LStatus, True);
         end;
 
       finally
@@ -1046,13 +1107,13 @@ begin
               end;
             LLocalFile := nil;
           end;
+
+          SetPaintBoxOnPaint(pbRetrieveFilesFromServer, LStatus);
         end
         else
         begin
-          // SetLEDStatus(True, JvLEDRetrieveFiles, True);
+          SetPaintBoxOnPaint(pbRetrieveFilesFromServer, LStatus, True);
         end;
-
-        // SetLEDStatus(LStatus, JvLEDRetrieveFiles);
 
         if not LStatus then
         begin
@@ -1125,7 +1186,7 @@ begin
       finally
         LLocalUpdateController.Free;
       end;
-      // SetLEDStatus(LStatus, JvLEDCompressLocalFiles);
+      SetPaintBoxOnPaint(pbCompressingLocalFiles, LStatus);
 
       LErrorMsg := '';
       // Add all selected files into the DB.
@@ -1155,7 +1216,7 @@ begin
           LLocalUpdateController.Free;
         end;
 
-        // SetLEDStatus(LStatus, JvLEDUploadLocalFiles);
+        SetPaintBoxOnPaint(pbUploadingLocalFiles, LStatus);
       end;
 
     finally
@@ -1187,13 +1248,6 @@ begin
   end;
 
   Result := LStatus;
-end;
-
-procedure TfMain.bShowHTTPLoggerClick(Sender: TObject);
-begin
-{$IFDEF DEBUG}
-  HTTPLogger.Show;
-{$ENDIF}
 end;
 
 end.
