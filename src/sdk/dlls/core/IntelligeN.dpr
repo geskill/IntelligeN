@@ -6,7 +6,7 @@ uses
   // Common
   uBaseConst,
   // Utils
-  uPathUtils;
+  uPathUtils, uSystemUtils;
 
 {$R *.res}
 
@@ -15,21 +15,6 @@ const
   PluginsFolder: string = 'plugins';
   SettingsFolder: string = 'settings';
   TemplatesFolder: string = 'templates';
-
-  { ****************************************************************************** }
-
-function GetModulePath: string;
-var
-  QueryRes: TMemoryBasicInformation;
-  LBuffer: string;
-begin
-  VirtualQuery(@GetModulePath, QueryRes, SizeOf(QueryRes));
-  SetLength(LBuffer, MAX_PATH);
-  SetLength(LBuffer, GetModuleFileName(Cardinal(QueryRes.AllocationBase), PChar(LBuffer), Length(LBuffer)));
-  Result := LBuffer;
-end;
-
-{ ****************************************************************************** }
 
 function IsPortable: WordBool; stdcall; export;
 begin

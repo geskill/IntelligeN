@@ -6,7 +6,9 @@ uses
   // Delphi
   Windows, SysUtils, XMLDoc, XMLIntf, ActiveX, Variants,
   // Plugin system
-  uPlugInCAPTCHAClass, uPlugInConst;
+  uPlugInCAPTCHAClass, uPlugInConst,
+  // Utils
+  uSystemUtils;
 
 type
   TvBulletin_RandomQuestion = class(TCAPTCHAPlugIn)
@@ -21,17 +23,6 @@ type
   end;
 
 implementation
-
-function GetModulePath: string;
-var
-  QueryRes: TMemoryBasicInformation;
-  LBuffer: string;
-begin
-  VirtualQuery(@GetModulePath, QueryRes, SizeOf(QueryRes));
-  SetLength(LBuffer, MAX_PATH);
-  SetLength(LBuffer, GetModuleFileName(Cardinal(QueryRes.AllocationBase), PChar(LBuffer), Length(LBuffer)));
-  Result := LBuffer;
-end;
 
 { TvBulletin_RandomQuestion }
 
