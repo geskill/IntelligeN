@@ -433,7 +433,7 @@ begin
         ModifierS := False;
 
         InputString := HTTPResult.SourceCode;
-        Expression := StringReplace(NewURL, '://', '://(.*?)', []);
+        Expression := RegExpEscape(StringReplace(NewURL, '://', '://(.*?)', []));
 
         if Exec(InputString) then
         begin
