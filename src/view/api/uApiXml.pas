@@ -73,6 +73,9 @@ procedure GetControls(const AFileName: string; const AControlController: IContro
 
 implementation
 
+resourcestring
+  StrTheXMLFileIsNotCompatible = 'The XML file is not compatible to the intelligen.xml.2 standard';
+
 class function TApiXml.GetControlsTemplateInfo(const AFileName: string): TTemplateInfo;
 var
   LNeedToUninitialize: Boolean;
@@ -91,6 +94,7 @@ begin
 
       with LXMLDoc.DocumentElement do
         if HasChildNodes then
+        begin
           with ChildNodes.Nodes['templatetype'] do
           begin
             with LTemplateInfo do
@@ -100,6 +104,11 @@ begin
               TemplateChecksum := VarToStr(Attributes['checksum']);
             end;
           end;
+        end
+        else
+        begin
+          raise Exception.Create(StrTheXMLFileIsNotCompatible);
+        end;
 
       Result := LTemplateInfo;
     finally
@@ -398,8 +407,8 @@ begin
         XMLDoc := nil;
       end;
     finally
-    if LNeedToUninitialize then
-      CoUninitialize;
+      if LNeedToUninitialize then
+        CoUninitialize;
     end;
   end;
 end;
@@ -743,8 +752,8 @@ begin
         XMLDoc := nil;
       end;
     finally
-    if LNeedToUninitialize then
-      CoUninitialize;
+      if LNeedToUninitialize then
+        CoUninitialize;
     end;
   end;
 end;

@@ -10,7 +10,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInImageHosterClass, uPlugInHTTPClasses,
+  uPlugInImageHosterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
   uHTMLUtils;
 
@@ -77,7 +77,31 @@ begin
     AddFormField('MAX_FILE_SIZE', '200000000');
 
     AddFormField('description', '');
-    AddFormField('dimension', '1600');
+    if (ImageHostResize = irNone) then
+    begin
+      AddFormField('dimension', '1600');
+    end
+    else
+    begin
+      case ImageHostResize of
+        ir320x240:
+          begin
+            AddFormField('dimension', '320');
+          end;
+        ir450x338:
+          begin
+            AddFormField('dimension', '450');
+          end;
+        ir640x480:
+          begin
+            AddFormField('dimension', '640');
+          end;
+        ir800x600:
+          begin
+            AddFormField('dimension', '800');
+          end;
+      end;
+    end;
     AddFormField('upload_form', '');
   end;
 

@@ -31,8 +31,8 @@ object fMain: TfMain
     OnPageChanging = WizardControlPageChanging
     object wcpWelcomePage: TdxWizardControlPage
       Header.Description = 
-        'Select your IntelligeN developer edition which will be used for ' +
-        'making the update from those files.'
+        'Select your IntelligeN developer edition, which will be used for' +
+        ' making the update from those files.'
       Header.Title = 'Welcome'
       DesignSize = (
         613
@@ -172,46 +172,73 @@ object fMain: TfMain
         202)
       object lConnectToServer: TLabel
         Left = 47
-        Top = 3
+        Top = 5
         Width = 117
         Height = 13
         Caption = 'Connecting to Server ...'
       end
       object lRecivingUpdateVersions: TLabel
         Left = 47
-        Top = 35
+        Top = 37
         Width = 135
         Height = 13
         Caption = 'Reciving update versions ...'
       end
       object lRecivingFTPServer: TLabel
         Left = 47
-        Top = 67
+        Top = 69
         Width = 230
         Height = 13
         Caption = 'Reciving FTP store path and login credentials ...'
       end
       object lRecivingUpdateFiles: TLabel
         Left = 47
-        Top = 99
+        Top = 101
         Width = 188
         Height = 13
         Caption = 'Reciving information for update files ...'
       end
       object lServerInfoError: TLabel
-        Left = 24
-        Top = 125
+        Left = 13
+        Top = 158
         Width = 28
         Height = 13
         Margins.Top = 190
         Anchors = [akLeft, akBottom]
         Caption = 'Error:'
         Visible = False
-        ExplicitTop = 190
+      end
+      object pbConnectToServer: TPaintBox
+        Left = 19
+        Top = 3
+        Width = 16
+        Height = 16
+        OnPaint = StatusDefaultPaint
+      end
+      object pbRecivingUpdateVersions: TPaintBox
+        Left = 19
+        Top = 35
+        Width = 16
+        Height = 16
+        OnPaint = StatusDefaultPaint
+      end
+      object pbRecivingFTPServer: TPaintBox
+        Left = 19
+        Top = 67
+        Width = 16
+        Height = 16
+        OnPaint = StatusDefaultPaint
+      end
+      object pbRecivingUpdateFiles: TPaintBox
+        Left = 19
+        Top = 99
+        Width = 16
+        Height = 16
+        OnPaint = StatusDefaultPaint
       end
       object eServerInfoError: TEdit
-        Left = 58
-        Top = 125
+        Left = 47
+        Top = 158
         Width = 255
         Height = 13
         Margins.Top = 190
@@ -477,7 +504,7 @@ object fMain: TfMain
         202)
       object lUpdateInfoError: TLabel
         Left = 24
-        Top = 82
+        Top = -48
         Width = 28
         Height = 13
         Anchors = [akLeft, akBottom]
@@ -487,28 +514,49 @@ object fMain: TfMain
       end
       object lAddingTheNewSystems: TLabel
         Left = 47
-        Top = 35
+        Top = 37
         Width = 212
         Height = 13
         Caption = 'Adding the new systems to the database ...'
       end
       object lAddVersion: TLabel
         Left = 47
-        Top = 3
+        Top = 5
         Width = 208
         Height = 13
         Caption = 'Adding the new version to the database ...'
       end
       object lRetrieveFilesFromServer: TLabel
         Left = 47
-        Top = 67
+        Top = 69
         Width = 231
         Height = 13
         Caption = 'Retrieve files for this version from the server ...'
       end
+      object pbAddVersion: TPaintBox
+        Left = 19
+        Top = 3
+        Width = 16
+        Height = 16
+        OnPaint = StatusDefaultPaint
+      end
+      object pbAddingTheNewSystems: TPaintBox
+        Left = 19
+        Top = 35
+        Width = 16
+        Height = 16
+        OnPaint = StatusDefaultPaint
+      end
+      object pbRetrieveFilesFromServer: TPaintBox
+        Left = 19
+        Top = 67
+        Width = 16
+        Height = 16
+        OnPaint = StatusDefaultPaint
+      end
       object eUpdateInfoError: TEdit
         Left = 58
-        Top = 82
+        Top = -48
         Width = 255
         Height = 13
         Anchors = [akLeft, akBottom]
@@ -529,21 +577,21 @@ object fMain: TfMain
         202)
       object lCompressingLocalFiles: TLabel
         Left = 47
-        Top = 3
+        Top = 5
         Width = 122
         Height = 13
         Caption = 'Compressing local files ...'
       end
       object lUploadingLocalFiles: TLabel
         Left = 47
-        Top = 35
+        Top = 37
         Width = 108
         Height = 13
         Caption = 'Uploading local files ...'
       end
       object lUploadInfoError: TLabel
         Left = 24
-        Top = 82
+        Top = -48
         Width = 28
         Height = 13
         Anchors = [akLeft, akBottom]
@@ -551,9 +599,23 @@ object fMain: TfMain
         Visible = False
         ExplicitTop = 264
       end
+      object pbCompressingLocalFiles: TPaintBox
+        Left = 19
+        Top = 3
+        Width = 16
+        Height = 16
+        OnPaint = StatusDefaultPaint
+      end
+      object pbUploadingLocalFiles: TPaintBox
+        Left = 19
+        Top = 35
+        Width = 16
+        Height = 16
+        OnPaint = StatusDefaultPaint
+      end
       object pbUploadProgress: TProgressBar
         Left = 66
-        Top = 53
+        Top = 55
         Width = 242
         Height = 17
         TabOrder = 0
@@ -561,7 +623,7 @@ object fMain: TfMain
       end
       object eUploadInfoError: TEdit
         Left = 58
-        Top = 82
+        Top = -48
         Width = 255
         Height = 13
         Anchors = [akLeft, akBottom]

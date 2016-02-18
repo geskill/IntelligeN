@@ -28,6 +28,8 @@ function RemoveTextBetween(const Str: string; const Delim1, Delim2: string): str
 
 function CharCount(const SubStr, S: string): Integer;
 
+function RegExpEscape(const AStr: string): string;
+
 function ReversePos(SubStr, S: string): Integer;
 
 function ReduceCapitals(const Str: string): string;
@@ -366,6 +368,11 @@ begin
     I := PosEx(SubStr, S, I) + 1;
     Inc(Result);
   end;
+end;
+
+function RegExpEscape(const AStr: string): string;
+begin
+  Result := ReplaceRegExpr('([.+*?\[\]\(\){}\\])', AStr, '\\$1', True);
 end;
 
 function ReversePos(SubStr, S: string): Integer;

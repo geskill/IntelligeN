@@ -14,7 +14,9 @@ const
   HTTP: string = 'http';
 
 function BeginsWithHTTP(const AUrl: string): Boolean;
-function IsURL(const AUrl: string): Boolean;
+function IsUrl(const AUrl: string): Boolean;
+
+function CombineUrl(const AUrl, ABaseUrl: string): string;
 
 function ExtractUrlFileName(const AUrl: string): string;
 function ExtractUrlPath(const AUrl: string): string;
@@ -44,9 +46,42 @@ begin
   Result := (copy(LowerCase(AUrl), 1, length(HTTP)) = HTTP);
 end;
 
-function IsURL(const AUrl: string): Boolean;
+function IsUrl(const AUrl: string): Boolean;
 begin
   Result := Pos('://', AUrl) > 0;
+end;
+
+function CombineUrl(const AUrl, ABaseUrl: string): string;
+var
+  LIdURI: TIdURI;
+begin
+  Result := AURL;
+  LIdURI := TIdURI.Create(ABaseURL);
+  try
+    if (Length(Result) > 1) and (Result[1] = '/') and (Result[2] = '/') then
+    begin
+      Result := LIdURI.Protocol + ':' + Result;
+    end;
+    if (Length(Result) > 0) and (Result[1] = '/') then
+    begin
+      Result := LIdURI.Protocol + '://' + LIdURI.Host + Result;
+    end;
+    if (Length(Result) > 0) and ((Result[1] = '?') or (Result[1] = '#')) then
+    begin
+      Result := ABaseURL + Result;
+    end;
+    if (Length(Result) > 1) and (Result[1] = '.') and (Result[2] = '/') then
+    begin
+      Result := LIdURI.Protocol + '://' + LIdURI.Host + LIdURI.Path + copy(Result, 3);
+    end;
+    if (Pos('://', Result) = 0) then
+    begin
+      Result := LIdURI.Protocol + '://' + LIdURI.Host + LIdURI.Path + Result;
+    end;
+    // TODO: Handle ../../
+  finally
+    LIdURI.Free;
+  end;
 end;
 
 function ExtractUrlFileName(const AUrl: string): string;
