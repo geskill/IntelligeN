@@ -15,13 +15,18 @@ function GetPersonalAppDataFolder: string;
 function GetPersonalLocalAppDataFolder: string;
 function GetPersonalLocalTempPath: string;
 
+function ExtractLongPathName(const ShortName: string): string;
+
 function PathCombineEx(const ABaseName, ARelativePath: string): string;
 
-function IsDirectory(const FileName: string): Boolean;
+function IsDirectory(const AFileName: string): Boolean;
 
 implementation
 
-// Je nach Delphi Version anpassen!
+function GetLongPathName(ShortPathName: PChar; LongPathName: PChar; cchBuffer: Integer): Integer; stdcall; external kernel32 name 'GetLongPathNameW';
+function GetLongPathNameA(ShortPathName: PAnsiChar; LongPathName: PAnsiChar; cchBuffer: Integer): Integer; stdcall; external kernel32;
+function GetLongPathNameW(ShortPathName: PWideChar; LongPathName: PWideChar; cchBuffer: Integer): Integer; stdcall; external kernel32;
+
 function PathCombine(lpszDest: PChar; const lpszDir, lpszFile: PChar): PChar; stdcall; external 'shlwapi.dll' name 'PathCombineW';
 function PathCombineA(lpszDest: PAnsiChar; const lpszDir, lpszFile: PAnsiChar): PAnsiChar; stdcall; external 'shlwapi.dll';
 function PathCombineW(lpszDest: PWideChar; const lpszDir, lpszFile: PWideChar): PWideChar; stdcall; external 'shlwapi.dll';
@@ -98,18 +103,24 @@ begin
   Result := IncludeTrailingPathDelimiter(GetEnvironmentVariable('TEMP'));
 end;
 
+function ExtractLongPathName(const ShortName: string): string;
+begin
+  SetLength(Result, GetLongPathName(PChar(ShortName), nil, 0));
+  SetLength(Result, GetLongPathName(PChar(ShortName), PChar(Result), Length(Result)));
+end;
+
 function PathCombineEx(const ABaseName, ARelativePath: string): string;
 begin
   SetLength(Result, MAX_PATH);
   PathCombine(@Result[1], PChar(ExtractFilePath(ABaseName)), PChar(ARelativePath));
-  SetLength(Result, length(PChar(@Result[1])));
+  SetLength(Result, Length(PChar(@Result[1])));
 end;
 
-function IsDirectory(const FileName: string): Boolean;
+function IsDirectory(const AFileName: string): Boolean;
 var
   R: DWORD;
 begin
-  R := GetFileAttributes(PChar(FileName));
+  R := GetFileAttributes(PChar(AFileName));
   Result := (R <> DWORD(-1)) and ((R and FILE_ATTRIBUTE_DIRECTORY) <> 0);
 end;
 
