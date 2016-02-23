@@ -198,6 +198,7 @@ type
     function ValidateFiles: Boolean;
 
     procedure HandleBlackWhitelist(ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; out AControlList: TControlDataList; out AMirrorList: TMirrorContainerList);
+    procedure HandleCustomFieldList(ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; AControlList: TControlDataList; AMirrorList: TMirrorContainerList; out ACustomFieldList: TCustomFieldList);
 
     procedure WebsiteChange(ACMSItemChangeType: TCMSItemChangeType; AIndex, AParam: Integer);
     procedure ControlChange(const Sender: IControlBasic);
@@ -339,7 +340,7 @@ type
     function GeneratePublishJob: IPublishJob;
 
     function CheckIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData: ITabSheetData): RIScriptResult;
-    function ParseIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData: ITabSheetData; ADataChanged: WordBool = True): RIScriptResult;
+    function ParseIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData: ITabSheetData; ADataChanged: WordBool = True): RIScriptResult; // TODO: Improve this (don't use ITabSheetData directly)
 
     property OnUpdateCMSList: IUpdateCMSListEvent read GetUpdateCMSList;
     property OnUpdateCMSWebsiteList: IUpdateCMSWebsiteListEvent read GetUpdateCMSWebsiteList;
@@ -1022,6 +1023,23 @@ begin
   LControlBasic := nil;
 end;
 
+procedure TICMSWebsiteContainer.HandleCustomFieldList(ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; AControlList: TControlDataList; AMirrorList: TMirrorContainerList; out ACustomFieldList: TCustomFieldList);
+var
+  LCustomFieldIndex: Integer;
+  LIScript : WideString;
+  LIScriptResult: RIScriptResult;
+begin
+  ACustomFieldList := TCustomFieldList.Create;
+
+  with ACMSWebsiteCollectionItem.CustomFields do
+    for LCustomFieldIndex := 0 to CustomFields.Count - 1 do
+    begin
+      LIScript := CustomFields[LCustomFieldIndex].Value;
+      LIScriptResult := TabSheetController.PublishController.ParseIScript(CMS, Website, LIScript, TITabSheetData.Create(TabSheetController.TypeID, AControlList, AMirrorList, ACustomFieldList, False)); // TODO: Improve this
+      ACustomFieldList.Add(TINameValueItem.Create(CustomFields[LCustomFieldIndex].Name, IfThen(not LIScriptResult.HasError, LIScriptResult.CompiledText)));
+    end;
+end;
+
 procedure TICMSWebsiteContainer.WebsiteChange(ACMSItemChangeType: TCMSItemChangeType; AIndex, AParam: Integer);
 var
   LNewValue: Boolean;
@@ -1288,6 +1306,7 @@ function TICMSWebsiteContainer.GenerateData: ITabSheetData;
 var
   LControlList: TControlDataList;
   LMirrorList: TMirrorContainerList;
+  LCustomFieldList: TCustomFieldList;
 
   LControlIndex: Integer;
 begin
@@ -1301,7 +1320,9 @@ begin
         LControlList.Add(TabSheetController.ControlController.Control[LControlIndex]);
     end;
 
-    FDataBuffer := TITabSheetData.Create(TabSheetController.TypeID, LControlList, LMirrorList);
+    HandleCustomFieldList(FCMSWebsiteCollectionItem, LControlList, LMirrorList, LCustomFieldList);
+
+    FDataBuffer := TITabSheetData.Create(TabSheetController.TypeID, LControlList, LMirrorList, LCustomFieldList);
     FDataChanged := False;
   end;
 

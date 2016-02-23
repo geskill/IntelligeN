@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, Classes, Controls, Forms, Graphics, ImgList,
+  Windows, SysUtils, Classes, Controls, Forms, Graphics, ImgList, Generics.Collections,
   // Dev Express
   dxDockControl, cxCheckListBox,
   // AnyDAC
@@ -60,6 +60,7 @@ type
     FAccountName, FAccountPassword, FSubjectFileName, FMessageFileName: string;
     FWebsite: string;
     FFilter: IFilter;
+    FCustomFields: ICustomFields;
     function GetHostWithPath: string;
   public
     function GetPath: string; override;
@@ -69,6 +70,7 @@ type
     property HostWithPath: string read GetHostWithPath;
     property Website: string read FWebsite write FWebsite;
     property Filter: IFilter read FFilter write FFilter;
+    property CustomFields: ICustomFields read FCustomFields write FCustomFields;
   published
     property Name;
     property Enabled;
@@ -709,6 +711,7 @@ begin
   begin
     Website := WebsiteURL;
     Filter := WebsiteFilter;
+    CustomFields := WebsiteCustomFields;
   end;
   if Assigned(OnWebsitesChange) then
     OnWebsitesChange.Invoke(cctChange, LCMSWebsitesCollectionItem.Index, -1);

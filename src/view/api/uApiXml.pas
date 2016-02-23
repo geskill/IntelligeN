@@ -36,6 +36,7 @@ type
     XML_CHARSET = 'charset';
     XML_SETTINGS = 'settings';
     XML_FILTERS = 'filters';
+    XML_CUSTOMFIELDS = 'customfields';
   public
     class function Import(const AFileName: TFileName): IWebsiteConfigurationFile;
     class function Load(const AFileName: TFileName): IIntelligeNConfigurationFile;
@@ -400,6 +401,13 @@ begin
                           end;
                     end;
 
+                if Assigned(ChildNodes.FindNode(XML_CUSTOMFIELDS)) then
+                  with ChildNodes.Nodes[XML_CUSTOMFIELDS] do
+                    for I := 0 to ChildNodes.Count - 1 do
+                    begin
+                      WebsiteCustomFields.CustomFields.Add(TCustomField.Create(VarToStr(ChildNodes.Nodes[I].Attributes['name']), VarToStr(ChildNodes.Nodes[I].NodeValue)));
+                    end;
+
                 Changed := False;
               end;
         end;
@@ -712,9 +720,8 @@ begin
                 with ChildNodes.Nodes[I] do
                   if HasChildNodes then
                   begin
-                    AControlController.NewControl(StringToControlID(NodeName), VarToStr(ChildNodes.Nodes['title'].NodeValue), VarToStr(ChildNodes.Nodes['value'].NodeValue), VarToStr(ChildNodes.Nodes['title'].Attributes['hint']),
-                      VarToStr(ChildNodes.Nodes['value'].Attributes['list']), VarToIntDef(ChildNodes.Nodes['position'].Attributes['left'], 0), VarToIntDef(ChildNodes.Nodes['position'].Attributes['top'], 0),
-                      VarToIntDef(ChildNodes.Nodes['position'].Attributes['width'], 0), VarToIntDef(ChildNodes.Nodes['position'].Attributes['height'], 0));
+                    AControlController.NewControl(StringToControlID(NodeName), VarToStr(ChildNodes.Nodes['title'].NodeValue), VarToStr(ChildNodes.Nodes['value'].NodeValue), VarToStr(ChildNodes.Nodes['title'].Attributes['hint']), VarToStr(ChildNodes.Nodes['value'].Attributes['list']),
+                      VarToIntDef(ChildNodes.Nodes['position'].Attributes['left'], 0), VarToIntDef(ChildNodes.Nodes['position'].Attributes['top'], 0), VarToIntDef(ChildNodes.Nodes['position'].Attributes['width'], 0), VarToIntDef(ChildNodes.Nodes['position'].Attributes['height'], 0));
                     APageController.CallControlAligner;
                   end;
     finally

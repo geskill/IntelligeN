@@ -131,12 +131,31 @@ type
     property Hosters: TList<IHoster>read GetHoster;
   end;
 
+  ICustomField = interface(IChangeable)
+    ['{6EB05D20-DDFA-43E1-9C57-D70212C0A000}']
+    function GetName: WideString;
+    procedure SetName(const AName: WideString);
+    function GetValue: WideString;
+    procedure SetValue(const AValue: WideString);
+
+    property Name: WideString read GetName write SetName;
+    property Value: WideString read GetValue write SetValue;
+  end;
+
+  ICustomFields = interface(IChangeable)
+    ['{59F8051E-1E7E-42BB-866A-F4A84B0A9767}']
+    function GetCustomFields: TList<ICustomField>;
+
+    property CustomFields: TList<ICustomField>read GetCustomFields;
+  end;
+
   IIntelligeNConfigurationFile = interface(IWebsiteConfigurationFile)
     ['{83C439E8-0FD3-4E56-8FF1-F54387180693}']
-
     function GetWebsiteFilter: IFilter;
+    function GetWebsiteCustomFields: ICustomFields;
 
     property WebsiteFilter: IFilter read GetWebsiteFilter;
+    property WebsiteCustomFields: ICustomFields read GetWebsiteCustomFields;
   end;
 
 implementation
