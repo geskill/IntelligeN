@@ -113,7 +113,7 @@ object fPluginWizard: TfPluginWizard
     MaxValue = 0
     MinValue = 0
     TabOrder = 7
-    Value = 0
+    Value = 2
   end
   object seBuild: TSpinEdit
     Left = 368
@@ -152,7 +152,7 @@ object fPluginWizard: TfPluginWizard
     Height = 21
     TabOrder = 4
     Items.Strings = (
-      '(c) 2015 Sebastian Klatte')
+      '(c) 2016 Sebastian Klatte')
   end
   object eWebsite: TEdit
     Left = 8

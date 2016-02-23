@@ -8,7 +8,7 @@ uses
   // DevExpress
   cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, cxTextEdit, cxMaskEdit,
   // Utils
-  uFileUtils, uSpecialStringUtils;
+  uFileUtils, uStringUtils;
 
 type
   TfPluginWizard = class(TForm)

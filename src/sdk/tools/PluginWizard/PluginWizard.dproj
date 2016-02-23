@@ -1,10 +1,10 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
-			<ProjectGuid>{D8C573A7-4924-4A2D-8ED8-C031BDEADA5D}</ProjectGuid>
-			<ProjectVersion>12.0</ProjectVersion>
-			<MainSource>sharelinksbiz.dpr</MainSource>
+			<ProjectGuid>{2786EA74-8190-454F-AF75-B544302FA0AA}</ProjectGuid>
+			<MainSource>PluginWizard.dpr</MainSource>
 			<Config Condition="'$(Config)'==''">Debug</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
+			<ProjectVersion>12.0</ProjectVersion>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Basis' or '$(Base)'!=''">
 			<Base>true</Base>
@@ -19,38 +19,34 @@
 			<CfgParent>Base</CfgParent>
 			<Base>true</Base>
 		</PropertyGroup>
-		<Import Project="..\..\plugin.optset" Condition="'$(Base)'!='' And Exists('..\..\plugin.optset')"/>
+		<Import Project="..\tools.optset" Condition="'$(Base)'!='' And Exists('..\tools.optset')"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
-			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
-			<UsePackages>true</UsePackages>
-			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\sharelinksbiz.dll</DCC_DependencyCheckOutputName>
-			<GenDll>true</GenDll>
-			<DCC_UsePackage>framework;frameworkX</DCC_UsePackage>
+			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;$(DCC_UnitAlias)</DCC_UnitAlias>
+			<DCC_DcuOutput>dcu</DCC_DcuOutput>
+			<DCC_DependencyCheckOutputName>PluginWizard.exe</DCC_DependencyCheckOutputName>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DCC_Platform>x86</DCC_Platform>
-			<CfgDependentOn>..\..\plugin.optset</CfgDependentOn>
+			<CfgDependentOn>..\tools.optset</CfgDependentOn>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
-			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
 			<DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
 			<DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
+			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
 			<DCC_DebugInformation>false</DCC_DebugInformation>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<ItemGroup>
-			<DelphiCompile Include="sharelinksbiz.dpr">
+			<DelphiCompile Include="PluginWizard.dpr">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="uShareLinksBiz.pas"/>
-			<RcItem Include="Share-Links.biz.ico">
-				<ResourceType>Icon</ResourceType>
-				<ResourceId>icon</ResourceId>
-			</RcItem>
+			<DCCReference Include="uPluginWizard.pas">
+				<Form>fPluginWizard</Form>
+			</DCCReference>
 			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
-				<DependentOn>..\..\plugin.optset</DependentOn>
+				<DependentOn>..\tools.optset</DependentOn>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_1</Key>
@@ -64,24 +60,23 @@
 		<Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
 		<ProjectExtensions>
 			<Borland.Personality>Delphi.Personality.12</Borland.Personality>
-			<Borland.ProjectType/>
+			<Borland.ProjectType>VCLApplication</Borland.ProjectType>
 			<BorlandProject>
 				<Delphi.Personality>
 					<Source>
-						<Source Name="MainSource">sharelinksbiz.dpr</Source>
+						<Source Name="MainSource">PluginWizard.dpr</Source>
 					</Source>
 					<Parameters>
 						<Parameters Name="UseLauncher">False</Parameters>
 						<Parameters Name="LoadAllSymbols">True</Parameters>
 						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
-						<Parameters Name="HostApplication">../../../../../bin_portable\IntelligeN.exe</Parameters>
 					</Parameters>
 					<VersionInfo>
-						<VersionInfo Name="IncludeVerInfo">True</VersionInfo>
+						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>
 						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
-						<VersionInfo Name="MajorVer">2</VersionInfo>
-						<VersionInfo Name="MinorVer">129</VersionInfo>
-						<VersionInfo Name="Release">2</VersionInfo>
+						<VersionInfo Name="MajorVer">1</VersionInfo>
+						<VersionInfo Name="MinorVer">0</VersionInfo>
+						<VersionInfo Name="Release">0</VersionInfo>
 						<VersionInfo Name="Build">0</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">False</VersionInfo>
@@ -92,18 +87,17 @@
 						<VersionInfo Name="CodePage">1252</VersionInfo>
 					</VersionInfo>
 					<VersionInfoKeys>
-						<VersionInfoKeys Name="CompanyName">Sebastian Klatte</VersionInfoKeys>
-						<VersionInfoKeys Name="FileDescription">IntelligeN 2009 Plugin</VersionInfoKeys>
-						<VersionInfoKeys Name="FileVersion">2.129.2.0</VersionInfoKeys>
+						<VersionInfoKeys Name="CompanyName"/>
+						<VersionInfoKeys Name="FileDescription"/>
+						<VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
-						<VersionInfoKeys Name="LegalCopyright">(c) 2016 Sebastian Klatte</VersionInfoKeys>
+						<VersionInfoKeys Name="LegalCopyright"/>
 						<VersionInfoKeys Name="LegalTrademarks"/>
-						<VersionInfoKeys Name="OriginalFilename">sharelinksbiz.dll</VersionInfoKeys>
-						<VersionInfoKeys Name="ProductName">IntelligeN 2009</VersionInfoKeys>
-						<VersionInfoKeys Name="ProductVersion">2.5</VersionInfoKeys>
+						<VersionInfoKeys Name="OriginalFilename"/>
+						<VersionInfoKeys Name="ProductName"/>
+						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
-					<Excluded_Packages/>
 				</Delphi.Personality>
 			</BorlandProject>
 			<ProjectFileVersion>12</ProjectFileVersion>
