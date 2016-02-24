@@ -14,12 +14,27 @@ uses
 
 type
   TControlDataList = TInterfaceList<IControlData>;
+  TCustomFieldList = TInterfaceList<INameValueItem>;
+
+  TINameValueItem = class(TInterfacedObject, INameValueItem)
+  private
+    FName, FValue: string;
+  protected
+    function GetName: WideString; safecall;
+    function GetValue: WideString; safecall;
+  public
+    constructor Create(const AName, AValue: WideString);
+    property Name: WideString read GetName;
+    property Value: WideString read GetValue;
+  end;
 
   TITabSheetData = class(TInterfacedObject, ITabSheetData)
   private
     FTypeID: TTypeID;
     FControlList: TControlDataList;
     FMirrorList: TMirrorContainerList;
+    FCustomFieldList: TCustomFieldList;
+    FOwn: Boolean; // TODO: Remove at next Build
   protected
     function GetTypeID: TTypeID; safecall;
 
@@ -32,7 +47,7 @@ type
     function GetCustomFieldCount: Integer; safecall;
   public
     constructor Create(ATypeID: TTypeID); overload;
-    constructor Create(ATypeID: TTypeID; AControlList: TControlDataList; AMirrorList: TMirrorContainerList); overload;
+    constructor Create(ATypeID: TTypeID; AControlList: TControlDataList; AMirrorList: TMirrorContainerList; ACustomFieldList: TCustomFieldList; AOwn: Boolean = True); overload;
     constructor Clone(const ATabSheetData: ITabSheetData);
     destructor Destroy; override;
 
@@ -40,6 +55,7 @@ type
 
     function FindControl(const AControlID: TControlID): IControlData; safecall;
     function FindMirror(const AHoster: WideString): IMirrorContainer; safecall;
+    function FindCustomField(const AName: WideString): INameValueItem; safecall; // TODO: Future version
 
     property Control[const IndexOrName: OleVariant]: IControlData read GetControl;
     property ControlCount: Integer read GetControlCount;
@@ -51,6 +67,25 @@ type
   end;
 
 implementation
+
+{ TINameValueItem }
+
+constructor TINameValueItem.Create(const AName, AValue: WideString);
+begin
+  inherited Create;
+  FName := AName;
+  FValue := AValue;
+end;
+
+function TINameValueItem.GetName: WideString;
+begin
+  Result := FName;
+end;
+
+function TINameValueItem.GetValue: WideString;
+begin
+  Result := FValue;
+end;
 
 { TITabSheetData }
 
@@ -97,22 +132,28 @@ end;
 
 function TITabSheetData.GetCustomField(const IndexOrName: OleVariant): INameValueItem;
 begin
-  // TODO: Implement this
   Result := nil;
+
+  if not VarIsNull(IndexOrName) then
+  begin
+    if VarIsNumeric(IndexOrName) then
+      Result := FCustomFieldList[IndexOrName]
+    else
+      Result := FindCustomField(IndexOrName);
+  end;
 end;
 
 function TITabSheetData.GetCustomFieldCount: Integer;
 begin
-  // TODO: Implement this
-  Result := 0;
+  Result := FCustomFieldList.Count;
 end;
 
 constructor TITabSheetData.Create(ATypeID: TTypeID);
 begin
-  Create(ATypeID, nil, nil);
+  Create(ATypeID, nil, nil, nil);
 end;
 
-constructor TITabSheetData.Create(ATypeID: TTypeID; AControlList: TControlDataList; AMirrorList: TMirrorContainerList);
+constructor TITabSheetData.Create(ATypeID: TTypeID; AControlList: TControlDataList; AMirrorList: TMirrorContainerList; ACustomFieldList: TCustomFieldList; AOwn: Boolean = True);
 begin
   inherited Create;
 
@@ -127,6 +168,13 @@ begin
     FMirrorList := TMirrorContainerList.Create
   else
     FMirrorList := AMirrorList;
+
+  if not Assigned(ACustomFieldList) then
+    FCustomFieldList := TCustomFieldList.Create
+  else
+    FCustomFieldList := ACustomFieldList;
+
+  FOwn := AOwn;
 end;
 
 constructor TITabSheetData.Clone(const ATabSheetData: ITabSheetData);
@@ -188,10 +236,33 @@ begin
   end;
 end;
 
+function TITabSheetData.FindCustomField(const AName: WideString): INameValueItem;
+var
+  LIndex: Integer;
+  LCustomField: INameValueItem;
+begin
+  Result := nil;
+
+  for LIndex := 0 to FCustomFieldList.Count - 1 do
+  begin
+    LCustomField := FCustomFieldList[LIndex];
+
+    if SameText(AName, LCustomField.Name) then
+    begin
+      Result := LCustomField;
+      break;
+    end;
+  end;
+end;
+
 destructor TITabSheetData.Destroy;
 begin
-  FMirrorList.Free;
-  FControlList.Free;
+  if FOwn then
+  begin
+    FCustomFieldList.Free;
+    FMirrorList.Free;
+    FControlList.Free;
+  end;
 
   inherited Destroy;
 end;

@@ -197,20 +197,52 @@ type
     destructor Destroy; override;
   end;
 
+  TCustomField = class(TChangeableObject, ICustomField)
+  private
+    FName, FValue: string;
+  protected
+    function GetName: WideString;
+    procedure SetName(const AName: WideString);
+    function GetValue: WideString;
+    procedure SetValue(const AValue: WideString);
+  public
+    constructor Create(const AName, AValue: WideString); reintroduce;
+    property Name: WideString read GetName write SetName;
+    property Value: WideString read GetValue write SetValue;
+  end;
+
+  TCustomFields = class(TChangeableObject, ICustomFields)
+  private
+    FCustomFields: TList<ICustomField>;
+    procedure CustomFieldsNotify(Sender: TObject; const Item: ICustomField; Action: TCollectionNotification);
+  protected
+    function GetChanged: WordBool; override;
+    procedure SetChanged(AChanged: WordBool); override;
+
+    function GetCustomFields: TList<ICustomField>;
+  public
+    constructor Create; override;
+    property CustomFields: TList<ICustomField>read GetCustomFields;
+    destructor Destroy; override;
+  end;
+
   TIntelligeNConfigurationFile = class(TWebsiteConfigurationFile, IIntelligeNConfigurationFile)
   private
     FFilter: IFilter;
+    FCustomFields: ICustomFields;
   protected
     function GetChanged: WordBool; override;
     procedure SetChanged(AChanged: WordBool); override;
 
     function GetWebsiteFilter: IFilter;
+    function GetWebsiteCustomFields: ICustomFields;
   public
     constructor Create; override;
     property WebsiteURL;
     property WebsiteType;
     property WebsiteCharset;
     property WebsiteFilter: IFilter read GetWebsiteFilter;
+    property WebsiteCustomFields: ICustomFields read GetWebsiteCustomFields;
     destructor Destroy; override;
   end;
 
@@ -745,18 +777,92 @@ begin
   inherited;
 end;
 {$ENDREGION}
+{$REGION 'TCustomField'}
+{ TCustomField }
+
+function TCustomField.GetName: WideString;
+begin
+  Result := FName;
+end;
+
+procedure TCustomField.SetName(const AName: WideString);
+begin
+  FName := AName;
+  Change;
+end;
+
+function TCustomField.GetValue: WideString;
+begin
+  Result := FValue;
+end;
+
+procedure TCustomField.SetValue(const AValue: WideString);
+begin
+  FValue := AValue;
+  Change;
+end;
+
+constructor TCustomField.Create(const AName, AValue: WideString);
+begin
+  inherited Create;
+  FName := AName;
+  FValue := AValue;
+end;
+{$ENDREGION}
+{$REGION 'TCustomFields'}
+{ TCustomFields }
+
+procedure TCustomFields.CustomFieldsNotify(Sender: TObject; const Item: ICustomField; Action: TCollectionNotification);
+begin
+  if Action in [cnAdded, cnRemoved] then
+    Change;
+end;
+
+function TCustomFields.GetChanged: WordBool;
+begin
+  Result := ( inherited GetChanged) and ListChanged[TList<IChangeable>(FCustomFields)];
+end;
+
+procedure TCustomFields.SetChanged(AChanged: WordBool);
+begin
+  inherited SetChanged(AChanged);
+  ListChanged[TList<IChangeable>(FCustomFields)] := AChanged;
+end;
+
+function TCustomFields.GetCustomFields: TList<ICustomField>;
+begin
+  Result := FCustomFields;
+end;
+
+constructor TCustomFields.Create;
+begin
+  inherited Create;
+  FCustomFields := TList<ICustomField>.Create;
+
+  FCustomFields.OnNotify := CustomFieldsNotify;
+end;
+
+destructor TCustomFields.Destroy;
+begin
+  FCustomFields.OnNotify := nil;
+
+  FCustomFields.Free;
+  inherited Destroy;
+end;
+{$ENDREGION}
 {$REGION 'TIntelligeNConfigurationFile'}
 { TIntelligeNConfigurationFile }
 
 function TIntelligeNConfigurationFile.GetChanged: WordBool;
 begin
-  Result := ( inherited GetChanged) and WebsiteFilter.Changed;
+  Result := ( inherited GetChanged) and WebsiteFilter.Changed and WebsiteCustomFields.Changed;
 end;
 
 procedure TIntelligeNConfigurationFile.SetChanged(AChanged: WordBool);
 begin
   inherited SetChanged(AChanged);
   WebsiteFilter.Changed := AChanged;
+  WebsiteCustomFields.Changed := AChanged;
 end;
 
 function TIntelligeNConfigurationFile.GetWebsiteFilter: IFilter;
@@ -764,14 +870,21 @@ begin
   Result := FFilter;
 end;
 
+function TIntelligeNConfigurationFile.GetWebsiteCustomFields: ICustomFields;
+begin
+  Result := FCustomFields;
+end;
+
 constructor TIntelligeNConfigurationFile.Create;
 begin
   inherited Create;
   FFilter := TFilter.Create;
+  FCustomFields := TCustomFields.Create;
 end;
 
 destructor TIntelligeNConfigurationFile.Destroy;
 begin
+  FCustomFields := nil;
   FFilter := nil;
   inherited Destroy;
 end;

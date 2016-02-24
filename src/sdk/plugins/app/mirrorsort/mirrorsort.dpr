@@ -1,5 +1,7 @@
 library mirrorsort;
 
+{$R *.dres}
+
 uses
   uPlugInInterfaceAdv,
   uPlugInAppClass,

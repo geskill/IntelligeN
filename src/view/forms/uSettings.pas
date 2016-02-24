@@ -443,6 +443,7 @@ type
 
     procedure ImageHosterClick(Sender: TObject);
     procedure ImageHosterClickCheck(Sender: TObject; AIndex: Integer; APrevState, ANewState: TcxCheckBoxState);
+    procedure ImageHosterEndDrag(Sender: TObject; OldIndex, NewIndex: Integer);
     procedure ImageHosterAddClick(Sender: TObject);
     procedure ImageHosterAddAllClick(Sender: TObject);
     procedure RemoveImageHosterClick(Sender: TObject);
@@ -2338,11 +2339,15 @@ begin
   ImageHosterUpdate(Main.fMain, TImageHosterCollectionItem(SettingsManager.Settings.Plugins.ImageHoster.Items[AIndex]));
 end;
 
+procedure TSettings.ImageHosterEndDrag(Sender: TObject; OldIndex, NewIndex: Integer);
+begin
+  SettingsManager.Settings.Plugins.ImageHoster.Items[OldIndex].index := NewIndex;
+end;
+
 procedure TSettings.ImageHosterAddClick(Sender: TObject);
 begin
   if TAddPlugin.Execute(GetDefaultPluginLoadedFunc, ptImageHoster) then
     ImageHosterClick(nil);
-
 end;
 
 procedure TSettings.ImageHosterAddAllClick(Sender: TObject);
@@ -2544,6 +2549,8 @@ begin
     Width := 129;
     Height := 262;
 
+    DragDrop := True;
+
     with InnerCheckListBox do
     begin
       Images := SettingsManager.Settings.Plugins.ImageHosterImageList;
@@ -2551,6 +2558,7 @@ begin
 
     OnClick := ImageHosterClick;
     OnClickCheck := ImageHosterClickCheck;
+    OnEndDrag := ImageHosterEndDrag;
     OnAddPluginClick := ImageHosterAddClick;
     OnAddAllPluginClick := ImageHosterAddAllClick;
     OnRemovePluginClick := RemoveImageHosterClick;
@@ -2661,7 +2669,7 @@ begin
         begin
           Checked := TPlugInCollectionItem(Items[I]).Enabled;
           Text := TPlugInCollectionItem(Items[I]).name;
-          // ImageIndex := FAppPluginsCheckListBox.InnerCheckListBox.Images.AddIcon(TPlugInCollectionItem(Items[I]).Icon);
+          ImageIndex := FAppPluginsCheckListBox.InnerCheckListBox.Images.AddIcon(TPlugInCollectionItem(Items[I]).Icon);
 
           if not FileExists(TPlugInCollectionItem(Items[I]).GetPath) then
             Enabled := False;

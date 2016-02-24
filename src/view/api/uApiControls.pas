@@ -1868,6 +1868,9 @@ begin
   end;
   with FmiLocalUploadImageMenu.ItemLinks.Add do
     Item := LNewMenuItem;
+
+  if Assigned(ControlController) and Assigned(ControlController.OnControlChange) then
+    ControlController.OnControlChange.Invoke(Self);
 end;
 
 function TIPicture.RemoveMirror(AIndex: Integer): WordBool;
@@ -1880,6 +1883,9 @@ begin
   except
     Result := False;
   end;
+
+  if Assigned(ControlController) and Assigned(ControlController.OnControlChange) then
+    ControlController.OnControlChange.Invoke(Self);
 end;
 
 constructor TIPicture.Create;

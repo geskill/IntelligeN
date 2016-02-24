@@ -209,27 +209,34 @@ begin
       Free;
     end;
 
-  MirrorControl := TMirrorControl.Create(FWorkPanel, Point.X, Point.Y);
-  MirrorControl.MirrorController := Self;
+  MirrorControl := TMirrorControl.Create(FWorkPanel, Self, Point.X, Point.Y);
 
   Result := FMirrorList.Add(MirrorControl);
+
+  if Assigned(OnChange) then
+    OnChange.Invoke(Self);
 end;
 
 procedure TMirrorController.Insert(Index: Integer; const Item: IMirrorControl);
 begin
   FMirrorList.Insert(Index, Item as IMirrorControl);
+
+  if Assigned(OnChange) then
+    OnChange.Invoke(Self);
 end;
 
 function TMirrorController.Insert(Index: Integer): IMirrorControl;
 begin
-  Result := TMirrorControl.Create(FWorkPanel);
-  Result.MirrorController := Self;
+  Result := TMirrorControl.Create(FWorkPanel, Self);
   FMirrorList.Insert(Index, Result);
 end;
 
 procedure TMirrorController.Move(CurIndex, NewIndex: Integer);
 begin
   FMirrorList.Move(CurIndex, NewIndex);
+
+  if Assigned(OnChange) then
+    OnChange.Invoke(Self);
 end;
 
 function TMirrorController.Remove(Index: Integer): WordBool;
@@ -254,6 +261,9 @@ begin
   except
     Result := False;
   end;
+
+  if Assigned(OnChange) then
+    OnChange.Invoke(Self);
 end;
 
 function TMirrorController.CloneInstance: IMirrorControllerBase;

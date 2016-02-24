@@ -280,7 +280,7 @@ begin
     AddFormField('excerpt', '');
     AddFormField('trackback_url', '');
 
-    for I := 0 to WordPressSettings.customfields.FieldCount - 1 do
+    for I := 0 to Data.CustomFieldCount - 1 do
     begin
       HTTPParams := THTTPParams.Create();
       with HTTPParams do
@@ -288,8 +288,8 @@ begin
         AddFormField('_ajax_nonce', '0');
         AddFormField('action', 'add-meta');
         AddFormField('metakeyselect', '#NONE#');
-        AddFormField('metakeyinput', WordPressSettings.customfields.Field[I].Name);
-        AddFormField('metavalue', WordPressSettings.customfields.Field[I].Value);
+        AddFormField('metakeyinput', Data.CustomField[I].Name);
+        AddFormField('metavalue', Data.CustomField[I].Value);
         AddFormField('_ajax_nonce-add-meta', _ajax_nonce_add_meta);
         AddFormField('post_id', IntToStr(ArticleID));
       end;
@@ -309,8 +309,8 @@ begin
 
           if Exec(InputString) then
           begin
-            AddFormField('meta[' + Match[1] + '][key]', WordPressSettings.customfields.Field[I].Name);
-            AddFormField('meta[' + Match[1] + '][value]', WordPressSettings.customfields.Field[I].Value);
+            AddFormField('meta[' + Match[1] + '][key]', Data.CustomField[I].Name);
+            AddFormField('meta[' + Match[1] + '][value]', Data.CustomField[I].Value);
           end;
         finally
           Free;
