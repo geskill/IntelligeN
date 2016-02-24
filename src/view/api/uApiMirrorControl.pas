@@ -428,7 +428,7 @@ type
     function GetFocus: WordBool;
     procedure SetFocus(AFocus: WordBool);
   public
-    constructor Create(const AOwner: TWinControl; ALeft: Integer = 0; ATop: Integer = 0);
+    constructor Create(const AOwner: TWinControl; const AMirrorController: IMirrorController; ALeft: Integer = 0; ATop: Integer = 0);
     destructor Destroy; override;
 
     // Base
@@ -2623,7 +2623,7 @@ end;
 
 constructor TMirrorControl.Create;
 var
-  I: Integer;
+  LIndex: Integer;
 begin
   inherited Create();
 
@@ -2802,7 +2802,7 @@ begin
     Parent := TWinControl(AOwner);
   end;
 
-  FMirrorController := nil;
+  FMirrorController := AMirrorController;
 
   FDirectlinksPanel := TDirectlinksPanel.Create(FcxTabControl, Self);
 
@@ -2811,16 +2811,16 @@ begin
   with SettingsManager.Settings do
   begin
     with Plugins.Crypter do
-      for I := 0 to Count - 1 do
-        if TPlugInCollectionItem(Items[I]).Enabled then
-          AddCrypter(TPlugInCollectionItem(Items[I]).Name);
+      for LIndex := 0 to Count - 1 do
+        if TPlugInCollectionItem(Items[LIndex]).Enabled then
+          AddCrypter(TPlugInCollectionItem(Items[LIndex]).Name);
 
     with ControlAligner do
       if not(DefaultMirrorTabIndex = StrDirectlinks) then
-        for I := 1 to FcxTabControl.Tabs.Count - 1 do
-          if (DefaultMirrorTabIndex = FcxTabControl.Tabs[I].Caption) then
+        for LIndex := 1 to FcxTabControl.Tabs.Count - 1 do
+          if (DefaultMirrorTabIndex = FcxTabControl.Tabs[LIndex].Caption) then
           begin
-            SetTabIndex(I);
+            SetTabIndex(LIndex);
             Break;
           end;
   end;
@@ -2960,6 +2960,9 @@ begin
     Width := GetTabControlTabWidth - Left - 1;
 
   Result := LIndex;
+
+  if Assigned(MirrorController) and Assigned(MirrorController.OnChange) then
+    MirrorController.OnChange.Invoke(Self);
 end;
 
 function TMirrorControl.RemoveCrypter;
@@ -2978,6 +2981,9 @@ begin
   else
     with FcxButtonCrypt do
       Width := GetTabControlTabWidth - Left - 1;
+
+  if Assigned(MirrorController) and Assigned(MirrorController.OnChange) then
+    MirrorController.OnChange.Invoke(Self);
 end;
 
 procedure TMirrorControl.UpdateErrorMsg(const AName, AErrorMsg: WideString);

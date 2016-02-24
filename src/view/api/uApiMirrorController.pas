@@ -209,8 +209,7 @@ begin
       Free;
     end;
 
-  MirrorControl := TMirrorControl.Create(FWorkPanel, Point.X, Point.Y);
-  MirrorControl.MirrorController := Self;
+  MirrorControl := TMirrorControl.Create(FWorkPanel, Self, Point.X, Point.Y);
 
   Result := FMirrorList.Add(MirrorControl);
 
@@ -228,8 +227,7 @@ end;
 
 function TMirrorController.Insert(Index: Integer): IMirrorControl;
 begin
-  Result := TMirrorControl.Create(FWorkPanel);
-  Result.MirrorController := Self;
+  Result := TMirrorControl.Create(FWorkPanel, Self);
   FMirrorList.Insert(Index, Result);
 end;
 
