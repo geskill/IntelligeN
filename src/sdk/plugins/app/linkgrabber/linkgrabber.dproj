@@ -46,6 +46,10 @@
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
 			<DCCReference Include="uLinkGrabber.pas"/>
+			<RcItem Include="linkgrabber.ico">
+				<ResourceType>Icon</ResourceType>
+				<ResourceId>icon</ResourceId>
+			</RcItem>
 			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
 				<DependentOn>..\..\plugin.optset;..\app.optset</DependentOn>

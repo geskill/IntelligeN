@@ -37,8 +37,6 @@
 			<DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
-			<DCC_ExeOutput>../../../../../bin_portable\plugins</DCC_ExeOutput>
-			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin_portable\plugins\dirwatch.dll</DCC_DependencyCheckOutputName>
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<ItemGroup>

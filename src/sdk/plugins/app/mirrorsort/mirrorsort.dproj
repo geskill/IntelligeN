@@ -48,6 +48,10 @@
 			<DCCReference Include="uMirrorSort.pas">
 				<Form>fMirrorSort</Form>
 			</DCCReference>
+			<RcItem Include="mirrorsort.ico">
+				<ResourceType>Icon</ResourceType>
+				<ResourceId>icon</ResourceId>
+			</RcItem>
 			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
 				<DependentOn>..\..\plugin.optset;..\app.optset</DependentOn>

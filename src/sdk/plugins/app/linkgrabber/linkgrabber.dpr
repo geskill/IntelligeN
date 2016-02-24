@@ -1,5 +1,7 @@
 library linkgrabber;
 
+{$R *.dres}
+
 uses
   uPlugInInterfaceAdv,
   uPlugInAppClass,

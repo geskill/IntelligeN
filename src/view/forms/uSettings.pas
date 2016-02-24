@@ -2669,7 +2669,7 @@ begin
         begin
           Checked := TPlugInCollectionItem(Items[I]).Enabled;
           Text := TPlugInCollectionItem(Items[I]).name;
-          // ImageIndex := FAppPluginsCheckListBox.InnerCheckListBox.Images.AddIcon(TPlugInCollectionItem(Items[I]).Icon);
+          ImageIndex := FAppPluginsCheckListBox.InnerCheckListBox.Images.AddIcon(TPlugInCollectionItem(Items[I]).Icon);
 
           if not FileExists(TPlugInCollectionItem(Items[I]).GetPath) then
             Enabled := False;
