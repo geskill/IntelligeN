@@ -624,3 +624,39 @@
 
 * Fixed WordPress IDGrabber
 
+
+###Service Pack 2
+
+######major enhancements
+
+* Added IScript-CustomFields.
+
+######minor enhancements
+
+* Added DirWatch APP plugin.
+
+* Added ImageHoster ranking/drag'n'drop.
+
+* Improved default IScript message files.
+
+* Improved CMS publish error messages.
+
+* Improved intelligent_posting_alternativesearch.
+
+* Improved HTML2Text and HTMLDecode for 1advd.ch and erodvd.nl crawler plugins.
+
+* Improved cduniverse.com crawler.
+
+* Fixed possible issue closing tab from menu.
+
+* Fixed possible issue for non-escaped regular expressions.
+
+* Fixed OnChange of Mirror, Crypter and ImageHoster controls (Add, Insert, Move and Delete).
+
+* Fixed amazon.de crawler plugin.
+
+* Fixed minor issue of ReleaseName crawler accessing ICreator.
+
+* Fixed Tinypic.com re-size.
+
+* Updated openSSL libraries.
