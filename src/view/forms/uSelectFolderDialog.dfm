@@ -30,6 +30,7 @@ object SelectFolderDialog: TSelectFolderDialog
     Height = 240
     Anchors = [akLeft, akTop, akRight, akBottom]
     Indent = 19
+    Options.ShowNonFolders = False
     RightClickSelect = True
     TabOrder = 1
   end
@@ -47,7 +48,7 @@ object SelectFolderDialog: TSelectFolderDialog
     TabOrder = 3
     Width = 278
   end
-  object cxCancel: TcxButton
+  object cxBCancel: TcxButton
     Left = 130
     Top = 339
     Width = 75
@@ -56,8 +57,8 @@ object SelectFolderDialog: TSelectFolderDialog
     Cancel = True
     Caption = 'Cancel'
     ModalResult = 2
-    TabOrder = 4
-    OnClick = cxCancelClick
+    TabOrder = 5
+    OnClick = cxBCancelClick
   end
   object cxBOk: TcxButton
     Left = 211
@@ -68,7 +69,16 @@ object SelectFolderDialog: TSelectFolderDialog
     Caption = 'Ok'
     Default = True
     ModalResult = 1
-    TabOrder = 5
+    TabOrder = 6
     OnClick = cxBOkClick
+  end
+  object cxBNewFolder: TcxButton
+    Left = 8
+    Top = 339
+    Width = 75
+    Height = 25
+    Caption = 'New folder'
+    TabOrder = 4
+    OnClick = cxBNewFolderClick
   end
 end

@@ -12,8 +12,6 @@ Checked items are planned for next release.
 
 - [ ] Implement non-visual "default" control that holds title of current tab (i.e. delegation for releasename or whatever)
 
-- [ ] Add custom fields in ITabSheetData that hold compiled IScript (required for WordPress custom files powered by IScript)
-
 - [ ] Add direct index based link access (i.e. IMirror[\<Index\>].Directlink[\<Index\>].Link[\<Index\>])
 
 - [ ] Add direct index based filename access (i.e. Mirror[\<Index\>].Directlink[\<Index\>].FileName[\<Index\>])
@@ -36,7 +34,7 @@ Checked items are planned for next release.
 
 ###### APP
 
-- [ ] Implement a CustomScript crawler, which crawls in already crawled content
+
 
 ######Content-Management-Systems
 
