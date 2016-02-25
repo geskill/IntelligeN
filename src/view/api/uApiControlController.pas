@@ -30,7 +30,6 @@ type
     FControlEnter, FControlExit: IControlEventHandler;
     FReleaseNameChange: IReleaseNameChange;
     FPopupMenuChange: IPopupMenuChange;
-    FCrawlingFinished: INotifyEvent;
 
     function GetClassType(AType: TControlID): TIControlBasicMeta;
   protected
@@ -58,7 +57,6 @@ type
     procedure SetReleaseNameChange(AReleaseNameChange: IReleaseNameChange);
     function GetPopupMenuChange: IPopupMenuChange;
     procedure SetPopupMenuChange(APopupMenuChange: IPopupMenuChange);
-    function GetCrawlingFinished: INotifyEvent;
   public
     constructor Create(const AWorkPanel: TWinControl);
     destructor Destroy; override;
@@ -88,7 +86,6 @@ type
     property OnControlExit: IControlEventHandler read GetControlExit write SetControlExit;
     property OnReleaseNameChange: IReleaseNameChange read GetReleaseNameChange write SetReleaseNameChange;
     property OnPopupMenuChange: IPopupMenuChange read GetPopupMenuChange write SetPopupMenuChange;
-    property OnCrawlingFinished: INotifyEvent read GetCrawlingFinished;
   end;
 
 implementation
@@ -106,22 +103,6 @@ begin
       Result := TITags;
     cTitle:
       Result := TITitle;
-    cCreator:
-      Result := TICreator;
-    cDirector:
-      Result := TIDirector;
-    cPublisher:
-      Result := TIPublisher;
-    cPicture:
-      Result := TIPicture;
-    cTrailer:
-      Result := TITrailer;
-    cSample:
-      Result := TISample;
-    cNotes:
-      Result := TINotes;
-    cPassword:
-      Result := TIPassword;
     cAudioBitrate:
       Result := TIAudioBitrate;
     cAudioBitrateType:
@@ -132,18 +113,40 @@ begin
       Result := TIAudioSamplingRate;
     cAudioStream:
       Result := TIAudioStream;
+    cCreator:
+      Result := TICreator;
+    cDirector:
+      Result := TIDirector;
     cGenre:
       Result := TIGenre;
     cLanguage:
       Result := TILanguage;
+    cNotes:
+      Result := TINotes;
+    cPassword:
+      Result := TIPassword;
+    cPicture:
+      Result := TIPicture;
+    cPublisher:
+      Result := TIPublisher;
     cRuntime:
       Result := TIRuntime;
+    cSample:
+      Result := TISample;
+    cSubtitle:
+      Result := TISubtitle;
+    cTrailer:
+      Result := TITrailer;
+    cVersion:
+      Result := TIVersion;
     cVideoCodec:
       Result := TIVideoCodec;
     cVideoStream:
       Result := TIVideoStream;
     cVideoSystem:
       Result := TIVideoSystem;
+    cWebsite:
+      Result := TIWebsite;
     cNFO:
       Result := TINFO;
     cDescription:
@@ -251,11 +254,6 @@ begin
   FPopupMenuChange := APopupMenuChange;
 end;
 
-function TControlController.GetCrawlingFinished: INotifyEvent;
-begin
-  Result := FCrawlingFinished;
-end;
-
 constructor TControlController.Create;
 begin
   inherited Create;
@@ -264,12 +262,10 @@ begin
   FControlList := TInterfaceList<IControlBasic>.Create;
 
   FControlChange := TIControlChangeEvent.Create;
-  FCrawlingFinished := TINotifyEvent.Create;
 end;
 
 destructor TControlController.Destroy;
 begin
-  FCrawlingFinished := nil;
   FSpaceMouseDown := nil;
   FControlChange := nil;
   FControlEnter := nil;
@@ -325,18 +321,18 @@ begin
   LBasicControl := AClass.Create(FWorkPanel, Self, AType);
 
   (*
-  with TControlAligner.Create do
-  try
+    with TControlAligner.Create do
+    try
     WorkPanelWidth := FWorkPanel.Width;
     ControlController := Self;
     MirrorController := TabSheetController.MirrorController;
     LPoint := NextControlPosition(AHeight, AWidth);
     ControlController := nil;
     MirrorController := nil;
-  finally
+    finally
     Free;
-  end;
-  *)
+    end;
+    *)
 
   LBasicControlInterface := LBasicControl;
   with LBasicControlInterface do

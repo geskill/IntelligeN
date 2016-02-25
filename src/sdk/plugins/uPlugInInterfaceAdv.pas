@@ -27,15 +27,19 @@ type
   IFileFormatPlugIn = interface(IPlugIn)
     ['{8A7373D1-51F3-4A98-912F-D3480274A715}']
     function GetForceAddCrypter: WordBool; safecall;
-    procedure SetForceAddCrypter(AForceAddCrypter: WordBool); safecall;
+    procedure SetForceAddCrypter(const AForceAddCrypter: WordBool); safecall;
     function GetForceAddImageMirror: WordBool; safecall;
-    procedure SetForceAddImageMirror(AForceAddImageMirror: WordBool); safecall;
+    procedure SetForceAddImageMirror(const AForceAddImageMirror: WordBool); safecall;
 
-    function GetFileFormatName: WideString; safecall;
-    function CanSaveControls: WordBool; safecall;
-    procedure SaveControls(const AFileName, ATemplateFileName: WideString; const ATabSheetController: ITabSheetController); safecall;
-    function CanLoadControls: WordBool; safecall;
-    function LoadControls(const AFileName, ATemplateDirectory: WideString; const APageController: IPageController): Integer; safecall;
+    function GetFileExtension: WideString; safecall;
+    function GetFileFilter: WideString; safecall;
+
+    function CanSaveFiles: WordBool; safecall;
+    function SaveFile(const AFileName: WideString; const ATabSheetController: ITabSheetController): WordBool; safecall;
+
+    function CanLoadFiles: WordBool; safecall;
+    function LoadFile(const AFileName: WideString; const APageController: IPageController): Integer; safecall;
+
     property ForceAddCrypter: WordBool read GetForceAddCrypter write SetForceAddCrypter;
     property ForceAddImageMirror: WordBool read GetForceAddImageMirror write SetForceAddImageMirror;
   end;

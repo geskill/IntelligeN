@@ -64,7 +64,7 @@ type
     function GetName: WideString; override; safecall;
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
-    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID, AArticlePathID: Integer): WideString; override; safecall;
   end;
 
 implementation

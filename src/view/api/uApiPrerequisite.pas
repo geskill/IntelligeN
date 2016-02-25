@@ -16,8 +16,7 @@ implementation
 
 function GenerateFolderSystem: Boolean;
 begin
-  result := ForceDirectories(GetSettingsFolder) and ForceDirectories(GetTemplatesCMSFolder) and ForceDirectories(GetTemplatesSiteFolder) and ForceDirectories
-    (GetTemplatesTypeFolder);
+  result := ForceDirectories(GetDocumentsFolder) and ForceDirectories(GetSettingsFolder) and ForceDirectories(GetTemplatesCMSFolder) and ForceDirectories(GetTemplatesSiteFolder) and ForceDirectories(GetTemplatesTypeFolder);
 end;
 
 end.

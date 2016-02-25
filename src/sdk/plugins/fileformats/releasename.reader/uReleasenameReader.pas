@@ -16,11 +16,15 @@ type
   TReleasenameReader = class(TFileFormatPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function GetFileFormatName: WideString; override; safecall;
-    function CanSaveControls: WordBool; override; safecall;
-    procedure SaveControls(const AFileName, ATemplateFileName: WideString; const ATabSheetController: ITabSheetController); override; safecall;
-    function CanLoadControls: WordBool; override; safecall;
-    function LoadControls(const AFileName, ATemplateDirectory: WideString; const APageController: IPageController): Integer; override; safecall;
+
+    function GetFileExtension: WideString; override; safecall;
+    function GetFileFilter: WideString; override; safecall;
+
+    function CanSaveFiles: WordBool; override; safecall;
+    function SaveFile(const AFileName: WideString; const ATabSheetController: ITabSheetController): WordBool; override; safecall;
+
+    function CanLoadFiles: WordBool; override; safecall;
+    function LoadFile(const AFileName: WideString; const APageController: IPageController): Integer; override; safecall;
   end;
 
 implementation
@@ -32,36 +36,40 @@ uses
 
 function TReleasenameReader.GetName;
 begin
-  result := 'releasename.reader';
+  Result := 'releasename.reader';
 end;
 
-function TReleasenameReader.GetFileFormatName;
+function TReleasenameReader.GetFileExtension;
 begin
-  result := 'releasename list %s (*.txt)|*.txt|';
+  Result := '.txt';
 end;
 
-function TReleasenameReader.CanSaveControls;
+function TReleasenameReader.GetFileFilter;
 begin
-  result := False;
+  Result := 'releasename list %s (*.txt)|*.txt|';
 end;
 
-procedure TReleasenameReader.SaveControls;
+function TReleasenameReader.CanSaveFiles;
 begin
-  //
+  Result := False;
 end;
 
-function TReleasenameReader.CanLoadControls;
+function TReleasenameReader.SaveFile;
 begin
-  result := True;
+  Result := False;
 end;
 
-function TReleasenameReader.LoadControls;
+function TReleasenameReader.CanLoadFiles;
+begin
+  Result := True;
+end;
+
+function TReleasenameReader.LoadFile;
 var
   I: Integer;
-  TemplateType: TTypeID;
-  _TemplateFileName: TFileName;
+  LTemplateFileName: TFileName;
 begin
-  result := -1;
+  Result := -1;
   with TStringlist.Create do
     try
       LoadFromFile(AFileName);
@@ -69,12 +77,7 @@ begin
       with TSelectTemplateFileName.Create(nil) do
         try
           if Execute then
-          begin
-            TemplateType := GetFileInfo(ATemplateDirectory + TemplateFileName + '.xml').TemplateType;
-            _TemplateFileName := TemplateFileName + '.xml';
-          end
-          else
-            raise Exception.Create('');
+            LTemplateFileName := TemplateFileName;
         finally
           Free;
         end;
@@ -82,16 +85,15 @@ begin
       for I := 0 to Count - 1 do
         if length(Strings[I]) > 12 then
         begin
-          with APageController.TabSheetController[APageController.Add(ATemplateDirectory + _TemplateFileName, TemplateType)] do
+          with APageController.TabSheetController[APageController.NewTabSheet(LTemplateFileName)] do
           begin
-            ControlController.FindControl(cReleaseName).Value := Strings[I];
+            ReleaseName := Strings[I];
             Result := TabSheetIndex;
           end;
         end;
     finally
       Free;
     end;
-
 end;
 
 end.

@@ -4,8 +4,8 @@ interface
 
 uses
   // Delphi
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtDlgs, Menus,
-  ExtCtrls, StdCtrls, DateUtils,
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Menus, ExtCtrls, StdCtrls,
+  DateUtils, StrUtils,
   // Dev Express
   cxGraphics, cxControls, cxContainer, cxEdit, cxProgressBar, dxStatusBar, cxLookAndFeels, cxLookAndFeelPainters,
   cxGridTableView, cxPC, cxHint, cxCustomData, cxButtonEdit, cxPCdxBarPopupMenu, dxBar, dxBarBuiltInMenu,
@@ -51,7 +51,8 @@ type
     FImageHosterManager: IImageHosterManager;
     FChange: INotifyEvent;
     FViewChange: IViewChangeEvent;
-    FAddTab, FRemoveTab, FBeforeAutoCompletion, FAfterAutoCompletion: ITabSheetEvent;
+    FTabCaptionChange: ICaptionChangeEvent;
+    FAddTab, FRemoveTab, FBeforeCrawling, FAfterCrawling: ITabSheetEvent;
     function LockPageControl: Boolean;
     function UnlockPageControl: Boolean;
     procedure CrawlerGUIInteraction(const AControlController: IControlController; AStatus: TCrawlerTaskStatus; AProgressPosition: Extended; AMessage: string);
@@ -60,6 +61,7 @@ type
     function GetActiveViewType: TTabViewType;
     procedure SetActiveViewType(AViewType: TTabViewType);
     procedure CommonActiveViewTypeChange(AViewType: TTabViewType);
+  protected
     function GetPublishManager: IPublishManager;
     function GetCrawlerManager: ICrawlerManager;
     function GetCrypterManager: ICrypterManager;
@@ -67,54 +69,151 @@ type
     function GetImageHosterManager: IImageHosterManager;
     function GetActiveTabSheetIndex: Integer;
     function GetActiveTabSheetController: ITabSheetController;
-    function GetTabSheetController(index: Integer): ITabSheetController;
+    function GetTabSheetController(AIndex: Integer): ITabSheetController;
     function GetChange: INotifyEvent;
     function GetViewChange: IViewChangeEvent;
+    function GetTabCaptionChange: ICaptionChangeEvent;
     function GetAddTab: ITabSheetEvent;
     function GetRemoveTab: ITabSheetEvent;
-    function GetBeforeAutoCompletion: ITabSheetEvent;
-    function GetAfterAutoCompletion: ITabSheetEvent;
+    function GetBeforeCrawling: ITabSheetEvent;
+    function GetAfterCrawling: ITabSheetEvent;
   public
     constructor Create(AOwner: TComponent); override;
     procedure PostCreate; // called after all frames are created
 
-    procedure CallBackupManager;
+    procedure CallBackupManager; overload;
+    procedure CallBackupManager(const ATabIndex: Integer); overload;
     procedure CallControlAligner;
-    procedure CallPublish(ATabIndex: Integer); overload;
+
     procedure CallPublish; overload;
+    procedure CallPublish(const ATabIndex: Integer); overload;
     procedure CallSeriesPublish;
-    procedure CallAutoCompletion; // TODO: rename, move to ITabSheetController
-    procedure CallSeriesAutoCompletion;
-    procedure CallCrypterCrypt(ATabIndex: Integer); overload;
+
+    procedure CallCrawler; overload;
+    procedure CallCrawler(const ATabIndex: Integer); overload;
+    procedure CallSeriesCrawler;
+
     procedure CallCrypterCrypt; overload;
-    procedure CallSeriesCrypterCrypt;
-    procedure CallCrypterCheck(ATabIndex: Integer); overload;
+    procedure CallCrypterCrypt(const ATabIndex: Integer); overload;
+    procedure CallSeriesCrypterCrypt; overload;
+
     procedure CallCrypterCheck; overload;
+    procedure CallCrypterCheck(const ATabIndex: Integer); overload;
     procedure CallSeriesCrypterCheck;
 
     procedure SwitchDesignView(AEnabled: Boolean);
 
     property PagesAvailable: Boolean read GetPagesAvailable write SetPagesAvailable;
     property ActiveViewType: TTabViewType read GetActiveViewType write SetActiveViewType;
+{$REGION 'Documentation'}
+    /// <summary>
+    /// Create a new tab with several options. This function is provided for
+    /// the file format plug-in interface.
+    /// </summary>
+    /// <param name="ATemplateFileName">
+    /// The template file located in the templates_type folder or either a
+    /// different file.
+    /// </param>
+    /// <param name="ATypeID">
+    /// The base type of the new tab.
+    /// </param>
+    /// <param name="AEmptyTab">
+    /// Possibility to create an empty tab without any mirrors.
+    /// </param>
+    /// <returns>
+    /// The tab index of the created tab.
+    /// </returns>
+{$ENDREGION}
+    function CreateTabSheet(const ATemplateFileName: WideString; ATypeID: TTypeID; AEmptyTab: WordBool = True): Integer;
+{$REGION 'Documentation'}
+    /// <summary>
+    /// Create a new tab from the specified template file located in the
+    /// templates_type folder.
+    /// </summary>
+    /// <param name="ATemplateName">
+    /// The template file located in the templates_type folder.
+    /// </param>
+    /// <returns>
+    /// The tab index of the created tab.
+    /// </returns>
+{$ENDREGION}
+    function NewTabSheet(const ATemplateName: WideString): Integer;
+    //
+    function InternalOpenFile(const AFileName: string): Integer;
+    function InternalOpenFiles(const AFiles: TStrings): Integer;
+{$REGION 'Documentation'}
+    /// <summary>
+    /// Open a file with the aid of the internal file format plug-ins in
+    /// order to create a new tab.
+    /// </summary>
+    /// <param name="AFileName">
+    /// The file name of the file to open.
+    /// </param>
+    /// <returns>
+    /// The tab index of the created tab.
+    /// </returns>
+{$ENDREGION}
+    function OpenTabSheet(const AFileName: WideString = ''): Integer;
+    //
+    function InternalSaveFile(const ATabSheetController: ITabSheetController; const AFileName, AFileFormat: WideString): Boolean;
+{$REGION 'Documentation'}
+    /// <summary>
+    /// Save a file with the aid of a internal file format plug-in in order
+    /// to create or override a new file.
+    /// </summary>
+    /// <param name="ATabIndex">
+    /// The tab index of the tab to be saved.
+    /// </param>
+    /// <param name="AFileName">
+    /// The file name of the file to be created.
+    /// </param>
+    /// <param name="AFileFormat">
+    /// The file format for the new file (= name of the file formats
+    /// plug-in). <br />
+    /// </param>
+    /// <param name="AForceDialog">
+    /// Force to open the file save dialog.
+    /// </param>
+    /// <returns>
+    /// The success of the operation.
+    /// </returns>
+{$ENDREGION}
+    function SaveTabSheet(const ATabIndex: Integer; const AFileName: WideString = ''; const AFileFormat: WideString = ''; const AForceDialog: WordBool = False): WordBool; overload;
+    function SaveTabSheet(const ATabIndex: Integer; const AForceDialog: WordBool): WordBool; overload;
 
-    function Add(AFileName: WideString): Integer; overload;
-    function Add(AFileName: WideString; ATypeID: TTypeID; AEmpty: WordBool = False): Integer; overload;
-    procedure SaveTab(ATabIndex: Integer; ASaveDialog: Boolean = False);
-    procedure SaveCurrentTab;
-    procedure SaveCurrentTabAs;
-    procedure SaveAllTabs;
-    procedure SaveAllToFolder;
-    procedure OpenToNewTab(AFileName: WideString = ''); // TODO: Implement index return value
-    function OpenFile(const AFileName: string): Boolean;
-    function OpenFiles(const AFiles: TStrings): Boolean;
-    function CanClose(ATabIndex: Integer): Boolean;
-    function CanCloseCurrentTab: Boolean;
-    function CanCloseAllOtherTabs: Boolean;
-    function CanCloseAllTabs: Boolean;
-    function RemoveTab(ATabIndex: Integer): Boolean;
-    function RemoveCurrentTab: Boolean;
-    function RemoveAllOtherTabs: Boolean;
-    function RemoveAllTabs: Boolean;
+    function SaveTheCurrentTabSheet: WordBool;
+    function SaveTheCurrentTabSheetAs: WordBool;
+    function SaveAllTabSheets: WordBool;
+    function SaveAllTabSheetsToFolder(const AFilePath: WideString = ''; const AFileFormat: WideString = ''): WordBool;
+{$REGION 'Documentation'}
+    /// <param name="ATabIndex">
+    /// Checks whether a tab can be closed.
+    /// </param>
+    /// <returns>
+    /// The success of the operation.
+    /// </returns>
+{$ENDREGION}
+    function CanCloseTabSheet(const ATabIndex: Integer): WordBool;
+
+    function CanCloseTheCurrentTabSheet: WordBool;
+    function CanCloseAllExceptTheCurrentTabSheet: WordBool;
+    function CanCloseAllTabSheets: WordBool;
+{$REGION 'Documentation'}
+    /// <summary>
+    /// Close a tab.
+    /// </summary>
+    /// <param name="ATabIndex">
+    /// The tab index of the tab to be closed. <br />
+    /// </param>
+    /// <returns>
+    /// The success of the operation. <br />
+    /// </returns>
+{$ENDREGION}
+    function CloseTabSheet(const ATabIndex: Integer): WordBool;
+
+    function CloseTheCurrentTabSheet: WordBool;
+    function CloseAllExceptTheCurrentTabSheet: WordBool;
+    function CloseAllTabSheets: WordBool;
 
     property PublishManager: IPublishManager read GetPublishManager;
     property CrawlerManager: ICrawlerManager read GetCrawlerManager;
@@ -128,10 +227,11 @@ type
 
     property OnChange: INotifyEvent read GetChange;
     property OnViewChange: IViewChangeEvent read GetViewChange;
+    property OnTabCaptionChange: ICaptionChangeEvent read GetTabCaptionChange;
     property OnAddTab: ITabSheetEvent read GetAddTab;
     property OnRemoveTab: ITabSheetEvent read GetRemoveTab;
-    property OnBeforeAutoCompletion: ITabSheetEvent read GetBeforeAutoCompletion; // TODO: Implement
-    property OnAfterAutoCompletion: ITabSheetEvent read GetAfterAutoCompletion; // TODO: Implement
+    property OnBeforeCrawling: ITabSheetEvent read GetBeforeCrawling;
+    property OnAfterCrawling: ITabSheetEvent read GetAfterCrawling;
 
     destructor Destroy; override;
   end;
@@ -167,7 +267,7 @@ procedure TfMain.pcMainCanCloseEx(Sender: TObject; ATabIndex: Integer; var ACanC
 begin
   FRemoveTab.Invoke(TabSheetController[ATabIndex]);
 
-  ACanClose := CanClose(ATabIndex);
+  ACanClose := CanCloseTabSheet(ATabIndex);
 
   // TODO: If app is closed, this message will appear in a loop. Another problem exists for two tabs crawling
   // at the same time FActiveCrawlerControlController only stores active tab.
@@ -183,13 +283,13 @@ begin
 
   if (TabSheetCount > 0) then
   begin
-    Main.UpdateCaption(pcMain.ActivePage.Caption); // TODO: Impelment this better in 130
+    OnTabCaptionChange.Invoke(pcMain.ActivePage.Caption);
     with ActiveTabSheetController do
       ActiveViewType := ViewType;
   end
   else
   begin
-    Main.UpdateCaption(); // TODO: Impelment this better in 130
+    OnTabCaptionChange.Invoke('');
     SwitchDesignView(False);
   end;
 
@@ -275,13 +375,6 @@ begin
     Position := AProgressPosition;
     Repaint;
   end;
-end;
-
-constructor TfMain.Create(AOwner: TComponent);
-begin
-  inherited Create(AOwner);
-
-  FLockCount := 0;
 end;
 
 function TfMain.GetPagesAvailable;
@@ -376,13 +469,13 @@ begin
   Result := TabSheetController[ActiveTabSheetIndex];
 end;
 
-function TfMain.GetTabSheetController(index: Integer): ITabSheetController;
+function TfMain.GetTabSheetController(AIndex: Integer): ITabSheetController;
 begin
   with pcMain do
   begin
     Properties.BeginUpdate;
     try
-      Result := TTabSheetController(Pages[index]);
+      Result := TTabSheetController(Pages[AIndex]);
     finally
       Properties.CancelUpdate;
     end;
@@ -399,6 +492,11 @@ begin
   Result := FViewChange;
 end;
 
+function TfMain.GetTabCaptionChange: ICaptionChangeEvent;
+begin
+  Result := FTabCaptionChange;
+end;
+
 function TfMain.GetAddTab: ITabSheetEvent;
 begin
   Result := FAddTab;
@@ -409,14 +507,21 @@ begin
   Result := FRemoveTab;
 end;
 
-function TfMain.GetBeforeAutoCompletion: ITabSheetEvent;
+function TfMain.GetBeforeCrawling: ITabSheetEvent;
 begin
-  Result := FBeforeAutoCompletion;
+  Result := FBeforeCrawling;
 end;
 
-function TfMain.GetAfterAutoCompletion: ITabSheetEvent;
+function TfMain.GetAfterCrawling: ITabSheetEvent;
 begin
-  Result := FAfterAutoCompletion;
+  Result := FAfterCrawling;
+end;
+
+constructor TfMain.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  FLockCount := 0;
 end;
 
 procedure TfMain.PostCreate;
@@ -446,16 +551,23 @@ begin
 
   FChange := TINotifyEvent.Create;
   FViewChange := TIViewChangeEvent.Create;
+  FTabCaptionChange := TICaptionChangeEvent.Create;
   FAddTab := TITabSheetEvent.Create;
   FRemoveTab := TITabSheetEvent.Create;
-  FBeforeAutoCompletion := TITabSheetEvent.Create;
-  FAfterAutoCompletion := TITabSheetEvent.Create;
+  FBeforeCrawling := TITabSheetEvent.Create;
+  FAfterCrawling := TITabSheetEvent.Create;
 end;
 
 procedure TfMain.CallBackupManager;
 begin
   if (TabSheetCount > 0) then
-    FBackupManager.Backup(ActiveTabSheetController);
+    CallBackupManager(ActiveTabSheetIndex);
+end;
+
+procedure TfMain.CallBackupManager(const ATabIndex: Integer);
+begin
+  if (ATabIndex >= 0) and (ATabIndex < TabSheetCount) then
+    FBackupManager.Backup(TabSheetController[ATabIndex]);
 end;
 
 procedure TfMain.CallControlAligner;
@@ -478,15 +590,16 @@ begin
     end;
 end;
 
-procedure TfMain.CallPublish(ATabIndex: Integer);
-begin
-  if (TabSheetCount > 0) then
-    PublishManager.AddPublishJob(TabSheetController[ATabIndex].PublishController.GeneratePublishJob);
-end;
-
 procedure TfMain.CallPublish;
 begin
-  CallPublish(ActiveTabSheetIndex);
+  if (TabSheetCount > 0) then
+    CallPublish(ActiveTabSheetIndex);
+end;
+
+procedure TfMain.CallPublish(const ATabIndex: Integer);
+begin
+  if (ATabIndex >= 0) and (ATabIndex < TabSheetCount) then
+    PublishManager.AddPublishJob(TabSheetController[ATabIndex].PublishController.GeneratePublishJob);
 end;
 
 procedure TfMain.CallSeriesPublish;
@@ -503,14 +616,23 @@ begin
   PublishManager.AddPublishJob(PublishJob);
 end;
 
-procedure TfMain.CallAutoCompletion;
+procedure TfMain.CallCrawler;
 begin
-  CallBackupManager;
-
-  CrawlerManager.AddCrawlerJob(ActiveTabSheetController.ControlController);
+  if (TabSheetCount > 0) then
+    CallCrawler(ActiveTabSheetIndex);
 end;
 
-procedure TfMain.CallSeriesAutoCompletion;
+procedure TfMain.CallCrawler(const ATabIndex: Integer);
+begin
+  if (ATabIndex >= 0) and (ATabIndex < TabSheetCount) then
+  begin
+    CallBackupManager;
+
+    CrawlerManager.AddCrawlerJob(ActiveTabSheetController.ControlController);
+  end;
+end;
+
+procedure TfMain.CallSeriesCrawler;
 var
   I: Integer;
 begin
@@ -518,7 +640,12 @@ begin
     CrawlerManager.AddCrawlerJob(TabSheetController[I].ControlController);
 end;
 
-procedure TfMain.CallCrypterCrypt(ATabIndex: Integer);
+procedure TfMain.CallCrypterCrypt;
+begin
+  CallCrypterCrypt(ActiveTabSheetIndex);
+end;
+
+procedure TfMain.CallCrypterCrypt(const ATabIndex: Integer);
 var
   I, J: Integer;
 begin
@@ -529,11 +656,6 @@ begin
           CrypterManager.AddCrypterJob(Crypter[J]);
 end;
 
-procedure TfMain.CallCrypterCrypt;
-begin
-  CallCrypterCrypt(ActiveTabSheetIndex);
-end;
-
 procedure TfMain.CallSeriesCrypterCrypt;
 var
   I: Integer;
@@ -542,7 +664,12 @@ begin
     CallCrypterCrypt(I);
 end;
 
-procedure TfMain.CallCrypterCheck(ATabIndex: Integer);
+procedure TfMain.CallCrypterCheck;
+begin
+  CallCrypterCheck(ActiveTabSheetIndex);
+end;
+
+procedure TfMain.CallCrypterCheck(const ATabIndex: Integer);
 var
   I, J: Integer;
 begin
@@ -551,11 +678,6 @@ begin
       with TabSheetController[ATabIndex].MirrorController.Mirror[I] do
         if not SameStr('', Crypter[J].Value) then
           CrypterManager.AddCrypterCheckJob(Crypter[J]);
-end;
-
-procedure TfMain.CallCrypterCheck;
-begin
-  CallCrypterCheck(ActiveTabSheetIndex);
 end;
 
 procedure TfMain.CallSeriesCrypterCheck;
@@ -591,12 +713,7 @@ begin
   end;
 end;
 
-function TfMain.Add(AFileName: WideString): Integer;
-begin
-  Result := Add(GetTemplatesTypeFolder + AFileName + '.xml', TApiXml.GetControlsTemplateInfo(GetTemplatesTypeFolder + AFileName + '.xml').TemplateType);
-end;
-
-function TfMain.Add(AFileName: WideString; ATypeID: TTypeID; AEmpty: WordBool = False): Integer;
+function TfMain.CreateTabSheet(const ATemplateFileName: WideString; ATypeID: TTypeID; AEmptyTab: WordBool = True): Integer;
 var
   LNewTabSheetController: TTabSheetController;
   LMirrorIndex: Integer;
@@ -610,7 +727,7 @@ begin
       begin
         PageControl := pcMain;
 
-        TemplateFileName := ExtractFileName(ChangeFileExt(AFileName, ''));
+        TemplateFileName := ExtractFileName(ChangeFileExt(ATemplateFileName, ''));
 
         Install;
       end;
@@ -622,19 +739,19 @@ begin
 
     if SettingsManager.Settings.ControlAligner.MirrorPosition = mpTop then
     begin
-      if not AEmpty then
+      if not AEmptyTab then
       begin
         for LMirrorIndex := 0 to SettingsManager.Settings.ControlAligner.MirrorCount - 1 do
           LNewTabSheetController.MirrorController.Mirror[LNewTabSheetController.MirrorController.Add].GetDirectlink.Add('');
       end;
 
-      GetControls(AFileName, LNewTabSheetController.ControlController, Self);
+      GetControls(ATemplateFileName, LNewTabSheetController.ControlController, Self);
     end
     else
     begin
-      GetControls(AFileName, LNewTabSheetController.ControlController, Self);
+      GetControls(ATemplateFileName, LNewTabSheetController.ControlController, Self);
 
-      if not AEmpty then
+      if not AEmptyTab then
       begin
         for LMirrorIndex := 0 to SettingsManager.Settings.ControlAligner.MirrorCount - 1 do
           LNewTabSheetController.MirrorController.Mirror[LNewTabSheetController.MirrorController.Add].GetDirectlink.Add('');
@@ -653,7 +770,7 @@ begin
       OnUpdateCMSWebsite.Add(Main.fPublish.GetUpdateCMSWebsiteEvent);
     end;
 
-    if not AEmpty then
+    if not AEmptyTab then
     begin
       Initialized;
       pcMain.OnChange(pcMain);
@@ -663,189 +780,18 @@ begin
   Result := ActiveTabSheetIndex;
 end;
 
-procedure TfMain.SaveTab(ATabIndex: Integer; ASaveDialog: Boolean = False);
-
-  function GetFileName: string;
-  var
-    Control: IControlBasic;
-  begin
-    with TabSheetController[ATabIndex] do
-      if length(FileName) > 0 then
-        Result := FileName
-      else if length(ReleaseName) > 0 then
-        Result := TrueFilename(ReleaseName)
-      else
-      begin
-        Control := ControlController.FindControl(cTitle);
-        if Assigned(Control) and (length(Control.Value) > 0) then
-          Result := TrueFilename(Control.Value);
-      end;
-  end;
-
-var
-  PluginsAvailable: Boolean;
-  FileFormats: TStrings;
-  FileFormatsIndex: Integer;
-  FileFilter: string;
+function TfMain.NewTabSheet(const ATemplateName: WideString): Integer;
 begin
-  FileFilter := '';
-
-  (* **
-    SaveDialog => Visible, if ASaveDialog = True or File exists
-    ASaveDialog = False, FileExists     FALSE
-    ASaveDialog = False, FileNotExists  TRUE
-    ASaveDialog = True,  FileExists     TRUE
-    ASaveDialog = True,  FileNotExists  TRUE
-    ** *)
-  ASaveDialog := ASaveDialog or not FileExists(TabSheetController[ATabIndex].FileName);
-
-  FileFormats := TPluginBasic.GetSaveFileFormats;
-  try
-    PluginsAvailable := FileFormats.Count > 0;
-
-    for FileFormatsIndex := 0 to FileFormats.Count - 1 do
-      FileFilter := FileFilter + FileFormats.ValueFromIndex[FileFormatsIndex];
-
-    if PluginsAvailable then
-      if not ASaveDialog then
-      begin
-        with TabSheetController[ATabIndex] do
-          Save(FileName, FileType);
-      end
-      else
-        with TSaveTextFileDialog.Create(nil) do
-          try
-            EncodingIndex := 4;
-
-            FileName := GetFileName;
-
-            Filter := FileFilter;
-
-            if Execute then
-            begin
-              if not(ExtractFileExt(FileName) = '.xml') then
-                FileName := FileName + '.xml';
-
-              TabSheetController[ATabIndex].Save(FileName, FileFormats.Names[FilterIndex - 1]);
-            end;
-          finally
-            Free;
-          end;
-  finally
-    FileFormats.Free;
-  end;
+  Result := CreateTabSheet(GetTemplatesTypeFolder + ATemplateName + '.xml', TApiXml.GetControlsTemplateInfo(GetTemplatesTypeFolder + ATemplateName + '.xml').TemplateType, False);
 end;
 
-procedure TfMain.SaveCurrentTab;
+function TfMain.InternalOpenFile(const AFileName: string): Integer;
 begin
-  SaveTab(ActiveTabSheetIndex);
-end;
-
-procedure TfMain.SaveCurrentTabAs;
-begin
-  SaveTab(ActiveTabSheetIndex, True);
-end;
-
-procedure TfMain.SaveAllTabs;
-var
-  I: Integer;
-begin
-  for I := 0 to TabSheetCount - 1 do
-    SaveTab(I);
-end;
-
-procedure TfMain.SaveAllToFolder;
-var
-  TabSheetIndex: Integer;
-  PluginAvailable: Boolean;
-  FileFormats: TStrings;
-  FileFormatsIndex: Integer;
-  FileFilter, AutoFileName: string;
-begin
-  FileFilter := '';
-
-  FileFormats := TPluginBasic.GetSaveFileFormats;
-  try
-    PluginAvailable := FileFormats.Count > 0;
-
-    for FileFormatsIndex := 0 to FileFormats.Count - 1 do
-      FileFilter := FileFilter + FileFormats.ValueFromIndex[FileFormatsIndex];
-
-    with TSelectFolderDialog.Create(nil) do
-      try
-        Filter := FileFilter;
-
-        if Execute and PluginAvailable then
-          for TabSheetIndex := 0 to TabSheetCount - 1 do
-            with TabSheetController[TabSheetIndex] do
-            begin
-              if not(ReleaseName = '') then
-                AutoFileName := TrueFilename(ReleaseName)
-              else if not(ControlController.FindControl(cTitle).Value = '') then
-                AutoFileName := TrueFilename(ControlController.FindControl(cTitle).Value);
-              AutoFileName := Path + AutoFileName;
-              if not(ExtractFileExt(AutoFileName) = '.xml') then
-                AutoFileName := AutoFileName + '.xml';
-              if (FileExists(AutoFileName) and (MessageDlg('Override "' + ExtractFileName(AutoFileName) + '" ?', mtConfirmation, [mbyes, mbno], 0) = mrYes)) or (not FileExists(AutoFileName)) then
-                Save(AutoFileName, FileFormats.Names[FilterIndex - 1]);
-            end;
-      finally
-        Free;
-      end;
-  finally
-    FileFormats.Free;
-  end;
-end;
-
-procedure TfMain.OpenToNewTab;
-var
-  LPluginAvailable: Boolean;
-  LFileFormats: TStrings;
-  LFileFormatsIndex: Integer;
-  LFileFilter: string;
-begin
-  if not FileExists(AFileName) then
-  begin
-    LFileFormats := TPluginBasic.GetLoadFileFormats;
-    try
-      LPluginAvailable := LFileFormats.Count > 0;
-
-      for LFileFormatsIndex := 0 to LFileFormats.Count - 1 do
-        LFileFilter := LFileFilter + LFileFormats.ValueFromIndex[LFileFormatsIndex];
-    finally
-      LFileFormats.Free;
-    end;
-    if LPluginAvailable then
-    begin
-      with TOpenDialog.Create(nil) do
-        try
-          Options := Options + [ofAllowMultiSelect];
-          Filter := LFileFilter;
-
-          if Execute then
-            OpenFiles(Files);
-        finally
-          Free;
-        end;
-    end
-    else
-    begin
-      MessageDlg('None of the FileFormat plugins is active.', mtError, [mbOK], 0);
-    end;
-  end
-  else
-  begin
-    OpenFile(AFileName);
-  end;
-end;
-
-function TfMain.OpenFile(const AFileName: string): Boolean;
-begin
-  Result := False;
+  Result := -1;
   try
     Result := TPluginBasic.LoadFile(AFileName, Self);
 
-    if not Result then
+    if not(Result = -1) then
       TLogManager.Instance().Add(Format('File %s could not be loaded.', [AFileName]));
 
     pcMain.OnChange(pcMain);
@@ -854,28 +800,267 @@ begin
   end;
 end;
 
-function TfMain.OpenFiles(const AFiles: TStrings): Boolean;
+function TfMain.InternalOpenFiles(const AFiles: TStrings): Integer;
 var
-  LFileIndex: Integer;
-  LResult: Boolean;
+  LFileIndex, LTabIndex: Integer;
 begin
-  Result := False;
-  LResult := True;
+  Result := -1;
+  LTabIndex := -1;
 
   LockPageControl;
   try
     for LFileIndex := 0 to AFiles.Count - 1 do
     begin
-      LResult := OpenFile(AFiles.Strings[LFileIndex]);
-      Result := Result and LResult;
+      LTabIndex := InternalOpenFile(AFiles.Strings[LFileIndex]);
+      if not(LTabIndex = -1) and (Result = -1) then
+        Result := LTabIndex;
     end;
-
   finally
     UnlockPageControl;
   end;
 end;
 
-function TfMain.CanClose(ATabIndex: Integer): Boolean;
+function TfMain.OpenTabSheet(const AFileName: WideString = ''): Integer;
+var
+  LFileFormats: TStrings;
+  LFileFormatsIndex: Integer;
+  LFileFilter: string;
+begin
+  if not FileExists(AFileName) then
+  begin
+    LFileFormats := TPluginBasic.GetLoadFileFormats;
+    try
+      if not(LFileFormats.Count > 0) then
+      begin
+        MessageDlg('There is no file format plugin that can be used to open the file.', mtError, [mbOK], 0);
+        Exit(-1);
+      end;
+
+      LFileFilter := '';
+      for LFileFormatsIndex := 0 to LFileFormats.Count - 1 do
+        LFileFilter := LFileFilter + LFileFormats.ValueFromIndex[LFileFormatsIndex];
+    finally
+      LFileFormats.Free;
+    end;
+
+    with TOpenDialog.Create(nil) do
+      try
+        InitialDir := GetDocumentsFolder;
+        Filter := LFileFilter;
+        Options := Options + [ofAllowMultiSelect];
+
+        if Execute then
+          Result := InternalOpenFiles(Files);
+      finally
+        Free;
+      end;
+  end
+  else
+  begin
+    Result := InternalOpenFile(AFileName);
+  end;
+end;
+
+function TfMain.InternalSaveFile(const ATabSheetController: ITabSheetController; const AFileName, AFileFormat: WideString): Boolean;
+var
+  LPlugInCollectionItem: TPlugInCollectionItem;
+  LFileExtension, LFileName: string;
+begin
+  with SettingsManager.Settings.Plugins do
+    LPlugInCollectionItem := FindPlugInCollectionItemFromCollection(AFileFormat, FileFormats);
+
+  with SettingsManager.Settings.Plugins do
+    LFileExtension := TPluginBasic.GetFileFormatFileExtension(LPlugInCollectionItem);
+
+  if not SameStr(LFileExtension, ExtractFileExt(AFileName)) then
+    LFileName := AFileName + LFileExtension;
+
+  Result := TPluginBasic.SaveFile(LPlugInCollectionItem, LFileName, ATabSheetController);
+
+  if Result then
+    ATabSheetController.FileSaved(AFileName, AFileFormat);
+end;
+
+function TfMain.SaveTabSheet(const ATabIndex: Integer; const AFileName: WideString = ''; const AFileFormat: WideString = ''; const AForceDialog: WordBool = False): WordBool;
+var
+  LNeedDialog, LFileFormatFound: Boolean;
+  LFileFormats: TStrings;
+  LFileFormatsIndex: Integer;
+  LFileFormat, LFileFilter, LFileName, LFileExtension: string;
+begin
+  // file format
+  if not SameStr('', AFileFormat) then
+    LFileFormat := AFileFormat
+  else if not SameStr('', TabSheetController[ATabIndex].FileFormat) then
+    LFileFormat := TabSheetController[ATabIndex].FileFormat
+  else
+    LFileFormat := TPluginBasic.GetDefaultSaveFileFormat;
+
+  // need dialog
+  LNeedDialog := AForceDialog or not FileExists(TabSheetController[ATabIndex].FileName);
+
+  LFileFormats := TPluginBasic.GetSaveFileFormats;
+  try
+    if not(LFileFormats.Count > 0) then
+    begin
+      MessageDlg('There is no file format plugin that can be used to save the file.', mtError, [mbOK], 0);
+      Exit(False);
+    end;
+
+    LFileFormatFound := False;
+    for LFileFormatsIndex := 0 to LFileFormats.Count - 1 do
+      if SameText(LFileFormat, LFileFormats.Names[LFileFormatsIndex]) then
+      begin
+        LFileFormatFound := True;
+        break;
+      end;
+    if not LFileFormatFound then
+    begin
+      LFileFormat := TPluginBasic.GetDefaultSaveFileFormat;
+      LNeedDialog := True;
+    end;
+
+    LFileFilter := '';
+    for LFileFormatsIndex := 0 to LFileFormats.Count - 1 do
+      LFileFilter := LFileFilter + LFileFormats.ValueFromIndex[LFileFormatsIndex];
+
+    if LNeedDialog then
+    begin
+      LFileName := IfThen(not SameStr('', AFileName), AFileName, TabSheetController[ATabIndex].SuggestFileName);
+      with TSaveDialog.Create(nil) do
+        try
+          FileName := IfThen(not SameStr('', LFileName), LFileName, 'Unnamed');
+          if not(LFileFormats.IndexOfName(LFileFormat) = -1) then
+            FilterIndex := LFileFormats.IndexOfName(LFileFormat) + 1;
+          Filter := LFileFilter;
+          InitialDir := GetDocumentsFolder;
+
+          if Execute then
+          begin
+            LFileFormat := LFileFormats.Names[FilterIndex - 1];
+            Result := InternalSaveFile(TabSheetController[ATabIndex], FileName, LFileFormat);
+          end
+          else
+          begin
+            Exit(False);
+          end;
+        finally
+          Free;
+        end;
+    end
+    else
+    begin
+      Result := InternalSaveFile(TabSheetController[ATabIndex], AFileName, LFileFormat);
+    end;
+  finally
+    LFileFormats.Free;
+  end;
+end;
+
+function TfMain.SaveTabSheet(const ATabIndex: Integer; const AForceDialog: WordBool): WordBool;
+begin
+  Result := SaveTabSheet(ATabIndex, '', '', AForceDialog);
+end;
+
+function TfMain.SaveTheCurrentTabSheet: WordBool;
+begin
+  Result := SaveTabSheet(ActiveTabSheetIndex);
+end;
+
+function TfMain.SaveTheCurrentTabSheetAs: WordBool;
+begin
+  Result := SaveTabSheet(ActiveTabSheetIndex, True);
+end;
+
+function TfMain.SaveAllTabSheets: WordBool;
+var
+  LTabIndex: Integer;
+begin
+  Result := True;
+
+  for LTabIndex := 0 to TabSheetCount - 1 do
+    Result := Result and SaveTabSheet(LTabIndex);
+end;
+
+function TfMain.SaveAllTabSheetsToFolder(const AFilePath: WideString = ''; const AFileFormat: WideString = ''): WordBool;
+var
+  LNeedDialog, LFileFormatFound: Boolean;
+  LFileFormats: TStrings;
+  LFileFormatsIndex: Integer;
+  LFilePath, LFileFormat, LFileFilter, LFileName: string;
+  LTabIndex: Integer;
+begin
+  Result := True;
+
+  LFilePath := AFilePath;
+
+  // file format
+  LFileFormat := AFileFormat;
+
+  // need dialog
+  LNeedDialog := (SameStr('', LFilePath) or not DirectoryExists(LFilePath)) or (SameStr('', LFileFormat));
+
+  LFileFormats := TPluginBasic.GetSaveFileFormats;
+  try
+    if not(LFileFormats.Count > 0) then
+    begin
+      MessageDlg('There is no file format plugin that can be used to save the files.', mtError, [mbOK], 0);
+      Exit(False);
+    end;
+
+    LFileFormatFound := False;
+    for LFileFormatsIndex := 0 to LFileFormats.Count - 1 do
+      if SameText(LFileFormat, LFileFormats.Names[LFileFormatsIndex]) then
+      begin
+        LFileFormatFound := True;
+        break;
+      end;
+    if not LFileFormatFound then
+    begin
+      LFileFormat := TPluginBasic.GetDefaultSaveFileFormat;
+      LNeedDialog := True;
+    end;
+
+    LFileFilter := '';
+    for LFileFormatsIndex := 0 to LFileFormats.Count - 1 do
+      LFileFilter := LFileFilter + LFileFormats.ValueFromIndex[LFileFormatsIndex];
+
+    if LNeedDialog then
+    begin
+      with TSelectFolderDialog.Create(nil) do
+        try
+          Filter := LFileFilter;
+          Path := GetDocumentsFolder;
+
+          if Execute then
+          begin
+            LFilePath := Path;
+            LFileFormat := LFileFormats.Names[FilterIndex - 1];
+          end
+          else
+          begin
+            Exit(False);
+          end;
+        finally
+          Free;
+        end;
+    end;
+  finally
+    LFileFormats.Free;
+  end;
+
+  for LTabIndex := 0 to TabSheetCount - 1 do
+  begin
+    LFileName := LFilePath + TabSheetController[LTabIndex].SuggestFileName;
+
+    if not(FileExists(LFileName) and (MessageDlg('Override "' + ExtractFileName(LFileName) + '" ?', mtConfirmation, [mbYes, mbNo, mbCancel], 0) = mrYes)) then
+      Continue;
+
+    Result := Result and InternalSaveFile(TabSheetController[LTabIndex], LFileName, LFileFormat);
+  end;
+end;
+
+function TfMain.CanCloseTabSheet(const ATabIndex: Integer): WordBool;
 var
   LTabSheetController: ITabSheetController;
 begin
@@ -889,22 +1074,22 @@ begin
   LTabSheetController := nil;
 end;
 
-function TfMain.CanCloseCurrentTab: Boolean;
+function TfMain.CanCloseTheCurrentTabSheet: WordBool;
 begin
-  Result := CanClose(ActiveTabSheetIndex);
+  Result := CanCloseTabSheet(ActiveTabSheetIndex);
 end;
 
-function TfMain.CanCloseAllOtherTabs: Boolean;
+function TfMain.CanCloseAllExceptTheCurrentTabSheet: WordBool;
 var
-  LTabSheetIndex: Integer;
+  LTabIndex: Integer;
   LResult: Boolean;
 begin
   LResult := True;
 
-  for LTabSheetIndex := 0 to TabSheetCount - 1 do
-    if not(LTabSheetIndex = ActiveTabSheetIndex) then
+  for LTabIndex := 0 to TabSheetCount - 1 do
+    if not(LTabIndex = ActiveTabSheetIndex) then
     begin
-      LResult := CanClose(LTabSheetIndex);
+      LResult := CanCloseTabSheet(LTabIndex);
       if not LResult then
         break;
     end;
@@ -912,7 +1097,7 @@ begin
   Result := LResult;
 end;
 
-function TfMain.CanCloseAllTabs: Boolean;
+function TfMain.CanCloseAllTabSheets: WordBool;
 var
   LTabSheetIndex: Integer;
   LResult: Boolean;
@@ -921,7 +1106,7 @@ begin
 
   for LTabSheetIndex := 0 to TabSheetCount - 1 do
   begin
-    LResult := CanClose(LTabSheetIndex);
+    LResult := CanCloseTabSheet(LTabSheetIndex);
     if not LResult then
       break;
   end;
@@ -929,7 +1114,7 @@ begin
   Result := LResult;
 end;
 
-function TfMain.RemoveTab(ATabIndex: Integer): Boolean;
+function TfMain.CloseTabSheet(const ATabIndex: Integer): WordBool;
 begin
   Result := True;
 
@@ -949,29 +1134,29 @@ begin
   end;
 end;
 
-function TfMain.RemoveCurrentTab: Boolean;
+function TfMain.CloseTheCurrentTabSheet: WordBool;
 begin
-  Result := RemoveTab(ActiveTabSheetIndex);
+  Result := CloseTabSheet(ActiveTabSheetIndex);
 end;
 
-function TfMain.RemoveAllOtherTabs;
+function TfMain.CloseAllExceptTheCurrentTabSheet: WordBool;
 var
-  I: Integer;
+  LTabIndex: Integer;
 begin
   // remove all tabs on the right side
-  for I := TabSheetCount - 1 downto ActiveTabSheetIndex + 1 do
-    RemoveTab(I);
+  for LTabIndex := TabSheetCount - 1 downto ActiveTabSheetIndex + 1 do
+    CloseTabSheet(LTabIndex);
   // remove all tabs on the left side
-  for I := TabSheetCount - 2 downto 0 do
-    RemoveTab(I);
+  for LTabIndex := TabSheetCount - 2 downto 0 do
+    CloseTabSheet(LTabIndex);
 
   Result := (TabSheetCount = 1);
 end;
 
-function TfMain.RemoveAllTabs: Boolean;
+function TfMain.CloseAllTabSheets: WordBool;
 begin
   while TabSheetCount > 0 do
-    RemoveCurrentTab;
+    CloseTheCurrentTabSheet;
 
   Result := (TabSheetCount = 0);
 end;
@@ -983,10 +1168,11 @@ end;
 
 destructor TfMain.Destroy;
 begin
-  FAfterAutoCompletion := nil;
-  FBeforeAutoCompletion := nil;
+  FAfterCrawling := nil;
+  FBeforeCrawling := nil;
   FRemoveTab := nil;
   FAddTab := nil;
+  FTabCaptionChange := nil;
   FViewChange := nil;
   FChange := nil;
 

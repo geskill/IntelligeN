@@ -16,7 +16,9 @@ uses
   // MultiEvent
   Generics.MultiEvents.Handler, Generics.MultiEvents.NotifyHandler,
   // Plugin
-  uPlugInEvent;
+  uPlugInEvent,
+  // Utils
+  uFileUtils;
 
 type
   TReleaseNameChangeMethod = procedure(const AReleaseName: WideString) of object;
@@ -31,7 +33,7 @@ type
     FPageController: IPageController;
     FTypeID: TTypeID;
 
-    FFileName, FFileType, FReleaseName, FTemplateFileName: string;
+    FFileName, FFileFormat, FReleaseName, FTemplateFileName: string;
     FInitialized, FDataChanged: Boolean;
 
     FDataTabSheetItem: TDataTabSheetItem;
@@ -53,13 +55,15 @@ type
     procedure SetViewType(AViewType: TTabViewType);
     function GetFileName: WideString;
     procedure SetFileName(const AFileName: WideString);
-    function GetFileType: WideString;
-    procedure SetFileType(const AFileType: WideString);
+    function GetFileFormat: WideString;
+    procedure SetFileFormat(const AFileFormat: WideString);
     function GetReleaseName: WideString;
     procedure SetReleaseName(const AReleaseName: WideString);
     function GetReleaseNameShort: WideString;
     function GetDataChanged: Boolean;
     procedure SetDataChanged(ADataChanged: Boolean);
+    function GetTemplateFileName: WideString;
+    procedure SetTemplateFileName(const ATemplateFileName: WideString);
     function GetTypeID: TTypeID;
     function GetActiveWebsite: WideString;
     procedure SetActiveWebsite(const AWebsite: WideString);
@@ -89,20 +93,23 @@ type
 
     property ViewType: TTabViewType read GetViewType write SetViewType;
 
+    function SuggestFileName: WideString;
+
     property FileName: WideString read GetFileName write SetFileName;
-    property FileType: WideString read GetFileType write SetFileType;
+    property FileFormat: WideString read GetFileFormat write SetFileFormat;
 
     property ReleaseName: WideString read GetReleaseName write SetReleaseName;
     property ReleaseNameShort: WideString read GetReleaseNameShort;
 
-    procedure Save(const AFileName, AFileType: WideString);
+    function Save(const AFileName, AFileFormat: WideString): WordBool;
     procedure Initialized(); overload;
-    procedure Initialized(const AFileName, AFileType: WideString); overload;
+    procedure Initialized(const AFileName, AFileFormat: WideString); overload;
+    procedure FileSaved(const AFileName, AFileFormat: WideString);
     procedure ResetControlFocused();
 
     property DataChanged: Boolean read GetDataChanged write SetDataChanged;
 
-    property TemplateFileName: string read FTemplateFileName write FTemplateFileName;
+    property TemplateFileName: WideString read GetTemplateFileName write SetTemplateFileName;
     property TypeID: TTypeID read GetTypeID write FTypeID;
 
     property ActiveWebsite: WideString read GetActiveWebsite write SetActiveWebsite;
@@ -199,14 +206,14 @@ begin
   FFileName := AFileName;
 end;
 
-function TTabSheetController.GetFileType;
+function TTabSheetController.GetFileFormat;
 begin
-  Result := FFileType;
+  Result := FFileFormat;
 end;
 
-procedure TTabSheetController.SetFileType(const AFileType: WideString);
+procedure TTabSheetController.SetFileFormat(const AFileFormat: WideString);
 begin
-  FFileType := AFileType;
+  FFileFormat := AFileFormat;
 end;
 
 function TTabSheetController.GetReleaseName: WideString;
@@ -216,9 +223,13 @@ end;
 
 procedure TTabSheetController.SetReleaseName(const AReleaseName: WideString);
 begin
-  FReleaseName := AReleaseName;
-  UpdateCaption;
-  TabHint := ReleaseName;
+  if not SameText(AReleaseName, FReleaseName) then
+  begin
+    FReleaseName := AReleaseName;
+    TabHint := ReleaseName;
+
+    UpdateCaption;
+  end;
 end;
 
 function TTabSheetController.GetReleaseNameShort: WideString;
@@ -236,8 +247,22 @@ end;
 
 procedure TTabSheetController.SetDataChanged(ADataChanged: Boolean);
 begin
-  FDataChanged := ADataChanged;
-  UpdateCaption;
+  if not(ADataChanged = FDataChanged) then
+  begin
+    FDataChanged := ADataChanged;
+
+    UpdateCaption;
+  end;
+end;
+
+function TTabSheetController.GetTemplateFileName;
+begin
+  Result := FTemplateFileName;
+end;
+
+procedure TTabSheetController.SetTemplateFileName(const ATemplateFileName: WideString);
+begin
+  FTemplateFileName := ATemplateFileName;
 end;
 
 function TTabSheetController.GetTypeID: TTypeID;
@@ -260,8 +285,7 @@ begin
   if FInitialized then
   begin
     Self.Caption := ReleaseNameShort + IfThen(DataChanged, '*');
-    if IsTabActive then
-      Main.UpdateCaption(Self.Caption); // TODO: Impelment this better in 130
+    PageController.OnTabCaptionChange.Invoke(Self.Caption);
   end;
 end;
 
@@ -338,13 +362,26 @@ begin
   PublishController.OnUpdateCMSWebsiteList.Add(FIUpdateCMSWebsiteListEvent);
 end;
 
-procedure TTabSheetController.Save(const AFileName, AFileType: WideString);
+function TTabSheetController.SuggestFileName: WideString;
+var
+  LControl: IControlBasic;
 begin
-  with SettingsManager.Settings.Plugins do
-    TPluginBasic.SaveFile(FindPlugInCollectionItemFromCollection(AFileType, FileFormats), AFileName, GetTemplatesTypeFolder + TemplateFileName + '.xml', Self);
-  FileName := AFileName;
-  FileType := AFileType;
-  DataChanged := False;
+  if not SameStr('', FileName) then
+    Exit(FileName);
+
+  if not SameStr('', ReleaseName) then
+    Exit(TrueFilename(ReleaseName));
+
+  LControl := ControlController.FindControl(cTitle);
+  if Assigned(LControl) and not SameStr('', LControl.Value) then
+    Exit(TrueFilename(LControl.Value));
+
+  Result := '';
+end;
+
+function TTabSheetController.Save(const AFileName, AFileFormat: WideString): WordBool;
+begin
+  Result := PageController.SaveTabSheet(TabSheetIndex, AFileName, AFileFormat);
 end;
 
 procedure TTabSheetController.Initialized;
@@ -352,10 +389,10 @@ begin
   Initialized('', '');
 end;
 
-procedure TTabSheetController.Initialized(const AFileName, AFileType: WideString);
+procedure TTabSheetController.Initialized(const AFileName, AFileFormat: WideString);
 begin
   FileName := AFileName;
-  FileType := AFileType;
+  FileFormat := AFileFormat;
   FInitialized := True;
   DataChanged := False;
   ResetControlFocused();
@@ -364,6 +401,13 @@ begin
   // Enabled := True;
 
   PageController.OnAddTab.Invoke(Self);
+end;
+
+procedure TTabSheetController.FileSaved(const AFileName, AFileFormat: WideString);
+begin
+  FileName := AFileName;
+  FileFormat := AFileFormat;
+  DataChanged := False;
 end;
 
 procedure TTabSheetController.ResetControlFocused;

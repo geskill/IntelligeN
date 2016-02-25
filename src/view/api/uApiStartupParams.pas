@@ -45,13 +45,13 @@ begin
           0:
             begin
               if ((I + 1) < Length(StartupParams)) then
-                Main.fMain.OpenToNewTab(StartupParams[I + 1])
+                Main.fMain.OpenTabSheet(StartupParams[I + 1])
               else
-                Main.fMain.OpenToNewTab();
+                Main.fMain.OpenTabSheet();
             end;
         end;
     if FileExists(StartupParams[0]) then
-      Main.fMain.OpenToNewTab(StartupParams[0]);
+      Main.fMain.OpenTabSheet(StartupParams[0]);
   end;
 end;
 

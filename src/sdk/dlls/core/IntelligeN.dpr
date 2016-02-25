@@ -12,6 +12,7 @@ uses
 
 const
   ConfigurationFolder: string = 'configuration';
+  DocumentsFolder: string = 'documents';
   PluginsFolder: string = 'plugins';
   SettingsFolder: string = 'settings';
   TemplatesFolder: string = 'templates';
@@ -46,6 +47,11 @@ begin
   Result := IncludeTrailingPathDelimiter(GetCommonDataDir + ConfigurationFolder);
 end;
 
+function GetDocumentsFolder: WideString; stdcall; export;
+begin
+  Result := IncludeTrailingPathDelimiter(GetPersonalDataDir + DocumentsFolder);
+end;
+
 function GetPluginFolder: WideString; stdcall; export;
 begin
   Result := IncludeTrailingPathDelimiter(GetCommonDataDir + PluginsFolder);
@@ -73,7 +79,7 @@ end;
 
 { ****************************************************************************** }
 
-function GetPathFromFileSystemID(AFileSystem: TFileSystem): WideString; stdcall; export;
+function GetPathFromFileSystemID(const AFileSystem: TFileSystem): WideString; stdcall; export;
 begin
   case AFileSystem of
     fsRoot:
@@ -97,7 +103,7 @@ begin
   end;
 end;
 
-function GetFileSystemIDFromPath(AFileName: WideString): TFileSystem; stdcall; export;
+function GetFileSystemIDFromPath(const AFileName: WideString): TFileSystem; stdcall; export;
 var
   LFilePath: string;
 begin
@@ -131,6 +137,7 @@ exports { . }
   GetHiddenDataDir name 'GetHiddenDataDir', { . }
   GetConfigurationFolder name 'GetConfigurationFolder', { . }
   GetPluginFolder name 'GetPluginFolder', { . }
+  GetDocumentsFolder name 'GetDocumentsFolder', { . }
   GetSettingsFolder name 'GetSettingsFolder', { . }
   GetTemplatesCMSFolder name 'GetTemplatesCMSFolder', { . }
   GetTemplatesSiteFolder name 'GetTemplatesSiteFolder', { . }

@@ -15,7 +15,7 @@ type
   protected
     function InternalIndexOf(const AStr: string): Integer;
     function GetTextValue: string;
-    procedure SetTextValue(const TextValue: string);
+    procedure SetTextValue(const AValue: string);
   public
     procedure CheckAll;
   published
@@ -53,6 +53,25 @@ begin
   Result := Text;
 end;
 
+procedure TMycxCheckComboBox.SetTextValue(const AValue: string);
+var
+  LIndex, LItemIndex: Integer;
+begin
+  Value := '';
+  with SplittString(Properties.Delimiter[1], AValue) do
+    try
+      for LIndex := 0 to Count - 1 do
+      begin
+        LItemIndex := InternalIndexOf(Strings[LIndex]);
+
+        if (LItemIndex <> -1) then
+          States[LItemIndex] := cbsChecked;
+      end;
+    finally
+      Free;
+    end;
+end;
+
 procedure TMycxCheckComboBox.CheckAll;
 var
   LItemIndex: Integer;
@@ -65,25 +84,6 @@ begin
       LStates[LItemIndex] := cbsChecked;
     Value := CalculateCheckStatesValue(LStates, Items, EditValueFormat);
   end;
-end;
-
-procedure TMycxCheckComboBox.SetTextValue(const TextValue: string);
-var
-  LCategoryIndex, LItemIndex: Integer;
-begin
-  with SplittString(Properties.Delimiter[1], TextValue) do
-    try
-      Value := '';
-      for LCategoryIndex := 0 to Count - 1 do
-      begin
-        LItemIndex := InternalIndexOf(Strings[LCategoryIndex]);
-
-        if (LItemIndex <> -1) then
-          States[LItemIndex] := cbsChecked;
-      end;
-    finally
-      Free;
-    end;
 end;
 
 end.

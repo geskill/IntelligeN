@@ -37,7 +37,8 @@ type
 
     procedure SetPossibleControlValue;
     procedure UpdateControlValues;
-    procedure CallCrawlingFinished;
+    procedure DoBeforeCrawling;
+    procedure DoAfterCrawling;
     procedure InitiateImageRemoteUpload;
   public
     constructor Create(const AControlController: IControlController); reintroduce;
@@ -167,9 +168,14 @@ begin
   end;
 end;
 
-procedure TCrawlerThread.CallCrawlingFinished;
+procedure TCrawlerThread.DoBeforeCrawling;
 begin
-  Data.ControlController.OnCrawlingFinished.Invoke(Self);
+  Data.TabSheetController.PageController.OnBeforeCrawling.Invoke(Data.TabSheetController);
+end;
+
+procedure TCrawlerThread.DoAfterCrawling;
+begin
+  Data.TabSheetController.PageController.OnAfterCrawling.Invoke(Data.TabSheetController);
 end;
 
 procedure TCrawlerThread.InitiateImageRemoteUpload;
@@ -208,6 +214,8 @@ begin
   Data.TabSheetController := AControlController.TabSheetController;
 
   Data.ControlController := AControlController;
+
+  DoBeforeCrawling;
 
   GetLocaleFormatSettings(LOCALE_USER_DEFAULT, FFormatSettings);
   FTypeID := AControlController.TypeID;
@@ -279,7 +287,7 @@ begin
     { } procedure
     { } begin
     { . } UpdateControlValues;
-    { . } CallCrawlingFinished;
+    { . } DoAfterCrawling;
     { . } InitiateImageRemoteUpload;
 
     { . } Finish;

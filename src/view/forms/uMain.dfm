@@ -132,11 +132,6 @@ object Main: TMain
                   end>
                 ExplicitTop = 573
                 ExplicitWidth = 516
-                inherited dxStatusBarContainer3: TdxStatusBarContainerControl
-                  inherited cxPBAutocompletion: TcxProgressBar
-                    ExplicitHeight = 18
-                  end
-                end
               end
               inherited pcMain: TcxPageControl
                 Width = 516
@@ -334,14 +329,6 @@ object Main: TMain
                 ExplicitWidth = 196
                 ExplicitHeight = 256
               end
-              inherited cxEditRepo: TcxEditRepository
-                inherited cxERCancelButtonActive: TcxEditRepositoryButtonItem
-                  Properties.Images = nil
-                end
-                inherited cxERCancelButtonDisabled: TcxEditRepositoryButtonItem
-                  Properties.Images = nil
-                end
-              end
             end
           end
         end
@@ -356,6 +343,7 @@ object Main: TMain
       AllowFloating = True
       AutoHide = False
       CustomCaptionButtons.Buttons = <>
+      ExplicitHeight = 650
       DockingType = 1
       OriginalWidth = 200
       OriginalHeight = 140
@@ -383,7 +371,7 @@ object Main: TMain
           Align = alClient
           TabOrder = 0
           ExplicitWidth = 196
-          ExplicitHeight = 227
+          ExplicitHeight = 254
           inherited pLogin: TPanel
             Width = 180
             ExplicitWidth = 180

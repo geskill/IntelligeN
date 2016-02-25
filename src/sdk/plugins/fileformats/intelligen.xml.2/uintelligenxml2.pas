@@ -18,11 +18,15 @@ type
   TIntelligeNXML2 = class(TFileFormatPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function GetFileFormatName: WideString; override; safecall;
-    function CanSaveControls: WordBool; override; safecall;
-    procedure SaveControls(const AFileName, ATemplateFileName: WideString; const ATabSheetController: ITabSheetController); override; safecall;
-    function CanLoadControls: WordBool; override; safecall;
-    function LoadControls(const AFileName, ATemplateDirectory: WideString; const APageController: IPageController): Integer; override; safecall;
+
+    function GetFileExtension: WideString; override; safecall;
+    function GetFileFilter: WideString; override; safecall;
+
+    function CanSaveFiles: WordBool; override; safecall;
+    function SaveFile(const AFileName: WideString; const ATabSheetController: ITabSheetController): WordBool; override; safecall;
+
+    function CanLoadFiles: WordBool; override; safecall;
+    function LoadFile(const AFileName: WideString; const APageController: IPageController): Integer; override; safecall;
   end;
 
 implementation
@@ -39,17 +43,22 @@ begin
   result := 'intelligen.xml.2';
 end;
 
-function TIntelligeNXML2.GetFileFormatName;
+function TIntelligeNXML2.GetFileExtension;
+begin
+  result := '.xml';
+end;
+
+function TIntelligeNXML2.GetFileFilter;
 begin
   result := 'IntelligeN 2009 %s (*.xml)|*.xml|';
 end;
 
-function TIntelligeNXML2.CanSaveControls;
+function TIntelligeNXML2.CanSaveFiles;
 begin
   result := True;
 end;
 
-procedure TIntelligeNXML2.SaveControls;
+function TIntelligeNXML2.SaveFile;
 var
   LNeedToUninitialize: Boolean;
   XMLDoc: IXMLDocument;
@@ -78,10 +87,10 @@ begin
       begin
         with AddChild('templatetype') do
         begin
-          if FileExists(ATemplateFileName) then
+          if FileExists(ATabSheetController.TemplateFileName) then
           begin
-            Attributes['filename'] := ExtractFileName(ChangeFileExt(ATemplateFileName, ''));
-            Attributes['checksum'] := GetMD5FromFile(ATemplateFileName);
+            Attributes['filename'] := ExtractFileName(ChangeFileExt(ATabSheetController.TemplateFileName, ''));
+            Attributes['checksum'] := GetMD5FromFile(ATabSheetController.TemplateFileName);
           end;
           NodeValue := TypeIDToString(ATabSheetController.ControlController.TypeID);
         end;
@@ -157,12 +166,12 @@ begin
   end;
 end;
 
-function TIntelligeNXML2.CanLoadControls;
+function TIntelligeNXML2.CanLoadFiles;
 begin
   result := True;
 end;
 
-function TIntelligeNXML2.LoadControls;
+function TIntelligeNXML2.LoadFile;
 var
   LNeedToUninitialize: Boolean;
   LXMLDoc: IXMLDocument;
@@ -198,7 +207,7 @@ begin
                   try
                     if Execute then
                     begin
-                      LType := GetFileInfo(ATemplateDirectory + TemplateFileName + '.xml').TemplateType;
+                      LType := GetFileInfo(GetTemplatesTypeFolder + TemplateFileName + '.xml').TypeID;
                       LTemplateFileName := TemplateFileName + '.xml';
                       LTemplateChecksum := '#';
                     end
@@ -229,12 +238,12 @@ begin
           end;
         end;
 
-        if (FileExists(ATemplateDirectory + LTemplateFileName)) and (SameText(LTemplateChecksum, GetMD5FromFile(ATemplateDirectory + LTemplateFileName)) or SameText('#', LTemplateChecksum)) then
-          LTemplateFile := ATemplateDirectory + LTemplateFileName
+        if (FileExists(GetTemplatesTypeFolder + LTemplateFileName)) and (SameText(LTemplateChecksum, GetMD5FromFile(GetTemplatesTypeFolder + LTemplateFileName)) or SameText('#', LTemplateChecksum)) then
+          LTemplateFile := GetTemplatesTypeFolder + LTemplateFileName
         else
           LTemplateFile := AFileName;
 
-        with APageController.TabSheetController[APageController.Add(LTemplateFile, LType, True)] do
+        with APageController.TabSheetController[APageController.CreateTabSheet(LTemplateFile, LType, True)] do
           with LXMLDoc.DocumentElement do
           begin
             for I := 0 to ChildNodes.Nodes['mirrors'].ChildNodes.Count - 1 do

@@ -59,8 +59,8 @@ type
   ///   to identify the exact control type along the IntelligeN eco-system.
   /// </summary>
   {$ENDREGION}
-  TControlID = (cReleaseName, cReleaseDate, cTags, cTitle, cCreator, cDirector, cPublisher, cPicture, cTrailer, cSample, cNotes, cPassword, cAudioBitrate, cAudioBitrateType, cAudioEncoder, cAudioSamplingRate, cAudioStream, cGenre, cLanguage, { cLanguageSubtitle, }
-    cRuntime, { cVersion, } cVideoCodec, cVideoStream, cVideoSystem, cNFO, cDescription);
+  TControlID = (cReleaseName, cReleaseDate, cTags, cTitle, cAudioBitrate, cAudioBitrateType, cAudioEncoder, cAudioSamplingRate, cAudioStream, cCreator, cDirector, cGenre, cLanguage, cNotes, cPassword, cPicture, cPublisher, cRuntime, cSample, cSubtitle, cTrailer, cVersion, cVideoCodec,
+    cVideoStream, cVideoSystem, cWebsite, cNFO, cDescription);
 
   TControlIDs = set of TControlID;
   {$REGION 'Documentation'}
@@ -80,13 +80,13 @@ type
   ///   Type definition of the different release categories.
   /// </summary>
   {$ENDREGION}
-  TTypeID = (cAudio, cEBook, cMovie, cNintendoDS, cPCGames, cPlayStation3, cPlayStation4, cPlayStationVita, cSoftware, cWii, cWiiU, cXbox360, cXboxOne, cXXX, cOther);
+  TTypeID = (cAudio, cEBook, cMovie, cNintendoDS, cNintendo3DS, cPCGames, cPlayStation3, cPlayStation4, cPlayStationVita, cSoftware, cWii, cWiiU, cXbox360, cXboxOne, cXXX, cOther);
 
   TTypeIDs = set of TTypeID;
 
 const
-  cConsole: set of TTypeID = [cNintendoDS, cPlayStation3, cPlayStation4, cPlayStationVita, cWii, cWiiU, cXbox360, cXboxOne];
-  cGames: set of TTypeID = [cNintendoDS, cPCGames, cPlayStation3, cPlayStation4, cPlayStationVita, cWii, cWiiU, cXbox360, cXboxOne];
+  cConsole: set of TTypeID = [cNintendoDS, cNintendo3DS, cPlayStation3, cPlayStation4, cPlayStationVita, cWii, cWiiU, cXbox360, cXboxOne];
+  cGames: set of TTypeID = [cNintendoDS, cNintendo3DS, cPCGames, cPlayStation3, cPlayStation4, cPlayStationVita, cWii, cWiiU, cXbox360, cXboxOne];
 
 implementation
 

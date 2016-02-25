@@ -21,17 +21,18 @@ function GetPersonalDataDir: WideString; stdcall; external ProgrammLibrary name 
 function GetHiddenDataDir: WideString; stdcall; external ProgrammLibrary name 'GetHiddenDataDir';
 
 function GetConfigurationFolder: WideString; stdcall; external ProgrammLibrary name 'GetConfigurationFolder';
+function GetDocumentsFolder: WideString; stdcall; external ProgrammLibrary name 'GetDocumentsFolder';
 function GetPluginFolder: WideString; stdcall; external ProgrammLibrary name 'GetPluginFolder';
 function GetSettingsFolder: WideString; stdcall; external ProgrammLibrary name 'GetSettingsFolder';
 function GetTemplatesCMSFolder: WideString; stdcall; external ProgrammLibrary name 'GetTemplatesCMSFolder';
 function GetTemplatesSiteFolder: WideString; stdcall; external ProgrammLibrary name 'GetTemplatesSiteFolder';
 function GetTemplatesTypeFolder: WideString; stdcall; external ProgrammLibrary name 'GetTemplatesTypeFolder';
 
-function GetPathFromFileSystemID(AFileSystem: TFileSystem): WideString; stdcall; external ProgrammLibrary name 'GetPathFromFileSystemID';
-function GetFileSystemIDFromPath(AFileName: WideString): TFileSystem; stdcall; external ProgrammLibrary name 'GetFileSystemIDFromPath';
+function GetPathFromFileSystemID(const AFileSystem: TFileSystem): WideString; stdcall; external ProgrammLibrary name 'GetPathFromFileSystemID';
+function GetFileSystemIDFromPath(const AFileName: WideString): TFileSystem; stdcall; external ProgrammLibrary name 'GetFileSystemIDFromPath';
 
 // IXML
-function GetFileInfo(AFileName: WideString): RTemplateFileInfo; stdcall; external 'IXML.dll' name 'GetFileInfo';
+function GetFileInfo(const AFileName: WideString): RTemplateFileInfo; stdcall; external 'IXML.dll' name 'GetFileInfo';
 
 implementation
 

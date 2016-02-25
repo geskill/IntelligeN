@@ -27,10 +27,8 @@ type
   protected
     class function GetCAPTCHAType(const ACAPTCHA: WideString): TCAPTCHAType;
   public
-    class function PluginsHandle(const AWebsite: WideString; const ASubject: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString;
-      AErrorProc: TPluginErrorProc = nil): WordBool;
-    class function ManualHandle(const AWebsite: WideString; const ASubject: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString;
-      ACAPTCHAMemoryStream: TMemoryStream; AMaxWaitMs: Cardinal = INFINITE): WordBool;
+    class function PluginsHandle(const AWebsite: WideString; const ASubject: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString; AErrorProc: TPluginErrorProc = nil): WordBool;
+    class function ManualHandle(const AWebsite: WideString; const ASubject: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; ACAPTCHAMemoryStream: TMemoryStream; AMaxWaitMs: Cardinal = INFINITE): WordBool;
     class function DefaultHandler(const AWebsite: WideString; const ASubject: WideString; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString): WordBool; safecall;
   end;
 
@@ -66,17 +64,18 @@ type
     class function AppLoad(App: TAppCollectionItem; const AAppController: IAppController): Boolean;
     class function AppUnLoad(App: TAppCollectionItem): Boolean;
 
-    class function CAPTCHAExec(const ACAPTCHAPluginPath: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString;
-      AErrorProc: TPluginErrorProc = nil): WordBool;
+    class function CAPTCHAExec(const ACAPTCHAPluginPath: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString; AErrorProc: TPluginErrorProc = nil): WordBool;
 
     class function CMSDefaultCharset(const ARelativPluginPath: string): string;
     class function CMSBelongsTo(const ARelativPluginPath, AWebsiteSourceCode: string): Boolean;
     class function CMSShowWebsiteSettingsEditor(const ARelativPluginPath: string; ACMSWebsite: TCMSWebsitesCollectionItem; const AAppController: IAppController): Boolean;
 
+    class function GetFileFormatFileExtension(AFileFormats: TPlugInCollectionItem): string;
+    class function GetDefaultSaveFileFormat: string;
     class function GetSaveFileFormats: TStrings;
     class function GetLoadFileFormats: TStrings;
-    class procedure SaveFile(AFileFormats: TPlugInCollectionItem; const AFileName, ATemplateFileName: string; const ATabSheetController: ITabSheetController);
-    class function LoadFile(const AFileName: string; const APageController: IPageController): Boolean;
+    class function SaveFile(AFileFormats: TPlugInCollectionItem; const AFileName: string; const ATabSheetController: ITabSheetController): Boolean;
+    class function LoadFile(const AFileName: string; const APageController: IPageController): Integer;
   end;
 
   TApiThreadedPlugin = class(TPluginBasic)
@@ -124,8 +123,7 @@ begin
     Result := ctText;
 end;
 
-class function TApiCAPTCHA.PluginsHandle(const AWebsite: WideString; const ASubject: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString;
-  var ACookies: WideString; AErrorProc: TPluginErrorProc = nil): WordBool;
+class function TApiCAPTCHA.PluginsHandle(const AWebsite: WideString; const ASubject: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString; AErrorProc: TPluginErrorProc = nil): WordBool;
 var
   LHandled: WordBool;
   LCAPTCHAPluginIndex: Integer;
@@ -150,8 +148,8 @@ begin
   Result := LHandled;
 end;
 
-class function TApiCAPTCHA.ManualHandle(const AWebsite: WideString; const ASubject: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString;
-  ACAPTCHAMemoryStream: TMemoryStream; AMaxWaitMs: Cardinal = INFINITE): WordBool;
+class function TApiCAPTCHA.ManualHandle(const AWebsite: WideString; const ASubject: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; ACAPTCHAMemoryStream: TMemoryStream;
+  AMaxWaitMs: Cardinal = INFINITE): WordBool;
 begin
   Result := False;
 
@@ -565,8 +563,7 @@ begin
   end;
 end;
 
-class function TPluginBasic.CAPTCHAExec(const ACAPTCHAPluginPath: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString;
-  AErrorProc: TPluginErrorProc = nil): WordBool;
+class function TPluginBasic.CAPTCHAExec(const ACAPTCHAPluginPath: WideString; const ACAPTCHAType: TCAPTCHAType; const ACAPTCHA: WideString; const ACAPTCHAName: WideString; out ACAPTCHASolution: WideString; var ACookies: WideString; AErrorProc: TPluginErrorProc = nil): WordBool;
 var
   LResult, LDelphiException, LExternalException: Boolean;
   LDelphiErrorMsg: string;
@@ -686,26 +683,67 @@ begin
   Result := LResult;
 end;
 
+class function TPluginBasic.GetFileFormatFileExtension(AFileFormats: TPlugInCollectionItem): string;
+var
+  LResult: string;
+begin
+  LResult := '';
+
+  TPluginBasic.LoadFileFormatsPlugin(AFileFormats.Path,
+    { } procedure(var AFileFormatPlugin: IFileFormatPlugIn)
+    { } begin
+    { . } LResult := AFileFormatPlugin.GetFileExtension;
+    { } end);
+  Result := LResult;
+end;
+
+class function TPluginBasic.GetDefaultSaveFileFormat: string;
+var
+  LResult: string;
+  LFileFormatCollectionIndex: Integer;
+begin
+  LResult := '';
+
+  with SettingsManager.Settings.Plugins.FileFormats do
+    with SettingsManager.Settings.Plugins.FileFormats do
+      for LFileFormatCollectionIndex := 0 to Count - 1 do
+        with TFileFormatsCollectionItem(Items[LFileFormatCollectionIndex]) do
+          if Enabled then
+          begin
+            TPluginBasic.LoadFileFormatsPlugin(Path,
+              { } procedure(var AFileFormatPlugin: IFileFormatPlugIn)
+              { } begin
+              { . } if AFileFormatPlugin.CanSaveFiles then
+              { ... } LResult := AFileFormatPlugin.GetName;
+              { } end);
+            if not SameStr('', LResult) then
+              break;
+          end;
+  Result := LResult;
+end;
+
 class function TPluginBasic.GetSaveFileFormats: TStrings;
 var
   LResult: TStringList;
   LFileFormatCollectionIndex: Integer;
 begin
   LResult := TStringList.Create;
-
-  with SettingsManager.Settings.Plugins.FileFormats do
-    for LFileFormatCollectionIndex := 0 to Count - 1 do
-      with TFileFormatsCollectionItem(Items[LFileFormatCollectionIndex]) do
-        if Enabled then
-        begin
-          TPluginBasic.LoadFileFormatsPlugin(Path,
-            { } procedure(var AFileFormatPlugin: IFileFormatPlugIn)
-            { } begin
-            { . } if AFileFormatPlugin.CanSaveControls then
-            { ... } LResult.Add(AFileFormatPlugin.GetName + LResult.NameValueSeparator + Format(AFileFormatPlugin.GetFileFormatName, [StrDocument]));
-            { } end);
-        end;
-
+  try
+    with SettingsManager.Settings.Plugins.FileFormats do
+      for LFileFormatCollectionIndex := 0 to Count - 1 do
+        with TFileFormatsCollectionItem(Items[LFileFormatCollectionIndex]) do
+          if Enabled then
+          begin
+            TPluginBasic.LoadFileFormatsPlugin(Path,
+              { } procedure(var AFileFormatPlugin: IFileFormatPlugIn)
+              { } begin
+              { . } if AFileFormatPlugin.CanSaveFiles then
+              { ... } LResult.Add(AFileFormatPlugin.GetName + LResult.NameValueSeparator + Format(AFileFormatPlugin.GetFileFilter, [StrDocument]));
+              { } end);
+          end;
+  except
+    LResult.Free;
+  end;
   Result := LResult;
 end;
 
@@ -724,47 +762,50 @@ begin
           TPluginBasic.LoadFileFormatsPlugin(Path,
             { } procedure(var AFileFormatPlugin: IFileFormatPlugIn)
             { } begin
-            { . } if AFileFormatPlugin.CanLoadControls then
-            { ... } LResult.Add(AFileFormatPlugin.GetName + LResult.NameValueSeparator + Format(AFileFormatPlugin.GetFileFormatName, [StrDocument]));
+            { . } if AFileFormatPlugin.CanLoadFiles then
+            { ... } LResult.Add(AFileFormatPlugin.GetName + LResult.NameValueSeparator + Format(AFileFormatPlugin.GetFileFilter, [StrDocument]));
             { } end);
         end;
 
   Result := LResult;
 end;
 
-class procedure TPluginBasic.SaveFile(AFileFormats: TPlugInCollectionItem; const AFileName, ATemplateFileName: string; const ATabSheetController: ITabSheetController);
+class function TPluginBasic.SaveFile(AFileFormats: TPlugInCollectionItem; const AFileName: string; const ATabSheetController: ITabSheetController): Boolean;
+var
+  LResult: Boolean;
 begin
+  LResult := False;
   TPluginBasic.LoadFileFormatsPlugin(AFileFormats.Path,
     { } procedure(var AFileFormatPlugin: IFileFormatPlugIn)
     { } begin
-    { . } if AFileFormatPlugin.CanSaveControls then
-    { ... } AFileFormatPlugin.SaveControls(AFileName, ATemplateFileName, ATabSheetController)
+    { . } if AFileFormatPlugin.CanSaveFiles then
+    { ... } LResult := AFileFormatPlugin.SaveFile(AFileName, ATabSheetController);
     { } end);
+
+  Result := LResult;
 end;
 
-class function TPluginBasic.LoadFile(const AFileName: string; const APageController: IPageController): Boolean;
+class function TPluginBasic.LoadFile(const AFileName: string; const APageController: IPageController): Integer;
 var
   LFileFormatCollectionIndex, LTabIndex: Integer;
-  LHandled: Boolean;
 begin
-  LHandled := False;
+  LTabIndex := -1;
 
   with SettingsManager.Settings.Plugins.FileFormats do
     for LFileFormatCollectionIndex := 0 to Count - 1 do
-      if not LHandled then
+      if not(LTabIndex = -1) then
         with TFileFormatsCollectionItem(Items[LFileFormatCollectionIndex]) do
           if Enabled then
             TPluginBasic.LoadFileFormatsPlugin(Path,
               { } procedure(var AFileFormatPlugin: IFileFormatPlugIn)
               { } begin
-              { . } if AFileFormatPlugin.CanLoadControls then
+              { . } if AFileFormatPlugin.CanLoadFiles then
               { . } begin
               { ... } try
               { ..... } AFileFormatPlugin.ForceAddCrypter := ForceAddCrypter;
               { ..... } AFileFormatPlugin.ForceAddImageMirror := ForceAddImageMirror;
-              { ..... } LTabIndex := AFileFormatPlugin.LoadControls(AFileName, GetTemplatesTypeFolder, APageController);
-              { ..... } LHandled := not(LTabIndex = -1);
-              { ..... } if LHandled then
+              { ..... } LTabIndex := AFileFormatPlugin.LoadFile(AFileName, APageController);
+              { ..... } if not(LTabIndex = -1) then
               { ....... } with APageController.TabSheetController[LTabIndex] do
               { ......... } Initialized(AFileName, AFileFormatPlugin.GetName);
               { ... } except
@@ -773,7 +814,7 @@ begin
               { . } end;
               { } end);
 
-  Result := LHandled;
+  Result := LTabIndex;
 end;
 
 procedure TApiThreadedPlugin.DefaultInternalErrorHandler(const AErrorMsg: string);
@@ -849,8 +890,7 @@ begin
   Result := LResult;
 end;
 
-function TApiThreadedPlugin.DefaultIntelligentPostingHelperHandler(const AWebsite: WideString; const ASubject: WideString; var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer;
-  out ARedoSearch: WordBool): WordBool;
+function TApiThreadedPlugin.DefaultIntelligentPostingHelperHandler(const AWebsite: WideString; const ASubject: WideString; var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool;
 var
   LResult: WordBool;
 

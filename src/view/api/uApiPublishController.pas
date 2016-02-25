@@ -1035,7 +1035,8 @@ begin
     for LCustomFieldIndex := 0 to CustomFields.Count - 1 do
     begin
       LIScript := CustomFields[LCustomFieldIndex].Value;
-      LIScriptResult := TabSheetController.PublishController.ParseIScript(CMS, Website, LIScript, TITabSheetData.Create(TabSheetController.TypeID, AControlList, AMirrorList, ACustomFieldList, False)); // TODO: Improve this
+      // TODO: Implement this better
+      // LIScriptResult := TabSheetController.PublishController.ParseIScript(CMS, Website, LIScript, TITabSheetData.Create(TabSheetController.TypeID, AControlList, AMirrorList, ACustomFieldList));
       ACustomFieldList.Add(TINameValueItem.Create(CustomFields[LCustomFieldIndex].Name, IfThen(not LIScriptResult.HasError, LIScriptResult.CompiledText)));
     end;
 end;

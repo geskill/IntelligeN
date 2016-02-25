@@ -71,7 +71,7 @@ type
     function GetName: WideString; override; safecall;
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
-    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID, AArticlePathID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -592,8 +592,7 @@ end;
 
 function Tipb3.GetArticleLink;
 begin
-  // TODO: ipb3 requires threadID, too
-  Result := Format('%stopic/<THREAD-ID>-/?p=%d', [AURL, AArticleID]);
+  Result := Format('%stopic/%d-/?p=%d', [AURL, AArticlePathID, AArticleID]);
 end;
 
 end.

@@ -16,11 +16,15 @@ type
   TExtractedPostCode = class(TFileFormatPlugIn)
   public
     function GetName: WideString; override; safecall;
-    function GetFileFormatName: WideString; override; safecall;
-    function CanSaveControls: WordBool; override; safecall;
-    procedure SaveControls(const AFileName, ATemplateFileName: WideString; const ATabSheetController: ITabSheetController); override; safecall;
-    function CanLoadControls: WordBool; override; safecall;
-    function LoadControls(const AFileName, ATemplateDirectory: WideString; const APageController: IPageController): Integer; override; safecall;
+
+    function GetFileExtension: WideString; override; safecall;
+    function GetFileFilter: WideString; override; safecall;
+
+    function CanSaveFiles: WordBool; override; safecall;
+    function SaveFile(const AFileName: WideString; const ATabSheetController: ITabSheetController): WordBool; override; safecall;
+
+    function CanLoadFiles: WordBool; override; safecall;
+    function LoadFile(const AFileName: WideString; const APageController: IPageController): Integer; override; safecall;
   end;
 
 implementation
@@ -29,20 +33,25 @@ implementation
 
 function TExtractedPostCode.GetName;
 begin
-  result := 'extracted.post.code.1';
+  Result := 'extracted.post.code.1';
 end;
 
-function TExtractedPostCode.GetFileFormatName;
+function TExtractedPostCode.GetFileExtension;
+begin
+  result := '.epc';
+end;
+
+function TExtractedPostCode.GetFileFilter;
 begin
   result := 'extracted post code 1 %s (*.epc)|*.epc|';
 end;
 
-function TExtractedPostCode.CanSaveControls;
+function TExtractedPostCode.CanSaveFiles;
 begin
   result := True;
 end;
 
-procedure TExtractedPostCode.SaveControls;
+function TExtractedPostCode.SaveFile;
 var
   LNeedToUninitialize: Boolean;
   XMLDoc: IXMLDocument;
@@ -174,12 +183,12 @@ begin
   end;
 end;
 
-function TExtractedPostCode.CanLoadControls;
+function TExtractedPostCode.CanLoadFiles;
 begin
   result := False;
 end;
 
-function TExtractedPostCode.LoadControls;
+function TExtractedPostCode.LoadFile;
 begin
   result := -1;
 end;

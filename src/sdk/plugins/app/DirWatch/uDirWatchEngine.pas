@@ -81,7 +81,7 @@ procedure TDirWatchEngine.OnNotify(const Sender: TObject; const Action: TWatchAc
 begin
   if Action in [waAdded] then
   begin
-    GetPageController.OpenToNewTab(IncludeTrailingPathDelimiter(GetCurrentPath) + FileName);
+    GetPageController.OpenTabSheet(IncludeTrailingPathDelimiter(GetCurrentPath) + FileName);
   end;
 end;
 

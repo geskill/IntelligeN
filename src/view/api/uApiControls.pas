@@ -419,7 +419,16 @@ type
     constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
+  TISubtitle = class(TIControlCheckComboBox)
+  public
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+  end;
+
   TIRuntime = class(TIControlEdit)
+
+  end;
+
+  TIVersion = class(TIControlEdit)
 
   end;
 
@@ -436,6 +445,10 @@ type
   TIVideoSystem = class(TIControlComboBoxList)
   public
     constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+  end;
+
+  TIWebsite = class(TIControlEdit)
+
   end;
 
   TINFO = class(TIControlRichEdit)
@@ -1066,6 +1079,7 @@ procedure TIControlCheckComboBox.SetControlValue(const AValue: WideString);
 var
   LIndex, LValueIndex: Integer;
 begin
+  FCheckComboBox.Value := '';
   with SplittString(';', AValue) do
     try
       for LIndex := 0 to Count - 1 do
@@ -2256,6 +2270,22 @@ end;
 {$REGION 'TILanguage'}
 
 constructor TILanguage.Create;
+begin
+  inherited Create(AOwner, AControlController, AComponentID);
+
+  with FPanel.Constraints do
+  begin
+    MinHeight := 37;
+    MinWidth := 125;
+  end;
+
+  LoadDefaultConfiguration;
+end;
+{$ENDREGION}
+{ ****************************************************************************** }
+{$REGION 'TISubtitle'}
+
+constructor TISubtitle.Create;
 begin
   inherited Create(AOwner, AControlController, AComponentID);
 

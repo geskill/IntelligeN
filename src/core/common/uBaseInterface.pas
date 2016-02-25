@@ -140,6 +140,7 @@ type
 
     function FindControl(const AControlID: TControlID): IControlData; safecall;
     function FindMirror(const AHoster: WideString): IMirrorContainer; safecall;
+    function FindCustomField(const AName: WideString): INameValueItem; safecall;
 
     property Control[const IndexOrName: OleVariant]: IControlData read GetControl;
     property ControlCount: Integer read GetControlCount;

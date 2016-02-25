@@ -132,7 +132,7 @@ type
     property Data: ITabSheetData read GetData write SetData;
 
     property ArticleID: Integer read GetArticleID write SetArticleID;
-    property ArticlePathID: Integer read GetArticlePathID write SetArticlePathID; // TODO: Implement
+    property ArticlePathID: Integer read GetArticlePathID write SetArticlePathID;
 
     property IntelligentPostingHelper: TIntelligentPostingHelper read GetIntelligentPostingHelper;
 
@@ -145,7 +145,7 @@ type
     function AddArticle(): WordBool; virtual; safecall;
     function EditArticle(): WordBool; virtual; safecall;
     function GetArticle(out AArticle: WideString): WordBool; virtual; safecall;
-    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; virtual; safecall; abstract; // TODO: Add ArticlePathID
+    function GetArticleLink(const AURL: WideString; const AArticleID, AArticlePathID: Integer): WideString; virtual; safecall; abstract;
     function ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEditor): WordBool; safecall;
   end;
 

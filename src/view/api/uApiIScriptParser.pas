@@ -77,6 +77,7 @@ type
   public
     constructor Create(const AIScript: string); overload;
     constructor Create(const AWebsiteCMS, AWebsite: string; const ACMSWebsiteData: ITabSheetData; const AIScript: string); overload;
+    // constructor Create(const AWebsiteCMS, AWebsite: string; AControlList: TControlDataList; AMirrorList: TMirrorContainerList; const AIScript: string); overload;
     constructor Create(const ATabSheetController: ITabSheetController; const AIScript: string); overload;
     function CallFunction(const AName: string; AParams: Variant; out AResult: Variant): RIScriptResult;
     function CallFunction3(const AName: string; AParams: Variant; out AResult: Variant): RIScriptResult;

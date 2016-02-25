@@ -24,6 +24,13 @@ type
     procedure Invoke(const NewViewType: TTabViewType); safecall;
   end;
 
+  TCaptionChangeMethod = procedure(const ACaption: WideString) of object;
+
+  TICaptionChangeEventHandler = class(TGenericEventHandler<TCaptionChangeMethod>, ICaptionChangeEventHandler)
+  public
+    procedure Invoke(const NewCaption: WideString); safecall;
+  end;
+
   TITabSheetMethod = procedure(const Sender: ITabSheetController) of object;
 
   TITabSheetEventHandler = class(TGenericEventHandler<TITabSheetMethod>, ITabSheetEventHandler)
@@ -67,6 +74,14 @@ procedure TIViewChangeEventHandler.Invoke(const NewViewType: TTabViewType);
 begin
   if (@FHandler <> nil) then
     FHandler(NewViewType);
+end;
+
+{ TICaptionChangeEventHandler }
+
+procedure TICaptionChangeEventHandler.Invoke(const NewCaption: WideString);
+begin
+  if (@FHandler <> nil) then
+    FHandler(NewCaption);
 end;
 
 { TITabSheetEventHandler }

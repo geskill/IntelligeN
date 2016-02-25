@@ -21,6 +21,8 @@ uses
   uApiCodeTag, uApiConst, uApiLogManager, uApiMainMenu, uApiMain, uApiSettings, uApiTabSheetController, uApiXml,
   // DLLs
   uExport,
+  // Plugin system
+  uPlugInEvent,
   // Forms
   uSettings, uSelectDialog, uAbout, uUpdate,
   // Frames
@@ -310,6 +312,12 @@ type
     procedure LayoutClick(Sender: TObject);
     procedure LayoutChanged(Sender: TObject);
     procedure InsertTextBetweenSelected(const TagName: string);
+  protected
+    FITabCaptionChangeEvent: TICaptionChangeEventHandler;
+    procedure TabCaptionChange(const NewCaption: WideString);
+
+    function GetActiveTitle: WideString;
+    procedure SetActiveTitle(const AActiveTitle: WideString);
     function GetLogManager: ILogManager;
     function GetMainMenu: IMainMenu;
     function GetPageController: IPageController;
@@ -321,7 +329,8 @@ type
     procedure LoadLayout(ALayoutCollectionItem: TLayoutCollectionItem);
     procedure SaveLayout(const ALayoutName: string);
     procedure SetEditMenu(AMenuItems: TdxBarItemLinks);
-    procedure UpdateCaption(const ACaption: string = '');
+
+    property ActiveTitle: WideString read GetActiveTitle write SetActiveTitle;
   end;
 
 var
@@ -337,12 +346,12 @@ type
 
 procedure TMain.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  fMain.RemoveAllTabs;
+  fMain.CloseAllTabSheets;
 end;
 
 procedure TMain.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  CanClose := fMain.CanCloseAllTabs;
+  CanClose := fMain.CanCloseAllTabSheets;
 end;
 
 procedure TMain.FormCreate(Sender: TObject);
@@ -385,13 +394,13 @@ begin
 
   SettingsManager.Settings.Layout.Main.LoadLayout(Self);
 
-  UpdateCaption();
-
   FMainMenu := TIMainMenu.Create(dxBarManagerBarMainMenu);
 
   // FMonitorManager := TMonitorManager.Create;
 
   fMain.PostCreate;
+  FITabCaptionChangeEvent := TICaptionChangeEventHandler.Create(TabCaptionChange);
+  fMain.OnTabCaptionChange.Add(FITabCaptionChangeEvent);
 
   DragAcceptFiles(Handle, True);
 end;
@@ -401,6 +410,9 @@ var
   I: Integer;
 begin
   DragAcceptFiles(Handle, False);
+
+  fMain.OnTabCaptionChange.Remove(FITabCaptionChangeEvent);
+  FITabCaptionChangeEvent := nil;
 
   for I := 0 to length(FCodeDefinition.CodeTags) - 1 do
   begin
@@ -423,350 +435,17 @@ begin
   with SettingsManager.Settings.ControlAligner.DefaultStartup do
   begin
     if ActiveA and FileExists(GetTemplatesTypeFolder + TypeA + '.xml') then
-      fMain.Add(GetTemplatesTypeFolder + TypeA + '.xml', TApiXml.GetControlsTemplateInfo(GetTemplatesTypeFolder + TypeA + '.xml').TemplateType, False);
+      fMain.NewTabSheet(TypeA);
     if ActiveB and FileExists(GetTemplatesTypeFolder + TypeB + '.xml') then
-      fMain.Add(GetTemplatesTypeFolder + TypeB + '.xml', TApiXml.GetControlsTemplateInfo(GetTemplatesTypeFolder + TypeB + '.xml').TemplateType, False);
+      fMain.NewTabSheet(TypeB);
     if ActiveC and FileExists(GetTemplatesTypeFolder + TypeC + '.xml') then
-      fMain.Add(GetTemplatesTypeFolder + TypeC + '.xml', TApiXml.GetControlsTemplateInfo(GetTemplatesTypeFolder + TypeC + '.xml').TemplateType, False);
+      fMain.NewTabSheet(TypeC);
     if ActiveD and FileExists(GetTemplatesTypeFolder + TypeD + '.xml') then
-      fMain.Add(GetTemplatesTypeFolder + TypeD + '.xml', TApiXml.GetControlsTemplateInfo(GetTemplatesTypeFolder + TypeD + '.xml').TemplateType, False);
+      fMain.NewTabSheet(TypeD);
     if ActiveE and FileExists(GetTemplatesTypeFolder + TypeE + '.xml') then
-      fMain.Add(GetTemplatesTypeFolder + TypeE + '.xml', TApiXml.GetControlsTemplateInfo(GetTemplatesTypeFolder + TypeE + '.xml').TemplateType, False);
+      fMain.NewTabSheet(TypeE);
   end;
 end;
-{$REGION 'TAction.Execute'}
-
-procedure TMain.aBoldExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('bold');
-end;
-
-procedure TMain.aItalicExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('italic');
-end;
-
-procedure TMain.aUnderlineExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('underline');
-end;
-
-procedure TMain.aStrikeoutExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('strikethrough');
-end;
-
-procedure TMain.aSizeExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('size');
-end;
-
-procedure TMain.aColorExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('color');
-end;
-
-procedure TMain.aLeftExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('left');
-end;
-
-procedure TMain.aCenterExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('center');
-end;
-
-procedure TMain.aRightExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('right');
-end;
-
-procedure TMain.aImageExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('image');
-end;
-
-procedure TMain.aListExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('list');
-end;
-
-procedure TMain.aEMailExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('email');
-end;
-
-procedure TMain.aYoutubeExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('youtube');
-end;
-
-procedure TMain.aURLExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('url');
-end;
-
-procedure TMain.aQuoteExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('quote');
-end;
-
-procedure TMain.aCodeExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('code');
-end;
-
-procedure TMain.aSpoilerExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('spoiler');
-end;
-
-procedure TMain.aHideExecute(Sender: TObject);
-begin
-  InsertTextBetweenSelected('hide');
-end;
-
-procedure TMain.aNewExecute(Sender: TObject);
-begin
-  fMain.Add(dxBCType.Text);
-end;
-
-procedure TMain.aOpenExecute(Sender: TObject);
-begin
-  fMain.OpenToNewTab;
-end;
-
-procedure TMain.aSaveExecute(Sender: TObject);
-begin
-  fMain.SaveCurrentTab;
-end;
-
-procedure TMain.aSaveAsExecute(Sender: TObject);
-begin
-  fMain.SaveCurrentTabAs;
-end;
-
-procedure TMain.aSaveAllExecute(Sender: TObject);
-begin
-  fMain.SaveAllTabs;
-end;
-
-procedure TMain.aSaveAllToFolderExecute(Sender: TObject);
-begin
-  fMain.SaveAllToFolder;
-end;
-
-procedure TMain.aCloseExecute(Sender: TObject);
-begin
-  if fMain.CanCloseCurrentTab then
-    fMain.RemoveCurrentTab;
-end;
-
-procedure TMain.aCloseAllOtherExecute(Sender: TObject);
-begin
-  if fMain.CanCloseAllOtherTabs then
-    fMain.RemoveAllOtherTabs;
-end;
-
-procedure TMain.aCloseAllExecute(Sender: TObject);
-begin
-  if fMain.CanCloseAllTabs then
-    fMain.RemoveAllTabs;
-end;
-
-procedure TMain.aExitExecute(Sender: TObject);
-begin
-  Close;
-end;
-
-procedure TMain.aWindowControlEditorExecute(Sender: TObject);
-begin
-  dxDPControlEditor.Show;
-end;
-
-procedure TMain.aWindowDatabaseExecute(Sender: TObject);
-begin
-  dxDPDatabase.Show;
-end;
-
-procedure TMain.aWindowLoginExecute(Sender: TObject);
-begin
-  dxDPLogin.Show;
-end;
-
-procedure TMain.aWindowMainExecute(Sender: TObject);
-begin
-  dxDPMain.Show;
-end;
-
-procedure TMain.aWindowErrorLoggerExecute(Sender: TObject);
-begin
-  dxDPErrorLogger.Show;
-end;
-
-procedure TMain.aWindowHTTPLoggerExecute(Sender: TObject);
-begin
-  dxDPHTTPLogger.Show;
-end;
-
-procedure TMain.aWindowPublishExecute(Sender: TObject);
-begin
-  dxDPPublish.Show;
-end;
-
-procedure TMain.aWindowPublishQueueExecute(Sender: TObject);
-begin
-  dxDPPublishQueue.Show;
-end;
-
-procedure TMain.aSaveActiveDesktopExecute(Sender: TObject);
-begin
-  with TSelectDialog.Create(nil) do
-    try
-      SelectedItem := SettingsManager.Settings.Layout.ActiveLayoutName;
-      Caption := StrSaveDesktop;
-      Description := StrSaveCurentDesktop;
-
-      with SettingsManager.Settings.Layout.GetLayoutItemList do
-        try
-          Items.Text := Text;
-        finally
-          Free;
-        end;
-
-      if Execute then
-        SaveLayout(SelectedItem);
-    finally
-      Free;
-    end;
-end;
-
-procedure TMain.aDeleteDesktopExecute(Sender: TObject);
-begin
-  with TSelectDialog.Create(nil) do
-    try
-      Caption := StrDeleteDesktop;
-      Description := StrDeleteDesktop + ':';
-
-      with SettingsManager.Settings.Layout.GetLayoutItemList do
-        try
-          Items.Text := Text;
-        finally
-          Free;
-        end;
-
-      cxCOBSelect.Properties.DropDownListStyle := lsFixedList;
-      cxCOBSelect.ItemIndex := 0;
-
-      if Execute then
-        with SettingsManager.Settings.Layout do
-        begin
-          FindLayout(SelectedItem).Free;
-          if SelectedItem = ActiveLayoutName then
-            ActiveLayoutName := '';
-        end;
-    finally
-      Free;
-    end;
-end;
-
-procedure TMain.aOptionsExecute(Sender: TObject);
-begin
-  Settings.Show;
-end;
-
-procedure TMain.aAutoCompletionExecute(Sender: TObject);
-begin
-  fMain.CallAutoCompletion;
-end;
-
-procedure TMain.aCrypterCryptExecute(Sender: TObject);
-begin
-  fMain.CallCrypterCrypt;
-end;
-
-procedure TMain.aCrypterCheckExecute(Sender: TObject);
-begin
-  fMain.CallCrypterCheck;
-end;
-
-procedure TMain.aQuickBackupExecute(Sender: TObject);
-begin
-  fMain.CallBackupManager;
-end;
-
-procedure TMain.aPublishExecute(Sender: TObject);
-begin
-  fMain.CallPublish;
-end;
-
-procedure TMain.aPublishItemExecute(Sender: TObject);
-begin
-  fPublish.ExecuteActivePublishItem(TComponent(Sender).Tag);
-end;
-
-procedure TMain.aMirrorItemAddExecute(Sender: TObject);
-begin
-  fMain.ActiveTabSheetController.MirrorController.Add;
-  fMain.CallControlAligner;
-end;
-
-procedure TMain.aSeriesAutoCompletionExecute(Sender: TObject);
-begin
-  fMain.CallSeriesAutoCompletion;
-end;
-
-procedure TMain.aSeriesCrypterCryptExecute(Sender: TObject);
-begin
-  fMain.CallSeriesCrypterCrypt;
-end;
-
-procedure TMain.aSeriesCrypterCheckExecute(Sender: TObject);
-begin
-  fMain.CallSeriesCrypterCheck;
-end;
-
-procedure TMain.aSeriesPublishExecute(Sender: TObject);
-begin
-  fMain.CallSeriesPublish;
-end;
-
-procedure TMain.aHelpFileExecute(Sender: TObject);
-begin
-  ShellExecute(Handle, 'open', Homepage + 'help/', nil, nil, SW_SHOW);
-end;
-
-procedure TMain.aCheckforUpdatesExecute(Sender: TObject);
-begin
-  with uUpdate.Update do
-  begin
-    UpdateController.CheckForUpdates;
-    Show;
-  end;
-end;
-
-procedure TMain.aSupportBoardExecute(Sender: TObject);
-begin
-  ShellExecute(Handle, 'open', Homepage + 'forum/', nil, nil, SW_SHOW);
-end;
-
-procedure TMain.aVisitBlogExecute(Sender: TObject);
-begin
-  ShellExecute(Handle, 'open', Homepage + 'blog/', nil, nil, SW_SHOW);
-end;
-
-procedure TMain.aReportIssueExecute(Sender: TObject);
-begin
-  ShellExecute(Handle, 'open', Homepage + 'report-issue/', nil, nil, SW_SHOW);
-end;
-
-procedure TMain.aAboutExecute(Sender: TObject);
-begin
-  if not Assigned(About) then
-    Application.CreateForm(TAbout, About);
-  About.Show;
-end;
-{$ENDREGION}
 
 procedure TMain.dxBCTypeChange(Sender: TObject);
 begin
@@ -860,7 +539,7 @@ begin
     end;
     DragFinish(Msg.Drop);
 
-    fMain.OpenFiles(LFiles);
+    fMain.InternalOpenFiles(LFiles);
   finally
     LFiles.Free;
   end;
@@ -927,6 +606,27 @@ procedure TMain.InsertTextBetweenSelected(const TagName: string);
 
 begin
   TTabSheetController(fMain.pcMain.ActivePage).DesignTabSheetItem.InsertTextBetweenSelected(GetCodeTag(TagName));
+end;
+
+procedure TMain.TabCaptionChange(const NewCaption: WideString);
+begin
+  ActiveTitle := NewCaption;
+end;
+
+function TMain.GetActiveTitle: WideString;
+begin
+  if SameStr(Caption, ProgrammName) then
+    Result := ''
+  else
+    Result := copy(Caption, 1, length(Caption) - length(ProgrammName) - 4);
+end;
+
+procedure TMain.SetActiveTitle(const AActiveTitle: WideString);
+begin
+  if SameStr('', AActiveTitle) then
+    Caption := ProgrammName
+  else
+    Caption := AActiveTitle + ' - ' + ProgrammName;
 end;
 
 function TMain.GetLogManager;
@@ -1041,12 +741,335 @@ begin
     nEdit.ItemLinks.Clear;
 end;
 
-procedure TMain.UpdateCaption(const ACaption: string);
+{$REGION 'TAction.Execute'}
+
+procedure TMain.aBoldExecute(Sender: TObject);
 begin
-  if SameStr('', ACaption) then
-    Caption := ProgrammName
-  else
-    Caption := ACaption + ' - ' + ProgrammName;
+  InsertTextBetweenSelected('bold');
 end;
+
+procedure TMain.aItalicExecute(Sender: TObject);
+begin
+  InsertTextBetweenSelected('italic');
+end;
+
+procedure TMain.aUnderlineExecute(Sender: TObject);
+begin
+  InsertTextBetweenSelected('underline');
+end;
+
+procedure TMain.aStrikeoutExecute(Sender: TObject);
+begin
+  InsertTextBetweenSelected('strikethrough');
+end;
+
+procedure TMain.aSizeExecute(Sender: TObject);
+begin
+  InsertTextBetweenSelected('size');
+end;
+
+procedure TMain.aColorExecute(Sender: TObject);
+begin
+  InsertTextBetweenSelected('color');
+end;
+
+procedure TMain.aLeftExecute(Sender: TObject);
+begin
+  InsertTextBetweenSelected('left');
+end;
+
+procedure TMain.aCenterExecute(Sender: TObject);
+begin
+  InsertTextBetweenSelected('center');
+end;
+
+procedure TMain.aRightExecute(Sender: TObject);
+begin
+  InsertTextBetweenSelected('right');
+end;
+
+procedure TMain.aImageExecute(Sender: TObject);
+begin
+  InsertTextBetweenSelected('image');
+end;
+
+procedure TMain.aListExecute(Sender: TObject);
+begin
+  InsertTextBetweenSelected('list');
+end;
+
+procedure TMain.aEMailExecute(Sender: TObject);
+begin
+  InsertTextBetweenSelected('email');
+end;
+
+procedure TMain.aYoutubeExecute(Sender: TObject);
+begin
+  InsertTextBetweenSelected('youtube');
+end;
+
+procedure TMain.aURLExecute(Sender: TObject);
+begin
+  InsertTextBetweenSelected('url');
+end;
+
+procedure TMain.aQuoteExecute(Sender: TObject);
+begin
+  InsertTextBetweenSelected('quote');
+end;
+
+procedure TMain.aCodeExecute(Sender: TObject);
+begin
+  InsertTextBetweenSelected('code');
+end;
+
+procedure TMain.aSpoilerExecute(Sender: TObject);
+begin
+  InsertTextBetweenSelected('spoiler');
+end;
+
+procedure TMain.aHideExecute(Sender: TObject);
+begin
+  InsertTextBetweenSelected('hide');
+end;
+
+procedure TMain.aNewExecute(Sender: TObject);
+begin
+  fMain.NewTabSheet(dxBCType.Text);
+end;
+
+procedure TMain.aOpenExecute(Sender: TObject);
+begin
+  fMain.OpenTabSheet;
+end;
+
+procedure TMain.aSaveExecute(Sender: TObject);
+begin
+  fMain.SaveTheCurrentTabSheet;
+end;
+
+procedure TMain.aSaveAsExecute(Sender: TObject);
+begin
+  fMain.SaveTheCurrentTabSheetAs;
+end;
+
+procedure TMain.aSaveAllExecute(Sender: TObject);
+begin
+  fMain.SaveAllTabSheets;
+end;
+
+procedure TMain.aSaveAllToFolderExecute(Sender: TObject);
+begin
+  fMain.SaveAllTabSheetsToFolder;
+end;
+
+procedure TMain.aCloseExecute(Sender: TObject);
+begin
+  fMain.CloseTheCurrentTabSheet;
+end;
+
+procedure TMain.aCloseAllOtherExecute(Sender: TObject);
+begin
+  fMain.CloseAllExceptTheCurrentTabSheet;
+end;
+
+procedure TMain.aCloseAllExecute(Sender: TObject);
+begin
+  fMain.CloseAllTabSheets;
+end;
+
+procedure TMain.aExitExecute(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TMain.aWindowControlEditorExecute(Sender: TObject);
+begin
+  dxDPControlEditor.Show;
+end;
+
+procedure TMain.aWindowDatabaseExecute(Sender: TObject);
+begin
+  dxDPDatabase.Show;
+end;
+
+procedure TMain.aWindowLoginExecute(Sender: TObject);
+begin
+  dxDPLogin.Show;
+end;
+
+procedure TMain.aWindowMainExecute(Sender: TObject);
+begin
+  dxDPMain.Show;
+end;
+
+procedure TMain.aWindowErrorLoggerExecute(Sender: TObject);
+begin
+  dxDPErrorLogger.Show;
+end;
+
+procedure TMain.aWindowHTTPLoggerExecute(Sender: TObject);
+begin
+  dxDPHTTPLogger.Show;
+end;
+
+procedure TMain.aWindowPublishExecute(Sender: TObject);
+begin
+  dxDPPublish.Show;
+end;
+
+procedure TMain.aWindowPublishQueueExecute(Sender: TObject);
+begin
+  dxDPPublishQueue.Show;
+end;
+
+procedure TMain.aSaveActiveDesktopExecute(Sender: TObject);
+begin
+  with TSelectDialog.Create(nil) do
+    try
+      SelectedItem := SettingsManager.Settings.Layout.ActiveLayoutName;
+      Caption := StrSaveDesktop;
+      Description := StrSaveCurentDesktop;
+
+      with SettingsManager.Settings.Layout.GetLayoutItemList do
+        try
+          Items.Text := Text;
+        finally
+          Free;
+        end;
+
+      if Execute then
+        SaveLayout(SelectedItem);
+    finally
+      Free;
+    end;
+end;
+
+procedure TMain.aDeleteDesktopExecute(Sender: TObject);
+begin
+  with TSelectDialog.Create(nil) do
+    try
+      Caption := StrDeleteDesktop;
+      Description := StrDeleteDesktop + ':';
+
+      with SettingsManager.Settings.Layout.GetLayoutItemList do
+        try
+          Items.Text := Text;
+        finally
+          Free;
+        end;
+
+      cxCOBSelect.Properties.DropDownListStyle := lsFixedList;
+      cxCOBSelect.ItemIndex := 0;
+
+      if Execute then
+        with SettingsManager.Settings.Layout do
+        begin
+          FindLayout(SelectedItem).Free;
+          if SelectedItem = ActiveLayoutName then
+            ActiveLayoutName := '';
+        end;
+    finally
+      Free;
+    end;
+end;
+
+procedure TMain.aOptionsExecute(Sender: TObject);
+begin
+  Settings.Show;
+end;
+
+procedure TMain.aAutoCompletionExecute(Sender: TObject);
+begin
+  fMain.CallCrawler;
+end;
+
+procedure TMain.aCrypterCryptExecute(Sender: TObject);
+begin
+  fMain.CallCrypterCrypt;
+end;
+
+procedure TMain.aCrypterCheckExecute(Sender: TObject);
+begin
+  fMain.CallCrypterCheck;
+end;
+
+procedure TMain.aQuickBackupExecute(Sender: TObject);
+begin
+  fMain.CallBackupManager;
+end;
+
+procedure TMain.aPublishExecute(Sender: TObject);
+begin
+  fMain.CallPublish;
+end;
+
+procedure TMain.aPublishItemExecute(Sender: TObject);
+begin
+  fPublish.ExecuteActivePublishItem(TComponent(Sender).Tag);
+end;
+
+procedure TMain.aMirrorItemAddExecute(Sender: TObject);
+begin
+  fMain.ActiveTabSheetController.MirrorController.Add;
+  fMain.CallControlAligner;
+end;
+
+procedure TMain.aSeriesAutoCompletionExecute(Sender: TObject);
+begin
+  fMain.CallSeriesCrawler;
+end;
+
+procedure TMain.aSeriesCrypterCryptExecute(Sender: TObject);
+begin
+  fMain.CallSeriesCrypterCrypt;
+end;
+
+procedure TMain.aSeriesCrypterCheckExecute(Sender: TObject);
+begin
+  fMain.CallSeriesCrypterCheck;
+end;
+
+procedure TMain.aSeriesPublishExecute(Sender: TObject);
+begin
+  fMain.CallSeriesPublish;
+end;
+
+procedure TMain.aHelpFileExecute(Sender: TObject);
+begin
+  ShellExecute(Handle, 'open', Homepage + 'help/', nil, nil, SW_SHOW);
+end;
+
+procedure TMain.aCheckforUpdatesExecute(Sender: TObject);
+begin
+  with uUpdate.Update do
+  begin
+    UpdateController.CheckForUpdates;
+    Show;
+  end;
+end;
+
+procedure TMain.aSupportBoardExecute(Sender: TObject);
+begin
+  ShellExecute(Handle, 'open', Homepage + 'forum/', nil, nil, SW_SHOW);
+end;
+
+procedure TMain.aVisitBlogExecute(Sender: TObject);
+begin
+  ShellExecute(Handle, 'open', Homepage + 'blog/', nil, nil, SW_SHOW);
+end;
+
+procedure TMain.aReportIssueExecute(Sender: TObject);
+begin
+  ShellExecute(Handle, 'open', Homepage + 'report-issue/', nil, nil, SW_SHOW);
+end;
+
+procedure TMain.aAboutExecute(Sender: TObject);
+begin
+  if not Assigned(About) then
+    Application.CreateForm(TAbout, About);
+  About.Show;
+end;
+{$ENDREGION}
 
 end.

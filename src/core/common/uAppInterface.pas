@@ -31,6 +31,7 @@ type
   IPublishJob = interface;
   ITabSheetController = interface;
   IPageController = interface;
+  IAppController = interface;
 
   // // // Basic Events // // //
 
@@ -44,6 +45,18 @@ type
     procedure Add(const AHandler: IViewChangeEventHandler); safecall;
     procedure Remove(const AHandler: IViewChangeEventHandler); safecall;
     procedure Invoke(const ANewViewType: TTabViewType); safecall;
+  end;
+
+  ICaptionChangeEventHandler = interface(IUnknown)
+    ['{6ECA368B-7965-4DE9-AC42-9EF45D1CD9A5}']
+    procedure Invoke(const ACaption: WideString); safecall;
+  end;
+
+  ICaptionChangeEvent = interface(IUnknown)
+    ['{2A788962-E946-403A-9E8B-E70FD7080A70}']
+    procedure Add(const AHandler: ICaptionChangeEventHandler); safecall;
+    procedure Remove(const AHandler: ICaptionChangeEventHandler); safecall;
+    procedure Invoke(const ACaption: WideString); safecall;
   end;
 
   IPopupMenuChange = interface(IUnknown)
@@ -278,7 +291,6 @@ type
     procedure SetReleaseNameChange(AReleaseNameChange: IReleaseNameChange);
     function GetPopupMenuChange: IPopupMenuChange;
     procedure SetPopupMenuChange(APopupMenuChange: IPopupMenuChange);
-    function GetCrawlingFinished: INotifyEvent;
 
     // Base
     function FindControl(const AControlID: TControlID): IControlBasic; safecall;
@@ -301,7 +313,6 @@ type
     property OnControlExit: IControlEventHandler read GetControlExit write SetControlExit; { only for internal usage }
     property OnReleaseNameChange: IReleaseNameChange read GetReleaseNameChange write SetReleaseNameChange; { only for internal usage }
     property OnPopupMenuChange: IPopupMenuChange read GetPopupMenuChange write SetPopupMenuChange; { only for internal usage }
-    property OnCrawlingFinished: INotifyEvent read GetCrawlingFinished; // TODO: remove this event instead for IPageController OnAfterAutoCompletion
   end;
 
   // // // Mirror Controls // // //
@@ -759,8 +770,9 @@ type
     procedure SetTabSheetIndex(ATabSheetIndex: Integer);
     function GetViewType: TTabViewType;
     procedure SetViewType(AViewType: TTabViewType);
+    function GetTemplateFileName: WideString;
     function GetFileName: WideString;
-    function GetFileType: WideString;
+    function GetFileFormat: WideString;
     function GetReleaseName: WideString;
     procedure SetReleaseName(const AReleaseName: WideString);
     function GetReleaseNameShort: WideString;
@@ -779,17 +791,21 @@ type
 
     property ViewType: TTabViewType read GetViewType write SetViewType;
 
+    function SuggestFileName: WideString;
+
     property FileName: WideString read GetFileName;
-    property FileType: WideString read GetFileType;
+    property FileFormat: WideString read GetFileFormat;
 
     property ReleaseName: WideString read GetReleaseName write SetReleaseName;
     property ReleaseNameShort: WideString read GetReleaseNameShort;
 
-    procedure Save(const AFileName, AFileType: WideString);
+    function Save(const AFileName, AFileFormat: WideString): WordBool;
     procedure Initialized(); overload;
-    procedure Initialized(const AFileName, AFileType: WideString); overload;
+    procedure Initialized(const AFileName, AFileFormat: WideString); overload;
+    procedure FileSaved(const AFileName, AFileFormat: WideString);
     procedure ResetControlFocused();
 
+    property TemplateFileName: WideString read GetTemplateFileName;
     property TypeID: TTypeID read GetTypeID;
 
     property ActiveWebsite: WideString read GetActiveWebsite write SetActiveWebsite;
@@ -899,26 +915,124 @@ type
     function GetImageHosterManager: IImageHosterManager;
     function GetActiveTabSheetIndex: Integer;
     function GetActiveTabSheetController: ITabSheetController;
-    function GetTabSheetController(index: Integer): ITabSheetController;
+    function GetTabSheetController(AIndex: Integer): ITabSheetController;
     function GetChange: INotifyEvent;
     function GetViewChange: IViewChangeEvent;
+    function GetTabCaptionChange: ICaptionChangeEvent;
     function GetAddTab: ITabSheetEvent;
     function GetRemoveTab: ITabSheetEvent;
+    function GetBeforeCrawling: ITabSheetEvent;
+    function GetAfterCrawling: ITabSheetEvent;
 
+    procedure CallBackupManager;
     procedure CallControlAligner;
 
-    procedure CallPublish;
+    procedure CallPublish; overload;
+    procedure CallPublish(const ATabIndex: Integer); overload;
     procedure CallSeriesPublish;
-    procedure CallAutoCompletion;
-    procedure CallSeriesAutoCompletion;
-    procedure CallCrypterCrypt;
-    procedure CallSeriesCrypterCrypt;
-    procedure CallCrypterCheck;
+
+    procedure CallCrawler; overload;
+    procedure CallCrawler(const ATabIndex: Integer); overload;
+    procedure CallSeriesCrawler;
+
+    procedure CallCrypterCrypt; overload;
+    procedure CallCrypterCrypt(const ATabIndex: Integer); overload;
+    procedure CallSeriesCrypterCrypt; overload;
+
+    procedure CallCrypterCheck; overload;
+    procedure CallCrypterCheck(const ATabIndex: Integer); overload;
     procedure CallSeriesCrypterCheck;
+{$REGION 'Documentation'}
+    /// <summary>
+    /// Create a new tab with several options. This function is provided for
+    /// the file format plug-in interface.
+    /// </summary>
+    /// <param name="ATemplateFileName">
+    /// The template file located in the templates_type folder or either a
+    /// different file.
+    /// </param>
+    /// <param name="ATypeID">
+    /// The base type of the new tab.
+    /// </param>
+    /// <param name="AEmptyTab">
+    /// Possibility to create an empty tab without any mirrors.
+    /// </param>
+    /// <returns>
+    /// The tab index of the created tab.
+    /// </returns>
+{$ENDREGION}
+    function CreateTabSheet(const ATemplateFileName: WideString; ATypeID: TTypeID; AEmptyTab: WordBool = True): Integer;
+{$REGION 'Documentation'}
+    /// <summary>
+    /// Create a new tab from the specified template file located in the
+    /// templates_type folder.
+    /// </summary>
+    /// <param name="ATemplateName">
+    /// The template file located in the templates_type folder.
+    /// </param>
+    /// <returns>
+    /// The tab index of the created tab.
+    /// </returns>
+{$ENDREGION}
+    function NewTabSheet(const ATemplateName: WideString): Integer;
+{$REGION 'Documentation'}
+    /// <summary>
+    /// Open a file with the aid of the internal file format plug-ins in
+    /// order to create a new tab.
+    /// </summary>
+    /// <param name="AFileName">
+    /// The file name of the file to open.
+    /// </param>
+    /// <returns>
+    /// The tab index of the created tab.
+    /// </returns>
+{$ENDREGION}
+    function OpenTabSheet(const AFileName: WideString = ''): Integer;
+{$REGION 'Documentation'}
+    /// <summary>
+    /// Save a file with the aid of a internal file format plug-in in order
+    /// to create or override a new file.
+    /// </summary>
+    /// <param name="ATabIndex">
+    /// The tab index of the tab to be saved.
+    /// </param>
+    /// <param name="AFileName">
+    /// The file name of the file to be created.
+    /// </param>
+    /// <param name="AFileFormat">
+    /// The file format for the new file (= name of the file formats
+    /// plug-in). <br />
+    /// </param>
+    /// <param name="AForceDialog">
+    /// Force to open the file save dialog.
+    /// </param>
+    /// <returns>
+    /// The success of the operation.
+    /// </returns>
+{$ENDREGION}
+    function SaveTabSheet(const ATabIndex: Integer; const AFileName: WideString = ''; const AFileFormat: WideString = ''; const AForceDialog: WordBool = False): WordBool;
+{$REGION 'Documentation'}
+    /// <param name="ATabIndex">
+    /// Checks whether a tab can be closed.
+    /// </param>
+    /// <returns>
+    /// The success of the operation.
+    /// </returns>
+{$ENDREGION}
+    function CanCloseTabSheet(const ATabIndex: Integer): WordBool;
+{$REGION 'Documentation'}
+    /// <summary>
+    /// Close a tab.
+    /// </summary>
+    /// <param name="ATabIndex">
+    /// The tab index of the tab to be closed. <br />
+    /// </param>
+    /// <returns>
+    /// The success of the operation. <br />
+    /// </returns>
+{$ENDREGION}
+    function CloseTabSheet(const ATabIndex: Integer): WordBool;
 
-    procedure OpenToNewTab(AFileName: WideString = '');
-
-    function Add(AFileName: WideString; ATypeID: TTypeID; AEmpty: WordBool = False): Integer;
     property PublishManager: IPublishManager read GetPublishManager;
     property CrawlerManager: ICrawlerManager read GetCrawlerManager;
     property CrypterManager: ICrypterManager read GetCrypterManager;
@@ -926,13 +1040,16 @@ type
     property ImageHosterManager: IImageHosterManager read GetImageHosterManager;
     property ActiveTabSheetIndex: Integer read GetActiveTabSheetIndex;
     property ActiveTabSheetController: ITabSheetController read GetActiveTabSheetController;
-    property TabSheetController[index: Integer]: ITabSheetController read GetTabSheetController;
+    property TabSheetController[ATabIndex: Integer]: ITabSheetController read GetTabSheetController;
     function TabSheetCount: Integer;
 
     property OnChange: INotifyEvent read GetChange;
     property OnViewChange: IViewChangeEvent read GetViewChange;
+    property OnTabCaptionChange: ICaptionChangeEvent read GetTabCaptionChange;
     property OnAddTab: ITabSheetEvent read GetAddTab;
     property OnRemoveTab: ITabSheetEvent read GetRemoveTab;
+    property OnBeforeCrawling: ITabSheetEvent read GetBeforeCrawling;
+    property OnAfterCrawling: ITabSheetEvent read GetAfterCrawling;
   end;
 
   // // // Log Manager // // //
@@ -971,6 +1088,9 @@ type
 
   IAppController = interface
     ['{80AF47FD-847E-429D-922C-0F3B812AB637}']
+    function GetActiveTitle: WideString;
+    procedure SetActiveTitle(const AActiveTitle: WideString);
+
     function GetLogManager: ILogManager;
     function GetMainMenu: IMainMenu;
     function GetPageController: IPageController;
@@ -979,6 +1099,8 @@ type
     function GetImageHosters: WideString;
     function GetCustomisedHoster(const AHoster: WideString; AShortName: WordBool = False): WideString;
     function GetControlValues(const ATypeID: TTypeID; const AControlID: TControlID): WideString;
+
+    property ActiveTitle: WideString read GetActiveTitle write SetActiveTitle;
 
     property LogManager: ILogManager read GetLogManager;
     property MainMenu: IMainMenu read GetMainMenu;

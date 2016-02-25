@@ -20,15 +20,19 @@ Checked items are planned for next release.
 
 - [ ] Implement access for APP-plugins to add function to the IScript
 
-- [ ] Implement local image resizing instead of depending on image hosts resize
+- [x] Implement local image resizing instead of depending on image hosts resize
 
-- [ ] Implement a default path for saved XML files
+- [x] Implement a default path for saved XML files
+
+- [x] Implement a default hoster ranking
 
 - [ ] Implement a priority index for websites to publish articles first on specific websites
 
-- [ ] Improve saving and loading files using default path
+- [x] Improve saving and loading files using default path
 
 - [ ] Improve update system to only close required IntelligeN.exe instance
+
+- [x] Improve OLE access
 
 ###SDK
 

@@ -64,7 +64,7 @@ type
     function GetName: WideString; override; safecall;
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
-    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID, AArticlePathID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -439,8 +439,7 @@ end;
 
 function TSMF.GetArticleLink;
 begin
-  // TODO: SMF requires threadID, too
-  Result := Format('%sindex.php?topic=<THREAD-ID>.msg%d#msg%1:d', [AURL, AArticleID]);
+  Result := Format('%sindex.php?topic=%d.msg%d#msg%2:d', [AURL, AArticlePathID, AArticleID]);
 end;
 
 end.

@@ -87,6 +87,8 @@ type
 
     function GetArticleID: Integer; safecall;
     procedure SetArticleID(AArticleID: Integer); safecall;
+    function GetArticlePathID: Integer; safecall;
+    procedure SetArticlePathID(AArticlePathID: Integer); safecall;
 
     function GetIntelligentPostingHelper: TIntelligentPostingHelper; safecall;
     procedure SetIntelligentPostingHelper(AIntelligentPostingHelper: TIntelligentPostingHelper); safecall;
@@ -101,6 +103,7 @@ type
     property Data: ITabSheetData read GetData write SetData;
 
     property ArticleID: Integer read GetArticleID write SetArticleID;
+    property ArticlePathID: Integer read GetArticlePathID write SetArticlePathID;
 
     property IntelligentPostingHelper: TIntelligentPostingHelper read GetIntelligentPostingHelper;
 

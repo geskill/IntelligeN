@@ -61,7 +61,7 @@ type
     function GetName: WideString; override; safecall;
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
-    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID, AArticlePathID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -379,9 +379,8 @@ end;
 
 function TDiscuz.GetArticleLink;
 begin
-  // TODO: Discuz requires threadID, too
   // page ID problem
-  Result := Format('%sviewthread.php?tid=<THREAD-ID>&page=1#pid%d', [AURL, AArticleID]);
+  Result := Format('%sviewthread.php?tid=%&page=1#pid%d', [AURL, AArticlePathID, AArticleID]);
 end;
 
 end.

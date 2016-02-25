@@ -35,25 +35,25 @@ uses
 
 procedure TIntelligeN2009.openfile(const AFileName: WideString);
 begin
-  Main.fMain.OpenToNewTab(AFileName);
+  Main.fMain.OpenTabSheet(AFileName);
 end;
 
 procedure TIntelligeN2009.savefile(const AFileName: WideString);
 begin
   if SameText(AFileName, '') then
-    Main.fMain.SaveCurrentTab
+    Main.fMain.SaveTheCurrentTabSheet
   else
     Main.fMain.ActiveTabSheetController.Save(AFileName, 'intelligen.xml.2');
 end;
 
 procedure TIntelligeN2009.close;
 begin
-  Main.fMain.RemoveCurrentTab;
+  Main.fMain.CloseTheCurrentTabSheet;
 end;
 
 function TIntelligeN2009.canclose: SYSINT;
 begin
-  if not Main.fMain.CanCloseCurrentTab then
+  if not Main.fMain.CanCloseTheCurrentTabSheet then
     Result := 0
   else
     Result := 1;
@@ -62,7 +62,7 @@ end;
 procedure TIntelligeN2009.callcrawler;
 begin
   if (Main.fMain.TabSheetCount > 0) then
-    Main.fMain.CallAutoCompletion;
+    Main.fMain.CallCrawler;
 end;
 
 procedure TIntelligeN2009.callremoteupload;
@@ -91,10 +91,7 @@ var
   I, J: Integer;
 begin
   if (Main.fMain.TabSheetCount > 0) then
-    with Main.fMain.ActiveTabSheetController.MirrorController do
-      for I := 0 to MirrorCount - 1 do
-        for J := 0 to Mirror[I].CrypterCount - 1 do
-          Mirror[I].Crypter[J].CreateFolder;
+    Main.fMain.CallCrypterCrypt;
 end;
 
 procedure TIntelligeN2009.callpublish;

@@ -24,7 +24,7 @@ const
 
 type
   RTemplateFileInfo = packed record
-    TemplateType: TTypeID;
+    TypeID: TTypeID;
     FileName: WideString;
     Checksum: WideString;
   end;
@@ -47,12 +47,12 @@ type
     procedure Clear;
   end;
   { ****************************************************************************** }
+
 {$REGION 'Documentation'}
 /// <remarks>
 ///   Expects AStringTypeID in format "Audio" not "cAudio"
 /// </remarks>
 {$ENDREGION}
-
 function StringInTypeID(const AStringTypeID: string): Boolean;
 {$REGION 'Documentation'}
 /// <remarks>

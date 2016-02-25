@@ -8,7 +8,7 @@ uses
 {$R *.res}
 { ****************************************************************************** }
 
-function GetFileInfo(AFileName: WideString): RTemplateFileInfo; stdcall; export;
+function GetFileInfo(const AFileName: WideString): RTemplateFileInfo; stdcall; export;
 var
   LXMLDoc: IXMLDocument;
   LTemplateInfo: RTemplateFileInfo;
@@ -29,7 +29,7 @@ begin
           begin
             with LTemplateInfo do
             begin
-              TemplateType := StringToTypeID(VarToStr(NodeValue));
+              TypeID := StringToTypeID(VarToStr(NodeValue));
               FileName := VarToStr(Attributes['filename']);
               Checksum := VarToStr(Attributes['checksum']);
             end;

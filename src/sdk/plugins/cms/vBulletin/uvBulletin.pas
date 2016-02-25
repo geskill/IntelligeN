@@ -78,7 +78,7 @@ type
     function GetName: WideString; override; safecall;
     function DefaultCharset: WideString; override; safecall;
     function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; override; safecall;
-    function GetArticleLink(const AURL: WideString; const AArticleID: Integer): WideString; override; safecall;
+    function GetArticleLink(const AURL: WideString; const AArticleID, AArticlePathID: Integer): WideString; override; safecall;
   end;
 
 implementation
@@ -874,7 +874,8 @@ function TvBulletin.GetArticleLink;
 begin
   // TODO: vBulletin requires threadID, too
   // old version:
-  Result := Format('%sshowpost.php?p=%d#post%1:d', [AURL, AArticleID]);
+  // Result := Format('%sshowpost.php?p=%d#post%1:d', [AURL, AArticleID]);
+  Result := Format('%sshowthread.php?f=%d&p=%d&viewfull=1#post%2:d', [AURL, AArticlePathID, AArticleID]);
 end;
 
 end.

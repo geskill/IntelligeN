@@ -42,7 +42,7 @@ implementation
 procedure TSelectDialog.cxButton1Click(Sender: TObject);
 begin
   if FOverrideQuestion and (cxCOBSelect.Properties.Items.IndexOf(SelectedItem) >= 0) then
-    if (MessageDlg('Override ' + SelectedItem + ' layout?', mtConfirmation, [mbyes, mbno], 0) <> mrYes) then
+    if (MessageDlg('Override ' + SelectedItem + ' layout?', mtConfirmation, [mbyes, mbno, mbCancel], 0) <> mrYes) then
     begin
       ModalResult := mrNone;
       Exit;

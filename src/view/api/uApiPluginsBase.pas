@@ -109,7 +109,7 @@ begin
     else
     begin
       // not(MINOR_VERSION = LPluginMinorVersion)
-      TPluginBase.ReturnError(Format(StrPluginIncompatible, [LPluginMinorVersion, MINOR_VERSION, LPluginFileName]), AErrorProc);
+      TPluginBase.ReturnError(Format(StrPluginIncompatible, [IntToStr(LPluginMinorVersion), IntToStr(MINOR_VERSION), LPluginFileName]), AErrorProc);
     end;
   end
   else

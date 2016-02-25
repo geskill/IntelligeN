@@ -7,6 +7,8 @@ uses
   SysUtils, Variants, XMLDoc, XMLIntf, ActiveX, DECFmt,
   // Common
   uBaseConst, uAppConst, uAppInterface,
+  // DLLs
+  uExport,
   // Plugin system
   uPlugInFileFormatClass;
 
@@ -18,16 +20,21 @@ type
 
   Tintelligenxml1 = class(TFileFormatPlugIn)
   private const
-    TStringComponentIDEx: array [0 .. 24] of string = ('eReleaseName', '', '', 'ePostTitle', '', '', '', 'cobPicture', 'eTrailer', 'cobSample', 'cobNotes', 'ePassword', 'cobBitrate', '', 'cobEncoder', 'cobQuality', 'cobAudioSource', 'cobGenre', 'cobLanguage', '',
-      'cobVideoFormat', 'cobVideoSource', 'cobSystem', 'mNfo', 'mDescription');
+    TStringComponentIDEx: array [0 .. 27] of string = ('eReleaseName', '', '', 'ePostTitle', 'cobBitrate', '', 'cobEncoder', 'cobQuality', 'cobAudioSource', '', '', 'cobGenre', 'cobLanguage', 'cobNotes', 'ePassword', 'cobPicture', '', '', 'cobSample', '', 'eTrailer', '', 'cobVideoFormat',
+      'cobVideoSource', 'cobSystem', '', 'mNfo', 'mDescription');
+
     eDownloadLink = 'eDownloadLink';
   public
     function GetName: WideString; override; safecall;
-    function GetFileFormatName: WideString; override; safecall;
-    function CanSaveControls: WordBool; override; safecall;
-    procedure SaveControls(const AFileName, ATemplateFileName: WideString; const ATabSheetController: ITabSheetController); override; safecall;
-    function CanLoadControls: WordBool; override; safecall;
-    function LoadControls(const AFileName, ATemplateDirectory: WideString; const APageController: IPageController): Integer; override; safecall;
+
+    function GetFileExtension: WideString; override; safecall;
+    function GetFileFilter: WideString; override; safecall;
+
+    function CanSaveFiles: WordBool; override; safecall;
+    function SaveFile(const AFileName: WideString; const ATabSheetController: ITabSheetController): WordBool; override; safecall;
+
+    function CanLoadFiles: WordBool; override; safecall;
+    function LoadFile(const AFileName: WideString; const APageController: IPageController): Integer; override; safecall;
   end;
 
 implementation
@@ -50,17 +57,22 @@ begin
   Result := 'intelligen.xml.1';
 end;
 
-function Tintelligenxml1.GetFileFormatName;
+function Tintelligenxml1.GetFileExtension;
+begin
+  Result := '.xml';
+end;
+
+function Tintelligenxml1.GetFileFilter;
 begin
   Result := 'IntelligeN %s (*.xml)|*.xml|';
 end;
 
-function Tintelligenxml1.CanSaveControls;
+function Tintelligenxml1.CanSaveFiles;
 begin
   Result := True;
 end;
 
-procedure Tintelligenxml1.SaveControls;
+function Tintelligenxml1.SaveFile;
 var
   LNeedToUninitialize: Boolean;
   XMLDoc: IXMLDocument;
@@ -82,7 +94,7 @@ begin
       end;
       with XMLDoc.DocumentElement do
       begin
-        with AddChild(ExtractFileName(ChangeFileExt(ATemplateFileName, ''))) do
+        with AddChild(ExtractFileName(ChangeFileExt(ATabSheetController.TemplateFileName, ''))) do
         begin
           with ATabSheetController.ControlController do
           begin
@@ -158,17 +170,17 @@ begin
   end;
 end;
 
-function Tintelligenxml1.CanLoadControls;
+function Tintelligenxml1.CanLoadFiles;
 begin
   Result := True;
 end;
 
-function Tintelligenxml1.LoadControls;
+function Tintelligenxml1.LoadFile;
 var
   LNeedToUninitialize: Boolean;
   XMLDoc: IXMLDocument;
   I, J, K, CompPos: Integer;
-  TemplateType: TTypeID;
+  LTypeID: TTypeID;
   Base64, _CrypterExists: Boolean;
   _value: string;
 begin
@@ -193,12 +205,12 @@ begin
             for I := 0 to ChildNodes.Count - 1 do
               with ChildNodes.Nodes[I] do
               begin
-                TemplateType := StringToTypeID(NodeName);
+                LTypeID := StringToTypeID(NodeName);
 
                 if HasAttribute('BASE64') then
                   Base64 := Attributes['BASE64'] = VarToStr('1');
 
-                with APageController.TabSheetController[APageController.Add(ATemplateDirectory + NodeName + '.xml', TemplateType, True)] do
+                with APageController.TabSheetController[APageController.CreateTabSheet(GetTemplatesTypeFolder + NodeName + '.xml', LTypeID, True)] do
                 begin
                   for J := 0 to ChildNodes.Count - 1 do
                     with ChildNodes.Nodes[J] do
@@ -254,8 +266,8 @@ begin
         XMLDoc := nil;
       end;
     finally
-    if LNeedToUninitialize then
-      CoUninitialize;
+      if LNeedToUninitialize then
+        CoUninitialize;
     end;
   except
     Result := -1;

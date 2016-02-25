@@ -34,7 +34,6 @@ type
     FControlList: TControlDataList;
     FMirrorList: TMirrorContainerList;
     FCustomFieldList: TCustomFieldList;
-    FOwn: Boolean; // TODO: Remove at next Build
   protected
     function GetTypeID: TTypeID; safecall;
 
@@ -47,7 +46,7 @@ type
     function GetCustomFieldCount: Integer; safecall;
   public
     constructor Create(ATypeID: TTypeID); overload;
-    constructor Create(ATypeID: TTypeID; AControlList: TControlDataList; AMirrorList: TMirrorContainerList; ACustomFieldList: TCustomFieldList; AOwn: Boolean = True); overload;
+    constructor Create(ATypeID: TTypeID; AControlList: TControlDataList; AMirrorList: TMirrorContainerList; ACustomFieldList: TCustomFieldList); overload;
     constructor Clone(const ATabSheetData: ITabSheetData);
     destructor Destroy; override;
 
@@ -55,7 +54,7 @@ type
 
     function FindControl(const AControlID: TControlID): IControlData; safecall;
     function FindMirror(const AHoster: WideString): IMirrorContainer; safecall;
-    function FindCustomField(const AName: WideString): INameValueItem; safecall; // TODO: Future version
+    function FindCustomField(const AName: WideString): INameValueItem; safecall;
 
     property Control[const IndexOrName: OleVariant]: IControlData read GetControl;
     property ControlCount: Integer read GetControlCount;
@@ -153,7 +152,7 @@ begin
   Create(ATypeID, nil, nil, nil);
 end;
 
-constructor TITabSheetData.Create(ATypeID: TTypeID; AControlList: TControlDataList; AMirrorList: TMirrorContainerList; ACustomFieldList: TCustomFieldList; AOwn: Boolean = True);
+constructor TITabSheetData.Create(ATypeID: TTypeID; AControlList: TControlDataList; AMirrorList: TMirrorContainerList; ACustomFieldList: TCustomFieldList);
 begin
   inherited Create;
 
@@ -173,8 +172,6 @@ begin
     FCustomFieldList := TCustomFieldList.Create
   else
     FCustomFieldList := ACustomFieldList;
-
-  FOwn := AOwn;
 end;
 
 constructor TITabSheetData.Clone(const ATabSheetData: ITabSheetData);
@@ -257,12 +254,9 @@ end;
 
 destructor TITabSheetData.Destroy;
 begin
-  if FOwn then
-  begin
-    FCustomFieldList.Free;
-    FMirrorList.Free;
-    FControlList.Free;
-  end;
+  FCustomFieldList.Free;
+  FMirrorList.Free;
+  FControlList.Free;
 
   inherited Destroy;
 end;
