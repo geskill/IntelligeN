@@ -6,8 +6,8 @@ uses
   // Delphi
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Menus, StdCtrls, ComCtrls, ShlObj,
   // Dev Express
-  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, cxShellCommon, cxTextEdit, cxMaskEdit, cxDropDownEdit,
-  cxShellTreeView, cxLabel, cxButtons, cxShellControls, cxTreeView,
+  cxGraphics, cxControls, cxLookAndFeels, cxLookAndFeelPainters, cxContainer, cxEdit, cxShellCommon, cxTextEdit, cxMaskEdit,
+  cxDropDownEdit, cxShellTreeView, cxLabel, cxButtons, cxShellControls, cxTreeView, cxShellListView,
   // RegEx
   RegExpr;
 
@@ -17,9 +17,11 @@ type
     cxShellTreeView: TcxShellTreeView;
     cxLFileFormat: TcxLabel;
     cxCOBFileFormat: TcxComboBox;
-    cxCancel: TcxButton;
+    cxBCancel: TcxButton;
     cxBOk: TcxButton;
-    procedure cxCancelClick(Sender: TObject);
+    cxBNewFolder: TcxButton;
+    procedure cxBNewFolderClick(Sender: TObject);
+    procedure cxBCancelClick(Sender: TObject);
     procedure cxBOkClick(Sender: TObject);
   private
     FFilter: string;
@@ -44,7 +46,31 @@ implementation
 
 {$R *.dfm}
 
-procedure TSelectFolderDialog.cxCancelClick(Sender: TObject);
+type
+  TcxShellTreeViewAccess = class(TcxShellTreeView);
+
+procedure TSelectFolderDialog.cxBNewFolderClick(Sender: TObject);
+var
+  LNewFolderName, LNewFolderPath: string;
+  LNewFolderRelativePidl: PItemIDList;
+  LShellFolder: IShellFolder;
+begin
+  LNewFolderName := 'New folder';
+  if InputQuery('Create New Folder', 'New Folder Name', LNewFolderName) then
+  begin
+    LNewFolderPath := IncludeTrailingPathDelimiter(cxShellTreeView.Path) + LNewFolderName;
+    if not ForceDirectories(LNewFolderPath) then
+      raise exception.createFmt('New Folder "%s" could not be created.', [LNewFolderName]);
+    cxShellTreeView.UpdateContent;
+    Application.ProcessMessages;
+    LShellFolder := cxShellTreeView.Folders[cxShellTreeView.InnerTreeView.Selected.AbsoluteIndex].ShellFolder;
+    LNewFolderRelativePidl := InternalParseDisplayName(LShellFolder, LNewFolderName, TcxShellTreeViewAccess(cxShellTreeView).GetViewOptions);
+    cxShellTreeView.AbsolutePIDL := ConcatenatePidls(cxShellTreeView.AbsolutePIDL, LNewFolderRelativePidl);
+    cxShellTreeView.SetFocus;
+  end;
+end;
+
+procedure TSelectFolderDialog.cxBCancelClick(Sender: TObject);
 begin
   CloseModal;
 end;
