@@ -232,9 +232,7 @@ begin
 
       RequestID := HTTPManager.Get(THTTPRequest.Create('http://www.google.com/recaptcha/api/challenge?k=' + _captcha_confirm_hash), TPlugInHTTPOptions.Create(Self));
 
-      repeat
-        sleep(50);
-      until HTTPManager.HasResult(RequestID);
+      HTTPManager.WaitFor(RequestID);
 
       _storecaptcha := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
 

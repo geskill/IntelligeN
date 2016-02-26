@@ -98,9 +98,7 @@ begin
 
   RequestID1 := HTTPManager.Get(HTTPRequest, TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID1);
+  HTTPManager.WaitFor(RequestID1);
 
   ResponseStrReleaseInformation := HTTPManager.GetResult(RequestID1).HTTPResult.SourceCode;
 
@@ -195,9 +193,7 @@ begin
     begin
       RequestID2 := HTTPManager.Get(WEBSITE + ProductInformationPageLink, RequestID1, TPlugInHTTPOptions.Create(Self));
 
-      repeat
-        sleep(50);
-      until HTTPManager.HasResult(RequestID2);
+      HTTPManager.WaitFor(RequestID2);
 
       ResponseStrProductInformation := HTTPManager.GetResult(RequestID2).HTTPResult.SourceCode;
 

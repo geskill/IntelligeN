@@ -41,9 +41,7 @@ begin
 
   LRequestID := HTTPManager.Get(THTTPRequest.Create('http://plugin.tinypic.com/plugin/index.php'), TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID);
+  HTTPManager.WaitFor(LRequestID);
 
   LResponsePluginPage := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
 
@@ -107,9 +105,7 @@ begin
 
   LRequestID := HTTPManager.Post(LUploadServer, LRequestID, AHTTPParams, TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID);
+  HTTPManager.WaitFor(LRequestID);
 
   LHTTPProcess := HTTPManager.GetResult(LRequestID);
 

@@ -35,7 +35,7 @@
 			<DCC_ExeOutput>../../bin</DCC_ExeOutput>
 			<DCC_DcuOutput>../../dcu</DCC_DcuOutput>
 			<DCC_ObjOutput>../../obj</DCC_ObjOutput>
-			<DCC_UnitSearchPath>../;../core\common;../core\external;../core\external\HTTPManager;../core\external\HTTPManager\implementors;../core\external\MultiEvent;../core\external\OmniThreadLibrary;../core\external\OmniThreadLibrary\src;../core\utils;../sdk\dlls;../sdk\plugins;external;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+			<DCC_UnitSearchPath>../;../core\common;../core\external;../core\external\HTTPManager;../core\external\HTTPManager\antiscrape;../core\external\HTTPManager\implementors;../core\external\MultiEvent;../core\external\OmniThreadLibrary;../core\external\OmniThreadLibrary\src;../core\utils;../sdk\dlls;../sdk\plugins;external;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
 			<DCC_MapFile>3</DCC_MapFile>

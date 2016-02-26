@@ -119,9 +119,7 @@ begin
 
           LRequestID := HTTPManager.Post(THTTPRequest.Create('http://api.share-online.biz/cgi-bin?q=checklinks&md5=1'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
-          repeat
-            sleep(50);
-          until HTTPManager.HasResult(LRequestID);
+          HTTPManager.WaitFor(LRequestID);
 
           ResponeStr := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
 

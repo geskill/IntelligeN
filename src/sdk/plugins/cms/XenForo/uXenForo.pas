@@ -257,9 +257,7 @@ begin
 
         ARequestID := HTTPManager.Post(Website + 'search/search', ARequestID, HTTPParams, HTTPOptions);
 
-        repeat
-          sleep(50);
-        until HTTPManager.HasResult(ARequestID);
+        HTTPManager.WaitFor(ARequestID);
 
         HTTPProcess := HTTPManager.GetResult(ARequestID);
 

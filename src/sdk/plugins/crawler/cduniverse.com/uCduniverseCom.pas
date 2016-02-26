@@ -389,9 +389,7 @@ begin
 
   LRequestID1 := HTTPManager.Get(LHTTPRequest, TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID1);
+  HTTPManager.WaitFor(LRequestID1);
 
   LResponeStr := HTTPManager.GetResult(LRequestID1).HTTPResult.SourceCode;
 

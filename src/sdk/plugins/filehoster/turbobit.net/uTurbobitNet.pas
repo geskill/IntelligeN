@@ -64,9 +64,7 @@ begin
 
   RequestID := HTTPManager.Get(HTTPRequest, TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  HTTPManager.WaitFor(RequestID);
 
   ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
 

@@ -29,6 +29,24 @@ uses
   OtlComm, OtlCommon, OtlEventMonitor, OtlSync, OtlTask, OtlTaskControl, OtlThreadPool;
 
 type
+  THTTPAntiScrapeManager = class(TInterfacedObject, IHTTPAntiScrapeManager)
+  private
+    FAntiScrapes: TInterfaceList;
+    function FindAntiScrape(const AName: WideString): IHTTPAntiScrape;
+  protected
+    function GetCount: Integer; safecall;
+    function GetAntiScrape(AIndex: Integer): IHTTPAntiScrape; safecall;
+  public
+    constructor Create; virtual;
+    destructor Destroy; override;
+
+    function Register(const AAntiScrape: IHTTPAntiScrape): WordBool; safecall;
+    function Unregister(const AName: WideString): WordBool; safecall;
+
+    property Count: Integer read GetCount;
+    property AntiScrapes[Index: Integer]: IHTTPAntiScrape read GetAntiScrape; default;
+  end;
+
   THTTPImplementationManager = class(TInterfacedObject, IHTTPImplementationManager)
   private
     FImplementations: TInterfaceList;
@@ -40,12 +58,13 @@ type
     constructor Create; virtual;
     destructor Destroy; override;
 
-    function Register(const AHTTPImplementation: IHTTPImplementation): WordBool; safecall;
+    function Register(const AImplementation: IHTTPImplementation): WordBool; safecall;
     function Unregister(const AName: WideString): WordBool; safecall;
 
     property Count: Integer read GetCount;
     property Implementations[Index: Integer]: IHTTPImplementation read GetImplementation; default;
   end;
+
   {$REGION 'Documentation'}
   /// <summary>
   ///   <para>
@@ -69,7 +88,6 @@ type
   ///   This class is a singleton.
   /// </remarks>
   {$ENDREGION}
-
   THTTPManager = class(TInterfacedObject, IHTTPManager)
   strict private
     class var FLock: TOmniCS;
@@ -83,9 +101,9 @@ type
     FRequestArrayLowerBoundUpdate: Boolean;
     FRequestArrayLowerBound: TOmniAlignedInt32;
     FThreadPool: IOmniThreadPool;
+    FAntiScrapeManager: IHTTPAntiScrapeManager;
     FImplementor: IHTTPImplementation;
     FImplementationManager: IHTTPImplementationManager;
-    FRequestScrape: IHTTPScrapeEvent;
     FRequestDoneEvent: IHTTPProcessEvent;
 
   const
@@ -110,10 +128,10 @@ type
   protected
     function GetConnectionMaximum: Integer; safecall;
     procedure SetConnectionMaximum(const AConnectionMaximum: Integer); safecall;
+    function GetAntiScrapeManager: IHTTPAntiScrapeManager; safecall;
     function GetImplementor: IHTTPImplementation; safecall;
     procedure SetImplementor(const AImplementor: IHTTPImplementation); safecall;
     function GetImplementationManager: IHTTPImplementationManager; safecall;
-    function GetRequestScrape: IHTTPScrapeEvent; safecall;
     function GetRequestDone: IHTTPProcessEvent; safecall;
   public
     {$REGION 'Documentation'}
@@ -229,6 +247,10 @@ type
     {$ENDREGION}
     function GetResult(AUniqueID: Double): IHTTPProcess; safecall;
 
+    function WaitFor(AUniqueID: Double; AMaxWaitMS: Cardinal = INFINITE): WordBool; safecall;
+
+    property AntiScrapeManager: IHTTPAntiScrapeManager read GetAntiScrapeManager;
+
     property Implementor: IHTTPImplementation read GetImplementor write SetImplementor;
     property ImplementationManager: IHTTPImplementationManager read GetImplementationManager;
     {$REGION 'Documentation'}
@@ -239,13 +261,76 @@ type
     ///   The event call is synchronized.
     /// </remarks>
     {$ENDREGION}
-    property OnRequestScrape: IHTTPScrapeEvent read GetRequestScrape write FRequestScrape;
     property OnRequestDone: IHTTPProcessEvent read GetRequestDone write FRequestDoneEvent;
 
     destructor Destroy; override;
   end;
 
 implementation
+
+{ THTTPAntiScrapeManager }
+
+function THTTPAntiScrapeManager.FindAntiScrape(const AName: WideString): IHTTPAntiScrape;
+var
+  LAntiScrapeIndex: Integer;
+  LAntiScrape: IHTTPAntiScrape;
+begin
+  Result := nil;
+
+  for LAntiScrapeIndex := 0 to FAntiScrapes.Count - 1 do
+  begin
+    LAntiScrape := AntiScrapes[LAntiScrapeIndex];
+
+    if SameText(AName, LAntiScrape.Name) then
+    begin
+      Result := LAntiScrape;
+      break;
+    end;
+  end;
+end;
+
+function THTTPAntiScrapeManager.GetCount: Integer;
+begin
+  Result := FAntiScrapes.Count;
+end;
+
+function THTTPAntiScrapeManager.GetAntiScrape(AIndex: Integer): IHTTPAntiScrape;
+begin
+  Result := FAntiScrapes.Items[AIndex] as IHTTPAntiScrape;
+end;
+
+constructor THTTPAntiScrapeManager.Create;
+begin
+  inherited Create;
+  FAntiScrapes := TInterfaceList.Create;
+end;
+
+destructor THTTPAntiScrapeManager.Destroy;
+begin
+  FAntiScrapes.Free;
+  inherited Destroy;
+end;
+
+function THTTPAntiScrapeManager.Register(const AAntiScrape: IHTTPAntiScrape): WordBool;
+begin
+  Result := not Assigned(FindAntiScrape(AAntiScrape.Name));
+  if Result then
+    FAntiScrapes.Add(AAntiScrape)
+end;
+
+function THTTPAntiScrapeManager.Unregister(const AName: WideString): WordBool;
+var
+  LAntiScrape: IHTTPAntiScrape;
+begin
+  LAntiScrape := FindAntiScrape(AName);
+  Result := Assigned(LAntiScrape);
+  if Result then
+    try
+      FAntiScrapes.Remove(LAntiScrape);
+    finally
+      LAntiScrape := nil;
+    end;
+end;
 
 { THTTPImplementationManager }
 
@@ -290,11 +375,11 @@ begin
   inherited Destroy;
 end;
 
-function THTTPImplementationManager.Register(const AHTTPImplementation: IHTTPImplementation): WordBool;
+function THTTPImplementationManager.Register(const AImplementation: IHTTPImplementation): WordBool;
 begin
-  Result := not Assigned(FindImplementation(AHTTPImplementation.Name));
+  Result := not Assigned(FindImplementation(AImplementation.Name));
   if Result then
-    FImplementations.Add(AHTTPImplementation)
+    FImplementations.Add(AImplementation)
 end;
 
 function THTTPImplementationManager.Unregister(const AName: WideString): WordBool;
@@ -366,8 +451,11 @@ procedure THTTPManager.Execute(AUniqueID: Int64; AHTTPData: IHTTPData; out AHTTP
 var
   HTTPResult: IHTTPResult;
 
-  ScrapeData: IHTTPData;
+  AntiScrapeIndex: Integer;
+
   ScrapeHandled: WordBool;
+
+  ScrapeData: IHTTPData;
   ScrapeResult: IHTTPResult;
   ScrapeProcess: IHTTPProcess;
 
@@ -387,7 +475,12 @@ begin
   AHTTPProcess.HTTPResult := HTTPResult;
 
   ScrapeHandled := False;
-  FRequestScrape.Invoke(AHTTPProcess, ScrapeData, ScrapeHandled);
+  for AntiScrapeIndex := 0 to AntiScrapeManager.Count - 1 do
+  begin
+    AntiScrapeManager.AntiScrapes[AntiScrapeIndex].Handle(AHTTPProcess, ScrapeData, ScrapeHandled);
+    if ScrapeHandled then
+      break;
+  end;
 
   if ScrapeHandled then
   begin
@@ -538,11 +631,16 @@ begin
     MaxQueued := 0;
   end;
 
+  FAntiScrapeManager := THTTPAntiScrapeManager.Create;
   FImplementor := nil;
   FImplementationManager := THTTPImplementationManager.Create;
 
-  FRequestScrape := TIHTTPScrapeEvent.Create;
   FRequestDoneEvent := TIHTTPProcessEvent.Create;
+end;
+
+function THTTPManager.GetAntiScrapeManager: IHTTPAntiScrapeManager;
+begin
+  Result := FAntiScrapeManager;
 end;
 
 function THTTPManager.GetImplementor: IHTTPImplementation;
@@ -566,11 +664,6 @@ end;
 procedure THTTPManager.SetImplementor(const AImplementor: IHTTPImplementation);
 begin
   FImplementor := AImplementor;
-end;
-
-function THTTPManager.GetRequestScrape: IHTTPScrapeEvent;
-begin
-  Result := FRequestScrape;
 end;
 
 function THTTPManager.GetRequestDone: IHTTPProcessEvent;
@@ -664,12 +757,33 @@ begin
   end;
 end;
 
+function THTTPManager.WaitFor(AUniqueID: Double; AMaxWaitMS: Cardinal = INFINITE): WordBool;
+var
+  Index: Integer;
+  TaskControl: IOmniTaskControl;
+begin
+  Result := False;
+
+  Index := Trunc(AUniqueID);
+
+  FTaskControlArrayLock.EnterWriteLock;
+  try
+    if (Index > FRequestArrayLowerBound.Value) and (Index < length(FTaskControlArray)) then
+      TaskControl := FTaskControlArray[Index];
+  finally
+    FTaskControlArrayLock.ExitWriteLock;
+  end;
+
+  if Assigned(TaskControl) then
+    Result := TaskControl.WaitFor(AMaxWaitMS);
+end;
+
 destructor THTTPManager.Destroy;
 begin
   FRequestDoneEvent := nil;
-  FRequestScrape := nil;
   FImplementationManager := nil;
   FImplementor := nil;
+  FAntiScrapeManager := nil;
 
   if Assigned(FThreadPool) then
   begin

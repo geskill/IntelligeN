@@ -71,9 +71,7 @@ begin
 
   AFollowUpRequest := HTTPManager.Post(LHTTPRequest, LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(AFollowUpRequest);
+  HTTPManager.WaitFor(AFollowUpRequest);
 
   Result := HTTPManager.GetResult(AFollowUpRequest).HTTPResult.SourceCode;
 end;

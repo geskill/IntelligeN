@@ -55,9 +55,7 @@ begin
 
     RequestID := HTTPManager.Get(HTTPRequest, TPlugInHTTPOptions.Create(Self));
 
-    repeat
-    sleep(50);
-    until HTTPManager.HasResult(RequestID);
+    HTTPManager.WaitFor(RequestID);
 
     with TRegExpr.Create do
     try
@@ -81,9 +79,7 @@ begin
 
     RequestID := HTTPManager.Post(website + 'Login', RequestID, HTTPParams, TPlugInHTTPOptions.Create(Self));
 
-    repeat
-    sleep(50);
-    until HTTPManager.HasResult(RequestID);
+    HTTPManager.WaitFor(RequestID);
 
     with TRegExpr.Create do
     try
@@ -155,9 +151,7 @@ begin
 
   LRequestID := HTTPManager.Post(LHTTPRequest, AHTTPParams, LHTTPOptions);
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID);
+  HTTPManager.WaitFor(LRequestID);
 
   LHTTPProcess := HTTPManager.GetResult(LRequestID);
 

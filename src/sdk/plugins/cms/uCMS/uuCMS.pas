@@ -557,9 +557,7 @@ begin
 
     ARequestID := HTTPManager.Post(Website + uCMSSettings.custom_upload_url, ARequestID, HTTPParams, TPlugInHTTPOptions.Create(Self));
 
-    repeat
-      sleep(50);
-    until HTTPManager.HasResult(ARequestID);
+    HTTPManager.WaitFor(ARequestID);
 
     HTTPProcess := HTTPManager.GetResult(ARequestID);
 
@@ -575,9 +573,7 @@ begin
   begin
     ARequestID := HTTPManager.Get(THTTPRequest.Create(Website + uCMSSettings.custom_upload_url), TPlugInHTTPOptions.Create(Self));
 
-    repeat
-      sleep(50);
-    until HTTPManager.HasResult(ARequestID);
+    HTTPManager.WaitFor(ARequestID);
 
     HTTPProcess := HTTPManager.GetResult(ARequestID);
 

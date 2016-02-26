@@ -296,9 +296,7 @@ begin
 
       RequestID := HTTPManager.Post(Website + 'wp-admin/admin-ajax.php', APrevRequest, HTTPParams);
 
-      repeat
-        sleep(50);
-      until HTTPManager.HasResult(RequestID);
+      HTTPManager.WaitFor(RequestID);
 
       HTTPProcess := HTTPManager.GetResult(RequestID);
 
@@ -534,9 +532,7 @@ begin
 
   RequestID := HTTPManager.Post(HTTPRequest, HTTPParams, HTTPOptions);
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  HTTPManager.WaitFor(RequestID);
 
   {
     if HTTPProcess.HTTPResult.HasError then

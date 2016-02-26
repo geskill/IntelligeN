@@ -22,8 +22,6 @@ implementation
 
 { THTTPImplementation }
 
-{ THTTPImplementation }
-
 function THTTPImplementation.GetName: WideString;
 begin
   Result := GetImplementationName;

@@ -117,9 +117,7 @@ begin
 
   LRequestID := HTTPManager.Post(THTTPRequest.Create(website + 'TODO_URL-ADD-FOLDER-REQUEST'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID);
+  HTTPManager.WaitFor(LRequestID);
 
   LHTTPProcess := HTTPManager.GetResult(LRequestID);
 
@@ -179,9 +177,7 @@ begin
   { TODO : update the example code here }
   LRequestID := HTTPManager.Post(THTTPRequest.Create(website + 'TODO_URL-GET-FOLDER-INFO-REQUEST'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID);
+  HTTPManager.WaitFor(LRequestID);
 
   LHTTPProcess := HTTPManager.GetResult(LRequestID);
 

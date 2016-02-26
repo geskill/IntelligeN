@@ -59,9 +59,7 @@ begin
 
   LRequestID := HTTPManager.Post(LHTTPRequest, AHTTPParams, LHTTPOptions);
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID);
+  HTTPManager.WaitFor(LRequestID);
 
   LHTTPProcess := HTTPManager.GetResult(LRequestID);
 

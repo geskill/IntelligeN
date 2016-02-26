@@ -294,15 +294,11 @@ begin
 
         ARequestID := HTTPManager.Post(GetSearchRequestURL, ARequestID, HTTPParams, HTTPOptions);
 
-        repeat
-          sleep(50);
-        until HTTPManager.HasResult(ARequestID);
+        HTTPManager.WaitFor(ARequestID);
 
         ResponseStr := HTTPManager.GetResult(ARequestID).HTTPResult.SourceCode;
 
-        repeat
-          sleep(50);
-        until HTTPManager.HasResult(ARequestID);
+        HTTPManager.WaitFor(ARequestID);
 
         HTTPProcess := HTTPManager.GetResult(ARequestID);
 
@@ -343,9 +339,7 @@ begin
 
                 ARequestID := HTTPManager.Get(Website + HTMLDecode(Match[1]), ARequestID, HTTPOptions);
 
-                repeat
-                  sleep(50);
-                until HTTPManager.HasResult(ARequestID);
+                HTTPManager.WaitFor(ARequestID);
 
                 HTTPProcess := HTTPManager.GetResult(ARequestID);
 

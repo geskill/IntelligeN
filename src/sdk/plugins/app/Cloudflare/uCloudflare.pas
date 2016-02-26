@@ -114,9 +114,7 @@ begin
         HTTPRequest := nil;
         OutputDebugString(PChar('LRequestID: ' + IntToStr(Trunc(LRequestID))));
 
-        repeat
-          sleep(75);
-        until HTTPManager.HasResult(LRequestID);
+        HTTPManager.WaitFor(LRequestID);
 
         if not NeedHandle(HTTPManager.GetResult(LRequestID).HTTPResult.HTTPResponse) then
         begin

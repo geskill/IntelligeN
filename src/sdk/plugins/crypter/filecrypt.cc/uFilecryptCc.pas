@@ -118,9 +118,7 @@ begin
 
   LRequestID := HTTPManager.Post(THTTPRequest.Create(WEBSITE + 'api.php'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID);
+  HTTPManager.WaitFor(LRequestID);
 
   LHTTPProcess := HTTPManager.GetResult(LRequestID);
 
@@ -242,9 +240,7 @@ begin
 
   LRequestID := HTTPManager.Post(THTTPRequest.Create(WEBSITE + 'api.php'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID);
+  HTTPManager.WaitFor(LRequestID);
 
   LHTTPProcess := HTTPManager.GetResult(LRequestID);
 

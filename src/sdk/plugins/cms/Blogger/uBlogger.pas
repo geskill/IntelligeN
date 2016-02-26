@@ -305,9 +305,7 @@ begin
 
   RequestID := HTTPManager.Get(THTTPRequest.Create(GetIDsRequestURL), TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  HTTPManager.WaitFor(RequestID);
 
   {
     if HTTPProcess.HTTPResult.HasError then

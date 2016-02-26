@@ -74,9 +74,7 @@ begin
   end;
   RequestID := HTTPManager.Get(THTTPRequest.Create('http://cloudzer.net/file/' + GetDownloadlinkID(AFile) + '/status'), TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  HTTPManager.WaitFor(RequestID);
 
   ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
 
@@ -142,9 +140,7 @@ begin
             try
               RequestID := HTTPManager.Post(THTTPRequest.Create('http://cloudzer.net/api/filemultiple'), HTTPParams, TPlugInHTTPOptions.Create(Self));
 
-              repeat
-                sleep(50);
-              until HTTPManager.HasResult(RequestID);
+              HTTPManager.WaitFor(RequestID);
 
               ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
 

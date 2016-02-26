@@ -294,18 +294,6 @@ type
     property HTTPResult: IHTTPResult read GetHTTPResult write SetHTTPResult;
   end;
 
-  IHTTPScrapeEventHandler = interface(IUnknown)
-    ['{C603F8DD-2789-4601-BF5A-A386CEEC4E56}']
-    procedure Invoke(const AHTTPProcess: IHTTPProcess; out AHTTPData: IHTTPData; var AHandled: WordBool); safecall;
-  end;
-
-  IHTTPScrapeEvent = interface(IUnknown)
-    ['{058E81B9-E661-4C58-A56F-4F0D41D4350B}']
-    procedure Add(const AHandler: IHTTPScrapeEventHandler); safecall;
-    procedure Remove(const AHandler: IHTTPScrapeEventHandler); safecall;
-    procedure Invoke(const AHTTPProcess: IHTTPProcess; out AHTTPData: IHTTPData; var AHandled: WordBool); safecall;
-  end;
-
   IHTTPProcessEventHandler = interface(IUnknown)
     ['{2FBF518D-3E91-4BFF-9713-D9BC872F1813}']
     procedure Invoke(const AHTTPProcess: IHTTPProcess); safecall;
@@ -316,6 +304,27 @@ type
     procedure Add(const AHandler: IHTTPProcessEventHandler); safecall;
     procedure Remove(const AHandler: IHTTPProcessEventHandler); safecall;
     procedure Invoke(const AHTTPProcess: IHTTPProcess); safecall;
+  end;
+
+  IHTTPAntiScrape = interface(IUnknown)
+    ['{03C8BCF2-87B8-4665-9119-4E63EB5EEE2C}']
+    function GetName: WideString; safecall;
+
+    procedure Handle(const AHTTPProcess: IHTTPProcess; out AHTTPData: IHTTPData; var AHandled: WordBool); safecall;
+
+    property Name: WideString read GetName;
+  end;
+
+  IHTTPAntiScrapeManager = interface(IUnknown)
+    ['{D5BE5CB3-CE28-42F1-8009-48E9254CC6CC}']
+    function GetCount: Integer; safecall;
+    function GetAntiScrape(AIndex: Integer): IHTTPAntiScrape; safecall;
+
+    function Register(const AHTTPAntiScrape: IHTTPAntiScrape): WordBool; safecall;
+    function Unregister(const AName: WideString): WordBool; safecall;
+
+    property Count: Integer read GetCount;
+    property AntiScrapes[Index: Integer]: IHTTPAntiScrape read GetAntiScrape; default;
   end;
 
   IHTTPImplementation = interface(IUnknown)
@@ -343,10 +352,10 @@ type
     ['{DB7FBA4F-CE5C-454A-AA74-FB8EC7DFAB8E}']
     function GetConnectionMaximum: Integer; safecall;
     procedure SetConnectionMaximum(const AConnectionMaximum: Integer); safecall;
+    function GetAntiScrapeManager: IHTTPAntiScrapeManager; safecall;
     function GetImplementor: IHTTPImplementation; safecall;
     procedure SetImplementor(const AImplementor: IHTTPImplementation); safecall;
     function GetImplementationManager: IHTTPImplementationManager; safecall;
-    function GetRequestScrape: IHTTPScrapeEvent; safecall;
     function GetRequestDone: IHTTPProcessEvent; safecall;
 
     property ConnectionMaximum: Integer read GetConnectionMaximum write SetConnectionMaximum;
@@ -359,10 +368,13 @@ type
     function HasResult(AUniqueID: Double): WordBool; safecall;
     function GetResult(AUniqueID: Double): IHTTPProcess; safecall;
 
+    function WaitFor(AUniqueID: Double; AMaxWaitMS: Cardinal = INFINITE): WordBool; safecall;
+
+    property AntiScrapeManager: IHTTPAntiScrapeManager read GetAntiScrapeManager;
+
     property Implementor: IHTTPImplementation read GetImplementor write SetImplementor;
     property ImplementationManager: IHTTPImplementationManager read GetImplementationManager;
 
-    property OnRequestScrape: IHTTPScrapeEvent read GetRequestScrape;
     property OnRequestDone: IHTTPProcessEvent read GetRequestDone;
   end;
 

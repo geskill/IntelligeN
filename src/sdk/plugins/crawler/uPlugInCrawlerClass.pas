@@ -135,9 +135,7 @@ begin
 
   LRequestID := HTTPManager.Get(LHTTPRequest, LHTTPOptions);
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID);
+  HTTPManager.WaitFor(LRequestID);
 
   ARequestID := LRequestID;
   Result := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
@@ -157,9 +155,7 @@ begin
 
   LRequestID := HTTPManager.Get(AURL, AFollowUp, LHTTPOptions);
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID);
+  HTTPManager.WaitFor(LRequestID);
 
   ARequestID := LRequestID;
   Result := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;

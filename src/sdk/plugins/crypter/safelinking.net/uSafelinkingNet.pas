@@ -118,9 +118,7 @@ begin
 
   LRequestID := HTTPManager.Post(THTTPRequest.Create(WEBSITE + 'api'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID);
+  HTTPManager.WaitFor(LRequestID);
 
   LHTTPProcess := HTTPManager.GetResult(LRequestID);
 
@@ -203,9 +201,7 @@ begin
 
   LRequestID := HTTPManager.Get(THTTPRequest.Create(WEBSITE + 'check?link=' + HTTPEncode(AFolderIdentifier)), TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID);
+  HTTPManager.WaitFor(LRequestID);
 
   LHTTPProcess := HTTPManager.GetResult(LRequestID);
 

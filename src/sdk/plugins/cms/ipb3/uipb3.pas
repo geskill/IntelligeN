@@ -261,9 +261,7 @@ begin
 
         ARequestID := HTTPManager.Post(GetSearchRequestURL, ARequestID, HTTPParams, TPlugInHTTPOptions.Create(Self));
 
-        repeat
-          sleep(50);
-        until HTTPManager.HasResult(ARequestID);
+        HTTPManager.WaitFor(ARequestID);
 
         HTTPProcess := HTTPManager.GetResult(ARequestID);
 

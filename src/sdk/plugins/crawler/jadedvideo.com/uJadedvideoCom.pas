@@ -259,9 +259,7 @@ begin
 
   LRequestID2 := HTTPManager.Post(LHTTPRequest.URL, LRequestID1, LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID2);
+  HTTPManager.WaitFor(LRequestID2);
 
   LResponeStr := HTTPManager.GetResult(LRequestID2).HTTPResult.SourceCode;
 

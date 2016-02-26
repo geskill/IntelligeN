@@ -283,9 +283,7 @@ begin
 
         ARequestID := HTTPManager.Get(GetSearchRequestURL + '?keywords=' + SearchValue + '&terms=all&author=&sc=1&sf=all&sk=t&sd=d&sr=topics&st=0&ch=300&t=0&submit=', ARequestID, TPlugInHTTPOptions.Create(Self));
 
-        repeat
-          sleep(50);
-        until HTTPManager.HasResult(ARequestID);
+        HTTPManager.WaitFor(ARequestID);
 
         HTTPProcess := HTTPManager.GetResult(ARequestID);
 

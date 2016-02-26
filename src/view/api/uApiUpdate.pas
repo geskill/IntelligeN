@@ -237,9 +237,7 @@ begin
 
   LRequestID := LHTTPManager.Post(LHTTPRequest, LHTTPParams, LHTTPOptions);
 
-  repeat
-    sleep(75);
-  until LHTTPManager.HasResult(LRequestID);
+  LHTTPManager.WaitFor(LRequestID);
 
   LHTTPProcess := LHTTPManager.GetResult(LRequestID);
 

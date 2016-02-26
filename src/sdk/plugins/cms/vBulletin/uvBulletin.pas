@@ -300,9 +300,7 @@ begin
 
       ARequestID := HTTPManager.Get(GetSearchRequestURL, ARequestID, HTTPOptions);
 
-      repeat
-        sleep(50);
-      until HTTPManager.HasResult(ARequestID);
+      HTTPManager.WaitFor(ARequestID);
 
       ResponseStr := HTTPManager.GetResult(ARequestID).HTTPResult.SourceCode;
 
@@ -357,9 +355,7 @@ begin
 
         ARequestID := HTTPManager.Post(Website + 'search.php?do=process', ARequestID, HTTPParams, HTTPOptions);
 
-        repeat
-          sleep(50);
-        until HTTPManager.HasResult(ARequestID);
+        HTTPManager.WaitFor(ARequestID);
 
         HTTPProcess := HTTPManager.GetResult(ARequestID);
 
@@ -624,9 +620,7 @@ begin
 
       RequestID := HTTPManager.Get(THTTPRequest.Create('http://www.google.com/recaptcha/api/challenge?k=' + _captcha_confirm_hash), TPlugInHTTPOptions.Create(Self));
 
-      repeat
-        sleep(50);
-      until HTTPManager.HasResult(RequestID);
+      HTTPManager.WaitFor(RequestID);
 
       _storecaptcha := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
 

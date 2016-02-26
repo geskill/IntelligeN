@@ -140,9 +140,7 @@ begin
 
   LRequestID := HTTPManager.Post(THTTPRequest.Create(website + 'api.php'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID);
+  HTTPManager.WaitFor(LRequestID);
 
   LHTTPProcess := HTTPManager.GetResult(LRequestID);
 
@@ -230,9 +228,7 @@ begin
 
   LRequestID := HTTPManager.Get(THTTPRequest.Create(website + 'container_link_info.php?id=' + GetFolderID(AFolderIdentifier)), TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID);
+  HTTPManager.WaitFor(LRequestID);
 
   LHTTPProcess := HTTPManager.GetResult(LRequestID);
 

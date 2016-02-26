@@ -13,3 +13,5 @@
 * Implement a default path for saved XML files.
 
 * Improve saving and loading files using default path.
+
+* Updated HTTPManager (replaced check loop with WaitFor).

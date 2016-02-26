@@ -142,9 +142,7 @@ begin
 
           RequestID := HTTPManager.Post(THTTPRequest.Create('http://api.netload.in/info.php'), HTTPParams, TPlugInHTTPOptions.Create(Self));
 
-          repeat
-            sleep(50);
-          until HTTPManager.HasResult(RequestID);
+          HTTPManager.WaitFor(RequestID);
 
           ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
 

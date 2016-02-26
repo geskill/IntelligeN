@@ -213,9 +213,7 @@ begin
 
     RequestID := HTTPManager.Post(HTTPRequest, HTTPParams, HTTPOptions);
 
-    repeat
-      sleep(50);
-    until HTTPManager.HasResult(RequestID);
+    HTTPManager.WaitFor(RequestID);
 
     if not HTTPManager.GetResult(RequestID).HTTPResult.HasError then
     begin
@@ -237,9 +235,7 @@ begin
 
           RequestID := HTTPManager.Post('http://uploaded.net/io/me/list/files', RequestID, HTTPParams, TPlugInHTTPOptions.Create(Self));
 
-          repeat
-            sleep(50);
-          until HTTPManager.HasResult(RequestID);
+          HTTPManager.WaitFor(RequestID);
 
           try
             lkJSONobject := TlkJSON.ParseText(HTTPManager.GetResult(RequestID).HTTPResult.SourceCode) as TlkJSONobject;
@@ -319,9 +315,7 @@ begin
 
     RequestID := HTTPManager.Post(HTTPRequest, HTTPParams, HTTPOptions);
 
-    repeat
-      sleep(50);
-    until HTTPManager.HasResult(RequestID);
+    HTTPManager.WaitFor(RequestID);
 
     if not HTTPManager.GetResult(RequestID).HTTPResult.HasError then
     begin

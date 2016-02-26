@@ -139,9 +139,7 @@ begin
 
   LRequestID := HTTPManager.Post(THTTPRequest.Create(WEBSITE + 'api.html?api=create_V2'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID);
+  HTTPManager.WaitFor(LRequestID);
 
   LHTTPProcess := HTTPManager.GetResult(LRequestID);
 
@@ -237,9 +235,7 @@ begin
 
   LRequestID := HTTPManager.Post(THTTPRequest.Create(WEBSITE + 'api.html?api=getFolder_V2'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(LRequestID);
+  HTTPManager.WaitFor(LRequestID);
 
   LHTTPProcess := HTTPManager.GetResult(LRequestID);
 

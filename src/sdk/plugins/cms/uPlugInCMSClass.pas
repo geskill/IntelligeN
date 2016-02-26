@@ -436,9 +436,7 @@ begin
   else
     RequestID := HTTPManager.Get(GetIDsRequestURL, RequestID, TPlugInHTTPOptions.Create(Self));
 
-  repeat
-    sleep(50);
-  until HTTPManager.HasResult(RequestID);
+  HTTPManager.WaitFor(RequestID);
 
   {
     if HTTPProcess.HTTPResult.HasError then
@@ -488,9 +486,7 @@ begin
 
     RequestID := HTTPManager.Get(HTTPRequest, TPlugInHTTPOptions.Create(Self));
 
-    repeat
-      sleep(50);
-    until HTTPManager.HasResult(RequestID);
+    HTTPManager.WaitFor(RequestID);
 
     HTTPProcess := HTTPManager.GetResult(RequestID);
 
@@ -506,9 +502,7 @@ begin
     else
       ARequestID := HTTPManager.Post(HTTPRequest.URL, RequestID, HTTPParams, HTTPOptions);
 
-    repeat
-      sleep(50);
-    until HTTPManager.HasResult(ARequestID);
+    HTTPManager.WaitFor(ARequestID);
 
     HTTPProcess := HTTPManager.GetResult(ARequestID);
 
@@ -523,9 +517,7 @@ begin
     begin
       ARequestID := HTTPManager.Get(PostLoginURL, ARequestID, TPlugInHTTPOptions.Create(Self));
 
-      repeat
-        sleep(50);
-      until HTTPManager.HasResult(ARequestID);
+      HTTPManager.WaitFor(ARequestID);
 
       HTTPProcess := HTTPManager.GetResult(ARequestID);
 
@@ -541,9 +533,7 @@ begin
     begin
       ARequestID := HTTPManager.Post(HTTPRequest.URL, ARequestID, HTTPParams, HTTPOptions);
 
-      repeat
-        sleep(50);
-      until HTTPManager.HasResult(ARequestID);
+      HTTPManager.WaitFor(ARequestID);
 
       HTTPProcess := HTTPManager.GetResult(ARequestID);
 
@@ -601,9 +591,7 @@ begin
         else
           RequestID := HTTPManager.Get(PrePostURL, RequestID, TPlugInHTTPOptions.Create(Self));
 
-        repeat
-          sleep(50);
-        until HTTPManager.HasResult(RequestID);
+        HTTPManager.WaitFor(RequestID);
 
         ResponseStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
 
@@ -620,9 +608,7 @@ begin
         else
           RequestID := HTTPManager.Post(THTTPRequest.FollowUpClone(HTTPManager.GetResult(RequestID), HTTPRequest), HTTPParams, HTTPOptions);
 
-        repeat
-          sleep(50);
-        until HTTPManager.HasResult(RequestID);
+        HTTPManager.WaitFor(RequestID);
 
         HTTPProcess := HTTPManager.GetResult(RequestID);
 
