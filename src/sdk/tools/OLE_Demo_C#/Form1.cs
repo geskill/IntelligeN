@@ -33,7 +33,7 @@ namespace WindowsFormsApplication1
         private void bClose_Click(object sender, EventArgs e)
         {
             if (IntelligeNInstance != null)
-                IntelligeNInstance.close();
+                IntelligeNInstance.CloseTabSheet(IntelligeNInstance.ActiveTabSheetIndex());
 
             IntelligeNInstance = null;
         }
@@ -41,13 +41,70 @@ namespace WindowsFormsApplication1
         private void bLoadXML_Click(object sender, EventArgs e)
         {
             if (IntelligeNInstance != null)
-                IntelligeNInstance.openfile(tbFileName.Text);
+                IntelligeNInstance.OpenTabSheet(tbFileName.Text);
         }
 
         private void bSearchFile_Click(object sender, EventArgs e)
         {
             if (openFileDialog.ShowDialog() == DialogResult.OK)
                 tbFileName.Text = openFileDialog.FileName;
+        }
+
+        private void bStatus_Click(object sender, EventArgs e)
+        {
+            if (IntelligeNInstance != null)
+            {
+                if (IntelligeNInstance.IsCrawlerActive())
+                    lCrawlerStatus.Text = "Active";
+                else
+                    lCrawlerStatus.Text = "Inactive";
+
+                if (IntelligeNInstance.IsFileHosterActive())
+                    lHosterStatus.Text = "Active";
+                else
+                    lHosterStatus.Text = "Inactive";
+
+                if (IntelligeNInstance.IsPublishActive())
+                    lPublishStatus.Text = "Active";
+                else
+                    lPublishStatus.Text = "Inactive";
+            }
+        }
+
+        private void bStartCrawler_Click(object sender, EventArgs e)
+        {
+            if (IntelligeNInstance != null)
+                IntelligeNInstance.CallCrawler(IntelligeNInstance.ActiveTabSheetIndex());
+        }
+
+        private void bStartRemoteImageUpload_Click(object sender, EventArgs e)
+        {
+            if (IntelligeNInstance != null)
+                IntelligeNInstance.CallImageHosterRemoteUpload(IntelligeNInstance.ActiveTabSheetIndex());
+        }
+
+        private void bDirectlinksHosterCheck_Click(object sender, EventArgs e)
+        {
+            if (IntelligeNInstance != null)
+                IntelligeNInstance.CallFileHosterCheck(IntelligeNInstance.ActiveTabSheetIndex());
+        }
+
+        private void bStartCrypter_Click(object sender, EventArgs e)
+        {
+            if (IntelligeNInstance != null)
+                IntelligeNInstance.CallCrypterCrypt(IntelligeNInstance.ActiveTabSheetIndex());
+        }
+
+        private void bStartPublish_Click(object sender, EventArgs e)
+        {
+            if (IntelligeNInstance != null)
+                IntelligeNInstance.CallPublish(IntelligeNInstance.ActiveTabSheetIndex());
+        }
+
+        private void bSaveFile_Click(object sender, EventArgs e)
+        {
+            if (IntelligeNInstance != null)
+                IntelligeNInstance.SaveTabSheet(IntelligeNInstance.ActiveTabSheetIndex());
         }
 
     }

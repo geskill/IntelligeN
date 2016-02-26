@@ -76,6 +76,8 @@ type
     procedure NewControl(AType: TControlID; const ATitle, AValue, AHint, AList: WideString; ALeft, ATop, AWidth, AHeight: Integer); overload;
     procedure NewControl(AClass: TIControlBasicMeta; AType: TControlID; const ATitle, AValue, AHint, AList: WideString; ALeft, ATop, AWidth, AHeight: Integer); overload;
 
+    procedure InitiateImageHosterRemoteUpload(const AAfterCrawling: WordBool = False); safecall;
+
     // Cloning
     function CloneInstance(): IControlControllerBase;
 
@@ -360,6 +362,28 @@ begin
   end;
 
   FControlList.Add(LBasicControlInterface);
+end;
+
+procedure TControlController.InitiateImageHosterRemoteUpload(const AAfterCrawling: WordBool = False);
+var
+  LControlBasic: IControlBasic;
+  LPicture: IPicture;
+begin
+  LControlBasic := FindBasicControl(cPicture);
+  try
+    if Assigned(LControlBasic) then
+    begin
+      LControlBasic.QueryInterface(IPicture, LPicture);
+      try
+        if not SameStr('', LPicture.Value) then
+          LPicture.RemoteUpload(AAfterCrawling);
+      finally
+        LPicture := nil;
+      end;
+    end;
+  finally
+    LControlBasic := nil;
+  end;
 end;
 
 function TControlController.CloneInstance: IControlControllerBase;

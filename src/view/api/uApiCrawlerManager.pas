@@ -179,25 +179,8 @@ begin
 end;
 
 procedure TCrawlerThread.InitiateImageRemoteUpload;
-var
-  LControlBasic: IControlBasic;
-  LPicture: IPicture;
 begin
-  LControlBasic := Data.ControlController.FindControl(cPicture);
-  try
-    if Assigned(LControlBasic) then
-    begin
-      LControlBasic.QueryInterface(IPicture, LPicture);
-      try
-        if not SameStr('', LPicture.Value) then
-          LPicture.RemoteUpload(True);
-      finally
-        LPicture := nil;
-      end;
-    end;
-  finally
-    LControlBasic := nil;
-  end;
+  Data.ControlController.InitiateImageHosterRemoteUpload(True);
 end;
 
 constructor TCrawlerThread.Create(const AControlController: IControlController);

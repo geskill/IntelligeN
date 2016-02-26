@@ -12,11 +12,11 @@ unit IntelligeN_TLB;
 // ************************************************************************ //
 
 // $Rev: 17244 $
-// Datei am 29.01.2016 21:21:25 erzeugt aus der unten beschriebenen Typbibliothek.
+// Datei am 26.02.2016 21:37:38 erzeugt aus der unten beschriebenen Typbibliothek.
 
 // ************************************************************************  //
-// Typbib.: C:\Users\geskill\Documents\RAD Studio\Projekte\intelligen-2k9\src\view\ole\IntelligeN (1)
-// LIBID: {5C1F0CC8-EF0C-4A6E-8F5D-65C91A0B30B3}
+// Typbib.: C:\Users\geskill\Documents\RAD Studio\Projekte\intelligen-2k9-master\src\view\ole\IntelligeN (1)
+// LIBID: {DB0EEDEC-7A19-474C-8FCA-3C7CD25FAC03}
 // LCID: 0
 // Hilfedatei:
 // Hilfe-String:
@@ -44,10 +44,10 @@ const
   IntelligeNMajorVersion = 2;
   IntelligeNMinorVersion = 0;
 
-  LIBID_IntelligeN: TGUID = '{5C1F0CC8-EF0C-4A6E-8F5D-65C91A0B30B3}';
+  LIBID_IntelligeN: TGUID = '{DB0EEDEC-7A19-474C-8FCA-3C7CD25FAC03}';
 
-  IID_IIntelligeN2009: TGUID = '{9A66CF41-F8C1-4B09-A8B6-3CB436BFFB50}';
-  CLASS_IntelligeN2009: TGUID = '{DF174C84-0BD9-4DE4-B5F0-A0D8FCFA7EBF}';
+  IID_IIntelligeN2009: TGUID = '{F9F52CDE-A58E-44CD-A70A-EC57381D9FE0}';
+  CLASS_IntelligeN2009: TGUID = '{6BB30462-B804-4EDA-A9CD-906B64545E2B}';
 type
 
 // *********************************************************************//
@@ -66,43 +66,57 @@ type
 // *********************************************************************//
 // Interface: IIntelligeN2009
 // Flags:     (4416) Dual OleAutomation Dispatchable
-// GUID:      {9A66CF41-F8C1-4B09-A8B6-3CB436BFFB50}
+// GUID:      {F9F52CDE-A58E-44CD-A70A-EC57381D9FE0}
 // *********************************************************************//
   IIntelligeN2009 = interface(IDispatch)
-    ['{9A66CF41-F8C1-4B09-A8B6-3CB436BFFB50}']
-    procedure openfile(const AFileName: WideString); safecall;
-    procedure savefile(const AFileName: WideString); safecall;
-    procedure close; safecall;
-    function canclose: SYSINT; stdcall;
-    procedure callcrawler; safecall;
-    procedure callremoteupload; safecall;
-    procedure callcheckdirectlinks; safecall;
-    procedure callcrypter; safecall;
-    procedure callpublish; safecall;
-    function crawleractive: SYSINT; stdcall;
-    function hostermanageractive: SYSINT; stdcall;
-    function publishactive: SYSINT; stdcall;
+    ['{F9F52CDE-A58E-44CD-A70A-EC57381D9FE0}']
+    function NewTabSheet(const ATemplateName: WideString): SYSINT; stdcall;
+    function OpenTabSheet(const AFileName: WideString): SYSINT; stdcall;
+    function SaveTabSheet(ATabIndex: SYSINT; const AFileName: WideString;
+                          const AFileFormat: WideString; AForceDialog: WordBool): WordBool; stdcall;
+    function CanCloseTabSheet(ATabIndex: SYSINT): WordBool; stdcall;
+    function CloseTabSheet(ATabIndex: SYSINT): WordBool; stdcall;
+    procedure CallPublish(ATabIndex: SYSINT); safecall;
+    function IsPublishActive: WordBool; stdcall;
+    procedure CallCrawler(ATabIndex: SYSINT); safecall;
+    function IsCrawlerActive: WordBool; stdcall;
+    procedure CallCrypterCrypt(ATabIndex: SYSINT); safecall;
+    procedure CallCrypterCheck(ATabIndex: SYSINT); safecall;
+    function IsCrypterActive: WordBool; stdcall;
+    procedure CallFileHosterCheck(ATabIndex: SYSINT); safecall;
+    function IsFileHosterActive: WordBool; stdcall;
+    procedure CallImageHosterRemoteUpload(ATabIndex: SYSINT); safecall;
+    function IsImageHosterActive: WordBool; stdcall;
+    function ActiveTabSheetIndex: SYSINT; stdcall;
+    function TabSheetCount: SYSINT; stdcall;
   end;
 
 // *********************************************************************//
 // DispIntf:  IIntelligeN2009Disp
 // Flags:     (4416) Dual OleAutomation Dispatchable
-// GUID:      {9A66CF41-F8C1-4B09-A8B6-3CB436BFFB50}
+// GUID:      {F9F52CDE-A58E-44CD-A70A-EC57381D9FE0}
 // *********************************************************************//
   IIntelligeN2009Disp = dispinterface
-    ['{9A66CF41-F8C1-4B09-A8B6-3CB436BFFB50}']
-    procedure openfile(const AFileName: WideString); dispid 1;
-    procedure savefile(const AFileName: WideString); dispid 2;
-    procedure close; dispid 3;
-    function canclose: SYSINT; dispid 4;
-    procedure callcrawler; dispid 5;
-    procedure callremoteupload; dispid 6;
-    procedure callcheckdirectlinks; dispid 7;
-    procedure callcrypter; dispid 8;
-    procedure callpublish; dispid 9;
-    function crawleractive: SYSINT; dispid 10;
-    function hostermanageractive: SYSINT; dispid 11;
-    function publishactive: SYSINT; dispid 12;
+    ['{F9F52CDE-A58E-44CD-A70A-EC57381D9FE0}']
+    function NewTabSheet(const ATemplateName: WideString): SYSINT; dispid 201;
+    function OpenTabSheet(const AFileName: WideString): SYSINT; dispid 202;
+    function SaveTabSheet(ATabIndex: SYSINT; const AFileName: WideString;
+                          const AFileFormat: WideString; AForceDialog: WordBool): WordBool; dispid 203;
+    function CanCloseTabSheet(ATabIndex: SYSINT): WordBool; dispid 204;
+    function CloseTabSheet(ATabIndex: SYSINT): WordBool; dispid 205;
+    procedure CallPublish(ATabIndex: SYSINT); dispid 206;
+    function IsPublishActive: WordBool; dispid 207;
+    procedure CallCrawler(ATabIndex: SYSINT); dispid 208;
+    function IsCrawlerActive: WordBool; dispid 209;
+    procedure CallCrypterCrypt(ATabIndex: SYSINT); dispid 210;
+    procedure CallCrypterCheck(ATabIndex: SYSINT); dispid 211;
+    function IsCrypterActive: WordBool; dispid 212;
+    procedure CallFileHosterCheck(ATabIndex: SYSINT); dispid 213;
+    function IsFileHosterActive: WordBool; dispid 214;
+    procedure CallImageHosterRemoteUpload(ATabIndex: SYSINT); dispid 215;
+    function IsImageHosterActive: WordBool; dispid 216;
+    function ActiveTabSheetIndex: SYSINT; dispid 217;
+    function TabSheetCount: SYSINT; dispid 218;
   end;
 
 // *********************************************************************//

@@ -95,89 +95,97 @@ type
 
     procedure CallCrypterCrypt; overload;
     procedure CallCrypterCrypt(const ATabIndex: Integer); overload;
-    procedure CallSeriesCrypterCrypt; overload;
+    procedure CallSeriesCrypterCrypt;
 
     procedure CallCrypterCheck; overload;
     procedure CallCrypterCheck(const ATabIndex: Integer); overload;
     procedure CallSeriesCrypterCheck;
 
+    procedure CallFileHosterCheck; overload;
+    procedure CallFileHosterCheck(const ATabIndex: Integer); overload;
+    procedure CallSeriesFileHosterCheck;
+
+    procedure CallImageHosterRemoteUpload; overload;
+    procedure CallImageHosterRemoteUpload(const ATabIndex: Integer); overload;
+    procedure CallSeriesImageHosterRemoteUpload;
+
     procedure SwitchDesignView(AEnabled: Boolean);
 
     property PagesAvailable: Boolean read GetPagesAvailable write SetPagesAvailable;
     property ActiveViewType: TTabViewType read GetActiveViewType write SetActiveViewType;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// Create a new tab with several options. This function is provided for
-    /// the file format plug-in interface.
+    ///   Create a new tab with several options. This function is provided for
+    ///   the file format plug-in interface.
     /// </summary>
     /// <param name="ATemplateFileName">
-    /// The template file located in the templates_type folder or either a
-    /// different file.
+    ///   The template file located in the templates_type folder or either a
+    ///   different file.
     /// </param>
     /// <param name="ATypeID">
-    /// The base type of the new tab.
+    ///   The base type of the new tab.
     /// </param>
     /// <param name="AEmptyTab">
-    /// Possibility to create an empty tab without any mirrors.
+    ///   Possibility to create an empty tab without any mirrors.
     /// </param>
     /// <returns>
-    /// The tab index of the created tab.
+    ///   The tab index of the created tab.
     /// </returns>
-{$ENDREGION}
+    {$ENDREGION}
     function CreateTabSheet(const ATemplateFileName: WideString; ATypeID: TTypeID; AEmptyTab: WordBool = True): Integer;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// Create a new tab from the specified template file located in the
-    /// templates_type folder.
+    ///   Create a new tab from the specified template file located in the
+    ///   templates_type folder.
     /// </summary>
     /// <param name="ATemplateName">
-    /// The template file located in the templates_type folder.
+    ///   The template file located in the templates_type folder.
     /// </param>
     /// <returns>
-    /// The tab index of the created tab.
+    ///   The tab index of the created tab.
     /// </returns>
-{$ENDREGION}
+    {$ENDREGION}
     function NewTabSheet(const ATemplateName: WideString): Integer;
     //
     function InternalOpenFile(const AFileName: string): Integer;
     function InternalOpenFiles(const AFiles: TStrings): Integer;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// Open a file with the aid of the internal file format plug-ins in
-    /// order to create a new tab.
+    ///   Open a file with the aid of the internal file format plug-ins in
+    ///   order to create a new tab.
     /// </summary>
     /// <param name="AFileName">
-    /// The file name of the file to open.
+    ///   The file name of the file to open.
     /// </param>
     /// <returns>
-    /// The tab index of the created tab.
+    ///   The tab index of the created tab.
     /// </returns>
-{$ENDREGION}
+    {$ENDREGION}
     function OpenTabSheet(const AFileName: WideString = ''): Integer;
     //
     function InternalSaveFile(const ATabSheetController: ITabSheetController; const AFileName, AFileFormat: WideString): Boolean;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// Save a file with the aid of a internal file format plug-in in order
-    /// to create or override a new file.
+    ///   Save a file with the aid of a internal file format plug-in in order
+    ///   to create or override a new file.
     /// </summary>
     /// <param name="ATabIndex">
-    /// The tab index of the tab to be saved.
+    ///   The tab index of the tab to be saved.
     /// </param>
     /// <param name="AFileName">
-    /// The file name of the file to be created.
+    ///   The file name of the file to be created.
     /// </param>
     /// <param name="AFileFormat">
-    /// The file format for the new file (= name of the file formats
-    /// plug-in). <br />
+    ///   The file format for the new file (= name of the file formats
+    ///   plug-in). <br />
     /// </param>
     /// <param name="AForceDialog">
-    /// Force to open the file save dialog.
+    ///   Force to open the file save dialog.
     /// </param>
     /// <returns>
-    /// The success of the operation.
+    ///   The success of the operation.
     /// </returns>
-{$ENDREGION}
+    {$ENDREGION}
     function SaveTabSheet(const ATabIndex: Integer; const AFileName: WideString = ''; const AFileFormat: WideString = ''; const AForceDialog: WordBool = False): WordBool; overload;
     function SaveTabSheet(const ATabIndex: Integer; const AForceDialog: WordBool): WordBool; overload;
 
@@ -185,30 +193,30 @@ type
     function SaveTheCurrentTabSheetAs: WordBool;
     function SaveAllTabSheets: WordBool;
     function SaveAllTabSheetsToFolder(const AFilePath: WideString = ''; const AFileFormat: WideString = ''): WordBool;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <param name="ATabIndex">
-    /// Checks whether a tab can be closed.
+    ///   Checks whether a tab can be closed.
     /// </param>
     /// <returns>
-    /// The success of the operation.
+    ///   The success of the operation.
     /// </returns>
-{$ENDREGION}
+    {$ENDREGION}
     function CanCloseTabSheet(const ATabIndex: Integer): WordBool;
 
     function CanCloseTheCurrentTabSheet: WordBool;
     function CanCloseAllExceptTheCurrentTabSheet: WordBool;
     function CanCloseAllTabSheets: WordBool;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// Close a tab.
+    ///   Close a tab.
     /// </summary>
     /// <param name="ATabIndex">
-    /// The tab index of the tab to be closed. <br />
+    ///   The tab index of the tab to be closed. <br />
     /// </param>
     /// <returns>
-    /// The success of the operation. <br />
+    ///   The success of the operation. <br />
     /// </returns>
-{$ENDREGION}
+    {$ENDREGION}
     function CloseTabSheet(const ATabIndex: Integer): WordBool;
 
     function CloseTheCurrentTabSheet: WordBool;
@@ -642,18 +650,22 @@ end;
 
 procedure TfMain.CallCrypterCrypt;
 begin
-  CallCrypterCrypt(ActiveTabSheetIndex);
+  if (TabSheetCount > 0) then
+    CallCrypterCrypt(ActiveTabSheetIndex);
 end;
 
 procedure TfMain.CallCrypterCrypt(const ATabIndex: Integer);
 var
   I, J: Integer;
 begin
-  for I := 0 to TabSheetController[ATabIndex].MirrorController.MirrorCount - 1 do
-    for J := 0 to TabSheetController[ATabIndex].MirrorController.Mirror[I].CrypterCount - 1 do
-      with TabSheetController[ATabIndex].MirrorController.Mirror[I] do
-        if SameStr('', Crypter[J].Value) then
-          CrypterManager.AddCrypterJob(Crypter[J]);
+  if (ATabIndex >= 0) and (ATabIndex < TabSheetCount) then
+  begin
+    for I := 0 to TabSheetController[ATabIndex].MirrorController.MirrorCount - 1 do
+      for J := 0 to TabSheetController[ATabIndex].MirrorController.Mirror[I].CrypterCount - 1 do
+        with TabSheetController[ATabIndex].MirrorController.Mirror[I] do
+          if SameStr('', Crypter[J].Value) then
+            CrypterManager.AddCrypterJob(Crypter[J]);
+  end;
 end;
 
 procedure TfMain.CallSeriesCrypterCrypt;
@@ -666,18 +678,22 @@ end;
 
 procedure TfMain.CallCrypterCheck;
 begin
-  CallCrypterCheck(ActiveTabSheetIndex);
+  if (TabSheetCount > 0) then
+    CallCrypterCheck(ActiveTabSheetIndex);
 end;
 
 procedure TfMain.CallCrypterCheck(const ATabIndex: Integer);
 var
   I, J: Integer;
 begin
-  for I := 0 to TabSheetController[ATabIndex].MirrorController.MirrorCount - 1 do
-    for J := 0 to TabSheetController[ATabIndex].MirrorController.Mirror[I].CrypterCount - 1 do
-      with TabSheetController[ATabIndex].MirrorController.Mirror[I] do
-        if not SameStr('', Crypter[J].Value) then
-          CrypterManager.AddCrypterCheckJob(Crypter[J]);
+  if (ATabIndex >= 0) and (ATabIndex < TabSheetCount) then
+  begin
+    for I := 0 to TabSheetController[ATabIndex].MirrorController.MirrorCount - 1 do
+      for J := 0 to TabSheetController[ATabIndex].MirrorController.Mirror[I].CrypterCount - 1 do
+        with TabSheetController[ATabIndex].MirrorController.Mirror[I] do
+          if not SameStr('', Crypter[J].Value) then
+            CrypterManager.AddCrypterCheckJob(Crypter[J]);
+  end;
 end;
 
 procedure TfMain.CallSeriesCrypterCheck;
@@ -686,6 +702,54 @@ var
 begin
   for I := 0 to TabSheetCount - 1 do
     CallCrypterCheck(I);
+end;
+
+procedure TfMain.CallFileHosterCheck;
+begin
+  if (TabSheetCount > 0) then
+    CallFileHosterCheck(ActiveTabSheetIndex);
+end;
+
+procedure TfMain.CallFileHosterCheck(const ATabIndex: Integer);
+var
+  I, J: Integer;
+begin
+  if (ATabIndex >= 0) and (ATabIndex < TabSheetCount) then
+  begin
+    for I := 0 to TabSheetController[ATabIndex].MirrorController.MirrorCount - 1 do
+      for J := 0 to TabSheetController[ATabIndex].MirrorController.Mirror[I].DirectlinkCount - 1 do
+        with TabSheetController[ATabIndex].MirrorController.Mirror[I] do
+          if not SameStr('', Directlink[J].Value) then
+            FileHosterManager.AddHosterCheckJob(Directlink[J]);
+  end;
+end;
+
+procedure TfMain.CallSeriesFileHosterCheck;
+var
+  I: Integer;
+begin
+  for I := 0 to TabSheetCount - 1 do
+    CallFileHosterCheck(I);
+end;
+
+procedure TfMain.CallImageHosterRemoteUpload;
+begin
+  if (TabSheetCount > 0) then
+    CallImageHosterRemoteUpload(ActiveTabSheetIndex);
+end;
+
+procedure TfMain.CallImageHosterRemoteUpload(const ATabIndex: Integer);
+begin
+  if (ATabIndex >= 0) and (ATabIndex < TabSheetCount) then
+    TabSheetController[ATabIndex].ControlController.InitiateImageHosterRemoteUpload(False);
+end;
+
+procedure TfMain.CallSeriesImageHosterRemoteUpload;
+var
+  I: Integer;
+begin
+  for I := 0 to TabSheetCount - 1 do
+    CallImageHosterRemoteUpload(I);
 end;
 
 procedure TfMain.SwitchDesignView(AEnabled: Boolean);
@@ -850,7 +914,9 @@ begin
         Options := Options + [ofAllowMultiSelect];
 
         if Execute then
-          Result := InternalOpenFiles(Files);
+          Result := InternalOpenFiles(Files)
+        else
+          Result := -1;
       finally
         Free;
       end;
@@ -886,7 +952,7 @@ var
   LNeedDialog, LFileFormatFound: Boolean;
   LFileFormats: TStrings;
   LFileFormatsIndex: Integer;
-  LFileFormat, LFileFilter, LFileName, LFileExtension: string;
+  LFileFormat, LFileFilter, LFileName: string;
 begin
   // file format
   if not SameStr('', AFileFormat) then
@@ -1064,14 +1130,21 @@ function TfMain.CanCloseTabSheet(const ATabIndex: Integer): WordBool;
 var
   LTabSheetController: ITabSheetController;
 begin
-  LTabSheetController := TabSheetController[ATabIndex];
+  if (ATabIndex >= 0) and (ATabIndex < TabSheetCount) then
+  begin
+    LTabSheetController := TabSheetController[ATabIndex];
 
-  Result := not CrawlerManager.InUse(LTabSheetController) and { }
-  { } not CrypterManager.InUse(LTabSheetController) and { }
-  { } not FileHosterManager.InUse(LTabSheetController) and { }
-  { } not ImageHosterManager.InUse(LTabSheetController);
+    Result := not CrawlerManager.InUse(LTabSheetController) and { }
+    { } not CrypterManager.InUse(LTabSheetController) and { }
+    { } not FileHosterManager.InUse(LTabSheetController) and { }
+    { } not ImageHosterManager.InUse(LTabSheetController);
 
-  LTabSheetController := nil;
+    LTabSheetController := nil;
+  end
+  else
+  begin
+    Result := False;
+  end;
 end;
 
 function TfMain.CanCloseTheCurrentTabSheet: WordBool;
@@ -1116,21 +1189,27 @@ end;
 
 function TfMain.CloseTabSheet(const ATabIndex: Integer): WordBool;
 begin
-  Result := True;
-
-  with pcMain do
+  if (ATabIndex >= 0) and (ATabIndex < TabSheetCount) then
   begin
-    Properties.BeginUpdate;
-    try
+    with pcMain do
+    begin
+      Properties.BeginUpdate;
       try
-        CloseTab(ATabIndex);
-      except
-        Result := False;
+        try
+          CloseTab(ATabIndex);
+          Result := True;
+        except
+          Result := False;
+        end;
+      finally
+        Properties.EndUpdate;
       end;
-    finally
-      Properties.EndUpdate;
+      OnChange(pcMain);
     end;
-    OnChange(pcMain);
+  end
+  else
+  begin
+    Result := False;
   end;
 end;
 

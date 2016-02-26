@@ -225,23 +225,25 @@ begin
 
   if ACanUse(cLanguage) then
   begin
-    if (ATypeID = cMovie) and (Pos('german', LReleasename) > 0) and (Pos('.dl', LReleasename) > 0) then
-      AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'german;english')
+    if not Pos('.subbed', LReleasename) > 0 then
+    begin
+      if (ATypeID = cMovie) and (Pos('german', LReleasename) > 0) and (Pos('.dl', LReleasename) > 0) then
+        AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'german;english')
 
-    else if Pos('german', LReleasename) > 0 then
-      AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'german')
+      else if Pos('german', LReleasename) > 0 then
+        AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'german')
 
-    else if Pos('english', LReleasename) > 0 then
-      AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'english')
+      else if Pos('english', LReleasename) > 0 then
+        AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'english')
 
-    else if Pos('spanish', LReleasename) > 0 then
-      AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'spanish')
+      else if Pos('spanish', LReleasename) > 0 then
+        AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'spanish')
 
-    else if (Pos('japanese', LReleasename) > 0) or ((ATypeID = cXXX) and (Pos('jav', LReleasename) > 0)) then
-      AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'japanese')
-
-    else
-      AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'english')
+      else if (Pos('japanese', LReleasename) > 0) or ((ATypeID = cXXX) and (Pos('jav', LReleasename) > 0)) then
+        AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'japanese')
+      else
+        AControlController.FindControl(cLanguage).AddProposedValue(GetName, 'english')
+    end;
   end;
 
   if ACanUse(cNotes) then

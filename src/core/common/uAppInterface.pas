@@ -303,6 +303,8 @@ type
 
     procedure NewControl(AType: TControlID; const ATitle, AValue, AHint, AList: WideString; ALeft, ATop, AWidth, AHeight: Integer);
 
+    procedure InitiateImageHosterRemoteUpload(const AAfterCrawling: WordBool = False); safecall;
+
     // Cloning
     function CloneInstance(): IControlControllerBase;
 
@@ -924,7 +926,8 @@ type
     function GetBeforeCrawling: ITabSheetEvent;
     function GetAfterCrawling: ITabSheetEvent;
 
-    procedure CallBackupManager;
+    procedure CallBackupManager; overload;
+    procedure CallBackupManager(const ATabIndex: Integer); overload;
     procedure CallControlAligner;
 
     procedure CallPublish; overload;
@@ -937,100 +940,109 @@ type
 
     procedure CallCrypterCrypt; overload;
     procedure CallCrypterCrypt(const ATabIndex: Integer); overload;
-    procedure CallSeriesCrypterCrypt; overload;
+    procedure CallSeriesCrypterCrypt;
 
     procedure CallCrypterCheck; overload;
     procedure CallCrypterCheck(const ATabIndex: Integer); overload;
     procedure CallSeriesCrypterCheck;
-{$REGION 'Documentation'}
+
+    procedure CallFileHosterCheck; overload;
+    procedure CallFileHosterCheck(const ATabIndex: Integer); overload;
+    procedure CallSeriesFileHosterCheck;
+
+    procedure CallImageHosterRemoteUpload; overload;
+    procedure CallImageHosterRemoteUpload(const ATabIndex: Integer); overload;
+    procedure CallSeriesImageHosterRemoteUpload;
+
+    {$REGION 'Documentation'}
     /// <summary>
-    /// Create a new tab with several options. This function is provided for
-    /// the file format plug-in interface.
+    ///   Create a new tab with several options. This function is provided for
+    ///   the file format plug-in interface.
     /// </summary>
     /// <param name="ATemplateFileName">
-    /// The template file located in the templates_type folder or either a
-    /// different file.
+    ///   The template file located in the templates_type folder or either a
+    ///   different file.
     /// </param>
     /// <param name="ATypeID">
-    /// The base type of the new tab.
+    ///   The base type of the new tab.
     /// </param>
     /// <param name="AEmptyTab">
-    /// Possibility to create an empty tab without any mirrors.
+    ///   Possibility to create an empty tab without any mirrors.
     /// </param>
     /// <returns>
-    /// The tab index of the created tab.
+    ///   The tab index of the created tab.
     /// </returns>
-{$ENDREGION}
+    {$ENDREGION}
     function CreateTabSheet(const ATemplateFileName: WideString; ATypeID: TTypeID; AEmptyTab: WordBool = True): Integer;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// Create a new tab from the specified template file located in the
-    /// templates_type folder.
+    ///   Create a new tab from the specified template file located in the
+    ///   templates_type folder.
     /// </summary>
     /// <param name="ATemplateName">
-    /// The template file located in the templates_type folder.
+    ///   The template file located in the templates_type folder.
     /// </param>
     /// <returns>
-    /// The tab index of the created tab.
+    ///   The tab index of the created tab.
     /// </returns>
-{$ENDREGION}
+    {$ENDREGION}
     function NewTabSheet(const ATemplateName: WideString): Integer;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// Open a file with the aid of the internal file format plug-ins in
-    /// order to create a new tab.
+    ///   Open a file with the aid of the internal file format plug-ins in
+    ///   order to create a new tab.
     /// </summary>
     /// <param name="AFileName">
-    /// The file name of the file to open.
+    ///   The file name of the file to open.
     /// </param>
     /// <returns>
-    /// The tab index of the created tab.
+    ///   The tab index of the created tab.
     /// </returns>
-{$ENDREGION}
+    {$ENDREGION}
     function OpenTabSheet(const AFileName: WideString = ''): Integer;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// Save a file with the aid of a internal file format plug-in in order
-    /// to create or override a new file.
+    ///   Save a file with the aid of a internal file format plug-in in order
+    ///   to create or override a new file.
     /// </summary>
     /// <param name="ATabIndex">
-    /// The tab index of the tab to be saved.
+    ///   The tab index of the tab to be saved.
     /// </param>
     /// <param name="AFileName">
-    /// The file name of the file to be created.
+    ///   The file name of the file to be created.
     /// </param>
     /// <param name="AFileFormat">
-    /// The file format for the new file (= name of the file formats
-    /// plug-in). <br />
+    ///   The file format for the new file (= name of the file formats
+    ///   plug-in). <br />
     /// </param>
     /// <param name="AForceDialog">
-    /// Force to open the file save dialog.
+    ///   Force to open the file save dialog.
     /// </param>
     /// <returns>
-    /// The success of the operation.
+    ///   The success of the operation.
     /// </returns>
-{$ENDREGION}
+    {$ENDREGION}
     function SaveTabSheet(const ATabIndex: Integer; const AFileName: WideString = ''; const AFileFormat: WideString = ''; const AForceDialog: WordBool = False): WordBool;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <param name="ATabIndex">
-    /// Checks whether a tab can be closed.
+    ///   Checks whether a tab can be closed.
     /// </param>
     /// <returns>
-    /// The success of the operation.
+    ///   The success of the operation.
     /// </returns>
-{$ENDREGION}
+    {$ENDREGION}
     function CanCloseTabSheet(const ATabIndex: Integer): WordBool;
-{$REGION 'Documentation'}
+    {$REGION 'Documentation'}
     /// <summary>
-    /// Close a tab.
+    ///   Close a tab.
     /// </summary>
     /// <param name="ATabIndex">
-    /// The tab index of the tab to be closed. <br />
+    ///   The tab index of the tab to be closed. <br />
     /// </param>
     /// <returns>
-    /// The success of the operation. <br />
+    ///   The success of the operation. <br />
     /// </returns>
-{$ENDREGION}
+    {$ENDREGION}
     function CloseTabSheet(const ATabIndex: Integer): WordBool;
 
     property PublishManager: IPublishManager read GetPublishManager;

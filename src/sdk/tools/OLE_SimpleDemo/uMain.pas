@@ -64,14 +64,14 @@ end;
 procedure TMain.bCloseTabClick(Sender: TObject);
 begin
   if Assigned(IntelligeNInstance) then
-    if (IntelligeNInstance.canclose = 1) then
-      IntelligeNInstance.close;
+    if (IntelligeNInstance.CanCloseTabSheet(IntelligeNInstance.ActiveTabSheetIndex)) then
+      IntelligeNInstance.CloseTabSheet(IntelligeNInstance.ActiveTabSheetIndex);
 end;
 
 procedure TMain.bLoadFromFileClick(Sender: TObject);
 begin
   if Assigned(IntelligeNInstance) then
-    IntelligeNInstance.openfile(eFileName.Text);
+    IntelligeNInstance.OpenTabSheet(eFileName.Text);
 end;
 
 procedure TMain.spSearchFileClick(Sender: TObject);
@@ -84,17 +84,17 @@ procedure TMain.bUpdateStatusClick(Sender: TObject);
 begin
   if Assigned(IntelligeNInstance) then
   begin
-    if (IntelligeNInstance.crawleractive = 0) then
+    if (not IntelligeNInstance.IsCrawlerActive) then
       eStatusCrawler.Text := 'Inactive'
     else
       eStatusCrawler.Text := 'Active';
 
-    if (IntelligeNInstance.hostermanageractive = 0) then
+    if (not IntelligeNInstance.IsFileHosterActive) then
       eStatusHoster.Text := 'Inactive'
     else
       eStatusHoster.Text := 'Active';
 
-    if (IntelligeNInstance.publishactive = 0) then
+    if (not IntelligeNInstance.IsPublishActive) then
       eStatusPublish.Text := 'Inactive'
     else
       eStatusPublish.Text := 'Active';
@@ -104,37 +104,37 @@ end;
 procedure TMain.bStartCrawlerClick(Sender: TObject);
 begin
   if Assigned(IntelligeNInstance) then
-    IntelligeNInstance.callcrawler;
+    IntelligeNInstance.CallCrawler(IntelligeNInstance.ActiveTabSheetIndex);
 end;
 
 procedure TMain.bStartImageUploadClick(Sender: TObject);
 begin
   if Assigned(IntelligeNInstance) then
-    IntelligeNInstance.callremoteupload;
+    IntelligeNInstance.CallImageHosterRemoteUpload(IntelligeNInstance.ActiveTabSheetIndex);
 end;
 
 procedure TMain.bDirectlinksHosterCheckClick(Sender: TObject);
 begin
   if Assigned(IntelligeNInstance) then
-    IntelligeNInstance.callcheckdirectlinks;
+    IntelligeNInstance.CallFileHosterCheck(IntelligeNInstance.ActiveTabSheetIndex);
 end;
 
 procedure TMain.bStartCrypterClick(Sender: TObject);
 begin
   if Assigned(IntelligeNInstance) then
-    IntelligeNInstance.callcrypter;
+    IntelligeNInstance.CallCrypterCrypt(IntelligeNInstance.ActiveTabSheetIndex);
 end;
 
 procedure TMain.bStartPublishClick(Sender: TObject);
 begin
   if Assigned(IntelligeNInstance) then
-    IntelligeNInstance.callpublish;
+    IntelligeNInstance.CallPublish(IntelligeNInstance.ActiveTabSheetIndex);
 end;
 
 procedure TMain.bSaveClick(Sender: TObject);
 begin
   if Assigned(IntelligeNInstance) then
-    IntelligeNInstance.savefile('');
+    IntelligeNInstance.SaveTabSheet(IntelligeNInstance.ActiveTabSheetIndex, '', '', False);
 end;
 
 end.

@@ -14,18 +14,24 @@ uses
 type
   TIntelligeN2009 = class(TAutoObject, IIntelligeN2009)
   protected
-    procedure openfile(const AFileName: WideString); safecall;
-    procedure savefile(const AFileName: WideString); safecall;
-    procedure close; safecall;
-    function canclose: SYSINT; stdcall;
-    procedure callcrawler; safecall;
-    procedure callremoteupload; safecall;
-    procedure callcheckdirectlinks; safecall;
-    procedure callcrypter; safecall;
-    procedure callpublish; safecall;
-    function crawleractive: SYSINT; stdcall;
-    function hostermanageractive: SYSINT; stdcall;
-    function publishactive: SYSINT; stdcall;
+    function NewTabSheet(const ATemplateName: WideString): SYSINT; stdcall;
+    function OpenTabSheet(const AFileName: WideString = ''): SYSINT; stdcall;
+    function SaveTabSheet(ATabIndex: SYSINT; const AFileName: WideString = ''; const AFileFormat: WideString = ''; AForceDialog: WordBool = False): WordBool; stdcall;
+    function CanCloseTabSheet(ATabIndex: SYSINT): WordBool; stdcall;
+    function CloseTabSheet(ATabIndex: SYSINT): WordBool; stdcall;
+    procedure CallPublish(ATabIndex: SYSINT); safecall;
+    function IsPublishActive: WordBool; stdcall;
+    procedure CallCrawler(ATabIndex: SYSINT); safecall;
+    function IsCrawlerActive: WordBool; stdcall;
+    procedure CallCrypterCrypt(ATabIndex: SYSINT); safecall;
+    procedure CallCrypterCheck(ATabIndex: SYSINT); safecall;
+    function IsCrypterActive: WordBool; stdcall;
+    procedure CallFileHosterCheck(ATabIndex: SYSINT); safecall;
+    function IsFileHosterActive: WordBool; stdcall;
+    procedure CallImageHosterRemoteUpload(ATabIndex: SYSINT); safecall;
+    function IsImageHosterActive: WordBool; stdcall;
+    function ActiveTabSheetIndex: SYSINT; stdcall;
+    function TabSheetCount: SYSINT; stdcall;
   end;
 
 implementation
@@ -33,95 +39,96 @@ implementation
 uses
   uMain;
 
-procedure TIntelligeN2009.openfile(const AFileName: WideString);
+{ TIntelligeN2009 }
+
+function TIntelligeN2009.NewTabSheet(const ATemplateName: WideString): SYSINT;
 begin
-  Main.fMain.OpenTabSheet(AFileName);
+  Result := Main.fMain.NewTabSheet(ATemplateName);
 end;
 
-procedure TIntelligeN2009.savefile(const AFileName: WideString);
+function TIntelligeN2009.OpenTabSheet(const AFileName: WideString = ''): SYSINT;
 begin
-  if SameText(AFileName, '') then
-    Main.fMain.SaveTheCurrentTabSheet
-  else
-    Main.fMain.ActiveTabSheetController.Save(AFileName, 'intelligen.xml.2');
+  Result := Main.fMain.OpenTabSheet(AFileName);
 end;
 
-procedure TIntelligeN2009.close;
+function TIntelligeN2009.SaveTabSheet(ATabIndex: SYSINT; const AFileName: WideString = ''; const AFileFormat: WideString = ''; AForceDialog: WordBool = False): WordBool;
 begin
-  Main.fMain.CloseTheCurrentTabSheet;
+  Result := Main.fMain.SaveTabSheet(ATabIndex, AFileName, AFileFormat, AForceDialog);
 end;
 
-function TIntelligeN2009.canclose: SYSINT;
+function TIntelligeN2009.CanCloseTabSheet(ATabIndex: SYSINT): WordBool;
 begin
-  if not Main.fMain.CanCloseTheCurrentTabSheet then
-    Result := 0
-  else
-    Result := 1;
+  Result := Main.fMain.CanCloseTabSheet(ATabIndex);
 end;
 
-procedure TIntelligeN2009.callcrawler;
+function TIntelligeN2009.CloseTabSheet(ATabIndex: SYSINT): WordBool;
 begin
-  if (Main.fMain.TabSheetCount > 0) then
-    Main.fMain.CallCrawler;
+  Result := Main.fMain.CloseTabSheet(ATabIndex);
 end;
 
-procedure TIntelligeN2009.callremoteupload;
-var
-  Picture: IPicture;
+procedure TIntelligeN2009.CallPublish(ATabIndex: SYSINT);
 begin
-  if (Main.fMain.TabSheetCount > 0) then
-    Picture := Main.fMain.ActiveTabSheetController.ControlController.FindControl(cPicture) as IPicture;
-  if Assigned(Picture) then
-    Picture.RemoteUpload();
+  Main.fMain.CallPublish(ATabIndex);
 end;
 
-procedure TIntelligeN2009.callcheckdirectlinks;
-var
-  I, J: Integer;
+function TIntelligeN2009.IsPublishActive: WordBool;
 begin
-  if (Main.fMain.TabSheetCount > 0) then
-    with Main.fMain.ActiveTabSheetController.MirrorController do
-      for I := 0 to MirrorCount - 1 do
-        for J := 0 to Mirror[I].DirectlinkCount - 1 do
-          Mirror[I].Directlink[J].CheckStatus;
+  Result := not Main.fMain.PublishManager.IsIdle;
 end;
 
-procedure TIntelligeN2009.callcrypter;
-var
-  I, J: Integer;
+procedure TIntelligeN2009.CallCrawler(ATabIndex: SYSINT);
 begin
-  if (Main.fMain.TabSheetCount > 0) then
-    Main.fMain.CallCrypterCrypt;
+  Main.fMain.CallCrawler(ATabIndex);
 end;
 
-procedure TIntelligeN2009.callpublish;
+function TIntelligeN2009.IsCrawlerActive: WordBool;
 begin
-  if (Main.fMain.TabSheetCount > 0) then
-    Main.fMain.callpublish;
+  Result := not Main.fMain.CrawlerManager.IsIdle;
 end;
 
-function TIntelligeN2009.crawleractive: SYSINT;
+procedure TIntelligeN2009.CallCrypterCrypt(ATabIndex: SYSINT);
 begin
-  if Main.fMain.CrawlerManager.IsIdle then
-    Result := 0
-  else
-    Result := 1;
+  Main.fMain.CallCrypterCrypt(ATabIndex);
 end;
 
-function TIntelligeN2009.hostermanageractive: SYSINT;
+procedure TIntelligeN2009.CallCrypterCheck(ATabIndex: SYSINT);
 begin
-  if Main.fMain.FileHosterManager.IsIdle then
-    Result := 0
-  else
-    Result := 1;
+  Main.fMain.CallCrypterCheck(ATabIndex);
 end;
 
-function TIntelligeN2009.publishactive: SYSINT;
+function TIntelligeN2009.IsCrypterActive: WordBool;
 begin
-  if Main.fMain.PublishManager.IsIdle then
-    Result := 0
-  else
-    Result := 1;
+  Result := not Main.fMain.CrypterManager.IsIdle;
+end;
+
+procedure TIntelligeN2009.CallFileHosterCheck(ATabIndex: SYSINT);
+begin
+  Main.fMain.CallFileHosterCheck(ATabIndex);
+end;
+
+function TIntelligeN2009.IsFileHosterActive: WordBool;
+begin
+  Result := not Main.fMain.FileHosterManager.IsIdle;
+end;
+
+procedure TIntelligeN2009.CallImageHosterRemoteUpload(ATabIndex: SYSINT);
+begin
+  Main.fMain.CallImageHosterRemoteUpload(ATabIndex);
+end;
+
+function TIntelligeN2009.IsImageHosterActive: WordBool;
+begin
+  Result := not Main.fMain.ImageHosterManager.IsIdle;
+end;
+
+function TIntelligeN2009.ActiveTabSheetIndex: SYSINT;
+begin
+  Result := Main.fMain.ActiveTabSheetIndex;
+end;
+
+function TIntelligeN2009.TabSheetCount: SYSINT;
+begin
+  Result := Main.fMain.TabSheetCount;
 end;
 
 initialization

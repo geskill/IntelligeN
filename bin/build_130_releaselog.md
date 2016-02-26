@@ -4,14 +4,16 @@
 
 ######major enhancements
 
-* Added new base category Nintendo3DS.
+* Added new base category Nintendo3DS
 
-* Added new controls ISubtitle, IVersion and IWebsite.
+* Added new controls ISubtitle, IVersion and IWebsite
 
 ######minor enhancements
 
-* Implement a default path for saved XML files.
+* Implement a default path for saved XML files
 
-* Improve saving and loading files using default path.
+* Improve saving and loading files using default path
 
-* Updated HTTPManager (replaced check loop with WaitFor).
+* Improve OLE access
+
+* Updated HTTPManager (replaced check loop with WaitFor)
