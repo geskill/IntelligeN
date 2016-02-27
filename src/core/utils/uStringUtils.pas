@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, Classes, Variants, SysUtils, StrUtils,
+  Windows, Character, Classes, Variants, SysUtils, StrUtils,
   // Spring Framework
   Spring.Cryptography,
   // RegEx
@@ -20,6 +20,8 @@ function SplittString(splitt: Char; const S: string; AExact: Boolean = False): T
 
 function StringReplaceMultiple(const Source: string; const OldPatterns, NewPatterns: array of string; CaseSensitive: Boolean = True): string;
 
+function IsLineBreak(const AStr: string; AIndex: Integer): Boolean;
+
 function IsNumber(AVariant: Variant): Boolean;
 
 function ExtractTextBetween(const Str: string; const Delim1, Delim2: string): string;
@@ -34,7 +36,9 @@ function ReversePos(SubStr, S: string): Integer;
 
 function ReduceCapitals(const Str: string): string;
 
-function ReduceWhitespace(const Str: string; AComplete: Boolean = False): string;
+function ReduceWhitespace(const AStr: string): string;
+
+function RemoveWhitespace(const AStr: string): string;
 
 function RemoveW(const AHost: string): string;
 
@@ -317,6 +321,11 @@ begin
   end;
 end;
 
+function IsLineBreak(const AStr: string; AIndex: Integer): Boolean;
+begin
+  Result := CharInSet(AStr[AIndex], [#10, #13]);
+end;
+
 {$HINTS OFF}
 function IsNumber(AVariant: Variant): Boolean;
 var
@@ -397,16 +406,52 @@ begin
     end;
 end;
 
-function ReduceWhitespace(const Str: string; AComplete: Boolean = False): string;
+function ReduceWhitespace(const AStr: string): string;
+var
+  LCharIndex, LLength, LWhiteSpaceCount: Integer;
+  LHasLineBreak: Boolean;
+begin
+  Result := AStr;
+  LCharIndex := Length(AStr);
+  LLength := Length(AStr);
+  LWhiteSpaceCount := 0;
+  while LCharIndex > 0 do
+  begin
+    if IsWhiteSpace(AStr, LCharIndex) then
+    begin
+      Inc(LWhiteSpaceCount);
+      if IsLineBreak(AStr, LCharIndex) then
+        LHasLineBreak := True;
+    end
+    else
+    begin
+      if LWhiteSpaceCount > 1 then
+      begin
+        Delete(Result, LCharIndex + 1, LWhiteSpaceCount);
+        if LHasLineBreak then
+        begin
+          Insert(#10#13, Result, LCharIndex + 1);
+          LHasLineBreak := False;
+        end
+        else
+        begin
+          Insert(' ', Result, LCharIndex + 1);
+        end;
+      end;
+      LWhiteSpaceCount := 0;
+    end;
+
+    Dec(LCharIndex);
+  end;
+  if LWhiteSpaceCount > 1 then
+    Delete(Result, LCharIndex + 1, LWhiteSpaceCount);
+end;
+
+function RemoveWhitespace(const AStr: string): string;
 begin
   with TRegExpr.Create do
     try
-      case AComplete of
-        True:
-          Result := ReplaceRegExpr('\s+', Str, '', False);
-      else
-        Result := ReplaceRegExpr('\s+', Str, ' ', False);
-      end;
+      Result := ReplaceRegExpr('\s+', AStr, '', False);
     finally
       Free;
     end;

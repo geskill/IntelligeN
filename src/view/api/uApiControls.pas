@@ -11,7 +11,7 @@ uses
   // PopupMenu Mod
   uMydxBarPopupMenu, // uMyPopupMenu,
   // Dev Express
-  cxLookAndFeelPainters, cxLabel, cxEdit, cxTextEdit, cxDropDownEdit, cxCheckComboBox, cxCalendar, dxBar,
+  cxLookAndFeelPainters, cxLabel, cxEdit, cxTextEdit, cxDropDownEdit, cxCheckBox, cxCheckComboBox, cxCalendar, dxBar,
   // Dev Express Mod
   uMycxRichEdit, uMyMonospaceHint,
   // OmniThreadLibrary
@@ -164,6 +164,8 @@ type
   private
     function GetCustomisedComponentValue(const AValue: string): string;
     function InternalIndexOf(const AStr: string): Integer;
+    procedure CheckAll;
+    procedure UncheckAll;
   protected
     // GUI
     FCheckComboBox: TcxCheckComboBox;
@@ -419,7 +421,16 @@ type
     constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
   end;
 
+  TISubtitle = class(TIControlCheckComboBox)
+  public
+    constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+  end;
+
   TIRuntime = class(TIControlEdit)
+
+  end;
+
+  TIVersion = class(TIControlEdit)
 
   end;
 
@@ -436,6 +447,10 @@ type
   TIVideoSystem = class(TIControlComboBoxList)
   public
     constructor Create(const AOwner: TWinControl; const AControlController: IControlController; AComponentID: TControlID); override;
+  end;
+
+  TIWebsite = class(TIControlEdit)
+
   end;
 
   TINFO = class(TIControlRichEdit)
@@ -1008,6 +1023,24 @@ begin
     Result := LIndex;
 end;
 
+procedure TIControlCheckComboBox.CheckAll;
+var
+  LItemIndex: Integer;
+begin
+  with FCheckComboBox do
+    for LItemIndex := 0 to Properties.Items.Count - 1 do
+      States[LItemIndex] := cbsChecked;
+end;
+
+procedure TIControlCheckComboBox.UncheckAll;
+var
+  LItemIndex: Integer;
+begin
+  with FCheckComboBox do
+    for LItemIndex := 0 to Properties.Items.Count - 1 do
+      States[LItemIndex] := cbsUnchecked;
+end;
+
 function TIControlCheckComboBox.GetDropDownRows;
 begin
   Result := FCheckComboBox.Properties.DropDownRows;
@@ -1066,6 +1099,9 @@ procedure TIControlCheckComboBox.SetControlValue(const AValue: WideString);
 var
   LIndex, LValueIndex: Integer;
 begin
+  FCheckComboBox.Properties.OnChange := nil;
+  UncheckAll;
+
   with SplittString(';', AValue) do
     try
       for LIndex := 0 to Count - 1 do
@@ -1078,6 +1114,7 @@ begin
     finally
       Free;
     end;
+  FCheckComboBox.Properties.OnChange := ControlOnChange;
 end;
 
 function TIControlCheckComboBox.HasControlValue(const AValue: WideString): WordBool;
@@ -2256,6 +2293,22 @@ end;
 {$REGION 'TILanguage'}
 
 constructor TILanguage.Create;
+begin
+  inherited Create(AOwner, AControlController, AComponentID);
+
+  with FPanel.Constraints do
+  begin
+    MinHeight := 37;
+    MinWidth := 125;
+  end;
+
+  LoadDefaultConfiguration;
+end;
+{$ENDREGION}
+{ ****************************************************************************** }
+{$REGION 'TISubtitle'}
+
+constructor TISubtitle.Create;
 begin
   inherited Create(AOwner, AControlController, AComponentID);
 
