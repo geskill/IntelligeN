@@ -18,4 +18,6 @@
 
 * Improved OLE access
 
+* Fixed filter initialization values (possible validation failture at primary check)
+
 * Updated HTTPManager (replaced check loop with WaitFor)
