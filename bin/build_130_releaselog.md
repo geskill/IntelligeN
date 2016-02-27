@@ -12,8 +12,10 @@
 
 * Implement a default path for saved XML files
 
-* Improve saving and loading files using default path
+* Improved saving and loading files using default path
 
-* Improve OLE access
+* Improved ReduceWhitespace()-function
+
+* Improved OLE access
 
 * Updated HTTPManager (replaced check loop with WaitFor)
