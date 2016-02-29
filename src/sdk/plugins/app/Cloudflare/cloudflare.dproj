@@ -22,6 +22,7 @@
 		<Import Project="..\..\plugin.optset" Condition="'$(Base)'!='' And Exists('..\..\plugin.optset')"/>
 		<Import Project="..\app.optset" Condition="'$(Base)'!='' And Exists('..\app.optset')"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<DCC_UnitSearchPath>../../../../core/external\HTTPManager\antiscrape;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
 			<UsePackages>true</UsePackages>
 			<DCC_UsePackage>framework;frameworkX</DCC_UsePackage>
 			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\cloudflare.dll</DCC_DependencyCheckOutputName>

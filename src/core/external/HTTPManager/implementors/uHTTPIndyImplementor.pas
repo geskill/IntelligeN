@@ -6,7 +6,7 @@ uses
   // Interface
   uHTTPInterface,
   // Classes
-  uHTTPManager, uHTTPManagerClasses, uHTTPClasses, uHTTPImplementation,
+  uHTTPManager, uHTTPManagerClasses, uHTTPClasses, uHTTPExtensionClasses,
   // Const
   uHTTPConst,
   // Indy MOD
@@ -19,7 +19,7 @@ uses
 type
   THTTPIndyImplementation = class(THTTPImplementation)
   public
-    class function GetImplementationName: string; override;
+    class function GetExtensionName: string; override;
     procedure Handle(const AHTTPData: IHTTPData; out AHTTPResult: IHTTPResult); override;
   end;
 
@@ -27,7 +27,7 @@ implementation
 
 { THTTPIndyImplementation }
 
-class function THTTPIndyImplementation.GetImplementationName: string;
+class function THTTPIndyImplementation.GetExtensionName: string;
 var
   LDummy: TIdBaseComponent;
 begin
@@ -55,6 +55,8 @@ var
 
   I: Integer;
 begin
+  BeginUse;
+  try
     try
       HTTPHelper := THTTPIndyHelper.Create(AHTTPData.HTTPOptions.Proxy);
       try
@@ -269,13 +271,18 @@ begin
       end;
     end;
 
-  AHTTPResult := THTTPResult.Create(HTTPResponse, HTTPResponseInfo);
+    AHTTPResult := THTTPResult.Create(HTTPResponse, HTTPResponseInfo);
+  finally
+    EndUse;
+  end;
 end;
 
 initialization
-  THTTPManager.Instance().ImplementationManager.Register(THTTPIndyImplementation.Create);
+
+THTTPManager.Instance().ImplementationManager.Register(THTTPIndyImplementation.Create);
 
 finalization
-  THTTPManager.Instance().ImplementationManager.Unregister(THTTPIndyImplementation.GetImplementationName);
+
+THTTPManager.Instance().ImplementationManager.Unregister(THTTPIndyImplementation.GetExtensionName);
 
 end.

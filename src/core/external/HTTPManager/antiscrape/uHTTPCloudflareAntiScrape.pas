@@ -6,7 +6,7 @@ uses
   // Interface
   uHTTPInterface,
   // Classes
-  uHTTPManager, uHTTPManagerClasses, uHTTPClasses, uHTTPAntiScrape,
+  uHTTPManager, uHTTPManagerClasses, uHTTPClasses, uHTTPExtensionClasses,
   // Const
   uHTTPConst,
   // RegExpr
@@ -30,7 +30,7 @@ type
     constructor Create;
     destructor Destroy; override;
 
-    class function GetAntiScrapeName: string; override;
+    class function GetExtensionName: string; override;
     procedure Handle(const AHTTPProcess: IHTTPProcess; out AHTTPData: IHTTPData; var AHandled: WordBool); override;
   end;
 
@@ -90,7 +90,7 @@ begin
   inherited Destroy;
 end;
 
-class function THTTPCloudflareAntiScrape.GetAntiScrapeName: string;
+class function THTTPCloudflareAntiScrape.GetExtensionName: string;
 begin
   Result := 'Cloudflare';
 end;
@@ -108,135 +108,143 @@ var
 
   LRequestID: Double;
 begin
-  LCanHandleCloudflare := False;
+  BeginUse;
+  try
 
-  with TIdURI.Create(AHTTPProcess.HTTPData.Website) do
-    try
-      LProtocol := Protocol;
-      LHost := Host;
-    finally
-      Free;
-    end;
+    LCanHandleCloudflare := False;
 
-  if (AHTTPProcess.HTTPData.HTTPRequest.Cookies.IndexOfName('cf_clearance') > 0) then
-  begin
-    FCookieBuffer.AddOrSetValue(LHost, AHTTPProcess.HTTPData.HTTPRequest.Cookies.Values['cf_clearance']);
-  end
-  else if NeedToHandle(AHTTPProcess.HTTPResult.HTTPResponse) then
-  begin
-    if (Pos('why_captcha', string(AHTTPProcess.HTTPResult.SourceCode)) > 0) then
-    begin
-      // TODO: Handle CAPTCHA
-      Exit;
-    end;
-
-    if FCookieBuffer.ContainsKey(LHost) then
-    begin
-      cf_clearance := FCookieBuffer[LHost];
-      FCookieBuffer.Remove(LHost);
-
-      HTTPRequest := THTTPRequest.Clone(AHTTPProcess.HTTPData.HTTPRequest);
-      with HTTPRequest do
-      begin
-        Cookies.Add('cf_clearance=' + cf_clearance);
-      end;
-      HTTPOptions := THTTPOptions.Clone(AHTTPProcess.HTTPData.HTTPOptions);
-      if (HTTPRequest.Method = mPOST) then
-      begin
-        HTTPParams := THTTPParams.Clone(AHTTPProcess.HTTPData.HTTPParams);
-
-        LRequestID := THTTPManager.Instance().Post(HTTPRequest, HTTPParams, HTTPOptions);
-      end
-      else
-      begin
-        LRequestID := THTTPManager.Instance().Get(HTTPRequest, HTTPOptions);
-      end;
-      HTTPOptions := nil;
-      HTTPParams := nil;
-      HTTPRequest := nil;
-
-      THTTPManager.Instance().WaitFor(LRequestID);
-
-      if not NeedToHandle(THTTPManager.Instance().GetResult(LRequestID).HTTPResult.HTTPResponse) then
-      begin
-        AHTTPProcess.HTTPResult := THTTPManager.Instance().GetResult(LRequestID).HTTPResult;
-        FCookieBuffer.AddOrSetValue(LHost, cf_clearance);
-        Exit;
-      end;
-    end;
-
-    with TRegExpr.Create do
+    with TIdURI.Create(AHTTPProcess.HTTPData.Website) do
       try
-        InputString := AHTTPProcess.HTTPResult.SourceCode;
-
-        Expression := 'name="jschl_vc" value="(\w+)"';
-        if Exec(InputString) then
-        begin
-          jschl_vc := Match[1];
-        end;
-
-        Expression := 'name="pass" value="(.*?)"';
-        if Exec(InputString) then
-        begin
-          pass := Match[1];
-        end;
-
-        Expression := 'setTimeout\(function\(\){\s+(var t,r,a,f.+?\r?\n.+?a\.value =.+?)\r?\n';
-        if Exec(InputString) then
-        begin
-          jschl_script := Match[1];
-
-          InputString := jschl_script;
-          Expression := 'a\.value =(.+?) \+ .+?;';
-
-          jschl_script := Replace(InputString, '$1', True);
-
-          ModifierM := True;
-          InputString := jschl_script;
-          Expression := '\s{3,}([a-z]{1}.*?$)';
-
-          jschl_script := Replace(InputString, '', False);
-
-          jschl_answer := IntToStr(StrToInt(ExecJavaScript(jschl_script)) + Length(LHost));
-
-          LCanHandleCloudflare := True;
-        end;
+        LProtocol := Protocol;
+        LHost := Host;
       finally
         Free;
       end;
 
-    if LCanHandleCloudflare then
+    if (AHTTPProcess.HTTPData.HTTPRequest.Cookies.IndexOfName('cf_clearance') > 0) then
     begin
-      sleep(5000);
-
-      LParams := 'jschl_vc=' + jschl_vc + '&jschl_answer=' + jschl_answer + '&pass=' + pass;
-      LURL := LProtocol + '://' + LHost;
-
-      HTTPRequest := THTTPRequest.Create(LURL + '/cdn-cgi/l/chk_jschl?' + LParams);
-      with HTTPRequest do
+      FCookieBuffer.AddOrSetValue(LHost, AHTTPProcess.HTTPData.HTTPRequest.Cookies.Values['cf_clearance']);
+    end
+    else if NeedToHandle(AHTTPProcess.HTTPResult.HTTPResponse) then
+    begin
+      if (Pos('why_captcha', string(AHTTPProcess.HTTPResult.SourceCode)) > 0) then
       begin
-        Method := mGET;
-        Referer := LURL;
-        Cookies.Add('__cfduid=' + AHTTPProcess.HTTPResult.HTTPResponse.Cookies.Values['__cfduid']);
+        // TODO: Handle CAPTCHA
+        Exit;
       end;
 
-      HTTPOptions := AHTTPProcess.HTTPData.HTTPOptions;
-      with HTTPOptions do
+      if FCookieBuffer.ContainsKey(LHost) then
       begin
-        HandleRedirects := True;
-        RedirectMaximum := 5;
-      end;
-      AHTTPData := THTTPData.Create(HTTPRequest, HTTPOptions, nil);
+        cf_clearance := FCookieBuffer[LHost];
+        FCookieBuffer.Remove(LHost);
 
-      AHandled := True;
+        HTTPRequest := THTTPRequest.Clone(AHTTPProcess.HTTPData.HTTPRequest);
+        with HTTPRequest do
+        begin
+          Cookies.Add('cf_clearance=' + cf_clearance);
+        end;
+        HTTPOptions := THTTPOptions.Clone(AHTTPProcess.HTTPData.HTTPOptions);
+        if (HTTPRequest.Method = mPOST) then
+        begin
+          HTTPParams := THTTPParams.Clone(AHTTPProcess.HTTPData.HTTPParams);
+
+          LRequestID := THTTPManager.Instance().Post(HTTPRequest, HTTPParams, HTTPOptions);
+        end
+        else
+        begin
+          LRequestID := THTTPManager.Instance().Get(HTTPRequest, HTTPOptions);
+        end;
+        HTTPOptions := nil;
+        HTTPParams := nil;
+        HTTPRequest := nil;
+
+        THTTPManager.Instance().WaitFor(LRequestID);
+
+        if not NeedToHandle(THTTPManager.Instance().GetResult(LRequestID).HTTPResult.HTTPResponse) then
+        begin
+          AHTTPProcess.HTTPResult := THTTPManager.Instance().GetResult(LRequestID).HTTPResult;
+          FCookieBuffer.AddOrSetValue(LHost, cf_clearance);
+          Exit;
+        end;
+      end;
+
+      with TRegExpr.Create do
+        try
+          InputString := AHTTPProcess.HTTPResult.SourceCode;
+
+          Expression := 'name="jschl_vc" value="(\w+)"';
+          if Exec(InputString) then
+          begin
+            jschl_vc := Match[1];
+          end;
+
+          Expression := 'name="pass" value="(.*?)"';
+          if Exec(InputString) then
+          begin
+            pass := Match[1];
+          end;
+
+          Expression := 'setTimeout\(function\(\){\s+(var t,r,a,f.+?\r?\n.+?a\.value =.+?)\r?\n';
+          if Exec(InputString) then
+          begin
+            jschl_script := Match[1];
+
+            InputString := jschl_script;
+            Expression := 'a\.value =(.+?) \+ .+?;';
+
+            jschl_script := Replace(InputString, '$1', True);
+
+            ModifierM := True;
+            InputString := jschl_script;
+            Expression := '\s{3,}([a-z]{1}.*?$)';
+
+            jschl_script := Replace(InputString, '', False);
+
+            jschl_answer := IntToStr(StrToInt(ExecJavaScript(jschl_script)) + Length(LHost));
+
+            LCanHandleCloudflare := True;
+          end;
+        finally
+          Free;
+        end;
+
+      if LCanHandleCloudflare then
+      begin
+        sleep(5000);
+
+        LParams := 'jschl_vc=' + jschl_vc + '&jschl_answer=' + jschl_answer + '&pass=' + pass;
+        LURL := LProtocol + '://' + LHost;
+
+        HTTPRequest := THTTPRequest.Create(LURL + '/cdn-cgi/l/chk_jschl?' + LParams);
+        with HTTPRequest do
+        begin
+          Method := mGET;
+          Referer := LURL;
+          Cookies.Add('__cfduid=' + AHTTPProcess.HTTPResult.HTTPResponse.Cookies.Values['__cfduid']);
+        end;
+
+        HTTPOptions := AHTTPProcess.HTTPData.HTTPOptions;
+        with HTTPOptions do
+        begin
+          HandleRedirects := True;
+          RedirectMaximum := 5;
+        end;
+        AHTTPData := THTTPData.Create(HTTPRequest, HTTPOptions, nil);
+
+        AHandled := True;
+      end;
     end;
+  finally
+    EndUse;
   end;
 end;
 
 initialization
-  THTTPManager.Instance().AntiScrapeManager.Register(THTTPCloudflareAntiScrape.Create);
+
+THTTPManager.Instance().AntiScrapeManager.Register(THTTPCloudflareAntiScrape.Create);
 
 finalization
-  THTTPManager.Instance().AntiScrapeManager.Unregister(THTTPCloudflareAntiScrape.GetAntiScrapeName);
+
+THTTPManager.Instance().AntiScrapeManager.Unregister(THTTPCloudflareAntiScrape.GetExtensionName);
 
 end.

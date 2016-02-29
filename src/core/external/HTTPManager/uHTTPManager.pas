@@ -18,7 +18,7 @@ uses
   // Interface
   uHTTPInterface,
   // Classes
-  uHTTPManagerClasses, uHTTPClasses,
+  uHTTPExtensionManager, uHTTPManagerClasses, uHTTPClasses,
   // Const
   uHTTPConst,
   // Events
@@ -29,42 +29,6 @@ uses
   OtlComm, OtlCommon, OtlEventMonitor, OtlSync, OtlTask, OtlTaskControl, OtlThreadPool;
 
 type
-  THTTPAntiScrapeManager = class(TInterfacedObject, IHTTPAntiScrapeManager)
-  private
-    FAntiScrapes: TInterfaceList;
-    function FindAntiScrape(const AName: WideString): IHTTPAntiScrape;
-  protected
-    function GetCount: Integer; safecall;
-    function GetAntiScrape(AIndex: Integer): IHTTPAntiScrape; safecall;
-  public
-    constructor Create; virtual;
-    destructor Destroy; override;
-
-    function Register(const AAntiScrape: IHTTPAntiScrape): WordBool; safecall;
-    function Unregister(const AName: WideString): WordBool; safecall;
-
-    property Count: Integer read GetCount;
-    property AntiScrapes[Index: Integer]: IHTTPAntiScrape read GetAntiScrape; default;
-  end;
-
-  THTTPImplementationManager = class(TInterfacedObject, IHTTPImplementationManager)
-  private
-    FImplementations: TInterfaceList;
-    function FindImplementation(const AName: WideString): IHTTPImplementation;
-  protected
-    function GetCount: Integer; safecall;
-    function GetImplementation(AIndex: Integer): IHTTPImplementation; safecall;
-  public
-    constructor Create; virtual;
-    destructor Destroy; override;
-
-    function Register(const AImplementation: IHTTPImplementation): WordBool; safecall;
-    function Unregister(const AName: WideString): WordBool; safecall;
-
-    property Count: Integer read GetCount;
-    property Implementations[Index: Integer]: IHTTPImplementation read GetImplementation; default;
-  end;
-
   {$REGION 'Documentation'}
   /// <summary>
   ///   <para>
@@ -268,134 +232,6 @@ type
 
 implementation
 
-{ THTTPAntiScrapeManager }
-
-function THTTPAntiScrapeManager.FindAntiScrape(const AName: WideString): IHTTPAntiScrape;
-var
-  LAntiScrapeIndex: Integer;
-  LAntiScrape: IHTTPAntiScrape;
-begin
-  Result := nil;
-
-  for LAntiScrapeIndex := 0 to FAntiScrapes.Count - 1 do
-  begin
-    LAntiScrape := AntiScrapes[LAntiScrapeIndex];
-
-    if SameText(AName, LAntiScrape.Name) then
-    begin
-      Result := LAntiScrape;
-      break;
-    end;
-  end;
-end;
-
-function THTTPAntiScrapeManager.GetCount: Integer;
-begin
-  Result := FAntiScrapes.Count;
-end;
-
-function THTTPAntiScrapeManager.GetAntiScrape(AIndex: Integer): IHTTPAntiScrape;
-begin
-  Result := FAntiScrapes.Items[AIndex] as IHTTPAntiScrape;
-end;
-
-constructor THTTPAntiScrapeManager.Create;
-begin
-  inherited Create;
-  FAntiScrapes := TInterfaceList.Create;
-end;
-
-destructor THTTPAntiScrapeManager.Destroy;
-begin
-  FAntiScrapes.Free;
-  inherited Destroy;
-end;
-
-function THTTPAntiScrapeManager.Register(const AAntiScrape: IHTTPAntiScrape): WordBool;
-begin
-  Result := not Assigned(FindAntiScrape(AAntiScrape.Name));
-  if Result then
-    FAntiScrapes.Add(AAntiScrape)
-end;
-
-function THTTPAntiScrapeManager.Unregister(const AName: WideString): WordBool;
-var
-  LAntiScrape: IHTTPAntiScrape;
-begin
-  LAntiScrape := FindAntiScrape(AName);
-  Result := Assigned(LAntiScrape);
-  if Result then
-    try
-      FAntiScrapes.Remove(LAntiScrape);
-    finally
-      LAntiScrape := nil;
-    end;
-end;
-
-{ THTTPImplementationManager }
-
-function THTTPImplementationManager.FindImplementation(const AName: WideString): IHTTPImplementation;
-var
-  LImplementationIndex: Integer;
-  LImplementation: IHTTPImplementation;
-begin
-  Result := nil;
-
-  for LImplementationIndex := 0 to FImplementations.Count - 1 do
-  begin
-    LImplementation := Implementations[LImplementationIndex];
-
-    if SameText(AName, LImplementation.Name) then
-    begin
-      Result := LImplementation;
-      break;
-    end;
-  end;
-end;
-
-function THTTPImplementationManager.GetCount: Integer;
-begin
-  Result := FImplementations.Count;
-end;
-
-function THTTPImplementationManager.GetImplementation(AIndex: Integer): IHTTPImplementation;
-begin
-  Result := FImplementations.Items[AIndex] as IHTTPImplementation;
-end;
-
-constructor THTTPImplementationManager.Create;
-begin
-  inherited Create;
-  FImplementations := TInterfaceList.Create;
-end;
-
-destructor THTTPImplementationManager.Destroy;
-begin
-  FImplementations.Free;
-  inherited Destroy;
-end;
-
-function THTTPImplementationManager.Register(const AImplementation: IHTTPImplementation): WordBool;
-begin
-  Result := not Assigned(FindImplementation(AImplementation.Name));
-  if Result then
-    FImplementations.Add(AImplementation)
-end;
-
-function THTTPImplementationManager.Unregister(const AName: WideString): WordBool;
-var
-  LImplementation: IHTTPImplementation;
-begin
-  LImplementation := FindImplementation(AName);
-  Result := Assigned(LImplementation);
-  if Result then
-    try
-      FImplementations.Remove(LImplementation);
-    finally
-      LImplementation := nil;
-    end;
-end;
-
 { TIdHTTPManager }
 
 procedure THTTPManager.OmniEMTaskMessage(const task: IOmniTaskControl; const msg: TOmniMessage);
@@ -477,7 +313,7 @@ begin
   ScrapeHandled := False;
   for AntiScrapeIndex := 0 to AntiScrapeManager.Count - 1 do
   begin
-    AntiScrapeManager.AntiScrapes[AntiScrapeIndex].Handle(AHTTPProcess, ScrapeData, ScrapeHandled);
+    AntiScrapeManager.Extension[AntiScrapeIndex].Handle(AHTTPProcess, ScrapeData, ScrapeHandled);
     if ScrapeHandled then
       break;
   end;
@@ -648,7 +484,7 @@ begin
   if not Assigned(FImplementor) then
   begin
     if ImplementationManager.Count > 0 then
-      FImplementor := ImplementationManager.Implementations[0]
+      FImplementor := ImplementationManager.Extension[0]
     else
       raise Exception.Create('Assign a HTTPImplementor');
   end;

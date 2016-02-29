@@ -306,7 +306,29 @@ type
     procedure Invoke(const AHTTPProcess: IHTTPProcess); safecall;
   end;
 
-  IHTTPAntiScrape = interface(IUnknown)
+  IHTTPExtension = interface(IUnknown)
+    ['{FD4B9C9F-3693-4534-B2F5-89D42E3350A5}']
+    function GetInUse: WordBool; safecall;
+    function GetName: WideString; safecall;
+
+    property InUse: WordBool read GetInUse;
+    property Name: WideString read GetName;
+  end;
+
+  IHTTPExtensionManager = interface(IUnknown)
+    ['{C3BBE871-BDF2-4F57-BDF2-BC4B429355C7}']
+    function FindExtension(const AName: WideString): IHTTPExtension; safecall;
+    function GetCount: Integer; safecall;
+    function GetExtension(AIndex: Integer): IHTTPExtension; safecall;
+
+    function Register(const AHTTPExtension: IHTTPExtension): WordBool; safecall;
+    function Unregister(const AName: WideString): WordBool; safecall;
+
+    property Count: Integer read GetCount;
+    property Extension[AIndex: Integer]: IHTTPExtension read GetExtension; default;
+  end;
+
+  IHTTPAntiScrape = interface(IHTTPExtension)
     ['{03C8BCF2-87B8-4665-9119-4E63EB5EEE2C}']
     function GetName: WideString; safecall;
 
@@ -315,19 +337,19 @@ type
     property Name: WideString read GetName;
   end;
 
-  IHTTPAntiScrapeManager = interface(IUnknown)
+  IHTTPAntiScrapeManager = interface(IHTTPExtensionManager)
     ['{D5BE5CB3-CE28-42F1-8009-48E9254CC6CC}']
     function GetCount: Integer; safecall;
-    function GetAntiScrape(AIndex: Integer): IHTTPAntiScrape; safecall;
+    function GetExtension(AIndex: Integer): IHTTPAntiScrape; safecall;
 
     function Register(const AHTTPAntiScrape: IHTTPAntiScrape): WordBool; safecall;
     function Unregister(const AName: WideString): WordBool; safecall;
 
     property Count: Integer read GetCount;
-    property AntiScrapes[Index: Integer]: IHTTPAntiScrape read GetAntiScrape; default;
+    property Extension[AIndex: Integer]: IHTTPAntiScrape read GetExtension; default;
   end;
 
-  IHTTPImplementation = interface(IUnknown)
+  IHTTPImplementation = interface(IHTTPExtension)
     ['{4C83C736-0779-4355-A26C-96ADAB6909F2}']
     function GetName: WideString; safecall;
 
@@ -339,13 +361,13 @@ type
   IHTTPImplementationManager = interface(IUnknown)
     ['{9908E7A3-E2B5-40F4-9412-723F0D4686E6}']
     function GetCount: Integer; safecall;
-    function GetImplementation(AIndex: Integer): IHTTPImplementation; safecall;
+    function GetExtension(AIndex: Integer): IHTTPImplementation; safecall;
 
     function Register(const AHTTPImplementation: IHTTPImplementation): WordBool; safecall;
     function Unregister(const AName: WideString): WordBool; safecall;
 
     property Count: Integer read GetCount;
-    property Implementations[Index: Integer]: IHTTPImplementation read GetImplementation; default;
+    property Extension[AIndex: Integer]: IHTTPImplementation read GetExtension; default;
   end;
 
   IHTTPManager = interface
