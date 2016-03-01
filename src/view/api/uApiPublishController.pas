@@ -1259,8 +1259,8 @@ begin
   FParsedDataMessageChanged := True;
   FDataBuffer := nil;
 
-  FControlsPreviousValue := False;
-  FMirrorPreviousValue := False;
+  FControlsPreviousValue := True; // Need to be true to make first update.
+  FMirrorPreviousValue := True;
 
   FIWebsiteChange := TICMSItemChangeEventHandler.Create(WebsiteChange);
   FCMSCollectionItem.OnWebsitesChange.Add(FIWebsiteChange);
