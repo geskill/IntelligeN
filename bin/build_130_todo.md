@@ -56,7 +56,7 @@ Checked items are planned for next release.
 
 ######Crypter
 
-- [ ] Add flag if a user account is required
+- [x] Add flag if a user account is required
 
 - [ ] Add distinction flag if username/password or API-Key is required
 
@@ -74,7 +74,7 @@ Checked items are planned for next release.
 
 ###View
 
-- [ ] Add simpler hoster ranking not defined by website (i.e. FileHoster ranking)
+- [x] Add simpler hoster ranking not defined by website (i.e. FileHoster ranking)
 
 - [ ] Add progress bar or indication for crawling overall progress
 

@@ -1,26 +1,26 @@
-library relinkus;
+﻿library relinkto;
 
 {$R *.dres}
 
 uses
   uPlugInInterface,
   uPlugInCrypterClass,
-  uRelinkUs in 'uRelinkUs.pas';
+  uRelinkTo in 'uRelinkTo.pas';
 
 {$R *.res}
 
 function LoadPlugin(var APlugIn: ICrypterPlugIn): WordBool; safecall; export;
 begin
   try
-    APlugIn := TRelinkUs.Create;
+    APlugIn := TRelinkTo.Create;
     Result := True;
   except
     Result := False;
   end;
 end;
 
-exports LoadPlugin name 'LoadPlugIn';
+exports
+  LoadPlugIn name 'LoadPlugIn';
 
 begin
-
 end.

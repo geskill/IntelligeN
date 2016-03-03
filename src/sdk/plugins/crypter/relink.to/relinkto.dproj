@@ -1,8 +1,8 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
-			<ProjectGuid>{C52AF817-9B38-45F7-93C4-1DA216E92EEC}</ProjectGuid>
+			<ProjectGuid>{F87B7E71-482E-44A7-8075-D7C0201DF50E}</ProjectGuid>
 			<ProjectVersion>12.0</ProjectVersion>
-			<MainSource>relinkus.dpr</MainSource>
+			<MainSource>relinkto.dpr</MainSource>
 			<Config Condition="'$(Config)'==''">Debug</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 		</PropertyGroup>
@@ -21,31 +21,29 @@
 		</PropertyGroup>
 		<Import Project="..\..\plugin.optset" Condition="'$(Base)'!='' And Exists('..\..\plugin.optset')"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
-			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\relinkus.dll</DCC_DependencyCheckOutputName>
 			<UsePackages>true</UsePackages>
 			<DCC_UsePackage>framework;frameworkX</DCC_UsePackage>
-			<DCC_UnitSearchPath>../;../../;../../../3rdparty\HTTPManager;../../../3rdparty\MultiEvent;../../../3rdparty\TRegExpr\Source;../../../common;../../../utils;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
-			<DCC_UnitAlias>WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;$(DCC_UnitAlias)</DCC_UnitAlias>
+			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\relinkto.dll</DCC_DependencyCheckOutputName>
 			<GenDll>true</GenDll>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DCC_Platform>x86</DCC_Platform>
 			<CfgDependentOn>..\..\plugin.optset</CfgDependentOn>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_1)'!=''">
-			<DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
-			<DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+			<DCC_DebugInformation>False</DCC_DebugInformation>
+			<DCC_LocalDebugSymbols>False</DCC_LocalDebugSymbols>
 			<DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
-			<DCC_DebugInformation>false</DCC_DebugInformation>
+			<DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<ItemGroup>
-			<DelphiCompile Include="relinkus.dpr">
+			<DelphiCompile Include="relinkto.dpr">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="uRelinkUs.pas"/>
-			<RcItem Include="Relink.us.ico">
+			<DCCReference Include="uRelinkTo.pas"/>
+			<RcItem Include="relinkto.ico">
 				<ResourceType>Icon</ResourceType>
 				<ResourceId>icon</ResourceId>
 			</RcItem>
@@ -69,7 +67,7 @@
 			<BorlandProject>
 				<Delphi.Personality>
 					<Source>
-						<Source Name="MainSource">relinkus.dpr</Source>
+						<Source Name="MainSource">relinkto.dpr</Source>
 					</Source>
 					<Parameters>
 						<Parameters Name="UseLauncher">False</Parameters>
@@ -99,18 +97,12 @@
 						<VersionInfoKeys Name="InternalName"/>
 						<VersionInfoKeys Name="LegalCopyright">(c) 2016 Sebastian Klatte</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks"/>
-						<VersionInfoKeys Name="OriginalFilename">relinkus.dll</VersionInfoKeys>
+						<VersionInfoKeys Name="OriginalFilename">relinkto.dll</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductName">IntelligeN 2009</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductVersion">2.5</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
-					<Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dclDataSnapIndy10ServerTransport140.bpl">Embarcadero DBExpress DataSnap-Servertransport-Komponenten</Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dclDataSnapServer140.bpl">Embarcadero DBExpress DataSnap-Serverkomponenten</Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dcloffice2k140.bpl">Microsoft Office 2000 Beispiele für gekapselte Komponenten für Automation Server</Excluded_Packages>
-						<Excluded_Packages Name="$(BDS)\bin\dclofficexp140.bpl">Microsoft Office XP Beispiele für gekapselte Komponenten für Automation Server</Excluded_Packages>
-						<Excluded_Packages Name="C:\Program Files (x86)\FastReports\FastScript\LibD14\dclfsibx14.bpl">FastScript 1.9 IBX Components</Excluded_Packages>
-					</Excluded_Packages>
+					<Excluded_Packages/>
 				</Delphi.Personality>
 			</BorlandProject>
 			<ProjectFileVersion>12</ProjectFileVersion>
@@ -121,78 +113,6 @@
 [Exception Log]
 EurekaLog Version=7007
 Activate=0
-AutoCrashOperation=2
-boHandleSafeCallExceptions=1
-boUseMainModuleOptions=1
-CompatibilityMode=1
-csoAllowedRenderMethods=64
-csoDisabledRenderMethods=-2
-csoShowWindowsThreads=1
-DeleteMapAfterCompile=1
-Email Address=""
-Email Object=""
+DeleteMapAfterCompile=0
 Encrypt Password=""
-Errors Number=32
-Errors Terminate=3
-Foreground Tab=0
-Freeze Timeout=0
-loCatchLeaks=0
-loFreeAllLeaks=1
-loHideRTLLeaks=0
-loMaxLeaks=1024
-loOnlyUnderIDE=0
-loProcessesSection=1
-Output Path=""
-SMTP From="eurekalog@email.com"
-SMTP Host=""
-SMTP UserID=""
-sndAddDateInFileName=0
-sndScreenshot=3
-sndShowSuccessMsg=0
-soActCtlsControlClass=1
-soActCtlsControlText=1
-soActCtlsFormClass=1
-soActCtlsFormText=1
-soAppCompilationDate=1
-soAppName=1
-soAppParameters=1
-soAppStartDate=1
-soAppUpTime=1
-soAppVersionNumber=1
-soCmpDisplayDPI=1
-soCmpDisplayMode=1
-soCmpFreeDisk=1
-soCmpFreeMemory=1
-soCmpName=1
-soCmpPrinter=1
-soCmpProcessor=1
-soCmpSysUpTime=1
-soCmpTotalDisk=1
-soCmpTotalMemory=1
-soCmpVideoCard=1
-soCustomData=1
-soExcCount=1
-soExcDate=1
-soExcModuleName=1
-soExcModuleVersion=1
-soExcNote=1
-soExcStatus=1
-soNetDHCP=1
-soNetDNS1=1
-soNetDNS2=1
-soNetGateway=1
-soNetIP=1
-soNetSubmask=1
-soOSBuildN=1
-soOSCharset=1
-soOSLanguage=1
-soOSType=1
-soOSUpdate=1
-soUserCompany=1
-soUserID=1
-soUserPrivileges=1
-TextsCollection="English"
-TrakerUser=""
-WebPort=0
-WebURL=""
 EurekaLog Last Line -->
