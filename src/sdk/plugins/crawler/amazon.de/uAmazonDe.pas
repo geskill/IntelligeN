@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, HTTPApp,
+  Windows, SysUtils, Classes, HTTPApp,
   // RegEx
   RegExpr,
   // JSON
@@ -65,41 +65,52 @@ function TAmazonDe.InternalExecute;
   var
     I: Integer;
     LTrackList, s, img: string;
+    LImageList: TStringList;
     LJSONobject: TlkJSONobject;
   begin
     if ACanUse(cPicture) then
-      with TRegExpr.Create do
-        try
-          InputString := AWebsiteSourceCode;
+    begin
+      LImageList := TStringList.Create;
+      try
+        with TRegExpr.Create do
+          try
+            InputString := AWebsiteSourceCode;
 
-          Expression := 'data-old-hires="(.*?)"';
-          if Exec(InputString) then
-          begin
-            if AmazonCanAddImage(Match[1]) then
-              AControlController.FindControl(cPicture).AddProposedValue(GetName, AmazonOriginalImageSize(Match[1]));
-          end;
-
-          Expression := 'data-a-dynamic-image="(.*?)"';
-          if Exec(InputString) then
-          begin
-            if not SameStr('', Match[1]) then
+            Expression := 'data-old-hires="(.*?)"';
+            if Exec(InputString) then
             begin
-              try
-                LJSONobject := TlkJSON.ParseText(HTMLDecode(Match[1])) as TlkJSONobject;
-                for I := LJSONobject.Count - 1 downto 0 do
-                begin
-                  img := LJSONobject.NameOf[I];
-                  if AmazonCanAddImage(img) then
-                    AControlController.FindControl(cPicture).AddProposedValue(GetName, AmazonOriginalImageSize(img));
+              if AmazonCanAddImage(Match[1]) and (LImageList.IndexOf(AmazonOriginalImageSize(Match[1])) = -1) then
+                LImageList.Add(AmazonOriginalImageSize(Match[1]));
+            end;
+
+            Expression := 'data-a-dynamic-image="(.*?)"';
+            if Exec(InputString) then
+            begin
+              if not SameStr('', Match[1]) then
+              begin
+                try
+                  LJSONobject := TlkJSON.ParseText(HTMLDecode(Match[1])) as TlkJSONobject;
+                  for I := LJSONobject.Count - 1 downto 0 do
+                  begin
+                    img := LJSONobject.NameOf[I];
+                    if AmazonCanAddImage(img) and (LImageList.IndexOf(AmazonOriginalImageSize(img)) = -1) then
+                      LImageList.Add(AmazonOriginalImageSize(img));
+                  end;
+                finally
+                  LJSONobject.Free;
                 end;
-              finally
-                LJSONobject.Free;
               end;
             end;
+          finally
+            Free;
           end;
-        finally
-          Free;
-        end;
+
+        for I := 0 to LImageList.Count - 1 do
+          AControlController.FindControl(cPicture).AddProposedValue(GetName, LImageList.Strings[I]);
+      finally
+        LImageList.Free;
+      end;
+    end;
 
     if ACanUse(cRuntime) then
       with TRegExpr.Create do
@@ -132,6 +143,47 @@ function TAmazonDe.InternalExecute;
 
     if ACanUse(cDescription) then
     begin
+      with TRegExpr.Create do
+        try
+          InputString := AWebsiteSourceCode;
+          Expression := 'iframeContent = "(.*?)"';
+
+          if Exec(InputString) then
+          begin
+            s := HTTPDecode(Match[1]);
+
+            with TRegExpr.Create do
+            begin
+              try
+                InputString := s;
+                Expression := '<tr class="\w+">\s+<td>\s+(.*?)\s<\/td>';
+
+                if Exec(InputString) then
+                begin
+                  LTrackList := '';
+                  repeat
+                    LTrackList := LTrackList + Trim(Match[1]) + sLineBreak;
+                  until not ExecNext;
+                  AControlController.FindControl(cDescription).AddProposedValue(GetName, copy(LTrackList, 1, length(LTrackList) - 2));
+                end;
+
+                Expression := '<div class="productDescriptionWrapper"[ ]?>(.*?)<div class="emptyClear"';
+
+                if Exec(InputString) then
+                begin
+                  repeat
+                    AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(ReduceWhitespace(HTML2TextAndDecode(Match[1]))));
+                  until not ExecNext;
+                end;
+              finally
+                Free;
+              end;
+            end;
+          end;
+        finally
+          Free;
+        end;
+
       with TRegExpr.Create do
         try
           InputString := AWebsiteSourceCode;
