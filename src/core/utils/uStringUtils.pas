@@ -408,13 +408,13 @@ end;
 
 function ReduceWhitespace(const AStr: string): string;
 var
-  LCharIndex, LLength, LWhiteSpaceCount: Integer;
+  LCharIndex, LWhiteSpaceCount: Integer;
   LHasLineBreak: Boolean;
 begin
   Result := AStr;
   LCharIndex := Length(AStr);
-  LLength := Length(AStr);
   LWhiteSpaceCount := 0;
+  LHasLineBreak := False;
   while LCharIndex > 0 do
   begin
     if IsWhiteSpace(AStr, LCharIndex) then
