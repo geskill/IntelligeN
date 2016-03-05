@@ -826,7 +826,7 @@ begin
     with TRegExpr.Create do
       try
         InputString := AResponseStr;
-        Expression := 'option value="(\d+)" class="\D+(\d+)" >(.*?)<\/';
+        Expression := 'option value="(\d+)" class="\D+(\d+)" ?>(.*?)<\/';
 
         if Exec(InputString) then
         begin
