@@ -30,7 +30,7 @@ type
     function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; virtual; safecall;
     function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; virtual; safecall;
     function InternalGetDependentControlIDs: TControlIDs; virtual; safecall;
-    function InternalGetRetrieveData(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AAccountData: IAccountData; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; virtual; safecall; abstract;
+    function InternalGetRetrieveData(const AAccountData: IAccountData; const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; virtual; safecall; abstract;
 
     function GETRequest(const AURL: string; out ARequestID: Double; AHTTPOptions: IHTTPOptions = nil): string;
     function GETFollowUpRequest(const AURL: string; AFollowUp: Double; out ARequestID: Double; AHTTPOptions: IHTTPOptions = nil): string;
@@ -44,7 +44,7 @@ type
     function GetDependentControlIDs: Integer; safecall;
     function GetResultsLimitDefaultValue: Integer; virtual; safecall;
 
-    function GetRetrieveData(const ATypeID, AControlIDs, ALimit: Integer; const AAccountData: IAccountData; const AControlController: IControlControllerBase): WordBool; safecall;
+    function GetRetrieveData(const AAccountData: IAccountData; const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; safecall;
   end;
 
 implementation
@@ -167,7 +167,7 @@ var
   LControlIDs: TControlIDs;
 begin
   LongWord(LControlIDs) := AControlIDs;
-  Result := InternalGetRetrieveData(TTypeID(ATypeID), LControlIDs, ALimit, AAccountData, AControlController, { }
+  Result := InternalGetRetrieveData(AAccountData, TTypeID(ATypeID), LControlIDs, ALimit, AControlController, { }
     { } function(AControlID: TControlID): WordBool
     { } begin
     { . } Result := Assigned(AControlController.FindControl(AControlID)) and (AControlID in LControlIDs);

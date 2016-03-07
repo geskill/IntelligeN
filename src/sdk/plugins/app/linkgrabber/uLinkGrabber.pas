@@ -36,7 +36,11 @@ type
     function GetULLinks: string;
     function GetSOLinks: string;
   public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
     function GetName: WideString; override;
+
     function Start(const AAppController: IAppController): WordBool; override;
     function Stop: WordBool; override;
   end;
@@ -343,6 +347,21 @@ begin
 
     end;
   end;
+end;
+
+function TLinkGrabber.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TLinkGrabber.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TLinkGrabber.GetDescription;
+begin
+  Result := GetName + ' app plug-in.';
 end;
 
 function TLinkGrabber.GetName: WideString;

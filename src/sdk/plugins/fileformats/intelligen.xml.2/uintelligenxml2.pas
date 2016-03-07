@@ -10,23 +10,26 @@ uses
   // DLLs
   uExport,
   // Plugin system
-  uPlugInFileFormatClass,
+  uPlugInInterfaceAdv, uPlugInFileFormatClass,
   // Utils
   uFileUtils, uStringUtils, uVariantUtils;
 
 type
   TIntelligeNXML2 = class(TFileFormatPlugIn)
   public
-    function GetName: WideString; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
 
-    function GetFileExtension: WideString; override; safecall;
-    function GetFileFilter: WideString; override; safecall;
+    function GetFileExtension: WideString; override;
+    function GetFileFilter: WideString; override;
 
-    function CanSaveFiles: WordBool; override; safecall;
-    function SaveFile(const AFileName: WideString; const ATabSheetController: ITabSheetController): WordBool; override; safecall;
+    function CanSaveFiles: WordBool; override;
+    function SaveFile(const AFileName: WideString; const ATabSheetController: ITabSheetController): WordBool; override;
 
-    function CanLoadFiles: WordBool; override; safecall;
-    function LoadFile(const AFileName: WideString; const APageController: IPageController): Integer; override; safecall;
+    function CanLoadFiles: WordBool; override;
+    function LoadFile(const AFileFormatData: IFileFormatData; const AFileName: WideString; const APageController: IPageController): Integer; override;
   end;
 
 implementation
@@ -37,6 +40,21 @@ uses
 resourcestring
   StrTheXMLFileIsNotCompatible = 'The XML file is not compatible to the intelligen.xml.2 standard';
   StrTheIntelligeNXML2StdReq = 'The intelligen.xml.2 standard requires a template file.';
+
+function TIntelligeNXML2.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TIntelligeNXML2.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TIntelligeNXML2.GetDescription;
+begin
+  Result := GetName + ' file formats plug-in.';
+end;
 
 function TIntelligeNXML2.GetName;
 begin
@@ -263,7 +281,7 @@ begin
                   end
                   else if ChildNodes.Nodes['mirrors'].ChildNodes.Nodes[I].ChildNodes.Nodes[X].NodeName = 'crypter' then
                   begin
-                    if ForceAddCrypter then
+                    if AFileFormatData.ForceAddCrypter then
                     begin
                       _CrypterExists := False;
                       for Y := 0 to CrypterCount - 1 do
@@ -304,7 +322,7 @@ begin
                   begin
                     for X := 0 to ChildNodes.Nodes['hosters'].ChildNodes.Count - 1 do
                     begin
-                      if ForceAddImageMirror then
+                      if AFileFormatData.ForceAddImageMirror then
                       begin
                         _ImageMirrorExists := False;
                         for Y := 0 to Picture.MirrorCount - 1 do

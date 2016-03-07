@@ -68,7 +68,11 @@ type
     FNotifyEvent: TINotifyEventHandler;
     procedure OnClick(const Sender: IUnknown);
   public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
     function GetName: WideString; override;
+
     function Start(const AAppController: IAppController): WordBool; override;
     function Stop: WordBool; override;
   end;
@@ -403,6 +407,21 @@ begin
 
   FMirrorSort.Show;
   FMirrorSort.WindowState := wsNormal;
+end;
+
+function TMirrorSort.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TMirrorSort.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TMirrorSort.GetDescription;
+begin
+  Result := GetName + ' app plug-in.';
 end;
 
 function TMirrorSort.GetName;

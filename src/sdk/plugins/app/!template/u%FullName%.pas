@@ -26,7 +26,11 @@ type
     FNotifyEventHandler: TINotifyEventHandler;
     procedure OnClick(const Sender: IUnknown);
   public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
     function GetName: WideString; override;
+
     function Start(const AAppController: IAppController): WordBool; override;
     function Stop: WordBool; override;
   end;
@@ -41,6 +45,21 @@ begin
   begin
     { TODO : add your code for your menu item action here }
   end;
+end;
+
+function T%FullName%.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function T%FullName%.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function T%FullName%.GetDescription;
+begin
+  Result := GetName + ' app plug-in.';
 end;
 
 function T%FullName%.GetName: WideString;

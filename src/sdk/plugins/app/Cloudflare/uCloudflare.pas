@@ -21,7 +21,11 @@ type
   private
     FAppController: IAppController;
   public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
     function GetName: WideString; override;
+
     function Start(const AAppController: IAppController): WordBool; override;
     function Stop: WordBool; override;
   end;
@@ -29,6 +33,21 @@ type
 implementation
 
 { TCloudflare }
+
+function TCloudflare.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TCloudflare.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TCloudflare.GetDescription;
+begin
+  Result := GetName + ' app plug-in.';
+end;
 
 function TCloudflare.GetName: WideString;
 begin

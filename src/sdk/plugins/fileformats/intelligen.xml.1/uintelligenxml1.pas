@@ -10,7 +10,7 @@ uses
   // DLLs
   uExport,
   // Plugin system
-  uPlugInFileFormatClass;
+  uPlugInInterfaceAdv, uPlugInFileFormatClass;
 
 type
   TInArray = class
@@ -25,16 +25,19 @@ type
 
     eDownloadLink = 'eDownloadLink';
   public
-    function GetName: WideString; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
 
-    function GetFileExtension: WideString; override; safecall;
-    function GetFileFilter: WideString; override; safecall;
+    function GetFileExtension: WideString; override;
+    function GetFileFilter: WideString; override;
 
-    function CanSaveFiles: WordBool; override; safecall;
-    function SaveFile(const AFileName: WideString; const ATabSheetController: ITabSheetController): WordBool; override; safecall;
+    function CanSaveFiles: WordBool; override;
+    function SaveFile(const AFileName: WideString; const ATabSheetController: ITabSheetController): WordBool; override;
 
-    function CanLoadFiles: WordBool; override; safecall;
-    function LoadFile(const AFileName: WideString; const APageController: IPageController): Integer; override; safecall;
+    function CanLoadFiles: WordBool; override;
+    function LoadFile(const AFileFormatData: IFileFormatData; const AFileName: WideString; const APageController: IPageController): Integer; override;
   end;
 
 implementation
@@ -50,6 +53,21 @@ begin
       Result := I;
       exit;
     end;
+end;
+
+function Tintelligenxml1.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function Tintelligenxml1.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function Tintelligenxml1.GetDescription;
+begin
+  Result := GetName + ' file formats plug-in.';
 end;
 
 function Tintelligenxml1.GetName;
@@ -229,7 +247,7 @@ begin
                       else if copy(NodeName, 0, length(eDownloadLink)) = eDownloadLink then
                         with MirrorController.Mirror[MirrorController.Add] do
                         begin
-                          if ForceAddCrypter then
+                          if AFileFormatData.ForceAddCrypter then
                           begin
                             _CrypterExists := False;
                             for K := 0 to CrypterCount - 1 do

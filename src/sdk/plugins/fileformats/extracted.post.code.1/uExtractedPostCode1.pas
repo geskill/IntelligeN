@@ -10,26 +10,44 @@ uses
   // Utils
   uStringUtils,
   // Plugin system
-  uPlugInFileFormatClass;
+  uPlugInInterfaceAdv, uPlugInFileFormatClass;
 
 type
   TExtractedPostCode = class(TFileFormatPlugIn)
   public
-    function GetName: WideString; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
 
-    function GetFileExtension: WideString; override; safecall;
-    function GetFileFilter: WideString; override; safecall;
+    function GetFileExtension: WideString; override;
+    function GetFileFilter: WideString; override;
 
-    function CanSaveFiles: WordBool; override; safecall;
-    function SaveFile(const AFileName: WideString; const ATabSheetController: ITabSheetController): WordBool; override; safecall;
+    function CanSaveFiles: WordBool; override;
+    function SaveFile(const AFileName: WideString; const ATabSheetController: ITabSheetController): WordBool; override;
 
-    function CanLoadFiles: WordBool; override; safecall;
-    function LoadFile(const AFileName: WideString; const APageController: IPageController): Integer; override; safecall;
+    function CanLoadFiles: WordBool; override;
+    function LoadFile(const AFileFormatData: IFileFormatData; const AFileName: WideString; const APageController: IPageController): Integer; override;
   end;
 
 implementation
 
 { TExtractedPostCode }
+
+function TExtractedPostCode.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TExtractedPostCode.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TExtractedPostCode.GetDescription;
+begin
+  Result := GetName + ' file formats plug-in.';
+end;
 
 function TExtractedPostCode.GetName;
 begin
@@ -79,7 +97,7 @@ begin
               NodeValue := '24';
             cMovie:
               NodeValue := '14';
-            cNintendoDS:
+            cNintendoDS, cNintendo3DS:
               NodeValue := '10';
             cPCGames:
               NodeValue := '4';

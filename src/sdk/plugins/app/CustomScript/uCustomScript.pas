@@ -35,7 +35,11 @@ type
     procedure OnExecuteAll(const Sender: IUnknown);
     procedure OnSettings(const Sender: IUnknown);
   public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
     function GetName: WideString; override;
+
     function Start(const AAppController: IAppController): WordBool; override;
     function Stop: WordBool; override;
   end;
@@ -88,6 +92,21 @@ begin
 
   fCustomScriptSettingsForm.LoadSettings(FCustomScriptSettings);
   fCustomScriptSettingsForm.Show;
+end;
+
+function TCustomScript.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TCustomScript.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TCustomScript.GetDescription;
+begin
+  Result := GetName + ' app plug-in.';
 end;
 
 function TCustomScript.GetName: WideString;
