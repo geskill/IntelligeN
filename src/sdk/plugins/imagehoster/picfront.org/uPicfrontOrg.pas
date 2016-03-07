@@ -12,25 +12,29 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInImageHosterClass, uPlugInHTTPClasses, uPlugInConst;
+  uPlugInInterface, uPlugInImageHosterClass, uPlugInHTTPClasses, uPlugInConst;
 
 type
   TPicfrontOrg = class(TImageHosterPlugIn)
   protected { . }
   const
     WEBSITE: string = 'http://picfront.org/';
-    function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
+    function Upload(const AImageHosterData: IImageHosterData; const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
     function GetName: WideString; override;
-    function LocalUpload(const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
-    function RemoteUpload(const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
+
+    function AddLocalImage(const AImageHosterData: IImageHosterData; const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
+    function AddWebImage(const AImageHosterData: IImageHosterData; const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
   end;
 
 implementation
 
 { TPicfrontOrg }
 
-function TPicfrontOrg.Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
+function TPicfrontOrg.Upload;
 var
   LHTTPRequest: IHTTPRequest;
 
@@ -52,9 +56,9 @@ begin
     AddFormField('HOST_END', 'org');
     AddFormField('UPLOAD_IDENTIFIER', '');
     AddFormField('urlimage', '');
-    if not(ImageHostResize = irNone) then
+    if not(AImageHosterData.ImageHostResize = irNone) then
     begin
-      case ImageHostResize of
+      case AImageHosterData.ImageHostResize of
         ir320x240:
           begin
             AddFormField('resize_x', '320');
@@ -113,12 +117,27 @@ begin
   end;
 end;
 
+function TPicfrontOrg.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TPicfrontOrg.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TPicfrontOrg.GetDescription;
+begin
+  Result := GetName + ' image hoster plug-in.';
+end;
+
 function TPicfrontOrg.GetName;
 begin
   result := 'Picfront.org';
 end;
 
-function TPicfrontOrg.LocalUpload;
+function TPicfrontOrg.AddLocalImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -128,10 +147,10 @@ begin
   with LHTTPParams do
     AddFile('file_0', ALocalPath);
 
-  Result := Upload(LHTTPParams, AUrl);
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl);
 end;
 
-function TPicfrontOrg.RemoteUpload;
+function TPicfrontOrg.AddWebImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -141,7 +160,7 @@ begin
   with LHTTPParams do
     AddFormField('urluploadfile_0', ARemoteUrl);
 
-  Result := Upload(LHTTPParams, AUrl);
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl);
 end;
 
 end.

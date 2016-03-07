@@ -2,7 +2,7 @@
   *                            IntelligeN PLUGIN SYSTEM  *
   *  PlugIn base class                                   *
   *  Version 2.5.0.0                                     *
-  *  Copyright (c) 2015 Sebastian Klatte                 *
+  *  Copyright (c) 2016 Sebastian Klatte                 *
   *                                                      *
   ******************************************************** }
 unit uPlugInClass;
@@ -20,38 +20,37 @@ uses
 type
   TPlugIn = class(TInterfacedObject, IPlugIn)
   private
-    FCAPTCHAInput: TCAPTCHAInput;
+    FHTTPManager: IHTTPManager;
     FProxy: IProxy;
     FConnectTimeout, FReadTimeout: Integer;
-    FHTTPManager: IHTTPManager;
+
     FErrorMsg: WideString;
   protected
-    function GetCAPTCHAInput: TCAPTCHAInput; safecall;
-    procedure SetCAPTCHAInput(ACAPTCHAInput: TCAPTCHAInput); safecall;
     function GetHTTPManager: IHTTPManager; safecall;
-    procedure SetHTTPManager(AHTTPManager: IHTTPManager); safecall;
     function GetProxy: IProxy; safecall;
-    procedure SetProxy(AProxy: IProxy); safecall;
     function GetConnectTimeout: Integer; safecall;
-    procedure SetConnectTimeout(AConnectTimeout: Integer); safecall;
     function GetReadTimeout: Integer; safecall;
-    procedure SetReadTimeout(AReadTimeout: Integer); safecall;
+
     function GetErrorMsg: WideString; safecall;
     procedure SetErrorMsg(const AErrorMsg: WideString); safecall;
   public
     function SafeCallException(ExceptObject: TObject; ExceptAddr: Pointer): HResult; override;
+    procedure Initialize(const AHTTPManager: IHTTPManager; const AProxy: IProxy; const AConnectTimeout, AReadTimeout: Integer); safecall;
 
     constructor Create; virtual;
     destructor Destroy; override;
   public
+    function GetAuthor: WideString; virtual; safecall; abstract;
+    function GetAuthorURL: WideString; virtual; safecall; abstract;
+    function GetDescription: WideString; virtual; safecall; abstract;
     function GetName: WideString; virtual; safecall; abstract;
     function GetType: TPlugInType; virtual; safecall; abstract;
-    property CAPTCHAInput: TCAPTCHAInput read GetCAPTCHAInput;
 
     property HTTPManager: IHTTPManager read GetHTTPManager;
-    property Proxy: IProxy read GetProxy write SetProxy;
-    property ConnectTimeout: Integer read GetConnectTimeout write SetConnectTimeout;
-    property ReadTimeout: Integer read GetReadTimeout write SetReadTimeout;
+    property Proxy: IProxy read GetProxy;
+    property ConnectTimeout: Integer read GetConnectTimeout;
+    property ReadTimeout: Integer read GetReadTimeout;
+
     property ErrorMsg: WideString read GetErrorMsg write SetErrorMsg;
   end;
 
@@ -59,69 +58,47 @@ implementation
 
 { TPlugIn }
 
-function TPlugIn.GetCAPTCHAInput;
-begin
-  Result := FCAPTCHAInput;
-end;
-
-procedure TPlugIn.SetCAPTCHAInput(ACAPTCHAInput: TCAPTCHAInput);
-begin
-  FCAPTCHAInput := ACAPTCHAInput;
-end;
-
-function TPlugIn.GetHTTPManager: IHTTPManager;
+function TPlugIn.GetHTTPManager;
 begin
   Result := FHTTPManager;
 end;
 
-procedure TPlugIn.SetHTTPManager(AHTTPManager: IHTTPManager);
-begin
-  FHTTPManager := AHTTPManager;
-end;
-
-function TPlugIn.GetProxy: IProxy;
+function TPlugIn.GetProxy;
 begin
   Result := FProxy;
 end;
 
-procedure TPlugIn.SetProxy(AProxy: IProxy);
-begin
-  FProxy := AProxy;
-end;
-
-function TPlugIn.GetConnectTimeout: Integer;
+function TPlugIn.GetConnectTimeout;
 begin
   Result := FConnectTimeout;
 end;
 
-procedure TPlugIn.SetConnectTimeout(AConnectTimeout: Integer);
-begin
-  FConnectTimeout := AConnectTimeout;
-end;
-
-function TPlugIn.GetReadTimeout: Integer;
+function TPlugIn.GetReadTimeout;
 begin
   Result := FReadTimeout;
 end;
 
-procedure TPlugIn.SetReadTimeout(AReadTimeout: Integer);
-begin
-  FReadTimeout := AReadTimeout;
-end;
-
-function TPlugIn.GetErrorMsg: WideString;
+function TPlugIn.GetErrorMsg;
 begin
   Result := FErrorMsg;
 end;
 
-procedure TPlugIn.SetErrorMsg(const AErrorMsg: WideString);
+procedure TPlugIn.SetErrorMsg;
 begin
   FErrorMsg := AErrorMsg;
 end;
 
-function TPlugIn.SafeCallException(ExceptObject: TObject; ExceptAddr: Pointer): HResult;
+function TPlugIn.SafeCallException;
 begin
   Result := ComObj.HandleSafeCallException(ExceptObject, ExceptAddr, IUnknown, '', '');
+end;
+
+procedure TPlugIn.Initialize;
+begin
+  FHTTPManager := AHTTPManager;
+  FProxy := AProxy;
+  FConnectTimeout := AConnectTimeout;
+  FReadTimeout := AReadTimeout;
 end;
 
 constructor TPlugIn.Create;

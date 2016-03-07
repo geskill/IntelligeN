@@ -12,27 +12,54 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // plugin system
-  uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst;
+  uPlugInInterface, uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst;
 
 type
   TNcryptIn = class(TCrypterPlugIn)
-  private const
-    website = 'http://ncrypt.in/';
+  protected { . }
+  const
+    WEBSITE = 'http://ncrypt.in/';
   public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
     function GetName: WideString; override;
-    function AddFolder(const AMirrorContainer: IDirectlinkContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
-    function EditFolder(const AMirrorContainer: IDirectlinkContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
-    function DeleteFolder(AFolderIdentifier: WideString): WordBool; override; safecall;
-    function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+
+    function GetServiceRequiresAccess: TCrypterAccess; override;
+
+    function AddFolder(const ACrypterData: ICrypterData; const AMirrorContainer: IDirectlinkContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
+    function EditFolder(const ACrypterData: ICrypterData; const AMirrorContainer: IDirectlinkContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
+    function DeleteFolder(const AAccountData: IAccountData; const AFolderIdentifier: WideString): WordBool; override;
+    function GetFolder(const AAccountData: IAccountData; const AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
   end;
 
 implementation
 
 { TNcryptIn }
 
+function TNcryptIn.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TNcryptIn.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TNcryptIn.GetDescription;
+begin
+  Result := GetName + ' crypter plug-in.';
+end;
+
 function TNcryptIn.GetName;
 begin
   Result := 'nCrypt.in';
+end;
+
+function TNcryptIn.GetServiceRequiresAccess;
+begin
+  Result := caNone;
 end;
 
 function TNcryptIn.AddFolder;
@@ -61,16 +88,16 @@ begin
     StatusImageText := '';
   end;
 
-  LFoldertypes := TFoldertypes(TFoldertype(Foldertypes));
-  LContainertypes := TContainertypes(TContainertype(ContainerTypes));
+  LFoldertypes := TFoldertypes(TFoldertype(ACrypterData.Foldertypes));
+  LContainertypes := TContainertypes(TContainertype(ACrypterData.ContainerTypes));
 
   LHTTPParams := THTTPParams.Create;
   with LHTTPParams do
   begin
-    if UseAccount then
-      AddFormField('auth_code', AccountName);
+    if ACrypterData.UseAccount then
+      AddFormField('auth_code', ACrypterData.AccountName);
 
-    AddFormField('foldername', FolderName);
+    AddFormField('foldername', ACrypterData.FolderName);
 
     AddFormField('links', AMirrorContainer.Directlink[0].Value);
 
@@ -92,22 +119,22 @@ begin
       AddFormField('rsdf', IfThen(ctRSDF in LContainertypes, '1', '0'));
     end;
 
-    AddFormField('cnl', IfThen(UseCNL, '1', '0'));
+    AddFormField('cnl', IfThen(ACrypterData.UseCNL, '1', '0'));
 
-    AddFormField('captcha', IfThen(UseCaptcha, '1', '0'));
+    AddFormField('captcha', IfThen(ACrypterData.UseCaptcha, '1', '0'));
 
-    if UseVisitorPassword then
-      AddFormField('password', Visitorpassword);
+    if ACrypterData.UseVisitorPassword then
+      AddFormField('password', ACrypterData.Visitorpassword);
 
-    if UseDescription then
-      AddFormField('description', Description);
+    if ACrypterData.UseDescription then
+      AddFormField('description', ACrypterData.Description);
 
-    if UseCoverLink then
-      AddFormField('image', CoverLink);
+    if ACrypterData.UseCoverLink then
+      AddFormField('image', ACrypterData.CoverLink);
 
-    if UseEMailforStatusNotice then
+    if ACrypterData.UseEMailforStatusNotice then
     begin
-      AddFormField('notify_adress', EMailforStatusNotice);
+      AddFormField('notify_adress', ACrypterData.EMailforStatusNotice);
     end;
   end;
 

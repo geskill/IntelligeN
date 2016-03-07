@@ -12,24 +12,31 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst,
+  uPlugInInterface, uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
   uVariantUtils;
 
 type
   // see: http://linkcrypt.ws/image/Linkcrypt.ws_API-Create_folder_DE.pdf
   TLinkcryptWs = class(TCrypterPlugIn)
-  private const
+  protected { . }
+  const
     WEBSITE = 'http://linkcrypt.ws/';
 
     function GetFolderID(AFolderURL: string): string;
     function GetStatusImageLink(AFolderIdentifier: WideString; Small: WordBool = True): WideString;
   public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
     function GetName: WideString; override;
-    function AddFolder(const AMirrorContainer: IDirectlinkContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
-    function EditFolder(const AMirrorContainer: IDirectlinkContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
-    function DeleteFolder(AFolderIdentifier: WideString): WordBool; override; safecall;
-    function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+
+    function GetServiceRequiresAccess: TCrypterAccess; override;
+
+    function AddFolder(const ACrypterData: ICrypterData; const AMirrorContainer: IDirectlinkContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
+    function EditFolder(const ACrypterData: ICrypterData; const AMirrorContainer: IDirectlinkContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
+    function DeleteFolder(const AAccountData: IAccountData; const AFolderIdentifier: WideString): WordBool; override;
+    function GetFolder(const AAccountData: IAccountData; const AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
   end;
 
 implementation
@@ -60,9 +67,29 @@ begin
   end;
 end;
 
+function TLinkcryptWs.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TLinkcryptWs.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TLinkcryptWs.GetDescription;
+begin
+  Result := GetName + ' crypter plug-in.';
+end;
+
 function TLinkcryptWs.GetName;
 begin
   Result := 'Linkcrypt.ws';
+end;
+
+function TLinkcryptWs.GetServiceRequiresAccess;
+begin
+  Result := caAPIKey;
 end;
 
 function TLinkcryptWs.AddFolder;
@@ -94,27 +121,27 @@ begin
     StatusImageText := '';
   end;
 
-  LFoldertypes := TFoldertypes(TFoldertype(Foldertypes));
-  LContainertypes := TContainertypes(TContainertype(ContainerTypes));
+  LFoldertypes := TFoldertypes(TFoldertype(ACrypterData.Foldertypes));
+  LContainertypes := TContainertypes(TContainertype(ACrypterData.ContainerTypes));
 
   LHTTPParams := THTTPParams.Create;
   with LHTTPParams do
   begin
-    if UseAccount then
-      AddFormField('apiKey', AccountName);
+    if ACrypterData.UseAccount then
+      AddFormField('apiKey', ACrypterData.AccountName);
 
     AddFormField('urls', StringReplace(AMirrorContainer.Directlink[0].Value, sLineBreak, ';', [rfReplaceAll]));
 
-    if not SameStr('', FolderName) then
-      AddFormField('title', FolderName);
+    if not SameStr('', ACrypterData.FolderName) then
+      AddFormField('title', ACrypterData.FolderName);
 
-    if UseVisitorPassword then
-      AddFormField('folder_password', Visitorpassword);
+    if ACrypterData.UseVisitorPassword then
+      AddFormField('folder_password', ACrypterData.Visitorpassword);
 
-    if UseFilePassword then
-      AddFormField('download_password', FilePassword);
+    if ACrypterData.UseFilePassword then
+      AddFormField('download_password', ACrypterData.FilePassword);
 
-    AddFormField('captx', IfThen(UseCaptcha, '1', '0'));
+    AddFormField('captx', IfThen(ACrypterData.UseCaptcha, '1', '0'));
 
     AddFormField('weburls', IfThen(ftWeb in LFoldertypes, '1', '0'));
 
@@ -131,7 +158,7 @@ begin
       AddFormField('ccf', '0');
     end;
 
-    AddFormField('cnl', IfThen(UseCNL, '1', '0'));
+    AddFormField('cnl', IfThen(ACrypterData.UseCNL, '1', '0'));
 
     for LDirectlinkIndex := 1 to AMirrorContainer.DirectlinkCount - 1 do
       AddFormField('mirror_' + IntToStr(LDirectlinkIndex), StringReplace(AMirrorContainer.Directlink[LDirectlinkIndex].Value, sLineBreak, ';', [rfReplaceAll]));
@@ -227,8 +254,8 @@ begin
   LHTTPParams := THTTPParams.Create;
   with LHTTPParams do
   begin
-    if UseAccount then
-      AddFormField('apiKey', AccountName);
+    if AAccountData.UseAccount then
+      AddFormField('apiKey', AAccountData.AccountName);
 
     AddFormField('folderKey', GetFolderID(AFolderIdentifier));
   end;

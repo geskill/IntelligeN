@@ -12,19 +12,27 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // plugin system
-  uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst;
+  uPlugInInterface, uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst;
 
 type
   TShareLinksBiz = class(TCrypterPlugIn)
-  private const
-    website = 'http://share-links.biz/';
+  protected { . }
+  const
+    WEBSITE = 'http://share-links.biz/';
+
     function GetFolderID(AFolderName: string): string;
   public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
     function GetName: WideString; override;
-    function AddFolder(const AMirrorContainer: IDirectlinkContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
-    function EditFolder(const AMirrorContainer: IDirectlinkContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
-    function DeleteFolder(AFolderIdentifier: WideString): WordBool; override; safecall;
-    function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+
+    function GetServiceRequiresAccess: TCrypterAccess; override;
+
+    function AddFolder(const ACrypterData: ICrypterData; const AMirrorContainer: IDirectlinkContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
+    function EditFolder(const ACrypterData: ICrypterData; const AMirrorContainer: IDirectlinkContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
+    function DeleteFolder(const AAccountData: IAccountData; const AFolderIdentifier: WideString): WordBool; override;
+    function GetFolder(const AAccountData: IAccountData; const AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
   end;
 
 implementation
@@ -34,9 +42,29 @@ begin
   Result := copy(AFolderName, Pos('/_', string(AFolderName)) + 2);
 end;
 
+function TShareLinksBiz.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TShareLinksBiz.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TShareLinksBiz.GetDescription;
+begin
+  Result := GetName + ' crypter plug-in.';
+end;
+
 function TShareLinksBiz.GetName;
 begin
   Result := 'Share-Links.biz';
+end;
+
+function TShareLinksBiz.GetServiceRequiresAccess;
+begin
+  Result := caAPIKey;
 end;
 
 function TShareLinksBiz.AddFolder;
@@ -65,17 +93,17 @@ begin
     StatusImageText := '';
   end;
 
-  LFoldertypes := TFoldertypes(TFoldertype(Foldertypes));
-  LContainertypes := TContainertypes(TContainertype(ContainerTypes));
+  LFoldertypes := TFoldertypes(TFoldertype(ACrypterData.Foldertypes));
+  LContainertypes := TContainertypes(TContainertype(ACrypterData.ContainerTypes));
 
   LHTTPParams := THTTPParams.Create;
   with LHTTPParams do
   begin
-    if UseAccount then
-      AddFormField('apikey', AccountName);
+    if ACrypterData.UseAccount then
+      AddFormField('apikey', ACrypterData.AccountName);
 
-    if not(FolderName = '') then
-      AddFormField('folderName', FolderName);
+    if not(ACrypterData.FolderName = '') then
+      AddFormField('folderName', ACrypterData.FolderName);
 
     AddFormField('links', AMirrorContainer.Directlink[0].Value);
 
@@ -93,13 +121,13 @@ begin
       end;
     end;
 
-    AddFormField('captcha', IfThen(UseCaptcha, '1', '0'));
+    AddFormField('captcha', IfThen(ACrypterData.UseCaptcha, '1', '0'));
 
-    if UseVisitorPassword then
-      AddFormField('pass_user', Visitorpassword);
+    if ACrypterData.UseVisitorPassword then
+      AddFormField('pass_user', ACrypterData.Visitorpassword);
 
-    if UseAdminPassword then
-      AddFormField('pass_admin', AdminPassword);
+    if ACrypterData.UseAdminPassword then
+      AddFormField('pass_admin', ACrypterData.AdminPassword);
 
     AddFormField('c_web', IfThen(ftWeb in LFoldertypes, '1', '0'));
 
@@ -112,10 +140,10 @@ begin
       AddFormField('c_rsdf', IfThen(ctRSDF in LContainertypes, '1', '0'));
     end;
 
-    AddFormField('c_cnl', IfThen(UseCNL, '1', '0'));
+    AddFormField('c_cnl', IfThen(ACrypterData.UseCNL, '1', '0'));
 
-    if UseDescription then
-      AddFormField('comment', Description);
+    if ACrypterData.UseDescription then
+      AddFormField('comment', ACrypterData.Description);
   end;
 
   LRequestID := HTTPManager.Post(THTTPRequest.Create(website + 'api/insert'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
@@ -172,8 +200,8 @@ begin
   LHTTPParams := THTTPParams.Create;
   with LHTTPParams do
   begin
-    if UseAccount then
-      AddFormField('apikey', AccountName);
+    if AAccountData.UseAccount then
+      AddFormField('apikey', AAccountData.AccountName);
 
     AddFormField('folderCode', GetFolderID(AFolderIdentifier));
   end;

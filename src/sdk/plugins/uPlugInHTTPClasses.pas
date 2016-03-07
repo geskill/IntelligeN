@@ -1,3 +1,10 @@
+{ ********************************************************
+  *                            IntelligeN PLUGIN SYSTEM  *
+  *  PlugIn HTTP bridge                                  *
+  *  Version 2.5.0.0                                     *
+  *  Copyright (c) 2016 Sebastian Klatte                 *
+  *                                                      *
+  ******************************************************** }
 unit uPlugInHTTPClasses;
 
 interface
@@ -6,19 +13,19 @@ uses
   // HTTPManager
   uHTTPClasses,
   // plugin system
-  uPlugInInterface;
+  uPlugInClass;
 
 type
   TPlugInHTTPOptions = class(THTTPOptions)
   public
-    constructor Create(APlugIn: IPlugIn); overload;
+    constructor Create(const APlugIn: TPlugIn); overload;
   end;
 
 implementation
 
 { TPlugInHTTPOptions }
 
-constructor TPlugInHTTPOptions.Create(APlugIn: IPlugIn);
+constructor TPlugInHTTPOptions.Create(const APlugIn: TPlugIn);
 begin
   inherited Create(APlugIn.Proxy);
 

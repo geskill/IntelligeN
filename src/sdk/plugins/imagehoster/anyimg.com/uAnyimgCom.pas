@@ -12,25 +12,29 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInImageHosterClass, uPlugInHTTPClasses, uPlugInConst;
+  uPlugInInterface, uPlugInImageHosterClass, uPlugInHTTPClasses, uPlugInConst;
 
 type
   TAnyimgCom = class(TImageHosterPlugIn)
   protected { . }
   const
     WEBSITE: string = 'http://anyimg.com/';
-    function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
+    function Upload(const AImageHosterData: IImageHosterData; const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
     function GetName: WideString; override;
-    function LocalUpload(const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
-    function RemoteUpload(const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
+
+    function AddLocalImage(const AImageHosterData: IImageHosterData; const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
+    function AddWebImage(const AImageHosterData: IImageHosterData; const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
   end;
 
 implementation
 
 { TAnyimgCom }
 
-function TAnyimgCom.Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
+function TAnyimgCom.Upload;
 const
   UPLOADED_STRING: string = 'Uploaded/';
 var
@@ -127,9 +131,9 @@ begin
 
     AddFormField('a', '2'); // Adult Content
 
-    if not(ImageHostResize = irNone) then
+    if not(AImageHosterData.ImageHostResize = irNone) then
     begin
-      case ImageHostResize of
+      case AImageHosterData.ImageHostResize of
         ir320x240:
           AddFormField('imageSize', '320_240');
         ir450x338:
@@ -257,12 +261,27 @@ begin
   end;
 end;
 
-function TAnyimgCom.GetName: WideString;
+function TAnyimgCom.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TAnyimgCom.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TAnyimgCom.GetDescription;
+begin
+  Result := GetName + ' image hoster plug-in.';
+end;
+
+function TAnyimgCom.GetName;
 begin
   Result := 'Anyimg.com';
 end;
 
-function TAnyimgCom.LocalUpload;
+function TAnyimgCom.AddLocalImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -276,10 +295,10 @@ begin
     AddFile('uploadFiles[]', ALocalPath);
   end;
 
-  Result := Upload(LHTTPParams, AUrl);
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl);
 end;
 
-function TAnyimgCom.RemoteUpload;
+function TAnyimgCom.AddWebImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -293,7 +312,7 @@ begin
     AddFormField('remoteFiles[]', ARemoteUrl);
   end;
 
-  Result := Upload(LHTTPParams, AUrl);
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl);
 end;
 
 end.

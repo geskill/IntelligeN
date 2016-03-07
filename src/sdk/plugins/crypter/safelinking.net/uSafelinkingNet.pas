@@ -12,7 +12,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst,
+  uPlugInInterface, uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
   uVariantUtils;
 
@@ -22,19 +22,44 @@ type
   const
     WEBSITE = 'http://safelinking.net/';
   public
-    function GetName: WideString; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
 
-    function AddFolder(const AMirrorContainer: IDirectlinkContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
-    function EditFolder(const AMirrorContainer: IDirectlinkContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
-    function DeleteFolder(AFolderIdentifier: WideString): WordBool; override; safecall;
-    function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function GetServiceRequiresAccess: TCrypterAccess; override;
+
+    function AddFolder(const ACrypterData: ICrypterData; const AMirrorContainer: IDirectlinkContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
+    function EditFolder(const ACrypterData: ICrypterData; const AMirrorContainer: IDirectlinkContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
+    function DeleteFolder(const AAccountData: IAccountData; const AFolderIdentifier: WideString): WordBool; override;
+    function GetFolder(const AAccountData: IAccountData; const AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
   end;
 
 implementation
 
+function Tsafelinkingnet.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function Tsafelinkingnet.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function Tsafelinkingnet.GetDescription;
+begin
+  Result := GetName + ' crypter plug-in.';
+end;
+
 function Tsafelinkingnet.GetName;
 begin
   Result := 'Safelinking.net';
+end;
+
+function Tsafelinkingnet.GetServiceRequiresAccess;
+begin
+  Result := caAPIKey;
 end;
 
 function Tsafelinkingnet.AddFolder;
@@ -66,19 +91,19 @@ begin
     StatusImageText := '';
   end;
 
-  LFoldertypes := TFoldertypes(TFoldertype(Foldertypes));
-  LContainertypes := TContainertypes(TContainertype(ContainerTypes));
+  LFoldertypes := TFoldertypes(TFoldertype(ACrypterData.Foldertypes));
+  LContainertypes := TContainertypes(TContainertype(ACrypterData.ContainerTypes));
 
   LHTTPParams := THTTPParams.Create;
   with LHTTPParams do
   begin
-    if UseAccount then
+    if ACrypterData.UseAccount then
     begin
-      AddFormField('username', AccountName);
-      AddFormField('api_hash', AccountPassword);
+      AddFormField('username', ACrypterData.AccountName);
+      AddFormField('api_hash', ACrypterData.AccountPassword);
     end;
 
-    AddFormField('link-title', FolderName);
+    AddFormField('link-title', ACrypterData.FolderName);
 
     AddFormField('links-to-protect', AMirrorContainer.Directlink[0].Value);
 
@@ -100,18 +125,18 @@ begin
       AddFormField('rsdf', IfThen(ctRSDF in LContainertypes, 'on', 'no'));
     end;
 
-    AddFormField('cnl2', IfThen(UseCNL, 'on', 'no'));
+    AddFormField('cnl2', IfThen(ACrypterData.UseCNL, 'on', 'no'));
 
-    AddFormField('enable-captcha', IfThen(UseCaptcha, 'on', 'no'));
+    AddFormField('enable-captcha', IfThen(ACrypterData.UseCaptcha, 'on', 'no'));
 
-    if UseVisitorPassword then
-      AddFormField('link-password', Visitorpassword);
+    if ACrypterData.UseVisitorPassword then
+      AddFormField('link-password', ACrypterData.Visitorpassword);
 
-    if UseDescription then
-      AddFormField('link-description', Description);
+    if ACrypterData.UseDescription then
+      AddFormField('link-description', ACrypterData.Description);
 
-    if UseWebseiteLink then
-      AddFormField('provider-url', WebseiteLink);
+    if ACrypterData.UseWebseiteLink then
+      AddFormField('provider-url', ACrypterData.WebseiteLink);
 
     AddFormField('use-default-options', '1');
   end;

@@ -12,7 +12,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrawlerClass, uPlugInHTTPClasses,
+  uPlugInInterface, uPlugInCrawlerClass, uPlugInHTTPClasses,
   // Utils
   uHTMLUtils, uURLUtils;
 
@@ -22,19 +22,37 @@ type
   const
     WEBSITE = '%Website%';
   public
-    function GetName: WideString; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
 
-    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
-    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
-    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
-    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override;
+    function InternalGetDependentControlIDs: TControlIDs; override;
 
-    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+    function InternalGetRetrieveData(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AAccountData: IAccountData; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override;
 
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override;
   end;
 
 implementation
+
+function T%FullName%.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function T%FullName%.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function T%FullName%.GetDescription;
+begin
+  Result := GetName + ' crawler plug-in.';
+end;
 
 function T%FullName%.GetName;
 begin
@@ -82,7 +100,7 @@ begin
   Result := [cTitle];
 end;
 
-function T%FullName%.InternalExecute;
+function T%FullName%.InternalGetRetrieveData;
 
   procedure deep_search(AWebsiteSourceCode: string);
   var

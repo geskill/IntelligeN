@@ -14,7 +14,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrawlerClass, uPlugInHTTPClasses, uBigfishgamesCom;
+  uPlugInInterface, uPlugInCrawlerClass, uPlugInHTTPClasses, uBigfishgamesCom;
 
 type
   TBigfishgamesDe = class(TBigfishgamesCom)
@@ -24,7 +24,10 @@ type
 
     function BigfishgamesGetWebsite: string; override;
   public
-    function GetName: WideString; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
   end;
 
 implementation
@@ -34,6 +37,21 @@ implementation
 function TBigfishgamesDe.BigfishgamesGetWebsite: string;
 begin
   Result := WEBSITE;
+end;
+
+function TBigfishgamesDe.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TBigfishgamesDe.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TBigfishgamesDe.GetDescription;
+begin
+  Result := GetName + ' crawler plug-in.';
 end;
 
 function TBigfishgamesDe.GetName;

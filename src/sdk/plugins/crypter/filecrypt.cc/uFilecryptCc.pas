@@ -12,7 +12,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst,
+  uPlugInInterface, uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
   uVariantUtils;
 
@@ -25,12 +25,17 @@ type
 
     function GetFolderID(AFolderURL: string): string;
   public
-    function GetName: WideString; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
 
-    function AddFolder(const AMirrorContainer: IDirectlinkContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
-    function EditFolder(const AMirrorContainer: IDirectlinkContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
-    function DeleteFolder(AFolderIdentifier: WideString): WordBool; override; safecall;
-    function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function GetServiceRequiresAccess: TCrypterAccess; override;
+
+    function AddFolder(const ACrypterData: ICrypterData; const AMirrorContainer: IDirectlinkContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
+    function EditFolder(const ACrypterData: ICrypterData; const AMirrorContainer: IDirectlinkContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
+    function DeleteFolder(const AAccountData: IAccountData; const AFolderIdentifier: WideString): WordBool; override;
+    function GetFolder(const AAccountData: IAccountData; const AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
   end;
 
 implementation
@@ -51,9 +56,29 @@ begin
     end;
 end;
 
+function TFilecryptCc.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TFilecryptCc.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TFilecryptCc.GetDescription;
+begin
+  Result := GetName + ' crypter plug-in.';
+end;
+
 function TFilecryptCc.GetName;
 begin
   Result := 'Filecrypt.cc';
+end;
+
+function TFilecryptCc.GetServiceRequiresAccess;
+begin
+  Result := caAPIKey;
 end;
 
 function TFilecryptCc.AddFolder;
@@ -86,28 +111,28 @@ begin
     StatusImageText := '';
   end;
 
-  LFoldertypes := TFoldertypes(TFoldertype(Foldertypes));
-  LContainertypes := TContainertypes(TContainertype(ContainerTypes));
+  LFoldertypes := TFoldertypes(TFoldertype(ACrypterData.Foldertypes));
+  LContainertypes := TContainertypes(TContainertype(ACrypterData.ContainerTypes));
 
   LHTTPParams := THTTPParams.Create;
   with LHTTPParams do
   begin
-    if UseAccount then
-      AddFormField('api_key', AccountName);
+    if ACrypterData.UseAccount then
+      AddFormField('api_key', ACrypterData.AccountName);
 
-    AddFormField('foldername', FolderName);
+    AddFormField('foldername', ACrypterData.FolderName);
 
     for LDirectlinkIndex := 0 to AMirrorContainer.DirectlinkCount - 1 do
       AddFormField('mirror[]', AMirrorContainer.Directlink[LDirectlinkIndex].Value);
 
     AddFormField('allow_links', IfThen(ftWeb in LFoldertypes, '1', '0'));
 
-    AddFormField('allow_container', IfThen((ftContainer in LFoldertypes) or UseCNL, '1', '0'));
+    AddFormField('allow_container', IfThen((ftContainer in LFoldertypes) or ACrypterData.UseCNL, '1', '0'));
 
-    AddFormField('captcha', IfThen(UseCaptcha, '1', '0'));
+    AddFormField('captcha', IfThen(ACrypterData.UseCaptcha, '1', '0'));
 
-    if UseVisitorPassword then
-      AddFormField('folderpass', Visitorpassword);
+    if ACrypterData.UseVisitorPassword then
+      AddFormField('folderpass', ACrypterData.Visitorpassword);
 
     AddFormField('fn', 'container');
 
@@ -226,8 +251,8 @@ begin
   LHTTPParams := THTTPParams.Create;
   with LHTTPParams do
   begin
-    if UseAccount then
-      AddFormField('api_key', AccountName);
+    if AAccountData.UseAccount then
+      AddFormField('api_key', AAccountData.AccountName);
 
     AddFormField('container_id', GetFolderID(AFolderIdentifier));
 

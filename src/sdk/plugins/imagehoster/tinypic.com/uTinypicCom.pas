@@ -10,25 +10,29 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInImageHosterClass, uPlugInHTTPClasses, uPlugInConst,
+  uPlugInInterface, uPlugInImageHosterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
   uHTMLUtils;
 
 type
   TTinypicCom = class(TImageHosterPlugIn)
   private
-    function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
+    function Upload(const AImageHosterData: IImageHosterData; const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
     function GetName: WideString; override;
-    function LocalUpload(const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
-    function RemoteUpload(const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
+
+    function AddLocalImage(const AImageHosterData: IImageHosterData; const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
+    function AddWebImage(const AImageHosterData: IImageHosterData; const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
   end;
 
 implementation
 
 { TTinypicCom }
 
-function TTinypicCom.Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
+function TTinypicCom.Upload;
 var
   LRequestID: Double;
   LHTTPProcess: IHTTPProcess;
@@ -75,13 +79,13 @@ begin
     AddFormField('MAX_FILE_SIZE', '200000000');
 
     AddFormField('description', '');
-    if (ImageHostResize = irNone) then
+    if (AImageHosterData.ImageHostResize = irNone) then
     begin
       AddFormField('dimension', '1600');
     end
     else
     begin
-      case ImageHostResize of
+      case AImageHosterData.ImageHostResize of
         ir320x240:
           begin
             AddFormField('dimension', '320');
@@ -152,12 +156,27 @@ begin
 
 end;
 
+function TTinypicCom.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TTinypicCom.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TTinypicCom.GetDescription;
+begin
+  Result := GetName + ' image hoster plug-in.';
+end;
+
 function TTinypicCom.GetName;
 begin
   Result := 'Tinypic.com';
 end;
 
-function TTinypicCom.LocalUpload;
+function TTinypicCom.AddLocalImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -170,10 +189,10 @@ begin
     AddFormField('file_type', 'image');
   end;
 
-  Result := Upload(LHTTPParams, AUrl);
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl);
 end;
 
-function TTinypicCom.RemoteUpload;
+function TTinypicCom.AddWebImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -186,7 +205,7 @@ begin
     AddFormField('file_type', 'url');
   end;
 
-  Result := Upload(LHTTPParams, AUrl);
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl);
 end;
 
 end.

@@ -8,25 +8,29 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInImageHosterClass, uPlugInHTTPClasses, uPlugInConst;
+  uPlugInInterface, uPlugInImageHosterClass, uPlugInHTTPClasses, uPlugInConst;
 
 type
   TDdlwOrg = class(TImageHosterPlugIn)
   protected { . }
   const
     WEBSITE: string = 'http://ddlw.org/';
-    function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
+    function Upload(const AImageHosterData: IImageHosterData; const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
     function GetName: WideString; override;
-    function LocalUpload(const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
-    function RemoteUpload(const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
+
+    function AddLocalImage(const AImageHosterData: IImageHosterData; const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
+    function AddWebImage(const AImageHosterData: IImageHosterData; const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
   end;
 
 implementation
 
 { TDdlwOrg }
 
-function TDdlwOrg.Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
+function TDdlwOrg.Upload;
 var
   LHTTPRequest: IHTTPRequest;
   LHTTPOptions: IHTTPOptions;
@@ -45,9 +49,9 @@ begin
 
   with AHTTPParams do
   begin
-    if not(ImageHostResize = irNone) then
+    if not(AImageHosterData.ImageHostResize = irNone) then
     begin
-      case ImageHostResize of
+      case AImageHosterData.ImageHostResize of
         ir320x240:
           AddFormField('imgsize', '240');
         ir450x338:
@@ -91,12 +95,27 @@ begin
   end;
 end;
 
+function TDdlwOrg.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TDdlwOrg.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TDdlwOrg.GetDescription;
+begin
+  Result := GetName + ' image hoster plug-in.';
+end;
+
 function TDdlwOrg.GetName: WideString;
 begin
   Result := 'Ddlw.org';
 end;
 
-function TDdlwOrg.LocalUpload;
+function TDdlwOrg.AddLocalImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -106,10 +125,10 @@ begin
   with LHTTPParams do
     AddFile('file', ALocalPath);
 
-  Result := Upload(LHTTPParams, AUrl);
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl);
 end;
 
-function TDdlwOrg.RemoteUpload;
+function TDdlwOrg.AddWebImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -119,7 +138,7 @@ begin
   with LHTTPParams do
     AddFormField('url', ARemoteUrl);
 
-  Result := Upload(LHTTPParams, AUrl);
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl);
 end;
 
 end.

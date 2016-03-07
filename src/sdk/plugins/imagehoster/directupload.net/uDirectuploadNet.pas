@@ -10,7 +10,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInImageHosterClass, uPlugInHTTPClasses,
+  uPlugInInterface, uPlugInImageHosterClass, uPlugInHTTPClasses,
   // Utils
   uHTMLUtils;
 
@@ -19,18 +19,22 @@ type
   protected { . }
   const
     WEBSITE: string = 'http://www.directupload.net/';
-    function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
+    function Upload(const AImageHosterData: IImageHosterData; const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
     function GetName: WideString; override;
-    function LocalUpload(const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
-    function RemoteUpload(const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
+
+    function AddLocalImage(const AImageHosterData: IImageHosterData; const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
+    function AddWebImage(const AImageHosterData: IImageHosterData; const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
   end;
 
 implementation
 
 { TDirectuploadNet }
 
-function TDirectuploadNet.Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
+function TDirectuploadNet.Upload;
 var
   LHTTPRequest: IHTTPRequest;
 
@@ -93,12 +97,27 @@ begin
   end;
 end;
 
+function TDirectuploadNet.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TDirectuploadNet.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TDirectuploadNet.GetDescription;
+begin
+  Result := GetName + ' image hoster plug-in.';
+end;
+
 function TDirectuploadNet.GetName: WideString;
 begin
   Result := 'Directupload.net';
 end;
 
-function TDirectuploadNet.LocalUpload;
+function TDirectuploadNet.AddLocalImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -111,10 +130,10 @@ begin
     AddFile('bilddatei', ALocalPath);
   end;
 
-  Result := Upload(LHTTPParams, AUrl);
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl);
 end;
 
-function TDirectuploadNet.RemoteUpload;
+function TDirectuploadNet.AddWebImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -127,7 +146,7 @@ begin
     AddFormField('image_link', ARemoteUrl);
   end;
 
-  Result := Upload(LHTTPParams, AUrl);
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl);
 end;
 
 end.

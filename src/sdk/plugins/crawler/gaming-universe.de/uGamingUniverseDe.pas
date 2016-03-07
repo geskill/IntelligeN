@@ -14,7 +14,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrawlerClass, uPlugInHTTPClasses;
+  uPlugInInterface, uPlugInCrawlerClass, uPlugInHTTPClasses;
 
 type
   TGamingUniverseDe = class(TCrawlerPlugIn)
@@ -24,16 +24,19 @@ type
 
     function GetGameSearchType(const ATypeID: TTypeID): string;
   public
-    function GetName: WideString; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
 
-    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
-    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
-    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
-    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override;
+    function InternalGetDependentControlIDs: TControlIDs; override;
 
-    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+    function InternalGetRetrieveData(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AAccountData: IAccountData; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override;
 
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override;
   end;
 
 implementation
@@ -44,10 +47,14 @@ function TGamingUniverseDe.GetGameSearchType(const ATypeID: TTypeID): string;
 begin
   Result := '';
 
-  // cNintendoDS, cPlayStation3, cPlayStation4, cPlayStationVita, cWii, cWiiU, cXbox360, cXboxOne
+  // cNintendoDS, cNintendo3DS, cPlayStation3, cPlayStation4, cPlayStationVita, cWii, cWiiU, cXbox360, cXboxOne
 
   case ATypeID of
     cNintendoDS:
+      begin
+        Result := 'nintendods';
+      end;
+    cNintendo3DS:
       begin
         Result := 'nintendo3ds';
       end;
@@ -82,6 +89,21 @@ begin
   end;
 end;
 
+function TGamingUniverseDe.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TGamingUniverseDe.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TGamingUniverseDe.GetDescription;
+begin
+  Result := GetName + ' crawler plug-in.';
+end;
+
 function TGamingUniverseDe.GetName;
 begin
   Result := 'gaming-universe.org';
@@ -107,7 +129,7 @@ begin
   Result := [cTitle];
 end;
 
-function TGamingUniverseDe.InternalExecute;
+function TGamingUniverseDe.InternalGetRetrieveData;
 
   procedure deep_search(AWebsiteSourceCode: string);
   var

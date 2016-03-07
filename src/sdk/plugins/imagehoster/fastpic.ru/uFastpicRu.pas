@@ -12,7 +12,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInImageHosterClass, uPlugInHTTPClasses, uPlugInConst,
+  uPlugInInterface, uPlugInImageHosterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
   uHTMLUtils;
 
@@ -21,18 +21,22 @@ type
   protected { . }
   const
     WEBSITE: string = 'http://fastpic.ru/';
-    function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString; AUploadURI: string): Boolean;
+    function Upload(const AImageHosterData: IImageHosterData; const AHTTPParams: IHTTPParams; out AImageUrl: WideString; AUploadURI: string): Boolean;
   public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
     function GetName: WideString; override;
-    function LocalUpload(const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
-    function RemoteUpload(const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
+
+    function AddLocalImage(const AImageHosterData: IImageHosterData; const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
+    function AddWebImage(const AImageHosterData: IImageHosterData; const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
   end;
 
 implementation
 
 { TFastpicRu }
 
-function TFastpicRu.Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString; AUploadURI: string): Boolean;
+function TFastpicRu.Upload;
 var
   LHTTPRequest: IHTTPRequest;
   LHTTPOptions: IHTTPOptions;
@@ -65,11 +69,11 @@ begin
 
     AddFormField('uploading', '1');
 
-    if not(ImageHostResize = irNone) then
+    if not(AImageHosterData.ImageHostResize = irNone) then
     begin
       AddFormField('check_orig_resize', '1');
 
-      case ImageHostResize of
+      case AImageHosterData.ImageHostResize of
         ir320x240:
           begin
             AddFormField('res_select', '320');
@@ -150,12 +154,27 @@ begin
   end;
 end;
 
+function TFastpicRu.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TFastpicRu.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TFastpicRu.GetDescription;
+begin
+  Result := GetName + ' image hoster plug-in.';
+end;
+
 function TFastpicRu.GetName;
 begin
   Result := 'Fastpic.ru';
 end;
 
-function TFastpicRu.LocalUpload;
+function TFastpicRu.AddLocalImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -167,10 +186,10 @@ begin
     AddFile('file[]', ALocalPath);
   end;
 
-  Result := Upload(LHTTPParams, AUrl, 'uploadmulti');
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl, 'uploadmulti');
 end;
 
-function TFastpicRu.RemoteUpload;
+function TFastpicRu.AddWebImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -182,7 +201,7 @@ begin
     AddFormField('files', ARemoteUrl);
   end;
 
-  Result := Upload(LHTTPParams, AUrl, 'upload_copy');
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl, 'upload_copy');
 end;
 
 end.

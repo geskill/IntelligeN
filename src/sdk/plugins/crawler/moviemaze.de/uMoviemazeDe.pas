@@ -12,7 +12,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrawlerClass, uPlugInHTTPClasses,
+  uPlugInInterface, uPlugInCrawlerClass, uPlugInHTTPClasses,
   // Utils
   uHTMLUtils, uStringUtils;
 
@@ -22,34 +22,39 @@ type
   const
     WEBSITE = 'http://www.moviemaze.de/';
 
-    function MoviemazeHTMLDescription2Text(AHtmlContent: string): string;
   public
-    function GetName: WideString; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
 
-    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
-    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
-    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
-    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override;
+    function InternalGetDependentControlIDs: TControlIDs; override;
 
-    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+    function InternalGetRetrieveData(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AAccountData: IAccountData; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override;
 
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override;
   end;
 
 implementation
 
 { TMoviemazeDe }
 
-function TMoviemazeDe.MoviemazeHTMLDescription2Text(AHtmlContent: string): string;
-var
-  Text: string;
+function TMoviemazeDe.GetAuthor;
 begin
-  Text := Trim(HTML2Text(AHtmlContent, False, True));
-  try
-    Result := HTMLDecode(Text);
-  except
-    Result := Text;
-  end;
+  Result := 'Sebastian Klatte';
+end;
+
+function TMoviemazeDe.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TMoviemazeDe.GetDescription;
+begin
+  Result := GetName + ' crawler plug-in.';
 end;
 
 function TMoviemazeDe.GetName;
@@ -77,7 +82,7 @@ begin
   Result := [cTitle];
 end;
 
-function TMoviemazeDe.InternalExecute;
+function TMoviemazeDe.InternalGetRetrieveData;
 
   procedure deep_search_picture(AWebsiteSourceCode: string);
   var
@@ -216,7 +221,7 @@ function TMoviemazeDe.InternalExecute;
           Expression := 'itemprop="articleBody">(.*?)<\/article>';
 
           if Exec(InputString) then
-            AControlController.FindControl(cDescription).AddProposedValue(GetName, MoviemazeHTMLDescription2Text(Match[1]));
+            AControlController.FindControl(cDescription).AddProposedValue(GetName, Trim(HTML2TextAndDecode(Match[1])));
         finally
           Free;
         end;

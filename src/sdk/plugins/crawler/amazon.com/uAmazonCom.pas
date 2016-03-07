@@ -16,7 +16,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrawlerClass, uPlugInHTTPClasses;
+  uPlugInInterface, uPlugInCrawlerClass, uPlugInHTTPClasses;
 
 type
   TAmazonCom = class(TCrawlerPlugIn)
@@ -32,16 +32,19 @@ type
 
     function AmazonCanAddImage(AImageLink: string): Boolean;
   public
-    function GetName: WideString; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
 
-    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
-    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
-    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
-    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override;
+    function InternalGetDependentControlIDs: TControlIDs; override;
 
-    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+    function InternalGetRetrieveData(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AAccountData: IAccountData; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override;
 
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override;
   end;
 
 implementation
@@ -76,7 +79,11 @@ begin
   case ATypeID of
     cNintendoDS:
       begin
-        Result := (ASystem = 'Nintendo DS') or (ASystem = 'Nintendo 3DS');
+        Result := (ASystem = 'Nintendo DS');
+      end;
+    cNintendo3DS:
+      begin
+        Result := (ASystem = 'Nintendo 3DS');
       end;
     cPCGames:
       begin
@@ -138,6 +145,21 @@ begin
   Result := not SameStr('', AImageLink) and not(Pos('no-img', AImageLink) > 0);
 end;
 
+function TAmazonCom.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TAmazonCom.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TAmazonCom.GetDescription;
+begin
+  Result := GetName + ' crawler plug-in.';
+end;
+
 function TAmazonCom.GetName;
 begin
   Result := 'Amazon.com';
@@ -166,7 +188,7 @@ begin
   Result := [cTitle];
 end;
 
-function TAmazonCom.InternalExecute;
+function TAmazonCom.InternalGetRetrieveData;
 
   procedure deep_search(AWebsiteSourceCode: string);
   var

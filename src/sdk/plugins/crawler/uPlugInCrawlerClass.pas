@@ -2,7 +2,7 @@
   *                            IntelligeN PLUGIN SYSTEM  *
   *  PlugIn crawler class                                *
   *  Version 2.5.0.0                                     *
-  *  Copyright (c) 2015 Sebastian Klatte                 *
+  *  Copyright (c) 2016 Sebastian Klatte                 *
   *                                                      *
   ******************************************************** }
 unit uPlugInCrawlerClass;
@@ -25,27 +25,16 @@ type
   TCrawlerCanUseFunc = reference to function(AControlID: TControlID): WordBool;
 
   TCrawlerPlugIn = class(TPlugIn, ICrawlerPlugIn)
-  private
-    FUseAccount: WordBool;
-    FAccountname, FAccountpassword: WideString;
   protected
-    function GetUseAccount: WordBool; safecall;
-    procedure SetUseAccount(AUseAccount: WordBool); safecall;
-    function GetAccountName: WideString; safecall;
-    procedure SetAccountName(const AAccountName: WideString); safecall;
-    function GetAccountPassword: WideString; safecall;
-    procedure SetAccountPassword(const AAccountPassword: WideString); safecall;
-
     function InternalGetAvailableTypeIDs: TTypeIDs; virtual; safecall;
     function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; virtual; safecall;
     function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; virtual; safecall;
     function InternalGetDependentControlIDs: TControlIDs; virtual; safecall;
+    function InternalGetRetrieveData(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AAccountData: IAccountData; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; virtual; safecall; abstract;
 
     function GETRequest(const AURL: string; out ARequestID: Double; AHTTPOptions: IHTTPOptions = nil): string;
     function GETFollowUpRequest(const AURL: string; AFollowUp: Double; out ARequestID: Double; AHTTPOptions: IHTTPOptions = nil): string;
     function SimpleGETRequest(const AURL: string; AHTTPOptions: IHTTPOptions = nil): string;
-
-    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; virtual; safecall; abstract;
   public
     function GetType: TPlugInType; override; safecall;
 
@@ -55,44 +44,10 @@ type
     function GetDependentControlIDs: Integer; safecall;
     function GetResultsLimitDefaultValue: Integer; virtual; safecall;
 
-    property UseAccount: WordBool read GetUseAccount write SetUseAccount;
-    property AccountName: WideString read GetAccountName write SetAccountName;
-    property AccountPassword: WideString read GetAccountPassword write SetAccountPassword;
-
-    function Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool; safecall;
+    function GetRetrieveData(const ATypeID, AControlIDs, ALimit: Integer; const AAccountData: IAccountData; const AControlController: IControlControllerBase): WordBool; safecall;
   end;
 
 implementation
-
-function TCrawlerPlugIn.GetUseAccount: WordBool;
-begin
-  Result := FUseAccount;
-end;
-
-procedure TCrawlerPlugIn.SetUseAccount(AUseAccount: WordBool);
-begin
-  FUseAccount := AUseAccount;
-end;
-
-function TCrawlerPlugIn.GetAccountName: WideString;
-begin
-  Result := FAccountname;
-end;
-
-procedure TCrawlerPlugIn.SetAccountName(const AAccountName: WideString);
-begin
-  FAccountname := AAccountName;
-end;
-
-function TCrawlerPlugIn.GetAccountPassword: WideString;
-begin
-  Result := FAccountpassword;
-end;
-
-procedure TCrawlerPlugIn.SetAccountPassword(const AAccountPassword: WideString);
-begin
-  FAccountpassword := AAccountPassword;
-end;
 
 function TCrawlerPlugIn.InternalGetAvailableTypeIDs: TTypeIDs;
 begin
@@ -168,12 +123,12 @@ begin
   Result := GETRequest(AURL, LRequestID, AHTTPOptions);
 end;
 
-function TCrawlerPlugIn.GetType: TPlugInType;
+function TCrawlerPlugIn.GetType;
 begin
   Result := ptCrawler;
 end;
 
-function TCrawlerPlugIn.GetAvailableTypeIDs: Integer;
+function TCrawlerPlugIn.GetAvailableTypeIDs;
 var
   LTypeIDs: TTypeIDs;
 begin
@@ -181,7 +136,7 @@ begin
   Result := Word(LTypeIDs);
 end;
 
-function TCrawlerPlugIn.GetAvailableControlIDs(const ATypeID: Integer): Integer;
+function TCrawlerPlugIn.GetAvailableControlIDs;
 var
   LControlIDs: TControlIDs;
 begin
@@ -189,12 +144,12 @@ begin
   Result := LongWord(LControlIDs);
 end;
 
-function TCrawlerPlugIn.GetControlIDDefaultValue(const ATypeID, AControlID: Integer): WordBool;
+function TCrawlerPlugIn.GetControlIDDefaultValue;
 begin
   Result := InternalGetControlIDDefaultValue(TTypeID(ATypeID), TControlID(AControlID));
 end;
 
-function TCrawlerPlugIn.GetDependentControlIDs: Integer;
+function TCrawlerPlugIn.GetDependentControlIDs;
 var
   LControlIDs: TControlIDs;
 begin
@@ -202,17 +157,17 @@ begin
   Result := LongWord(LControlIDs);
 end;
 
-function TCrawlerPlugIn.GetResultsLimitDefaultValue: Integer;
+function TCrawlerPlugIn.GetResultsLimitDefaultValue;
 begin
   Result := 5;
 end;
 
-function TCrawlerPlugIn.Exec(const ATypeID, AControlIDs, ALimit: Integer; const AControlController: IControlControllerBase): WordBool;
+function TCrawlerPlugIn.GetRetrieveData;
 var
   LControlIDs: TControlIDs;
 begin
   LongWord(LControlIDs) := AControlIDs;
-  Result := InternalExecute(TTypeID(ATypeID), LControlIDs, ALimit, AControlController, { }
+  Result := InternalGetRetrieveData(TTypeID(ATypeID), LControlIDs, ALimit, AAccountData, AControlController, { }
     { } function(AControlID: TControlID): WordBool
     { } begin
     { . } Result := Assigned(AControlController.FindControl(AControlID)) and (AControlID in LControlIDs);

@@ -2,7 +2,7 @@
   *                            IntelligeN PLUGIN SYSTEM  *
   *  PlugIn constants                                    *
   *  Version 2.5.0.0                                     *
-  *  Copyright (c) 2015 Sebastian Klatte                 *
+  *  Copyright (c) 2016 Sebastian Klatte                 *
   *                                                      *
   ******************************************************** }
 unit uPlugInConst;
@@ -22,6 +22,7 @@ type
   TIntelligentPostingHelper = function(const AWebsite: WideString; const ASubject: WideString; var ASearchValue: WideString; const ASearchResults: WideString; var ASearchIndex: Integer; out ARedoSearch: WordBool): WordBool of object; safecall;
   TCMSType = (cmsBoard, cmsBlog, cmsFormbased);
   TCMSIDType = (citCategory, citPrefix, citIcon);
+  TCrypterAccess = (caNone, caUserName, caEMailAddress, caAPIKey);
   TFoldertype = (ftWeb, ftPlain, ftContainer);
   TFoldertypes = set of TFoldertype;
   TContainertype = (ctDLC, ctCCF, ctRSDF);
@@ -33,6 +34,10 @@ type
 
   TIDInfo = packed record
     ID, Path: WideString;
+  end;
+
+  TCMSArticleInfo = packed record
+    ArticleID, ArticlePathID: Integer;
   end;
 
   TLinkInfo = packed record

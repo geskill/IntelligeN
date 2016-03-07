@@ -10,25 +10,29 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInImageHosterClass, uPlugInHTTPClasses, uPlugInConst;
+  uPlugInInterface, uPlugInImageHosterClass, uPlugInHTTPClasses, uPlugInConst;
 
 type
   TImgurCom = class(TImageHosterPlugIn)
   protected { . }
   const
     WEBSITE: string = 'http://imgur.com/';
-    function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString; AFileExt: string): Boolean;
+    function Upload(const AImageHosterData: IImageHosterData; const AHTTPParams: IHTTPParams; out AImageUrl: WideString; AFileExt: string): Boolean;
   public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
     function GetName: WideString; override;
-    function LocalUpload(const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
-    function RemoteUpload(const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
+
+    function AddLocalImage(const AImageHosterData: IImageHosterData; const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
+    function AddWebImage(const AImageHosterData: IImageHosterData; const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
   end;
 
 implementation
 
 { TImgurCom }
 
-function TImgurCom.Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString; AFileExt: string): Boolean;
+function TImgurCom.Upload;
 var
   LHTTPRequest: IHTTPRequest;
 
@@ -100,12 +104,27 @@ begin
   end;
 end;
 
+function TImgurCom.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TImgurCom.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TImgurCom.GetDescription;
+begin
+  Result := GetName + ' image hoster plug-in.';
+end;
+
 function TImgurCom.GetName: WideString;
 begin
   Result := 'Imgur.com';
 end;
 
-function TImgurCom.LocalUpload;
+function TImgurCom.AddLocalImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -115,10 +134,10 @@ begin
   with LHTTPParams do
     AddFile('Filedata', ALocalPath);
 
-  Result := Upload(LHTTPParams, AUrl, ExtractFileExt(ALocalPath));
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl, ExtractFileExt(ALocalPath));
 end;
 
-function TImgurCom.RemoteUpload;
+function TImgurCom.AddWebImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -128,7 +147,7 @@ begin
   with LHTTPParams do
     AddFormField('url', ARemoteUrl);
 
-  Result := Upload(LHTTPParams, AUrl, ExtractFileExt(ARemoteUrl));
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl, ExtractFileExt(ARemoteUrl));
 end;
 
 end.

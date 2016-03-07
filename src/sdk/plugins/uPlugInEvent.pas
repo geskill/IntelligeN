@@ -2,7 +2,7 @@
   *                            IntelligeN PLUGIN SYSTEM  *
   *  PlugIn events                                       *
   *  Version 2.5.0.0                                     *
-  *  Copyright (c) 2015 Sebastian Klatte                 *
+  *  Copyright (c) 2016 Sebastian Klatte                 *
   *                                                      *
   ******************************************************** }
 unit uPlugInEvent;
@@ -29,6 +29,13 @@ type
   TICaptionChangeEventHandler = class(TGenericEventHandler<TCaptionChangeMethod>, ICaptionChangeEventHandler)
   public
     procedure Invoke(const NewCaption: WideString); safecall;
+  end;
+
+  TIThreadMethod = procedure(const Sender: ITabSheetController; const SenderObject: IUnknown) of object;
+
+  TIThreadEventHandler = class(TGenericEventHandler<TIThreadMethod>, IThreadEventHandler)
+  public
+    procedure Invoke(const Sender: ITabSheetController; const SenderObject: IUnknown); safecall;
   end;
 
   TITabSheetMethod = procedure(const Sender: ITabSheetController) of object;
@@ -82,6 +89,14 @@ procedure TICaptionChangeEventHandler.Invoke(const NewCaption: WideString);
 begin
   if (@FHandler <> nil) then
     FHandler(NewCaption);
+end;
+
+{ TIThreadEventHandler }
+
+procedure TIThreadEventHandler.Invoke(const Sender: ITabSheetController; const SenderObject: IUnknown);
+begin
+  if (@FHandler <> nil) then
+    FHandler(Sender, SenderObject);
 end;
 
 { TITabSheetEventHandler }

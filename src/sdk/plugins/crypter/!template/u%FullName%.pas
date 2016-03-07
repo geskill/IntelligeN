@@ -12,7 +12,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst,
+  uPlugInInterface, uPlugInCrypterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
   uVariantUtils;
 
@@ -21,21 +21,55 @@ type
   protected { . }
   const
     WEBSITE = '%Website%';
-  public
-    function GetName: WideString; override; safecall;
 
-    function AddFolder(const AMirrorContainer: IDirectlinkContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
-    function EditFolder(const AMirrorContainer: IDirectlinkContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
-    function DeleteFolder(AFolderIdentifier: WideString): WordBool; override; safecall;
-    function GetFolder(AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override; safecall;
+    function GetFolderID(AFolderURL: string): string;
+  public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
+
+    function GetServiceRequiresAccess: TCrypterAccess; override;
+
+    function AddFolder(const ACrypterData: ICrypterData; const AMirrorContainer: IDirectlinkContainer; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
+    function EditFolder(const ACrypterData: ICrypterData; const AMirrorContainer: IDirectlinkContainer; var ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
+    function DeleteFolder(const AAccountData: IAccountData; const AFolderIdentifier: WideString): WordBool; override;
+    function GetFolder(const AAccountData: IAccountData; const AFolderIdentifier: WideString; out ACrypterFolderInfo: TCrypterFolderInfo): WordBool; override;
   end;
 
 implementation
+
+function T%FullName%.GetFolderID;
+begin
+  { TODO : implement? }
+  Result := '';
+end;
+
+function T%FullName%.GetAuthor;
+begin
+  Result := '%CompanyName%';
+end;
+
+function T%FullName%.GetAuthorURL;
+begin
+  Result := 'http://example.com/';
+end;
+
+function T%FullName%.GetDescription;
+begin
+  Result := GetName + ' crypter plug-in.';
+end;
 
 function T%FullName%.GetName;
 begin
   { TODO : change name? }
   Result := '%FullName%';
+end;
+
+function T%FullName%.GetServiceRequiresAccess;
+begin
+  { TODO : change? }
+  Result := caAPIKey;
 end;
 
 function T%FullName%.AddFolder;
@@ -64,17 +98,17 @@ begin
     StatusImageText := '';
   end;
 
-  LFoldertypes := TFoldertypes(TFoldertype(Foldertypes));
-  LContainertypes := TContainertypes(TContainertype(ContainerTypes));
+  LFoldertypes := TFoldertypes(TFoldertype(ACrypterData.Foldertypes));
+  LContainertypes := TContainertypes(TContainertype(ACrypterData.ContainerTypes));
 
   LHTTPParams := THTTPParams.Create;
   with LHTTPParams do
   begin
     { TODO : update example parameters }
-    if UseAccount then
-      AddFormField('auth_code', AccountName);
+    if ACrypterData.UseAccount then
+      AddFormField('auth_code', ACrypterData.AccountName);
 
-    AddFormField('foldername', FolderName);
+    AddFormField('foldername', ACrypterData.FolderName);
 
     AddFormField('links', AMirrorContainer.Directlink[0].Value);
 
@@ -96,22 +130,22 @@ begin
       AddFormField('rsdf', IfThen(ctRSDF in LContainertypes, '1', '0'));
     end;
 
-    AddFormField('cnl', IfThen(UseCNL, '1', '0'));
+    AddFormField('cnl', IfThen(ACrypterData.UseCNL, '1', '0'));
 
-    AddFormField('captcha', IfThen(UseCaptcha, '1', '0'));
+    AddFormField('captcha', IfThen(ACrypterData.UseCaptcha, '1', '0'));
 
-    if UseVisitorPassword then
-      AddFormField('password', Visitorpassword);
+    if ACrypterData.UseVisitorPassword then
+      AddFormField('password', ACrypterData.Visitorpassword);
 
-    if UseDescription then
-      AddFormField('description', Description);
+    if ACrypterData.UseDescription then
+      AddFormField('description', ACrypterData.Description);
 
-    if UseCoverLink then
-      AddFormField('image', CoverLink);
+    if ACrypterData.UseCoverLink then
+      AddFormField('image', ACrypterData.CoverLink);
 
-    if UseEMailforStatusNotice then
+    if ACrypterData.UseEMailforStatusNotice then
     begin
-      AddFormField('notify_adress', EMailforStatusNotice);
+      AddFormField('notify_adress', ACrypterData.EMailforStatusNotice);
     end;
   end;
 

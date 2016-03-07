@@ -10,7 +10,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInImageHosterClass, uPlugInHTTPClasses,
+  uPlugInInterface, uPlugInImageHosterClass, uPlugInHTTPClasses,
   // Utils
   uHTMLUtils;
 
@@ -19,18 +19,22 @@ type
   protected { . }
   const
     WEBSITE: string = 'http://picload.org/';
-    function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
+    function Upload(const AImageHosterData: IImageHosterData; const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
     function GetName: WideString; override;
-    function LocalUpload(const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
-    function RemoteUpload(const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
+
+    function AddLocalImage(const AImageHosterData: IImageHosterData; const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
+    function AddWebImage(const AImageHosterData: IImageHosterData; const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
   end;
 
 implementation
 
 { TPicloadOrg }
 
-function TPicloadOrg.Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
+function TPicloadOrg.Upload;
 var
   LHTTPRequest: IHTTPRequest;
   LHTTPOptions: IHTTPOptions;
@@ -102,12 +106,27 @@ begin
   end;
 end;
 
+function TPicloadOrg.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TPicloadOrg.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TPicloadOrg.GetDescription;
+begin
+  Result := GetName + ' image hoster plug-in.';
+end;
+
 function TPicloadOrg.GetName;
 begin
   Result := 'Picload.org';
 end;
 
-function TPicloadOrg.LocalUpload;
+function TPicloadOrg.AddLocalImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -120,10 +139,10 @@ begin
     AddFile('images[]', ALocalPath);
   end;
 
-  Result := Upload(LHTTPParams, AUrl);
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl);
 end;
 
-function TPicloadOrg.RemoteUpload;
+function TPicloadOrg.AddWebImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -136,7 +155,7 @@ begin
     AddFormField('links', ARemoteUrl);
   end;
 
-  Result := Upload(LHTTPParams, AUrl);
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl);
 end;
 
 end.

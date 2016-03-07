@@ -12,7 +12,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInImageHosterClass, uPlugInHTTPClasses, uPlugInConst,
+  uPlugInInterface, uPlugInImageHosterClass, uPlugInHTTPClasses, uPlugInConst,
   // Utils
   uHTMLUtils;
 
@@ -22,18 +22,22 @@ type
   const
     WEBSITE = '%Website%';
 	
-    function Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
+    function Upload(const AImageHosterData: IImageHosterData; const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
   public
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
     function GetName: WideString; override;
-    function LocalUpload(const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
-    function RemoteUpload(const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
+
+    function AddLocalImage(const AImageHosterData: IImageHosterData; const ALocalPath: WideString; out AUrl: WideString): WordBool; override;
+    function AddWebImage(const AImageHosterData: IImageHosterData; const ARemoteUrl: WideString; out AUrl: WideString): WordBool; override;
   end;
 
 implementation
 
 { T%FullName% }
 
-function T%FullName%.Upload(const AHTTPParams: IHTTPParams; out AImageUrl: WideString): Boolean;
+function T%FullName%.Upload;
 var
   LHTTPRequest: IHTTPRequest;
   LHTTPOptions: IHTTPOptions;
@@ -56,11 +60,11 @@ begin
 	
 	{ TODO : add general upload params }
 
-    if not(ImageHostResize = irNone) then
+    if not(AImageHosterData.ImageHostResize = irNone) then
     begin
       { TODO : update resize params }
-	  
-	  case ImageHostResize of
+
+	    case AImageHosterData.ImageHostResize of
         ir320x240:
           AddFormField('imageSize', '320_240');
         ir450x338:
@@ -73,9 +77,9 @@ begin
 
     end
     else
-	begin
+	  begin
       AddFormField('imageSize', '1');
-	end;  
+	  end;
   end;
 
   LHTTPOptions := TPlugInHTTPOptions.Create(Self);
@@ -96,9 +100,9 @@ begin
 
     with TRegExpr.Create do
       try
-		InputString := string(LHTTPProcess.HTTPResult.SourceCode);
+		    InputString := string(LHTTPProcess.HTTPResult.SourceCode);
         { TODO : update regular expression that matches the uploaded directlink }
-		Expression := 'expression to get image url';
+		    Expression := 'expression to get image url';
 
         if Exec(InputString) then
         begin
@@ -118,9 +122,9 @@ begin
   begin
     with TRegExpr.Create do
       try
-		InputString := string(LHTTPProcess.HTTPResult.SourceCode);
+		    InputString := string(LHTTPProcess.HTTPResult.SourceCode);
         { TODO : update regular expression that matches the error message if upload fails }
-		Expression := 'Expression to get error message';
+		    Expression := 'Expression to get error message';
 
         if Exec(InputString) then
         begin
@@ -132,12 +136,27 @@ begin
   end;
 end;
 
+function T%FullName%.GetAuthor;
+begin
+  Result := '%CompanyName%';
+end;
+
+function T%FullName%.GetAuthorURL;
+begin
+  Result := 'http://example.com/';
+end;
+
+function T%FullName%.GetDescription;
+begin
+  Result := GetName + ' image hoster plug-in.';
+end;
+
 function T%FullName%.GetName;
 begin
   Result := '%FullName%';
 end;
 
-function T%FullName%.LocalUpload;
+function T%FullName%.AddLocalImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -149,10 +168,10 @@ begin
     { TODO : add specific local upload params }
   end;
 
-  Result := Upload(LHTTPParams, AUrl);
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl);
 end;
 
-function T%FullName%.RemoteUpload;
+function T%FullName%.AddWebImage;
 var
   LHTTPParams: IHTTPParams;
 begin
@@ -164,7 +183,7 @@ begin
     { TODO : add specific remote upload params }
   end;
 
-  Result := Upload(LHTTPParams, AUrl);
+  Result := Upload(AImageHosterData, LHTTPParams, AUrl);
 end;
 
 end.

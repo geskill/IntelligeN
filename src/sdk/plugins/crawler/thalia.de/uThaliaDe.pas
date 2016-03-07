@@ -12,7 +12,7 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCrawlerClass, uPlugInHTTPClasses,
+  uPlugInInterface, uPlugInCrawlerClass, uPlugInHTTPClasses,
   // Utils
   uHTMLUtils, uStringUtils;
 
@@ -25,16 +25,19 @@ type
     function GetBaseSearchType(const ATypeID: TTypeID): string;
     function GetGameSearchType(const ATypeID: TTypeID): string;
   public
-    function GetName: WideString; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
 
-    function InternalGetAvailableTypeIDs: TTypeIDs; override; safecall;
-    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override; safecall;
-    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override; safecall;
-    function InternalGetDependentControlIDs: TControlIDs; override; safecall;
+    function InternalGetAvailableTypeIDs: TTypeIDs; override;
+    function InternalGetAvailableControlIDs(const ATypeID: TTypeID): TControlIDs; override;
+    function InternalGetControlIDDefaultValue(const ATypeID: TTypeID; const AControlID: TControlID): WordBool; override;
+    function InternalGetDependentControlIDs: TControlIDs; override;
 
-    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+    function InternalGetRetrieveData(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AAccountData: IAccountData; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override;
 
-    function GetResultsLimitDefaultValue: Integer; override; safecall;
+    function GetResultsLimitDefaultValue: Integer; override;
   end;
 
 implementation
@@ -77,7 +80,8 @@ end;
 function TThaliaDe.GetGameSearchType(const ATypeID: TTypeID): string;
 begin
   case ATypeID of
-    cNintendoDS:
+    cNintendoDS, cNintendo3DS:
+      // http://www.thalia.de/shop/home/suche/ANY/?fltPATHROOT=5067&st=Super+Mario&sswg=ANY&asnlinkname=Kategorien_Nintendo+3DS+%26+2DS&asn=true&fltPATHROOT/5067=5350&timestamp=1457354453654
       // http://www.thalia.de/shop/home/suche/ANY/?fltKATEGORIEN_2=5350&sswg=ANY&asnlinkname=Kategorien_Nintendo+3DS+%26+2DS&fltKATEGORIEN_1=5067&asn=true&sq=Final+Fantasy&timestamp=1446157389683
       Result := '5350';
     cPCGames:
@@ -105,6 +109,21 @@ begin
       // http://www.thalia.de/shop/home/suche/ANY/?fltKATEGORIEN_2=14975&sswg=ANY&asnlinkname=Kategorien_Xbox+One&fltKATEGORIEN_1=5067&asn=true&sq=Final+Fantasy&timestamp=1446157389683
       Result := '14975';
   end;
+end;
+
+function TThaliaDe.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TThaliaDe.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TThaliaDe.GetDescription;
+begin
+  Result := GetName + ' crawler plug-in.';
 end;
 
 function TThaliaDe.GetName;
@@ -138,7 +157,7 @@ begin
   Result := [cTitle];
 end;
 
-function TThaliaDe.InternalExecute;
+function TThaliaDe.InternalGetRetrieveData;
 
   procedure deep_search(AWebsiteSourceCode: string);
   var

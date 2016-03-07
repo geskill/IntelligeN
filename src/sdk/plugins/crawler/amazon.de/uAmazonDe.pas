@@ -14,7 +14,7 @@ uses
   // Common
   uBaseConst, uBaseInterface,
   // Plugin system
-  uPlugInCrawlerClass, uAmazonCom;
+  uPlugInInterface, uPlugInCrawlerClass, uAmazonCom;
 
 type
   TAmazonDe = class(TAmazonCom)
@@ -24,9 +24,12 @@ type
 
     function GetBaseSearchType(const ATypeID: TTypeID): string; override;
   public
-    function GetName: WideString; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
 
-    function InternalExecute(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override; safecall;
+    function InternalGetRetrieveData(const ATypeID: TTypeID; const AControlIDs: TControlIDs; const ALimit: Integer; const AAccountData: IAccountData; const AControlController: IControlControllerBase; ACanUse: TCrawlerCanUseFunc): WordBool; override;
   end;
 
 implementation
@@ -54,12 +57,27 @@ begin
   end;
 end;
 
+function TAmazonCom.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TAmazonCom.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TAmazonCom.GetDescription;
+begin
+  Result := GetName + ' crawler plug-in.';
+end;
+
 function TAmazonDe.GetName: WideString;
 begin
   Result := 'Amazon.de';
 end;
 
-function TAmazonDe.InternalExecute;
+function TAmazonDe.InternalGetRetrieveData;
 
   procedure deep_search(AWebsiteSourceCode: string);
   var
