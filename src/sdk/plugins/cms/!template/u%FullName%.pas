@@ -211,6 +211,12 @@ begin
   { TODO : evaluate the AWebsiteSourceCode for matching webpage }
 end;
 
+function T%FullName%.GetIDs;
+begin
+  Result := 0;
+  { TODO : implement }
+end;
+
 function T%FullName%.GetArticleLink;
 begin
   Result := Format('%s?id=%d', [AURL, AArticleID]);
