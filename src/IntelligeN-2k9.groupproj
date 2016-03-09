@@ -249,9 +249,6 @@
 			<Projects Include="sdk\plugins\filehoster\rapidgator.net\rapidgatornet.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="sdk\plugins\filehoster\remixshare.com\remixsharecom.dproj">
-				<Dependencies/>
-			</Projects>
 			<Projects Include="sdk\plugins\filehoster\sendspace.com\sendspacecom.dproj">
 				<Dependencies/>
 			</Projects>
@@ -265,9 +262,6 @@
 				<Dependencies/>
 			</Projects>
 			<Projects Include="sdk\plugins\filehoster\uploading.com\uploadingcom.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\uploadstube.de\uploadstubede.dproj">
 				<Dependencies/>
 			</Projects>
 			<Projects Include="sdk\plugins\filehoster\xup.in\xupin.dproj">
@@ -1046,15 +1040,6 @@
 		<Target Name="rapidgatornet:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\rapidgator.net\rapidgatornet.dproj"/>
 		</Target>
-		<Target Name="remixsharecom">
-			<MSBuild Projects="sdk\plugins\filehoster\remixshare.com\remixsharecom.dproj"/>
-		</Target>
-		<Target Name="remixsharecom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\remixshare.com\remixsharecom.dproj"/>
-		</Target>
-		<Target Name="remixsharecom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\remixshare.com\remixsharecom.dproj"/>
-		</Target>
 		<Target Name="sendspacecom">
 			<MSBuild Projects="sdk\plugins\filehoster\sendspace.com\sendspacecom.dproj"/>
 		</Target>
@@ -1099,15 +1084,6 @@
 		</Target>
 		<Target Name="uploadingcom:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\uploading.com\uploadingcom.dproj"/>
-		</Target>
-		<Target Name="uploadstubede">
-			<MSBuild Projects="sdk\plugins\filehoster\uploadstube.de\uploadstubede.dproj"/>
-		</Target>
-		<Target Name="uploadstubede:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\uploadstube.de\uploadstubede.dproj"/>
-		</Target>
-		<Target Name="uploadstubede:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\uploadstube.de\uploadstubede.dproj"/>
 		</Target>
 		<Target Name="xupin">
 			<MSBuild Projects="sdk\plugins\filehoster\xup.in\xupin.dproj"/>
@@ -1200,13 +1176,13 @@
 			<MSBuild Targets="Make" Projects="sdk\plugins\imagehoster\tinypic.com\tinypiccom.dproj"/>
 		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="IntelligeN;dirwatch;linkgrabber;mirrorsort;vbulletin_randomquestion;blogger;cherrycms;discuz;discuzx;dle;fluxbb;htw;icms;ipb2;ipb3;joomla;loadit;mybb;n3m0cms;phpbb2;phpbb3;smf;ucms;vbulletin;wbb2;wbb3;wbb4;wfusion;wordpress;xenforo;einsadvdch;adultdvdempirecom;amazoncom;amazonde;bigfishgamescom;bigfishgamesde;binsearchinfo;cdlexikonde;cduniversecom;cinefactsde;erodvdnl;gamestarde;gaminguniversede;igncom;imagesgooglede;imdbcom;jadedvideocom;moviemazede;nfodbru;nintendolifecom;pcgdbde;releasename;sexvideoallcom;thaliade;wiiboxartcom;xrelto;youtubecom;zelluloidde;filecryptcc;linkcryptws;ncryptin;relinkto;safelinkingnet;sharelinksbiz;extractedpostcode1;intelligenxml1;intelligenxml2;releasenamereader;crockocom;dateito;depositfilescom;extabitcom;filefactorycom;filepostcom;fileservecom;filestoreto;freaksharecom;junocloudme;letitbitnet;loadto;mediafirecom;rapidgatornet;remixsharecom;sendspacecom;shareonlinebiz;turbobitnet;uploadednet;uploadingcom;uploadstubede;xupin;zippysharecom;anyimgcom;ddlworg;directuploadnet;fastpicru;imgurcom;picfrontorg;picloadorg;tinypiccom"/>
+			<CallTarget Targets="IntelligeN;dirwatch;linkgrabber;mirrorsort;vbulletin_randomquestion;blogger;cherrycms;discuz;discuzx;dle;fluxbb;htw;icms;ipb2;ipb3;joomla;loadit;mybb;n3m0cms;phpbb2;phpbb3;smf;ucms;vbulletin;wbb2;wbb3;wbb4;wfusion;wordpress;xenforo;einsadvdch;adultdvdempirecom;amazoncom;amazonde;bigfishgamescom;bigfishgamesde;binsearchinfo;cdlexikonde;cduniversecom;cinefactsde;erodvdnl;gamestarde;gaminguniversede;igncom;imagesgooglede;imdbcom;jadedvideocom;moviemazede;nfodbru;nintendolifecom;pcgdbde;releasename;sexvideoallcom;thaliade;wiiboxartcom;xrelto;youtubecom;zelluloidde;filecryptcc;linkcryptws;ncryptin;relinkto;safelinkingnet;sharelinksbiz;extractedpostcode1;intelligenxml1;intelligenxml2;releasenamereader;crockocom;dateito;depositfilescom;extabitcom;filefactorycom;filepostcom;fileservecom;filestoreto;freaksharecom;junocloudme;letitbitnet;loadto;mediafirecom;rapidgatornet;sendspacecom;shareonlinebiz;turbobitnet;uploadednet;uploadingcom;xupin;zippysharecom;anyimgcom;ddlworg;directuploadnet;fastpicru;imgurcom;picfrontorg;picloadorg;tinypiccom"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="IntelligeN:Clean;dirwatch:Clean;linkgrabber:Clean;mirrorsort:Clean;vbulletin_randomquestion:Clean;blogger:Clean;cherrycms:Clean;discuz:Clean;discuzx:Clean;dle:Clean;fluxbb:Clean;htw:Clean;icms:Clean;ipb2:Clean;ipb3:Clean;joomla:Clean;loadit:Clean;mybb:Clean;n3m0cms:Clean;phpbb2:Clean;phpbb3:Clean;smf:Clean;ucms:Clean;vbulletin:Clean;wbb2:Clean;wbb3:Clean;wbb4:Clean;wfusion:Clean;wordpress:Clean;xenforo:Clean;einsadvdch:Clean;adultdvdempirecom:Clean;amazoncom:Clean;amazonde:Clean;bigfishgamescom:Clean;bigfishgamesde:Clean;binsearchinfo:Clean;cdlexikonde:Clean;cduniversecom:Clean;cinefactsde:Clean;erodvdnl:Clean;gamestarde:Clean;gaminguniversede:Clean;igncom:Clean;imagesgooglede:Clean;imdbcom:Clean;jadedvideocom:Clean;moviemazede:Clean;nfodbru:Clean;nintendolifecom:Clean;pcgdbde:Clean;releasename:Clean;sexvideoallcom:Clean;thaliade:Clean;wiiboxartcom:Clean;xrelto:Clean;youtubecom:Clean;zelluloidde:Clean;filecryptcc:Clean;linkcryptws:Clean;ncryptin:Clean;relinkto:Clean;safelinkingnet:Clean;sharelinksbiz:Clean;extractedpostcode1:Clean;intelligenxml1:Clean;intelligenxml2:Clean;releasenamereader:Clean;crockocom:Clean;dateito:Clean;depositfilescom:Clean;extabitcom:Clean;filefactorycom:Clean;filepostcom:Clean;fileservecom:Clean;filestoreto:Clean;freaksharecom:Clean;junocloudme:Clean;letitbitnet:Clean;loadto:Clean;mediafirecom:Clean;rapidgatornet:Clean;remixsharecom:Clean;sendspacecom:Clean;shareonlinebiz:Clean;turbobitnet:Clean;uploadednet:Clean;uploadingcom:Clean;uploadstubede:Clean;xupin:Clean;zippysharecom:Clean;anyimgcom:Clean;ddlworg:Clean;directuploadnet:Clean;fastpicru:Clean;imgurcom:Clean;picfrontorg:Clean;picloadorg:Clean;tinypiccom:Clean"/>
+			<CallTarget Targets="IntelligeN:Clean;dirwatch:Clean;linkgrabber:Clean;mirrorsort:Clean;vbulletin_randomquestion:Clean;blogger:Clean;cherrycms:Clean;discuz:Clean;discuzx:Clean;dle:Clean;fluxbb:Clean;htw:Clean;icms:Clean;ipb2:Clean;ipb3:Clean;joomla:Clean;loadit:Clean;mybb:Clean;n3m0cms:Clean;phpbb2:Clean;phpbb3:Clean;smf:Clean;ucms:Clean;vbulletin:Clean;wbb2:Clean;wbb3:Clean;wbb4:Clean;wfusion:Clean;wordpress:Clean;xenforo:Clean;einsadvdch:Clean;adultdvdempirecom:Clean;amazoncom:Clean;amazonde:Clean;bigfishgamescom:Clean;bigfishgamesde:Clean;binsearchinfo:Clean;cdlexikonde:Clean;cduniversecom:Clean;cinefactsde:Clean;erodvdnl:Clean;gamestarde:Clean;gaminguniversede:Clean;igncom:Clean;imagesgooglede:Clean;imdbcom:Clean;jadedvideocom:Clean;moviemazede:Clean;nfodbru:Clean;nintendolifecom:Clean;pcgdbde:Clean;releasename:Clean;sexvideoallcom:Clean;thaliade:Clean;wiiboxartcom:Clean;xrelto:Clean;youtubecom:Clean;zelluloidde:Clean;filecryptcc:Clean;linkcryptws:Clean;ncryptin:Clean;relinkto:Clean;safelinkingnet:Clean;sharelinksbiz:Clean;extractedpostcode1:Clean;intelligenxml1:Clean;intelligenxml2:Clean;releasenamereader:Clean;crockocom:Clean;dateito:Clean;depositfilescom:Clean;extabitcom:Clean;filefactorycom:Clean;filepostcom:Clean;fileservecom:Clean;filestoreto:Clean;freaksharecom:Clean;junocloudme:Clean;letitbitnet:Clean;loadto:Clean;mediafirecom:Clean;rapidgatornet:Clean;sendspacecom:Clean;shareonlinebiz:Clean;turbobitnet:Clean;uploadednet:Clean;uploadingcom:Clean;xupin:Clean;zippysharecom:Clean;anyimgcom:Clean;ddlworg:Clean;directuploadnet:Clean;fastpicru:Clean;imgurcom:Clean;picfrontorg:Clean;picloadorg:Clean;tinypiccom:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="IntelligeN:Make;dirwatch:Make;linkgrabber:Make;mirrorsort:Make;vbulletin_randomquestion:Make;blogger:Make;cherrycms:Make;discuz:Make;discuzx:Make;dle:Make;fluxbb:Make;htw:Make;icms:Make;ipb2:Make;ipb3:Make;joomla:Make;loadit:Make;mybb:Make;n3m0cms:Make;phpbb2:Make;phpbb3:Make;smf:Make;ucms:Make;vbulletin:Make;wbb2:Make;wbb3:Make;wbb4:Make;wfusion:Make;wordpress:Make;xenforo:Make;einsadvdch:Make;adultdvdempirecom:Make;amazoncom:Make;amazonde:Make;bigfishgamescom:Make;bigfishgamesde:Make;binsearchinfo:Make;cdlexikonde:Make;cduniversecom:Make;cinefactsde:Make;erodvdnl:Make;gamestarde:Make;gaminguniversede:Make;igncom:Make;imagesgooglede:Make;imdbcom:Make;jadedvideocom:Make;moviemazede:Make;nfodbru:Make;nintendolifecom:Make;pcgdbde:Make;releasename:Make;sexvideoallcom:Make;thaliade:Make;wiiboxartcom:Make;xrelto:Make;youtubecom:Make;zelluloidde:Make;filecryptcc:Make;linkcryptws:Make;ncryptin:Make;relinkto:Make;safelinkingnet:Make;sharelinksbiz:Make;extractedpostcode1:Make;intelligenxml1:Make;intelligenxml2:Make;releasenamereader:Make;crockocom:Make;dateito:Make;depositfilescom:Make;extabitcom:Make;filefactorycom:Make;filepostcom:Make;fileservecom:Make;filestoreto:Make;freaksharecom:Make;junocloudme:Make;letitbitnet:Make;loadto:Make;mediafirecom:Make;rapidgatornet:Make;remixsharecom:Make;sendspacecom:Make;shareonlinebiz:Make;turbobitnet:Make;uploadednet:Make;uploadingcom:Make;uploadstubede:Make;xupin:Make;zippysharecom:Make;anyimgcom:Make;ddlworg:Make;directuploadnet:Make;fastpicru:Make;imgurcom:Make;picfrontorg:Make;picloadorg:Make;tinypiccom:Make"/>
+			<CallTarget Targets="IntelligeN:Make;dirwatch:Make;linkgrabber:Make;mirrorsort:Make;vbulletin_randomquestion:Make;blogger:Make;cherrycms:Make;discuz:Make;discuzx:Make;dle:Make;fluxbb:Make;htw:Make;icms:Make;ipb2:Make;ipb3:Make;joomla:Make;loadit:Make;mybb:Make;n3m0cms:Make;phpbb2:Make;phpbb3:Make;smf:Make;ucms:Make;vbulletin:Make;wbb2:Make;wbb3:Make;wbb4:Make;wfusion:Make;wordpress:Make;xenforo:Make;einsadvdch:Make;adultdvdempirecom:Make;amazoncom:Make;amazonde:Make;bigfishgamescom:Make;bigfishgamesde:Make;binsearchinfo:Make;cdlexikonde:Make;cduniversecom:Make;cinefactsde:Make;erodvdnl:Make;gamestarde:Make;gaminguniversede:Make;igncom:Make;imagesgooglede:Make;imdbcom:Make;jadedvideocom:Make;moviemazede:Make;nfodbru:Make;nintendolifecom:Make;pcgdbde:Make;releasename:Make;sexvideoallcom:Make;thaliade:Make;wiiboxartcom:Make;xrelto:Make;youtubecom:Make;zelluloidde:Make;filecryptcc:Make;linkcryptws:Make;ncryptin:Make;relinkto:Make;safelinkingnet:Make;sharelinksbiz:Make;extractedpostcode1:Make;intelligenxml1:Make;intelligenxml2:Make;releasenamereader:Make;crockocom:Make;dateito:Make;depositfilescom:Make;extabitcom:Make;filefactorycom:Make;filepostcom:Make;fileservecom:Make;filestoreto:Make;freaksharecom:Make;junocloudme:Make;letitbitnet:Make;loadto:Make;mediafirecom:Make;rapidgatornet:Make;sendspacecom:Make;shareonlinebiz:Make;turbobitnet:Make;uploadednet:Make;uploadingcom:Make;xupin:Make;zippysharecom:Make;anyimgcom:Make;ddlworg:Make;directuploadnet:Make;fastpicru:Make;imgurcom:Make;picfrontorg:Make;picloadorg:Make;tinypiccom:Make"/>
 		</Target>
 		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 	</Project>

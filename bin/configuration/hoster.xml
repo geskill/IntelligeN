@@ -78,10 +78,6 @@
 	<hoster name="Rapidgator.net" short="RG">
 		<alsoknownas>Rapidgator</alsoknownas>
 	</hoster>
-	<hoster name="Remixshare.com" short="RX">
-		<alsoknownas>Remixshare</alsoknownas>
-		<alsoknownas>rmx</alsoknownas>
-	</hoster>
 	<hoster name="Secureupload.eu" short="SU">
 		<alsoknownas>Secureupload</alsoknownas>
 	</hoster>
@@ -112,9 +108,6 @@
 	</hoster>
 	<hoster name="Uploading.com" short="UP">
 		<alsoknownas>Uploading</alsoknownas>
-	</hoster>
-	<hoster name="Uploadstube.de" short="US">
-		<alsoknownas>Uploadstube</alsoknownas>
 	</hoster>
 	<hoster name="Userscloud.com" short="UC">
 		<alsoknownas>Userscloud</alsoknownas>
