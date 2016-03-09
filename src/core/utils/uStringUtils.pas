@@ -24,6 +24,8 @@ function IsLineBreak(const AStr: string; AIndex: Integer): Boolean;
 
 function IsNumber(AVariant: Variant): Boolean;
 
+function ExtractNumbers(const AStr: string): string;
+
 function ExtractTextBetween(const Str: string; const Delim1, Delim2: string): string;
 
 function RemoveTextBetween(const Str: string; const Delim1, Delim2: string): string;
@@ -335,6 +337,16 @@ begin
   Result := (LCode = 0);
 end;
 {$HINTS ON}
+
+function ExtractNumbers(const AStr: string): string;
+var
+  LStringIndex: Integer;
+begin
+  Result := AStr;
+  for LStringIndex := Length(Result) downto 1 do
+    if not(Result[LStringIndex] in ['0' .. '9']) then
+      Delete(Result, LStringIndex, 1);
+end;
 
 function ExtractTextBetween(const Str: string; const Delim1, Delim2: string): string;
 var

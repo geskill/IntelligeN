@@ -151,17 +151,6 @@ begin
 end;
 
 function TN3m0CMS.DoBuildPostRequest;
-
-  function NumbersOnly(s: string): string;
-  var
-    X: Integer;
-  begin
-    for X := length(s) downto 1 do
-      if not(s[X] in ['0' .. '9']) then
-        Delete(s, X, 1);
-    Result := s;
-  end;
-
 const
   HosterArray: array [0 .. 7] of string = ('Shragle.com', 'Depositfiles.com', 'Rapidshare.com', 'Uploaded.to', 'Share-Online.biz', 'Netload.in', 'Sharebase.to', 'x7.to');
 var
@@ -256,7 +245,7 @@ begin
       AddFormField('Interpret', AData.FindControl(cCreator).Value);
 
     if Assigned(AData.FindControl(cAudioBitrate)) then
-      AddFormField('Bitrate', NumbersOnly(AData.FindControl(cAudioBitrate).Value));
+      AddFormField('Bitrate', ExtractNumbers(AData.FindControl(cAudioBitrate).Value));
 
     if Assigned(AData.FindControl(cLanguage)) then
     begin
