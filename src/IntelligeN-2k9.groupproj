@@ -207,16 +207,7 @@
 			<Projects Include="sdk\plugins\fileformats\releasename.reader\releasenamereader.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="sdk\plugins\filehoster\bitshare.com\bitsharecom.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\cloudzer.net\cloudzernet.dproj">
-				<Dependencies/>
-			</Projects>
 			<Projects Include="sdk\plugins\filehoster\crocko.com\crockocom.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\data-loading.com\dataloadingcom.dproj">
 				<Dependencies/>
 			</Projects>
 			<Projects Include="sdk\plugins\filehoster\datei.to\dateito.dproj">
@@ -225,19 +216,10 @@
 			<Projects Include="sdk\plugins\filehoster\depositfiles.com\depositfilescom.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="sdk\plugins\filehoster\enterupload.com\enteruploadcom.dproj">
-				<Dependencies/>
-			</Projects>
 			<Projects Include="sdk\plugins\filehoster\extabit.com\extabitcom.dproj">
 				<Dependencies/>
 			</Projects>
 			<Projects Include="sdk\plugins\filehoster\filefactory.com\filefactorycom.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\filefrog.to\filefrogto.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\filejungle.com\filejunglecom.dproj">
 				<Dependencies/>
 			</Projects>
 			<Projects Include="sdk\plugins\filehoster\filepost.com\filepostcom.dproj">
@@ -246,28 +228,13 @@
 			<Projects Include="sdk\plugins\filehoster\fileserve.com\fileservecom.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="sdk\plugins\filehoster\filesonic.com\filesoniccom.dproj">
-				<Dependencies/>
-			</Projects>
 			<Projects Include="sdk\plugins\filehoster\filestore.to\filestoreto.dproj">
 				<Dependencies/>
 			</Projects>
 			<Projects Include="sdk\plugins\filehoster\freakshare.com\freaksharecom.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="sdk\plugins\filehoster\hotfile.com\hotfilecom.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\ifile.it\ifileit.dproj">
-				<Dependencies/>
-			</Projects>
 			<Projects Include="sdk\plugins\filehoster\junocloud.me\junocloudme.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\kewlshare.com\kewlsharecom.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\kickload.com\kickloadcom.dproj">
 				<Dependencies/>
 			</Projects>
 			<Projects Include="sdk\plugins\filehoster\letitbit.net\letitbitnet.dproj">
@@ -276,31 +243,10 @@
 			<Projects Include="sdk\plugins\filehoster\load.to\loadto.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="sdk\plugins\filehoster\loadfiles.in\loadfilesin.dproj">
-				<Dependencies/>
-			</Projects>
 			<Projects Include="sdk\plugins\filehoster\mediafire.com\mediafirecom.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="sdk\plugins\filehoster\megaupload.com\megauploadcom.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\netload.in\netloadin.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\netuploaded.com\netuploadedcom.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\oron.com\oroncom.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\qshare.com\qsharecom.dproj">
-				<Dependencies/>
-			</Projects>
 			<Projects Include="sdk\plugins\filehoster\rapidgator.net\rapidgatornet.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\rapidshare.com\rapidsharecom.dproj">
 				<Dependencies/>
 			</Projects>
 			<Projects Include="sdk\plugins\filehoster\remixshare.com\remixsharecom.dproj">
@@ -309,25 +255,10 @@
 			<Projects Include="sdk\plugins\filehoster\sendspace.com\sendspacecom.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="sdk\plugins\filehoster\share-now.net\sharenownet.dproj">
-				<Dependencies/>
-			</Projects>
 			<Projects Include="sdk\plugins\filehoster\share-online.biz\shareonlinebiz.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="sdk\plugins\filehoster\shragle.com\shraglecom.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\speedshare.org\speedshareorg.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\terabit.to\terabitto.dproj">
-				<Dependencies/>
-			</Projects>
 			<Projects Include="sdk\plugins\filehoster\turbobit.net\turbobitnet.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\ugotfile.com\ugotfilecom.dproj">
 				<Dependencies/>
 			</Projects>
 			<Projects Include="sdk\plugins\filehoster\uploaded.net\uploadednet.dproj">
@@ -336,28 +267,13 @@
 			<Projects Include="sdk\plugins\filehoster\uploading.com\uploadingcom.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="sdk\plugins\filehoster\uploadspace.pl\uploadspacepl.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\uploadstation.com\uploadstationcom.dproj">
-				<Dependencies/>
-			</Projects>
 			<Projects Include="sdk\plugins\filehoster\uploadstube.de\uploadstubede.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\wupload.com\wuploadcom.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\x7.to\x7to.dproj">
 				<Dependencies/>
 			</Projects>
 			<Projects Include="sdk\plugins\filehoster\xup.in\xupin.dproj">
 				<Dependencies/>
 			</Projects>
 			<Projects Include="sdk\plugins\filehoster\zippyshare.com\zippysharecom.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="sdk\plugins\filehoster\zshare.net\zsharenet.dproj">
 				<Dependencies/>
 			</Projects>
 			<Projects Include="sdk\plugins\imagehoster\anyimg.com\anyimgcom.dproj">
@@ -1004,24 +920,6 @@
 		<Target Name="releasenamereader:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\fileformats\releasename.reader\releasenamereader.dproj"/>
 		</Target>
-		<Target Name="bitsharecom">
-			<MSBuild Projects="sdk\plugins\filehoster\bitshare.com\bitsharecom.dproj"/>
-		</Target>
-		<Target Name="bitsharecom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\bitshare.com\bitsharecom.dproj"/>
-		</Target>
-		<Target Name="bitsharecom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\bitshare.com\bitsharecom.dproj"/>
-		</Target>
-		<Target Name="cloudzernet">
-			<MSBuild Projects="sdk\plugins\filehoster\cloudzer.net\cloudzernet.dproj"/>
-		</Target>
-		<Target Name="cloudzernet:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\cloudzer.net\cloudzernet.dproj"/>
-		</Target>
-		<Target Name="cloudzernet:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\cloudzer.net\cloudzernet.dproj"/>
-		</Target>
 		<Target Name="crockocom">
 			<MSBuild Projects="sdk\plugins\filehoster\crocko.com\crockocom.dproj"/>
 		</Target>
@@ -1030,15 +928,6 @@
 		</Target>
 		<Target Name="crockocom:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\crocko.com\crockocom.dproj"/>
-		</Target>
-		<Target Name="dataloadingcom">
-			<MSBuild Projects="sdk\plugins\filehoster\data-loading.com\dataloadingcom.dproj"/>
-		</Target>
-		<Target Name="dataloadingcom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\data-loading.com\dataloadingcom.dproj"/>
-		</Target>
-		<Target Name="dataloadingcom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\data-loading.com\dataloadingcom.dproj"/>
 		</Target>
 		<Target Name="dateito">
 			<MSBuild Projects="sdk\plugins\filehoster\datei.to\dateito.dproj"/>
@@ -1058,15 +947,6 @@
 		<Target Name="depositfilescom:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\depositfiles.com\depositfilescom.dproj"/>
 		</Target>
-		<Target Name="enteruploadcom">
-			<MSBuild Projects="sdk\plugins\filehoster\enterupload.com\enteruploadcom.dproj"/>
-		</Target>
-		<Target Name="enteruploadcom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\enterupload.com\enteruploadcom.dproj"/>
-		</Target>
-		<Target Name="enteruploadcom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\enterupload.com\enteruploadcom.dproj"/>
-		</Target>
 		<Target Name="extabitcom">
 			<MSBuild Projects="sdk\plugins\filehoster\extabit.com\extabitcom.dproj"/>
 		</Target>
@@ -1084,24 +964,6 @@
 		</Target>
 		<Target Name="filefactorycom:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\filefactory.com\filefactorycom.dproj"/>
-		</Target>
-		<Target Name="filefrogto">
-			<MSBuild Projects="sdk\plugins\filehoster\filefrog.to\filefrogto.dproj"/>
-		</Target>
-		<Target Name="filefrogto:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\filefrog.to\filefrogto.dproj"/>
-		</Target>
-		<Target Name="filefrogto:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\filefrog.to\filefrogto.dproj"/>
-		</Target>
-		<Target Name="filejunglecom">
-			<MSBuild Projects="sdk\plugins\filehoster\filejungle.com\filejunglecom.dproj"/>
-		</Target>
-		<Target Name="filejunglecom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\filejungle.com\filejunglecom.dproj"/>
-		</Target>
-		<Target Name="filejunglecom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\filejungle.com\filejunglecom.dproj"/>
 		</Target>
 		<Target Name="filepostcom">
 			<MSBuild Projects="sdk\plugins\filehoster\filepost.com\filepostcom.dproj"/>
@@ -1121,15 +983,6 @@
 		<Target Name="fileservecom:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\fileserve.com\fileservecom.dproj"/>
 		</Target>
-		<Target Name="filesoniccom">
-			<MSBuild Projects="sdk\plugins\filehoster\filesonic.com\filesoniccom.dproj"/>
-		</Target>
-		<Target Name="filesoniccom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\filesonic.com\filesoniccom.dproj"/>
-		</Target>
-		<Target Name="filesoniccom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\filesonic.com\filesoniccom.dproj"/>
-		</Target>
 		<Target Name="filestoreto">
 			<MSBuild Projects="sdk\plugins\filehoster\filestore.to\filestoreto.dproj"/>
 		</Target>
@@ -1148,24 +1001,6 @@
 		<Target Name="freaksharecom:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\freakshare.com\freaksharecom.dproj"/>
 		</Target>
-		<Target Name="hotfilecom">
-			<MSBuild Projects="sdk\plugins\filehoster\hotfile.com\hotfilecom.dproj"/>
-		</Target>
-		<Target Name="hotfilecom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\hotfile.com\hotfilecom.dproj"/>
-		</Target>
-		<Target Name="hotfilecom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\hotfile.com\hotfilecom.dproj"/>
-		</Target>
-		<Target Name="ifileit">
-			<MSBuild Projects="sdk\plugins\filehoster\ifile.it\ifileit.dproj"/>
-		</Target>
-		<Target Name="ifileit:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\ifile.it\ifileit.dproj"/>
-		</Target>
-		<Target Name="ifileit:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\ifile.it\ifileit.dproj"/>
-		</Target>
 		<Target Name="junocloudme">
 			<MSBuild Projects="sdk\plugins\filehoster\junocloud.me\junocloudme.dproj"/>
 		</Target>
@@ -1174,24 +1009,6 @@
 		</Target>
 		<Target Name="junocloudme:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\junocloud.me\junocloudme.dproj"/>
-		</Target>
-		<Target Name="kewlsharecom">
-			<MSBuild Projects="sdk\plugins\filehoster\kewlshare.com\kewlsharecom.dproj"/>
-		</Target>
-		<Target Name="kewlsharecom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\kewlshare.com\kewlsharecom.dproj"/>
-		</Target>
-		<Target Name="kewlsharecom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\kewlshare.com\kewlsharecom.dproj"/>
-		</Target>
-		<Target Name="kickloadcom">
-			<MSBuild Projects="sdk\plugins\filehoster\kickload.com\kickloadcom.dproj"/>
-		</Target>
-		<Target Name="kickloadcom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\kickload.com\kickloadcom.dproj"/>
-		</Target>
-		<Target Name="kickloadcom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\kickload.com\kickloadcom.dproj"/>
 		</Target>
 		<Target Name="letitbitnet">
 			<MSBuild Projects="sdk\plugins\filehoster\letitbit.net\letitbitnet.dproj"/>
@@ -1211,15 +1028,6 @@
 		<Target Name="loadto:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\load.to\loadto.dproj"/>
 		</Target>
-		<Target Name="loadfilesin">
-			<MSBuild Projects="sdk\plugins\filehoster\loadfiles.in\loadfilesin.dproj"/>
-		</Target>
-		<Target Name="loadfilesin:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\loadfiles.in\loadfilesin.dproj"/>
-		</Target>
-		<Target Name="loadfilesin:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\loadfiles.in\loadfilesin.dproj"/>
-		</Target>
 		<Target Name="mediafirecom">
 			<MSBuild Projects="sdk\plugins\filehoster\mediafire.com\mediafirecom.dproj"/>
 		</Target>
@@ -1229,51 +1037,6 @@
 		<Target Name="mediafirecom:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\mediafire.com\mediafirecom.dproj"/>
 		</Target>
-		<Target Name="megauploadcom">
-			<MSBuild Projects="sdk\plugins\filehoster\megaupload.com\megauploadcom.dproj"/>
-		</Target>
-		<Target Name="megauploadcom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\megaupload.com\megauploadcom.dproj"/>
-		</Target>
-		<Target Name="megauploadcom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\megaupload.com\megauploadcom.dproj"/>
-		</Target>
-		<Target Name="netloadin">
-			<MSBuild Projects="sdk\plugins\filehoster\netload.in\netloadin.dproj"/>
-		</Target>
-		<Target Name="netloadin:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\netload.in\netloadin.dproj"/>
-		</Target>
-		<Target Name="netloadin:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\netload.in\netloadin.dproj"/>
-		</Target>
-		<Target Name="netuploadedcom">
-			<MSBuild Projects="sdk\plugins\filehoster\netuploaded.com\netuploadedcom.dproj"/>
-		</Target>
-		<Target Name="netuploadedcom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\netuploaded.com\netuploadedcom.dproj"/>
-		</Target>
-		<Target Name="netuploadedcom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\netuploaded.com\netuploadedcom.dproj"/>
-		</Target>
-		<Target Name="oroncom">
-			<MSBuild Projects="sdk\plugins\filehoster\oron.com\oroncom.dproj"/>
-		</Target>
-		<Target Name="oroncom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\oron.com\oroncom.dproj"/>
-		</Target>
-		<Target Name="oroncom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\oron.com\oroncom.dproj"/>
-		</Target>
-		<Target Name="qsharecom">
-			<MSBuild Projects="sdk\plugins\filehoster\qshare.com\qsharecom.dproj"/>
-		</Target>
-		<Target Name="qsharecom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\qshare.com\qsharecom.dproj"/>
-		</Target>
-		<Target Name="qsharecom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\qshare.com\qsharecom.dproj"/>
-		</Target>
 		<Target Name="rapidgatornet">
 			<MSBuild Projects="sdk\plugins\filehoster\rapidgator.net\rapidgatornet.dproj"/>
 		</Target>
@@ -1282,15 +1045,6 @@
 		</Target>
 		<Target Name="rapidgatornet:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\rapidgator.net\rapidgatornet.dproj"/>
-		</Target>
-		<Target Name="rapidsharecom">
-			<MSBuild Projects="sdk\plugins\filehoster\rapidshare.com\rapidsharecom.dproj"/>
-		</Target>
-		<Target Name="rapidsharecom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\rapidshare.com\rapidsharecom.dproj"/>
-		</Target>
-		<Target Name="rapidsharecom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\rapidshare.com\rapidsharecom.dproj"/>
 		</Target>
 		<Target Name="remixsharecom">
 			<MSBuild Projects="sdk\plugins\filehoster\remixshare.com\remixsharecom.dproj"/>
@@ -1310,15 +1064,6 @@
 		<Target Name="sendspacecom:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\sendspace.com\sendspacecom.dproj"/>
 		</Target>
-		<Target Name="sharenownet">
-			<MSBuild Projects="sdk\plugins\filehoster\share-now.net\sharenownet.dproj"/>
-		</Target>
-		<Target Name="sharenownet:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\share-now.net\sharenownet.dproj"/>
-		</Target>
-		<Target Name="sharenownet:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\share-now.net\sharenownet.dproj"/>
-		</Target>
 		<Target Name="shareonlinebiz">
 			<MSBuild Projects="sdk\plugins\filehoster\share-online.biz\shareonlinebiz.dproj"/>
 		</Target>
@@ -1328,33 +1073,6 @@
 		<Target Name="shareonlinebiz:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\share-online.biz\shareonlinebiz.dproj"/>
 		</Target>
-		<Target Name="shraglecom">
-			<MSBuild Projects="sdk\plugins\filehoster\shragle.com\shraglecom.dproj"/>
-		</Target>
-		<Target Name="shraglecom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\shragle.com\shraglecom.dproj"/>
-		</Target>
-		<Target Name="shraglecom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\shragle.com\shraglecom.dproj"/>
-		</Target>
-		<Target Name="speedshareorg">
-			<MSBuild Projects="sdk\plugins\filehoster\speedshare.org\speedshareorg.dproj"/>
-		</Target>
-		<Target Name="speedshareorg:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\speedshare.org\speedshareorg.dproj"/>
-		</Target>
-		<Target Name="speedshareorg:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\speedshare.org\speedshareorg.dproj"/>
-		</Target>
-		<Target Name="terabitto">
-			<MSBuild Projects="sdk\plugins\filehoster\terabit.to\terabitto.dproj"/>
-		</Target>
-		<Target Name="terabitto:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\terabit.to\terabitto.dproj"/>
-		</Target>
-		<Target Name="terabitto:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\terabit.to\terabitto.dproj"/>
-		</Target>
 		<Target Name="turbobitnet">
 			<MSBuild Projects="sdk\plugins\filehoster\turbobit.net\turbobitnet.dproj"/>
 		</Target>
@@ -1363,15 +1081,6 @@
 		</Target>
 		<Target Name="turbobitnet:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\turbobit.net\turbobitnet.dproj"/>
-		</Target>
-		<Target Name="ugotfilecom">
-			<MSBuild Projects="sdk\plugins\filehoster\ugotfile.com\ugotfilecom.dproj"/>
-		</Target>
-		<Target Name="ugotfilecom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\ugotfile.com\ugotfilecom.dproj"/>
-		</Target>
-		<Target Name="ugotfilecom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\ugotfile.com\ugotfilecom.dproj"/>
 		</Target>
 		<Target Name="uploadednet">
 			<MSBuild Projects="sdk\plugins\filehoster\uploaded.net\uploadednet.dproj"/>
@@ -1391,24 +1100,6 @@
 		<Target Name="uploadingcom:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\uploading.com\uploadingcom.dproj"/>
 		</Target>
-		<Target Name="uploadspacepl">
-			<MSBuild Projects="sdk\plugins\filehoster\uploadspace.pl\uploadspacepl.dproj"/>
-		</Target>
-		<Target Name="uploadspacepl:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\uploadspace.pl\uploadspacepl.dproj"/>
-		</Target>
-		<Target Name="uploadspacepl:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\uploadspace.pl\uploadspacepl.dproj"/>
-		</Target>
-		<Target Name="uploadstationcom">
-			<MSBuild Projects="sdk\plugins\filehoster\uploadstation.com\uploadstationcom.dproj"/>
-		</Target>
-		<Target Name="uploadstationcom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\uploadstation.com\uploadstationcom.dproj"/>
-		</Target>
-		<Target Name="uploadstationcom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\uploadstation.com\uploadstationcom.dproj"/>
-		</Target>
 		<Target Name="uploadstubede">
 			<MSBuild Projects="sdk\plugins\filehoster\uploadstube.de\uploadstubede.dproj"/>
 		</Target>
@@ -1417,24 +1108,6 @@
 		</Target>
 		<Target Name="uploadstubede:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\uploadstube.de\uploadstubede.dproj"/>
-		</Target>
-		<Target Name="wuploadcom">
-			<MSBuild Projects="sdk\plugins\filehoster\wupload.com\wuploadcom.dproj"/>
-		</Target>
-		<Target Name="wuploadcom:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\wupload.com\wuploadcom.dproj"/>
-		</Target>
-		<Target Name="wuploadcom:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\wupload.com\wuploadcom.dproj"/>
-		</Target>
-		<Target Name="x7to">
-			<MSBuild Projects="sdk\plugins\filehoster\x7.to\x7to.dproj"/>
-		</Target>
-		<Target Name="x7to:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\x7.to\x7to.dproj"/>
-		</Target>
-		<Target Name="x7to:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\x7.to\x7to.dproj"/>
 		</Target>
 		<Target Name="xupin">
 			<MSBuild Projects="sdk\plugins\filehoster\xup.in\xupin.dproj"/>
@@ -1453,15 +1126,6 @@
 		</Target>
 		<Target Name="zippysharecom:Make">
 			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\zippyshare.com\zippysharecom.dproj"/>
-		</Target>
-		<Target Name="zsharenet">
-			<MSBuild Projects="sdk\plugins\filehoster\zshare.net\zsharenet.dproj"/>
-		</Target>
-		<Target Name="zsharenet:Clean">
-			<MSBuild Targets="Clean" Projects="sdk\plugins\filehoster\zshare.net\zsharenet.dproj"/>
-		</Target>
-		<Target Name="zsharenet:Make">
-			<MSBuild Targets="Make" Projects="sdk\plugins\filehoster\zshare.net\zsharenet.dproj"/>
 		</Target>
 		<Target Name="anyimgcom">
 			<MSBuild Projects="sdk\plugins\imagehoster\anyimg.com\anyimgcom.dproj"/>
@@ -1536,13 +1200,13 @@
 			<MSBuild Targets="Make" Projects="sdk\plugins\imagehoster\tinypic.com\tinypiccom.dproj"/>
 		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="IntelligeN;dirwatch;linkgrabber;mirrorsort;vbulletin_randomquestion;blogger;cherrycms;discuz;discuzx;dle;fluxbb;htw;icms;ipb2;ipb3;joomla;loadit;mybb;n3m0cms;phpbb2;phpbb3;smf;ucms;vbulletin;wbb2;wbb3;wbb4;wfusion;wordpress;xenforo;einsadvdch;adultdvdempirecom;amazoncom;amazonde;bigfishgamescom;bigfishgamesde;binsearchinfo;cdlexikonde;cduniversecom;cinefactsde;erodvdnl;gamestarde;gaminguniversede;igncom;imagesgooglede;imdbcom;jadedvideocom;moviemazede;nfodbru;nintendolifecom;pcgdbde;releasename;sexvideoallcom;thaliade;wiiboxartcom;xrelto;youtubecom;zelluloidde;filecryptcc;linkcryptws;ncryptin;relinkto;safelinkingnet;sharelinksbiz;extractedpostcode1;intelligenxml1;intelligenxml2;releasenamereader;bitsharecom;cloudzernet;crockocom;dataloadingcom;dateito;depositfilescom;enteruploadcom;extabitcom;filefactorycom;filefrogto;filejunglecom;filepostcom;fileservecom;filesoniccom;filestoreto;freaksharecom;hotfilecom;ifileit;junocloudme;kewlsharecom;kickloadcom;letitbitnet;loadto;loadfilesin;mediafirecom;megauploadcom;netloadin;netuploadedcom;oroncom;qsharecom;rapidgatornet;rapidsharecom;remixsharecom;sendspacecom;sharenownet;shareonlinebiz;shraglecom;speedshareorg;terabitto;turbobitnet;ugotfilecom;uploadednet;uploadingcom;uploadspacepl;uploadstationcom;uploadstubede;wuploadcom;x7to;xupin;zippysharecom;zsharenet;anyimgcom;ddlworg;directuploadnet;fastpicru;imgurcom;picfrontorg;picloadorg;tinypiccom"/>
+			<CallTarget Targets="IntelligeN;dirwatch;linkgrabber;mirrorsort;vbulletin_randomquestion;blogger;cherrycms;discuz;discuzx;dle;fluxbb;htw;icms;ipb2;ipb3;joomla;loadit;mybb;n3m0cms;phpbb2;phpbb3;smf;ucms;vbulletin;wbb2;wbb3;wbb4;wfusion;wordpress;xenforo;einsadvdch;adultdvdempirecom;amazoncom;amazonde;bigfishgamescom;bigfishgamesde;binsearchinfo;cdlexikonde;cduniversecom;cinefactsde;erodvdnl;gamestarde;gaminguniversede;igncom;imagesgooglede;imdbcom;jadedvideocom;moviemazede;nfodbru;nintendolifecom;pcgdbde;releasename;sexvideoallcom;thaliade;wiiboxartcom;xrelto;youtubecom;zelluloidde;filecryptcc;linkcryptws;ncryptin;relinkto;safelinkingnet;sharelinksbiz;extractedpostcode1;intelligenxml1;intelligenxml2;releasenamereader;crockocom;dateito;depositfilescom;extabitcom;filefactorycom;filepostcom;fileservecom;filestoreto;freaksharecom;junocloudme;letitbitnet;loadto;mediafirecom;rapidgatornet;remixsharecom;sendspacecom;shareonlinebiz;turbobitnet;uploadednet;uploadingcom;uploadstubede;xupin;zippysharecom;anyimgcom;ddlworg;directuploadnet;fastpicru;imgurcom;picfrontorg;picloadorg;tinypiccom"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="IntelligeN:Clean;dirwatch:Clean;linkgrabber:Clean;mirrorsort:Clean;vbulletin_randomquestion:Clean;blogger:Clean;cherrycms:Clean;discuz:Clean;discuzx:Clean;dle:Clean;fluxbb:Clean;htw:Clean;icms:Clean;ipb2:Clean;ipb3:Clean;joomla:Clean;loadit:Clean;mybb:Clean;n3m0cms:Clean;phpbb2:Clean;phpbb3:Clean;smf:Clean;ucms:Clean;vbulletin:Clean;wbb2:Clean;wbb3:Clean;wbb4:Clean;wfusion:Clean;wordpress:Clean;xenforo:Clean;einsadvdch:Clean;adultdvdempirecom:Clean;amazoncom:Clean;amazonde:Clean;bigfishgamescom:Clean;bigfishgamesde:Clean;binsearchinfo:Clean;cdlexikonde:Clean;cduniversecom:Clean;cinefactsde:Clean;erodvdnl:Clean;gamestarde:Clean;gaminguniversede:Clean;igncom:Clean;imagesgooglede:Clean;imdbcom:Clean;jadedvideocom:Clean;moviemazede:Clean;nfodbru:Clean;nintendolifecom:Clean;pcgdbde:Clean;releasename:Clean;sexvideoallcom:Clean;thaliade:Clean;wiiboxartcom:Clean;xrelto:Clean;youtubecom:Clean;zelluloidde:Clean;filecryptcc:Clean;linkcryptws:Clean;ncryptin:Clean;relinkto:Clean;safelinkingnet:Clean;sharelinksbiz:Clean;extractedpostcode1:Clean;intelligenxml1:Clean;intelligenxml2:Clean;releasenamereader:Clean;bitsharecom:Clean;cloudzernet:Clean;crockocom:Clean;dataloadingcom:Clean;dateito:Clean;depositfilescom:Clean;enteruploadcom:Clean;extabitcom:Clean;filefactorycom:Clean;filefrogto:Clean;filejunglecom:Clean;filepostcom:Clean;fileservecom:Clean;filesoniccom:Clean;filestoreto:Clean;freaksharecom:Clean;hotfilecom:Clean;ifileit:Clean;junocloudme:Clean;kewlsharecom:Clean;kickloadcom:Clean;letitbitnet:Clean;loadto:Clean;loadfilesin:Clean;mediafirecom:Clean;megauploadcom:Clean;netloadin:Clean;netuploadedcom:Clean;oroncom:Clean;qsharecom:Clean;rapidgatornet:Clean;rapidsharecom:Clean;remixsharecom:Clean;sendspacecom:Clean;sharenownet:Clean;shareonlinebiz:Clean;shraglecom:Clean;speedshareorg:Clean;terabitto:Clean;turbobitnet:Clean;ugotfilecom:Clean;uploadednet:Clean;uploadingcom:Clean;uploadspacepl:Clean;uploadstationcom:Clean;uploadstubede:Clean;wuploadcom:Clean;x7to:Clean;xupin:Clean;zippysharecom:Clean;zsharenet:Clean;anyimgcom:Clean;ddlworg:Clean;directuploadnet:Clean;fastpicru:Clean;imgurcom:Clean;picfrontorg:Clean;picloadorg:Clean;tinypiccom:Clean"/>
+			<CallTarget Targets="IntelligeN:Clean;dirwatch:Clean;linkgrabber:Clean;mirrorsort:Clean;vbulletin_randomquestion:Clean;blogger:Clean;cherrycms:Clean;discuz:Clean;discuzx:Clean;dle:Clean;fluxbb:Clean;htw:Clean;icms:Clean;ipb2:Clean;ipb3:Clean;joomla:Clean;loadit:Clean;mybb:Clean;n3m0cms:Clean;phpbb2:Clean;phpbb3:Clean;smf:Clean;ucms:Clean;vbulletin:Clean;wbb2:Clean;wbb3:Clean;wbb4:Clean;wfusion:Clean;wordpress:Clean;xenforo:Clean;einsadvdch:Clean;adultdvdempirecom:Clean;amazoncom:Clean;amazonde:Clean;bigfishgamescom:Clean;bigfishgamesde:Clean;binsearchinfo:Clean;cdlexikonde:Clean;cduniversecom:Clean;cinefactsde:Clean;erodvdnl:Clean;gamestarde:Clean;gaminguniversede:Clean;igncom:Clean;imagesgooglede:Clean;imdbcom:Clean;jadedvideocom:Clean;moviemazede:Clean;nfodbru:Clean;nintendolifecom:Clean;pcgdbde:Clean;releasename:Clean;sexvideoallcom:Clean;thaliade:Clean;wiiboxartcom:Clean;xrelto:Clean;youtubecom:Clean;zelluloidde:Clean;filecryptcc:Clean;linkcryptws:Clean;ncryptin:Clean;relinkto:Clean;safelinkingnet:Clean;sharelinksbiz:Clean;extractedpostcode1:Clean;intelligenxml1:Clean;intelligenxml2:Clean;releasenamereader:Clean;crockocom:Clean;dateito:Clean;depositfilescom:Clean;extabitcom:Clean;filefactorycom:Clean;filepostcom:Clean;fileservecom:Clean;filestoreto:Clean;freaksharecom:Clean;junocloudme:Clean;letitbitnet:Clean;loadto:Clean;mediafirecom:Clean;rapidgatornet:Clean;remixsharecom:Clean;sendspacecom:Clean;shareonlinebiz:Clean;turbobitnet:Clean;uploadednet:Clean;uploadingcom:Clean;uploadstubede:Clean;xupin:Clean;zippysharecom:Clean;anyimgcom:Clean;ddlworg:Clean;directuploadnet:Clean;fastpicru:Clean;imgurcom:Clean;picfrontorg:Clean;picloadorg:Clean;tinypiccom:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="IntelligeN:Make;dirwatch:Make;linkgrabber:Make;mirrorsort:Make;vbulletin_randomquestion:Make;blogger:Make;cherrycms:Make;discuz:Make;discuzx:Make;dle:Make;fluxbb:Make;htw:Make;icms:Make;ipb2:Make;ipb3:Make;joomla:Make;loadit:Make;mybb:Make;n3m0cms:Make;phpbb2:Make;phpbb3:Make;smf:Make;ucms:Make;vbulletin:Make;wbb2:Make;wbb3:Make;wbb4:Make;wfusion:Make;wordpress:Make;xenforo:Make;einsadvdch:Make;adultdvdempirecom:Make;amazoncom:Make;amazonde:Make;bigfishgamescom:Make;bigfishgamesde:Make;binsearchinfo:Make;cdlexikonde:Make;cduniversecom:Make;cinefactsde:Make;erodvdnl:Make;gamestarde:Make;gaminguniversede:Make;igncom:Make;imagesgooglede:Make;imdbcom:Make;jadedvideocom:Make;moviemazede:Make;nfodbru:Make;nintendolifecom:Make;pcgdbde:Make;releasename:Make;sexvideoallcom:Make;thaliade:Make;wiiboxartcom:Make;xrelto:Make;youtubecom:Make;zelluloidde:Make;filecryptcc:Make;linkcryptws:Make;ncryptin:Make;relinkto:Make;safelinkingnet:Make;sharelinksbiz:Make;extractedpostcode1:Make;intelligenxml1:Make;intelligenxml2:Make;releasenamereader:Make;bitsharecom:Make;cloudzernet:Make;crockocom:Make;dataloadingcom:Make;dateito:Make;depositfilescom:Make;enteruploadcom:Make;extabitcom:Make;filefactorycom:Make;filefrogto:Make;filejunglecom:Make;filepostcom:Make;fileservecom:Make;filesoniccom:Make;filestoreto:Make;freaksharecom:Make;hotfilecom:Make;ifileit:Make;junocloudme:Make;kewlsharecom:Make;kickloadcom:Make;letitbitnet:Make;loadto:Make;loadfilesin:Make;mediafirecom:Make;megauploadcom:Make;netloadin:Make;netuploadedcom:Make;oroncom:Make;qsharecom:Make;rapidgatornet:Make;rapidsharecom:Make;remixsharecom:Make;sendspacecom:Make;sharenownet:Make;shareonlinebiz:Make;shraglecom:Make;speedshareorg:Make;terabitto:Make;turbobitnet:Make;ugotfilecom:Make;uploadednet:Make;uploadingcom:Make;uploadspacepl:Make;uploadstationcom:Make;uploadstubede:Make;wuploadcom:Make;x7to:Make;xupin:Make;zippysharecom:Make;zsharenet:Make;anyimgcom:Make;ddlworg:Make;directuploadnet:Make;fastpicru:Make;imgurcom:Make;picfrontorg:Make;picloadorg:Make;tinypiccom:Make"/>
+			<CallTarget Targets="IntelligeN:Make;dirwatch:Make;linkgrabber:Make;mirrorsort:Make;vbulletin_randomquestion:Make;blogger:Make;cherrycms:Make;discuz:Make;discuzx:Make;dle:Make;fluxbb:Make;htw:Make;icms:Make;ipb2:Make;ipb3:Make;joomla:Make;loadit:Make;mybb:Make;n3m0cms:Make;phpbb2:Make;phpbb3:Make;smf:Make;ucms:Make;vbulletin:Make;wbb2:Make;wbb3:Make;wbb4:Make;wfusion:Make;wordpress:Make;xenforo:Make;einsadvdch:Make;adultdvdempirecom:Make;amazoncom:Make;amazonde:Make;bigfishgamescom:Make;bigfishgamesde:Make;binsearchinfo:Make;cdlexikonde:Make;cduniversecom:Make;cinefactsde:Make;erodvdnl:Make;gamestarde:Make;gaminguniversede:Make;igncom:Make;imagesgooglede:Make;imdbcom:Make;jadedvideocom:Make;moviemazede:Make;nfodbru:Make;nintendolifecom:Make;pcgdbde:Make;releasename:Make;sexvideoallcom:Make;thaliade:Make;wiiboxartcom:Make;xrelto:Make;youtubecom:Make;zelluloidde:Make;filecryptcc:Make;linkcryptws:Make;ncryptin:Make;relinkto:Make;safelinkingnet:Make;sharelinksbiz:Make;extractedpostcode1:Make;intelligenxml1:Make;intelligenxml2:Make;releasenamereader:Make;crockocom:Make;dateito:Make;depositfilescom:Make;extabitcom:Make;filefactorycom:Make;filepostcom:Make;fileservecom:Make;filestoreto:Make;freaksharecom:Make;junocloudme:Make;letitbitnet:Make;loadto:Make;mediafirecom:Make;rapidgatornet:Make;remixsharecom:Make;sendspacecom:Make;shareonlinebiz:Make;turbobitnet:Make;uploadednet:Make;uploadingcom:Make;uploadstubede:Make;xupin:Make;zippysharecom:Make;anyimgcom:Make;ddlworg:Make;directuploadnet:Make;fastpicru:Make;imgurcom:Make;picfrontorg:Make;picloadorg:Make;tinypiccom:Make"/>
 		</Target>
 		<Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 	</Project>
