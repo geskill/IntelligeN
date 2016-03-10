@@ -31,6 +31,9 @@ type
     cobCopyright: TComboBox;
     lWebsite: TLabel;
     eWebsite: TEdit;
+    lFolderName: TLabel;
+    eFolderName: TcxMaskEdit;
+    procedure eFolderNamePropertiesChange(Sender: TObject);
     procedure eFullNamePropertiesChange(Sender: TObject);
     procedure bCreateClick(Sender: TObject);
   private
@@ -55,7 +58,7 @@ var
   LFileIndex: Integer;
 begin
   Path := IncludeTrailingPathDelimiter(TemplatePath);
-  NewPath := Path + IncludeTrailingPathDelimiter(eFullName.Text);
+  NewPath := Path + IncludeTrailingPathDelimiter(eFolderName.Text);
   ForceDirectories(NewPath);
 
   StringList := TStringList.Create;
@@ -89,11 +92,37 @@ begin
   Close;
 end;
 
+procedure TfPluginWizard.eFolderNamePropertiesChange(Sender: TObject);
+
+  function ConvertName(const AStr: string): string;
+  var
+    LStringIndex: Integer;
+  begin
+    Result := AStr;
+    for LStringIndex := Length(Result) downto 1 do
+      if (Result[LStringIndex] in ['.']) then
+      begin
+        // Upper case every char after '-'
+        if LStringIndex < Length(Result) then
+          Result[LStringIndex + 1] := UpCase(Result[LStringIndex + 1]);
+        Delete(Result, LStringIndex, 1);
+      end;
+    // Upper case first char
+    if Length(Result) > 0 then
+      Result[1] := UpCase(Result[1]);
+  end;
+
+begin
+  eFullName.Text := ConvertName(eFolderName.Text);
+
+  bCreate.Enabled := (Length(eFolderName.Text) > 2) and (Length(eFullName.Text) > 2);
+end;
+
 procedure TfPluginWizard.eFullNamePropertiesChange(Sender: TObject);
 begin
   eBasicName.Text := LowerCase(eFullName.Text);
 
-  bCreate.Enabled := (length(eFullName.Text) > 2);
+  bCreate.Enabled := (Length(eFolderName.Text) > 2) and (Length(eFullName.Text) > 2);
 end;
 
 function TfPluginWizard.Replace(AString: string): string;
@@ -101,8 +130,8 @@ var
   NewGUID: TGUID;
 begin
   CreateGUID(NewGUID);
-  Result := StringReplaceMultiple(AString, ['%ProjectGuid%', '%BasicName%', '%FullName%', '%Website%', '%CompanyName%', '%Copyright%', '%MajorVer%', '%MinorVer%', '%Release%', '%Build%'], { . }
-    [GUIDToString(NewGUID), eBasicName.Text, eFullName.Text, eWebsite.Text, cobCompanyName.Text, cobCopyright.Text, seMajorVer.Text, seMinorVer.Text, seRelease.Text, seBuild.Text], False);
+  Result := StringReplaceMultiple(AString, ['%ProjectGuid%', '%BasicName%', '%FullName%', '%FolderName%', '%Website%', '%CompanyName%', '%Copyright%', '%MajorVer%', '%MinorVer%', '%Release%', '%Build%'], { . }
+    [GUIDToString(NewGUID), eBasicName.Text, eFullName.Text, eFolderName.Text, eWebsite.Text, cobCompanyName.Text, cobCopyright.Text, seMajorVer.Text, seMinorVer.Text, seRelease.Text, seBuild.Text], False);
 end;
 
 end.

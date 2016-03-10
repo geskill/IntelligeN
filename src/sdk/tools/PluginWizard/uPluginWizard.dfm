@@ -16,14 +16,14 @@ object fPluginWizard: TfPluginWizard
   TextHeight = 13
   object lFullName: TLabel
     Left = 8
-    Top = 8
+    Top = 48
     Width = 50
     Height = 13
     Caption = 'Full Name:'
   end
   object lBasicName: TLabel
     Left = 8
-    Top = 48
+    Top = 96
     Width = 58
     Height = 13
     Caption = 'Basic Name:'
@@ -72,18 +72,25 @@ object fPluginWizard: TfPluginWizard
   end
   object lWebsite: TLabel
     Left = 8
-    Top = 96
+    Top = 137
     Width = 43
     Height = 13
     Caption = 'Website:'
   end
+  object lFolderName: TLabel
+    Left = 8
+    Top = 8
+    Width = 64
+    Height = 13
+    Caption = 'Folder Name:'
+  end
   object eBasicName: TEdit
     Left = 8
-    Top = 61
+    Top = 109
     Width = 225
     Height = 21
     ReadOnly = True
-    TabOrder = 1
+    TabOrder = 2
   end
   object seMajorVer: TSpinEdit
     Left = 248
@@ -92,7 +99,7 @@ object fPluginWizard: TfPluginWizard
     Height = 22
     MaxValue = 0
     MinValue = 0
-    TabOrder = 5
+    TabOrder = 6
     Value = 2
   end
   object seMinorVer: TSpinEdit
@@ -102,7 +109,7 @@ object fPluginWizard: TfPluginWizard
     Height = 22
     MaxValue = 0
     MinValue = 0
-    TabOrder = 6
+    TabOrder = 7
     Value = 129
   end
   object seRelease: TSpinEdit
@@ -112,7 +119,7 @@ object fPluginWizard: TfPluginWizard
     Height = 22
     MaxValue = 0
     MinValue = 0
-    TabOrder = 7
+    TabOrder = 8
     Value = 2
   end
   object seBuild: TSpinEdit
@@ -122,7 +129,7 @@ object fPluginWizard: TfPluginWizard
     Height = 22
     MaxValue = 0
     MinValue = 0
-    TabOrder = 8
+    TabOrder = 9
     Value = 0
   end
   object bCreate: TButton
@@ -133,7 +140,7 @@ object fPluginWizard: TfPluginWizard
     Caption = 'Create'
     Default = True
     Enabled = False
-    TabOrder = 9
+    TabOrder = 10
     OnClick = bCreateClick
   end
   object cobCompanyName: TComboBox
@@ -141,7 +148,7 @@ object fPluginWizard: TfPluginWizard
     Top = 21
     Width = 225
     Height = 21
-    TabOrder = 3
+    TabOrder = 4
     Items.Strings = (
       'Sebastian Klatte')
   end
@@ -150,24 +157,33 @@ object fPluginWizard: TfPluginWizard
     Top = 61
     Width = 225
     Height = 21
-    TabOrder = 4
+    TabOrder = 5
     Items.Strings = (
       '(c) 2016 Sebastian Klatte')
   end
   object eWebsite: TEdit
     Left = 8
-    Top = 109
+    Top = 150
     Width = 225
     Height = 21
-    TabOrder = 2
+    TabOrder = 3
     Text = 'http://www.intelligen2009.com/'
   end
   object eFullName: TcxMaskEdit
     Left = 8
-    Top = 21
+    Top = 61
     Properties.MaskKind = emkRegExpr
     Properties.EditMask = '([A-Za-z_]{1}\w{2,15})'
     Properties.OnChange = eFullNamePropertiesChange
+    TabOrder = 1
+    Width = 225
+  end
+  object eFolderName: TcxMaskEdit
+    Left = 8
+    Top = 21
+    Properties.MaskKind = emkRegExpr
+    Properties.EditMask = '[^<>:"\\\/\|\?\*]+'
+    Properties.OnChange = eFolderNamePropertiesChange
     TabOrder = 0
     Width = 225
   end
