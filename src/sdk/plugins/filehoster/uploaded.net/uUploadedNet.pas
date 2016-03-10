@@ -1,10 +1,10 @@
-{ ******************************************************
-  *                                                    *
-  *  Uploaded.to Delphi API                            *
-  *  Version 2.0.0.0                                   *
-  *  Copyright (c) 2010 Sebastian Klatte               *
-  *                                                    *
-  ****************************************************** }
+{ ********************************************************
+  *                            IntelligeN PLUGIN SYSTEM  *
+  *  Uploaded.net Delphi API                             *
+  *  Version 2.5.0.0                                     *
+  *  Copyright (c) 2016 Sebastian Klatte                 *
+  *                                                      *
+  ******************************************************** }
 unit uUploadedNet;
 
 interface
@@ -25,10 +25,14 @@ uses
 
 type
   TUploadedNet = class(TFileHosterPlugIn)
+  protected
+    function InternalCheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool; override;
+    function InternalCheckLinks(const AFiles: WideString; out ALinksInfo: ILinksInfo): WordBool; override;
   public
-    function GetName: WideString; override; safecall;
-    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
-    function CheckLinks(const AFiles: WideString): Integer; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
   end;
 
 implementation
@@ -53,6 +57,21 @@ begin
 end;
 
 { TUploadedTo }
+
+function TUploadedNet.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TUploadedNet.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TUploadedNet.GetDescription;
+begin
+  Result := GetName + ' file hoster plug-in.';
+end;
 
 function TUploadedNet.GetName: WideString;
 begin

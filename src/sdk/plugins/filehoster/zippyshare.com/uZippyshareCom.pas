@@ -1,8 +1,8 @@
 { ********************************************************
-  *                                                      *
+  *                            IntelligeN PLUGIN SYSTEM  *
   *  Zippyshare.com Delphi API                           *
-  *  Version 2.0.0.0                                     *
-  *  Copyright (c) 2010 Sebastian Klatte                 *
+  *  Version 2.5.0.0                                     *
+  *  Copyright (c) 2016 Sebastian Klatte                 *
   *                                                      *
   ******************************************************** }
 unit uZippyshareCom;
@@ -19,85 +19,100 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // plugin system
-  uPlugInFileHosterClass, uPlugInHTTPClasses, uPlugInConst,
+  uPlugInConst, uPlugInInterface, uPlugInFileHosterClass, uPlugInFileHosterClasses, uPlugInHTTPClasses,
   // Utils
   uPathUtils, uSizeUtils, uURLUtils;
 
 type
   TZippyshareCom = class(TFileHosterPlugIn)
+  protected
+    function InternalCheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool; override;
   public
-    function GetName: WideString; override; safecall;
-    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
-    // function CheckLinks(const AFiles: WideString): Integer; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
   end;
 
 implementation
 
 { TZippyshareCom }
 
-function TZippyshareCom.GetName: WideString;
-begin
-  Result := 'Zippyshare.com';
-end;
-
-function TZippyshareCom.CheckLink(const AFile: WideString): TLinkInfo;
+function TZippyshareCom.InternalCheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool;
 var
-  LinkInfo: TLinkInfo;
-
-  RequestID: Double;
-
-  ResponeStr: string;
+  LHTTPRequest: IHTTPRequest;
+  LRequestID: Double;
+  LResponeStr: string;
 begin
-  with LinkInfo do
-  begin
-    Link := AFile;
-    Status := csUnknown;
-    Size := 0;
-    FileName := '';
-    Checksum := '';
-  end;
+  ALinkInfo := TLinkInfo.Create;
 
-  RequestID := HTTPManager.Get(THTTPRequest.Create(AFile), TPlugInHTTPOptions.Create(Self));
+  LHTTPRequest := THTTPRequest.Create(AFile);
+  LHTTPRequest.Cookies.Add('ziplocale=en');
 
-  HTTPManager.WaitFor(RequestID);
+  LRequestID := HTTPManager.Get(LHTTPRequest, TPlugInHTTPOptions.Create(Self));
 
-  ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
+  HTTPManager.WaitFor(LRequestID);
 
-  if (Pos('File does not exist on this server', ResponeStr) > 0) then
-    LinkInfo.Status := csOffline
+  LResponeStr := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
+
+  if (Pos('File has expired and does not exist anymore on this server', LResponeStr) > 0) or (Pos('File does not exist', LResponeStr) > 0) then
+    ALinkInfo.Status := csOffline
   else
     with TRegExpr.Create do
       try
-        InputString := ResponeStr;
+        InputString := LResponeStr;
 
-        if (Pos('"og:title" content="Private file"', ResponeStr) > 0) then
-        begin
-          Expression := '\+"\/(.*?)";';
-          if Exec(InputString) then
-            LinkInfo.FileName := HTTPDecode(Match[1]);
+        Expression := '<title>Zippyshare\.com \- (.*?)<\/title>';
+        if Exec(InputString) then
+          ALinkInfo.FileName := Trim(HTTPDecode(Match[1]));
 
-          Expression := '>([\d\.]+) (\w+)<';
-          if Exec(InputString) then
-          begin
-            LinkInfo.Status := csOnline;
-            LinkInfo.Size := TSizeFormatter.SizeToByte(Match[1], Match[2]);
-          end;
-        end
-        else
+        if SameStr('', ALinkInfo.FileName) then
         begin
-          Expression := '"og:title" content="(.*?) ".*?>([\d\.]+) (\w+)<';
+          Expression := 'Name:(\s+)?<\/font>(\s+)?<font style=.*?>(.*?)<\/font>';
           if Exec(InputString) then
-          begin
-            LinkInfo.Status := csOnline;
-            LinkInfo.Size := TSizeFormatter.SizeToByte(Match[2], Match[3]);
-            LinkInfo.FileName := Match[1];
-          end;
+            ALinkInfo.FileName := Trim(HTTPDecode(Match[3]));
         end;
+
+        if SameStr('', ALinkInfo.FileName) then
+        begin
+          Expression := 'document\.getElementById\(\''dlbutton\''\)\.href.*"\/(.*?)";';
+          if Exec(InputString) then
+            ALinkInfo.FileName := Trim(HTTPDecode(Match[1]));
+        end;
+
+        if not SameStr('>Share movie:', LResponeStr) then
+        begin
+          Expression := 'Size:(\s+)?<\/font>(\s+)?<font style=.*?>([\d\.]+) (\w+)<\/font>';
+          if Exec(InputString) then
+            ALinkInfo.Size := TSizeFormatter.SizeToByte(Match[3], Match[4]);
+        end;
+
+        ALinkInfo.Status := csOnline;
       finally
         Free;
       end;
 
-  Result := LinkInfo;
+  Result := True;
+end;
+
+function TZippyshareCom.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TZippyshareCom.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TZippyshareCom.GetDescription;
+begin
+  Result := GetName + ' file hoster plug-in.';
+end;
+
+function TZippyshareCom.GetName: WideString;
+begin
+  Result := 'Zippyshare.com';
 end;
 
 end.

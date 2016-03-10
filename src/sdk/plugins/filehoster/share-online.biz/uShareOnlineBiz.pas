@@ -1,8 +1,8 @@
 { ********************************************************
-  *                                                      *
+  *                            IntelligeN PLUGIN SYSTEM  *
   *  Share-online.biz Delphi API                         *
-  *  Version 2.0.0.0                                     *
-  *  Copyright (c) 2010 Sebastian Klatte                 *
+  *  Version 2.5.0.0                                     *
+  *  Copyright (c) 2016 Sebastian Klatte                 *
   *                                                      *
   ******************************************************** }
 unit uShareOnlineBiz;
@@ -19,21 +19,40 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses, uHTTPConst,
   // plugin system
-  uPlugInFileHosterClass, uPlugInHTTPClasses, uPlugInConst,
+  uPlugInConst, uPlugInInterface, uPlugInFileHosterClass, uPlugInFileHosterClasses, uPlugInHTTPClasses,
   // Utils
   uPathUtils, uSizeUtils, uURLUtils;
 
 type
   TShareOnlineBiz = class(TFileHosterPlugIn)
+  protected
+    function InternalCheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool; override;
+    function InternalCheckLinks(const AFiles: WideString; out ALinksInfo: ILinksInfo): WordBool; override;
   public
-    function GetName: WideString; override; safecall;
-    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
-    function CheckLinks(const AFiles: WideString): Integer; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
   end;
 
 implementation
 
 { TShareOnlineBiz }
+
+function TShareOnlineBiz.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TShareOnlineBiz.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TShareOnlineBiz.GetDescription;
+begin
+  Result := GetName + ' file hoster plug-in.';
+end;
 
 function TShareOnlineBiz.GetName: WideString;
 begin

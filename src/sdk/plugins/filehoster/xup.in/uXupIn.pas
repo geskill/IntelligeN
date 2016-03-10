@@ -1,8 +1,8 @@
 { ********************************************************
-  *                                                      *
+  *                            IntelligeN PLUGIN SYSTEM  *
   *  Xup.in Delphi API                                   *
-  *  Version 2.0.0.0                                     *
-  *  Copyright (c) 2010 Sebastian Klatte                 *
+  *  Version 2.5.0.0                                     *
+  *  Copyright (c) 2016 Sebastian Klatte                 *
   *                                                      *
   ******************************************************** }
 unit uXupIn;
@@ -19,69 +19,104 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // plugin system
-  uPlugInFileHosterClass, uPlugInHTTPClasses, uPlugInConst,
+  uPlugInConst, uPlugInInterface, uPlugInFileHosterClass, uPlugInFileHosterClasses, uPlugInHTTPClasses,
   // Utils
   uPathUtils, uSizeUtils, uURLUtils;
 
 type
   TXupIn = class(TFileHosterPlugIn)
+  protected
+    function InternalCheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool; override;
   public
-    function GetName: WideString; override; safecall;
-    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
-    // function CheckLinks(const AFiles: WideString): Integer; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
   end;
 
 implementation
 
 { TXupIn }
 
-function TXupIn.GetName: WideString;
-begin
-  Result := 'Xup.in';
-end;
-
-function TXupIn.CheckLink(const AFile: WideString): TLinkInfo;
+function TXupIn.InternalCheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool;
 var
-  LinkInfo: TLinkInfo;
-
-  RequestID: Double;
-
-  ResponeStr: string;
+  LHTTPRequest: IHTTPRequest;
+  LRequestID: Double;
+  LResponeStr: string;
 begin
-  with LinkInfo do
+  ALinkInfo := TLinkInfo.Create;
+
+  LHTTPRequest := THTTPRequest.Create(AFile);
+
+  LRequestID := HTTPManager.Get(LHTTPRequest, TPlugInHTTPOptions.Create(Self));
+
+  HTTPManager.WaitFor(LRequestID);
+
+  LResponeStr := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
+
+  if (Pos('Datei existiert nicht', LResponeStr) > 0) then
   begin
-    Link := AFile;
-    Status := csUnknown;
-    Size := 0;
-    FileName := '';
-    Checksum := '';
-  end;
-
-  RequestID := HTTPManager.Get(THTTPRequest.Create(AFile), TPlugInHTTPOptions.Create(Self));
-
-  HTTPManager.WaitFor(RequestID);
-
-  ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
-
-  if (Pos('Datei existiert nicht', ResponeStr) > 0) then
-    LinkInfo.Status := csOffline
+    ALinkInfo.Status := csOffline
+  end
   else
     with TRegExpr.Create do
       try
-        InputString := ResponeStr;
-        Expression := '>Download: (.*?)<\/.*?Size: ([\d\.]+) (\w+)<';
+        InputString := LResponeStr;
 
-        if Exec(InputString) then
+        if SameStr('xup.raidrush.ws/', LResponeStr) then
         begin
-          LinkInfo.Status := csOnline;
-          LinkInfo.Size := TSizeFormatter.SizeToByte(Match[2], Match[3]);
-          LinkInfo.FileName := Match[1];
+          Expression := '<title>XUP - Download (.*?) \| ';
+          if Exec(InputString) then
+            ALinkInfo.FileName := Trim(HTTPDecode(Match[1]));
+
+          if SameStr('', ALinkInfo.FileName) then
+          begin
+            Expression := '<h1>XUP - Download (.*?) \| ';
+            if Exec(InputString) then
+              ALinkInfo.FileName := Trim(HTTPDecode(Match[1]));
+          end;
+
+          Expression := 'Size<\/font><\/td>[\t\n\r ]+<td>(\d+)<\/td>';
+          if Exec(InputString) then
+            ALinkInfo.Size := TSizeFormatter.SizeToByte(Match[1]);
+        end
+        else
+        begin
+          Expression := '<legend>.*?<.*?>Download: (.*?)<\/.*?>';
+          if Exec(InputString) then
+            ALinkInfo.FileName := Trim(HTTPDecode(Match[1]));
+
+          Expression := 'File Size: ([\d\.]+) (\w+)<';
+          if Exec(InputString) then
+            ALinkInfo.Size := TSizeFormatter.SizeToByte(Match[1], Match[2]);
         end;
+
+        ALinkInfo.Status := csOnline;
       finally
         Free;
       end;
 
-  Result := LinkInfo;
+  Result := True;
+end;
+
+function TXupIn.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TXupIn.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TXupIn.GetDescription;
+begin
+  Result := GetName + ' file hoster plug-in.';
+end;
+
+function TXupIn.GetName: WideString;
+begin
+  Result := 'Xup.in';
 end;
 
 end.

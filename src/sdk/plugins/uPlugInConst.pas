@@ -48,6 +48,7 @@ type
     ChecksumType: TChecksumType;
   end;
 
+  // TODO: Move from this file.
   TLinksInfo = packed record
     Status: TContentStatus;
     Size: Double;

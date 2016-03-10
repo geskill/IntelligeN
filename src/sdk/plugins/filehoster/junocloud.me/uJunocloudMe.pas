@@ -1,8 +1,8 @@
 { ********************************************************
-  *                                                      *
+  *                            IntelligeN PLUGIN SYSTEM  *
   *  Junocloud.me Delphi API                             *
-  *  Version 2.0.0.0                                     *
-  *  Copyright (c) 2013 Sebastian Klatte                 *
+  *  Version 2.5.0.0                                     *
+  *  Copyright (c) 2016 Sebastian Klatte                 *
   *                                                      *
   ******************************************************** }
 unit uJunocloudMe;
@@ -19,21 +19,39 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // plugin system
-  uPlugInFileHosterClass, uPlugInHTTPClasses, uPlugInConst,
+  uPlugInConst, uPlugInInterface, uPlugInFileHosterClass, uPlugInFileHosterClasses, uPlugInHTTPClasses,
   // Utils
   uPathUtils, uSizeUtils, uURLUtils;
 
 type
   TJunocloudMe = class(TFileHosterPlugIn)
+  protected
+    function InternalCheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool; override;
   public
-    function GetName: WideString; override; safecall;
-    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
-    // function CheckLinks(const AFiles: WideString): Integer; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
   end;
 
 implementation
 
 { TJunocloudMe }
+
+function TJunocloudMe.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TJunocloudMe.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TJunocloudMe.GetDescription;
+begin
+  Result := GetName + ' file hoster plug-in.';
+end;
 
 function TJunocloudMe.GetName: WideString;
 begin

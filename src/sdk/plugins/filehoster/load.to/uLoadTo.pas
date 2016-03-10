@@ -1,8 +1,8 @@
 { ********************************************************
-  *                                                      *
+  *                            IntelligeN PLUGIN SYSTEM  *
   *  Load.to Delphi API                                  *
-  *  Version 2.0.0.0                                     *
-  *  Copyright (c) 2010 Sebastian Klatte                 *
+  *  Version 2.5.0.0                                     *
+  *  Copyright (c) 2016 Sebastian Klatte                 *
   *                                                      *
   ******************************************************** }
 unit uLoadTo;
@@ -19,21 +19,39 @@ uses
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // plugin system
-  uPlugInFileHosterClass, uPlugInHTTPClasses, uPlugInConst,
+  uPlugInConst, uPlugInInterface, uPlugInFileHosterClass, uPlugInFileHosterClasses, uPlugInHTTPClasses,
   // Utils
   uPathUtils, uSizeUtils, uURLUtils;
 
 type
   TLoadTo = class(TFileHosterPlugIn)
+  protected
+    function InternalCheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool; override;
   public
-    function GetName: WideString; override; safecall;
-    function CheckLink(const AFile: WideString): TLinkInfo; override; safecall;
-    // function CheckLinks(const AFiles: WideString): Integer; override; safecall;
+    function GetAuthor: WideString; override;
+    function GetAuthorURL: WideString; override;
+    function GetDescription: WideString; override;
+    function GetName: WideString; override;
   end;
 
 implementation
 
 { TLoadTo }
+
+function TLoadTo.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TLoadTo.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TLoadTo.GetDescription;
+begin
+  Result := GetName + ' file hoster plug-in.';
+end;
 
 function TLoadTo.GetName: WideString;
 begin

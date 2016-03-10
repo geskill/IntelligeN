@@ -2,7 +2,7 @@
   *                            IntelligeN PLUGIN SYSTEM  *
   *  PlugIn file hoster class                            *
   *  Version 2.5.0.0                                     *
-  *  Copyright (c) 2015 Sebastian Klatte                 *
+  *  Copyright (c) 2016 Sebastian Klatte                 *
   *                                                      *
   ******************************************************** }
 unit uPlugInFileHosterClass;
@@ -11,85 +11,75 @@ interface
 
 uses
   // Delphi
-  SysUtils, Classes, Generics.Collections,
+  SysUtils, Classes, Variants,
   // Plugin
-  uPlugInConst, uPlugInInterface, uPlugInClass;
+  uPlugInConst, uPlugInInterface, uPlugInClass, uPlugInFileHosterClasses;
 
 type
   TFileHosterPlugIn = class(TPlugIn, IFileHosterPlugIn)
   protected
-    FCheckedLinksList: TList<TLinkInfo>;
-    procedure AddLink(const ALink, AFileName: string; AStatus: TLinkStatus; ASize: Int64; const AChecksum: string = ''; AChecksumType: TChecksumType = ctMD5);
+    function InternalCheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool; virtual;
+    function InternalCheckLinks(const AFiles: WideString; out ALinksInfo: ILinksInfo): WordBool; virtual;
   public
-    constructor Create; override;
-    destructor Destroy; override;
-
     function GetType: TPlugInType; override; safecall;
 
-    function CheckLink(const AFile: WideString): TLinkInfo; virtual; safecall; abstract;
-    function CheckLinks(const AFiles: WideString): Integer; virtual; safecall;
-    function CheckedLink(AIndex: Integer): TLinkInfo; safecall;
+    function CheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool; safecall;
+    function CheckLinks(const AFiles: WideString; out ALinksInfo: ILinksInfo): WordBool; safecall;
   end;
 
 implementation
 
 { TFileHosterPlugIn }
 
-procedure TFileHosterPlugIn.AddLink(const ALink, AFileName: string; AStatus: TLinkStatus; ASize: Int64; const AChecksum: string = ''; AChecksumType: TChecksumType = ctMD5);
+function TFileHosterPlugIn.InternalCheckLink;
 var
-  LinkInfo: TLinkInfo;
+  LLinkInfo: ILinkInfo;
 begin
-  with LinkInfo do
-  begin
-    Link := ALink;
-    Status := AStatus;
-    Size := ASize;
-    FileName := AFileName;
-    Checksum := AChecksum;
-    ChecksumType := AChecksumType;
-  end;
+  Result := False;
 
-  FCheckedLinksList.Add(LinkInfo);
+  LLinkInfo := TLinkInfo.Create;
+  ALinkInfo := LLinkInfo;
 end;
 
-constructor TFileHosterPlugIn.Create;
-begin
-  inherited Create;
-  FCheckedLinksList := TList<TLinkInfo>.Create;
-end;
-
-destructor TFileHosterPlugIn.Destroy;
-begin
-  FCheckedLinksList.Free;
-  inherited Destroy;
-end;
-
-function TFileHosterPlugIn.GetType: TPlugInType;
-begin
-  Result := ptFileHoster;
-end;
-
-function TFileHosterPlugIn.CheckLinks(const AFiles: WideString): Integer;
+function TFileHosterPlugIn.InternalCheckLinks;
 var
-  _FileIndex: Integer;
+  LLinkIndex: Integer;
+  LLinkInfo: ILinkInfo;
+  LLinksInfo: TLinksInfo;
 begin
-  FCheckedLinksList.Clear;
+  Result := True;
+
+  LLinksInfo := TLinksInfo.Create;
+
   with TStringList.Create do
     try
       Text := AFiles;
 
-      for _FileIndex := 0 to Count - 1 do
-        FCheckedLinksList.Add(CheckLink(Strings[_FileIndex]));
-
+      for LLinkIndex := 0 to Count - 1 do
+      begin
+        Result := Result and InternalCheckLink(Strings[LLinkIndex], LLinkInfo);
+        LLinksInfo.AddLink(LLinkInfo);
+      end;
     finally
       Free;
     end;
-  Result := FCheckedLinksList.Count;
+
+  ALinksInfo := LLinksInfo;
 end;
 
-function TFileHosterPlugIn.CheckedLink(AIndex: Integer): TLinkInfo;
+function TFileHosterPlugIn.GetType;
 begin
-  Result := FCheckedLinksList.Items[AIndex];
+  Result := ptFileHoster;
+end;
+
+function TFileHosterPlugIn.CheckLink;
+begin
+  Result := InternalCheckLink(AFile, ALinkInfo);
+end;
+
+function TFileHosterPlugIn.CheckLinks;
+begin
+  Result := InternalCheckLinks(AFiles, ALinksInfo);
 end;
 
 end.
