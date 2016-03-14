@@ -1235,6 +1235,10 @@ function TEZTexturePanel.UpdateShadeObjects: boolean;
           Result := CurrAct
         else
           Result := saNone;
+    end
+    else
+    begin
+      Result := saNone;
     end;
   end;
 
