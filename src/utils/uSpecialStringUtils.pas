@@ -23,6 +23,14 @@ function ReduceWhitespace(S: string): string;
 
 function RemoveW(AHost: string): string;
 
+function TrimLeft(const S: string; const C: Char): string; overload;
+
+function TrimRight(const S: string; const C: Char): string; overload;
+
+function PadLeft(const S: string; Ch: Char; Len: Integer): string;
+
+function PadRight(const S: string; Ch: Char; Len: Integer): string;
+
 implementation
 
 function MatchText(const Mask, S: WideString; CaseSensitive: Boolean = False): Boolean;
@@ -338,6 +346,49 @@ begin
     finally
       Free;
     end;
+end;
+
+function TrimLeft(const S: string; const C: Char): string;
+var
+  I, L: Integer;
+begin
+  L := Length(S);
+  I := 1;
+  while (I <= L) and ((S[I] <= ' ') or (S[I] = C)) do
+    Inc(I);
+  Result := copy(S, I, Maxint);
+end;
+
+function TrimRight(const S: string; const C: Char): string;
+var
+  I: Integer;
+begin
+  I := Length(S);
+  while (I > 0) and ((S[I] <= ' ') or ((S[I] = C))) do
+    Dec(I);
+  Result := copy(S, 1, I);
+end;
+
+function PadLeft(const S: string; Ch: Char; Len: Integer): string;
+var
+  RestLen: Integer;
+begin
+  Result := S;
+  RestLen := Len - Length(S);
+  if RestLen < 1 then
+    Exit;
+  Result := StringOfChar(Ch, RestLen) + S;
+end;
+
+function PadRight(const S: string; Ch: Char; Len: Integer): string;
+var
+  RestLen: Integer;
+begin
+  Result := S;
+  RestLen := Len - Length(S);
+  if RestLen < 1 then
+    Exit;
+  Result := S + StringOfChar(Ch, RestLen);
 end;
 
 end.
