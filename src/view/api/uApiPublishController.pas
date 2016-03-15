@@ -49,14 +49,17 @@ type
 
   TIPublishTab = class(TInterfacedObject, IPublishTab)
   private
+    FTabSheetController: ITabSheetController;
     FReleaseName: WideString;
     FPublishItemList: TInterfaceList<IPublishItem>;
   protected
+    function GetTabSheetController: ITabSheetController;
     function GetReleaseName: WideString;
     function GetItem(const IndexOrName: OleVariant): IPublishItem;
   public
-    constructor Create(const AReleaseName: WideString);
+    constructor Create(const ATabSheetController: ITabSheetController);
     procedure Add(const APublishItem: IPublishItem);
+    property TabSheetController: ITabSheetController read GetTabSheetController;
     property ReleaseName: WideString read GetReleaseName;
     property Item[const IndexOrName: OleVariant]: IPublishItem read GetItem;
     function Count: Integer;
@@ -411,6 +414,11 @@ end;
 
 { TIPublishTab }
 
+function TIPublishTab.GetTabSheetController: ITabSheetController;
+begin
+  Result := FTabSheetController;
+end;
+
 function TIPublishTab.GetReleaseName: WideString;
 begin
   Result := FReleaseName;
@@ -447,10 +455,11 @@ begin
   end;
 end;
 
-constructor TIPublishTab.Create(const AReleaseName: WideString);
+constructor TIPublishTab.Create(const ATabSheetController: ITabSheetController);
 begin
   inherited Create;
-  FReleaseName := AReleaseName;
+  FTabSheetController := ATabSheetController;
+  FReleaseName := ATabSheetController.ReleaseName;
   FPublishItemList := TInterfaceList<IPublishItem>.Create;
 end;
 
@@ -468,6 +477,7 @@ end;
 destructor TIPublishTab.Destroy;
 begin
   FPublishItemList.Free;
+  FTabSheetController := nil;
   inherited Destroy;
 end;
 
@@ -1026,7 +1036,7 @@ end;
 procedure TICMSWebsiteContainer.HandleCustomFieldList(ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; AControlList: TControlDataList; AMirrorList: TMirrorContainerList; out ACustomFieldList: TCustomFieldList);
 var
   LCustomFieldIndex: Integer;
-  LIScript : WideString;
+  LIScript: WideString;
   LIScriptResult: RIScriptResult;
 begin
   ACustomFieldList := TCustomFieldList.Create;
@@ -1341,7 +1351,7 @@ function TICMSWebsiteContainer.GeneratePublishTab: IPublishTab;
 var
   PublishTab: TIPublishTab;
 begin
-  PublishTab := TIPublishTab.Create(TabSheetController.ReleaseName);
+  PublishTab := TIPublishTab.Create(TabSheetController);
 
   PublishTab.Add(GeneratePublishItem);
 
@@ -1800,7 +1810,7 @@ var
 
   I, J: Integer;
 begin
-  PublishTab := TIPublishTab.Create(TabSheetController.ReleaseName);
+  PublishTab := TIPublishTab.Create(TabSheetController);
 
   for I := 0 to Count - 1 do
     for J := 0 to CMS[I].Count - 1 do
@@ -1833,12 +1843,29 @@ begin
 end;
 
 function TIPublishController.ParseIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData: ITabSheetData; ADataChanged: WordBool = True): RIScriptResult;
+
+  // TODO: Improve this
+  function GetWhitelistString(const ATabSheetData: ITabSheetData): string;
+  var
+    LControlData: IControlData;
+    LPicture: IPicture;
+    LIndex: Integer;
+  begin
+    Result := '';
+    LControlData := ATabSheetData.FindControl(cPicture);
+    if Assigned(LControlData) then
+      Result := Result + LControlData.Value;
+    for LIndex := 0 to ATabSheetData.MirrorCount - 1 do
+      Result := Result + ATabSheetData.Mirror[LIndex].Hoster;
+    LControlData := nil;
+  end;
+
 var
   LHash: string;
   LContainsKey: Boolean;
   LIScriptResult: RIScriptResult;
 begin
-  LHash := CreateMD5.ComputeHash(Trim(AIScript)).ToHexString;
+  LHash := CreateMD5.ComputeHash(Trim(AIScript) + GetWhitelistString(ATabSheetData)).ToHexString;
   if (FIScriptBuffer.Count > 20) then
   begin
     FIScriptBuffer.Clear;
