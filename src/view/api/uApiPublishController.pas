@@ -1026,7 +1026,7 @@ end;
 procedure TICMSWebsiteContainer.HandleCustomFieldList(ACMSWebsiteCollectionItem: TCMSWebsitesCollectionItem; AControlList: TControlDataList; AMirrorList: TMirrorContainerList; out ACustomFieldList: TCustomFieldList);
 var
   LCustomFieldIndex: Integer;
-  LIScript : WideString;
+  LIScript: WideString;
   LIScriptResult: RIScriptResult;
 begin
   ACustomFieldList := TCustomFieldList.Create;
@@ -1832,12 +1832,28 @@ begin
 end;
 
 function TIPublishController.ParseIScript(const ACMS, AWebsite, AIScript: WideString; const ATabSheetData: ITabSheetData; ADataChanged: WordBool = True): RIScriptResult;
+
+  function GetWhitelistString(const ATabSheetData: ITabSheetData): string;
+  var
+    LControlData: IControlData;
+    LPicture: IPicture;
+    LIndex: Integer;
+  begin
+    Result := '';
+    LControlData := ATabSheetData.FindControl(cPicture);
+    if Assigned(LControlData) then
+      Result := Result + LControlData.Value;
+    for LIndex := 0 to ATabSheetData.MirrorCount - 1 do
+      Result := Result + ATabSheetData.Mirror[LIndex].Hoster;
+    LControlData := nil;
+  end;
+
 var
   LHash: string;
   LContainsKey: Boolean;
   LIScriptResult: RIScriptResult;
 begin
-  LHash := CreateMD5.ComputeHash(Trim(AIScript)).ToHexString;
+  LHash := CreateMD5.ComputeHash(Trim(AIScript + GetWhitelistString(ATabSheetData))).ToHexString;
   if (FIScriptBuffer.Count > 20) then
   begin
     FIScriptBuffer.Clear;
