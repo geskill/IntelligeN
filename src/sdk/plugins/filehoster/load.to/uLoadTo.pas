@@ -38,6 +38,45 @@ implementation
 
 { TLoadTo }
 
+function TLoadTo.InternalCheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool;
+var
+  LHTTPRequest: IHTTPRequest;
+  LRequestID: Double;
+  LResponeStr: string;
+begin
+  ALinkInfo := TLinkInfo.Create;
+
+  LHTTPRequest := THTTPRequest.Create(AFile);
+
+  LRequestID := HTTPManager.Get(LHTTPRequest, TPlugInHTTPOptions.Create(Self));
+
+  HTTPManager.WaitFor(LRequestID);
+
+  LResponeStr := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
+
+  if (Pos('Can''t find file', LResponeStr) > 0) then
+    ALinkInfo.Status := csOffline
+  else
+    with TRegExpr.Create do
+      try
+        InputString := LResponeStr;
+
+        Expression := '<h1>(.*?)<\/h1>';
+        if Exec(InputString) then
+          ALinkInfo.FileName := Trim(HTMLDecode(Match[1]));
+
+        Expression := 'Size: ([\d\.]+) (\w+)';
+        if Exec(InputString) then
+          ALinkInfo.Size := TSizeFormatter.SizeToByte(Match[1], Match[2]);
+
+        ALinkInfo.Status := csOnline;
+      finally
+        Free;
+      end;
+
+  Result := True;
+end;
+
 function TLoadTo.GetAuthor;
 begin
   Result := 'Sebastian Klatte';
@@ -56,50 +95,6 @@ end;
 function TLoadTo.GetName: WideString;
 begin
   Result := 'Load.to';
-end;
-
-function TLoadTo.CheckLink(const AFile: WideString): TLinkInfo;
-var
-  LinkInfo: TLinkInfo;
-
-  RequestID: Double;
-
-  ResponeStr: string;
-begin
-  with LinkInfo do
-  begin
-    Link := AFile;
-    Status := csUnknown;
-    Size := 0;
-    FileName := '';
-    Checksum := '';
-  end;
-
-  RequestID := HTTPManager.Get(THTTPRequest.Create(AFile), TPlugInHTTPOptions.Create(Self));
-
-  HTTPManager.WaitFor(RequestID);
-
-  ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
-
-  if (Pos('Can''t find file', ResponeStr) > 0) then
-    LinkInfo.Status := csOffline
-  else
-    with TRegExpr.Create do
-      try
-        InputString := ResponeStr;
-        Expression := '<h1>(.*?)<\/h1>.*?download_table_right">(\d+) (\w+)<';
-
-        if Exec(InputString) then
-        begin
-          LinkInfo.Status := csOnline;
-          LinkInfo.Size := TSizeFormatter.SizeToByte(Match[2], Match[3]);
-          LinkInfo.FileName := Match[1];
-        end;
-      finally
-        Free;
-      end;
-
-  Result := LinkInfo;
 end;
 
 end.

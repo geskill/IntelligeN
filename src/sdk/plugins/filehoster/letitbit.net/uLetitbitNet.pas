@@ -26,7 +26,7 @@ uses
 type
   TLetitbitNet = class(TFileHosterPlugIn)
   protected
-    function InternalCheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool; override;
+    function InternalCheckLinks(const AFiles: WideString; out ALinksInfo: ILinksInfo): WordBool; override;
   public
     function GetAuthor: WideString; override;
     function GetAuthorURL: WideString; override;
@@ -37,6 +37,11 @@ type
 implementation
 
 { TLetitbitNet }
+
+function TLetitbitNet.InternalCheckLinks(const AFiles: WideString; out ALinksInfo: ILinksInfo): WordBool;
+begin
+
+end;
 
 function TLetitbitNet.GetAuthor;
 begin
@@ -56,59 +61,6 @@ end;
 function TLetitbitNet.GetName: WideString;
 begin
   Result := 'Letitbit.net';
-end;
-
-function TLetitbitNet.CheckLink(const AFile: WideString): TLinkInfo;
-var
-  LinkInfo: TLinkInfo;
-
-  HTTPRequest: IHTTPRequest;
-
-  RequestID: Double;
-
-  ResponeStr: string;
-begin
-  with LinkInfo do
-  begin
-    Link := AFile;
-    Status := csUnknown;
-    Size := 0;
-    FileName := '';
-    Checksum := '';
-  end;
-
-  HTTPRequest := THTTPRequest.Create(AFile);
-  HTTPRequest.Cookies.Add('lang=en');
-
-  RequestID := HTTPManager.Get(HTTPRequest, TPlugInHTTPOptions.Create(Self));
-
-  HTTPManager.WaitFor(RequestID);
-
-  ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
-
-  if (Pos('<title>404</title>', ResponeStr) > 0) or (Pos('File not found', ResponeStr) > 0) then
-    LinkInfo.Status := csOffline
-  else
-    with TRegExpr.Create do
-      try
-        InputString := ResponeStr;
-
-        Expression := 'name="realname" value="(.*?)"';
-        if Exec(InputString) then
-        begin
-          LinkInfo.Status := csOnline;
-          LinkInfo.FileName := Match[1];
-        end;
-
-        Expression := 'name="sssize" value="(\d+)"';
-        if Exec(InputString) then
-          LinkInfo.Size := StrToInt64Def(Match[1], 0);
-
-      finally
-        Free;
-      end;
-
-  Result := LinkInfo;
 end;
 
 end.

@@ -64,20 +64,20 @@ begin
 
         Expression := '<title>Zippyshare\.com \- (.*?)<\/title>';
         if Exec(InputString) then
-          ALinkInfo.FileName := Trim(HTTPDecode(Match[1]));
+          ALinkInfo.FileName := Trim(HTMLDecode(Match[1]));
 
         if SameStr('', ALinkInfo.FileName) then
         begin
           Expression := 'Name:(\s+)?<\/font>(\s+)?<font style=.*?>(.*?)<\/font>';
           if Exec(InputString) then
-            ALinkInfo.FileName := Trim(HTTPDecode(Match[3]));
+            ALinkInfo.FileName := Trim(HTMLDecode(Match[3]));
         end;
 
         if SameStr('', ALinkInfo.FileName) then
         begin
           Expression := 'document\.getElementById\(\''dlbutton\''\)\.href.*"\/(.*?)";';
           if Exec(InputString) then
-            ALinkInfo.FileName := Trim(HTTPDecode(Match[1]));
+            ALinkInfo.FileName := Trim(HTMLDecode(Match[1]));
         end;
 
         if not SameStr('>Share movie:', LResponeStr) then

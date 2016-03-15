@@ -9,12 +9,12 @@ uses
   RegExpr,
   // JSON
   uLkJSON,
-  // Utils
-  uHTMLUtils, uStringUtils,
   // Common
   uBaseConst, uBaseInterface,
   // Plugin system
-  uPlugInInterface, uPlugInCrawlerClass, uAmazonCom;
+  uPlugInInterface, uPlugInCrawlerClass, uAmazonCom,
+  // Utils
+  uHTMLUtils, uStringUtils, uURLUtils;
 
 type
   TAmazonDe = class(TAmazonCom)
@@ -168,7 +168,7 @@ function TAmazonDe.InternalGetRetrieveData;
 
           if Exec(InputString) then
           begin
-            s := HTTPDecode(Match[1]);
+            s := URLDecode(Match[1]);
 
             with TRegExpr.Create do
             begin

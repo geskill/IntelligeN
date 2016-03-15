@@ -67,13 +67,13 @@ begin
         begin
           Expression := '<title>XUP - Download (.*?) \| ';
           if Exec(InputString) then
-            ALinkInfo.FileName := Trim(HTTPDecode(Match[1]));
+            ALinkInfo.FileName := Trim(HTMLDecode(Match[1]));
 
           if SameStr('', ALinkInfo.FileName) then
           begin
             Expression := '<h1>XUP - Download (.*?) \| ';
             if Exec(InputString) then
-              ALinkInfo.FileName := Trim(HTTPDecode(Match[1]));
+              ALinkInfo.FileName := Trim(HTMLDecode(Match[1]));
           end;
 
           Expression := 'Size<\/font><\/td>[\t\n\r ]+<td>(\d+)<\/td>';
@@ -84,7 +84,7 @@ begin
         begin
           Expression := '<legend>.*?<.*?>Download: (.*?)<\/.*?>';
           if Exec(InputString) then
-            ALinkInfo.FileName := Trim(HTTPDecode(Match[1]));
+            ALinkInfo.FileName := Trim(HTMLDecode(Match[1]));
 
           Expression := 'File Size: ([\d\.]+) (\w+)<';
           if Exec(InputString) then

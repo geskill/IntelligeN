@@ -9,14 +9,14 @@ uses
   RegExpr,
   // JSON
   uLkJSON,
-  // Utils
-  uHTMLUtils, uStringUtils,
   // Common
   uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInInterface, uPlugInCrawlerClass, uPlugInHTTPClasses;
+  uPlugInInterface, uPlugInCrawlerClass, uPlugInHTTPClasses,
+  // Utils
+  uHTMLUtils, uStringUtils, uURLUtils;
 
 type
   TAmazonCom = class(TCrawlerPlugIn)
@@ -279,7 +279,7 @@ function TAmazonCom.InternalGetRetrieveData;
 
           if Exec(InputString) then
           begin
-            s := HTTPDecode(Match[1]);
+            s := URLDecode(Match[1]);
 
             with TRegExpr.Create do
             begin

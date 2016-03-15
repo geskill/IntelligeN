@@ -7,14 +7,14 @@ uses
   Windows, SysUtils, Classes, Variants, HTTPApp,
   // RegEx
   RegExpr,
-  // Utils,
-  uHTMLUtils, uStringUtils,
   // Common
   uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInCMSClass, uPlugInCMSBoardClass, uPlugInHTTPClasses, uPlugInCMSSettingsHelper;
+  uPlugInCMSClass, uPlugInCMSBoardClass, uPlugInHTTPClasses, uPlugInCMSSettingsHelper,
+  // Utils
+  uHTMLUtils, uStringUtils, uURLUtils;
 
 type
   TXenForoSettings = class(TCMSBoardIPPlugInSettings)
@@ -174,7 +174,7 @@ begin
       Expression := '_xfToken=(.*?)"';
 
       if Exec(InputString) then
-        FSessionID := HTTPDecode(Match[1]);
+        FSessionID := URLDecode(Match[1]);
     finally
       Free;
     end;

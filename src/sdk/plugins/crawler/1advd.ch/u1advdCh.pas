@@ -7,14 +7,14 @@ uses
   SysUtils, StrUtils, Classes, HTTPApp,
   // RegEx
   RegExpr,
-  // Utils
-  uHTMLUtils,
   // Common
   uBaseConst, uBaseInterface,
   // HTTPManager
   uHTTPInterface, uHTTPClasses,
   // Plugin system
-  uPlugInInterface, uPlugInCrawlerClass, uPlugInHTTPClasses;
+  uPlugInInterface, uPlugInCrawlerClass, uPlugInHTTPClasses,
+  // Utils
+  uHTMLUtils, uURLUtils;
 
 type
   T1advdCh = class(TCrawlerPlugIn)
@@ -182,7 +182,7 @@ function T1advdCh.InternalGetRetrieveData;
                 s := StringReplace(s, '/img/', '/imgbc/', []);
                 s := StringReplace(s, '/imgAx/', '/imgA/', []);
               end;
-              AControlController.FindControl(cPicture).AddProposedValue(GetName, HTTPDecode(s));
+              AControlController.FindControl(cPicture).AddProposedValue(GetName, URLDecode(s));
             end;
           end;
         finally

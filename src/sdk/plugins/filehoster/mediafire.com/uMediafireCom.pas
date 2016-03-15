@@ -26,7 +26,7 @@ uses
 type
   TMediafireCom = class(TFileHosterPlugIn)
   protected
-    function InternalCheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool; override;
+    function InternalCheckLinks(const AFiles: WideString; out ALinksInfo: ILinksInfo): WordBool; override;
   public
     function GetAuthor: WideString; override;
     function GetAuthorURL: WideString; override;
@@ -37,6 +37,11 @@ type
 implementation
 
 { TMediafireCom }
+
+function TMediafireCom.InternalCheckLinks(const AFiles: WideString; out ALinksInfo: ILinksInfo): WordBool;
+begin
+
+end;
 
 function TMediafireCom.GetAuthor;
 begin
@@ -56,50 +61,6 @@ end;
 function TMediafireCom.GetName: WideString;
 begin
   Result := 'Mediafire.com';
-end;
-
-function TMediafireCom.CheckLink(const AFile: WideString): TLinkInfo;
-var
-  LinkInfo: TLinkInfo;
-
-  RequestID: Double;
-
-  ResponeStr: string;
-begin
-  with LinkInfo do
-  begin
-    Link := AFile;
-    Status := csUnknown;
-    Size := 0;
-    FileName := '';
-    Checksum := '';
-  end;
-
-  RequestID := HTTPManager.Get(THTTPRequest.Create(AFile), TPlugInHTTPOptions.Create(Self));
-
-  HTTPManager.WaitFor(RequestID);
-
-  ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
-
-  if (Pos('Invalid or Deleted File', ResponeStr) > 0) or (Pos('tos_aup_violation', ResponeStr) > 0) then
-    LinkInfo.Status := csOffline
-  else
-    with TRegExpr.Create do
-      try
-        InputString := ResponeStr;
-        Expression := '<div class="download_file_title".*?> (.*?) <div.*?\(([\d\.]+) (\w+)\)';
-
-        if Exec(InputString) then
-        begin
-          LinkInfo.Status := csOnline;
-          LinkInfo.Size := TSizeFormatter.SizeToByte(Match[2], Match[3]);
-          LinkInfo.FileName := Match[1];
-        end;
-      finally
-        Free;
-      end;
-
-  Result := LinkInfo;
 end;
 
 end.

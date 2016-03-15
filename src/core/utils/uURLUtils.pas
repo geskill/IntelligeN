@@ -13,6 +13,9 @@ uses
 const
   HTTP: string = 'http';
 
+function URLEncode(const AUrl: string): string;
+function URLDecode(const AUrl: string): string;
+
 function BeginsWithHTTP(const AUrl: string): Boolean;
 function IsUrl(const AUrl: string): Boolean;
 
@@ -40,6 +43,16 @@ function IncludeTrailingUrlDelimiter(const AUrl: string): string;
 function ExcludeTrailingUrlDelimiter(const AUrl: string): string;
 
 implementation
+
+function URLEncode(const AUrl: string): string;
+begin
+  Result := TIdURI.URLEncode(AUrl);
+end;
+
+function URLDecode(const AUrl: string): string;
+begin
+  Result := TIdURI.URLDecode(AUrl);
+end;
 
 function BeginsWithHTTP(const AUrl: string): Boolean;
 begin

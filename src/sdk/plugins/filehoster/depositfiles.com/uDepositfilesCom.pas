@@ -40,6 +40,51 @@ implementation
 
 { TDepositfilesCom }
 
+function TDepositfilesCom.InternalCheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool;
+var
+  LHTTPRequest: IHTTPRequest;
+  LRequestID: Double;
+  LResponeStr, LEncodedResponeStr: string;
+begin
+  ALinkInfo := TLinkInfo.Create;
+
+  LHTTPRequest := THTTPRequest.Create(AFile);
+  LHTTPRequest.Cookies.Add('lang_current=de');
+
+  LRequestID := HTTPManager.Get(LHTTPRequest, TPlugInHTTPOptions.Create(Self));
+
+  HTTPManager.WaitFor(LRequestID);
+
+  LResponeStr := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
+
+  if (Pos('Dieser File existiert nicht', LResponeStr) > 0) or (Pos('Diese Datei besteht nicht', LResponeStr) > 0) or (Pos('Entweder existiert diese Datei nicht oder sie wurde', LResponeStr) > 0) then
+    ALinkInfo.Status := csOffline
+  else
+    with TRegExpr.Create do
+      try
+        InputString := LResponeStr;
+
+        Expression := 'class=\"info\".*?unescape\(''(.*?)''';
+        if Exec(InputString) then
+          LEncodedResponeStr := Trim(HTMLDecode(Match[1]));
+
+        Expression := '>Datei Grösse: <b>([\d\.]+) (\w+)<\/b>';
+        if Exec(InputString) then
+          ALinkInfo.Size := TSizeFormatter.SizeToByte(Match[1], Match[2]);
+
+        InputString := LEncodedResponeStr;
+        Expression := 'Dateiname: <b title=\"(.*?)\">.*?<\/b>';
+        if Exec(InputString) then
+          ALinkInfo.FileName := Trim(HTMLDecode(Match[1]));
+
+        ALinkInfo.Status := csOnline;
+      finally
+        Free;
+      end;
+
+  Result := True;
+end;
+
 function TDepositfilesCom.GetAuthor;
 begin
   Result := 'Sebastian Klatte';
@@ -60,117 +105,4 @@ begin
   Result := 'Depositfiles.com';
 end;
 
-function TDepositfilesCom.CheckLink(const AFile: WideString): TLinkInfo;
-var
-  LinkInfo: TLinkInfo;
-
-  HTTPRequest: IHTTPRequest;
-
-  RequestID: Double;
-
-  ResponeStr: string;
-begin
-  with LinkInfo do
-  begin
-    Link := AFile;
-    Status := csUnknown;
-    Size := 0;
-    FileName := '';
-    Checksum := '';
-  end;
-
-  HTTPRequest := THTTPRequest.Create(AFile);
-  HTTPRequest.Cookies.Add('lang_current=de');
-
-  RequestID := HTTPManager.Get(HTTPRequest, TPlugInHTTPOptions.Create(Self));
-
-  HTTPManager.WaitFor(RequestID);
-
-  ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
-
-  if (Pos('html_download_api-not_exists', ResponeStr) > 0) then
-    LinkInfo.Status := csOffline
-  else
-    with TRegExpr.Create do
-      try
-        ModifierS := True;
-
-        InputString := ResponeStr;
-        Expression := '<b title=\"(.*?)\".*?<b>([\d\.]+)&nbsp;(\w+)';
-
-        if Exec(InputString) then
-        begin
-          LinkInfo.Status := csOnline;
-          LinkInfo.Size := TSizeFormatter.SizeToByte(Match[2], Match[3]);
-          LinkInfo.FileName := Match[1];
-        end;
-      finally
-        Free;
-      end;
-
-  Result := LinkInfo;
-end;
-
-(*
-  // Cookie vorgeschaltet
-
-  {"links_existed":[],"links_deleted":{"ve4w82ro7":{"id_str":"ve4w82ro7","filename":"DFManagerSetup.exe","size":"1063760","download_url":"http://depositfiles.com/files/ve4w82ro7"}}}
-
-  function TDepositfilesCom.CheckLinks(const AFiles: WideString): Integer;
-  var
-  I: Integer;
-  _params, _postreply: TStringStream;
-  _lkJSONobject: TlkJSONobject;
-  begin
-  with TIdHTTPHelper.Create(Self) do
-  try
-  AddCookie('lang_current=de', 'http://bonus.depositfiles.com/');
-
-  with TStringList.Create do
-  try
-  Text := AFiles;
-
-  _params := TStringStream.Create('');
-  _postreply := TStringStream.Create('');
-  try
-  _params.WriteString('links=');
-  for I := 0 to Count - 1 do
-  begin
-  if (I > 0) then
-  _params.WriteString(sLineBreak);
-  _params.WriteString(Strings[I]);
-  end;
-
-  try
-  Post('http://bonus.depositfiles.com/de/links_checker.php', _params, _postreply);
-
-  except
-
-  end;
-
-  _lkJSONobject := TlkJSON.ParseText(_postreply.DataString) as TlkJSONobject;
-  try
-  with _lkJSONobject.Field['links_existed'] do
-  for I := 0 to Count - 1 do
-  with Child[I] do
-  AddLink(Field['download_url'].Value, Field['filename'].Value, csOnline, Field['size'].Value);
-  with _lkJSONobject.Field['links_deleted'] do
-  for I := 0 to Count - 1 do
-  with Child[I] do
-  AddLink(Field['download_url'].Value, Field['filename'].Value, csOffline, Field['size'].Value);
-  finally
-  _lkJSONobject.Free;
-  end;
-  finally
-  _postreply.Free;
-  _params.Free;
-  end;
-  finally
-  Free;
-  end;
-  finally
-  Free;
-  end;
-  end;
-  *)
 end.

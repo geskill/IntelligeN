@@ -38,6 +38,44 @@ implementation
 
 { TJunocloudMe }
 
+function TJunocloudMe.InternalCheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool;
+var
+  LHTTPRequest: IHTTPRequest;
+  LRequestID: Double;
+  LResponeStr: string;
+begin
+  ALinkInfo := TLinkInfo.Create;
+
+  LHTTPRequest := THTTPRequest.Create(AFile);
+  LHTTPRequest.Cookies.Add('ziplocale=en');
+
+  LRequestID := HTTPManager.Get(LHTTPRequest, TPlugInHTTPOptions.Create(Self));
+
+  HTTPManager.WaitFor(LRequestID);
+
+  LResponeStr := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
+
+  if not(Pos('name="fname"', LResponeStr) > 0) then
+    ALinkInfo.Status := csOffline
+  else
+    with TRegExpr.Create do
+      try
+        InputString := LResponeStr;
+        Expression := ': ([\d\.]+) (\w+).*?name="fname" value="(.*?)"';
+
+        if Exec(InputString) then
+        begin
+          ALinkInfo.Status := csOnline;
+          ALinkInfo.Size := TSizeFormatter.SizeToByte(Match[1], Match[2]);
+          ALinkInfo.FileName := Match[3];
+        end;
+      finally
+        Free;
+      end;
+
+  Result := True;
+end;
+
 function TJunocloudMe.GetAuthor;
 begin
   Result := 'Sebastian Klatte';
@@ -56,50 +94,6 @@ end;
 function TJunocloudMe.GetName: WideString;
 begin
   Result := 'Junocloud.me';
-end;
-
-function TJunocloudMe.CheckLink(const AFile: WideString): TLinkInfo;
-var
-  LinkInfo: TLinkInfo;
-
-  RequestID: Double;
-
-  ResponeStr: string;
-begin
-  with LinkInfo do
-  begin
-    Link := AFile;
-    Status := csUnknown;
-    Size := 0;
-    FileName := '';
-    Checksum := '';
-  end;
-
-  RequestID := HTTPManager.Get(THTTPRequest.Create(AFile), TPlugInHTTPOptions.Create(Self));
-
-  HTTPManager.WaitFor(RequestID);
-
-  ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
-
-  if (Pos('name="fname"', ResponeStr) = 0) then
-    LinkInfo.Status := csOffline
-  else
-    with TRegExpr.Create do
-      try
-        InputString := ResponeStr;
-        Expression := ': ([\d\.]+) (\w+).*?name="fname" value="(.*?)"';
-
-        if Exec(InputString) then
-        begin
-          LinkInfo.Status := csOnline;
-          LinkInfo.Size := TSizeFormatter.SizeToByte(Match[1], Match[2]);
-          LinkInfo.FileName := Match[3];
-        end;
-      finally
-        Free;
-      end;
-
-  Result := LinkInfo;
 end;
 
 end.
