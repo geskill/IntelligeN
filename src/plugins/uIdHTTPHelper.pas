@@ -6,7 +6,7 @@ uses
   // Delphi
   SysUtils, Classes, Dialogs, StrUtils,
   // Indy
-  IdGlobal, IdURI, IdCharsets, IdHTTP, IdCookieManager, IdCookie, IdZLib, IdCompressorZLib, IdSSLOpenSSL, IdSocks, IdMultipartFormData,
+  IdGlobal, IdGlobalProtocols, IdCTypes, IdException, IdURI, IdCharsets, IdHTTP, IdCookieManager, IdCookie, IdZLib, IdCompressorZLib, IdSSLOpenSSL, IdSSLOpenSSLHeaders, IdSocks, IdMultipartFormData,
   // Plugin System
   uPlugInInterface, uPlugInConst;
 
@@ -14,27 +14,63 @@ type
   TIdHTTPHelper = class(TIdHTTP)
   private
     FLastRedirect: string;
+    FHandleWrongProtocolException: Boolean;
+    FHandleSketchyRedirects: Boolean;
 
     function GetCookieList: string;
     procedure SetCookieList(ACookies: string);
+    function GetUseCompressor: Boolean;
+    procedure SetUseCompressor(AUseCompressor: Boolean);
     function GetResponseRefresh: string;
 
-    procedure Redirect(Sender: TObject; var dest: string; var NumRedirect: Integer; var Handled: boolean; var VMethod: TIdHTTPMethod);
+    function IsWrongProtocolException(ALowerCaseSourceCode: string): Boolean;
+
+    procedure WriteErrorMsgToStream(AMsg: string; AStream: TStream);
+
+    procedure Redirect(Sender: TObject; var dest: string; var NumRedirect: Integer; var Handled: Boolean; var VMethod: TIdHTTPMethod);
   protected
     FIdCookieManager: TIdCookieManager;
     FIdCompressorZLib: TIdCompressorZLib;
     FIdSSLIOHandlerSocketOpenSSL: TIdSSLIOHandlerSocketOpenSSL;
     FIdSocksInfo: TIdSocksInfo;
+
+    procedure DoStatusInfoEx(ASender: TObject; const AsslSocket: PSSL; const AWhere, Aret: TIdC_INT; const AType, AMsg: String);
+    procedure DoRequest(const AMethod: TIdHTTPMethod; AURL: string; ASource, AResponseContent: TStream; AIgnoreReplies: array of SmallInt); override;
   public
     constructor Create; overload;
     constructor Create(const APlugIn: IPlugIn); overload;
     property LastRedirect: string read FLastRedirect;
     procedure AddCookie(ACookie, AWebsite: string);
-    procedure Get(AURL: string; AResponseContent: TStream); overload;
-    function Post(AURL: string; ASource: TStrings; AByteEncoding: TIdTextEncoding = nil): string; overload;
-    procedure Post(AURL: string; ASource, AResponseContent: TStream); overload;
-    procedure Post(AURL: string; ASource: TIdMultiPartFormDataStream; AResponseContent: TStream); overload;
+    function ResponseContentString: string;
     property CookieList: string read GetCookieList write SetCookieList;
+    property UseCompressor: Boolean read GetUseCompressor write SetUseCompressor;
+
+    property HandleWrongProtocolException: Boolean read FHandleWrongProtocolException write FHandleWrongProtocolException;
+    {$REGION 'Documentation'}
+    /// <summary>
+    ///   <para>
+    ///     Not all responses which send a <see href="ms-help://embarcadero.rs2010/Indy/TIdResponseHeaderInfo_Location.html">
+    ///     Location</see> header are redirected through the <see href="ms-help://embarcadero.rs2010/Indy/TIdHTTP.html">
+    ///     TIdHTTP</see> component because only redirects with a specific <see href="ms-help://embarcadero.rs2010/Indy/TIdHTTPResponse_ResponseCode.html">
+    ///     ResponseCode</see> are addressed.
+    ///   </para>
+    ///   <para>
+    ///     By default this is True and after a POST-request the unhandled
+    ///     Location or Response header is processed by a additional
+    ///     GET-request.
+    ///   </para>
+    /// </summary>
+    {$ENDREGION}
+    property HandleSketchyRedirects: Boolean read FHandleSketchyRedirects write FHandleSketchyRedirects;
+    {$REGION 'Documentation'}
+    /// <summary>
+    ///   This additional header information is similar to the <see href="ms-help://embarcadero.rs2010/Indy/TIdResponseHeaderInfo_Location.html">
+    ///   Location</see> header.
+    /// </summary>
+    /// <seealso href="http://stackoverflow.com/questions/283752/refresh-http-header">
+    ///   'Refresh' HTTP header
+    /// </seealso>
+    {$ENDREGION}
     property Response_Refresh: string read GetResponseRefresh;
     class function Charsets: string;
     destructor Destroy; override;
@@ -83,8 +119,23 @@ begin
     end;
 end;
 
+function TIdHTTPHelper.GetUseCompressor: Boolean;
+begin
+  Result := Assigned(Compressor);
+end;
+
+procedure TIdHTTPHelper.SetUseCompressor(AUseCompressor: Boolean);
+begin
+  case AUseCompressor of
+    True:
+      Compressor := FIdCompressorZLib;
+    False:
+      Compressor := nil;
+  end;
+end;
+
 function TIdHTTPHelper.GetResponseRefresh: string;
-// Ähnlich dem "Location" Header
+// similar to "Location" header
 const
   url = 'url=';
 var
@@ -96,20 +147,67 @@ begin
     Result := copy(_RefreshHeader, Pos(url, _RefreshHeader) + length(url));
 end;
 
-procedure TIdHTTPHelper.Redirect(Sender: TObject; var dest: string; var NumRedirect: Integer; var Handled: boolean; var VMethod: TIdHTTPMethod);
+function TIdHTTPHelper.IsWrongProtocolException(ALowerCaseSourceCode: string): Boolean;
+begin
+  Result := (not(Pos('<body', ALowerCaseSourceCode) = 0));
+end;
+
+procedure TIdHTTPHelper.WriteErrorMsgToStream(AMsg: string; AStream: TStream);
+begin
+  WriteStringToStream(AStream, AMsg, CharsetToEncoding(Response.CharSet));
+end;
+
+procedure TIdHTTPHelper.Redirect(Sender: TObject; var dest: string; var NumRedirect: Integer; var Handled: Boolean; var VMethod: TIdHTTPMethod);
 begin
   FLastRedirect := dest;
 end;
 
-constructor TIdHTTPHelper.Create();
+procedure TIdHTTPHelper.DoStatusInfoEx(ASender: TObject; const AsslSocket: PSSL; const AWhere, Aret: TIdC_INT; const AType, AMsg: String);
 begin
-  inherited Create(nil);
-  FIdCookieManager := TIdCookieManager.Create(nil);
-  FIdCompressorZLib := TIdCompressorZLib.Create(nil);
-  FIdSSLIOHandlerSocketOpenSSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
-  FIdSocksInfo := TIdSocksInfo.Create(nil);
+  SSL_set_tlsext_host_name(AsslSocket, Request.Host);
+end;
 
-  OnRedirect := Redirect;
+procedure TIdHTTPHelper.DoRequest(const AMethod: TIdHTTPMethod; AURL: string; ASource, AResponseContent: TStream; AIgnoreReplies: array of SmallInt);
+
+  function IsPOSTRequest: Boolean;
+  begin
+    Result := SameStr(Id_HTTPMethodPost, AMethod);
+  end;
+
+begin
+  try
+    inherited DoRequest(AMethod, AURL, ASource, AResponseContent, AIgnoreReplies);
+  except
+    on E: EDecompressionError do
+      ;
+    on E: EIdConnClosedGracefully do
+      if not IsPOSTRequest then
+        raise ;
+    on E: EIdHTTPProtocolException do
+    begin
+      if HandleWrongProtocolException and IsWrongProtocolException(LowerCase(E.ErrorMessage)) then
+        // handle normaly for wrong HTTP code responses
+        WriteErrorMsgToStream(E.ErrorMessage, AResponseContent)
+      else if ((not HandleRedirects) or (RedirectCount < RedirectMaximum)) and (ResponseCode = 302) then
+        // don't raise for 302 Found errors
+      else
+      begin
+        raise ;
+      end;
+    end;
+    on Exception do
+      raise ;
+  end;
+  // DO only for POST-request
+  if IsPOSTRequest then
+    // size = 0 correct? maybe little overhead?
+    if HandleSketchyRedirects and (AResponseContent.Size = 0) then
+    begin
+      if not(Response.Location = '') then
+        Get(Response.Location, AResponseContent)
+      else if not(Response_Refresh = '') then
+        Get(Response_Refresh, AResponseContent);
+    end;
 end;
 
 constructor TIdHTTPHelper.Create(const APlugIn: IPlugIn);
@@ -117,6 +215,16 @@ var
   _ICMSPlugin: ICMSPlugIn;
 begin
   Create();
+
+  with FIdSSLIOHandlerSocketOpenSSL do
+  begin
+    OnStatusInfoEx := DoStatusInfoEx;
+    with SSLOptions do
+    begin
+      //Method := sslvTLSv1_2;
+      //SSLVersions := [sslvTLSv1_2];
+    end;
+  end;
 
   with APlugIn do
     if Proxy.Active then
@@ -143,6 +251,7 @@ begin
             ProxyPassword := Proxy.AccountPassword;
           end;
 
+  // TransparentProxy needs FIdSocksInfo class before we can assign this to the TIdHTTP.IOHandler!
   FIdSSLIOHandlerSocketOpenSSL.TransparentProxy := FIdSocksInfo;
 
   CookieManager := FIdCookieManager;
@@ -151,10 +260,13 @@ begin
 
   AllowCookies := True;
   HandleRedirects := True;
+  FHandleWrongProtocolException := True;
+  FHandleSketchyRedirects := True;
 
   ConnectTimeout := APlugIn.ConnectTimeout;
   ReadTimeout := APlugIn.ReadTimeout;
 
+  // force to use HTTP 1.1
   ProtocolVersion := pv1_1;
   HTTPOptions := HTTPOptions + [hoKeepOrigProtocol];
 
@@ -177,6 +289,17 @@ begin
   ReuseSocket := rsTrue;
 end;
 
+constructor TIdHTTPHelper.Create();
+begin
+  inherited Create(nil);
+  FIdCookieManager := TIdCookieManager.Create(nil);
+  FIdCompressorZLib := TIdCompressorZLib.Create(nil);
+  FIdSSLIOHandlerSocketOpenSSL := TIdSSLIOHandlerSocketOpenSSL.Create(nil);
+  FIdSocksInfo := TIdSocksInfo.Create(nil);
+
+  OnRedirect := Redirect;
+end;
+
 procedure TIdHTTPHelper.AddCookie(ACookie: string; AWebsite: string);
 var
   IdURI: TIdURI;
@@ -189,82 +312,10 @@ begin
   end;
 end;
 
-procedure TIdHTTPHelper.Get(AURL: string; AResponseContent: TStream);
+function TIdHTTPHelper.ResponseContentString: string;
 begin
-  try
-    inherited Get(AURL, AResponseContent);
-  except
-    on E: EDecompressionError do
-      ;
-    on E: EIdHTTPProtocolException do
-    begin
-      if not(Pos('<body', LowerCase(E.ErrorMessage)) = 0) then
-      begin
-        if AResponseContent.InheritsFrom(TStringStream) then
-          TStringStream(AResponseContent).WriteString(E.ErrorMessage);
-      end
-      else
-        raise ;
-    end;
-  end;
-end;
-
-function TIdHTTPHelper.Post(AURL: string; ASource: TStrings; AByteEncoding: TIdTextEncoding = nil): string;
-begin
-  try
-    Result := inherited Post(AURL, ASource, AByteEncoding);
-  except
-    on E: EDecompressionError do
-      ;
-    on E: EIdHTTPProtocolException do
-    begin
-      if not(Pos('<body', LowerCase(E.ErrorMessage)) = 0) then
-        Result := E.ErrorMessage
-      else
-        raise ;
-    end;
-  end;
-  if SameStr('', Result) then
-  begin
-    if not(Response.Location = '') then
-      Result := Get(Response.Location)
-    else if not(Response_Refresh = '') then
-      Result := Get(Response_Refresh);
-  end;
-end;
-
-procedure TIdHTTPHelper.Post(AURL: string; ASource, AResponseContent: TStream);
-begin
-  try
-    inherited Post(AURL, ASource, AResponseContent);
-  except
-    on E: EDecompressionError do
-      ;
-    on E: EIdHTTPProtocolException do
-    begin
-      if not(Pos('<body', LowerCase(E.ErrorMessage)) = 0) then
-      begin
-        if AResponseContent.InheritsFrom(TStringStream) then
-          TStringStream(AResponseContent).WriteString(E.ErrorMessage);
-      end
-      else
-        raise ;
-    end;
-  end;
-  if AResponseContent.InheritsFrom(TStringStream) and (TStringStream(AResponseContent).DataString = '') then
-  begin
-    if not(Response.Location = '') then
-      Get(Response.Location, AResponseContent)
-    else if not(Response_Refresh = '') then
-      Get(Response_Refresh, AResponseContent);
-  end;
-end;
-
-procedure TIdHTTPHelper.Post(AURL: string; ASource: TIdMultiPartFormDataStream; AResponseContent: TStream);
-begin
-  Assert(ASource <> nil);
-  Request.ContentType := ASource.RequestContentType;
-  Post(AURL, TStream(ASource), AResponseContent);
+  Response.ContentStream.Position := 0;
+  Result := ReadStringAsCharset(Response.ContentStream, Response.CharSet);
 end;
 
 class function TIdHTTPHelper.Charsets: string;
