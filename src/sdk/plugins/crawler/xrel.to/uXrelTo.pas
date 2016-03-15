@@ -20,7 +20,7 @@ type
   TXrelTo = class(TCrawlerPlugIn)
   protected { . }
   const
-    WEBSITE = 'http://www.xrel.to/';
+    WEBSITE = 'https://www.xrel.to/';
   public
     function GetAuthor: WideString; override;
     function GetAuthorURL: WideString; override;
