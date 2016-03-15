@@ -2,7 +2,7 @@
   *                            IntelligeN PLUGIN SYSTEM  *
   *  PlugIn content management system class              *
   *  Version 2.5.0.0                                     *
-  *  Copyright (c) 2015 Sebastian Klatte                 *
+  *  Copyright (c) 2016 Sebastian Klatte                 *
   *                                                      *
   ******************************************************** }
 unit uPlugInCMSClass;
@@ -59,9 +59,6 @@ type
 
   TCMSPlugIn = class(TPlugIn, ICMSPlugIn)
   private
-    FAccountname, FAccountpassword, FSettingsFileName, FSubject, FTags, FMessage, FWebsite: WideString;
-    FData: ITabSheetData;
-    FArticleID, FArticlePathID: Integer;
     FIntelligentPostingHelper: TIntelligentPostingHelper;
   protected
     FCheckedIDsList: TList<TIDInfo>;
@@ -69,84 +66,58 @@ type
     function SettingsClass: TCMSPlugInSettingsMeta; virtual; abstract;
     function GetSettings: TCMSPlugInSettings; virtual; abstract;
     procedure SetSettings(ACMSPlugInSettings: TCMSPlugInSettings); virtual; abstract;
-    function LoadSettings(const AData: ITabSheetData = nil): Boolean; virtual;
+    function LoadSettings(const ACMSData: ICMSData; const APublishData: ICMSPublishData = nil): Boolean; virtual;
 
-    function NeedPreLogin(out ARequestURL: string): Boolean; virtual;
+    function CanLogin(const ACMSData: ICMSData): Boolean; virtual;
+    function NeedPreLogin(const ACMSData: ICMSData; out ARequestURL: string): Boolean; virtual;
     function NeedLogin: Boolean; virtual;
     function DoBuildLoginRequest(out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; ACAPTCHALogin: Boolean = False): Boolean; virtual; abstract;
-    function NeedPostLogin(out ARequestURL: string): Boolean; virtual;
+    function NeedPostLogin(const ACMSData: ICMSData; out ARequestURL: string): Boolean; virtual;
     function DoAnalyzeLogin(const AResponseStr: string; out ACAPTCHALogin: Boolean): Boolean; virtual; abstract;
     procedure DoHandleSessionID(AHTTPProcess: IHTTPProcess); virtual;
 
     function NeedBeforePostAction: Boolean; virtual;
     function DoBeforePostAction(var ARequestID: Double): Boolean; virtual;
 
-    function NeedPrePost(out ARequestURL: string): Boolean; virtual;
+    function NeedPrePost(const ACMSData: ICMSData; out ARequestURL: string): Boolean; virtual;
     function DoAnalyzePrePost(const AResponseStr: string): Boolean; virtual;
 
-    function DoBuildPostRequest(const AData: ITabSheetData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; virtual; abstract;
+    function DoBuildPostRequest(const APublishData: ICMSPublishData; out AHTTPRequest: IHTTPRequest; out AHTTPParams: IHTTPParams; out AHTTPOptions: IHTTPOptions; APrevResponse: string; APrevRequest: Double): Boolean; virtual; abstract;
     function DoAnalyzePost(const AResponseStr: string; AHTTPProcess: IHTTPProcess): Boolean; virtual; abstract;
 
-    function GetIDsRequestURL: string; virtual;
-    function DoAnalyzeIDsRequest(const AResponseStr: string): Integer; virtual;
+    function GetRetrieveIDsRequestURL(const ACMSData: ICMSData; const ACategoryType: WideString): string; virtual;
+    function DoAnalyzeRetrieveIDsRequest(const ACategoryType: WideString; const AResponseStr: string; out ACMSIDsInfo: ICMSIDsInfo): WordBool; virtual;
 
     property Settings: TCMSPlugInSettings read GetSettings write SetSettings;
 
-    function GetAccountName: WideString; safecall;
-    procedure SetAccountName(const AAccountName: WideString); safecall;
-    function GetAccountPassword: WideString; safecall;
-    procedure SetAccountPassword(const AAccountPassword: WideString); safecall;
-    function GetSettingsFileName: WideString; safecall;
-    procedure SetSettingsFileName(const ASettingsFileName: WideString); safecall;
-    function GetSubject: WideString; safecall;
-    procedure SetSubject(const ASubject: WideString); safecall;
-    function GetTags: WideString; safecall;
-    procedure SetTags(const ATags: WideString); safecall;
-    function GetMessage: WideString; safecall;
-    procedure SetMessage(const AMessage: WideString); safecall;
-    function GetWebsite: WideString; safecall;
-    procedure SetWebsite(const AWebsite: WideString); safecall;
-    function GetData: ITabSheetData; safecall;
-    procedure SetData(const AData: ITabSheetData); safecall;
-
-    function GetArticleID: Integer; safecall;
-    procedure SetArticleID(AArticleID: Integer); safecall;
-    function GetArticlePathID: Integer; safecall;
-    procedure SetArticlePathID(AArticlePathID: Integer); safecall;
-
     function GetIntelligentPostingHelper: TIntelligentPostingHelper; safecall;
-    procedure SetIntelligentPostingHelper(AIntelligentPostingHelper: TIntelligentPostingHelper); safecall;
+
+    property IntelligentPostingHelper: TIntelligentPostingHelper read GetIntelligentPostingHelper;
   public
     constructor Create; override;
     destructor Destroy; override;
 
     function GetType: TPlugInType; override; safecall;
 
-    property AccountName: WideString read GetAccountName write SetAccountName;
-    property AccountPassword: WideString read GetAccountPassword write SetAccountPassword;
-    property SettingsFileName: WideString read GetSettingsFileName write SetSettingsFileName;
-    property Subject: WideString read GetSubject write SetSubject;
-    property Tags: WideString read GetTags write SetTags;
-    property Message: WideString read GetMessage write SetMessage;
-    property Website: WideString read GetWebsite write SetWebsite;
-    property Data: ITabSheetData read GetData write SetData;
+    function GetCMSType: TCMSType; virtual; safecall; abstract;
 
-    property ArticleID: Integer read GetArticleID write SetArticleID;
-    property ArticlePathID: Integer read GetArticlePathID write SetArticlePathID;
+    function GetDefaultCharset: WideString; virtual; safecall; abstract;
+    function GetBelongsTo(const AWebsiteSourceCode: WideString): WordBool; virtual; safecall; abstract;
 
-    property IntelligentPostingHelper: TIntelligentPostingHelper read GetIntelligentPostingHelper;
+    function GetLogin(const ACMSData: ICMSData; out ARequestID: Double): WordBool; virtual; safecall;
 
-    function CMSType: TCMSType; virtual; safecall; abstract;
-    function DefaultCharset: WideString; virtual; safecall; abstract;
-    function BelongsTo(const AWebsiteSourceCode: WideString): WordBool; virtual; safecall; abstract;
-    function GetIDs: Integer; virtual; safecall;
-    function ReadID(AIndex: Integer): TIDInfo; safecall;
-    function Login(out ARequestID: Double): Boolean; virtual; safecall;
-    function AddArticle(): WordBool; virtual; safecall;
-    function EditArticle(): WordBool; virtual; safecall;
-    function GetArticle(out AArticle: WideString): WordBool; virtual; safecall;
-    function GetArticleLink(const AURL: WideString; const AArticleID, AArticlePathID: Integer): WideString; virtual; safecall; abstract;
-    function ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEditor): WordBool; safecall;
+    function GetRetrieveIDs(const ACMSData: ICMSData; const ACategoryType: WideString; out ACMSIDsInfo: ICMSIDsInfo): WordBool; virtual; safecall;
+
+    function AddArticle(const ACMSData: ICMSData; const ACMSPublishData: ICMSPublishData; out ACMSArticleInfo: TCMSArticleInfo): WordBool; virtual; safecall;
+    function EditArticle(const ACMSData: ICMSData; const ACMSPublishData: ICMSPublishData; var ACMSArticleInfo: TCMSArticleInfo): WordBool; virtual; safecall;
+    function DeleteArticle(const ACMSData: ICMSData; const ACMSArticleInfo: TCMSArticleInfo): WordBool; virtual; safecall;
+    function GetArticle(const ACMSData: ICMSData; const ACMSArticleInfo: TCMSArticleInfo; out ACMSPublishData: ICMSPublishData): WordBool; virtual; safecall;
+
+    function GetArticleLink(const AWebsite: WideString; const ACMSArticleInfo: TCMSArticleInfo): WideString; virtual; safecall; abstract;
+
+    procedure Initialize(const AHTTPManager: IHTTPManager; const AProxy: IProxy; const AConnectTimeout, AReadTimeout: Integer; const AIntelligentPostingHelper: TIntelligentPostingHelper); safecall;
+
+    function ShowWebsiteSettingsEditor(const ACMSData: ICMSData; const AWebsiteEditor: IWebsiteEditor): WordBool; safecall;
   end;
 
 resourcestring
@@ -228,16 +199,21 @@ begin
   FCheckedIDsList.Add(IDInfo);
 end;
 
-function TCMSPlugIn.LoadSettings(const AData: ITabSheetData = nil): Boolean;
+function TCMSPlugIn.LoadSettings;
 begin
   Result := True;
-  TPlugInCMSSettingsHelper.LoadSettingsToClass(SettingsFileName, Settings, AData);
+  TPlugInCMSSettingsHelper.LoadSettingsToClass(ACMSData.SettingsFileName, Settings, APublishData.Data);
   with Settings do
-    if Assigned(AData) and SameStr('', Charset) then
-      Charset := DefaultCharset;
+    if Assigned(APublishData) and SameStr('', Charset) then
+      Charset := GetDefaultCharset;
 end;
 
-function TCMSPlugIn.NeedPreLogin(out ARequestURL: string): Boolean;
+function TCMSPlugIn.CanLogin(const ACMSData: ICMSData): Boolean;
+begin
+  Result := not SameStr('', ACMSData.AccountName);
+end;
+
+function TCMSPlugIn.NeedPreLogin(const ACMSData: ICMSData; out ARequestURL: string): Boolean;
 begin
   Result := False;
 end;
@@ -247,7 +223,7 @@ begin
   Result := True;
 end;
 
-function TCMSPlugIn.NeedPostLogin(out ARequestURL: string): Boolean;
+function TCMSPlugIn.NeedPostLogin(const ACMSData: ICMSData; out ARequestURL: string): Boolean;
 begin
   Result := False;
 end;
@@ -267,7 +243,7 @@ begin
   Result := False;
 end;
 
-function TCMSPlugIn.NeedPrePost(out ARequestURL: string): Boolean;
+function TCMSPlugIn.NeedPrePost(const ACMSData: ICMSData; out ARequestURL: string): Boolean;
 begin
   Result := False;
 end;
@@ -277,124 +253,19 @@ begin
   Result := True;
 end;
 
-function TCMSPlugIn.GetIDsRequestURL: string;
+function TCMSPlugIn.GetRetrieveIDsRequestURL(const ACMSData: ICMSData; const ACategoryType: WideString): string;
 begin
-  Result := Website + 'search.php';
+  Result := ACMSData.Website + 'search.php';
 end;
 
-function TCMSPlugIn.DoAnalyzeIDsRequest(const AResponseStr: string): Integer;
+function TCMSPlugIn.DoAnalyzeRetrieveIDsRequest(const ACategoryType: WideString; const AResponseStr: string; out ACMSIDsInfo: ICMSIDsInfo): WordBool;
 begin
-  Result := FCheckedIDsList.Count;
-end;
-
-function TCMSPlugIn.GetAccountName: WideString;
-begin
-  Result := FAccountname;
-end;
-
-procedure TCMSPlugIn.SetAccountName(const AAccountName: WideString);
-begin
-  FAccountname := AAccountName;
-end;
-
-function TCMSPlugIn.GetAccountPassword: WideString;
-begin
-  Result := FAccountpassword;
-end;
-
-procedure TCMSPlugIn.SetAccountPassword(const AAccountPassword: WideString);
-begin
-  FAccountpassword := AAccountPassword;
-end;
-
-function TCMSPlugIn.GetSettingsFileName: WideString;
-begin
-  Result := FSettingsFileName;
-end;
-
-procedure TCMSPlugIn.SetSettingsFileName(const ASettingsFileName: WideString);
-begin
-  FSettingsFileName := ASettingsFileName;
-end;
-
-function TCMSPlugIn.GetSubject: WideString;
-begin
-  Result := FSubject;
-end;
-
-procedure TCMSPlugIn.SetSubject(const ASubject: WideString);
-begin
-  FSubject := ASubject;
-end;
-
-function TCMSPlugIn.GetTags: WideString;
-begin
-  Result := FTags;
-end;
-
-procedure TCMSPlugIn.SetTags(const ATags: WideString);
-begin
-  FTags := ATags;
-end;
-
-function TCMSPlugIn.GetMessage: WideString;
-begin
-  Result := FMessage;
-end;
-
-procedure TCMSPlugIn.SetMessage(const AMessage: WideString);
-begin
-  FMessage := AMessage;
-end;
-
-function TCMSPlugIn.GetWebsite: WideString;
-begin
-  Result := FWebsite;
-end;
-
-procedure TCMSPlugIn.SetWebsite(const AWebsite: WideString);
-begin
-  FWebsite := AWebsite;
-end;
-
-function TCMSPlugIn.GetData: ITabSheetData;
-begin
-  Result := FData;
-end;
-
-procedure TCMSPlugIn.SetData(const AData: ITabSheetData);
-begin
-  FData := AData;
-end;
-
-function TCMSPlugIn.GetArticleID: Integer;
-begin
-  Result := FArticleID;
-end;
-
-procedure TCMSPlugIn.SetArticleID(AArticleID: Integer);
-begin
-  FArticleID := AArticleID;
-end;
-
-function TCMSPlugIn.GetArticlePathID: Integer;
-begin
-  Result := FArticlePathID;
-end;
-
-procedure TCMSPlugIn.SetArticlePathID(AArticlePathID: Integer);
-begin
-  FArticleID := AArticlePathID;
+  // TODO
 end;
 
 function TCMSPlugIn.GetIntelligentPostingHelper;
 begin
   Result := FIntelligentPostingHelper;
-end;
-
-procedure TCMSPlugIn.SetIntelligentPostingHelper(AIntelligentPostingHelper: TIntelligentPostingHelper);
-begin
-  FIntelligentPostingHelper := AIntelligentPostingHelper;
 end;
 
 constructor TCMSPlugIn.Create;
@@ -406,55 +277,17 @@ end;
 
 destructor TCMSPlugIn.Destroy;
 begin
-  FData := nil;
   Settings.Free;
   FCheckedIDsList.Free;
   inherited Destroy;
 end;
 
-function TCMSPlugIn.GetType: TPlugInType;
+function TCMSPlugIn.GetType;
 begin
   Result := ptCMS;
 end;
 
-function TCMSPlugIn.GetIDs: Integer;
-var
-  RequestID: Double;
-begin
-  Result := FCheckedIDsList.Count;
-
-  RequestID := -1;
-
-  LoadSettings;
-
-  if not(AccountName = '') then
-    if not Login(RequestID) then
-      Exit;
-
-  if (RequestID = -1) then
-    RequestID := HTTPManager.Get(THTTPRequest.Create(GetIDsRequestURL), TPlugInHTTPOptions.Create(Self))
-  else
-    RequestID := HTTPManager.Get(GetIDsRequestURL, RequestID, TPlugInHTTPOptions.Create(Self));
-
-  HTTPManager.WaitFor(RequestID);
-
-  {
-    if HTTPProcess.HTTPResult.HasError then
-    begin
-    ErrorMsg := HTTPProcess.HTTPResult.HTTPResponseInfo.ErrorMessage;
-    Exit;
-    end;
-    }
-
-  Result := DoAnalyzeIDsRequest(HTTPManager.GetResult(RequestID).HTTPResult.SourceCode);
-end;
-
-function TCMSPlugIn.ReadID(AIndex: Integer): TIDInfo;
-begin
-  Result := FCheckedIDsList.Items[AIndex];
-end;
-
-function TCMSPlugIn.Login(out ARequestID: Double): Boolean;
+function TCMSPlugIn.GetLogin;
 var
   PreLoginURL: string;
   PostLoginURL: string;
@@ -473,14 +306,21 @@ begin
   RequestID := -1;
   ResponseStr := '';
 
+  if not CanLogin(ACMSData) then
+  begin
+    // TODO
+    ErrorMsg := 'Cant login. No username specified ...';
+    Exit;
+  end;
+
   /// pre login is commonly not used, but reserved for some pre login actions
   /// some CMS need a GET request before log-in (require cookie other security values)
-  if NeedPreLogin(PreLoginURL) then
+  if NeedPreLogin(ACMSData, PreLoginURL) then
   begin
     HTTPRequest := THTTPRequest.Create(PreLoginURL);
     with HTTPRequest do
     begin
-      Referer := Website;
+      Referer := ACMSData.Website;
       Charset := Settings.Charset;
     end;
 
@@ -513,7 +353,7 @@ begin
 
     /// post login is commonly not used, but reserved for some post login actions
     /// some CMS need a GET request after log-in (refresh session, validate login)
-    if NeedPostLogin(PostLoginURL) then
+    if NeedPostLogin(ACMSData, PostLoginURL) then
     begin
       ARequestID := HTTPManager.Get(PostLoginURL, ARequestID, TPlugInHTTPOptions.Create(Self));
 
@@ -549,7 +389,41 @@ begin
   end;
 end;
 
-function TCMSPlugIn.AddArticle(): WordBool;
+function TCMSPlugIn.GetRetrieveIDs;
+var
+  LRequestID: Double;
+  LHTTPResult: IHTTPResult;
+begin
+  Result := False;
+  LRequestID := -1;
+
+  // TODO
+  LoadSettings(ACMSData);
+
+  // do login if possible
+  if CanLogin(ACMSData) then
+    if not GetLogin(ACMSData, LRequestID) then
+      Exit;
+
+  if (LRequestID = -1) then
+    LRequestID := HTTPManager.Get(THTTPRequest.Create(GetRetrieveIDsRequestURL(ACMSData, ACategoryType)), TPlugInHTTPOptions.Create(Self))
+  else
+    LRequestID := HTTPManager.Get(GetRetrieveIDsRequestURL(ACMSData, ACategoryType), LRequestID, TPlugInHTTPOptions.Create(Self));
+
+  HTTPManager.WaitFor(LRequestID);
+
+  LHTTPResult := HTTPManager.GetResult(LRequestID).HTTPResult;
+
+  if LHTTPResult.HasError then
+  begin
+    ErrorMsg := LHTTPResult.HTTPResponseInfo.ErrorMessage;
+    Exit;
+  end;
+
+  Result := DoAnalyzeRetrieveIDsRequest(ACategoryType, LHTTPResult.SourceCode, ACMSIDsInfo);
+end;
+
+function TCMSPlugIn.AddArticle;
 var
   PrePostURL: string;
   RequestID: Double;
@@ -568,14 +442,15 @@ begin
   RequestID := -1;
   ResponseStr := '';
 
-  if LoadSettings(Data) then
-    if (not NeedLogin) xor (not SameStr('', AccountName) and NeedLogin and Login(RequestID)) xor SameStr('', AccountName) then
+  if LoadSettings(ACMSData, ACMSPublishData) then
+    // do login if required
+    if (not NeedLogin) xor (NeedLogin and GetLogin(ACMSData, RequestID)) then
     begin
       if NeedBeforePostAction then
       begin
         if DoBeforePostAction(RequestID) then
         begin
-          if not (RequestID = -1) then // no previous request actions
+          if not(RequestID = -1) then // no previous request actions
             ResponseStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
         end
         else
@@ -584,7 +459,7 @@ begin
         end;
       end;
 
-      if NeedPrePost(PrePostURL) then
+      if NeedPrePost(ACMSData, PrePostURL) then
       begin
         if (RequestID = -1) then // no previous request actions
           RequestID := HTTPManager.Get(THTTPRequest.Create(PrePostURL), TPlugInHTTPOptions.Create(Self))
@@ -599,7 +474,7 @@ begin
           Exit;
       end;
 
-      if DoBuildPostRequest(Data, HTTPRequest, HTTPParams, HTTPOptions, ResponseStr, RequestID) then
+      if DoBuildPostRequest(ACMSPublishData, HTTPRequest, HTTPParams, HTTPOptions, ResponseStr, RequestID) then
       begin
         HTTPRequest.Method := mPOST;
 
@@ -622,20 +497,31 @@ begin
     end;
 end;
 
-function TCMSPlugIn.EditArticle(): WordBool;
+function TCMSPlugIn.EditArticle;
 begin
   // TODO: Implement this
   Result := False;
 end;
 
-function TCMSPlugIn.GetArticle(out AArticle: WideString): WordBool;
+function TCMSPlugIn.DeleteArticle;
 begin
   // TODO: Implement this
-  AArticle := '';
   Result := False;
 end;
 
-function TCMSPlugIn.ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEditor): WordBool;
+function TCMSPlugIn.GetArticle;
+begin
+  // TODO: Implement this
+  Result := False;
+end;
+
+procedure TCMSPlugIn.Initialize;
+begin
+  inherited Initialize(AHTTPManager, AProxy, AConnectTimeout, AReadTimeout);
+  FIntelligentPostingHelper := AIntelligentPostingHelper;
+end;
+
+function TCMSPlugIn.ShowWebsiteSettingsEditor;
 
 /// taken from Controls unit; saves ~3kb
   function IsPositiveResult(AModalResult: Integer): Boolean;
@@ -644,7 +530,7 @@ function TCMSPlugIn.ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEdit
   end;
 
 begin
-  TPlugInCMSSettingsHelper.LoadSettingsToWebsiteEditor(SettingsFileName, Settings, AWebsiteEditor);
+  TPlugInCMSSettingsHelper.LoadSettingsToWebsiteEditor(ACMSData.SettingsFileName, Settings, AWebsiteEditor);
   Result := IsPositiveResult(AWebsiteEditor.ShowModal);
 end;
 

@@ -2,7 +2,7 @@
   *                            IntelligeN PLUGIN SYSTEM  *
   *  PlugIn content management system class              *
   *  Version 2.5.0.0                                     *
-  *  Copyright (c) 2015 Sebastian Klatte                 *
+  *  Copyright (c) 2016 Sebastian Klatte                 *
   *                                                      *
   ******************************************************** }
 unit uPlugInCMSFormbasedClass;
@@ -40,7 +40,7 @@ type
 
     property ArticleID;
 
-    function CMSType: TCMSType; override; safecall;
+    function GetCMSType: TCMSType; override; safecall;
   end;
 
 implementation
@@ -58,7 +58,7 @@ end;
 
 { TCMSFormbasedPlugIn }
 
-function TCMSFormbasedPlugIn.CMSType: TCMSType;
+function TCMSFormbasedPlugIn.GetCMSType: TCMSType;
 begin
   Result := cmsFormbased;
 end;

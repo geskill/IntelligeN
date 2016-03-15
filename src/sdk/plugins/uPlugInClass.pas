@@ -36,6 +36,7 @@ type
   public
     function SafeCallException(ExceptObject: TObject; ExceptAddr: Pointer): HResult; override;
     procedure Initialize(const AHTTPManager: IHTTPManager; const AProxy: IProxy; const AConnectTimeout, AReadTimeout: Integer); safecall;
+    procedure Uninitialize(); safecall;
 
     constructor Create; virtual;
     destructor Destroy; override;
@@ -101,6 +102,12 @@ begin
   FReadTimeout := AReadTimeout;
 end;
 
+procedure TPlugIn.Uninitialize;
+begin
+  FProxy := nil;
+  FHTTPManager := nil;
+end;
+
 constructor TPlugIn.Create;
 begin
   inherited Create;
@@ -109,8 +116,7 @@ end;
 
 destructor TPlugIn.Destroy;
 begin
-  FProxy := nil;
-  FHTTPManager := nil;
+  Uninitialize;
   inherited Destroy;
 end;
 

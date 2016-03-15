@@ -29,6 +29,7 @@ type
     function GetErrorMsg: WideString; safecall;
 
     procedure Initialize(const AHTTPManager: IHTTPManager; const AProxy: IProxy; const AConnectTimeout, AReadTimeout: Integer); safecall;
+    procedure Uninitialize(); safecall;
 
     property ErrorMsg: WideString read GetErrorMsg;
   end;
@@ -135,7 +136,7 @@ type
 
     function GetLogin(const ACMSData: ICMSData; out ARequestID: Double): WordBool; safecall;
 
-    function GetRetrieveIDs(const ACategoryType: WideString; out ACMSIDsInfo: ICMSIDsInfo): WordBool; safecall;
+    function GetRetrieveIDs(const ACMSData: ICMSData; const ACategoryType: WideString; out ACMSIDsInfo: ICMSIDsInfo): WordBool; safecall;
 
     function AddArticle(const ACMSData: ICMSData; const ACMSPublishData: ICMSPublishData; out ACMSArticleInfo: TCMSArticleInfo): WordBool; safecall;
     function EditArticle(const ACMSData: ICMSData; const ACMSPublishData: ICMSPublishData; var ACMSArticleInfo: TCMSArticleInfo): WordBool; safecall;
@@ -146,7 +147,7 @@ type
 
     procedure Initialize(const AHTTPManager: IHTTPManager; const AProxy: IProxy; const AConnectTimeout, AReadTimeout: Integer; const AIntelligentPostingHelper: TIntelligentPostingHelper); safecall;
 
-    function ShowWebsiteSettingsEditor(const AWebsiteEditor: IWebsiteEditor): WordBool; safecall;
+    function ShowWebsiteSettingsEditor(const ACMSData: ICMSData; const AWebsiteEditor: IWebsiteEditor): WordBool; safecall;
   end;
 
   ICrawlerPlugIn = interface(IPlugIn)

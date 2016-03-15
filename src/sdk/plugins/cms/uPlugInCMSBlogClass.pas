@@ -2,7 +2,7 @@
   *                            IntelligeN PLUGIN SYSTEM  *
   *  PlugIn content management system class              *
   *  Version 2.5.0.0                                     *
-  *  Copyright (c) 2015 Sebastian Klatte                 *
+  *  Copyright (c) 2016 Sebastian Klatte                 *
   *                                                      *
   ******************************************************** }
 unit uPlugInCMSBlogClass;
@@ -37,14 +37,14 @@ type
 
     property ArticleID;
 
-    function CMSType: TCMSType; override; safecall;
+    function GetCMSType: TCMSType; override; safecall;
   end;
 
 implementation
 
 { TCMSBlogPlugIn }
 
-function TCMSBlogPlugIn.CMSType: TCMSType;
+function TCMSBlogPlugIn.GetCMSType: TCMSType;
 begin
   Result := cmsBlog;
 end;
