@@ -229,8 +229,6 @@ var
   LHTTPProcess: IHTTPProcess;
   LJSONobject: TlkJSONobject;
 
-  LResponseStr: string;
-
   LSizeInBytes, LPartSizeInBytes, LBestPartSizeInBytes: Int64;
   LLinksIndex, LLinksUnknown, LLinksOnline, LLinksOffline: Integer;
 begin
@@ -271,11 +269,8 @@ begin
   else
   begin
     try
-      LResponseStr := LHTTPProcess.HTTPResult.SourceCode;
-      if (Pos('<pre>', LResponseStr) = 1) then // Workaround for stupid relink.to implementation ...
-        LResponseStr := copy(LResponseStr, 6);
       try
-        LJSONobject := TlkJSON.ParseText(LResponseStr) as TlkJSONobject;
+        LJSONobject := TlkJSON.ParseText(LHTTPProcess.HTTPResult.SourceCode) as TlkJSONobject;
         if (LJSONobject.IndexOfName('error') = -1) then
         begin
           for LLinksIndex := 0 to LJSONobject.Field['links'].Count - 1 do
