@@ -30,14 +30,14 @@ type
   TAdvertismenttype = (atLayer, atLink, atBanner);
   TImageHostResize = (irNone, ir320x240, ir450x338, ir640x480, ir800x600);
   TLinkStatus = csNotChecked .. csTemporaryOffline;
-  TChecksumType = (ctMD5, ctSHA512);
+  TChecksumType = (ctMD5, ctSHA256, ctSHA512);
 
   TIDInfo = packed record
     ID, Path: WideString;
   end;
 
   TCMSArticleInfo = packed record
-    ArticleID, ArticlePathID: Integer;
+    ArticleID, ArticleGroupID, ArticlePathID: Integer;
   end;
 
   TLinkInfo = packed record
