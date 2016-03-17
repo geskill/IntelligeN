@@ -21,7 +21,7 @@ uses
   // plugin system
   uPlugInConst, uPlugInInterface, uPlugInFileHosterClass, uPlugInFileHosterClasses, uPlugInHTTPClasses,
   // Utils
-  uPathUtils, uSizeUtils, uURLUtils;
+  uPathUtils, uSizeUtils, uStringUtils, uURLUtils;
 
 type
   TTurbobitNet = class(TFileHosterPlugIn)
@@ -37,6 +37,45 @@ type
 implementation
 
 { TTurbobitNet }
+
+function TTurbobitNet.InternalCheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool;
+var
+  LHTTPRequest: IHTTPRequest;
+  LRequestID: Double;
+  LResponeStr: string;
+begin
+  ALinkInfo := TLinkInfo.Create;
+
+  LHTTPRequest := THTTPRequest.Create(AFile);
+  LHTTPRequest.Cookies.Add('set_user_lang_change=en');
+
+  LRequestID := HTTPManager.Get(LHTTPRequest, TPlugInHTTPOptions.Create(Self));
+
+  HTTPManager.WaitFor(LRequestID);
+
+  LResponeStr := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
+
+  if (Pos('File not found.', LResponeStr) > 0) or (Pos('File was not found.', LResponeStr) > 0) then
+    ALinkInfo.Status := csOffline
+  else
+    with TRegExpr.Create do
+      try
+        InputString := LResponeStr;
+        Expression := '="file-title">(.*?)<\/span>.*?class="file-size">([\d, ]+) (\w+)<\/span>';
+
+        if Exec(InputString) then
+        begin
+          ALinkInfo.Status := csOnline;
+          ALinkInfo.Size := TSizeFormatter.SizeToByte(RemoveWhitespace(Match[2]), Match[3], False);
+          ALinkInfo.FileName := Match[1];
+        end;
+
+      finally
+        Free;
+      end;
+
+  Result := True;
+end;
 
 function TTurbobitNet.GetAuthor;
 begin
@@ -56,55 +95,6 @@ end;
 function TTurbobitNet.GetName: WideString;
 begin
   Result := 'Turbobit.net';
-end;
-
-function TTurbobitNet.CheckLink(const AFile: WideString): TLinkInfo;
-var
-  LinkInfo: TLinkInfo;
-
-  HTTPRequest: IHTTPRequest;
-
-  RequestID: Double;
-
-  ResponeStr: string;
-begin
-  with LinkInfo do
-  begin
-    Link := AFile;
-    Status := csUnknown;
-    Size := 0;
-    FileName := '';
-    Checksum := '';
-  end;
-
-  HTTPRequest := THTTPRequest.Create(AFile);
-  HTTPRequest.Cookies.Add('set_user_lang_change=en');
-
-  RequestID := HTTPManager.Get(HTTPRequest, TPlugInHTTPOptions.Create(Self));
-
-  HTTPManager.WaitFor(RequestID);
-
-  ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
-
-  if (Pos('File not found.', ResponeStr) > 0) then
-    LinkInfo.Status := csOffline
-  else
-    with TRegExpr.Create do
-      try
-        InputString := ResponeStr;
-        Expression := '<h1 class="download-file">.*?''>(.*?)<\/span>\s+\(([\d,]+) (\w+)\)';
-
-        if Exec(InputString) then
-        begin
-          LinkInfo.Status := csOnline;
-          LinkInfo.Size := TSizeFormatter.SizeToByte(Match[2], Match[3], False);
-          LinkInfo.FileName := Match[1];
-        end;
-      finally
-        Free;
-      end;
-
-  Result := LinkInfo;
 end;
 
 end.

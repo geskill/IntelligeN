@@ -26,7 +26,6 @@ uses
 type
   TShareOnlineBiz = class(TFileHosterPlugIn)
   protected
-    function InternalCheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool; override;
     function InternalCheckLinks(const AFiles: WideString; out ALinksInfo: ILinksInfo): WordBool; override;
   public
     function GetAuthor: WideString; override;
@@ -39,42 +38,7 @@ implementation
 
 { TShareOnlineBiz }
 
-function TShareOnlineBiz.GetAuthor;
-begin
-  Result := 'Sebastian Klatte';
-end;
-
-function TShareOnlineBiz.GetAuthorURL;
-begin
-  Result := 'http://www.intelligen2009.com/';
-end;
-
-function TShareOnlineBiz.GetDescription;
-begin
-  Result := GetName + ' file hoster plug-in.';
-end;
-
-function TShareOnlineBiz.GetName: WideString;
-begin
-  Result := 'Share-online.biz';
-end;
-
-function TShareOnlineBiz.CheckLink(const AFile: WideString): TLinkInfo;
-var
-  LinkInfo: TLinkInfo;
-begin
-  with LinkInfo do
-  begin
-    Link := AFile;
-    Status := csUnknown;
-    Size := 0;
-    FileName := '';
-    Checksum := '';
-  end;
-  Result := LinkInfo;
-end;
-
-function TShareOnlineBiz.CheckLinks(const AFiles: WideString): Integer;
+function TShareOnlineBiz.InternalCheckLinks(const AFiles: WideString; out ALinksInfo: ILinksInfo): WordBool;
 
   function GetDownloadlinkID(ALink: string): string;
   begin
@@ -109,40 +73,44 @@ function TShareOnlineBiz.CheckLinks(const AFiles: WideString): Integer;
   end;
 
 var
-  LFileIndex: Integer;
-  LOverAllPostReply, LIDsString: string;
+  LLinkIndex: Integer;
+  LLinksInfo: TLinksInfo;
 
+  LHTTPRequest: IHTTPRequest;
   LHTTPParams: IHTTPParams;
-
   LRequestID: Double;
 
-  ResponeStr: string;
-
-  LResultList: TStringList;
+  LResponeStr, LIDsString, LOverAllPostReply: string;
 begin
+  Result := True;
+
+  LLinksInfo := TLinksInfo.Create;
+
   with TStringList.Create do
     try
       Text := AFiles;
 
       LOverAllPostReply := '';
       LIDsString := '';
-      for LFileIndex := 0 to Count - 1 do
+      for LLinkIndex := 0 to Count - 1 do
       begin
-        LIDsString := LIDsString + GetDownloadlinkID(Strings[LFileIndex]);
-        if not(LFileIndex = Count - 1) then
+        LIDsString := LIDsString + GetDownloadlinkID(Strings[LLinkIndex]);
+        if not(LLinkIndex = Count - 1) then
           LIDsString := LIDsString + sLineBreak;
 
-        if (length(LIDsString) > 200) or (LFileIndex = Count - 1) then
+        if (length(LIDsString) > 200) or (LLinkIndex = Count - 1) then
         begin
           LHTTPParams := THTTPParams.Create('links=' + LIDsString);
 
-          LRequestID := HTTPManager.Post(THTTPRequest.Create('http://api.share-online.biz/cgi-bin?q=checklinks&md5=1'), LHTTPParams, TPlugInHTTPOptions.Create(Self));
+          LHTTPRequest := THTTPRequest.Create('http://api.share-online.biz/cgi-bin?q=checklinks&md5=1');
+
+          LRequestID := HTTPManager.Post(LHTTPRequest, LHTTPParams, TPlugInHTTPOptions.Create(Self));
 
           HTTPManager.WaitFor(LRequestID);
 
-          ResponeStr := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
+          LResponeStr := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
 
-          LOverAllPostReply := LOverAllPostReply + ResponeStr;
+          LOverAllPostReply := LOverAllPostReply + LResponeStr;
           LIDsString := '';
         end;
       end;
@@ -160,14 +128,14 @@ begin
           if Exec(InputString) then
           begin
             repeat
-              for LFileIndex := 0 to Count - 1 do
+              for LLinkIndex := 0 to Count - 1 do
               begin
-                if SameText(GetDownloadlinkID(Strings[LFileIndex]), Match[1]) or SameText(GetDownloadlinkID(Strings[LFileIndex]), Match[6]) then
+                if SameText(GetDownloadlinkID(Strings[LLinkIndex]), Match[1]) or SameText(GetDownloadlinkID(Strings[LLinkIndex]), Match[6]) then
                 begin
-                  if SameText(Match[6], '') then
-                    AddLink(Strings[LFileIndex], Match[3], APIResultToStatus(Match[2]), StrToInt64Def(Match[4], 0), Match[5])
+                  if SameStr(Match[6], '') then
+                    LLinksInfo.AddLink(Strings[LLinkIndex], Match[3], APIResultToStatus(Match[2]), StrToInt64Def(Match[4], 0), Match[5])
                   else
-                    AddLink(Strings[LFileIndex], '', APIResultToStatus(Match[6]), 0);
+                    LLinksInfo.AddLink(Strings[LLinkIndex], '', APIResultToStatus(Match[6]), 0);
                   break;
                 end;
               end;
@@ -176,10 +144,32 @@ begin
         finally
           Free;
         end;
+
     finally
       Free;
     end;
-  Result := FCheckedLinksList.Count;
+
+  ALinksInfo := LLinksInfo;
+end;
+
+function TShareOnlineBiz.GetAuthor;
+begin
+  Result := 'Sebastian Klatte';
+end;
+
+function TShareOnlineBiz.GetAuthorURL;
+begin
+  Result := 'http://www.intelligen2009.com/';
+end;
+
+function TShareOnlineBiz.GetDescription;
+begin
+  Result := GetName + ' file hoster plug-in.';
+end;
+
+function TShareOnlineBiz.GetName: WideString;
+begin
+  Result := 'Share-online.biz';
 end;
 
 end.

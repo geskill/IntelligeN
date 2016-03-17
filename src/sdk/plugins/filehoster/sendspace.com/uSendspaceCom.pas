@@ -38,6 +38,45 @@ implementation
 
 { TSendspaceCom }
 
+function TSendspaceCom.InternalCheckLink(const AFile: WideString; out ALinkInfo: ILinkInfo): WordBool;
+var
+  LHTTPRequest: IHTTPRequest;
+  LRequestID: Double;
+  LResponeStr: string;
+begin
+  ALinkInfo := TLinkInfo.Create;
+
+  LHTTPRequest := THTTPRequest.Create(AFile);
+  LHTTPRequest.Cookies.Add('set_user_lang_change=en');
+
+  LRequestID := HTTPManager.Get(LHTTPRequest, TPlugInHTTPOptions.Create(Self));
+
+  HTTPManager.WaitFor(LRequestID);
+
+  LResponeStr := HTTPManager.GetResult(LRequestID).HTTPResult.SourceCode;
+
+  if (Pos('class="msg error"', LResponeStr) > 0) then
+    ALinkInfo.Status := csOffline
+  else
+    with TRegExpr.Create do
+      try
+        InputString := LResponeStr;
+        Expression := '<h2.*?<b>(.*?)<.*?<\/b> ([\d\.]+)(\w+)';
+
+        if Exec(InputString) then
+        begin
+          ALinkInfo.Status := csOnline;
+          ALinkInfo.Size := TSizeFormatter.SizeToByte(Match[2], Match[3]);
+          ALinkInfo.FileName := Match[1];
+        end;
+
+      finally
+        Free;
+      end;
+
+  Result := True;
+end;
+
 function TSendspaceCom.GetAuthor;
 begin
   Result := 'Sebastian Klatte';
@@ -56,50 +95,6 @@ end;
 function TSendspaceCom.GetName: WideString;
 begin
   Result := 'Sendspace.com';
-end;
-
-function TSendspaceCom.CheckLink(const AFile: WideString): TLinkInfo;
-var
-  LinkInfo: TLinkInfo;
-
-  RequestID: Double;
-
-  ResponeStr: string;
-begin
-  with LinkInfo do
-  begin
-    Link := AFile;
-    Status := csUnknown;
-    Size := 0;
-    FileName := '';
-    Checksum := '';
-  end;
-
-  RequestID := HTTPManager.Get(THTTPRequest.Create(AFile), TPlugInHTTPOptions.Create(Self));
-
-  HTTPManager.WaitFor(RequestID);
-
-  ResponeStr := HTTPManager.GetResult(RequestID).HTTPResult.SourceCode;
-
-  if (Pos('class="msg error"', ResponeStr) > 0) then
-    LinkInfo.Status := csOffline
-  else
-    with TRegExpr.Create do
-      try
-        InputString := ResponeStr;
-        Expression := '<h2.*?<strong>(.*?)<.*?<\/b> ([\d\.]+)(\w+)';
-
-        if Exec(InputString) then
-        begin
-          LinkInfo.Status := csOnline;
-          LinkInfo.Size := TSizeFormatter.SizeToByte(Match[2], Match[3]);
-          LinkInfo.FileName := Match[1];
-        end;
-      finally
-        Free;
-      end;
-
-  Result := LinkInfo;
 end;
 
 end.
