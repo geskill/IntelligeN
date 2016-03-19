@@ -19,7 +19,7 @@ uses
 type
   TwBB4Settings = class(TCMSBoardIPPlugInSettings)
   strict private
-    ficon_field: string;
+    ficon_field, fseoChar: string;
 
     fpreParse, fenableSmilies, fenableBBCodes, fenableHtml, fshowSignature, fhasThank, fcloseThread, fdisableThread, fintelligent_posting_boundedsearch: Boolean;
 
@@ -29,6 +29,8 @@ type
     constructor Create; override;
   published
     property icon_field: string read ficon_field write ficon_field;
+    property seoChar: string read fseoChar write fseoChar;
+
     property preParse: Boolean read fpreParse write fpreParse;
     property enableSmilies: Boolean read fenableSmilies write fenableSmilies;
     property enableBBCodes: Boolean read fenableBBCodes write fenableBBCodes;
@@ -90,6 +92,7 @@ begin
 
   // default setup
   icon_field := 'threadIconID';
+  seoChar := '?';
   preParse := True;
   enableSmilies := True;
   enableBBCodes := True;
@@ -139,14 +142,14 @@ end;
 function TwBB4.NeedPreLogin;
 begin
   Result := True;
-  ARequestURL := Website + 'index.php?login';
+  ARequestURL := Website + 'index.php' + wBB4Settings.seoChar + 'login';
 end;
 
 function TwBB4.DoBuildLoginRequest;
 begin
   Result := True;
 
-  AHTTPRequest := THTTPRequest.Create(Website + 'index.php?login/&s=' + FSessionID);
+  AHTTPRequest := THTTPRequest.Create(Website + 'index.php' + wBB4Settings.seoChar + 'login/&s=' + FSessionID);
   with AHTTPRequest do
   begin
     Referer := Website;
@@ -357,9 +360,9 @@ function TwBB4.NeedPrePost;
 begin
   Result := True;
   if PostReply then
-    ARequestURL := Website + 'index.php?post-add/' + VarToStr(wBB4Settings.threads) + '/'
+    ARequestURL := Website + 'index.php' + wBB4Settings.seoChar + 'post-add/' + VarToStr(wBB4Settings.threads) + '/'
   else
-    ARequestURL := Website + 'index.php?thread-add/' + VarToStr(wBB4Settings.forums) + '/'
+    ARequestURL := Website + 'index.php' + wBB4Settings.seoChar + 'thread-add/' + VarToStr(wBB4Settings.forums) + '/'
 end;
 
 function TwBB4.DoAnalyzePrePost;
@@ -392,9 +395,9 @@ begin
   Result := True;
 
   if PostReply then
-    RequestURL := Website + 'index.php?post-add/' + VarToStr(wBB4Settings.threads) + '/&s=' + FSessionID
+    RequestURL := Website + 'index.php' + wBB4Settings.seoChar + 'post-add/' + VarToStr(wBB4Settings.threads) + '/&s=' + FSessionID
   else
-    RequestURL := Website + 'index.php?thread-add/' + VarToStr(wBB4Settings.forums) + '/&s=' + FSessionID;
+    RequestURL := Website + 'index.php' + wBB4Settings.seoChar + 'thread-add/' + VarToStr(wBB4Settings.forums) + '/&s=' + FSessionID;
 
   AHTTPRequest := THTTPRequest.Create(RequestURL);
   with AHTTPRequest do
@@ -486,7 +489,7 @@ end;
 
 function TwBB4.GetIDsRequestURL;
 begin
-  Result := Website + 'index.php?search';
+  Result := Website + 'index.php' + wBB4Settings.seoChar + 'search';
 end;
 
 function TwBB4.DoAnalyzeIDsRequest;
@@ -576,7 +579,7 @@ end;
 
 function TwBB4.GetArticleLink;
 begin
-  Result := Format('%sindex.php?thread&postID=%d#post%1:d', [AURL, AArticleID]);
+  Result := Format('%sindex.php' + wBB4Settings.seoChar + 'thread&postID=%d#post%1:d', [AURL, AArticleID]);
 end;
 
 
