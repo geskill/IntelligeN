@@ -10,7 +10,7 @@ uses
   // MultiEvent
   Generics.MultiEvents.NotifyInterface, Generics.MultiEvents.NotifyHandler,
   // Common
-  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface, uFileInterface,
   // DLLs
   uExport,
   // Api
@@ -103,8 +103,8 @@ type
       FControlsSide: Boolean;
       FHosterSide: Boolean;
 
-      function IsControlValueAllowed(AControl: IControlBasic): Boolean;
-      function IsHosterAllowed(AHoster: IMirrorControl): Boolean;
+      function IsControlValueAllowed(const AControl: IControlBasic): Boolean;
+      function IsHosterAllowed(const AHoster: IMirrorControl): Boolean;
 
       function IsAllowed: Boolean;
       function AllControlsAllowed: Boolean;
@@ -568,36 +568,68 @@ begin
     end;
 end;
 
-function TICMSWebsiteContainer.TICMSWebsiteContainerActiveController.IsControlValueAllowed(AControl: IControlBasic): Boolean;
+function TICMSWebsiteContainer.TICMSWebsiteContainerActiveController.IsControlValueAllowed(const AControl: IControlBasic): Boolean;
 
-  function RelToBool(ARel: string): Boolean;
+  function GetControlsForControl(const AControls: Generics.Collections.TList<IControl>; const AControl: IControlBasic): TList<IControl>;
+  var
+    LIndex: Integer;
+    LCategory: string;
+    LIsCategory: Boolean;
+  begin
+    Result := TList<IControl>.Create;
+
+    for LIndex := 0 to AControls.Count - 1 do
+    begin
+      LCategory := AControls.Items[LIndex].Category;
+      LIsCategory := StringInTypeID(LCategory);
+      if (not LIsCategory or (LIsCategory and (AControl.TypeID = StringToTypeID(LCategory)))) and
+      { . } (AControl.ControlID = StringToControlID(AControls.Items[LIndex].Name)) then
+        Result.Add(AControls.Items[LIndex]);
+    end;
+  end;
+
+  function RelToBool(const ARel: string): Boolean;
   begin
     Result := (ARel = '=');
   end;
 
 var
-  I: Integer;
-  LCategory: string;
-  LIsCategory: Boolean;
-  Allowed: Boolean;
+  LControlFilters: TList<IControl>;
+  LFilterIndex: Integer;
+  LAllowed, LHasAFilter: Boolean;
 begin
   Result := True;
-  for I := 0 to FACMSCollectionItem.Filter.Controls.Count - 1 do
-  begin
-    LCategory := FACMSCollectionItem.Filter.Controls.Items[I].Category;
-    LIsCategory := StringInTypeID(LCategory);
-    if (not LIsCategory or ((LIsCategory) and (AControl.TypeID = StringToTypeID(LCategory)))) and
-    { . } (AControl.ControlID = StringToControlID(FACMSCollectionItem.Filter.Controls.Items[I].Name)) then
+  LControlFilters := GetControlsForControl(FACMSCollectionItem.Filter.Controls, AControl);
+  try
+    if (LControlFilters.Count > 0) then
     begin
-      Allowed := RelToBool(FACMSCollectionItem.Filter.Controls.Items[I].Relation) = MatchTextMask(FACMSCollectionItem.Filter.Controls.Items[I].Value, AControl.Value);
+      // for not equals relations: make AND connection
+      for LFilterIndex := 0 to LControlFilters.Count - 1 do
+        if not RelToBool(LControlFilters.Items[LFilterIndex].Relation) then
+        begin
+          LAllowed := not MatchTextMask(LControlFilters.Items[LFilterIndex].Value, AControl.Value);
 
-      if not Allowed then
+          if not LAllowed then
+            Exit(False);
+        end;
+      // for equals relations: make OR connection
+      LAllowed := False;
+      LHasAFilter := False;
+      for LFilterIndex := 0 to LControlFilters.Count - 1 do
+        if RelToBool(LControlFilters.Items[LFilterIndex].Relation) then
+        begin
+          LHasAFilter := True;
+          LAllowed := LAllowed or MatchTextMask(LControlFilters.Items[LFilterIndex].Value, AControl.Value);
+        end;
+      if LHasAFilter and not LAllowed then
         Exit(False);
     end;
+  finally
+    LControlFilters.Free;
   end;
 end;
 
-function TICMSWebsiteContainer.TICMSWebsiteContainerActiveController.IsHosterAllowed(AHoster: IMirrorControl): Boolean;
+function TICMSWebsiteContainer.TICMSWebsiteContainerActiveController.IsHosterAllowed(const AHoster: IMirrorControl): Boolean;
 var
   I: Integer;
 begin
