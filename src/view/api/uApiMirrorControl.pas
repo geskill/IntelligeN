@@ -1014,7 +1014,7 @@ begin
     // Check at most 4 links
     for LFileIndex := 0 to Min(Count - 1, 4) do
     begin
-      LHost := RemoveW(ExtractUrlHost(Strings[LFileIndex]));
+      LHost := ExtractUrlHost(Strings[LFileIndex], True);
       if not SameStr('', LHost) then
       begin
         LNormalizedHost := THosterConfiguration.GetCustomisedHoster(LHost, AShortName);

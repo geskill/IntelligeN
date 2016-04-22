@@ -7,6 +7,8 @@ uses
   Windows, SysUtils,
   // Indy
   IdURI,
+  // RegEx
+  RegExpr,
   // Utils
   uStringUtils;
 
@@ -18,6 +20,8 @@ function URLDecode(const AUrl: string): string;
 
 function BeginsWithHTTP(const AUrl: string): Boolean;
 function IsUrl(const AUrl: string): Boolean;
+
+function RemoveW(const AHost: string): string;
 
 function CombineUrl(const AUrl, ABaseUrl: string): string;
 
@@ -36,8 +40,8 @@ function ExtractUrlProtocol(const AUrl: string): string;
 ///   converted to www.sub.example.org.
 /// </example>
 {$ENDREGION}
-function ExtractUrlHost(const AUrl: string): string;
-function ExtractUrlHostWithPath(const AUrl: string): string;
+function ExtractUrlHost(const AUrl: string; ARemoveW: Boolean = False): string;
+function ExtractUrlHostWithPath(const AUrl: string; ARemoveW: Boolean = False): string;
 function BuildWebsiteUrl(const AUrl: string): string;
 function IncludeTrailingUrlDelimiter(const AUrl: string): string;
 function ExcludeTrailingUrlDelimiter(const AUrl: string): string;
@@ -62,6 +66,22 @@ end;
 function IsUrl(const AUrl: string): Boolean;
 begin
   Result := Pos('://', AUrl) > 0;
+end;
+
+function RemoveW(const AHost: string): string;
+begin
+  with TRegExpr.Create do
+    try
+      InputString := AHost;
+      Expression := 'www\d{0,3}\.';
+
+      if Exec(InputString) then
+        Result := copy(AHost, Pos(string(Match[0]), AHost) + Length(Match[0]))
+      else
+        Result := AHost;
+    finally
+      Free;
+    end;
 end;
 
 function CombineUrl(const AUrl, ABaseUrl: string): string;
@@ -124,21 +144,27 @@ begin
     Result := copy(AUrl, 1, LPosition - 1);
 end;
 
-function ExtractUrlHost(const AUrl: string): string;
+function ExtractUrlHost(const AUrl: string; ARemoveW: Boolean = False): string;
 begin
   with TIdURI.Create(AUrl) do
     try
-      Result := Host;
+      if ARemoveW then
+        Result := RemoveW(Host)
+      else
+        Result := Host;
     finally
       Free;
     end;
 end;
 
-function ExtractUrlHostWithPath(const AUrl: string): string;
+function ExtractUrlHostWithPath(const AUrl: string; ARemoveW: Boolean = False): string;
 begin
   with TIdURI.Create(AUrl) do
     try
-      Result := Host + Path;
+      if ARemoveW then
+        Result := RemoveW(Host) + Path
+      else
+        Result := Host + Path;
     finally
       Free;
     end;
