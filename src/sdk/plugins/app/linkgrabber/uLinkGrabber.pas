@@ -89,7 +89,7 @@ procedure TLinkGrabber.OnClick(const Sender: IInterface);
           if not(Pos(sLineBreak, _Link) = 0) then
             _Link := copy(_Link, 1, Pos(sLineBreak, _Link) - 1);
 
-          if SameText(RemoveW(ExtractUrlHost(_Link)), RemoveW(ExtractUrlHost(ALink))) then
+          if SameText(ExtractUrlHost(_Link, True), ExtractUrlHost(ALink, True)) then
           begin
             with TStringList.Create do
               try

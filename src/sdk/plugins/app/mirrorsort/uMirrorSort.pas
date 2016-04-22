@@ -306,7 +306,7 @@ begin
           if not(Pos(sLineBreak, _Link) = 0) then
             _Link := copy(_Link, 1, Pos(sLineBreak, _Link) - 1);
 
-          if SameText(RemoveW(ExtractUrlHost(_Link)), RemoveW(ExtractUrlHost(ALines.Strings[_LinksToSortIndex]))) then
+          if SameText(ExtractUrlHost(_Link, True), ExtractUrlHost(ALines.Strings[_LinksToSortIndex], True)) then
           begin
             with TStringList.Create do
               try

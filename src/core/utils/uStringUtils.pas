@@ -42,8 +42,6 @@ function ReduceWhitespace(const AStr: string): string;
 
 function RemoveWhitespace(const AStr: string): string;
 
-function RemoveW(const AHost: string): string;
-
 function Trim(const S: string; const C: Char): string; overload;
 
 function TrimLeft(const S: string; const C: Char): string; overload;
@@ -464,22 +462,6 @@ begin
   with TRegExpr.Create do
     try
       Result := ReplaceRegExpr('\s+', AStr, '', False);
-    finally
-      Free;
-    end;
-end;
-
-function RemoveW(const AHost: string): string;
-begin
-  with TRegExpr.Create do
-    try
-      InputString := AHost;
-      Expression := 'www\d{0,2}\.';
-
-      if Exec(InputString) then
-        Result := copy(AHost, Pos(string(Match[0]), AHost) + Length(Match[0]))
-      else
-        Result := AHost;
     finally
       Free;
     end;

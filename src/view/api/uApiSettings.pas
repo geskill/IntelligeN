@@ -668,7 +668,7 @@ end;
 
 function TCMSWebsitesCollectionItem.GetHostWithPath: string;
 begin
-  Result := RemoveW(ExtractUrlHostWithPath(Website));
+  Result := ExtractUrlHostWithPath(Website, True);
 end;
 
 function TCMSWebsitesCollectionItem.GetPath: string;

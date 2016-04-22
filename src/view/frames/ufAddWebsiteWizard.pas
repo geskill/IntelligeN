@@ -248,7 +248,7 @@ begin
         try
           Filter := 'Website Templates (*.xml)|*.xml';
           InitialDir := ExcludeTrailingPathDelimiter(GetTemplatesSiteFolder);
-          FileName := TrueFilename(RemoveW(ExtractUrlHost(cxTEFormattedURL.Text)));
+          FileName := TrueFilename(ExtractUrlHost(cxTEFormattedURL.Text, True));
 
           if Execute then
           begin
