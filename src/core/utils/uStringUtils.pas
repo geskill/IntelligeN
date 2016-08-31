@@ -457,6 +457,16 @@ begin
     Delete(Result, LCharIndex + 1, LWhiteSpaceCount);
 end;
 
+function RemoveWhitespace(const AStr: string): string;
+begin
+  with TRegExpr.Create do
+    try
+      Result := ReplaceRegExpr('\s+', AStr, '', False);
+    finally
+      Free;
+    end;
+end;
+
 function Trim(const S: string; const C: Char): string;
 var
   I, L: Integer;
