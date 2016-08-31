@@ -864,7 +864,8 @@ begin
   Cookies.Text := AHTTPProcess.HTTPData.HTTPRequest.Cookies.Text + AHTTPProcess.HTTPResult.HTTPResponse.Cookies.Text;
 
   CacheControl := AHTTPProcess.HTTPResult.HTTPResponse.CacheControl;
-  CharSet := AHTTPProcess.HTTPResult.HTTPResponse.CharSet;
+  if not SameStr('', AHTTPProcess.HTTPResult.HTTPResponse.CharSet) then
+    CharSet := AHTTPProcess.HTTPResult.HTTPResponse.CharSet;
   Connection := AHTTPProcess.HTTPResult.HTTPResponse.Connection;
   ContentDisposition := AHTTPProcess.HTTPResult.HTTPResponse.ContentDisposition;
   ContentEncoding := AHTTPProcess.HTTPResult.HTTPResponse.ContentEncoding;
