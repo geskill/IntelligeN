@@ -34,16 +34,6 @@ type
   protected
     property PostReply: Boolean read FPostReply write FPostReply;
   public
-    property AccountName;
-    property AccountPassword;
-    property SettingsFileName;
-    property Subject;
-    property Tags;
-    property Message;
-    property Website;
-
-    property ArticleID;
-
     function GetCMSType: TCMSType; override; safecall;
   end;
 

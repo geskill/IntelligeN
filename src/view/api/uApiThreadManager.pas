@@ -13,18 +13,20 @@ uses
   // Generic TThreadList
   hThreadList,
   // Common
-  uBaseConst, uBaseInterface, uAppConst, uAppInterface;
+  uBaseConst, uBaseInterface, uAppConst, uAppInterface,
+  // API
+  uApiMultiCastEvent;
 
 type
   TThreadWorkData = class
-  protected
+  private
     // TODO: FUTURE: Replace ITabSheetController instance with UniqueID of every tab.
     FTabSheetController: ITabSheetController;
+  protected
+    property TabSheetController: ITabSheetController read FTabSheetController write FTabSheetController;
   public
     constructor Create; virtual;
     destructor Destroy; override;
-
-    property TabSheetController: ITabSheetController read FTabSheetController write FTabSheetController;
   end;
 
   TThreadWorker<T: TThreadWorkData, constructor> = class(TOmniWorker)
@@ -47,6 +49,7 @@ type
   TThreadManager<T: TThreadWorkData, constructor> = class(TInterfacedObject, IThreadManager)
   private
     FInList, FBlackList: TThreadList<T>;
+    FBeforeExecute, FAfterExecute: IThreadEvent;
   protected
     FOmniEM: TOmniEventMonitor;
     function InAnyList(const ATabSheetController: ITabSheetController): Boolean; virtual;
@@ -62,21 +65,31 @@ type
     function RemoveAllJobs: Boolean;
 
     function RemoveIterator(ARemoveProc: TThreadManagerRemoveProc<T>): Boolean;
+
+    procedure DoBeforeExecute(const AJobWorkData: T; out ASenderObject: IUnknown); virtual; abstract;
+    procedure DoAfterExecute(const AJobWorkData: T; out ASenderObject: IUnknown); virtual; abstract;
+
+    function GetBeforeExecute: IThreadEvent; virtual; safecall;
+    function GetAfterExecute: IThreadEvent; virtual; safecall;
   public
     constructor Create();
 
-    function InUse(const ATabSheetController: ITabSheetController): WordBool;
-    function IsIdle: WordBool;
+    function InUse(const ATabSheetController: ITabSheetController): WordBool; safecall;
+    function IsIdle: WordBool; safecall;
+
+    property OnBeforeExecute: IThreadEvent read GetBeforeExecute;
+    property OnAfterExecute: IThreadEvent read GetAfterExecute;
 
     destructor Destroy; override;
   end;
 
 const
-  MSG_TASK_BLACKLISTED = 0;
+  MSG_IS_TASK_BLACKLISTED = 0;
   MSG_CONTINUE_TASK = 1;
   MSG_QUIT_TASK = 2;
-  MSG_TASK_QUIT = 3;
-  MSG_TASK_QUIT_BY_ITSELF = 4;
+  MSG_TASK_START = 3;
+  MSG_TASK_QUIT = 4;
+  MSG_TASK_QUIT_BY_ITSELF = 5;
 
 implementation
 
@@ -114,7 +127,7 @@ begin
   Result := False;
 
   LOmniValue := TOmniValue.CastFrom<T>(Data);
-  task.Comm.Send(MSG_TASK_BLACKLISTED, [task.UniqueID, LOmniValue.AsObject]);
+  task.Comm.Send(MSG_IS_TASK_BLACKLISTED, [task.UniqueID, LOmniValue.AsObject]);
 
   repeat
     task.Comm.ReceiveWait(LMessage, INFINITE);
@@ -136,6 +149,8 @@ begin
 end;
 
 function TThreadWorker<T>.Initialize: Boolean;
+var
+  LOmniValue: TOmniValue;
 begin
   // This is already executed in a seperate thread/task
   Result := inherited Initialize;
@@ -145,6 +160,8 @@ begin
     Finish(True);
     Exit(False);
   end;
+  LOmniValue := TOmniValue.CastFrom<T>(Data);
+  task.Comm.Send(MSG_TASK_START, [task.UniqueID, LOmniValue.AsObject]);
   Result := True;
 end;
 
@@ -225,6 +242,7 @@ end;
 procedure TThreadManager<T>.OmniEMTaskMessage(const task: IOmniTaskControl; const msg: TOmniMessage);
 var
   LJobWorkData: T;
+  LSenderObject: IUnknown;
 begin
   (*
     task.Comm.Send( <Message ID>, [<UniqueID>, <TThreadWorkData>, <Additional Parameter 1>, <Additional Parameter 2>, ...])
@@ -232,7 +250,7 @@ begin
   LJobWorkData := T(msg.MsgData[1].AsObject);
 
   case msg.MsgID of
-    MSG_TASK_BLACKLISTED:
+    MSG_IS_TASK_BLACKLISTED:
       begin
         if InBlackList(LJobWorkData) then
         begin
@@ -244,8 +262,15 @@ begin
           task.Comm.Send(MSG_CONTINUE_TASK, [msg.MsgData[0].AsInt64]);
         end;
       end;
+    MSG_TASK_START:
+      begin
+        DoBeforeExecute(LJobWorkData, LSenderObject);
+        OnBeforeExecute.Invoke(LJobWorkData.TabSheetController, LSenderObject);
+      end;
     MSG_TASK_QUIT, MSG_TASK_QUIT_BY_ITSELF:
       begin
+        DoAfterExecute(LJobWorkData, LSenderObject);
+        OnAfterExecute.Invoke(LJobWorkData.TabSheetController, LSenderObject);
 {$IFDEF DEBUG_THREADWORKER}
         OutputDebugString(PChar(ClassName + ' Retrieve: MSG_TASK_QUIT'));
 {$ENDIF}
@@ -357,6 +382,16 @@ begin
   end;
 end;
 
+function TThreadManager<T>.GetBeforeExecute: IThreadEvent;
+begin
+  //
+end;
+
+function TThreadManager<T>.GetAfterExecute: IThreadEvent;
+begin
+  //
+end;
+
 constructor TThreadManager<T>.Create;
 begin
   inherited Create;
@@ -369,6 +404,9 @@ begin
   begin
     OnTaskMessage := OmniEMTaskMessage;
   end;
+
+  FBeforeExecute := TIThreadEvent.Create;
+  FAfterExecute := TIThreadEvent.Create;
 end;
 
 function TThreadManager<T>.InUse(const ATabSheetController: ITabSheetController): WordBool;
@@ -383,6 +421,8 @@ end;
 
 destructor TThreadManager<T>.Destroy;
 begin
+  FAfterExecute := nil;
+  FBeforeExecute := nil;
   FBlackList.Free;
   FInList.Free;
   FOmniEM.Free;

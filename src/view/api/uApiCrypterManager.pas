@@ -23,6 +23,7 @@ type
     constructor Create; override;
     destructor Destroy; override;
 
+    property TabSheetController;
     property CrypterPanel: ICrypterPanel read FCrypterPanel write FCrypterPanel;
     property CrypterCollectionItem: TCrypterCollectionItem read FCrypterCollectionItem write FCrypterCollectionItem;
   end;
@@ -58,6 +59,9 @@ type
   end;
 
   TCrypterManager = class(TThreadManager<TCrypterData>, ICrypterManager)
+  protected
+    procedure DoBeforeExecute(const AJobWorkData: TCrypterData; out ASenderObject: IUnknown); override;
+    procedure DoAfterExecute(const AJobWorkData: TCrypterData; out ASenderObject: IUnknown); override;
   public
     constructor Create;
     destructor Destroy; override;
@@ -219,6 +223,16 @@ begin
 end;
 
 { TCrypterManager }
+
+procedure TCrypterManager.DoBeforeExecute(const AJobWorkData: TCrypterData; out ASenderObject: IInterface);
+begin
+  ASenderObject := AJobWorkData.CrypterPanel;
+end;
+
+procedure TCrypterManager.DoAfterExecute(const AJobWorkData: TCrypterData; out ASenderObject: IInterface);
+begin
+  ASenderObject := AJobWorkData.CrypterPanel;
+end;
 
 constructor TCrypterManager.Create;
 begin

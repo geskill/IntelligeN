@@ -5,8 +5,6 @@ interface
 uses
   // Delphi
   Windows, SysUtils, StrUtils, Classes, Dialogs, Variants,
-  // Indy
-  IdURI,
   // RegEx
   RegExpr,
   // FastScript
@@ -159,9 +157,9 @@ begin
   else if MethodName = 'STRINGREPLACE' then
     Result := StringReplace(Params[0], Params[1], Params[2], [rfReplaceAll])
   else if MethodName = 'URLENCODE' then
-    Result := TIdURI.URLEncode(Params[0])
+    Result := URLEncode(Params[0])
   else if MethodName = 'URLDECODE' then
-    Result := TIdURI.URLDecode(Params[0])
+    Result := URLDecode(Params[0])
   else if MethodName = 'EXTRACTURLFILENAME' then
     Result := ExtractUrlFileName(Params[0])
   else if MethodName = 'EXTRACTURLPATH' then

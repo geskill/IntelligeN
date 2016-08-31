@@ -60,8 +60,9 @@ uses
   uApiMody in 'api\uApiMody.pas',
   uApiMultiCastEvent in 'api\uApiMultiCastEvent.pas',
   uApiPlugins in 'api\uApiPlugins.pas',
-  uApiPluginsBase in 'api\uApiPluginsBase.pas',
   uApiPluginsAdd in 'api\uApiPluginsAdd.pas',
+  uApiPluginsBase in 'api\uApiPluginsBase.pas',
+  uApiPluginsClasses in 'api\uApiPluginsClasses.pas',
   uApiPrerequisite in 'api\uApiPrerequisite.pas',
   uApiPublishController in 'api\uApiPublishController.pas',
   uApiPublishManager in 'api\uApiPublishManager.pas',
@@ -111,6 +112,7 @@ uses
   uPlugInInterfaceAdv in '..\sdk\plugins\uPlugInInterfaceAdv.pas',
   uPlugInClass in '..\sdk\plugins\uPlugInClass.pas',
   uPlugInConst in '..\sdk\plugins\uPlugInConst.pas',
+  uPlugInClasses in '..\sdk\plugins\uPlugInClasses.pas',
   uPlugInEvent in '..\sdk\plugins\uPlugInEvent.pas',
   uPlugInHTTPClasses in '..\sdk\plugins\uPlugInHTTPClasses.pas',
   uPlugInAppClass in '..\sdk\plugins\app\uPlugInAppClass.pas',
@@ -124,6 +126,7 @@ uses
   uPlugInCrypterClass in '..\sdk\plugins\crypter\uPlugInCrypterClass.pas',
   uPlugInFileFormatClass in '..\sdk\plugins\fileformats\uPlugInFileFormatClass.pas',
   uPlugInFileHosterClass in '..\sdk\plugins\filehoster\uPlugInFileHosterClass.pas',
+  uPlugInFileHosterClasses in '..\sdk\plugins\filehoster\uPlugInFileHosterClasses.pas',
   uPlugInImageHosterClass in '..\sdk\plugins\imagehoster\uPlugInImageHosterClass.pas',
   uFileUtils in '..\core\utils\uFileUtils.pas',
   uHTMLUtils in '..\core\utils\uHTMLUtils.pas',
@@ -178,7 +181,7 @@ begin
       Application.CreateForm(TMain, Main);
       Application.CreateForm(TSettings, Settings);
       Application.CreateForm(TUpdate, Update);
-	  
+
       if SettingsManager.Settings.Login.AutoLogin then
         Main.fLogin.cxbLoginClick(nil);
 

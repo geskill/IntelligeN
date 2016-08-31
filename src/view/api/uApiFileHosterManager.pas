@@ -23,6 +23,7 @@ type
     constructor Create; override;
     destructor Destroy; override;
 
+    property TabSheetController;
     property Directlink: IDirectlinksMirror read FDirectlink write FDirectlink;
     property FileHosterCollectionItem: TPlugInCollectionItem read FFileHosterCollectionItem write FFileHosterCollectionItem;
   end;
@@ -40,6 +41,9 @@ type
   end;
 
   TFileHosterManager = class(TThreadManager<TFileHosterData>, IFileHosterManager)
+  protected
+    procedure DoBeforeExecute(const AJobWorkData: TFileHosterData; out ASenderObject: IUnknown); override;
+    procedure DoAfterExecute(const AJobWorkData: TFileHosterData; out ASenderObject: IUnknown); override;
   public
     constructor Create;
     destructor Destroy; override;
@@ -122,6 +126,16 @@ begin
 end;
 
 { THosterManager }
+
+procedure TFileHosterManager.DoBeforeExecute(const AJobWorkData: TFileHosterData; out ASenderObject: IInterface);
+begin
+  ASenderObject := AJobWorkData.Directlink;
+end;
+
+procedure TFileHosterManager.DoAfterExecute(const AJobWorkData: TFileHosterData; out ASenderObject: IInterface);
+begin
+  ASenderObject := AJobWorkData.Directlink;
+end;
 
 constructor TFileHosterManager.Create;
 begin

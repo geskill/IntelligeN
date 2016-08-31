@@ -23,6 +23,7 @@ type
     constructor Create; override;
     destructor Destroy; override;
 
+    property TabSheetController;
     property ControlController: IControlController read FControlController write FControlController;
   end;
 
@@ -37,8 +38,6 @@ type
 
     procedure SetPossibleControlValue;
     procedure UpdateControlValues;
-    procedure DoBeforeCrawling;
-    procedure DoAfterCrawling;
     procedure InitiateImageRemoteUpload;
   public
     constructor Create(const AControlController: IControlController); reintroduce;
@@ -52,6 +51,9 @@ type
     FOnGUIInteraction: TCrawlerGUIInteractionEvent;
   protected
     procedure OmniEMTaskMessage(const task: IOmniTaskControl; const msg: TOmniMessage); override;
+
+    procedure DoBeforeExecute(const AJobWorkData: TCrawlerData; out ASenderObject: IUnknown); override;
+    procedure DoAfterExecute(const AJobWorkData: TCrawlerData; out ASenderObject: IUnknown); override;
   public
     constructor Create;
     destructor Destroy; override;
@@ -63,9 +65,9 @@ type
   end;
 
 const
-  MSG_CRAWLER_TASK_CREATED = 5;
-  MSG_CRAWLER_TASK_STARTED = 6; // One crawler from a subset of crawlers for one tab begins to work
-  MSG_CRAWLER_TASK_FINISHED = 7;
+  MSG_CRAWLER_TASK_CREATED = 10;
+  MSG_CRAWLER_TASK_STARTED = 11; // One crawler from a subset of crawlers for one tab begins to work
+  MSG_CRAWLER_TASK_FINISHED = 12;
 
 implementation
 
@@ -168,16 +170,6 @@ begin
   end;
 end;
 
-procedure TCrawlerThread.DoBeforeCrawling;
-begin
-  Data.TabSheetController.PageController.OnBeforeCrawling.Invoke(Data.TabSheetController);
-end;
-
-procedure TCrawlerThread.DoAfterCrawling;
-begin
-  Data.TabSheetController.PageController.OnAfterCrawling.Invoke(Data.TabSheetController);
-end;
-
 procedure TCrawlerThread.InitiateImageRemoteUpload;
 begin
   Data.ControlController.InitiateImageHosterRemoteUpload(True);
@@ -197,8 +189,6 @@ begin
   Data.TabSheetController := AControlController.TabSheetController;
 
   Data.ControlController := AControlController;
-
-  DoBeforeCrawling;
 
   GetLocaleFormatSettings(LOCALE_USER_DEFAULT, FFormatSettings);
   FTypeID := AControlController.TypeID;
@@ -270,7 +260,6 @@ begin
     { } procedure
     { } begin
     { . } UpdateControlValues;
-    { . } DoAfterCrawling;
     { . } InitiateImageRemoteUpload;
 
     { . } Finish;
@@ -311,6 +300,16 @@ begin
       inherited OmniEMTaskMessage(task, msg);
     end;
   end;
+end;
+
+procedure TCrawlerManager.DoBeforeExecute(const AJobWorkData: TCrawlerData; out ASenderObject: IInterface);
+begin
+  ASenderObject := AJobWorkData.ControlController;
+end;
+
+procedure TCrawlerManager.DoAfterExecute(const AJobWorkData: TCrawlerData; out ASenderObject: IInterface);
+begin
+  ASenderObject := AJobWorkData.ControlController;
 end;
 
 constructor TCrawlerManager.Create;

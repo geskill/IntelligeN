@@ -733,19 +733,10 @@ end;
 { TIDGrabberThread }
 
 procedure TIDGrabberThread.Execute;
-var
-  IDIndex, IDCount: Integer;
-  IDInfos: TIDInfos;
 begin
-  IDCount := FCMSPlugIn.GetIDs;
-
-  for IDIndex := 0 to IDCount - 1 do
-  begin
-    SetLength(IDInfos, IDIndex + 1);
-    IDInfos[IDIndex] := FCMSPlugIn.ReadID(IDIndex);
-  end;
-
-  if not Terminated then
+  // TODO
+  (*
+  if FCMSPlugIn.GetRetrieveIDs( ) and not Terminated then
     Synchronize(
       { } procedure
       { } begin
@@ -754,6 +745,8 @@ begin
       { . } except
       { . } end;
       { } end);
+
+  *)
 end;
 
 constructor TIDGrabberThread.Create(ACMSPlugIn: ICMSPlugIn; AIDPanel: TIDPanel);
@@ -2591,7 +2584,7 @@ begin
             if Assigned(ChildNodes.FindNode('charset')) and not SameStr('', VarToStrDef(ChildNodes.Nodes['charset'].NodeValue, '')) then
               FcxCOBCharset.Text := ChildNodes.Nodes['charset'].NodeValue
             else
-              FcxCOBCharset.Text := FCMSPlugIn.DefaultCharset;
+              FcxCOBCharset.Text := FCMSPlugIn.GetDefaultCharset;
 
             for I := 0 to length(FEditArray) - 1 do
             begin

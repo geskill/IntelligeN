@@ -2,7 +2,7 @@
   *                            IntelligeN PLUGIN SYSTEM  *
   *  PlugIn content management system class              *
   *  Version 2.5.0.0                                     *
-  *  Copyright (c) 2015 Sebastian Klatte                 *
+  *  Copyright (c) 2016 Sebastian Klatte                 *
   *                                                      *
   ******************************************************** }
 unit uPlugInCMSSettingsHelper;
@@ -25,7 +25,7 @@ type
 function InArray(const AInteger: Integer; const AArray: TIntegerArray): Boolean;
 
 type
-  TXMLAccess = reference to procedure(AXMLNode: IXMLNode);
+  TXMLAccess = reference to procedure(const AXMLNode: IXMLNode);
 
   TPlugInCMSSettingsHelper = class
   private
@@ -40,7 +40,8 @@ type
   public
     class function GetID(const ANode: IXMLNode): string;
     class procedure SubSearch(const ANode: IXMLNode; const AData: ITabSheetData; var AID: Variant);
-    class function LoadSettingsToClass(const AFileName: TFileName; const ASettings: TCMSPlugInSettings; const AData: ITabSheetData = nil; AXMLAccess: TXMLAccess = nil): TIntegerArray;
+    class function LoadSettingsToClass(const AFileName: TFileName; const ASettings: TCMSPlugInSettings; const AData: ITabSheetData = nil): Boolean; overload;
+    class function LoadSettingsToClass(const AFileName: TFileName; const ASettings: TCMSPlugInSettings; const AData: ITabSheetData; const AXMLAccess: TXMLAccess; out AIntegerArray: TIntegerArray): Boolean; overload;
     class procedure LoadSettingsToWebsiteEditor(const AFileName: TFileName; const ASettings: TCMSPlugInSettings; const AWebsiteEditor: IWebsiteEditor);
   end;
 
@@ -147,7 +148,14 @@ begin
       end;
 end;
 
-class function TPlugInCMSSettingsHelper.LoadSettingsToClass(const AFileName: TFileName; const ASettings: TCMSPlugInSettings; const AData: ITabSheetData = nil; AXMLAccess: TXMLAccess = nil): TIntegerArray;
+class function TPlugInCMSSettingsHelper.LoadSettingsToClass(const AFileName: TFileName; const ASettings: TCMSPlugInSettings; const AData: ITabSheetData): Boolean;
+var
+  LIntegerArray: TIntegerArray;
+begin
+  Result := LoadSettingsToClass(AFileName, ASettings, AData, nil, LIntegerArray);
+end;
+
+class function TPlugInCMSSettingsHelper.LoadSettingsToClass(const AFileName: TFileName; const ASettings: TCMSPlugInSettings; const AData: ITabSheetData; const AXMLAccess: TXMLAccess; out AIntegerArray: TIntegerArray): Boolean;
 
   procedure SubAllSearch(const ANode: IXMLNode; var AArray: TIntegerArray);
   var
@@ -188,7 +196,8 @@ var
 
   LIDValue: Variant;
 begin
-  SetLength(Result, 0);
+  Result := False;
+  SetLength(AIntegerArray, 0);
   LNeedToUninitialize := Succeeded(CoInitializeEx(nil, COINIT_MULTITHREADED));
   try
     LXMLDoc := NewXMLDocument;
@@ -239,10 +248,10 @@ begin
                           begin
                             if IsNumber(GetID(ChildNodes.Nodes[LXMLIndex])) then
                             begin
-                              SetLength(Result, 1);
-                              Result[0] := StrToInt(GetID(ChildNodes.Nodes[LXMLIndex]));
+                              SetLength(AIntegerArray, 1);
+                              AIntegerArray[0] := StrToInt(GetID(ChildNodes.Nodes[LXMLIndex]));
                             end;
-                            SubAllSearch(ChildNodes.Nodes[LXMLIndex], Result);
+                            SubAllSearch(ChildNodes.Nodes[LXMLIndex], AIntegerArray);
                           end;
 
                           SubSearch(ChildNodes.Nodes[LXMLIndex], AData, LIDValue);
@@ -290,6 +299,7 @@ begin
     if LNeedToUninitialize then
       CoUninitialize;
   end;
+  Result := True;
 end;
 
 (* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ *)

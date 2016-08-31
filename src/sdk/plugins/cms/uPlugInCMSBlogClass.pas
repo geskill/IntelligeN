@@ -20,23 +20,13 @@ uses
 type
   TCMSBlogPlugInSettings = class(TCMSPlugInSettings)
   strict private
-    fcategorys: Variant;
+    fcategories: Variant;
   published
-    property categorys: Variant read fcategorys write fcategorys;
+    property categorys: Variant read fcategories write fcategories;
   end;
 
   TCMSBlogPlugIn = class(TCMSPlugIn)
   public
-    property AccountName;
-    property AccountPassword;
-    property SettingsFileName;
-    property Subject;
-    property Tags;
-    property Message;
-    property Website;
-
-    property ArticleID;
-
     function GetCMSType: TCMSType; override; safecall;
   end;
 

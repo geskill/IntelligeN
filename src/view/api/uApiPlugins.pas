@@ -16,7 +16,7 @@ uses
   // Api
   uApiConst, uApiPluginsBase, uApiHTTP, uApiSettings, uApiWebsiteEditor, uApiXml,
   // HTTPManager
-  uHTTPManager,
+  uHTTPInterface, uHTTPManager,
   // Plugin system
   uPlugInConst, uPlugInInterface, uPlugInInterfaceAdv,
   // Utils
@@ -227,31 +227,30 @@ end;
 { TPluginBasic }
 
 class procedure TPluginBasic.InitializePlugin(const APlugin: IPlugIn);
+var
+  LProxy: IProxy;
 begin
-  APlugin.SetHTTPManager(THTTPManager.Instance());
-
   case APlugin.GetType of
     ptApp, ptCAPTCHA, ptFileFormats:
-      APlugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaMain);
+      LProxy := SettingsManager.Settings.HTTP.GetProxy(psaMain);
     ptCMS:
-      APlugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaCMS);
+      LProxy := SettingsManager.Settings.HTTP.GetProxy(psaCMS);
     ptCrawler:
-      APlugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaCMS);
+      LProxy := SettingsManager.Settings.HTTP.GetProxy(psaCMS);
     ptCrypter:
-      APlugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaCrypter);
+      LProxy := SettingsManager.Settings.HTTP.GetProxy(psaCrypter);
     ptFileHoster:
-      APlugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaFileHoster);
+      LProxy := SettingsManager.Settings.HTTP.GetProxy(psaFileHoster);
     ptImageHoster:
-      APlugin.Proxy := SettingsManager.Settings.HTTP.GetProxy(psaImageHoster);
+      LProxy := SettingsManager.Settings.HTTP.GetProxy(psaImageHoster);
   end;
 
-  APlugin.ConnectTimeout := SettingsManager.Settings.HTTP.ConnectTimeout;
-  APlugin.ReadTimeout := SettingsManager.Settings.HTTP.ReadTimeout;
+  APlugin.Initialize(THTTPManager.Instance(), LProxy, SettingsManager.Settings.HTTP.ConnectTimeout, SettingsManager.Settings.HTTP.ReadTimeout);
 end;
 
 class procedure TPluginBasic.UninitializePlugin(const APlugin: IPlugIn);
 begin
-  APlugin.SetHTTPManager(nil);
+  APlugin.Uninitialize();
 end;
 
 class function TPluginBasic.RelativToAbsolutePath(const ARelativPluginPath: string): string;
@@ -633,7 +632,7 @@ begin
   TPluginBasic.LoadCMSPlugin(ARelativPluginPath,
     { } procedure(var ACMSPlugin: ICMSPlugIn)
     { } begin
-    { . } LResult := ACMSPlugin.DefaultCharset;
+    { . } LResult := ACMSPlugin.GetDefaultCharset;
     { } end);
   Result := LResult;
 end;
@@ -646,7 +645,7 @@ begin
   TPluginBasic.LoadCMSPlugin(ARelativPluginPath,
     { } procedure(var ACMSPlugin: ICMSPlugIn)
     { } begin
-    { . } LResult := ACMSPlugin.BelongsTo(AWebsiteSourceCode);
+    { . } LResult := ACMSPlugin.GetBelongsTo(AWebsiteSourceCode);
     { } end);
   Result := LResult;
 end;
@@ -663,18 +662,18 @@ begin
     { } begin
     { . } with ACMSPlugin do
     { . } begin
-    { ... } SetCAPTCHAInput(TApiCAPTCHA.DefaultHandler);
+    { ... } //SetCAPTCHAInput(TApiCAPTCHA.DefaultHandler);
 
-    { ... } Accountname := ACMSWebsite.Accountname;
-    { ... } Accountpassword := ACMSWebsite.Accountpassword;
+    { ... } //Accountname := ACMSWebsite.Accountname;
+    { ... } //Accountpassword := ACMSWebsite.Accountpassword;
 
-    { ... } SettingsFileName := ACMSWebsite.GetPath;
+    { ... } //SettingsFileName := ACMSWebsite.GetPath;
 
-    { ... } Website := ACMSWebsite.Name;
+    { ... } //Website := ACMSWebsite.Name;
 
-    { ... } LWebsiteEditor := TWebsiteEditorFactory.GetClassType(ACMSPlugin.CMSType).Create(ACMSPlugin, AAppController, ACMSWebsite.GetPath);
+    { ... } LWebsiteEditor := TWebsiteEditorFactory.GetClassType(ACMSPlugin.GetCMSType).Create(ACMSPlugin, AAppController, ACMSWebsite.GetPath);
     { ... } try
-    { ..... } LResult := ShowWebsiteSettingsEditor(LWebsiteEditor);
+    { ..... } // LResult := ShowWebsiteSettingsEditor(LWebsiteEditor);
     { ... } finally
     { ..... } LWebsiteEditor.Free;
     { ... } end;
@@ -802,9 +801,9 @@ begin
               { . } if AFileFormatPlugin.CanLoadFiles then
               { . } begin
               { ... } try
-              { ..... } AFileFormatPlugin.ForceAddCrypter := ForceAddCrypter;
-              { ..... } AFileFormatPlugin.ForceAddImageMirror := ForceAddImageMirror;
-              { ..... } LTabIndex := AFileFormatPlugin.LoadFile(AFileName, APageController);
+              { ..... } // AFileFormatPlugin.ForceAddCrypter := ForceAddCrypter;
+              { ..... } // AFileFormatPlugin.ForceAddImageMirror := ForceAddImageMirror;
+              { ..... } LTabIndex := AFileFormatPlugin.LoadFile(nil, AFileName, APageController);
               { ..... } if not(LTabIndex = -1) then
               { ....... } with APageController.TabSheetController[LTabIndex] do
               { ......... } Initialized(AFileName, AFileFormatPlugin.GetName);

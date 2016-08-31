@@ -30,16 +30,6 @@ type
 
   TCMSFormbasedPlugIn = class(TCMSPlugIn)
   public
-    property AccountName;
-    property AccountPassword;
-    property SettingsFileName;
-    property Subject;
-    property Tags;
-    property Message;
-    property Website;
-
-    property ArticleID;
-
     function GetCMSType: TCMSType; override; safecall;
   end;
 

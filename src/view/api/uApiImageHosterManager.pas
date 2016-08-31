@@ -21,6 +21,7 @@ type
     constructor Create; override;
     destructor Destroy; override;
 
+    property TabSheetController;
     property PictureMirror: IPictureMirror read FPictureMirror write FPictureMirror;
     property ImageHosterCollectionItem: TImageHosterCollectionItem read FImageHosterCollectionItem write FImageHosterCollectionItem;
   end;
@@ -52,6 +53,9 @@ type
   end;
 
   TImageHosterManager = class(TThreadManager<TImageHosterData>, IImageHosterManager)
+  protected
+    procedure DoBeforeExecute(const AJobWorkData: TImageHosterData; out ASenderObject: IUnknown); override;
+    procedure DoAfterExecute(const AJobWorkData: TImageHosterData; out ASenderObject: IUnknown); override;
   public
     procedure AddLocalUploadJob(const APictureMirror: IPictureMirror; const ALocalPath: WideString);
     procedure AddRemoteUploadJob(const APictureMirror: IPictureMirror; const ARemoteUrl: WideString);
@@ -176,6 +180,16 @@ begin
 end;
 
 { TImageHosterManager }
+
+procedure TImageHosterManager.DoBeforeExecute(const AJobWorkData: TImageHosterData; out ASenderObject: IInterface);
+begin
+  ASenderObject := AJobWorkData.PictureMirror;
+end;
+
+procedure TImageHosterManager.DoAfterExecute(const AJobWorkData: TImageHosterData; out ASenderObject: IInterface);
+begin
+  ASenderObject := AJobWorkData.PictureMirror;
+end;
 
 procedure TImageHosterManager.AddLocalUploadJob(const APictureMirror: IPictureMirror; const ALocalPath: WideString);
 var

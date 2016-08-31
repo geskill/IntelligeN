@@ -20,6 +20,11 @@ type
     procedure Invoke(const ACaption: WideString); safecall;
   end;
 
+  TIThreadEvent = class(TGenericEvent<IThreadEventHandler>, IThreadEvent)
+  public
+    procedure Invoke(const ASender: ITabSheetController; const ASenderObject: IUnknown); safecall;
+  end;
+
   TITabSheetEvent = class(TGenericEvent<ITabSheetEventHandler>, ITabSheetEvent)
   public
     procedure Invoke(const ASender: ITabSheetController); safecall;
@@ -119,6 +124,16 @@ var
 begin
   for LCaptionChangeEventHandler in Methods do
     LCaptionChangeEventHandler.Invoke(ACaption);
+end;
+
+{ TIThreadEvent }
+
+procedure TIThreadEvent.Invoke(const ASender: ITabSheetController; const ASenderObject: IUnknown);
+var
+  LThreadEventHandler: IThreadEventHandler;
+begin
+  for LThreadEventHandler in Methods do
+    LThreadEventHandler.Invoke(ASender, ASenderObject);
 end;
 
 { TITabSheetEvent }

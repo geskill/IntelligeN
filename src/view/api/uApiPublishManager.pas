@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, Classes, Messages,
+  Windows, SysUtils, Classes, Messages, Math,
   // OmniThreadLibrary
   OtlCollections, OtlComm, OtlCommon, OtlParallel, OtlTask, OtlTaskControl, OtlThreadPool,
   // Generic TThreadList
@@ -60,6 +60,9 @@ type
     function GetProgressPosition: Extended;
   protected
     procedure OmniEMTaskMessage(const task: IOmniTaskControl; const msg: TOmniMessage); override;
+
+    procedure DoBeforeExecute(const AJobWorkData: TPublishInnerData; out ASenderObject: IUnknown); override;
+    procedure DoAfterExecute(const AJobWorkData: TPublishInnerData; out ASenderObject: IUnknown); override;
   public
     constructor Create(const APublishJob: IPublishJob; APublishRate: Integer; AOnGUIInteractionItem: TGUIInteractionItemEvent); reintroduce;
     destructor Destroy; override;
@@ -106,6 +109,9 @@ type
   protected
     function InAnyList(const ATabSheetController: ITabSheetController): Boolean; override;
     procedure OmniEMTaskMessage(const task: IOmniTaskControl; const msg: TOmniMessage); override;
+
+    procedure DoBeforeExecute(const AJobWorkData: TPublishData; out ASenderObject: IUnknown); override;
+    procedure DoAfterExecute(const AJobWorkData: TPublishData; out ASenderObject: IUnknown); override;
   public
     constructor Create;
     destructor Destroy; override;
@@ -124,11 +130,12 @@ type
 
 const
   MSG_PUBLISH_ITEM_TASK_CREATED = 10;
-  MSG_PUBLISH_ITEM_TASK_ERROR = 11;
-  MSG_PUBLISH_ITEM_TASK_COMPLETED = 12;
+  MSG_PUBLISH_ITEM_TASK_SUCCESS = 12;
+  MSG_PUBLISH_ITEM_TASK_ERROR = 12;
+  MSG_PUBLISH_ITEM_TASK_COMPLETED = 13;
 
-  MSG_PUBLISH_TASK_CANCELED = 13;
-  MSG_PUBLISH_TASK_FINISHED = 14;
+  MSG_PUBLISH_TASK_CANCELED = 14;
+  MSG_PUBLISH_TASK_FINISHED = 15;
 
 implementation
 
@@ -161,7 +168,7 @@ constructor TPublishInnerThread.Create;
 begin
   inherited Create;
 
-  // TODO: Data.TabSheetController := ???;
+  // Data.TabSheetController := ;
 
   Data.PublishItem := APublishItem;
   Data.PublishRetry := APublishRetry;
@@ -201,10 +208,7 @@ begin
               Free;
             end;
 
-          if FHasError then
-          begin
-            task.Comm.Send(MSG_PUBLISH_ITEM_TASK_ERROR, [task.UniqueID, LOmniValue.AsObject, FErrorMsg]);
-          end;
+          task.Comm.Send(IfThen(FHasError, MSG_PUBLISH_ITEM_TASK_ERROR, MSG_PUBLISH_ITEM_TASK_SUCCESS), [task.UniqueID, LOmniValue.AsObject, FErrorMsg]);
 
           // LRepeatIndex = 0, 1, 2
           Inc(LRepeatIndex);
@@ -214,6 +218,8 @@ begin
           begin
             Exit;
           end;
+
+          FErrorMsg := '';
 
         until (LSuccess or (LRepeatIndex > Data.PublishRetry));
 
@@ -264,6 +270,7 @@ begin
       end;
     MSG_PUBLISH_ITEM_TASK_ERROR:
       begin
+        // TODO: Modify to support error fixing with retry
         if Assigned(FOnGUIInteractionItem) then
           FOnGUIInteractionItem(pmisERROR, FPublishJob, GetProgressPosition, msg.MsgData[2].AsString);
       end;
@@ -280,6 +287,16 @@ begin
       inherited OmniEMTaskMessage(task, msg);
     end;
   end;
+end;
+
+procedure TPublishInnerManager.DoBeforeExecute(const AJobWorkData: TPublishInnerData; out ASenderObject: IInterface);
+begin
+  ASenderObject := AJobWorkData.PublishItem;
+end;
+
+procedure TPublishInnerManager.DoAfterExecute(const AJobWorkData: TPublishInnerData; out ASenderObject: IInterface);
+begin
+  ASenderObject := AJobWorkData.PublishItem;
 end;
 
 constructor TPublishInnerManager.Create(const APublishJob: IPublishJob; APublishRate: Integer; AOnGUIInteractionItem: TGUIInteractionItemEvent);
@@ -364,7 +381,7 @@ constructor TPublishThread.Create(const APublishJob: IPublishJob; APublishRate, 
 begin
   inherited Create;
 
-  // TODO: Data.TabSheetController := ???;
+  // Data.TabSheetController := nil; not used
 
   Data.PublishJob := APublishJob;
   Data.PublishDelay := APublishDelay;
@@ -454,26 +471,42 @@ end;
 
 function TPublishManager.InAnyList(const ATabSheetController: ITabSheetController): Boolean;
 var
-  LListIndex: Integer;
+  LList: TThreadList<TPublishData>.TListObj;
+  LListIndex, LJobIndex: Integer;
+  LListItem: TPublishData;
 begin
-  Result := True;
-  for LListIndex := 0 to FInList.Count - 1 do
-  begin
-    // TODO: Add loop
-    // if ATabSheetController = FInList[LListIndex].PublishJob.Upload[] then
-    // begin
-    // Result := True;
-    // Break;
-    // end;
+  Result := False;
+
+  LList := FInList.LockList;
+  try
+    for LListIndex := 0 to LList.Count - 1 do
+    begin
+      LListItem := LList[LListIndex];
+
+      for LJobIndex := 0 to LListItem.PublishJob.Count - 1 do
+        if ATabSheetController = LListItem.PublishJob.Upload[LJobIndex].TabSheetController then
+        begin
+          Exit(True);
+        end;
+    end;
+  finally
+    FInList.UnlockList;
   end;
-  for LListIndex := 0 to FBlackList.Count - 1 do
-  begin
-    // TODO: Add loop
-    // if ATabSheetController = FBlackList[LListIndex].TabSheetController then
-    // begin
-    // Result := True;
-    // Break;
-    // end;
+
+  LList := FBlackList.LockList;
+  try
+    for LListIndex := 0 to LList.Count - 1 do
+    begin
+      LListItem := LList[LListIndex];
+
+      for LJobIndex := 0 to LListItem.PublishJob.Count - 1 do
+        if ATabSheetController = LListItem.PublishJob.Upload[LJobIndex].TabSheetController then
+        begin
+          Exit(True);
+        end;
+    end;
+  finally
+    FBlackList.UnlockList;
   end;
 end;
 
@@ -499,6 +532,16 @@ begin
       inherited OmniEMTaskMessage(task, msg);
     end;
   end;
+end;
+
+procedure TPublishManager.DoBeforeExecute(const AJobWorkData: TPublishData; out ASenderObject: IInterface);
+begin
+  ASenderObject := AJobWorkData.PublishJob;
+end;
+
+procedure TPublishManager.DoAfterExecute(const AJobWorkData: TPublishData; out ASenderObject: IInterface);
+begin
+  ASenderObject := AJobWorkData.PublishJob;
 end;
 
 constructor TPublishManager.Create;

@@ -819,10 +819,28 @@ type
 
   // // // Multithreading Manager // // //
 
+  IThreadEventHandler = interface(IUnknown)
+    ['{290F11C1-D895-478C-9378-8C8F3C78EFF7}']
+    procedure Invoke(const ASender: ITabSheetController; const ASenderObject: IUnknown); safecall;
+  end;
+
+  IThreadEvent = interface(IUnknown)
+    ['{16ED53C2-A7E6-4651-B5C8-157E5415BEE3}']
+    procedure Add(const AHandler: IThreadEventHandler); safecall;
+    procedure Remove(const AHandler: IThreadEventHandler); safecall;
+    procedure Invoke(const ASender: ITabSheetController; const ASenderObject: IUnknown); safecall;
+  end;
+
   IThreadManager = interface
     ['{3861EE60-B97E-4F27-AB4D-657F702B7D62}']
-    function InUse(const ATabSheetController: ITabSheetController): WordBool;
-    function IsIdle: WordBool;
+    function GetBeforeExecute: IThreadEvent; safecall;
+    function GetAfterExecute: IThreadEvent; safecall;
+
+    function InUse(const ATabSheetController: ITabSheetController): WordBool; safecall;
+    function IsIdle: WordBool; safecall;
+
+    property OnBeforeExecute: IThreadEvent read GetBeforeExecute;
+    property OnAfterExecute: IThreadEvent read GetAfterExecute;
   end;
 
   IPublishItem = interface(ICMSWebsite)
@@ -836,9 +854,11 @@ type
 
   IPublishTab = interface
     ['{71E8F700-FE93-4D6C-AF3F-7D08168848AC}']
+    function GetTabSheetController: ITabSheetController;
     function GetReleaseName: WideString;
     function GetItem(const IndexOrName: OleVariant): IPublishItem;
 
+    property TabSheetController: ITabSheetController read GetTabSheetController;
     property ReleaseName: WideString read GetReleaseName;
     property Item[const IndexOrName: OleVariant]: IPublishItem read GetItem;
     function Count: Integer;
@@ -923,8 +943,10 @@ type
     function GetTabCaptionChange: ICaptionChangeEvent;
     function GetAddTab: ITabSheetEvent;
     function GetRemoveTab: ITabSheetEvent;
-    function GetBeforeCrawling: ITabSheetEvent;
-    function GetAfterCrawling: ITabSheetEvent;
+    function GetBeforePublish: IThreadEvent;
+    function GetAfterPublish: IThreadEvent;
+    function GetBeforeCrawling: IThreadEvent;
+    function GetAfterCrawling: IThreadEvent;
 
     procedure CallBackupManager; overload;
     procedure CallBackupManager(const ATabIndex: Integer); overload;
@@ -1060,8 +1082,10 @@ type
     property OnTabCaptionChange: ICaptionChangeEvent read GetTabCaptionChange;
     property OnAddTab: ITabSheetEvent read GetAddTab;
     property OnRemoveTab: ITabSheetEvent read GetRemoveTab;
-    property OnBeforeCrawling: ITabSheetEvent read GetBeforeCrawling;
-    property OnAfterCrawling: ITabSheetEvent read GetAfterCrawling;
+    property OnBeforePublish: IThreadEvent read GetBeforePublish;
+    property OnAfterPublish: IThreadEvent read GetAfterPublish;
+    property OnBeforeCrawling: IThreadEvent read GetBeforeCrawling;
+    property OnAfterCrawling: IThreadEvent read GetAfterCrawling;
   end;
 
   // // // Log Manager // // //

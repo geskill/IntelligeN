@@ -409,7 +409,6 @@ end;
 
 procedure TDesignTabSheetItem.FWebsiteChange(Sender: TObject);
 begin
-  // TODO: Fix host with same host i.e. localhost/wbb4/ localhost/xenforo/ => both localhost
   UpdateActiveWebsite;
 end;
 

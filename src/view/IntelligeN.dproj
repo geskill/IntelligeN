@@ -119,8 +119,9 @@
 			<DCCReference Include="api\uApiMody.pas"/>
 			<DCCReference Include="api\uApiMultiCastEvent.pas"/>
 			<DCCReference Include="api\uApiPlugins.pas"/>
-			<DCCReference Include="api\uApiPluginsBase.pas"/>
 			<DCCReference Include="api\uApiPluginsAdd.pas"/>
+			<DCCReference Include="api\uApiPluginsBase.pas"/>
+			<DCCReference Include="api\uApiPluginsClasses.pas"/>
 			<DCCReference Include="api\uApiPrerequisite.pas"/>
 			<DCCReference Include="api\uApiPublishController.pas"/>
 			<DCCReference Include="api\uApiPublishManager.pas"/>
@@ -209,6 +210,7 @@
 			<DCCReference Include="..\sdk\plugins\uPlugInInterfaceAdv.pas"/>
 			<DCCReference Include="..\sdk\plugins\uPlugInClass.pas"/>
 			<DCCReference Include="..\sdk\plugins\uPlugInConst.pas"/>
+			<DCCReference Include="..\sdk\plugins\uPlugInClasses.pas"/>
 			<DCCReference Include="..\sdk\plugins\uPlugInEvent.pas"/>
 			<DCCReference Include="..\sdk\plugins\uPlugInHTTPClasses.pas"/>
 			<DCCReference Include="..\sdk\plugins\app\uPlugInAppClass.pas"/>
@@ -222,6 +224,7 @@
 			<DCCReference Include="..\sdk\plugins\crypter\uPlugInCrypterClass.pas"/>
 			<DCCReference Include="..\sdk\plugins\fileformats\uPlugInFileFormatClass.pas"/>
 			<DCCReference Include="..\sdk\plugins\filehoster\uPlugInFileHosterClass.pas"/>
+			<DCCReference Include="..\sdk\plugins\filehoster\uPlugInFileHosterClasses.pas"/>
 			<DCCReference Include="..\sdk\plugins\imagehoster\uPlugInImageHosterClass.pas"/>
 			<DCCReference Include="..\core\utils\uFileUtils.pas"/>
 			<DCCReference Include="..\core\utils\uHTMLUtils.pas"/>

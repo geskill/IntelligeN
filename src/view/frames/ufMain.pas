@@ -52,7 +52,7 @@ type
     FChange: INotifyEvent;
     FViewChange: IViewChangeEvent;
     FTabCaptionChange: ICaptionChangeEvent;
-    FAddTab, FRemoveTab, FBeforeCrawling, FAfterCrawling: ITabSheetEvent;
+    FAddTab, FRemoveTab: ITabSheetEvent;
     function LockPageControl: Boolean;
     function UnlockPageControl: Boolean;
     procedure CrawlerGUIInteraction(const AControlController: IControlController; AStatus: TCrawlerTaskStatus; AProgressPosition: Extended; AMessage: string);
@@ -75,8 +75,10 @@ type
     function GetTabCaptionChange: ICaptionChangeEvent;
     function GetAddTab: ITabSheetEvent;
     function GetRemoveTab: ITabSheetEvent;
-    function GetBeforeCrawling: ITabSheetEvent;
-    function GetAfterCrawling: ITabSheetEvent;
+    function GetBeforePublish: IThreadEvent;
+    function GetAfterPublish: IThreadEvent;
+    function GetBeforeCrawling: IThreadEvent;
+    function GetAfterCrawling: IThreadEvent;
   public
     constructor Create(AOwner: TComponent); override;
     procedure PostCreate; // called after all frames are created
@@ -238,8 +240,10 @@ type
     property OnTabCaptionChange: ICaptionChangeEvent read GetTabCaptionChange;
     property OnAddTab: ITabSheetEvent read GetAddTab;
     property OnRemoveTab: ITabSheetEvent read GetRemoveTab;
-    property OnBeforeCrawling: ITabSheetEvent read GetBeforeCrawling;
-    property OnAfterCrawling: ITabSheetEvent read GetAfterCrawling;
+    property OnBeforePublish: IThreadEvent read GetBeforePublish;
+    property OnAfterPublish: IThreadEvent read GetAfterPublish;
+    property OnBeforeCrawling: IThreadEvent read GetBeforeCrawling;
+    property OnAfterCrawling: IThreadEvent read GetAfterCrawling;
 
     destructor Destroy; override;
   end;
@@ -515,14 +519,24 @@ begin
   Result := FRemoveTab;
 end;
 
-function TfMain.GetBeforeCrawling: ITabSheetEvent;
+function TfMain.GetBeforePublish: IThreadEvent;
 begin
-  Result := FBeforeCrawling;
+  Result := PublishManager.OnBeforeExecute;
 end;
 
-function TfMain.GetAfterCrawling: ITabSheetEvent;
+function TfMain.GetAfterPublish: IThreadEvent;
 begin
-  Result := FAfterCrawling;
+  Result := PublishManager.OnAfterExecute;
+end;
+
+function TfMain.GetBeforeCrawling: IThreadEvent;
+begin
+  Result := CrawlerManager.OnBeforeExecute;
+end;
+
+function TfMain.GetAfterCrawling: IThreadEvent;
+begin
+  Result := CrawlerManager.OnAfterExecute;
 end;
 
 constructor TfMain.Create(AOwner: TComponent);
@@ -562,8 +576,6 @@ begin
   FTabCaptionChange := TICaptionChangeEvent.Create;
   FAddTab := TITabSheetEvent.Create;
   FRemoveTab := TITabSheetEvent.Create;
-  FBeforeCrawling := TITabSheetEvent.Create;
-  FAfterCrawling := TITabSheetEvent.Create;
 end;
 
 procedure TfMain.CallBackupManager;
@@ -1247,8 +1259,6 @@ end;
 
 destructor TfMain.Destroy;
 begin
-  FAfterCrawling := nil;
-  FBeforeCrawling := nil;
   FRemoveTab := nil;
   FAddTab := nil;
   FTabCaptionChange := nil;

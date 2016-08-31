@@ -136,17 +136,19 @@ type
 
     function GetLogin(const ACMSData: ICMSData; out ARequestID: Double): WordBool; safecall;
 
-    function GetRetrieveIDs(const ACMSData: ICMSData; const ACategoryType: WideString; out ACMSIDsInfo: ICMSIDsInfo): WordBool; safecall;
+    function GetRetrieveIDs(var ARequestID: Double; const ACMSData: ICMSData; const ACategoryType: WideString; out ACMSIDsInfo: ICMSIDsInfo): WordBool; safecall;
 
-    function AddArticle(const ACMSData: ICMSData; const ACMSPublishData: ICMSPublishData; out ACMSArticleInfo: TCMSArticleInfo): WordBool; safecall;
-    function EditArticle(const ACMSData: ICMSData; const ACMSPublishData: ICMSPublishData; var ACMSArticleInfo: TCMSArticleInfo): WordBool; safecall;
-    function DeleteArticle(const ACMSData: ICMSData; const ACMSArticleInfo: TCMSArticleInfo): WordBool; safecall;
-    function GetArticle(const ACMSData: ICMSData; const ACMSArticleInfo: TCMSArticleInfo; out ACMSPublishData: ICMSPublishData): WordBool; safecall;
+    function NewArticle(var ARequestID: Double; const ACMSData: ICMSData; const ACMSPublishData: ICMSPublishData; const ACMSArticleInfo: TCMSArticleInfo; out ANewArticleInfo: TCMSArticleInfo): WordBool; safecall;
+    function AddArticle(var ARequestID: Double; const ACMSData: ICMSData; const ACMSPublishData: ICMSPublishData; const ACMSArticleInfo: TCMSArticleInfo; out ANewArticleInfo: TCMSArticleInfo): WordBool; safecall;
+    function EditArticle(var ARequestID: Double; const ACMSData: ICMSData; const ACMSPublishData: ICMSPublishData; var ACMSArticleInfo: TCMSArticleInfo): WordBool; safecall;
+    function DeleteArticle(var ARequestID: Double; const ACMSData: ICMSData; const ACMSArticleInfo: TCMSArticleInfo): WordBool; safecall;
+    function GetArticle(var ARequestID: Double; const ACMSData: ICMSData; const ACMSArticleInfo: TCMSArticleInfo; out ACMSPublishData: ICMSPublishData): WordBool; safecall;
 
-    function GetArticleLink(const AWebsite: WideString; const ACMSArticleInfo: TCMSArticleInfo): WideString; safecall;
+    function GetArticleLink(const ACMSData: ICMSData; const ACMSArticleInfo: TCMSArticleInfo): WideString; safecall;
 
     procedure Initialize(const AHTTPManager: IHTTPManager; const AProxy: IProxy; const AConnectTimeout, AReadTimeout: Integer; const AIntelligentPostingHelper: TIntelligentPostingHelper); safecall;
 
+    function NewOrAddArticle(var ARequestID: Double; const ACMSData: ICMSData; const ACMSPublishData: ICMSPublishData; out ANewArticleInfo: TCMSArticleInfo): WordBool; safecall;
     function ShowWebsiteSettingsEditor(const ACMSData: ICMSData; const AWebsiteEditor: IWebsiteEditor): WordBool; safecall;
   end;
 
