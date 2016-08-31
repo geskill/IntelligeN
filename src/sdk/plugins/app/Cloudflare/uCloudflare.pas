@@ -142,13 +142,13 @@ begin
             pass := Match[1];
           end;
 
-          Expression := 'setTimeout\(function\(\){\s+(var t,r,a,f.+?\r?\n.+?a\.value =.+?)\r?\n';
+          Expression := 'setTimeout\(function\(\){\s+(var s,t,o,p,b,r,e,a,k,i,n,g,f.+?\r?\n.+?a\.value =.+?)\r?\n';
           if Exec(InputString) then
           begin
             jschl_script := Match[1];
 
             InputString := jschl_script;
-            Expression := 'a\.value =(.+?) \+ .+?;';
+            Expression := 'a\.value = (parseInt\(.+?\)).+';
 
             jschl_script := Replace(InputString, '$1', True);
 
