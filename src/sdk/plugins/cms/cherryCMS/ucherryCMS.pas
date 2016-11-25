@@ -222,7 +222,7 @@ begin
     for I := 0 to AData.MirrorCount - 1 do
 
     begin
-      if cherryCMSSettings.use_plainlinks then
+      if cherryCMSSettings.use_plainlinks and (AData.Mirror[I].DirectlinkCount > 0) then
       begin
         with TStringList.Create do
           try
@@ -237,7 +237,7 @@ begin
             Free;
           end;
       end
-      else if (AData.Mirror[I].CrypterCount > 0) then
+      else if not cherryCMSSettings.use_plainlinks and (AData.Mirror[I].CrypterCount > 0) then
       begin
         for J := 0 to AData.Mirror[I].CrypterCount - 1 do
         begin
@@ -249,7 +249,7 @@ begin
       end
       else
       begin
-        ErrorMsg := 'No crypter initialized! (disable use_plainlinks or add a crypter)';
+        ErrorMsg := 'No directlink or crypter initialized! (enable use_plainlinks with a directlink for each mirror or disable use_plainlinks and add a crypter)';
         Result := False;
       end;
 

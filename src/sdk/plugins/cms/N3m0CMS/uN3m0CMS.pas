@@ -308,13 +308,13 @@ begin
       else
         AddFormField('Hoster' + IntToStr(I + 1), HosterArray[HosterPos]);
 
-      if N3m0CMSSettings.use_plainlinks then
+      if N3m0CMSSettings.use_plainlinks and (AData.Mirror[I].DirectlinkCount > 0) then
         AddFormField('Mirror' + IntToStr(I + 1), Trim(AData.Mirror[I].Directlink[0].Value))
-      else if (AData.Mirror[I].CrypterCount > 0) then
+      else if not N3m0CMSSettings.use_plainlinks and (AData.Mirror[I].CrypterCount > 0) then
         AddFormField('Mirror' + IntToStr(I + 1), AData.Mirror[I].Crypter[0].Value)
       else
       begin
-        ErrorMsg := 'No crypter initialized! (disable use_plainlinks or add a crypter)';
+        ErrorMsg := 'No directlink or crypter initialized! (enable use_plainlinks with a directlink for each mirror or disable use_plainlinks and add a crypter)';
         Result := False;
       end;
     end;

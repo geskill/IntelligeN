@@ -252,19 +252,19 @@ begin
     // max 5 mirrors
     for I := 0 to Min(5, AData.MirrorCount) - 1 do
     begin
-      if HTWSettings.use_plainlinks then
+      if HTWSettings.use_plainlinks and (AData.Mirror[I].DirectlinkCount > 0) then
       begin
         AddFormField(DownloadArrayA[I], AData.Mirror[I].Directlink[0].Value);
         AddFormField(DownloadArrayB[I], AData.Mirror[I].Directlink[0].Value);
       end
-      else if (AData.Mirror[I].CrypterCount > 0) then
+      else if not HTWSettings.use_plainlinks and (AData.Mirror[I].CrypterCount > 0) then
       begin
         AddFormField(DownloadArrayA[I], AData.Mirror[I].Crypter[0].Value);
         AddFormField(DownloadArrayB[I], AData.Mirror[I].Crypter[0].Value);
       end
       else
       begin
-        ErrorMsg := 'No crypter initialized! (disable use_plainlinks or add a crypter)';
+        ErrorMsg := 'No directlink or crypter initialized! (enable use_plainlinks with a directlink for each mirror or disable use_plainlinks and add a crypter)';
         Result := False;
       end;
       AddFormField(HosterArray[I], AData.Mirror[I].Hoster);

@@ -179,13 +179,13 @@ begin
 
     for I := 0 to AData.MirrorCount - 1 do
     begin
-      if wFusionSettings.use_plainlinks then
+      if wFusionSettings.use_plainlinks and (AData.Mirror[I].DirectlinkCount > 0) then
         AddFormField('urls[]', AData.Mirror[I].Directlink[0].Value)
-      else if (AData.Mirror[I].CrypterCount > 0) then
+      else if not wFusionSettings.use_plainlinks and (AData.Mirror[I].CrypterCount > 0) then
         AddFormField('urls[]', AData.Mirror[I].Crypter[0].Value)
       else
       begin
-        ErrorMsg := 'No crypter initialized! (disable use_plainlinks or add a crypter)';
+        ErrorMsg := 'No directlink or crypter initialized! (enable use_plainlinks with a directlink for each mirror or disable use_plainlinks and add a crypter)';
         Result := False;
       end;
     end;
