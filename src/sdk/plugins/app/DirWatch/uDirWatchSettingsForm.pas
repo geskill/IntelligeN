@@ -26,6 +26,7 @@ type
     cbWatchSubdirectories: TCheckBox;
     cbLoadOnyXMLFiles: TCheckBox;
     cbLoadOnlyIntelligeNXML2Files: TCheckBox;
+    cbCloseTabAfterPublish: TCheckBox;
     cbRunCrawlers: TCheckBox;
     cbRunCrypters: TCheckBox;
     cbRunSave: TCheckBox;
@@ -196,6 +197,7 @@ begin
   cbWatchSubdirectories.Checked := ADirWatchSettings.WatchSubdirectories;
   cbLoadOnyXMLFiles.Checked := ADirWatchSettings.LoadOnyXMLFiles;
   cbLoadOnlyIntelligeNXML2Files.Checked := ADirWatchSettings.LoadOnlyIntelligeNXML2Files;
+  cbCloseTabAfterPublish.Checked := ADirWatchSettings.CloseTabAfterPublish;
   cbRunCrawlers.Checked := ADirWatchSettings.RunCrawlers;
   cbRunCrypters.Checked := ADirWatchSettings.RunCrypters;
   cbRunSave.Checked := ADirWatchSettings.RunSave;
@@ -216,6 +218,7 @@ begin
   FDirWatchSettings.WatchSubdirectories := cbWatchSubdirectories.Checked;
   FDirWatchSettings.LoadOnyXMLFiles := cbLoadOnyXMLFiles.Checked;
   FDirWatchSettings.LoadOnlyIntelligeNXML2Files := cbLoadOnlyIntelligeNXML2Files.Checked;
+  FDirWatchSettings.CloseTabAfterPublish := cbCloseTabAfterPublish.Checked;
   FDirWatchSettings.RunCrawlers := cbRunCrawlers.Checked;
   FDirWatchSettings.RunCrypters := cbRunCrypters.Checked;
   FDirWatchSettings.RunSave := cbRunSave.Checked;

@@ -123,7 +123,7 @@ object fDirWatchSettingsForm: TfDirWatchSettingsForm
       Width = 234
       Height = 17
       Caption = 'Run crawlers'
-      TabOrder = 5
+      TabOrder = 6
     end
     object cbRunCrypters: TCheckBox
       Left = 261
@@ -131,7 +131,7 @@ object fDirWatchSettingsForm: TfDirWatchSettingsForm
       Width = 234
       Height = 17
       Caption = 'Run crypters'
-      TabOrder = 6
+      TabOrder = 7
     end
     object cbRunSave: TCheckBox
       Left = 261
@@ -139,7 +139,7 @@ object fDirWatchSettingsForm: TfDirWatchSettingsForm
       Width = 234
       Height = 17
       Caption = 'Run save under same file name'
-      TabOrder = 7
+      TabOrder = 8
     end
     object cbRunPublish: TCheckBox
       Left = 261
@@ -147,7 +147,7 @@ object fDirWatchSettingsForm: TfDirWatchSettingsForm
       Width = 234
       Height = 17
       Caption = 'Run publish'
-      TabOrder = 8
+      TabOrder = 9
       OnClick = cbRunPublishClick
     end
     object cbRunPublishOnlyWithCustomCheck: TCheckBox
@@ -157,7 +157,7 @@ object fDirWatchSettingsForm: TfDirWatchSettingsForm
       Height = 17
       Caption = 'Only with custom check'
       Enabled = False
-      TabOrder = 9
+      TabOrder = 10
       OnClick = cbRunPublishOnlyWithCustomCheckClick
     end
     object ePublishCustomCheckScriptFile: TEdit
@@ -166,7 +166,15 @@ object fDirWatchSettingsForm: TfDirWatchSettingsForm
       Width = 295
       Height = 21
       Enabled = False
-      TabOrder = 10
+      TabOrder = 11
+    end
+    object cbCloseTabAfterPublish: TCheckBox
+      Left = 21
+      Top = 139
+      Width = 234
+      Height = 17
+      Caption = 'Close tab after publish'
+      TabOrder = 5
     end
   end
   object bSave: TButton

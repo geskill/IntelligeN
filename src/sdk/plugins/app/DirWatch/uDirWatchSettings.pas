@@ -15,7 +15,7 @@ type
   protected
     FDirWatchPath, FPublishCustomCheckScriptFile: string;
     FLoadFilesOnlyOnce, FLoadAlreadyExistingFiles, FWatchSubdirectories, { . }
-    FLoadOnyXMLFiles, FLoadOnlyIntelligeNXML2Files, { . }
+    FLoadOnyXMLFiles, FLoadOnlyIntelligeNXML2Files, FCloseTabAfterPublish, { . }
     FRunCrawlers, FRunCrypters, FRunSave, FRunPublish, FRunPublishOnlyWithCustomCheck: Boolean;
   public
     procedure LoadDefaultSettings; override;
@@ -26,6 +26,7 @@ type
     property WatchSubdirectories: Boolean read FWatchSubdirectories write FWatchSubdirectories;
     property LoadOnyXMLFiles: Boolean read FLoadOnyXMLFiles write FLoadOnyXMLFiles;
     property LoadOnlyIntelligeNXML2Files: Boolean read FLoadOnlyIntelligeNXML2Files write FLoadOnlyIntelligeNXML2Files;
+    property CloseTabAfterPublish: Boolean read FCloseTabAfterPublish write FCloseTabAfterPublish;
     property RunCrawlers: Boolean read FRunCrawlers write FRunCrawlers;
     property RunCrypters: Boolean read FRunCrypters write FRunCrypters;
     property RunSave: Boolean read FRunSave write FRunSave;
