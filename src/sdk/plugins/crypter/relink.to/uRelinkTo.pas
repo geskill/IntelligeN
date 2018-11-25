@@ -22,7 +22,7 @@ type
   TRelinkTo = class(TCrypterPlugIn)
   protected { . }
   const
-    WEBSITE = 'http://www.relink.to/';
+    WEBSITE = 'http://relink.to/';
 
     function GetFolderID(AFolderName: string): string;
     function GetStatusImageLink(AFolderIdentifier: WideString; Small: WordBool = True): WideString;
