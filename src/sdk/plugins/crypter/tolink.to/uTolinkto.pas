@@ -4,7 +4,7 @@ interface
 
 uses
   // Delphi
-  Windows, SysUtils, StrUtils, Math, Variants, XMLDoc, XMLIntf, ActiveX,
+  Windows, SysUtils, StrUtils, Math, Variants,
   // RegEx
   RegExpr,
   // Common
@@ -16,7 +16,9 @@ uses
   // Utils
   uVariantUtils,
   // LkJSON
-  uLkJSON;
+  uLkJSON,
+  // XYZ
+  IniFiles, uSystemUtils;
 
 type
   // see: https://tolink.to/app/index/api
@@ -67,7 +69,7 @@ end;
 
 function TTolinkto.AddFolder;
 var
-
+  ini: TIniFile;
   LFoldertypes: TFoldertypes;
   LContainertypes: TContainertypes;
 
@@ -80,6 +82,7 @@ var
   MainJSONObject, BodyJSONObject, OptionsJSONObject, LJSONobject: TlkJSONobject;
   LJSONStr: string;
 begin
+  // update 15.03 add captcha_text
   // {
   // "apikey": "key123456",
   // "body": {
@@ -90,11 +93,12 @@ begin
   // "container": false,
   // "cln": true,
   // "captcha": true,
+  // "captcha_text": false,
   // "password": ""
   // }
   // }
   // }
-
+  ini := TIniFile.Create(ExtractFilePath(GetModulePath) + 'tolinkto.ini');
   LFoldertypes := TFoldertypes(TFoldertype(Foldertypes));
   LContainertypes := TContainertypes(TContainertype(ContainerTypes));
 
@@ -111,13 +115,37 @@ begin
     BodyJSONObject.Add('links',
       StringReplace(AMirrorContainer.Directlink[0].Value, sLineBreak, ';',
         [rfReplaceAll]));
-
-    OptionsJSONObject.Add('web', IfThen(ftWeb in LFoldertypes, 'true',
-        'false'));
-    OptionsJSONObject.Add('container', IfThen(ftContainer in LFoldertypes,
-        'true', 'false'));
-    OptionsJSONObject.Add('cln', IfThen(UseCNL, 'true', 'false'));
-    OptionsJSONObject.Add('captcha', IfThen(UseCaptcha, 'true', 'false'));
+    // fix Boolean as string error 18.03.19
+    if (ftWeb in LFoldertypes) then
+      OptionsJSONObject.Add('web', True)
+    else
+      OptionsJSONObject.Add('web', False);
+    if (ftContainer in LFoldertypes) then
+      OptionsJSONObject.Add('container', True)
+    else
+      OptionsJSONObject.Add('container', False);
+    if (UseCNL) then
+      OptionsJSONObject.Add('cln', True)
+    else
+      OptionsJSONObject.Add('cln', False);
+    if (UseCaptcha) then
+    begin
+      if (ini.ReadBool('tolinkto', 'text_captcha', False)) then
+      begin
+        OptionsJSONObject.Add('captcha', False);
+        OptionsJSONObject.Add('captcha_text', True)
+      end
+      else
+      begin
+        OptionsJSONObject.Add('captcha', True);
+        OptionsJSONObject.Add('captcha_text', False)
+      end
+    end
+    else
+    begin
+      OptionsJSONObject.Add('captcha', False);
+      OptionsJSONObject.Add('captcha_text', False)
+    end;
     OptionsJSONObject.Add('password', Visitorpassword);
     BodyJSONObject.Add('options', OptionsJSONObject);
     MainJSONObject.Add('body', BodyJSONObject);

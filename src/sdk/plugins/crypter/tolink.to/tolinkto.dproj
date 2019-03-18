@@ -91,15 +91,15 @@
 						<VersionInfo Name="CodePage">1252</VersionInfo>
 					</VersionInfo>
 					<VersionInfoKeys>
-						<VersionInfoKeys Name="CompanyName">fluffyxyz</VersionInfoKeys>
+						<VersionInfoKeys Name="CompanyName">FluffyXYZ</VersionInfoKeys>
 						<VersionInfoKeys Name="FileDescription">IntelligeN 2009 Plugin</VersionInfoKeys>
 						<VersionInfoKeys Name="FileVersion">2.129.2.0</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
-						<VersionInfoKeys Name="LegalCopyright">(c) 2019 xyz</VersionInfoKeys>
+						<VersionInfoKeys Name="LegalCopyright">(c) 2019 XYZ</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks"/>
 						<VersionInfoKeys Name="OriginalFilename">tolinkto.dll</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductName">IntelligeN 2009</VersionInfoKeys>
-						<VersionInfoKeys Name="ProductVersion">0.1</VersionInfoKeys>
+						<VersionInfoKeys Name="ProductVersion">0.2</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
 					<Excluded_Packages>
