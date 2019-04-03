@@ -1,9 +1,9 @@
 ﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 		<PropertyGroup>
-			<ProjectGuid>{F87B7E71-482E-44A7-8075-D7C0201DF50E}</ProjectGuid>
+			<ProjectGuid>{AB3C8A0E-9FFA-4B31-A4F4-99CB73AFAF22}</ProjectGuid>
 			<ProjectVersion>12.0</ProjectVersion>
-			<MainSource>relinkto.dpr</MainSource>
-			<Config Condition="'$(Config)'==''">Debug</Config>
+			<MainSource>criptto.dpr</MainSource>
+			<Config Condition="'$(Config)'==''">Release</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Basis' or '$(Base)'!=''">
@@ -21,9 +21,10 @@
 		</PropertyGroup>
 		<Import Project="..\..\plugin.optset" Condition="'$(Base)'!='' And Exists('..\..\plugin.optset')"/>
 		<PropertyGroup Condition="'$(Base)'!=''">
+			<DCC_ExeOutput>..\..\..\..\..\bin_portable\plugins\</DCC_ExeOutput>
 			<UsePackages>true</UsePackages>
-			<DCC_UsePackage>framework;</DCC_UsePackage>
-			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin\plugins\relinkto.dll</DCC_DependencyCheckOutputName>
+			<DCC_UsePackage>framework</DCC_UsePackage>
+			<DCC_DependencyCheckOutputName>..\..\..\..\..\bin_portable\plugins\criptto.dll</DCC_DependencyCheckOutputName>
 			<GenDll>true</GenDll>
 			<DCC_ImageBase>00400000</DCC_ImageBase>
 			<DCC_Platform>x86</DCC_Platform>
@@ -39,11 +40,11 @@
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
 		</PropertyGroup>
 		<ItemGroup>
-			<DelphiCompile Include="relinkto.dpr">
+			<DelphiCompile Include="criptto.dpr">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
-			<DCCReference Include="uRelinkTo.pas"/>
-			<RcItem Include="relinkto.ico">
+			<DCCReference Include="uCriptto.pas"/>
+			<RcItem Include="criptto.ico">
 				<ResourceType>Icon</ResourceType>
 				<ResourceId>icon</ResourceId>
 			</RcItem>
@@ -51,12 +52,12 @@
 				<Key>Base</Key>
 				<DependentOn>..\..\plugin.optset</DependentOn>
 			</BuildConfiguration>
-			<BuildConfiguration Include="Release">
-				<Key>Cfg_1</Key>
-				<CfgParent>Base</CfgParent>
-			</BuildConfiguration>
 			<BuildConfiguration Include="Debug">
 				<Key>Cfg_2</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Release">
+				<Key>Cfg_1</Key>
 				<CfgParent>Base</CfgParent>
 			</BuildConfiguration>
 		</ItemGroup>
@@ -67,7 +68,7 @@
 			<BorlandProject>
 				<Delphi.Personality>
 					<Source>
-						<Source Name="MainSource">relinkto.dpr</Source>
+						<Source Name="MainSource">criptto.dpr</Source>
 					</Source>
 					<Parameters>
 						<Parameters Name="UseLauncher">False</Parameters>
@@ -91,28 +92,22 @@
 						<VersionInfo Name="CodePage">1252</VersionInfo>
 					</VersionInfo>
 					<VersionInfoKeys>
-						<VersionInfoKeys Name="CompanyName">Sebastian Klatte</VersionInfoKeys>
+						<VersionInfoKeys Name="CompanyName">FluffyXYZ</VersionInfoKeys>
 						<VersionInfoKeys Name="FileDescription">IntelligeN 2009 Plugin</VersionInfoKeys>
 						<VersionInfoKeys Name="FileVersion">2.129.2.0</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
-						<VersionInfoKeys Name="LegalCopyright">(c) 2016 Sebastian Klatte</VersionInfoKeys>
+						<VersionInfoKeys Name="LegalCopyright">(c) 2019 XYZ</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks"/>
-						<VersionInfoKeys Name="OriginalFilename">relinkto.dll</VersionInfoKeys>
+						<VersionInfoKeys Name="OriginalFilename">criptto.dll</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductName">IntelligeN 2009</VersionInfoKeys>
-						<VersionInfoKeys Name="ProductVersion">2.5</VersionInfoKeys>
+						<VersionInfoKeys Name="ProductVersion">0.1</VersionInfoKeys>
 						<VersionInfoKeys Name="Comments"/>
 					</VersionInfoKeys>
-					<Excluded_Packages/>
+					<Excluded_Packages>
+						<Excluded_Packages Name="$(BDS)\bin\dclDataSnapServer140.bpl">Embarcadero DBExpress DataSnap-Serverkomponenten</Excluded_Packages>
+					</Excluded_Packages>
 				</Delphi.Personality>
 			</BorlandProject>
 			<ProjectFileVersion>12</ProjectFileVersion>
 		</ProjectExtensions>
 	</Project>
-
-<!-- EurekaLog First Line
-[Exception Log]
-EurekaLog Version=7007
-Activate=0
-DeleteMapAfterCompile=0
-Encrypt Password=""
-EurekaLog Last Line -->
